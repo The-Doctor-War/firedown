@@ -191,7 +191,6 @@ public class ImageViewerFragment extends Fragment {
                                                        Target<GifDrawable> target,
                                                        @NonNull DataSource dataSource, boolean isFirst) {
                             Log.d(TAG, "gif onResourceReady frames=" + resource.getFrameCount()
-                                    + " loops=" + resource.getFrameLoopCount()
                                     + " size=" + resource.getIntrinsicWidth() + "x" + resource.getIntrinsicHeight()
                                     + " running=" + resource.isRunning());
                             startPostponedEnterTransition();

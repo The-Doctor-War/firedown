@@ -2,6 +2,7 @@ package com.solarized.firedown.phone.fragments;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -38,7 +39,6 @@ import com.solarized.firedown.Keys;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegGifMaker;
-import com.solarized.firedown.ffmpegutils.FFmpegThumbnailer;
 import com.solarized.firedown.manager.tasks.TaskManager;
 import com.solarized.firedown.ui.FilmstripTrimSlider;
 import com.solarized.firedown.utils.NavigationUtils;
@@ -277,20 +277,28 @@ public class GifMakerFragment extends BaseFocusFragment {
         mThumbnailExecutor.execute(() -> extractThumbnailsBlocking(filePath, durationMs, count));
     }
 
-    /** Runs on the executor. Opens the source once, decodes frames at
-     *  evenly-spaced positions, downscales each, and posts the batch
-     *  to the main thread. Failures are logged but never crash —
-     *  the filmstrip falls back to grey placeholder cells. */
+    /** Runs on the executor. Opens the source once, seeks to evenly-
+     *  spaced positions, grabs a frame at each, downscales it, and
+     *  posts the batch to the main thread.
+     *
+     *  Uses {@link MediaMetadataRetriever} rather than the project's
+     *  {@code FFmpegThumbnailer}: the latter's native seek is wired
+     *  with {@code AVSEEK_FLAG_ANY}, which lands on the closest
+     *  frame regardless of keyframe status — for mid-clip seeks the
+     *  decoder then can't produce output without an upstream keyframe
+     *  and bails to EOF, returning null. {@code MediaMetadataRetriever}
+     *  handles the seek-then-decode-from-keyframe dance correctly
+     *  for every format Android natively decodes (which is every
+     *  format this app's downloads are likely to be).
+     *
+     *  Failures are logged but never crash — the filmstrip falls
+     *  back to grey placeholder cells. */
     private void extractThumbnailsBlocking(String filePath, long durationMs, int count) {
-        FFmpegThumbnailer thumb = new FFmpegThumbnailer();
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         List<Bitmap> bitmaps = new ArrayList<>(count);
 
         try {
-            int err = thumb.setDataSource(filePath, null);
-            if (err < 0) {
-                Log.w(TAG, "thumbnail setDataSource failed: " + err);
-                return;
-            }
+            retriever.setDataSource(filePath);
 
             long durationUs = durationMs * 1000L;
             for (int i = 0; i < count; i++) {
@@ -308,18 +316,25 @@ public class GifMakerFragment extends BaseFocusFragment {
                     posUs = startUs + (long) i * (endUs - startUs) / (count - 1);
                 }
 
-                Bitmap full = thumb.getBitmap(posUs);
-                if (full == null) {
+                /* OPTION_CLOSEST decodes from the previous keyframe up to
+                 * the requested time, which is exactly what we want for a
+                 * mid-clip filmstrip. Slower than OPTION_CLOSEST_SYNC
+                 * (which jumps to the nearest keyframe) but the difference
+                 * matters: SYNC on a clip with sparse keyframes gives all
+                 * thumbnails the same handful of frames. */
+                Bitmap frame = retriever.getFrameAtTime(posUs,
+                        MediaMetadataRetriever.OPTION_CLOSEST);
+                if (frame == null) {
                     Log.w(TAG, "thumbnail null at pos " + posUs);
                     continue;
                 }
 
-                bitmaps.add(scaleDown(full));
+                bitmaps.add(scaleDown(frame));
             }
         } catch (Throwable t) {
             Log.e(TAG, "thumbnail extraction failed", t);
         } finally {
-            thumb.release();
+            try { retriever.release(); } catch (Throwable ignored) { }
         }
 
         if (mDestroyed || bitmaps.isEmpty()) return;

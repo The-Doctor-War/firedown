@@ -194,10 +194,26 @@ public class ImageViewerFragment extends Fragment {
                                     + " size=" + resource.getIntrinsicWidth() + "x" + resource.getIntrinsicHeight()
                                     + " running=" + resource.isRunning());
                             startPostponedEnterTransition();
-                            if (!resource.isRunning()) {
-                                resource.start();
-                            }
-                            return false;
+
+                            /* Take over from Glide here. Default flow
+                             * was leaving the drawable on the view but
+                             * not animating — observed running=false
+                             * even after a manual start() call before
+                             * returning false, presumably because
+                             * Glide's default ImageViewTarget runs
+                             * after the listener and resets state.
+                             *
+                             * setLoopCount(LOOP_FOREVER) overrides the
+                             * GIF's own loop count (which can be 1 for
+                             * single-play GIFs and would stop the
+                             * drawable after one cycle). Returning
+                             * true tells Glide we handled the result
+                             * so its default setImageDrawable / start
+                             * pipeline is skipped. */
+                            resource.setLoopCount(GifDrawable.LOOP_FOREVER);
+                            mPhotoView.setImageDrawable(resource);
+                            resource.start();
+                            return true;
                         }
                     })
                     .fallback(R.drawable.ic_baseline_image_24)

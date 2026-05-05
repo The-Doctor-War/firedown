@@ -479,6 +479,13 @@ static int gifmaker_alloc_frames(struct GifMaker *gif) {
 }
 
 
+/* Reserve the tail of the progress bar for the palette/encode burst that
+ * fires at EOF — palettegen buffers every input frame and only emits its
+ * palette once the source signals EOF, so paletteuse + the GIF encoder do
+ * all their real work after decoding finishes. Without this, the bar sat
+ * at 0 for the entire decode pass, then jumped to 100. */
+#define DECODE_PROGRESS_FRACTION 95
+
 static void gifmaker_publish_progress(JNIEnv *env, struct GifMaker *gif, int64_t current_us) {
 
     int64_t total = gif->end_us > gif->start_us ? gif->end_us - gif->start_us : gif->duration_us;
@@ -488,6 +495,11 @@ static void gifmaker_publish_progress(JNIEnv *env, struct GifMaker *gif, int64_t
     int64_t elapsed = current_us - gif->start_us;
     if (elapsed < 0) elapsed = 0;
     if (elapsed > total) elapsed = total;
+
+    /* Map decode progress onto [0, total*95/100] so we leave headroom for
+     * the final palette/encode burst, which we report separately when
+     * frames come out of the filter graph. */
+    elapsed = (elapsed * DECODE_PROGRESS_FRACTION) / 100;
 
     int64_t now = av_gettime_relative();
     if (gif->last_progress_us != 0 && (now - gif->last_progress_us) < UPDATE_TIME_US) {
@@ -567,9 +579,14 @@ static int gifmaker_drain_filter(JNIEnv *env, struct GifMaker *gif) {
             return ret;
         }
 
+        /* Progress for the encode burst: the filter graph re-stamps frames
+         * to the buffersink's output time_base (1/fps for our fps filter),
+         * so rescale from there, not from the input stream's time_base. */
         gifmaker_publish_progress(env, gif,
+                                  gif->start_us +
                                   av_rescale_q(gif->filtered_frame->pts,
-                                               gif->input_stream->time_base, AV_TIME_BASE_Q));
+                                               av_buffersink_get_time_base(gif->buffersink_ctx),
+                                               AV_TIME_BASE_Q));
 
         av_frame_unref(gif->filtered_frame);
     }
@@ -624,6 +641,13 @@ static int gifmaker_decode_packet(JNIEnv *env, struct GifMaker *gif, AVPacket *p
         ret = av_buffersrc_add_frame_flags(gif->buffersrc_ctx, gif->decoded_frame,
                                            AV_BUFFERSRC_FLAG_KEEP_REF);
         av_frame_unref(gif->decoded_frame);
+
+        /* palettegen swallows every frame and emits nothing until EOF,
+         * so the filter-drain path below produces no output during decode.
+         * Drive the progress bar from the input side here — that's where
+         * the real time is being spent anyway. */
+        gifmaker_publish_progress(env, gif, frame_pts_us);
+
         if (ret < 0) {
             LOGE(1, "gifmaker_decode_packet buffersrc_add_frame failed (%d)", ret);
             return -ERROR_WHILE_FILTERING;

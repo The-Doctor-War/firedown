@@ -1,0 +1,161 @@
+package com.solarized.firedown.manager.tasks;
+
+import android.util.Log;
+
+import com.solarized.firedown.data.Download;
+import com.solarized.firedown.data.TaskEvent;
+import com.solarized.firedown.data.entity.DownloadEntity;
+import com.solarized.firedown.data.repository.DownloadDataRepository;
+import com.solarized.firedown.ffmpegutils.FFmpegGifMaker;
+import com.solarized.firedown.ffmpegutils.FFmpegListener;
+import com.solarized.firedown.manager.ServiceActions;
+import com.solarized.firedown.utils.FileUriHelper;
+import com.solarized.firedown.StoragePaths;
+import com.solarized.firedown.utils.Utils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.UUID;
+
+
+public class GifMakerTask extends TaskRunnable implements FFmpegListener {
+
+    private static final String TAG = GifMakerTask.class.getSimpleName();
+
+    private FFmpegGifMaker mFFmpegGifMaker;
+
+    private final DownloadDataRepository mDownloadRepository;
+    private final TaskManager mTaskManager;
+
+
+    public GifMakerTask(TaskManager taskManager, DownloadDataRepository downloadDataRepository) {
+        super(taskManager);
+        mTaskManager = taskManager;
+        mDownloadRepository = downloadDataRepository;
+    }
+
+    @Override
+    public void stoppableRun() {
+
+        final ArrayList<DownloadEntity> mQueueList = getQueueList();
+
+        File outFile = null;
+
+        DownloadEntity mDownloadEntity = null;
+
+        if (mQueueList == null || mQueueList.isEmpty()) {
+            Log.w(TAG, "Empty Queue");
+            return;
+        }
+
+        try {
+
+            deliverMessage(new TaskEvent.Started(ServiceActions.MAKE_GIF));
+
+            StoragePaths.ensureDownloadPath(mTaskManager);
+
+            mDownloadEntity = mQueueList.get(0);
+
+            String filePath = mDownloadEntity.getFilePath();
+
+            if (Thread.interrupted() || isStopped()) {
+                Log.d(TAG, "Interrupted");
+                mDownloadEntity.setFileStatus(Download.ERROR);
+                return;
+            }
+
+            Log.d(TAG, "start FFmpeg gif maker");
+
+            mDownloadEntity.setFileStatus(Download.PROGRESS);
+
+            mDownloadEntity.setId(UUID.randomUUID().hashCode());
+
+            mDownloadEntity.setFileDate(System.currentTimeMillis());
+
+            mDownloadEntity.setFileMimeType(FileUriHelper.MIMETYPE_GIF);
+
+            mFFmpegGifMaker = new FFmpegGifMaker();
+
+            mFFmpegGifMaker.addListener(this);
+
+            outFile = ensureFilePath(Utils.changeExtension(filePath, "gif"));
+
+            mDownloadEntity.setFilePath(outFile.getAbsolutePath());
+
+            mDownloadEntity.setFileImg(null);
+
+            mDownloadEntity.setFileName(outFile.getName());
+
+            /* startMs/endMs == 0 means "whole file"; the native side maps 0
+             * to "no trim" for both ends. fps/width default in native side
+             * if non-positive. */
+            int ret = mFFmpegGifMaker.start(filePath, outFile.getAbsolutePath(),
+                    0L, 0L,
+                    FFmpegGifMaker.DEFAULT_FPS,
+                    FFmpegGifMaker.DEFAULT_WIDTH);
+
+            if (ret < 0) {
+                Log.d(TAG, "FFmpegGifMaker start error " + ret);
+                mDownloadEntity.setFileStatus(Download.ERROR);
+                return;
+            }
+
+            if (Thread.currentThread().isInterrupted() || isStopped()) {
+                Log.d(TAG, "Thread interrupted");
+                mDownloadEntity.setFileStatus(Download.ERROR);
+                return;
+            }
+
+            mDownloadEntity.setFileSize(outFile.length());
+
+            mDownloadEntity.setFileStatus(Download.FINISHED);
+
+            mDownloadRepository.addSync(mDownloadEntity);
+
+            deliverMessage(new TaskEvent.Finished(ServiceActions.MAKE_GIF, null));
+
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "IOException ", e);
+            if (mDownloadEntity != null)
+                mDownloadEntity.setFileStatus(Download.ERROR);
+        } finally {
+            int status = mDownloadEntity != null ? mDownloadEntity.getFileStatus() : Download.ERROR;
+            if (status != Download.FINISHED) {
+                if (outFile != null)
+                    outFile.delete();
+                deliverMessage(new TaskEvent.Finished(
+                        isStopped() ? ServiceActions.CANCEL_MAKE_GIF : ServiceActions.ERROR_MAKE_GIF,
+                        null));
+            }
+            if (mFFmpegGifMaker != null) {
+                mFFmpegGifMaker.stop();
+                mFFmpegGifMaker.free();
+            }
+            stopService();
+            Log.d(TAG, "Finished");
+        }
+    }
+
+    @Override
+    public void stop() {
+        super.stop();
+        Log.d(TAG, "GifMakerTask STOP");
+        if (mFFmpegGifMaker != null) {
+            mFFmpegGifMaker.interrupt();
+        }
+    }
+
+
+    @Override
+    public void onProgress(long currentLength, long totalLength) {
+        publishProgress(currentLength, totalLength);
+    }
+
+    @Override
+    public void onStarted() {
+    }
+
+    @Override
+    public void onFinished() {
+    }
+}

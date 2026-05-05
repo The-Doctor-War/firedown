@@ -130,6 +130,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
 
     protected void handleTaskCancellation() {
         if (mNotificationAction == ServiceActions.AUDIO_ENCODE.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, null);
+        else if (mNotificationAction == ServiceActions.MAKE_GIF.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_MAKE_GIF, null);
         else if (mNotificationAction == ServiceActions.ENCRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_ENCRYPTION, null);
         else if (mNotificationAction == ServiceActions.DECRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_DECRYPTION, null);
     }
@@ -202,6 +203,10 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             NavigationUtils.navigateSafe(mNavController, R.id.dialog_delete_files, bundle);
         } else if (iconId == R.drawable.ic_headphones_24) {
             handleItemAction(IntentActions.DOWNLOAD_START_AUDIO_ENCODE, entity);
+            mOperationActive = true;
+            startActionMode(option.getPosition());
+        } else if (iconId == R.drawable.ic_movie_24) {
+            handleItemAction(IntentActions.DOWNLOAD_START_MAKE_GIF, entity);
             mOperationActive = true;
             startActionMode(option.getPosition());
         } else if (iconId == R.drawable.ic_lock_24) {
@@ -299,6 +304,10 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         if (action == ServiceActions.AUDIO_ENCODE) {
             mBottomProgressView.setProgress(100);
             mBottomProgressView.setTitle(R.string.task_audio_finished);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.MAKE_GIF) {
+            mBottomProgressView.setProgress(100);
+            mBottomProgressView.setTitle(R.string.task_gif_finished);
             mBottomProgressView.setActionButtonVisibility(View.GONE);
         } else if (action == ServiceActions.ENCRYPTION) {
             setupEncryptionFinishUI((int) obj);
@@ -408,6 +417,9 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         }else if(action == ServiceActions.AUDIO_ENCODE){
             mBottomProgressView.setTitle(R.string.download_saving_audio);
             mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, null));
+        }else if(action == ServiceActions.MAKE_GIF){
+            mBottomProgressView.setTitle(R.string.download_saving_gif);
+            mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_MAKE_GIF, null));
         }
     }
 

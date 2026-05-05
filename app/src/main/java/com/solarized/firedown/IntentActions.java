@@ -33,6 +33,10 @@ public class IntentActions {
 
     public static final String DOWNLOAD_START_AUDIO_ENCODE = "com.solarized.firedown.DOWNLOAD_START_AUDIO_ENCODE";
 
+    public static final String DOWNLOAD_START_MAKE_GIF = "com.solarized.firedown.DOWNLOAD_START_MAKE_GIF";
+
+    public static final String DOWNLOAD_CANCEL_MAKE_GIF = "com.solarized.firedown.DOWNLOAD_CANCEL_MAKE_GIF";
+
     public static final String LOCK_FOR_ENCRYPTION = "com.solarized.firedown.LOCK_FOR_ENCRYPTION";
 
     public static final String START_ENCRYPTION = "com.solarized.firedown.START_ENCRYPTION";

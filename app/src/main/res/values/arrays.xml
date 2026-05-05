@@ -229,6 +229,7 @@
         <item>@string/open_with</item>
         <item>@string/open_origin</item>
         <item>@string/extract_audio</item>
+        <item>@string/make_gif</item>
         <item>@string/share</item>
         <item>@string/popular_list_thumbnail</item>
         <item>@string/rename</item>
@@ -242,6 +243,7 @@
         <item>@drawable/ic_web_24</item>
         <item>@drawable/ic_travel_explore_24</item>
         <item>@drawable/ic_headphones_24</item>
+        <item>@drawable/ic_movie_24</item>
         <item>@drawable/ic_share_24</item>
         <item>@drawable/ic_baseline_image_24</item>
         <item>@drawable/ic_edit_24</item>

@@ -300,7 +300,20 @@ static int gifmaker_open_output(struct GifMaker *gif, const char *output_path) {
     enc_ctx->width = target_w;
     enc_ctx->height = target_h;
     enc_ctx->pix_fmt = AV_PIX_FMT_PAL8;
-    enc_ctx->time_base = (AVRational) {1, gif->fps};
+    /* GIF stores frame delays in centiseconds (1/100 s) in the wire
+     * format — see gif_write_header in libavformat/gifenc.c which forces
+     * the muxer's stream time_base to {1, 100}. Set the encoder's
+     * time_base to the same unit so frame PTS map directly to delay
+     * stops without rounding through an intermediate rate.
+     *
+     * Previously this was {1, fps}: the encoder still produced delays
+     * proportional to fps, but the slowest setting (6 fps) and the
+     * fastest (25 fps) ended up looking similar because frames were
+     * being dropped by the fps= filter rather than the delays differing.
+     * Pinning the encoder to centiseconds and rescaling each frame's
+     * PTS to that base makes the per-frame delay explicit, so the
+     * playback speed actually changes. */
+    enc_ctx->time_base = (AVRational) {1, 100};
     enc_ctx->framerate = (AVRational) {gif->fps, 1};
     enc_ctx->sample_aspect_ratio = (AVRational) {1, 1};
 
@@ -586,20 +599,32 @@ static int gifmaker_drain_filter(JNIEnv *env, struct GifMaker *gif) {
 
         gif->filtered_frame->pict_type = AV_PICTURE_TYPE_NONE;
 
+        /* Progress for the encode burst: the filter graph re-stamps frames
+         * to the buffersink's output time_base (1/fps for our fps filter),
+         * so rescale from there before we overwrite pts for the encoder. */
+        AVRational filter_tb = av_buffersink_get_time_base(gif->buffersink_ctx);
+        gifmaker_publish_progress(env, gif,
+                                  gif->start_us +
+                                  av_rescale_q(gif->filtered_frame->pts,
+                                               filter_tb,
+                                               AV_TIME_BASE_Q),
+                                  PROGRESS_PHASE_ENCODE);
+
+        /* Rescale frame pts from the filter's time_base (1/fps) to the
+         * encoder's (1/100, GIF-native centiseconds). The GIF encoder
+         * uses these PTS values directly to compute the per-frame delay
+         * tag in the GIF stream — without this conversion every fps
+         * setting produces ~the same playback speed because the encoder
+         * sees frames at PTS 0,1,2,... regardless of fps and emits the
+         * minimum delay (1 cs) between them. */
+        gif->filtered_frame->pts = av_rescale_q(gif->filtered_frame->pts,
+                                                filter_tb,
+                                                gif->output_codec_ctx->time_base);
+
         if ((ret = gifmaker_drain_encoder(gif, gif->filtered_frame)) < 0) {
             av_frame_unref(gif->filtered_frame);
             return ret;
         }
-
-        /* Progress for the encode burst: the filter graph re-stamps frames
-         * to the buffersink's output time_base (1/fps for our fps filter),
-         * so rescale from there, not from the input stream's time_base. */
-        gifmaker_publish_progress(env, gif,
-                                  gif->start_us +
-                                  av_rescale_q(gif->filtered_frame->pts,
-                                               av_buffersink_get_time_base(gif->buffersink_ctx),
-                                               AV_TIME_BASE_Q),
-                                  PROGRESS_PHASE_ENCODE);
 
         av_frame_unref(gif->filtered_frame);
     }

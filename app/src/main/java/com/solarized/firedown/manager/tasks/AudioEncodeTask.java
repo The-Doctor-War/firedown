@@ -17,12 +17,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import okhttp3.internal.concurrent.Task;
 
+public class AudioEncodeTask extends TaskRunnable implements FFmpegListener {
 
-public class AudoEncodeTask extends TaskRunnable implements FFmpegListener {
-
-    private static final String TAG = AudoEncodeTask.class.getSimpleName();
+    private static final String TAG = AudioEncodeTask.class.getSimpleName();
 
     private FFmpegEncoder mFFmpegEncoder;
 
@@ -30,7 +28,7 @@ public class AudoEncodeTask extends TaskRunnable implements FFmpegListener {
     private final TaskManager mTaskManager;
 
 
-    public AudoEncodeTask(TaskManager taskManager, DownloadDataRepository downloadDataRepository) {
+    public AudioEncodeTask(TaskManager taskManager, DownloadDataRepository downloadDataRepository) {
         super(taskManager);
         mTaskManager = taskManager;
         mDownloadRepository = downloadDataRepository;

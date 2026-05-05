@@ -57,7 +57,7 @@ public class TaskManager extends Service {
             String action = (String) msg.obj;
             Log.d(TAG, "handleMessage: " + action);
             if(IntentActions.DOWNLOAD_START_AUDIO_ENCODE.equals(action)){
-                mCurrentRunnable = new AudoEncodeTask(TaskManager.this, mDownloadRepository);
+                mCurrentRunnable = new AudioEncodeTask(TaskManager.this, mDownloadRepository);
                 post(mCurrentRunnable);
             }else if(IntentActions.START_ENCRYPTION.equals(action)){
                 mCurrentRunnable = new InSafeTask(TaskManager.this, mDownloadRepository);

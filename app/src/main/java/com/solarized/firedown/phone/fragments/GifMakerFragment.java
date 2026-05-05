@@ -1,10 +1,12 @@
 package com.solarized.firedown.phone.fragments;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,8 +31,6 @@ import androidx.media3.extractor.ExtractorsFactory;
 import androidx.media3.ui.PlayerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.android.material.slider.RangeSlider;
 import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.IntentActions;
@@ -38,28 +38,33 @@ import com.solarized.firedown.Keys;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegGifMaker;
+import com.solarized.firedown.ffmpegutils.FFmpegThumbnailer;
 import com.solarized.firedown.manager.tasks.TaskManager;
+import com.solarized.firedown.ui.FilmstripTrimSlider;
 import com.solarized.firedown.utils.NavigationUtils;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GifMakerFragment extends BaseFocusFragment {
+
+    private static final String TAG = GifMakerFragment.class.getSimpleName();
 
     private DownloadEntity mDownloadEntity;
 
     private PlayerView mPlayerView;
     private ExoPlayer mExoPlayer;
 
-    private RangeSlider mRangeSlider;
+    private FilmstripTrimSlider mFilmstrip;
     private Slider mSpeedSlider;
     private TextView mSpeedValue;
     private TextView mRangeLabel;
-    private LinearProgressIndicator mPlayheadIndicator;
 
     /* Slider position → fps mapping. Indexed by (int) slider value. */
     private static final int[] SPEED_FPS = {6, 8, 12, 18, 25};
-    private static final int SPEED_DEFAULT_INDEX = 2;
 
     /* Below this, the encode either produces an empty GIF (start == end)
      * or a single-frame one that's barely a GIF — ffmpeg's gif muxer
@@ -67,27 +72,33 @@ public class GifMakerFragment extends BaseFocusFragment {
      * we want to fail fast in the UI rather than start a doomed task. */
     private static final long MIN_TRIM_MS = 200L;
 
+    /* Long-edge cap for extracted thumbnails. 256 px keeps each frame
+     * under ~256 KB so a strip of 12 stays around 3 MB even on 16:9
+     * sources, while still giving the filmstrip enough resolution to
+     * read at the 64 dp strip height. */
+    private static final int THUMB_MAX_DIM = 256;
+
     private MaterialButton mCreateButton;
 
-    /* Cached duration in ms — populated from the player once it's ready.
-     * Until then the slider operates on the placeholder 0..100 range from
-     * the layout. */
     private long mDurationMs;
-
-    /* RangeSlider's onChange callback reports the new value for whichever
-     * thumb moved but doesn't say which one. Tracking the previous values
-     * lets us diff and seek the player only to the thumb that actually
-     * changed — otherwise dragging the end thumb would jump the preview
-     * past the start. */
     private long mLastStartMs;
     private long mLastEndMs;
 
-    /* Live preview: poll the player position and snap it back to the
-     * start thumb whenever it crosses the end thumb, so the user always
-     * sees exactly what's going to land in the GIF. ExoPlayer doesn't
-     * have a "loop between A and B" primitive — ClippingMediaSource
-     * exists but re-prepares the pipeline on every range change, which
-     * is way too costly for a slider that updates 10×/second. */
+    /* Thumbnail extraction needs both the source duration (for evenly
+     * spaced positions) and the filmstrip's measured width (for count).
+     * Both arrive asynchronously and in arbitrary order — duration when
+     * the player reaches STATE_READY, count when the view is laid out.
+     * Track whichever is missing and kick off extraction the moment we
+     * have both, but only once. */
+    private int mPendingThumbnailCount = -1;
+    private boolean mThumbnailsRequested;
+
+    @Nullable
+    private ExecutorService mThumbnailExecutor;
+    /* Set on onDestroy so the worker thread doesn't post results back
+     * into a torn-down view. */
+    private volatile boolean mDestroyed;
+
     private static final long PREVIEW_LOOP_INTERVAL_MS = 250L;
     private final Handler mLoopHandler = new Handler(Looper.getMainLooper());
     private final Runnable mLoopTask = new Runnable() {
@@ -99,7 +110,7 @@ public class GifMakerFragment extends BaseFocusFragment {
                     mExoPlayer.seekTo(mLastStartMs);
                     pos = mLastStartMs;
                 }
-                updatePlayhead(pos);
+                if (mFilmstrip != null) mFilmstrip.setPlayhead(pos);
             }
             mLoopHandler.postDelayed(this, PREVIEW_LOOP_INTERVAL_MS);
         }
@@ -128,12 +139,10 @@ public class GifMakerFragment extends BaseFocusFragment {
         mToolbar = view.findViewById(R.id.toolbar);
         mAppBarLayout = view.findViewById(R.id.appbar_layout);
         mPlayerView = view.findViewById(R.id.player_view);
-        mRangeSlider = view.findViewById(R.id.range_slider);
+        mFilmstrip = view.findViewById(R.id.filmstrip);
         mSpeedSlider = view.findViewById(R.id.speed_slider);
         mSpeedValue = view.findViewById(R.id.speed_value);
         mRangeLabel = view.findViewById(R.id.range_label);
-        mPlayheadIndicator = view.findViewById(R.id.playhead_indicator);
-        mPlayheadIndicator.setMax(10000);
 
         return view;
     }
@@ -151,9 +160,6 @@ public class GifMakerFragment extends BaseFocusFragment {
 
         mCreateButton = view.findViewById(R.id.create_button);
         mCreateButton.setOnClickListener(v -> startGifMakerTask());
-        /* Disabled until the player reports STATE_READY so the duration
-         * is known — otherwise the user can hit Create with the slider
-         * still on its 0..100 placeholder and produce a 100 ms GIF. */
         mCreateButton.setEnabled(false);
 
         /* The create button is constrained to the body's bottom, which is
@@ -173,23 +179,10 @@ public class GifMakerFragment extends BaseFocusFragment {
         });
 
         configurePlayer();
-        configureRangeSlider();
+        configureFilmstrip();
         configureSpeedSlider();
 
         mLoopHandler.postDelayed(mLoopTask, PREVIEW_LOOP_INTERVAL_MS);
-    }
-
-    /* Maps the player position onto the same horizontal axis as the range
-     * slider, so the user sees the playhead sweep across the trim region
-     * during the live preview. Indicator's max is 10 000 (~0.01% steps);
-     * mDurationMs may not be set yet during the first few ticks before
-     * the player reports STATE_READY. */
-    private void updatePlayhead(long positionMs) {
-        if (mPlayheadIndicator == null || mDurationMs <= 0) return;
-        int progress = (int) ((positionMs * 10000L) / mDurationMs);
-        if (progress < 0) progress = 0;
-        if (progress > 10000) progress = 10000;
-        mPlayheadIndicator.setProgressCompat(progress, true);
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -226,22 +219,127 @@ public class GifMakerFragment extends BaseFocusFragment {
         });
     }
 
-    private void configureRangeSlider() {
-        mRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
+    private void configureFilmstrip() {
+        mFilmstrip.setMinTrimMs(MIN_TRIM_MS);
+        mFilmstrip.setOnTrimChangedListener((startMs, endMs, fromUser) -> {
+            mLastStartMs = startMs;
+            mLastEndMs = endMs;
             updateRangeLabel();
-            if (fromUser && slider.getValues().size() >= 2) {
-                long start = slider.getValues().get(0).longValue();
-                long end = slider.getValues().get(1).longValue();
-                if (start != mLastStartMs) {
-                    mExoPlayer.seekTo(start);
-                } else if (end != mLastEndMs) {
-                    mExoPlayer.seekTo(end);
-                }
-                mLastStartMs = start;
-                mLastEndMs = end;
+            if (fromUser && mExoPlayer != null) {
+                /* Seek to the handle the user just moved. The filmstrip
+                 * doesn't tell us which one changed, but mLast* shadowed
+                 * the previous values so a comparison would work — for
+                 * simplicity, always seek to the start handle on drag.
+                 * The live-preview loop will cycle the player back into
+                 * the trim region anyway. */
+                mExoPlayer.seekTo(startMs);
             }
         });
+        mFilmstrip.setOnLayoutReadyListener(count -> {
+            mPendingThumbnailCount = count;
+            maybeExtractThumbnails();
+        });
+    }
+
+    private void applyDuration(long durationMs) {
+        /* Round duration down to 100 ms — keeps the same step granularity
+         * the old RangeSlider needed, and keeps the time label clean. */
+        long rounded = (durationMs / 100L) * 100L;
+        if (rounded < 100L) rounded = 100L;
+        mDurationMs = rounded;
+        mLastStartMs = 0L;
+        mLastEndMs = rounded;
+
+        mFilmstrip.setDuration(rounded);
         updateRangeLabel();
+
+        if (mCreateButton != null) mCreateButton.setEnabled(true);
+
+        maybeExtractThumbnails();
+    }
+
+    /** Kick off async extraction once both prerequisites are known.
+     *  Either side may complete first: duration arrives via STATE_READY,
+     *  count arrives via the filmstrip's OnLayoutReadyListener. */
+    private void maybeExtractThumbnails() {
+        if (mThumbnailsRequested) return;
+        if (mDurationMs <= 0 || mPendingThumbnailCount <= 0) return;
+
+        mThumbnailsRequested = true;
+
+        int count = mPendingThumbnailCount;
+        long durationMs = mDurationMs;
+        String filePath = mDownloadEntity.getFilePath();
+
+        if (mThumbnailExecutor == null) {
+            mThumbnailExecutor = Executors.newSingleThreadExecutor();
+        }
+        mThumbnailExecutor.execute(() -> extractThumbnailsBlocking(filePath, durationMs, count));
+    }
+
+    /** Runs on the executor. Opens the source once, decodes frames at
+     *  evenly-spaced positions, downscales each, and posts the batch
+     *  to the main thread. Failures are logged but never crash —
+     *  the filmstrip falls back to grey placeholder cells. */
+    private void extractThumbnailsBlocking(String filePath, long durationMs, int count) {
+        FFmpegThumbnailer thumb = new FFmpegThumbnailer();
+        List<Bitmap> bitmaps = new ArrayList<>(count);
+
+        try {
+            int err = thumb.setDataSource(filePath, null);
+            if (err < 0) {
+                Log.w(TAG, "thumbnail setDataSource failed: " + err);
+                return;
+            }
+
+            long durationUs = durationMs * 1000L;
+            for (int i = 0; i < count; i++) {
+                if (mDestroyed) return;
+
+                /* Anchor at 5% into the clip and stop at 95% so we don't
+                 * pick black frames at the very start/end of fade-in /
+                 * fade-out edits. Spread evenly across the 90% middle. */
+                long posUs;
+                if (count == 1) {
+                    posUs = durationUs / 2;
+                } else {
+                    long startUs = durationUs / 20;
+                    long endUs = durationUs - startUs;
+                    posUs = startUs + (long) i * (endUs - startUs) / (count - 1);
+                }
+
+                Bitmap full = thumb.getBitmap(posUs);
+                if (full == null) {
+                    Log.w(TAG, "thumbnail null at pos " + posUs);
+                    continue;
+                }
+
+                bitmaps.add(scaleDown(full));
+            }
+        } catch (Throwable t) {
+            Log.e(TAG, "thumbnail extraction failed", t);
+        } finally {
+            thumb.release();
+        }
+
+        if (mDestroyed || bitmaps.isEmpty()) return;
+
+        mLoopHandler.post(() -> {
+            if (mDestroyed || mFilmstrip == null) return;
+            mFilmstrip.setThumbnails(bitmaps);
+        });
+    }
+
+    private static Bitmap scaleDown(Bitmap src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        int max = Math.max(w, h);
+        if (max <= THUMB_MAX_DIM) return src;
+        float scale = THUMB_MAX_DIM / (float) max;
+        return Bitmap.createScaledBitmap(src,
+                Math.max(1, (int) (w * scale)),
+                Math.max(1, (int) (h * scale)),
+                true);
     }
 
     private void configureSpeedSlider() {
@@ -267,40 +365,15 @@ public class GifMakerFragment extends BaseFocusFragment {
         return index;
     }
 
-    private void applyDuration(long durationMs) {
-        /* Material RangeSlider requires (valueTo - valueFrom) to be a
-         * multiple of stepSize, and rejects the configuration with
-         * IllegalStateException otherwise. Round the duration down to the
-         * nearest 100 ms before publishing it as the slider's max so a
-         * 9:30.86 video doesn't crash the screen. */
-        long rounded = (durationMs / 100L) * 100L;
-        if (rounded < 100L) rounded = 100L;
-        mDurationMs = rounded;
-
-        mRangeSlider.setValueFrom(0f);
-        mRangeSlider.setValueTo((float) rounded);
-        mRangeSlider.setStepSize(100f);
-        mRangeSlider.setValues(0f, (float) rounded);
-        mLastStartMs = 0L;
-        mLastEndMs = rounded;
-        updateRangeLabel();
-
-        /* Now that we know the duration, the slider has real values and
-         * the encode args will be coherent. Safe to let the user submit. */
-        if (mCreateButton != null) mCreateButton.setEnabled(true);
-    }
-
     private void updateRangeLabel() {
-        if (mRangeSlider.getValues().size() < 2) {
+        if (mDurationMs <= 0) {
             mRangeLabel.setText(formatTime(0) + " → " + formatTime(0) + " (0s)");
             return;
         }
-        long start = mRangeSlider.getValues().get(0).longValue();
-        long end = mRangeSlider.getValues().get(1).longValue();
-        long span = Math.max(0L, end - start);
+        long span = Math.max(0L, mLastEndMs - mLastStartMs);
         mRangeLabel.setText(String.format(Locale.getDefault(),
                 "%s → %s (%s)",
-                formatTime(start), formatTime(end), formatDuration(span)));
+                formatTime(mLastStartMs), formatTime(mLastEndMs), formatDuration(span)));
     }
 
     private static String formatTime(long ms) {
@@ -320,10 +393,6 @@ public class GifMakerFragment extends BaseFocusFragment {
     private void startGifMakerTask() {
         if (mDownloadEntity == null) return;
 
-        /* Player hasn't reported STATE_READY yet → mDurationMs == 0,
-         * mLastEndMs == 0, slider is on its 0..100 placeholder. The
-         * Create button is disabled in this state, but guard anyway in
-         * case something fires through (e.g. accessibility action). */
         if (mDurationMs <= 0) {
             Snackbar.make(requireView(), R.string.gif_maker_not_ready,
                     Snackbar.LENGTH_SHORT).show();
@@ -333,12 +402,6 @@ public class GifMakerFragment extends BaseFocusFragment {
         long start = mLastStartMs;
         long end = mLastEndMs;
 
-        /* end == 0 here would mean "encode the whole clip", which is
-         * the legacy semantics the native side honours. But once the
-         * duration is known we always have end > 0 from applyDuration,
-         * so an end <= start range is genuinely degenerate. Reject it
-         * with the same message as the too-short case to keep the UI
-         * simple — both cases mean "pick a real range". */
         if (end - start < MIN_TRIM_MS) {
             Snackbar.make(requireView(), R.string.gif_maker_invalid_range,
                     Snackbar.LENGTH_LONG).show();
@@ -357,8 +420,6 @@ public class GifMakerFragment extends BaseFocusFragment {
         intent.putExtra(Keys.GIF_WIDTH, FFmpegGifMaker.DEFAULT_WIDTH);
         requireContext().startService(intent);
 
-        /* Hand control back to the downloads list so the bottom progress
-         * view shows the encode in progress. */
         NavigationUtils.popBackStackSafe(mNavController, R.id.gif_maker);
     }
 
@@ -371,12 +432,17 @@ public class GifMakerFragment extends BaseFocusFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        mDestroyed = true;
         mLoopHandler.removeCallbacks(mLoopTask);
+        if (mThumbnailExecutor != null) {
+            mThumbnailExecutor.shutdownNow();
+            mThumbnailExecutor = null;
+        }
         if (mPlayerView != null) mPlayerView.setPlayer(null);
         if (mExoPlayer != null) mExoPlayer.release();
         mExoPlayer = null;
         mPlayerView = null;
-        mPlayheadIndicator = null;
+        mFilmstrip = null;
         mCreateButton = null;
     }
 }

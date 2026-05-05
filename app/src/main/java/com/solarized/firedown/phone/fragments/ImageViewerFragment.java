@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -143,20 +144,45 @@ public class ImageViewerFragment extends Fragment {
         long interval = mDownloadEntity.getThumbnailDuration();
 
         if(FileUriHelper.isGIF(mimeType)) {
-            /* Pass MIMETYPE so FFmpegUriDecoder.handles() can skip GIFs
-             * and let Glide's built-in animated-GIF decoder run. The
-             * old code wrapped this in a 1500 ms postDelayed because
-             * routing GIFs through FFmpegThumbnailer was flaky on
-             * freshly-written files; with the FFmpegUriDecoder change
-             * that's no longer needed. */
-            RequestOptions options = new RequestOptions().frame(interval)
-                    .set(GlideRequestOptions.MIMETYPE, mimeType)
-                    .set(GlideRequestOptions.FILEPATH, filePath);
+            /* asGif() forces Glide down the StreamGifDecoder /
+             * ByteBufferGifDecoder path which produces a GifDrawable
+             * (animated). Without this, Glide's auto-selection picks
+             * a generic Bitmap decoder for the file and the GIF
+             * shows as a single static frame. The .frame() option
+             * the JPEG / video paths use is dropped for GIFs because
+             * it's a video-frame-extraction hint that steers decoders
+             * toward static output.
+             *
+             * Listener has to be GifDrawable-typed since asGif()
+             * narrows the result type — keep it inline so we don't
+             * pollute the shared mRequestListener which is Drawable
+             * for the other branches. */
             Glide.with(App.getAppContext())
+                    .asGif()
                     .load(filePath)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .apply(options)
-                    .listener(mRequestListener)
+                    .listener(new RequestListener<GifDrawable>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model,
+                                                    @NonNull Target<GifDrawable> target,
+                                                    boolean isFirst) {
+                            Log.d(TAG, "gif onLoadFailed", e);
+                            startPostponedEnterTransition();
+                            if (mActivity != null) {
+                                Snackbar.make(mActivity.getWindow().getDecorView(),
+                                        R.string.error_file, Snackbar.LENGTH_LONG).show();
+                            }
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(@NonNull GifDrawable resource, @NonNull Object model,
+                                                       Target<GifDrawable> target,
+                                                       @NonNull DataSource dataSource, boolean isFirst) {
+                            startPostponedEnterTransition();
+                            return false;
+                        }
+                    })
                     .fallback(R.drawable.ic_baseline_image_24)
                     .error(R.drawable.ic_baseline_image_24)
                     .into(mPhotoView);

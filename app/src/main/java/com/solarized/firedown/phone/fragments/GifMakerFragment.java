@@ -13,6 +13,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
@@ -26,9 +29,9 @@ import androidx.media3.extractor.ExtractorsFactory;
 import androidx.media3.ui.PlayerView;
 
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.slider.RangeSlider;
+import com.google.android.material.slider.Slider;
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
@@ -49,9 +52,14 @@ public class GifMakerFragment extends BaseFocusFragment {
     private ExoPlayer mExoPlayer;
 
     private RangeSlider mRangeSlider;
-    private ChipGroup mSpeedChipGroup;
+    private Slider mSpeedSlider;
+    private TextView mSpeedValue;
     private TextView mRangeLabel;
     private LinearProgressIndicator mPlayheadIndicator;
+
+    /* Slider position → fps mapping. Indexed by (int) slider value. */
+    private static final int[] SPEED_FPS = {6, 8, 12, 18, 25};
+    private static final int SPEED_DEFAULT_INDEX = 2;
 
     /* Cached duration in ms — populated from the player once it's ready.
      * Until then the slider operates on the placeholder 0..100 range from
@@ -113,7 +121,8 @@ public class GifMakerFragment extends BaseFocusFragment {
         mAppBarLayout = view.findViewById(R.id.appbar_layout);
         mPlayerView = view.findViewById(R.id.player_view);
         mRangeSlider = view.findViewById(R.id.range_slider);
-        mSpeedChipGroup = view.findViewById(R.id.speed_chip_group);
+        mSpeedSlider = view.findViewById(R.id.speed_slider);
+        mSpeedValue = view.findViewById(R.id.speed_value);
         mRangeLabel = view.findViewById(R.id.range_label);
         mPlayheadIndicator = view.findViewById(R.id.playhead_indicator);
         mPlayheadIndicator.setMax(10000);
@@ -135,9 +144,25 @@ public class GifMakerFragment extends BaseFocusFragment {
         MaterialButton createButton = view.findViewById(R.id.create_button);
         createButton.setOnClickListener(v -> startGifMakerTask());
 
+        /* The create button is constrained to the body's bottom, which is
+         * the same screen edge that navigation_scrim grows up from. On
+         * gesture-bar devices the scrim is ~24dp tall, taller than the
+         * button's own 16dp bottom margin, so the button sits behind it.
+         * Add the system bottom inset to the button's bottom margin —
+         * same approach BaseFocusFragment uses for mFab. */
+        int baseBottomMargin = ((ViewGroup.MarginLayoutParams) createButton.getLayoutParams())
+                .bottomMargin;
+        ViewCompat.setOnApplyWindowInsetsListener(createButton, (v, windowInsets) -> {
+            Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            lp.bottomMargin = baseBottomMargin + bars.bottom;
+            v.setLayoutParams(lp);
+            return windowInsets;
+        });
+
         configurePlayer();
         configureRangeSlider();
-        configureSpeedChips();
+        configureSpeedSlider();
 
         mLoopHandler.postDelayed(mLoopTask, PREVIEW_LOOP_INTERVAL_MS);
     }
@@ -207,12 +232,27 @@ public class GifMakerFragment extends BaseFocusFragment {
         updateRangeLabel();
     }
 
-    private void configureSpeedChips() {
-        /* ChipGroup with selectionRequired keeps at least one chip checked,
-         * but guard anyway in case the layout default ever drifts. */
-        if (mSpeedChipGroup.getCheckedChipId() == View.NO_ID) {
-            mSpeedChipGroup.check(R.id.speed_medium);
+    private void configureSpeedSlider() {
+        mSpeedSlider.setLabelFormatter(value -> speedLabel((int) value));
+        mSpeedSlider.addOnChangeListener((slider, value, fromUser) ->
+                mSpeedValue.setText(speedLabel((int) value)));
+        mSpeedValue.setText(speedLabel((int) mSpeedSlider.getValue()));
+    }
+
+    private String speedLabel(int index) {
+        switch (clampSpeedIndex(index)) {
+            case 0: return getString(R.string.gif_maker_speed_very_slow);
+            case 1: return getString(R.string.gif_maker_speed_slow);
+            case 3: return getString(R.string.gif_maker_speed_fast);
+            case 4: return getString(R.string.gif_maker_speed_very_fast);
+            default: return getString(R.string.gif_maker_speed_medium);
         }
+    }
+
+    private static int clampSpeedIndex(int index) {
+        if (index < 0) return 0;
+        if (index >= SPEED_FPS.length) return SPEED_FPS.length - 1;
+        return index;
     }
 
     private void applyDuration(long durationMs) {
@@ -258,12 +298,7 @@ public class GifMakerFragment extends BaseFocusFragment {
     }
 
     private int currentFps() {
-        int id = mSpeedChipGroup.getCheckedChipId();
-        if (id == R.id.speed_very_slow) return 6;
-        if (id == R.id.speed_slow) return 8;
-        if (id == R.id.speed_fast) return 18;
-        if (id == R.id.speed_very_fast) return 25;
-        return 12; /* speed_medium / fallback */
+        return SPEED_FPS[clampSpeedIndex((int) mSpeedSlider.getValue())];
     }
 
     private void startGifMakerTask() {

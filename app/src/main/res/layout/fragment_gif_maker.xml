@@ -87,75 +87,56 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <TextView
-            android:id="@+id/speed_label"
+        <!-- Header row: static label on the left, current selection on the
+             right. The slider itself only shows tick stops and a thumb;
+             the right-side TextView keeps the selected speed visible
+             without forcing the user to drag to read the tooltip. -->
+        <LinearLayout
+            android:id="@+id/speed_header"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:paddingHorizontal="16dp"
             android:paddingTop="16dp"
-            android:text="@string/gif_maker_speed_label"
-            android:textAppearance="?attr/textAppearanceTitleSmall"
-            android:textColor="?attr/colorOnSurface"
-            app:layout_constraintBottom_toTopOf="@id/speed_scroll"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
-
-        <HorizontalScrollView
-            android:id="@+id/speed_scroll"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:scrollbars="none"
-            android:paddingHorizontal="16dp"
-            app:layout_constraintBottom_toTopOf="@id/create_button"
+            app:layout_constraintBottom_toTopOf="@id/speed_slider"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/speed_chip_group"
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/gif_maker_speed_label"
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorOnSurface" />
+
+            <TextView
+                android:id="@+id/speed_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:singleSelection="true"
-                app:selectionRequired="true">
+                android:textAppearance="?attr/textAppearanceTitleSmall"
+                android:textColor="?attr/colorPrimary"
+                tools:text="Medium" />
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/speed_very_slow"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gif_maker_speed_very_slow" />
+        </LinearLayout>
 
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/speed_slow"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gif_maker_speed_slow" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/speed_medium"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:checked="true"
-                    android:text="@string/gif_maker_speed_medium" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/speed_fast"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gif_maker_speed_fast" />
-
-                <com.google.android.material.chip.Chip
-                    android:id="@+id/speed_very_fast"
-                    style="@style/Widget.Material3.Chip.Filter"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/gif_maker_speed_very_fast" />
-
-            </com.google.android.material.chip.ChipGroup>
-
-        </HorizontalScrollView>
+        <!-- 5-stop slider (0..4 → very slow / slow / medium / fast / very
+             fast). tickVisible draws a dot at each stop so the discrete
+             positions are obvious; the floating label is configured in
+             code via a LabelFormatter. -->
+        <com.google.android.material.slider.Slider
+            android:id="@+id/speed_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:valueFrom="0"
+            android:valueTo="4"
+            android:stepSize="1"
+            android:value="2"
+            app:tickVisible="true"
+            app:layout_constraintBottom_toTopOf="@id/create_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/create_button"

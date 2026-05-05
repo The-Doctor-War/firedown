@@ -1,6 +1,6 @@
 package com.solarized.firedown.phone.fragments;
 
-import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.Player;
@@ -25,14 +26,20 @@ import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.extractor.DefaultExtractorsFactory;
 import androidx.media3.extractor.ExtractorsFactory;
 import androidx.media3.ui.PlayerView;
+import androidx.navigation.fragment.NavHostFragment;
 
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.slider.RangeSlider;
-import com.google.android.material.slider.Slider;
+import com.google.android.material.snackbar.Snackbar;
+import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegGifMaker;
+import com.solarized.firedown.manager.tasks.TaskManager;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class GifMakerFragment extends Fragment {
@@ -43,11 +50,8 @@ public class GifMakerFragment extends Fragment {
     private ExoPlayer mExoPlayer;
 
     private RangeSlider mRangeSlider;
-    private Slider mFpsSlider;
-    private Slider mWidthSlider;
+    private ChipGroup mSpeedChipGroup;
     private TextView mRangeLabel;
-    private TextView mFpsLabel;
-    private TextView mWidthLabel;
 
     /* Cached duration in ms — populated from the player once it's ready.
      * Until then the slider operates on the placeholder 0..100 range from
@@ -109,17 +113,28 @@ public class GifMakerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Toolbar toolbar = view.findViewById(R.id.toolbar);
+        toolbar.setNavigationOnClickListener(v ->
+                NavHostFragment.findNavController(this).popBackStack());
+
+        MaterialButton createButton = view.findViewById(R.id.create_button);
+        createButton.setOnClickListener(v -> startGifMakerTask());
+
         mPlayerView = view.findViewById(R.id.player_view);
         mRangeSlider = view.findViewById(R.id.range_slider);
-        mFpsSlider = view.findViewById(R.id.fps_slider);
-        mWidthSlider = view.findViewById(R.id.width_slider);
+        mSpeedChipGroup = view.findViewById(R.id.speed_chip_group);
         mRangeLabel = view.findViewById(R.id.range_label);
-        mFpsLabel = view.findViewById(R.id.fps_label);
-        mWidthLabel = view.findViewById(R.id.width_label);
 
-        Context context = requireContext();
+        configurePlayer();
+        configureRangeSlider();
+        configureSpeedChips();
 
-        mExoPlayer = new ExoPlayer.Builder(context).build();
+        mLoopHandler.postDelayed(mLoopTask, PREVIEW_LOOP_INTERVAL_MS);
+    }
+
+    @OptIn(markerClass = UnstableApi.class)
+    private void configurePlayer() {
+        mExoPlayer = new ExoPlayer.Builder(requireContext()).build();
         mPlayerView.setPlayer(mExoPlayer);
 
         DataSource.Factory dataSourceFactory = new FileDataSource.Factory();
@@ -133,25 +148,34 @@ public class GifMakerFragment extends Fragment {
 
         mExoPlayer.setMediaSource(source);
         mExoPlayer.prepare();
-        mExoPlayer.setPlayWhenReady(true);
-        mLoopHandler.postDelayed(mLoopTask, PREVIEW_LOOP_INTERVAL_MS);
+        /* Don't autoplay — the user opens this screen to set up the trim,
+         * not to immediately blast audio. They can hit play in the player
+         * controls when they want to verify the loop. */
+        mExoPlayer.setPlayWhenReady(false);
 
         mExoPlayer.addListener(new Player.Listener() {
             @Override
-            public void onPlaybackStateChanged(int playbackState) {
-                /* Duration is only known once the player has finished
-                 * preparation. Configure the range slider then; the user
-                 * could start adjusting before this fires, but the layout
-                 * defaults give them a usable 0..100 placeholder. */
-                if (playbackState == Player.STATE_READY && mDurationMs <= 0) {
+            public void onPlaybackStateChanged(int state) {
+                if (state == Player.STATE_READY && mDurationMs <= 0) {
                     long duration = mExoPlayer.getDuration();
                     if (duration > 0) {
-                        configureRangeSlider(duration);
+                        applyDuration(duration);
                     }
                 }
             }
         });
 
+        /* The settings (gear) button is built into media3's default
+         * controller layout and there's no public attribute to suppress
+         * it — find it by id and hide. show_subtitle_button and
+         * show_shuffle_button are handled via XML attributes; the repeat
+         * (loop) button is hidden by simply not setting
+         * app:repeat_toggle_modes (the default is "none"). */
+        View settings = mPlayerView.findViewById(androidx.media3.ui.R.id.exo_settings);
+        if (settings != null) settings.setVisibility(View.GONE);
+    }
+
+    private void configureRangeSlider() {
         mRangeSlider.addOnChangeListener((slider, value, fromUser) -> {
             updateRangeLabel();
             if (fromUser && slider.getValues().size() >= 2) {
@@ -166,16 +190,18 @@ public class GifMakerFragment extends Fragment {
                 mLastEndMs = end;
             }
         });
-
-        mFpsSlider.addOnChangeListener((slider, value, fromUser) -> updateFpsLabel());
-        mWidthSlider.addOnChangeListener((slider, value, fromUser) -> updateWidthLabel());
-
         updateRangeLabel();
-        updateFpsLabel();
-        updateWidthLabel();
     }
 
-    private void configureRangeSlider(long durationMs) {
+    private void configureSpeedChips() {
+        /* ChipGroup with selectionRequired keeps at least one chip checked,
+         * but guard anyway in case the layout default ever drifts. */
+        if (mSpeedChipGroup.getCheckedChipId() == View.NO_ID) {
+            mSpeedChipGroup.check(R.id.speed_medium);
+        }
+    }
+
+    private void applyDuration(long durationMs) {
         /* Material RangeSlider requires (valueTo - valueFrom) to be a
          * multiple of stepSize, and rejects the configuration with
          * IllegalStateException otherwise. Round the duration down to the
@@ -195,52 +221,64 @@ public class GifMakerFragment extends Fragment {
     }
 
     private void updateRangeLabel() {
-        if (mRangeSlider.getValues().size() < 2) return;
+        if (mRangeSlider.getValues().size() < 2) {
+            mRangeLabel.setText(formatTime(0) + " → " + formatTime(0) + " (0s)");
+            return;
+        }
         long start = mRangeSlider.getValues().get(0).longValue();
         long end = mRangeSlider.getValues().get(1).longValue();
-        long span = Math.max(0, end - start);
+        long span = Math.max(0L, end - start);
         mRangeLabel.setText(String.format(Locale.getDefault(),
                 "%s → %s (%s)",
                 formatTime(start), formatTime(end), formatDuration(span)));
     }
 
-    private void updateFpsLabel() {
-        mFpsLabel.setText(getString(R.string.gif_maker_fps_label, (int) mFpsSlider.getValue()));
-    }
-
-    private void updateWidthLabel() {
-        mWidthLabel.setText(getString(R.string.gif_maker_width_label, (int) mWidthSlider.getValue()));
-    }
-
     private static String formatTime(long ms) {
-        long s = ms / 1000;
-        return String.format(Locale.getDefault(), "%02d:%02d", s / 60, s % 60);
+        long s = ms / 1000L;
+        return String.format(Locale.getDefault(), "%02d:%02d", s / 60L, s % 60L);
     }
 
     private static String formatDuration(long ms) {
-        long s = (ms + 500) / 1000;
+        long s = (ms + 500L) / 1000L;
         return s + "s";
     }
 
-    /* Called by GifMakerActivity when the user taps the toolbar Create
-     * action. Pulls the current slider state into the holder the activity
-     * uses to build the start-task intent. */
-    public Args collectArgs() {
-        long start = 0L;
-        long end = 0L;
-        if (mRangeSlider.getValues().size() >= 2) {
-            start = mRangeSlider.getValues().get(0).longValue();
-            end = mRangeSlider.getValues().get(1).longValue();
-        }
-        int fps = (int) mFpsSlider.getValue();
-        int width = (int) mWidthSlider.getValue();
-        if (fps <= 0) fps = FFmpegGifMaker.DEFAULT_FPS;
-        if (width <= 0) width = FFmpegGifMaker.DEFAULT_WIDTH;
-        return new Args(start, end, fps, width);
+    private int currentFps() {
+        int id = mSpeedChipGroup.getCheckedChipId();
+        if (id == R.id.speed_very_slow) return 6;
+        if (id == R.id.speed_slow) return 8;
+        if (id == R.id.speed_fast) return 18;
+        if (id == R.id.speed_very_fast) return 25;
+        return 12; /* speed_medium / fallback */
     }
 
-    public DownloadEntity getDownloadEntity() {
-        return mDownloadEntity;
+    private void startGifMakerTask() {
+        if (mDownloadEntity == null) return;
+
+        long start = mLastStartMs;
+        long end = mLastEndMs;
+
+        if (end > 0 && end <= start) {
+            Snackbar.make(requireView(), R.string.gif_maker_invalid_range,
+                    Snackbar.LENGTH_LONG).show();
+            return;
+        }
+
+        ArrayList<DownloadEntity> entities = new ArrayList<>(1);
+        entities.add(mDownloadEntity);
+
+        Intent intent = new Intent(requireContext(), TaskManager.class);
+        intent.setAction(IntentActions.DOWNLOAD_START_MAKE_GIF);
+        intent.putExtra(Keys.ITEM_LIST_ID, entities);
+        intent.putExtra(Keys.GIF_START_MS, start);
+        intent.putExtra(Keys.GIF_END_MS, end);
+        intent.putExtra(Keys.GIF_FPS, currentFps());
+        intent.putExtra(Keys.GIF_WIDTH, FFmpegGifMaker.DEFAULT_WIDTH);
+        requireContext().startService(intent);
+
+        /* Hand control back to the downloads list so the bottom progress
+         * view shows the encode in progress. */
+        NavHostFragment.findNavController(this).popBackStack();
     }
 
     @Override
@@ -257,19 +295,5 @@ public class GifMakerFragment extends Fragment {
         if (mExoPlayer != null) mExoPlayer.release();
         mExoPlayer = null;
         mPlayerView = null;
-    }
-
-    public static final class Args {
-        public final long startMs;
-        public final long endMs;
-        public final int fps;
-        public final int width;
-
-        Args(long startMs, long endMs, int fps, int width) {
-            this.startMs = startMs;
-            this.endMs = endMs;
-            this.fps = fps;
-            this.width = width;
-        }
     }
 }

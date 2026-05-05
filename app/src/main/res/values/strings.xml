@@ -143,9 +143,13 @@
     <string name="extract_audio">Extract Audio</string>
     <string name="make_gif">Create GIF</string>
     <string name="gif_maker_title">Create GIF</string>
-    <string name="gif_maker_create">Create</string>
-    <string name="gif_maker_fps_label">Frame rate: %1$d fps</string>
-    <string name="gif_maker_width_label">Width: %1$d px</string>
+    <string name="gif_maker_create">Create GIF</string>
+    <string name="gif_maker_speed_label">Speed</string>
+    <string name="gif_maker_speed_very_slow">Very slow</string>
+    <string name="gif_maker_speed_slow">Slow</string>
+    <string name="gif_maker_speed_medium">Medium</string>
+    <string name="gif_maker_speed_fast">Fast</string>
+    <string name="gif_maker_speed_very_fast">Very fast</string>
     <string name="gif_maker_invalid_range">Pick a non-empty range first</string>
     <string name="file_view">View</string>
     <string name="finish_origin">Finish</string>

@@ -10,6 +10,11 @@
         android:label="fragment_downloads"
         tools:layout="@layout/fragment_download">
     </fragment>
+    <fragment
+        android:id="@+id/gif_maker"
+        android:name="com.solarized.firedown.phone.fragments.GifMakerFragment"
+        android:label="fragment_gif_maker"
+        tools:layout="@layout/fragment_gif_maker" />
     <dialog
         android:id="@+id/dialog_download_sort"
         android:name="com.solarized.firedown.phone.dialogs.DownloadsSortDialogFragment" />

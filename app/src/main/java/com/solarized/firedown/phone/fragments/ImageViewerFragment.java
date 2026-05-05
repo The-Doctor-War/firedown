@@ -190,6 +190,10 @@ public class ImageViewerFragment extends Fragment {
                         public boolean onResourceReady(@NonNull GifDrawable resource, @NonNull Object model,
                                                        Target<GifDrawable> target,
                                                        @NonNull DataSource dataSource, boolean isFirst) {
+                            Log.d(TAG, "gif onResourceReady frames=" + resource.getFrameCount()
+                                    + " loops=" + resource.getFrameLoopCount()
+                                    + " size=" + resource.getIntrinsicWidth() + "x" + resource.getIntrinsicHeight()
+                                    + " running=" + resource.isRunning());
                             startPostponedEnterTransition();
                             if (!resource.isRunning()) {
                                 resource.start();

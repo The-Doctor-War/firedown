@@ -212,7 +212,20 @@ public class ImageViewerFragment extends Fragment {
                              * pipeline is skipped. */
                             resource.setLoopCount(GifDrawable.LOOP_FOREVER);
                             mPhotoView.setImageDrawable(resource);
+                            /* Some Animatable drawables only step
+                             * frames when the framework thinks they
+                             * are visible — Glide internally calls
+                             * setVisible(false) on stop and may not
+                             * have flipped it back by the time we
+                             * reach here. Force-true the visibility
+                             * (restart=true) before start() so we
+                             * don't rely on that flag. */
+                            resource.setVisible(true, true);
                             resource.start();
+                            mPhotoView.post(() ->
+                                    Log.d(TAG, "gif post-start running=" + resource.isRunning()
+                                            + " visible=" + resource.isVisible()
+                                            + " callback=" + (resource.getCallback() != null)));
                             return true;
                         }
                     })

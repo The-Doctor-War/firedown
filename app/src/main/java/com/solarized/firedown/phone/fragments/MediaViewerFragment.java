@@ -206,7 +206,9 @@ public class MediaViewerFragment extends Fragment {
 
         final DataSource.Factory dataSourceFactory = new FileDataSource.Factory();
 
-        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+        ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory()
+                .setConstantBitrateSeekingEnabled(true)
+                .setConstantBitrateSeekingAlwaysEnabled(true);
 
         MediaItem mediaItem = MediaItem.fromUri(Uri.parse(mDownloadEntity.getFilePath()));
 

@@ -142,6 +142,11 @@
     <string name="error_unknown">Unknown error occurred</string>
     <string name="extract_audio">Extract Audio</string>
     <string name="make_gif">Create GIF</string>
+    <string name="gif_maker_title">Create GIF</string>
+    <string name="gif_maker_create">Create</string>
+    <string name="gif_maker_fps_label">Frame rate: %1$d fps</string>
+    <string name="gif_maker_width_label">Width: %1$d px</string>
+    <string name="gif_maker_invalid_range">Pick a non-empty range first</string>
     <string name="file_view">View</string>
     <string name="finish_origin">Finish</string>
     <string name="incognito_home_title">Private Browsing</string>

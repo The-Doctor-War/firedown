@@ -137,6 +137,13 @@
         </activity>
 
         <activity
+            android:name="com.solarized.firedown.phone.GifMakerActivity"
+            android:configChanges="keyboardHidden|orientation|screenLayout|screenSize"
+            android:exported="false"
+            android:theme="@style/Theme.FireDown">
+        </activity>
+
+        <activity
             android:name="com.solarized.firedown.phone.HistoryActivity"
             android:configChanges="keyboardHidden|orientation|screenLayout|screenSize"
             android:exported="true"

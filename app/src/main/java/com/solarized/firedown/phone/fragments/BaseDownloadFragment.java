@@ -35,6 +35,7 @@ import com.solarized.firedown.data.models.DownloadsViewModel;
 import com.solarized.firedown.data.models.TaskViewModel;
 import com.solarized.firedown.manager.ServiceActions;
 import com.solarized.firedown.phone.DownloadsActivity;
+import com.solarized.firedown.phone.GifMakerActivity;
 import com.solarized.firedown.phone.VaultActivity;
 import com.solarized.firedown.ui.CardViewListItemDecoration;
 import com.solarized.firedown.ui.EqualSpacingItemDecoration;
@@ -206,9 +207,13 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             mOperationActive = true;
             startActionMode(option.getPosition());
         } else if (iconId == R.drawable.ic_movie_24) {
-            handleItemAction(IntentActions.DOWNLOAD_START_MAKE_GIF, entity);
-            mOperationActive = true;
-            startActionMode(option.getPosition());
+            /* Hand off to GifMakerActivity so the user can pick a trim
+             * range, fps, and width before the encode kicks off. The
+             * activity itself starts TaskManager once the user confirms,
+             * so we don't flip mOperationActive / startActionMode here. */
+            Intent intent = new Intent(mActivity, GifMakerActivity.class);
+            intent.putExtra(Keys.ITEM_ID, entity);
+            startActivity(intent);
         } else if (iconId == R.drawable.ic_lock_24) {
             handleItemAction(IntentActions.LOCK_FOR_ENCRYPTION, entity);
             mOperationActive = true;

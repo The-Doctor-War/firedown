@@ -24,4 +24,9 @@ public class Keys {
     public static final String UPDATE_META = "com.solarized.firedown.UDPATE_META";
     public static final String UPDATE_NAME = "com.solarized.firedown.UPDATE_NAME";
 
+    public static final String GIF_START_MS = "com.solarized.firedown.GIF_START_MS";
+    public static final String GIF_END_MS = "com.solarized.firedown.GIF_END_MS";
+    public static final String GIF_FPS = "com.solarized.firedown.GIF_FPS";
+    public static final String GIF_WIDTH = "com.solarized.firedown.GIF_WIDTH";
+
 }

@@ -39,6 +39,8 @@ public class TaskManager extends Service {
 
     private ArrayList<DownloadEntity> mQueueList;
 
+    private GifMakerArgs mGifMakerArgs;
+
     @Inject
     DownloadDataRepository mDownloadRepository; // Injected by Hilt
     @Inject
@@ -119,6 +121,14 @@ public class TaskManager extends Service {
 
         String mAction = intent.getAction();
 
+        if (IntentActions.DOWNLOAD_START_MAKE_GIF.equals(mAction)) {
+            mGifMakerArgs = new GifMakerArgs(
+                    intent.getLongExtra(Keys.GIF_START_MS, 0L),
+                    intent.getLongExtra(Keys.GIF_END_MS, 0L),
+                    intent.getIntExtra(Keys.GIF_FPS, 0),
+                    intent.getIntExtra(Keys.GIF_WIDTH, 0));
+        }
+
         Log.d(TAG, "onStartCommand: " + mAction);
 
         switch (mAction) {
@@ -148,6 +158,10 @@ public class TaskManager extends Service {
 
     public ArrayList<DownloadEntity> getQueueList(){
         return mQueueList;
+    }
+
+    public GifMakerArgs getGifMakerArgs() {
+        return mGifMakerArgs;
     }
 
 }

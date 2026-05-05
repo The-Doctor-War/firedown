@@ -86,13 +86,18 @@ public class GifMakerTask extends TaskRunnable implements FFmpegListener {
 
             mDownloadEntity.setFileName(outFile.getName());
 
-            /* startMs/endMs == 0 means "whole file"; the native side maps 0
-             * to "no trim" for both ends. fps/width default in native side
-             * if non-positive. */
+            /* The trim UI hands us start/end/fps/width via the intent, which
+             * TaskManager parks on a side channel because the existing
+             * intent only forwards the entity list. If the args are missing
+             * (legacy callers), fall through to whole-file defaults. */
+            GifMakerArgs args = mTaskManager.getGifMakerArgs();
+            long startMs = args != null ? args.startMs : 0L;
+            long endMs = args != null ? args.endMs : 0L;
+            int fps = args != null && args.fps > 0 ? args.fps : FFmpegGifMaker.DEFAULT_FPS;
+            int width = args != null && args.width > 0 ? args.width : FFmpegGifMaker.DEFAULT_WIDTH;
+
             int ret = mFFmpegGifMaker.start(filePath, outFile.getAbsolutePath(),
-                    0L, 0L,
-                    FFmpegGifMaker.DEFAULT_FPS,
-                    FFmpegGifMaker.DEFAULT_WIDTH);
+                    startMs, endMs, fps, width);
 
             if (ret < 0) {
                 Log.d(TAG, "FFmpegGifMaker start error " + ret);

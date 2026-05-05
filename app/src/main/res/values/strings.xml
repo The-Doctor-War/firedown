@@ -88,6 +88,7 @@
     <string name="task_encryption_finished">Encryption finished</string>
     <string name="task_decryption_finished">Decryption finished</string>
     <string name="task_audio_finished">Audio extracted</string>
+    <string name="task_gif_finished">GIF created</string>
     <string name="task_cancel_operation">Do you want to stop the current operation?</string>
     <string name="task_stop">Stop</string>
     <string name="task_dismiss">Dismiss</string>
@@ -98,6 +99,7 @@
     <string name="download_queued">Pending…</string>
     <string name="download_rename_error">The file name is already in use.</string>
     <string name="download_saving_audio">Extracting Audio, please wait…</string>
+    <string name="download_saving_gif">Creating GIF, please wait…</string>
     <string name="downloading">Downloading…</string>
     <string name="edit">Edit</string>
     <string name="empty_learn_more">Learn more</string>
@@ -139,6 +141,7 @@
     <string name="error_security_io_exception">No matching key found for the ciphertext in the stream</string>
     <string name="error_unknown">Unknown error occurred</string>
     <string name="extract_audio">Extract Audio</string>
+    <string name="make_gif">Create GIF</string>
     <string name="file_view">View</string>
     <string name="finish_origin">Finish</string>
     <string name="incognito_home_title">Private Browsing</string>

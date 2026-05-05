@@ -25,6 +25,7 @@
 #include "thumbnailer.h"
 #include "metadatareader.h"
 #include "encoder.h"
+#include "gifmaker.h"
 #include "libavcodec/jni.h"
 
 /*for android logs*/
@@ -106,6 +107,14 @@ jint JNICALL JNI_OnLoad(JavaVM* vm, void* reserved)
 								encoder_methods,
 								NELEM(encoder_methods))) {
 		fprintf(stderr, "ERROR: Exif native Encoder registration failed\n");
+		goto bail;
+	}
+
+	if (!register_native_methods(env,
+								gifmaker_runnable_class_path_name,
+								gifmaker_methods,
+								NELEM(gifmaker_methods))) {
+		fprintf(stderr, "ERROR: Exif native GifMaker registration failed\n");
 		goto bail;
 	}
 

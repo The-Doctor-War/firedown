@@ -59,6 +59,9 @@ public class TaskManager extends Service {
             if(IntentActions.DOWNLOAD_START_AUDIO_ENCODE.equals(action)){
                 mCurrentRunnable = new AudoEncodeTask(TaskManager.this, mDownloadRepository);
                 post(mCurrentRunnable);
+            }else if(IntentActions.DOWNLOAD_START_MAKE_GIF.equals(action)){
+                mCurrentRunnable = new GifMakerTask(TaskManager.this, mDownloadRepository);
+                post(mCurrentRunnable);
             }else if(IntentActions.START_ENCRYPTION.equals(action)){
                 mCurrentRunnable = new InSafeTask(TaskManager.this, mDownloadRepository);
                 post(mCurrentRunnable);
@@ -119,11 +122,13 @@ public class TaskManager extends Service {
         Log.d(TAG, "onStartCommand: " + mAction);
 
         switch (mAction) {
-            case IntentActions.DOWNLOAD_START_AUDIO_ENCODE, IntentActions.START_DECRYPTION, IntentActions.START_ENCRYPTION -> {
+            case IntentActions.DOWNLOAD_START_AUDIO_ENCODE, IntentActions.DOWNLOAD_START_MAKE_GIF,
+                 IntentActions.START_DECRYPTION, IntentActions.START_ENCRYPTION -> {
                 msg.obj = mAction;
                 serviceHandler.sendMessage(msg);
             }
-            case IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, IntentActions.CANCEL_DECRYPTION, IntentActions.CANCEL_ENCRYPTION -> {
+            case IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, IntentActions.DOWNLOAD_CANCEL_MAKE_GIF,
+                 IntentActions.CANCEL_DECRYPTION, IntentActions.CANCEL_ENCRYPTION -> {
                 if(mCurrentRunnable != null){
                     mCurrentRunnable.stop();
                 }

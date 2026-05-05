@@ -157,7 +157,18 @@ public class ImageViewerFragment extends Fragment {
              * narrows the result type — keep it inline so we don't
              * pollute the shared mRequestListener which is Drawable
              * for the other branches. */
-            Glide.with(App.getAppContext())
+            /* Glide.with(this) ties the request to the fragment's
+             * lifecycle so the request manager forwards onStart /
+             * onStop to the GifDrawable — without that the drawable
+             * never gets the start signal and sits on its first
+             * frame. App-context binding (used by the other branches)
+             * doesn't matter for static images but actively breaks
+             * animation here.
+             *
+             * resource.start() in onResourceReady is belt-and-braces:
+             * if the lifecycle plumbing fails for any reason, the
+             * explicit start() guarantees animation. */
+            Glide.with(this)
                     .asGif()
                     .load(filePath)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
@@ -180,6 +191,9 @@ public class ImageViewerFragment extends Fragment {
                                                        Target<GifDrawable> target,
                                                        @NonNull DataSource dataSource, boolean isFirst) {
                             startPostponedEnterTransition();
+                            if (!resource.isRunning()) {
+                                resource.start();
+                            }
                             return false;
                         }
                     })

@@ -922,6 +922,19 @@ int jni_gifmaker_start(JNIEnv *env, jobject thiz, jstring filePath, jstring outp
     gif->start_us = startMs > 0 ? (int64_t) startMs * 1000ll : 0;
     gif->end_us = endMs > 0 ? (int64_t) endMs * 1000ll : 0;
 
+    /* Defence in depth: the UI already blocks ranges below MIN_TRIM_MS
+     * (200 ms), but a stale intent or a future caller could ask for a
+     * zero-length / negative range. palettegen needs at least one frame
+     * to emit a palette; without that the GIF muxer writes a header and
+     * trailer with no frames between them, and the resulting file fails
+     * to load in every viewer. Reject before we open any contexts. */
+    if (gif->end_us > 0 && gif->end_us - gif->start_us < 100000ll) {
+        LOGE(1, "jni_gifmaker_start trim range too short start=%" PRId64
+                " end=%" PRId64, gif->start_us, gif->end_us);
+        ret = -ERROR_COULD_NOT_INIT_PATHS;
+        goto end;
+    }
+
     if ((ret = gifmaker_open_input(gif, file_path)) < 0) goto end;
     if (gif->interrupt) { ret = -ERROR_INTERRUPTED; goto end; }
 

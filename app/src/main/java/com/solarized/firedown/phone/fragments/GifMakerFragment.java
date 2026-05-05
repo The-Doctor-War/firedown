@@ -61,6 +61,14 @@ public class GifMakerFragment extends BaseFocusFragment {
     private static final int[] SPEED_FPS = {6, 8, 12, 18, 25};
     private static final int SPEED_DEFAULT_INDEX = 2;
 
+    /* Below this, the encode either produces an empty GIF (start == end)
+     * or a single-frame one that's barely a GIF — ffmpeg's gif muxer
+     * rejects degenerate inputs and the native side guards too, but
+     * we want to fail fast in the UI rather than start a doomed task. */
+    private static final long MIN_TRIM_MS = 200L;
+
+    private MaterialButton mCreateButton;
+
     /* Cached duration in ms — populated from the player once it's ready.
      * Until then the slider operates on the placeholder 0..100 range from
      * the layout. */
@@ -141,8 +149,12 @@ public class GifMakerFragment extends BaseFocusFragment {
         mToolbar.setNavigationOnClickListener(v ->
                 NavigationUtils.popBackStackSafe(mNavController, R.id.gif_maker));
 
-        MaterialButton createButton = view.findViewById(R.id.create_button);
-        createButton.setOnClickListener(v -> startGifMakerTask());
+        mCreateButton = view.findViewById(R.id.create_button);
+        mCreateButton.setOnClickListener(v -> startGifMakerTask());
+        /* Disabled until the player reports STATE_READY so the duration
+         * is known — otherwise the user can hit Create with the slider
+         * still on its 0..100 placeholder and produce a 100 ms GIF. */
+        mCreateButton.setEnabled(false);
 
         /* The create button is constrained to the body's bottom, which is
          * the same screen edge that navigation_scrim grows up from. On
@@ -150,9 +162,9 @@ public class GifMakerFragment extends BaseFocusFragment {
          * button's own 16dp bottom margin, so the button sits behind it.
          * Add the system bottom inset to the button's bottom margin —
          * same approach BaseFocusFragment uses for mFab. */
-        int baseBottomMargin = ((ViewGroup.MarginLayoutParams) createButton.getLayoutParams())
+        int baseBottomMargin = ((ViewGroup.MarginLayoutParams) mCreateButton.getLayoutParams())
                 .bottomMargin;
-        ViewCompat.setOnApplyWindowInsetsListener(createButton, (v, windowInsets) -> {
+        ViewCompat.setOnApplyWindowInsetsListener(mCreateButton, (v, windowInsets) -> {
             Insets bars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             ViewGroup.MarginLayoutParams lp = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
             lp.bottomMargin = baseBottomMargin + bars.bottom;
@@ -272,6 +284,10 @@ public class GifMakerFragment extends BaseFocusFragment {
         mLastStartMs = 0L;
         mLastEndMs = rounded;
         updateRangeLabel();
+
+        /* Now that we know the duration, the slider has real values and
+         * the encode args will be coherent. Safe to let the user submit. */
+        if (mCreateButton != null) mCreateButton.setEnabled(true);
     }
 
     private void updateRangeLabel() {
@@ -304,10 +320,26 @@ public class GifMakerFragment extends BaseFocusFragment {
     private void startGifMakerTask() {
         if (mDownloadEntity == null) return;
 
+        /* Player hasn't reported STATE_READY yet → mDurationMs == 0,
+         * mLastEndMs == 0, slider is on its 0..100 placeholder. The
+         * Create button is disabled in this state, but guard anyway in
+         * case something fires through (e.g. accessibility action). */
+        if (mDurationMs <= 0) {
+            Snackbar.make(requireView(), R.string.gif_maker_not_ready,
+                    Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+
         long start = mLastStartMs;
         long end = mLastEndMs;
 
-        if (end > 0 && end <= start) {
+        /* end == 0 here would mean "encode the whole clip", which is
+         * the legacy semantics the native side honours. But once the
+         * duration is known we always have end > 0 from applyDuration,
+         * so an end <= start range is genuinely degenerate. Reject it
+         * with the same message as the too-short case to keep the UI
+         * simple — both cases mean "pick a real range". */
+        if (end - start < MIN_TRIM_MS) {
             Snackbar.make(requireView(), R.string.gif_maker_invalid_range,
                     Snackbar.LENGTH_LONG).show();
             return;
@@ -345,5 +377,6 @@ public class GifMakerFragment extends BaseFocusFragment {
         mExoPlayer = null;
         mPlayerView = null;
         mPlayheadIndicator = null;
+        mCreateButton = null;
     }
 }

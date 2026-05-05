@@ -151,6 +151,7 @@
     <string name="gif_maker_speed_fast">Fast</string>
     <string name="gif_maker_speed_very_fast">Very fast</string>
     <string name="gif_maker_invalid_range">Pick a non-empty range first</string>
+    <string name="gif_maker_not_ready">Waiting for the video to load…</string>
     <string name="file_view">View</string>
     <string name="finish_origin">Finish</string>
     <string name="incognito_home_title">Private Browsing</string>

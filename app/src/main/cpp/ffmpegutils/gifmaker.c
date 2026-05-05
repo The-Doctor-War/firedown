@@ -486,7 +486,13 @@ static int gifmaker_alloc_frames(struct GifMaker *gif) {
  * at 0 for the entire decode pass, then jumped to 100. */
 #define DECODE_PROGRESS_FRACTION 95
 
-static void gifmaker_publish_progress(JNIEnv *env, struct GifMaker *gif, int64_t current_us) {
+enum ProgressPhase {
+    PROGRESS_PHASE_DECODE,
+    PROGRESS_PHASE_ENCODE
+};
+
+static void gifmaker_publish_progress(JNIEnv *env, struct GifMaker *gif,
+                                      int64_t current_us, enum ProgressPhase phase) {
 
     int64_t total = gif->end_us > gif->start_us ? gif->end_us - gif->start_us : gif->duration_us;
 
@@ -496,10 +502,16 @@ static void gifmaker_publish_progress(JNIEnv *env, struct GifMaker *gif, int64_t
     if (elapsed < 0) elapsed = 0;
     if (elapsed > total) elapsed = total;
 
-    /* Map decode progress onto [0, total*95/100] so we leave headroom for
-     * the final palette/encode burst, which we report separately when
-     * frames come out of the filter graph. */
-    elapsed = (elapsed * DECODE_PROGRESS_FRACTION) / 100;
+    /* Decode pass owns 0..DECODE_PROGRESS_FRACTION%; encode burst owns the
+     * remainder. Without the phase split, the encode burst re-emitted the
+     * same 0..95% range and the bar visibly refilled twice. */
+    if (phase == PROGRESS_PHASE_DECODE) {
+        elapsed = (elapsed * DECODE_PROGRESS_FRACTION) / 100;
+    } else {
+        int64_t decode_part = (total * DECODE_PROGRESS_FRACTION) / 100;
+        int64_t encode_part = total - decode_part;
+        elapsed = decode_part + (elapsed * encode_part) / total;
+    }
 
     int64_t now = av_gettime_relative();
     if (gif->last_progress_us != 0 && (now - gif->last_progress_us) < UPDATE_TIME_US) {
@@ -586,7 +598,8 @@ static int gifmaker_drain_filter(JNIEnv *env, struct GifMaker *gif) {
                                   gif->start_us +
                                   av_rescale_q(gif->filtered_frame->pts,
                                                av_buffersink_get_time_base(gif->buffersink_ctx),
-                                               AV_TIME_BASE_Q));
+                                               AV_TIME_BASE_Q),
+                                  PROGRESS_PHASE_ENCODE);
 
         av_frame_unref(gif->filtered_frame);
     }
@@ -646,7 +659,7 @@ static int gifmaker_decode_packet(JNIEnv *env, struct GifMaker *gif, AVPacket *p
          * so the filter-drain path below produces no output during decode.
          * Drive the progress bar from the input side here — that's where
          * the real time is being spent anyway. */
-        gifmaker_publish_progress(env, gif, frame_pts_us);
+        gifmaker_publish_progress(env, gif, frame_pts_us, PROGRESS_PHASE_DECODE);
 
         if (ret < 0) {
             LOGE(1, "gifmaker_decode_packet buffersrc_add_frame failed (%d)", ret);

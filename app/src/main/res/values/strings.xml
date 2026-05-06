@@ -394,9 +394,9 @@
     <string name="settings_theme">Theme</string>
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">Disable WebGL</string>
-    <string name="settings_webgl_disabled_summary">Blocks GPU fingerprinting; may break 3D content</string>
+    <string name="settings_webgl_disabled_summary">Blocks GPU fingerprinting, may break 3D content</string>
     <string name="settings_webrtc_enabled">Enable WebRTC</string>
-    <string name="settings_webrtc_enabled_summary">Required for P2P calls; can leak your real IP</string>
+    <string name="settings_webrtc_enabled_summary">Required for P2P calls, can leak your real IP</string>
     <string name="share">Share</string>
     <string name="share_image">Share IMAGE</string>
     <string name="share_url">Share URL</string>

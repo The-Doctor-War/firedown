@@ -394,9 +394,9 @@
     <string name="settings_theme">主题</string>
     <string name="settings_version">版本</string>
     <string name="settings_webgl_disabled">禁用 WebGL</string>
-    <string name="settings_webgl_disabled_summary">阻止GPU指纹识别；可能影响3D内容</string>
+    <string name="settings_webgl_disabled_summary">阻止GPU指纹识别，可能影响3D内容</string>
     <string name="settings_webrtc_enabled">启用 WebRTC</string>
-    <string name="settings_webrtc_enabled_summary">P2P通话所需；可能泄露你的真实IP</string>
+    <string name="settings_webrtc_enabled_summary">P2P通话所需，可能泄露你的真实IP</string>
     <string name="share">分享</string>
     <string name="share_image">分享图像</string>
     <string name="share_url">分享网址</string>

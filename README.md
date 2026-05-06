@@ -1,9 +1,8 @@
 # Firedown
 
-**Android browser & downloader.** Save video, audio, and images from any site. Built on GeckoView, ad-blocking via uBlock Origin, no telemetry, no Play Store.
+**Android browser & downloader.** Save video, audio, and images from any site. Built on GeckoView with uBlock Origin ad-blocking. No telemetry, no Play Store, no accounts.
 
 → [firedown.app](https://firedown.app)
-
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/solarizeddev/firedown/main/branding/screenshots/landing.png" width="30%" />
@@ -15,9 +14,9 @@
 
 - Downloads video, audio, and images from YouTube, Twitch, Instagram, X, Facebook, Vimeo, and most websites
 - 4K downloads and background YouTube playback, no Premium needed
+- Convert to MP3, AAC, or GIF
 - uBlock Origin ad blocking, configured out of the box
-- Private Vault — PIN/biometric-locked encrypted storage for sensitive files
-- Convert to MP3, AAC, GIF
+- Private Vault — PIN/biometric-locked storage for sensitive files
 - GeckoView-based, not Chromium
 - No accounts, no ads, no telemetry
 
@@ -25,8 +24,8 @@
 
 - **[GitHub Releases](https://github.com/solarizeddev/firedown/releases)** — signed APKs with changelogs
 - **[Direct download](https://firedown.app/download)** from the website
-- **[Zapstore](https://zapstore.dev/apps/com.solarized.firedown)** from Zapstore
-- **[Obtainium](https://github.com/ImranR98/Obtainium)** Add repo https://github.com/solarizeddev/firedown
+- **[Zapstore](https://zapstore.dev/apps/com.solarized.firedown)**
+- **[Obtainium](https://github.com/ImranR98/Obtainium)** — add repo `https://github.com/solarizeddev/firedown`
 
 Not on the Play Store. Not currently submitted to F-Droid.
 
@@ -41,21 +40,21 @@ cd firedown
 Requires JDK 17 and Android SDK 34. Resulting APK in `app/build/outputs/apk/release/` is unsigned.
 
 ## License
- 
+
 Firedown's own code is MIT-licensed. See [LICENSE](LICENSE).
- 
+
 Bundled or linked third-party components:
- 
+
 - [GeckoView](https://mozilla.github.io/geckoview/) — MPL-2.0
 - [uBlock Origin](https://github.com/gorhill/uBlock) — GPL-3.0
 - [FFmpeg](https://ffmpeg.org/) — LGPL-2.1+, custom build at [firedown-ffmpeg](https://github.com/solarizeddev/firedown-ffmpeg)
+
 The combined APK is effectively GPL-3.0 due to bundled uBlock Origin. See [NOTICE](NOTICE).
- 
+
 ## Support
- 
+
 Lightning ⚡ at [firedown.app](https://firedown.app).
 
-## Notes
+---
 
-Parts of this codebase were reviewed and debugged with assistance from Claude (Anthropic).
-
+*Developed with AI-assisted code review.*

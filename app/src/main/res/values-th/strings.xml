@@ -299,4 +299,5 @@
     <string name="vault_decrypting">กำลังถอดรหัสไฟล์ โปรดรอสักครู่…</string>
     <string name="vault_encrypting">กำลังเข้ารหัสไฟล์ โปรดรอสักครู่…</string>
     <string name="vault_unsupported">ไม่สามารถเปิดไฟล์นี้ได้ หากต้องการเปิด ให้ย้ายออกจากโฟลเดอร์ที่ปลอดภัยแล้วลองอีกครั้ง</string>
+    <string name="bookmark_name">ชื่อ</string>
 </resources>

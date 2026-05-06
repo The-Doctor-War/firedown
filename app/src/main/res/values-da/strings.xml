@@ -312,4 +312,5 @@
     <string name="vault_decrypting">Dekrypterer fil, vent venligst…</string>
     <string name="vault_encrypting">Krypterer fil, vent venligst…</string>
     <string name="vault_unsupported">Kan ikke åbne denne fil. For at åbne skal du flytte den ud af sikker mappe og prøve igen.</string>
+    <string name="bookmark_name">Navn</string>
 </resources>

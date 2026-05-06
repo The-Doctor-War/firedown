@@ -287,4 +287,5 @@
     <string name="vault_decrypting">Მიმდინარეობს ფაილის გაშიფვრა, გთხოვთ დაელოდოთ…</string>
     <string name="vault_encrypting">Მიმდინარეობს ფაილის დაშიფვრა, გთხოვთ დაელოდოთ…</string>
     <string name="vault_unsupported">Ამ ფაილის გახსნა შეუძლებელია. გასახსნელად გადაიტანეთ ის უსაფრთხო საქაღალდიდან და სცადეთ ხელახლა.</string>
+    <string name="bookmark_name">სახელი</string>
 </resources>

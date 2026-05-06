@@ -277,4 +277,5 @@
     <string name="vault_decrypting">ගොනුව විකේතනය කරමින්, කරුණාකර රැඳී සිටින්න…</string>
     <string name="vault_encrypting">ගොනුව සංකේතනය කරමින්, කරුණාකර රැඳී සිටින්න…</string>
     <string name="vault_unsupported">මෙම ගොනුව විවෘත කළ නොහැක. විවෘත කිරීමට, එය ආරක්ෂිත ෆෝල්ඩරයෙන් පිටතට ගෙන ගොස් නැවත උත්සාහ කරන්න.</string>
+    <string name="bookmark_name">නම</string>
 </resources>

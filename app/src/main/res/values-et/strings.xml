@@ -290,4 +290,5 @@
     <string name="vault_decrypting">Faili dekrüpteerimine, palun oodake…</string>
     <string name="vault_encrypting">Faili krüptimine, palun oodake…</string>
     <string name="vault_unsupported">Seda faili ei saa avada. Avamiseks teisaldage see turvalisest kaustast välja ja proovige uuesti.</string>
+    <string name="bookmark_name">Nimi</string>
 </resources>

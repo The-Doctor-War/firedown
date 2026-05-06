@@ -293,4 +293,5 @@
     <string name="vault_decrypting">Дешифровање датотеке, сачекајте…</string>
     <string name="vault_encrypting">Шифровање датотеке, сачекајте…</string>
     <string name="vault_unsupported">Не могу да отворим ову датотеку. Да бисте отворили, преместите је из безбедне фасцикле и покушајте поново.</string>
+    <string name="bookmark_name">Назив</string>
 </resources>

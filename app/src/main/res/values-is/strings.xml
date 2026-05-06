@@ -284,4 +284,5 @@
     <string name="vault_decrypting">Afkóðar skrá, vinsamlegast bíddu…</string>
     <string name="vault_encrypting">Dulkóðar skrá, vinsamlegast bíddu…</string>
     <string name="vault_unsupported">Ekki er hægt að opna þessa skrá. Til að opna skaltu færa það úr Safe Folder og reyna aftur.</string>
+    <string name="bookmark_name">Heiti</string>
 </resources>

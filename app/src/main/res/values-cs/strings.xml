@@ -318,4 +318,5 @@
     <string name="vault_decrypting">Dešifrování souboru, čekejte prosím…</string>
     <string name="vault_encrypting">Šifrování souboru, čekejte prosím…</string>
     <string name="vault_unsupported">Tento soubor nelze otevřít. Chcete-li jej otevřít, přesuňte jej z bezpečné složky a zkuste to znovu.</string>
+    <string name="bookmark_name">Název</string>
 </resources>

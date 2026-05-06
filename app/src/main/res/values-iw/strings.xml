@@ -312,4 +312,5 @@
     <string name="vault_decrypting">מפענח קובץ, אנא המתן…</string>
     <string name="vault_encrypting">מצפין קובץ, אנא המתן…</string>
     <string name="vault_unsupported">לא ניתן לפתוח את הקובץ הזה. כדי לפתוח, העבר אותו מהתיקייה הבטוחה ונסה שוב.</string>
+    <string name="bookmark_name">שם</string>
 </resources>

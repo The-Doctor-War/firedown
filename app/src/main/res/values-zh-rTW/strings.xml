@@ -299,4 +299,5 @@
     <string name="vault_decrypting">正在解密文件，請稍候…</string>
     <string name="vault_encrypting">正在加密文件，請稍候…</string>
     <string name="vault_unsupported">無法開啟該文件。如要打開，請將其移出安全性資料夾，然後重試。</string>
+    <string name="bookmark_name">名稱</string>
 </resources>

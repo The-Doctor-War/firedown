@@ -200,7 +200,7 @@
     <string name="incognito_bullet_visited">Páginas visitadas</string>
     <string name="incognito_home_description">Cuando navegas en una ventana privada, Firedown </string>
     <string name="incognito_home_title">Navegación privada</string>
-    <string name="incognito_home_warning">La navegación privada <b>no te hace anónimo</b> en Internet. Tu proveedor de Internet aún puede saber qué páginas visitas.</string>
+    <string name="incognito_home_warning">La navegación privada </string>
     <string name="incognito_notification_channel">Navegación privada</string>
     <string name="incognito_notification_channel_desc">Notificación de pestañas privadas abiertas</string>
     <string name="incognito_notification_close_action">Cerrar todas</string>
@@ -226,7 +226,6 @@
     <string name="lock_unlock">Desbloquear</string>
     <string name="lock_vault_lock">Carpeta segura bloqueada</string>
     <string name="login_host">URL del sitio web</string>
-    <string name="login_title">Título</string>
     <string name="make_gif">Crear GIF</string>
     <string name="media_type_apk">APK</string>
     <string name="media_type_audio">Audio</string>
@@ -459,4 +458,5 @@
     <string name="vault_decrypting">Descifrando archivo, espere…</string>
     <string name="vault_encrypting">Cifrando archivo, espera…</string>
     <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sáCalo de la Carpeta segura y vuelve a intentarlo.</string>
+    <string name="bookmark_name">Nombre</string>
 </resources>

@@ -293,4 +293,5 @@
     <string name="vault_decrypting">የፋይል ምስጠራን በመፍታት ላይ፣ እባክዎ ይጠብቁ…</string>
     <string name="vault_encrypting">ፋይል በማመስጠር ላይ፣ እባክዎ ይጠብቁ…</string>
     <string name="vault_unsupported">ይህን ፋይል መክፈት አልተቻለም። ለመክፈት ደህንነቱ ከተጠበቀ አቃፊ አውጥተው ይውሰዱ እና እንደገና ይሞክሩ።</string>
+    <string name="bookmark_name">ስም</string>
 </resources>

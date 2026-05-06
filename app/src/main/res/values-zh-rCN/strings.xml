@@ -200,7 +200,7 @@
     <string name="incognito_bullet_visited">访问过的页面</string>
     <string name="incognito_home_description">在隐私窗口浏览时，Firedown </string>
     <string name="incognito_home_title">隐私浏览</string>
-    <string name="incognito_home_warning">隐私浏览<b>不会让你在互联网上匿名</b>。你的网络服务提供商仍然可以知道你访问了哪些页面。</string>
+    <string name="incognito_home_warning">隐私浏览</string>
     <string name="incognito_notification_channel">隐私浏览</string>
     <string name="incognito_notification_channel_desc">已打开隐私标签页的通知</string>
     <string name="incognito_notification_close_action">全部关闭</string>
@@ -226,7 +226,6 @@
     <string name="lock_unlock">解锁</string>
     <string name="lock_vault_lock">安全文件夹已锁定</string>
     <string name="login_host">网址</string>
-    <string name="login_title">标题</string>
     <string name="make_gif">创建GIF</string>
     <string name="media_type_apk">APK</string>
     <string name="media_type_audio">音频</string>
@@ -459,4 +458,5 @@
     <string name="vault_decrypting">正在解密文件，请稍候…</string>
     <string name="vault_encrypting">正在加密文件，请稍候…</string>
     <string name="vault_unsupported">无法打开该文件。如要打开，请将其移出安全文件夹，然后重试。</string>
+    <string name="bookmark_name">名称</string>
 </resources>

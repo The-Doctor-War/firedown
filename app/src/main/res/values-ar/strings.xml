@@ -303,4 +303,5 @@
     <string name="vault_decrypting">جارٍ فك تشفير الملف، يرجى الانتظار…</string>
     <string name="vault_encrypting">يتم الآن تشفير الملف، الرجاء الانتظار…</string>
     <string name="vault_unsupported">لا يمكن فتح هذا الملف. لفتحه، انقله خارج المجلد الآمن وحاول مرة أخرى.</string>
+    <string name="bookmark_name">الاسم</string>
 </resources>

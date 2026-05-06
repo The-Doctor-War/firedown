@@ -281,4 +281,5 @@
     <string name="vault_decrypting">ഫയൽ ഡീക്രിപ്റ്റ് ചെയ്യുന്നു, കാത്തിരിക്കൂ…</string>
     <string name="vault_encrypting">ഫയൽ എൻക്രിപ്റ്റ് ചെയ്യുന്നു, കാത്തിരിക്കൂ…</string>
     <string name="vault_unsupported">ഈ ഫയൽ തുറക്കാൻ കഴിയില്ല. തുറക്കാൻ, അത് സുരക്ഷിത ഫോൾഡറിൽ നിന്ന് നീക്കി വീണ്ടും ശ്രമിക്കുക.</string>
+    <string name="bookmark_name">പേരു്</string>
 </resources>

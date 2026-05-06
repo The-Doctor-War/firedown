@@ -287,4 +287,5 @@
     <string name="vault_decrypting">Descifrando o ficheiro, agarda…</string>
     <string name="vault_encrypting">Cifrando o ficheiro, agarda…</string>
     <string name="vault_unsupported">Non se pode abrir este ficheiro. Para abrilo, saia do cartafol seguro e téntao de novo.</string>
+    <string name="bookmark_name">Nome</string>
 </resources>

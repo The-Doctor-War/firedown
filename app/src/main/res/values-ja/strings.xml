@@ -200,7 +200,7 @@
     <string name="incognito_bullet_visited">閲覧したページ</string>
     <string name="incognito_home_description">プライベートウィンドウで閲覧する場合、Firedownは </string>
     <string name="incognito_home_title">プライベートブラウジング</string>
-    <string name="incognito_home_warning">プライベートブラウジングはインターネット上で<b>あなたを匿名にしません</b>。インターネットサービスプロバイダーは、あなたが訪問したページを依然として知ることができます。</string>
+    <string name="incognito_home_warning">プライベートブラウジングはインターネット上で</string>
     <string name="incognito_notification_channel">プライベートブラウジング</string>
     <string name="incognito_notification_channel_desc">開いているプライベートタブの通知</string>
     <string name="incognito_notification_close_action">すべて閉じる</string>
@@ -226,7 +226,6 @@
     <string name="lock_unlock">ロックを解除</string>
     <string name="lock_vault_lock">セーフフォルダがロックされています</string>
     <string name="login_host">ウェブサイトの URL</string>
-    <string name="login_title">タイトル</string>
     <string name="make_gif">GIFを作成</string>
     <string name="media_type_apk">APK</string>
     <string name="media_type_audio">音声</string>
@@ -459,4 +458,5 @@
     <string name="vault_decrypting">ファイルを復号化しています。お待ちください…</string>
     <string name="vault_encrypting">ファイルを暗号化しています。お待ちください…</string>
     <string name="vault_unsupported">このファイルを開けません。開くには、セーフフォルダの外に移動して、もう一度試してください。</string>
+    <string name="bookmark_name">名前</string>
 </resources>

@@ -287,4 +287,5 @@
     <string name="vault_decrypting">Dešifriranje fajla, sačekajte…</string>
     <string name="vault_encrypting">Šifriranje fajla, sačekajte…</string>
     <string name="vault_unsupported">Ne mogu otvoriti ovaj fajl. Da ga otvorite, premjestite ga iz sigurnog foldera i pokušajte ponovo.</string>
+    <string name="bookmark_name">Naziv</string>
 </resources>

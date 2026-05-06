@@ -200,7 +200,7 @@
     <string name="incognito_bullet_visited">Visited pages</string>
     <string name="incognito_home_description">When you browse in a Private Window, Firedown </string>
     <string name="incognito_home_title">Private Browsing</string>
-    <string name="incognito_home_warning">Private Browsing <b>does not make you anonymous</b> on the Internet. Your Internet service provider can still know what page you visit.</string>
+    <string name="incognito_home_warning">Private Browsing </string>
     <string name="incognito_notification_channel">Private Browsing</string>
     <string name="incognito_notification_channel_desc">Notification for open private tabs</string>
     <string name="incognito_notification_close_action">Close all</string>
@@ -226,7 +226,6 @@
     <string name="lock_unlock">Unlock</string>
     <string name="lock_vault_lock">Safe Folder locked</string>
     <string name="login_host">Website URL</string>
-    <string name="login_title">Title</string>
     <string name="make_gif">Create GIF</string>
     <string name="media_type_apk">Apk</string>
     <string name="media_type_audio">Audio</string>
@@ -459,4 +458,5 @@
     <string name="vault_decrypting">Decrypting file, please wait…</string>
     <string name="vault_encrypting">Encrypting file, please wait…</string>
     <string name="vault_unsupported">Can\'t open this file. To open, move it out of Safe Folder and try again.</string>
+    <string name="bookmark_name">Name</string>
 </resources>

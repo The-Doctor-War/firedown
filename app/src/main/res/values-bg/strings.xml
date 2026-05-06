@@ -305,4 +305,5 @@
     <string name="vault_decrypting">Файлът се декриптира, моля изчакайте…</string>
     <string name="vault_encrypting">Файлът се криптира, моля изчакайте…</string>
     <string name="vault_unsupported">Файлът не може да се отвори. За да го отворите, го преместете от Защитената папка и опитайте отново.</string>
+    <string name="bookmark_name">Име</string>
 </resources>

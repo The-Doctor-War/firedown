@@ -297,4 +297,5 @@
     <string name="vault_decrypting">Dešifriranje datoteke, pričekajte...</string>
     <string name="vault_encrypting">Šifriranje datoteke, pričekajte…</string>
     <string name="vault_unsupported">Ne mogu otvoriti ovu datoteku. Za otvaranje premjestite ga iz sigurne mape i pokušajte ponovno.</string>
+    <string name="bookmark_name">Ime</string>
 </resources>

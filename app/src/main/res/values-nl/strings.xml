@@ -318,4 +318,5 @@
     <string name="vault_decrypting">Het bestand wordt gedecodeerd. Even geduld a.u.b....</string>
     <string name="vault_encrypting">Bestand versleutelen, even geduld a.u.b....</string>
     <string name="vault_unsupported">Kan dit bestand niet openen. Om het te openen, verplaatst u het uit de Veilige map en probeert u het opnieuw.</string>
+    <string name="bookmark_name">Naam</string>
 </resources>

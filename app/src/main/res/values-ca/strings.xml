@@ -299,4 +299,5 @@
     <string name="vault_decrypting">S\'està desxifrant el fitxer, espereu...</string>
     <string name="vault_encrypting">S\'està encriptant el fitxer, espereu…</string>
     <string name="vault_unsupported">No es pot obrir aquest fitxer. Per obrir-lo, traieu-lo de la carpeta segura i torneu-ho a provar.</string>
+    <string name="bookmark_name">Nom</string>
 </resources>

@@ -268,4 +268,5 @@
     <string name="vault_decrypting">ਫ਼ਾਈਲ ਨੂੰ ਡੀਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ…</string>
     <string name="vault_encrypting">ਫ਼ਾਈਲ ਨੂੰ ਐਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ…</string>
     <string name="vault_unsupported">ਇਸ ਫ਼ਾਈਲ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਖੋਲ੍ਹਣ ਲਈ, ਇਸਨੂੰ ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ ਤੋਂ ਬਾਹਰ ਲੈ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="bookmark_name">ਨਾਂ</string>
 </resources>

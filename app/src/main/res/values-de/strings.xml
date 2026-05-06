@@ -200,7 +200,7 @@
     <string name="incognito_bullet_visited">Besuchte Seiten</string>
     <string name="incognito_home_description">Wenn du in einem privaten Fenster surfst, wird Firedown </string>
     <string name="incognito_home_title">Privater Modus</string>
-    <string name="incognito_home_warning">Privates Surfen <b>macht dich nicht anonym</b> im Internet. Dein Internetanbieter kann weiterhin sehen, welche Seiten du besuchst.</string>
+    <string name="incognito_home_warning">Privates Surfen </string>
     <string name="incognito_notification_channel">Privater Modus</string>
     <string name="incognito_notification_channel_desc">Benachrichtigung für offene private Tabs</string>
     <string name="incognito_notification_close_action">Alle schließen</string>
@@ -226,7 +226,6 @@
     <string name="lock_unlock">Entsperren</string>
     <string name="lock_vault_lock">Sicherer Ordner gesperrt</string>
     <string name="login_host">Webadresse</string>
-    <string name="login_title">Titel</string>
     <string name="make_gif">GIF erstellen</string>
     <string name="media_type_apk">APK</string>
     <string name="media_type_audio">Audio</string>
@@ -459,4 +458,5 @@
     <string name="vault_decrypting">Datei wird entschlüsselt, bitte warten…</string>
     <string name="vault_encrypting">Datei wird verschlüsselt, bitte warten…</string>
     <string name="vault_unsupported">Diese Datei kann nicht geöffnet werden. Um sie zu öffnen, verschieben Sie sie aus dem sicheren Ordner und versuchen Sie es erneut.</string>
+    <string name="bookmark_name">Name</string>
 </resources>

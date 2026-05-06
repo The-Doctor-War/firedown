@@ -72,4 +72,5 @@
     <string name="top_sites_edit_dialog_url_title">URL</string>
     <string name="top_sites_max_limit_confirmation_button">Vale, entendido</string>
     <string name="top_sites_rename_dialog_title">Nombre</string>
+    <string name="bookmark_name">Nombre</string>
 </resources>

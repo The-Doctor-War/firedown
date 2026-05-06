@@ -241,4 +241,5 @@
     <string name="vault_decrypting">Descriptografando arquivo, aguarde…</string>
     <string name="vault_encrypting">Criptografando arquivo, aguarde…</string>
     <string name="vault_unsupported">Não é possível abrir este arquivo. Para abrir, retire-o da Pasta Segura e tente novamente.</string>
+    <string name="bookmark_name">Nome</string>
 </resources>

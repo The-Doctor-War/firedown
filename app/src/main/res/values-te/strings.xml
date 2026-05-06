@@ -266,4 +266,5 @@
     <string name="vault_decrypting">ఫైల్‌ని డీక్రిప్ట్ చేస్తోంది, దయచేసి వేచి ఉండండి…</string>
     <string name="vault_encrypting">ఫైల్‌ని ఎన్‌క్రిప్ట్ చేస్తోంది, దయచేసి వేచి ఉండండి…</string>
     <string name="vault_unsupported">ఈ ఫైల్‌ను తెరవడం సాధ్యపడదు. తెరవడానికి, సురక్షిత ఫోల్డర్ నుండి దాన్ని తరలించి, మళ్లీ ప్రయత్నించండి.</string>
+    <string name="bookmark_name">పేరు</string>
 </resources>

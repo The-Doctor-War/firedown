@@ -281,4 +281,5 @@
     <string name="vault_decrypting">Nagde-decryption ng file, mangyaring maghintay…</string>
     <string name="vault_encrypting">Ini-encrypt ang file, mangyaring maghintay…</string>
     <string name="vault_unsupported">Hindi mabuksan ang file na ito. Upang buksan, alisin ito sa Safe Folder at subukang muli.</string>
+    <string name="bookmark_name">Pangalan</string>
 </resources>

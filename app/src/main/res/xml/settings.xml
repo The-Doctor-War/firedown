@@ -150,15 +150,19 @@
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="com.solarized.firedown.preferences.browser.disable.webgl"
+            android:summary="@string/settings_webgl_disabled_summary"
             android:title="@string/settings_webgl_disabled"
-            app:icon="@drawable/deployed_code_24" />
+            app:icon="@drawable/deployed_code_24"
+            app:singleLineTitle="false" />
 
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
             android:key="com.solarized.firedown.preferences.browser.enable.webrtc"
+            android:summary="@string/settings_webrtc_enabled_summary"
             android:title="@string/settings_webrtc_enabled"
-            app:icon="@drawable/ic_p2p_24" />
+            app:icon="@drawable/ic_p2p_24"
+            app:singleLineTitle="false" />
 
 
     </PreferenceCategory>

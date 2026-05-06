@@ -265,12 +265,6 @@
     <string name="popup_tabs_close">Cerrar todas las pestañas</string>
     <string name="popup_tabs_new">Nueva pestaña</string>
     <string name="popup_toggle">Cambiar vista</string>
-    <string name="settings_doh_provider_custom_dialog_error_https">La URL debe comenzar con “https://”</string>
-    <string name="settings_doh_provider_custom_dialog_error_invalid">URL no válida</string>
-    <string name="settings_jit_enabled">Habilitar la compilación JavaScript Just-in-time (JIT)</string>
-    <string name="settings_jit_enabled_summary">Cuando está deshabilitado, el rendimiento puede verse reducido en páginas web complejas - Cambiar esta configuración reiniciará el navegador</string>
-    <string name="settings_webgl_disabled">Deshabilitar WebGL</string>
-    <string name="settings_webrtc_enabled">Habilitar WebRTC</string>
     <string name="prompt_update_confirmation">Actualizar</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Se recomienda activar la protección contra rastreo.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Si algo parece roto en este sitio, prueba a desactivarla.</string>
@@ -329,6 +323,8 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookies y datos del sitio</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">Se cerrará sesión en la mayoría de los sitios</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Pestañas abiertas</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">La URL debe comenzar con “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL no válida</string>
     <string name="settings_doh_server">Servidor DNS</string>
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
@@ -363,6 +359,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">General</string>
     <string name="settings_help">Ayuda</string>
+    <string name="settings_jit_enabled">Habilitar la compilación JavaScript Just-in-time (JIT)</string>
+    <string name="settings_jit_enabled_summary">Cuando está deshabilitado, el rendimiento puede verse reducido en páginas web complejas - Cambiar esta configuración reiniciará el navegador</string>
     <string name="settings_license">Licencias</string>
     <string name="settings_light_theme">Claro</string>
     <string name="settings_lock_15_min">15 minutos sin actividad</string>
@@ -395,6 +393,10 @@
     <string name="settings_tabs_archive_title">Auto-cerrar pestañas</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_version">Versión</string>
+    <string name="settings_webgl_disabled">Deshabilitar WebGL</string>
+    <string name="settings_webgl_disabled_summary">Bloquea el fingerprinting de GPU; puede afectar al contenido 3D</string>
+    <string name="settings_webrtc_enabled">Habilitar WebRTC</string>
+    <string name="settings_webrtc_enabled_summary">Necesario para llamadas P2P; puede filtrar tu IP real</string>
     <string name="share">Compartir</string>
     <string name="share_image">Compartir imagen</string>
     <string name="share_url">Compartir URL</string>

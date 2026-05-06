@@ -265,12 +265,6 @@
     <string name="popup_tabs_close">Alle Tabs schließen</string>
     <string name="popup_tabs_new">Neuer Tab</string>
     <string name="popup_toggle">Ansicht umschalten</string>
-    <string name="settings_doh_provider_custom_dialog_error_https">Die Adresse muss mit „https://“ beginnen</string>
-    <string name="settings_doh_provider_custom_dialog_error_invalid">Ungültige Adresse</string>
-    <string name="settings_jit_enabled">JavaScript Just-in-time-Kompilierung (JIT) aktivieren</string>
-    <string name="settings_jit_enabled_summary">Wenn diese Option deaktiviert ist, kann die Leistung bei komplexen Webseiten beeinträchtigt sein. Durch Ändern dieser Einstellung wird Ihr Browser neu gestartet</string>
-    <string name="settings_webgl_disabled">WebGL deaktivieren</string>
-    <string name="settings_webrtc_enabled">WebRTC aktivieren</string>
     <string name="prompt_update_confirmation">Aktualisieren</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Es wird empfohlen, den Schutz vor Aktivitätenverfolgung zu aktivieren.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Wenn etwas auf dieser Website beschädigt aussieht, deaktivieren Sie ihn.</string>
@@ -329,6 +323,8 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookies und Website-Daten</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">Sie werden von den meisten Websites abgemeldet</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Offene Tabs</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">Die Adresse muss mit „https://“ beginnen</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Ungültige Adresse</string>
     <string name="settings_doh_server">DNS Server</string>
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
@@ -363,6 +359,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">Allgemein</string>
     <string name="settings_help">Hilfe</string>
+    <string name="settings_jit_enabled">JavaScript Just-in-time-Kompilierung (JIT) aktivieren</string>
+    <string name="settings_jit_enabled_summary">Wenn diese Option deaktiviert ist, kann die Leistung bei komplexen Webseiten beeinträchtigt sein. Durch Ändern dieser Einstellung wird Ihr Browser neu gestartet</string>
     <string name="settings_license">Lizenzen</string>
     <string name="settings_light_theme">Hell</string>
     <string name="settings_lock_15_min">15 Minuten Inaktivität</string>
@@ -395,6 +393,10 @@
     <string name="settings_tabs_archive_title">Tabs automatisch schließen</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_version">Version</string>
+    <string name="settings_webgl_disabled">WebGL deaktivieren</string>
+    <string name="settings_webgl_disabled_summary">Blockiert GPU-Fingerprinting; 3D-Inhalte können kaputt erscheinen</string>
+    <string name="settings_webrtc_enabled">WebRTC aktivieren</string>
+    <string name="settings_webrtc_enabled_summary">Nötig für P2P-Anrufe; kann deine echte IP preisgeben</string>
     <string name="share">Teilen</string>
     <string name="share_image">BILD teilen</string>
     <string name="share_url">URL teilen</string>

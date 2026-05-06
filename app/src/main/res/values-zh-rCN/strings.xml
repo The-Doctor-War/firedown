@@ -265,12 +265,6 @@
     <string name="popup_tabs_close">关闭所有选项卡</string>
     <string name="popup_tabs_new">新标签</string>
     <string name="popup_toggle">切换视图</string>
-    <string name="settings_doh_provider_custom_dialog_error_https">网址必须以 “https://” 开头</string>
-    <string name="settings_doh_provider_custom_dialog_error_invalid">网址无效</string>
-    <string name="settings_jit_enabled">启用 JavaScript 即时编译(JIT)</string>
-    <string name="settings_jit_enabled_summary">禁用后，复杂网页的性能可能会降低——更改此设置将重启浏览器</string>
-    <string name="settings_webgl_disabled">禁用 WebGL</string>
-    <string name="settings_webrtc_enabled">启用 WebRTC</string>
     <string name="prompt_update_confirmation">更新</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">建议开启跟踪保护功能。</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">若网站功能异常，请尝试关闭保护。</string>
@@ -329,6 +323,8 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookie 和网站数据</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">您在绝大多数网站的登录状态将被清除</string>
     <string name="settings_delete_browsing_data_tabs_title_2">打开的标签页</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">网址必须以 “https://” 开头</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">网址无效</string>
     <string name="settings_doh_server">DNS 服务器</string>
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
@@ -363,6 +359,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">一般的</string>
     <string name="settings_help">帮助</string>
+    <string name="settings_jit_enabled">启用 JavaScript 即时编译(JIT)</string>
+    <string name="settings_jit_enabled_summary">禁用后，复杂网页的性能可能会降低——更改此设置将重启浏览器</string>
     <string name="settings_license">许可证</string>
     <string name="settings_light_theme">明亮</string>
     <string name="settings_lock_15_min">15 分钟无操作</string>
@@ -395,6 +393,10 @@
     <string name="settings_tabs_archive_title">自动关闭标签页</string>
     <string name="settings_theme">主题</string>
     <string name="settings_version">版本</string>
+    <string name="settings_webgl_disabled">禁用 WebGL</string>
+    <string name="settings_webgl_disabled_summary">阻止GPU指纹识别；可能影响3D内容</string>
+    <string name="settings_webrtc_enabled">启用 WebRTC</string>
+    <string name="settings_webrtc_enabled_summary">P2P通话所需；可能泄露你的真实IP</string>
     <string name="share">分享</string>
     <string name="share_image">分享图像</string>
     <string name="share_url">分享网址</string>

@@ -265,12 +265,6 @@
     <string name="popup_tabs_close">すべてのタブを閉じる</string>
     <string name="popup_tabs_new">新しいタブ</string>
     <string name="popup_toggle">ビューの切り替え</string>
-    <string name="settings_doh_provider_custom_dialog_error_https">URL は “https://” で始まる必要があります</string>
-    <string name="settings_doh_provider_custom_dialog_error_invalid">不正な URL</string>
-    <string name="settings_jit_enabled">JavaScript Just-in-time コンパイル（JIT）を有効にする</string>
-    <string name="settings_jit_enabled_summary">無効にすると、複雑なWebページのパフォーマンスが低下する可能性があります。この設定を変更するとブラウザが再起動されます</string>
-    <string name="settings_webgl_disabled">WebGLを無効にする</string>
-    <string name="settings_webrtc_enabled">WebRTCを有効にする</string>
     <string name="prompt_update_confirmation">更新</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">追跡防止をオンにすることをお勧めします。</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">このサイトでの動作がおかしい場合は、オフにしてみてください。</string>
@@ -329,6 +323,8 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookie とサイトデータ</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">ログイン状態がリセットされます</string>
     <string name="settings_delete_browsing_data_tabs_title_2">開いているタブ</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL は “https://” で始まる必要があります</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">不正な URL</string>
     <string name="settings_doh_server">DNS サーバー</string>
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
@@ -363,6 +359,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">一般</string>
     <string name="settings_help">ヘルプ</string>
+    <string name="settings_jit_enabled">JavaScript Just-in-time コンパイル（JIT）を有効にする</string>
+    <string name="settings_jit_enabled_summary">無効にすると、複雑なWebページのパフォーマンスが低下する可能性があります。この設定を変更するとブラウザが再起動されます</string>
     <string name="settings_license">ライセンス</string>
     <string name="settings_light_theme">ライト</string>
     <string name="settings_lock_15_min">15分間操作なし</string>
@@ -395,6 +393,10 @@
     <string name="settings_tabs_archive_title">タブの自動クローズ</string>
     <string name="settings_theme">テーマ</string>
     <string name="settings_version">バージョン</string>
+    <string name="settings_webgl_disabled">WebGLを無効にする</string>
+    <string name="settings_webgl_disabled_summary">GPUフィンガープリントを防止。3Dコンテンツが動作しない場合があります</string>
+    <string name="settings_webrtc_enabled">WebRTCを有効にする</string>
+    <string name="settings_webrtc_enabled_summary">P2P通話に必要。実IPアドレスが漏れる可能性があります</string>
     <string name="share">共有</string>
     <string name="share_image">画像を共有</string>
     <string name="share_url">URL を共有</string>

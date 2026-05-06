@@ -2,7 +2,6 @@ package com.solarized.firedown.phone.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.text.Editable;
@@ -24,7 +23,6 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -65,8 +63,11 @@ import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.utils.NavigationUtils;
 import com.solarized.firedown.utils.WebUtils;
 
+import dagger.hilt.android.AndroidEntryPoint;
 
 
+
+@AndroidEntryPoint
 public class HomeFragment extends BaseBrowserFragment implements BottomNavigationBar.OnBottomBarListener,
         AutoCompleteEditText.OnCommitListener, AutoCompleteEditText.OnFilterListener, AutoCompleteEditText.OnFocusChangedListener,
         AutoCompleteEditText.OnTextChangedListener, AutoCompleteEditText.OnSearchStateChangeListener,
@@ -536,8 +537,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             String uri = GeckoResources.createFiredownTab(mActivity);
             openUri(uri);
         } else if (id == R.id.onboarding_remove) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
-            sharedPreferences.edit().putBoolean(Preferences.ONBOARDING_INFO, false).apply();
+            mSharedPreferences.edit().putBoolean(Preferences.ONBOARDING_INFO, false).apply();
             mOnBoardingCard.setVisibility(View.GONE);
         }
     }

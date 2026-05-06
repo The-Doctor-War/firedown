@@ -14,7 +14,6 @@ import android.widget.CheckedTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.solarized.firedown.Preferences;
@@ -23,11 +22,18 @@ import com.solarized.firedown.StoragePaths;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+
+@AndroidEntryPoint
 public class DownloadsDialogFragment extends BaseDialogFragment {
 
 
     private static final String TAG = DownloadsDialogFragment.class.getSimpleName();
+
+    @Inject SharedPreferences mSharedPreferences;
 
 
     @NonNull
@@ -42,9 +48,7 @@ public class DownloadsDialogFragment extends BaseDialogFragment {
 
         final ArrayList<CharSequence> choices = new ArrayList<>();
 
-        final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-
-        int checkedItem = sharedPreferences.getInt(Preferences.SETTINGS_DOWNLOADS, Preferences.DEFAULT_DOWNLOADS);
+        int checkedItem = mSharedPreferences.getInt(Preferences.SETTINGS_DOWNLOADS, Preferences.DEFAULT_DOWNLOADS);
 
         if(!StoragePaths.isSDCardAvailable(mActivity)){
             enabled.add(CustomAdapter.SDCARD_POSITION);
@@ -60,7 +64,7 @@ public class DownloadsDialogFragment extends BaseDialogFragment {
 
         return new MaterialAlertDialogBuilder(requireContext(), themeResId)
                 .setTitle(getString(R.string.settings_downloads_path))
-                .setSingleChoiceItems(customAdapter, checkedItem, (dialog, which) -> sharedPreferences.edit().putInt(Preferences.SETTINGS_DOWNLOADS, which).apply())
+                .setSingleChoiceItems(customAdapter, checkedItem, (dialog, which) -> mSharedPreferences.edit().putInt(Preferences.SETTINGS_DOWNLOADS, which).apply())
                 .setPositiveButton(getString(android.R.string.ok), (dialog, which) -> {
                     mNavController.popBackStack();
                 } )

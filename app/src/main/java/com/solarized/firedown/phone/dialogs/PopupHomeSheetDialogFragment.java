@@ -1,13 +1,13 @@
 package com.solarized.firedown.phone.dialogs;
 
 import android.annotation.SuppressLint;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.solarized.firedown.Keys;
@@ -22,14 +22,21 @@ import com.solarized.firedown.utils.NavigationUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import android.content.res.TypedArray;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class PopupHomeSheetDialogFragment extends BaseBottomResizedDialogFragment
         implements OptionsAdapter.OnItemClickListener {
 
     private BrowserDialogViewModel mBrowserDialogViewModel;
 
     private boolean mIsIncognito;
+
+    @Inject SharedPreferences mSharedPreferences;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -68,8 +75,7 @@ public class PopupHomeSheetDialogFragment extends BaseBottomResizedDialogFragmen
     }
 
     private List<OptionItem> buildOptionItems() {
-        boolean quitEnabled = PreferenceManager.getDefaultSharedPreferences(mActivity)
-                .getBoolean(Preferences.SETTINGS_QUIT_PREF, false);
+        boolean quitEnabled = mSharedPreferences.getBoolean(Preferences.SETTINGS_QUIT_PREF, false);
         TypedArray imgs = getResources().obtainTypedArray(
                 quitEnabled ? R.array.popup_home_quit_icon : R.array.popup_home_icon);
         String[] labels = getResources().getStringArray(

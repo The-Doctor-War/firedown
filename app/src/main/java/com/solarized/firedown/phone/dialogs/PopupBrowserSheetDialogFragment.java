@@ -1,6 +1,7 @@
 package com.solarized.firedown.phone.dialogs;
 
 
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.materialswitch.MaterialSwitch;
@@ -33,6 +33,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class PopupBrowserSheetDialogFragment extends BaseBottomResizedDialogFragment implements OnItemClickListener, View.OnClickListener {
 
     private BrowserDialogViewModel mBrowserDialogViewModel;
@@ -41,6 +46,8 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomResizedDialogFrag
     private ReloadBrowserButton mReloadBrowserButton;
     private CustomAdapter mCustomAdapter;
     private GeckoState mGeckoState;
+
+    @Inject SharedPreferences mSharedPreferences;
 
     @Override
     public void onDestroyView() {
@@ -95,7 +102,7 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomResizedDialogFrag
 
         boolean isDesktop = mGeckoState.isDesktop();
 
-        boolean quitEnabled =  PreferenceManager.getDefaultSharedPreferences(mActivity).getBoolean(Preferences.SETTINGS_QUIT_PREF, false);
+        boolean quitEnabled = mSharedPreferences.getBoolean(Preferences.SETTINGS_QUIT_PREF, false);
 
         RecyclerView recyclerView = mView.findViewById(R.id.recycler_view);
 

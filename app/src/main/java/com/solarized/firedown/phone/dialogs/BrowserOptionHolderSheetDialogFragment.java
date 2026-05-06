@@ -22,7 +22,6 @@ import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavBackStackEntry;
 import androidx.navigation.NavDestination;
-import androidx.preference.PreferenceManager;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -40,15 +39,20 @@ import com.solarized.firedown.utils.NavigationUtils;
 
 import java.util.ArrayList;
 
+import javax.inject.Inject;
+
+import dagger.hilt.android.AndroidEntryPoint;
 
 
+
+@AndroidEntryPoint
 public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialogFragment {
 
     private static final String TAG = BrowserOptionHolderSheetDialogFragment.class.getSimpleName();
 
     private FragmentsOptionsViewModel mFragmentsViewModel;
 
-    private SharedPreferences mSharedPreferences;
+    @Inject SharedPreferences mSharedPreferences;
 
     private FrameLayout mFrameHolder;
 
@@ -80,7 +84,6 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mActivity);
         mFragmentsViewModel = new ViewModelProvider(mActivity).get(FragmentsOptionsViewModel.class);
     }
 

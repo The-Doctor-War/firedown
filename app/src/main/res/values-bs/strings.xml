@@ -166,8 +166,8 @@
     <string name="popup_tabs_close">Zatvorite sve kartice</string>
     <string name="popup_tabs_new">Novi tab</string>
     <string name="popup_toggle">Prebaci prikaz</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL mora početi sa “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Neispravan URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL mora početi sa “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Neispravan URL</string>
     <string name="prompt_update_confirmation">Ažuriraj</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Preporučuje se uključivanje zaštite od praćenja.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Ako nešto izgleda pokvareno na ovoj stranici, pokušajte to isključiti.</string>

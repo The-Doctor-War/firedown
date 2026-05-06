@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Zapri vse zavihke</string>
     <string name="popup_tabs_new">Nov zavihek</string>
     <string name="popup_toggle">Preklopi pogled</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">Naslov URL se mora začeti s \"https://\"</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Neveljaven URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">Naslov URL se mora začeti s \"https://\"</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Neveljaven URL</string>
     <string name="prompt_update_confirmation">Posodobi</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Priporočamo, da vključite zaščito pred sledenjem.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Če je videti, da spletno mesto ne deluje pravilno, jo poskusite izklopiti.</string>

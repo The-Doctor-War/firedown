@@ -30,8 +30,8 @@
     <string name="library_history">Historikk</string>
     <string name="open_new_private_tab_2">Ny privat fane</string>
     <string name="open_new_tab_2">Ny fane</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">Nettadressen må begynne med «https://».</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Ugyldig nettadresse</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">Nettadressen må begynne med «https://».</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Ugyldig nettadresse</string>
     <string name="prompt_update_confirmation">Oppdater</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Det anbefales å aktivere sporingsbeskyttelse.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Hvis noe ser ødelagt ut på dette nettstedet, prøv å slå det av.</string>

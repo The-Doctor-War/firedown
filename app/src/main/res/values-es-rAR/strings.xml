@@ -30,8 +30,8 @@
     <string name="library_history">Historial</string>
     <string name="open_new_private_tab_2">Nueva pestaña privada</string>
     <string name="open_new_tab_2">Nueva pestaña</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">La URL debe comenzar con “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL inválida</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">La URL debe comenzar con “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL inválida</string>
     <string name="prompt_update_confirmation">Actualizar</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Se recomienda activar la protección contra rastreo.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Si algo parece roto en este sitio, probá desactivarla.</string>

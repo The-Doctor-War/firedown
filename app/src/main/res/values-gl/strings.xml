@@ -166,8 +166,8 @@
     <string name="popup_tabs_close">Pecha todas as pestanas</string>
     <string name="popup_tabs_new">Nova pestana</string>
     <string name="popup_toggle">Alterna a vista</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">O URL debe comezar por «https://»</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL non válido</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">O URL debe comezar por «https://»</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL non válido</string>
     <string name="prompt_update_confirmation">Actualizar</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Recoméndase activar a protección de rastrexo.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se algo parece que non funciona neste sitio, tenta desactivalo.</string>

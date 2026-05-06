@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Tanca totes les pestanyes</string>
     <string name="popup_tabs_new">Nova pestanya</string>
     <string name="popup_toggle">Canvia la vista</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">L’URL ha de començar per «https://»</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">L’URL no és vàlid</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">L’URL ha de començar per «https://»</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">L’URL no és vàlid</string>
     <string name="prompt_update_confirmation">Actualitza</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">És recomanable activar la protecció contra el seguiment.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Si us sembla que aquest lloc no funciona bé, proveu de desactivar-la.</string>

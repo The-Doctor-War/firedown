@@ -149,9 +149,9 @@
     <string name="popup_tabs_close">सभी टैब को बंद करें</string>
     <string name="popup_tabs_new">नया टैब</string>
     <string name="popup_toggle">व्यू टॉगल करें</string>
-    <string name="preference_jit_enabled">जावास्क्रिप्ट जस्ट-इन-टाइम संकलन (JIT) सक्षम करें</string>
-    <string name="preference_jit_enabled_summary">अक्षम होने पर, जटिल वेबपृष्ठों के लिए प्रदर्शन कम हो सकता है - इस सेटिंग को बदलने से आपका ब्राउज़र पुनः प्रारंभ हो जाएगा</string>
-    <string name="preference_webrtc_enabled">WebRTC सक्षम करें</string>
+    <string name="settings_jit_enabled">जावास्क्रिप्ट जस्ट-इन-टाइम संकलन (JIT) सक्षम करें</string>
+    <string name="settings_jit_enabled_summary">अक्षम होने पर, जटिल वेबपृष्ठों के लिए प्रदर्शन कम हो सकता है - इस सेटिंग को बदलने से आपका ब्राउज़र पुनः प्रारंभ हो जाएगा</string>
+    <string name="settings_webrtc_enabled">WebRTC सक्षम करें</string>
     <string name="rename">नाम बदलें</string>
     <string name="rename_file">फ़ाइल का नाम बदलें</string>
     <string name="request_geolocation">अपने डिवाइस का स्थान &lt;b&gt;%s/b&gt; के साथ साझा करें?</string>

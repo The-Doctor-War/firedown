@@ -180,11 +180,11 @@
     <string name="popup_tabs_close">Sulje kaikki välilehdet</string>
     <string name="popup_tabs_new">Uusi välilehti</string>
     <string name="popup_toggle">Vaihda näkymää</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL-osoitteen alussa on oltava “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Virheellinen osoite</string>
-    <string name="preference_jit_enabled">Ota käyttöön JavaScript Just-in-time kääntäminen (JIT)</string>
-    <string name="preference_jit_enabled_summary">Monimutkaisten sivustojen suorituskyky voi heikentyä mikäli tämä asetus on pois käytöstä - Selain käynnistyy uudelleen tätä asetusta muutettaessa</string>
-    <string name="preference_webrtc_enabled">Ota käyttöön WebRTC</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL-osoitteen alussa on oltava “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Virheellinen osoite</string>
+    <string name="settings_jit_enabled">Ota käyttöön JavaScript Just-in-time kääntäminen (JIT)</string>
+    <string name="settings_jit_enabled_summary">Monimutkaisten sivustojen suorituskyky voi heikentyä mikäli tämä asetus on pois käytöstä - Selain käynnistyy uudelleen tätä asetusta muutettaessa</string>
+    <string name="settings_webrtc_enabled">Ota käyttöön WebRTC</string>
     <string name="prompt_update_confirmation">Päivitä</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Seurannan suojauksen ottaminen käyttöön on suositeltavaa.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Jos jokin näyttää olevan rikki tällä sivustolla, yritä sammuttaa se.</string>

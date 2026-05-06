@@ -179,8 +179,8 @@
     <string name="popup_tabs_close">Chiudi tutte le schede</string>
     <string name="popup_tabs_new">Nuova scheda</string>
     <string name="popup_toggle">Attiva/disattiva visualizzazione</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">L’indirizzo deve iniziare con “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Indirizzo non valido</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">L’indirizzo deve iniziare con “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Indirizzo non valido</string>
     <string name="prompt_update_confirmation">Aggiorna</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">È consigliato attivare la protezione antitracciamento.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se qualcosa non funziona su questo sito, prova a disattivarla.</string>

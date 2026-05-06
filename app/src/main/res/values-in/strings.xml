@@ -166,8 +166,8 @@
     <string name="popup_tabs_close">Tutup semua tab</string>
     <string name="popup_tabs_new">Tab baru</string>
     <string name="popup_toggle">Alihkan tampilan</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL harus diawali dengan “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL tidak valid</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL harus diawali dengan “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL tidak valid</string>
     <string name="prompt_update_confirmation">Perbarui</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Disarankan untuk mengaktifkan perlindungan pelacakan.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Jika ada yang tampak rusak pada situs ini, coba matikan.</string>

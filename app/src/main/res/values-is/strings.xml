@@ -164,8 +164,8 @@
     <string name="popup_tabs_close">Lokaðu öllum flipum</string>
     <string name="popup_tabs_new">Nýr flipi</string>
     <string name="popup_toggle">Skipta yfirsýn</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">Vefslóð verður að byrja á „https://“</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Ógild vefslóð</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">Vefslóð verður að byrja á „https://“</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Ógild vefslóð</string>
     <string name="prompt_update_confirmation">Uppfæra</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Mælt er með að kveikja á rakningarvörn.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Ef eitthvað virðist bilað á þessu vefsvæði, skaltu prófa að slökkva á því.</string>

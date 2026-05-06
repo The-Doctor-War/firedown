@@ -166,8 +166,8 @@
     <string name="popup_tabs_close">Დახურეთ ყველა ჩანართი</string>
     <string name="popup_tabs_new">Ახალი ჩანართი</string>
     <string name="popup_toggle">Ხედის გადართვა</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL-ბმულის თავსართი უნდა „https://“</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">უმართებულო URL-ბმული</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL-ბმულის თავსართი უნდა „https://“</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">უმართებულო URL-ბმული</string>
     <string name="prompt_update_confirmation">განახლება</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">თვალთვალისგან დაცვის ჩართვა სასურველია.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">თუ საიტზე რამე გაუმართავია, სინჯეთ გამორთვა.</string>

@@ -165,8 +165,8 @@
     <string name="popup_tabs_close">Isara ang lahat ng tab</string>
     <string name="popup_tabs_new">Bagong tab</string>
     <string name="popup_toggle">I-toggle ang view</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">Dapat magsimula sa “https://” ang URL</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Di-wastong URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">Dapat magsimula sa “https://” ang URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Di-wastong URL</string>
     <string name="prompt_update_confirmation">I-update</string>
     <string name="quick_settings_sheet_insecure_connection_2">Ang koneksyon ay hindi ligtas</string>
     <string name="quick_settings_sheet_secure_connection_2">Ligtas na koneksyon</string>

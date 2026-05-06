@@ -165,8 +165,8 @@
     <string name="popup_tabs_close">ሁሉንም ትሮች ዝጋ</string>
     <string name="popup_tabs_new">አዲስ ትር</string>
     <string name="popup_toggle">እይታን ቀያይር</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL በ \"https://\" መጀመር አለበት</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">ልክ ያልሆነ URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL በ \"https://\" መጀመር አለበት</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">ልክ ያልሆነ URL</string>
     <string name="prompt_update_confirmation">አዘምን</string>
     <string name="quick_settings_sheet_insecure_connection_2">ግንኙነት ደህንነቱ የተጠበቀ አይደለም</string>
     <string name="quick_settings_sheet_secure_connection_2">ግንኙነት ደህንነቱ የተጠበቀ ነው</string>

@@ -179,8 +179,8 @@
     <string name="popup_tabs_close">Luk alle faner</string>
     <string name="popup_tabs_new">Ny fane</string>
     <string name="popup_toggle">Skift visning</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">"URL'er skal starte med “https://”"</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Ugyldig URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">"URL'er skal starte med “https://”"</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Ugyldig URL</string>
     <string name="prompt_update_confirmation">Opdater</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Det anbefales at aktivere beskyttelse mod sporing.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Hvis noget på webstedet ikke ser ud til at virke som det skal, så prøv at slå beskyttelse fra.</string>

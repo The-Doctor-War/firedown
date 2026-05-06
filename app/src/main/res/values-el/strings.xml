@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Κλείσιμοόλων των καρτελών</string>
     <string name="popup_tabs_new">Νέα καρτέλα</string>
     <string name="popup_toggle">Εναλλαγή προβολής</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">Το URL πρέπει να ξεκινά με «https://»</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Μη έγκυρο URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">Το URL πρέπει να ξεκινά με «https://»</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Μη έγκυρο URL</string>
     <string name="prompt_update_confirmation">Ενημέρωση</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Προτείνεται η ενεργοποίηση της προστασίας από καταγραφή.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Αν κάτι δεν λειτουργεί σωστά σε αυτόν τον ιστότοπο, δοκιμάστε να την απενεργοποιήσετε.</string>

@@ -58,9 +58,9 @@ public class DohEditPreference extends Preference {
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 String url = textInputEditText.getText().toString();
                 if(!URLUtil.isHttpsUrl(url)){
-                    showError(mContext.getString(R.string.preference_doh_provider_custom_dialog_error_https));
+                    showError(mContext.getString(R.string.settings_doh_provider_custom_dialog_error_https));
                 }else if(!URLUtil.isValidUrl(url)){
-                    showError(mContext.getString(R.string.preference_doh_provider_custom_dialog_error_invalid));
+                    showError(mContext.getString(R.string.settings_doh_provider_custom_dialog_error_invalid));
                 }else{
                     if(listener != null){
                         listener.onValidationRequested(url);

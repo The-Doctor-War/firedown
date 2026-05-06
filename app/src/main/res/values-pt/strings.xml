@@ -149,9 +149,9 @@
     <string name="popup_tabs_close">Fechar todas as guias</string>
     <string name="popup_tabs_new">Nova guia</string>
     <string name="popup_toggle">Alternar visualização</string>
-    <string name="preference_jit_enabled">Ativar compilação Just-In-Time do JavaScript (JIT)</string>
-    <string name="preference_jit_enabled_summary">Ao desativar, a performance pode ser reduzida em páginas complexas - Ao alterar esta configuração, o seu navegador será reiniciado</string>
-    <string name="preference_webrtc_enabled">Ativar WebRTC</string>
+    <string name="settings_jit_enabled">Ativar compilação Just-In-Time do JavaScript (JIT)</string>
+    <string name="settings_jit_enabled_summary">Ao desativar, a performance pode ser reduzida em páginas complexas - Ao alterar esta configuração, o seu navegador será reiniciado</string>
+    <string name="settings_webrtc_enabled">Ativar WebRTC</string>
     <string name="rename">Renomear</string>
     <string name="rename_file">Renomear arquivo</string>
     <string name="request_geolocation">Compartilhar a localização do seu dispositivo com &lt;b&gt;%s/b&gt;?</string>

@@ -166,8 +166,8 @@
     <string name="popup_tabs_close">Închideți toate filele</string>
     <string name="popup_tabs_new">Filă nouă</string>
     <string name="popup_toggle">Comutați Vizualizare</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL-ul trebuie să înceapă cu „https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL nevalid</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL-ul trebuie să înceapă cu „https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL nevalid</string>
     <string name="prompt_update_confirmation">Actualizează</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Se recomandă activarea protecției la urmărire.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Dacă ceva pare defect pe acest site, încearcă să îl dezactivezi.</string>

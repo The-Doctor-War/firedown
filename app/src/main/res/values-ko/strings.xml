@@ -179,8 +179,8 @@
     <string name="popup_tabs_close">모든 탭 닫기</string>
     <string name="popup_tabs_new">새 탭</string>
     <string name="popup_toggle">보기 설정/해제</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL은 “https://”로 시작해야 함</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">잘못된 URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL은 “https://”로 시작해야 함</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">잘못된 URL</string>
     <string name="prompt_update_confirmation">업데이트</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">추적 방지 기능을 켜는 것을 권장합니다.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">이 사이트에서 뭔가 손상된 것처럼 보이면 해당 기능을 꺼보세요.</string>

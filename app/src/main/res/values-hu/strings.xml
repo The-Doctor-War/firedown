@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Zárja be az összes lapot</string>
     <string name="popup_tabs_new">Új lap</string>
     <string name="popup_toggle">Nézet váltása</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">A webcímnek „https://” előtaggal kell kezdődnie</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Érvénytelen webcím</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">A webcímnek „https://” előtaggal kell kezdődnie</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Érvénytelen webcím</string>
     <string name="prompt_update_confirmation">Frissítés</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">A követés elleni védelem bekapcsolása ajánlott.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Ha valami nem működik ezen az oldalon, próbálja meg kikapcsolni.</string>

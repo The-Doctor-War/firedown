@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Mbyllni të gjitha skedat</string>
     <string name="popup_tabs_new">Tab i ri</string>
     <string name="popup_toggle">Ndrysho pamjen</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL-ja duhet të fillojnë me “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL e pavlefshme</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL-ja duhet të fillojnë me “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL e pavlefshme</string>
     <string name="prompt_update_confirmation">Përditësoje</string>
     <string name="quick_settings_sheet_insecure_connection_2">Lidhja s’është e siguruar</string>
     <string name="quick_settings_sheet_secure_connection_2">Lidhja është e siguruar</string>

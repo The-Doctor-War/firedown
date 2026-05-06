@@ -179,8 +179,8 @@
     <string name="popup_tabs_close">לסגור את כל הכרטיסיות</string>
     <string name="popup_tabs_new">כרטיסייה חדשה</string>
     <string name="popup_toggle">החלף תצוגה</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">הכתובת חייבת להתחיל ב־״https://‎״</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">כתובת לא תקנית</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">הכתובת חייבת להתחיל ב־״https://‎״</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">כתובת לא תקנית</string>
     <string name="prompt_update_confirmation">עדכון</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">מומלץ להפעיל את הגנת המעקב.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">אם משהו נראה שבור באתר הזה, ניתן לנסות לכבות אותה.</string>

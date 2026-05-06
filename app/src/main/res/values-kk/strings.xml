@@ -166,8 +166,8 @@
     <string name="popup_tabs_close">Барлық қойындыларды жабыңыз</string>
     <string name="popup_tabs_new">Жаңа қойынды</string>
     <string name="popup_toggle">Көріністі ауыстыру</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL адресі \"https://\" деп басталуы керек</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">Жарамсыз URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL адресі \"https://\" деп басталуы керек</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Жарамсыз URL</string>
     <string name="prompt_update_confirmation">Жаңарту</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Бақылаудан қорғанысты іске қосу ұсынылады.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Бұл сайтта бірдеңе бұзылған болып көрінсе, оны сөндіріп көріңіз.</string>

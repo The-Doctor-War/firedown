@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Đóng tất cả các tab</string>
     <string name="popup_tabs_new">Tab mới</string>
     <string name="popup_toggle">Chuyển đổi chế độ xem</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL phải bắt đầu bằng “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL không hợp lệ</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL phải bắt đầu bằng “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL không hợp lệ</string>
     <string name="prompt_update_confirmation">Cập nhật</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Nên bật tính năng trình chống theo dõi.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Nếu có gì đó bị hỏng trên trang web này, hãy thử tắt nó đi.</string>

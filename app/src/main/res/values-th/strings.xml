@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">ปิดแท็บทั้งหมด</string>
     <string name="popup_tabs_new">แท็บใหม่</string>
     <string name="popup_toggle">สลับมุมมอง</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URL ต้องขึ้นต้นด้วย “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL ไม่ถูกต้อง</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL ต้องขึ้นต้นด้วย “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL ไม่ถูกต้อง</string>
     <string name="prompt_update_confirmation">อัปเดต</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">แนะนำให้เปิดใช้งานการป้องกันการติดตาม</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">หากมีบางอย่างดูเสียหายในไซต์นี้ ให้ลองปิดการป้องกัน</string>

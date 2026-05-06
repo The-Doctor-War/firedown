@@ -143,8 +143,8 @@
     <string name="popup_tabs_close">Fechar todas as guias</string>
     <string name="popup_tabs_new">Nova aba</string>
     <string name="popup_toggle">Alternar visualização</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">O URL deve começar com “https://”</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL inválido</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">O URL deve começar com “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL inválido</string>
     <string name="prompt_update_confirmation">Atualizar</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Recomenda-se a ativação da proteção contra a monitorização.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se parecer que algo não está a funcionar neste site, experimente desativar.</string>

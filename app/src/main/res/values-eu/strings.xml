@@ -167,8 +167,8 @@
     <string name="popup_tabs_close">Itxi fitxa guztiak</string>
     <string name="popup_tabs_new">Fitxa berria</string>
     <string name="popup_toggle">Aldatu ikuspegia</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">URLak \"https://\" karaktereekin hasi behar du</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">URL baliogabea</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URLak \"https://\" karaktereekin hasi behar du</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">URL baliogabea</string>
     <string name="prompt_update_confirmation">Eguneratu</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Jarraipenaren babes aktibatzea gomendatzen dugu.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Zerbaitek apurtuta badirudi gune honetan, saiatu desaktibatzen.</string>

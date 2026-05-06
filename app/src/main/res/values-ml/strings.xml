@@ -163,8 +163,8 @@
     <string name="popup_tabs_close">എല്ലാ ടാബുകളും അടയ്ക്കുക</string>
     <string name="popup_tabs_new">പുതിയ ടാബ്</string>
     <string name="popup_toggle">കാഴ്ച ടോഗിൾ ചെയ്യുക</string>
-    <string name="preference_doh_provider_custom_dialog_error_https">യൂ.ആർ.എൽ എല്ലാം “https://”- കൂടെ തുടങ്ങണം</string>
-    <string name="preference_doh_provider_custom_dialog_error_invalid">തെറ്റായ URL</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">യൂ.ആർ.എൽ എല്ലാം “https://”- കൂടെ തുടങ്ങണം</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">തെറ്റായ URL</string>
     <string name="prompt_update_confirmation">പുതുക്കുക</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">പിന്തുടൎച്ച പരിരക്ഷണം തുടങ്ങിവയ്ക്കുന്നതു ശുപാൎശചെയ്യപ്പെട്ടതാണു്.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">ഈ വെബ്ബിടത്തിൽ എന്തെങ്കിലും തകരാറുണ്ടെന്നു തോന്നുന്നുണ്ടെങ്കിൽ പരിരക്ഷകളെ അണച്ചു നോക്കൂ.</string>

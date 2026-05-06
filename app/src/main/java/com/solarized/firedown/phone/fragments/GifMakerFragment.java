@@ -277,32 +277,54 @@ public class GifMakerFragment extends BaseFocusFragment {
         mThumbnailExecutor.execute(() -> extractThumbnailsBlocking(filePath, durationMs, count));
     }
 
-    /** Runs on the executor. Opens the source once, seeks to evenly-
-     *  spaced positions, grabs a frame at each, downscales it, and
-     *  posts the batch to the main thread.
+    /** Runs on the executor. Tries {@link MediaMetadataRetriever} for
+     *  evenly-spaced frames first; if MMR can't decode the clip at all
+     *  (codec not natively supported by Android — AV1 on older devices
+     *  is the common case), falls back to {@link FFmpegThumbnailer} for
+     *  a single representative frame at position 0.
      *
-     *  Uses {@link MediaMetadataRetriever} rather than the project's
-     *  {@code FFmpegThumbnailer}: the latter's native seek is wired
-     *  with {@code AVSEEK_FLAG_ANY}, which lands on the closest
-     *  frame regardless of keyframe status — for mid-clip seeks the
-     *  decoder then can't produce output without an upstream keyframe
-     *  and bails to EOF, returning null. {@code MediaMetadataRetriever}
-     *  handles the seek-then-decode-from-keyframe dance correctly
-     *  for every format Android natively decodes (which is every
-     *  format this app's downloads are likely to be).
+     *  Why MMR is primary: its time-based seek does the
+     *  seek-then-decode-from-keyframe dance correctly for mid-clip
+     *  positions, which gives a real filmstrip across the source. The
+     *  project's FFmpegThumbnailer uses AVSEEK_FLAG_ANY which lands on
+     *  non-keyframes, so its decoder bails to EOF for any non-zero
+     *  position — that's why we don't use it as the primary path.
+     *
+     *  Why FFmpeg is the fallback: the bundled build pulls in libdav1d
+     *  and the standard codec set, so it can decode AV1 / VP9 / etc.
+     *  even when the device's MediaCodec can't. With stream_pos=0 the
+     *  seek path is skipped (the native code only seeks for pos>0), so
+     *  decode starts cleanly from the file head and produces one valid
+     *  frame. Better than an empty grey strip.
      *
      *  Failures are logged but never crash — the filmstrip falls
-     *  back to grey placeholder cells. */
+     *  back to grey placeholder cells if both paths fail. */
     private void extractThumbnailsBlocking(String filePath, long durationMs, int count) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        List<Bitmap> bitmaps = new ArrayList<>(count);
+        List<Bitmap> bitmaps = extractWithMediaMetadataRetriever(filePath, durationMs, count);
 
+        if (bitmaps.isEmpty() && !mDestroyed) {
+            Log.w(TAG, "MediaMetadataRetriever returned no frames; falling back to FFmpegThumbnailer");
+            Bitmap fallback = extractWithFFmpegThumbnailer(filePath);
+            if (fallback != null) bitmaps.add(fallback);
+        }
+
+        if (mDestroyed || bitmaps.isEmpty()) return;
+
+        mLoopHandler.post(() -> {
+            if (mDestroyed || mFilmstrip == null) return;
+            mFilmstrip.setThumbnails(bitmaps);
+        });
+    }
+
+    private List<Bitmap> extractWithMediaMetadataRetriever(String filePath, long durationMs, int count) {
+        List<Bitmap> bitmaps = new ArrayList<>(count);
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(filePath);
 
             long durationUs = durationMs * 1000L;
             for (int i = 0; i < count; i++) {
-                if (mDestroyed) return;
+                if (mDestroyed) return bitmaps;
 
                 /* Anchor at 5% into the clip and stop at 95% so we don't
                  * pick black frames at the very start/end of fade-in /
@@ -332,17 +354,42 @@ public class GifMakerFragment extends BaseFocusFragment {
                 bitmaps.add(scaleDown(frame));
             }
         } catch (Throwable t) {
-            Log.e(TAG, "thumbnail extraction failed", t);
+            Log.e(TAG, "MediaMetadataRetriever extraction failed", t);
         } finally {
             try { retriever.release(); } catch (Throwable ignored) { }
         }
+        return bitmaps;
+    }
 
-        if (mDestroyed || bitmaps.isEmpty()) return;
-
-        mLoopHandler.post(() -> {
-            if (mDestroyed || mFilmstrip == null) return;
-            mFilmstrip.setThumbnails(bitmaps);
-        });
+    /** Single-frame fallback via the project's FFmpeg-based decoder.
+     *  Called only when MediaMetadataRetriever returned nothing — most
+     *  often AV1 on devices where MediaCodec can't decode it but the
+     *  bundled libdav1d can. Uses stream_pos=0 to skip the native seek
+     *  path (which is wired with AVSEEK_FLAG_ANY and lands on
+     *  non-keyframes for mid-clip positions); this gives one clean
+     *  frame from the file head, which the filmstrip view tiles across
+     *  the whole strip. Beats an empty grey strip. */
+    private @Nullable Bitmap extractWithFFmpegThumbnailer(String filePath) {
+        com.solarized.firedown.ffmpegutils.FFmpegThumbnailer thumb =
+                new com.solarized.firedown.ffmpegutils.FFmpegThumbnailer();
+        try {
+            int err = thumb.setDataSource(filePath, null);
+            if (err < 0) {
+                Log.w(TAG, "FFmpegThumbnailer setDataSource failed: " + err);
+                return null;
+            }
+            Bitmap full = thumb.getBitmap(0L);
+            if (full == null) {
+                Log.w(TAG, "FFmpegThumbnailer null bitmap");
+                return null;
+            }
+            return scaleDown(full);
+        } catch (Throwable t) {
+            Log.e(TAG, "FFmpegThumbnailer fallback failed", t);
+            return null;
+        } finally {
+            try { thumb.release(); } catch (Throwable ignored) { }
+        }
     }
 
     private static Bitmap scaleDown(Bitmap src) {

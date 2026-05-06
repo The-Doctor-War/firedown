@@ -265,12 +265,6 @@
     <string name="popup_tabs_close">Close all tabs</string>
     <string name="popup_tabs_new">New tab</string>
     <string name="popup_toggle">Toggle view</string>
-    <string name="settings_doh_provider_custom_dialog_error_https">URL must start with “https://”</string>
-    <string name="settings_doh_provider_custom_dialog_error_invalid">Invalid URL</string>
-    <string name="settings_jit_enabled">Enable JavaScript Just-in-time Compilation (JIT)</string>
-    <string name="settings_jit_enabled_summary">When disabled, performance may be reduced for complex webpages - Changing this setting will restart your browser</string>
-    <string name="settings_webgl_disabled">Disable WebGL</string>
-    <string name="settings_webrtc_enabled">Enable WebRTC</string>
     <string name="prompt_update_confirmation">Update</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Turning on tracking protection is recommended.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">If something looks broken on this site, try turning it off.</string>
@@ -329,6 +323,8 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookies and site data</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">You’ll be logged out of most sites</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Open tabs</string>
+    <string name="settings_doh_provider_custom_dialog_error_https">URL must start with “https://”</string>
+    <string name="settings_doh_provider_custom_dialog_error_invalid">Invalid URL</string>
     <string name="settings_doh_server">DNS Server</string>
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
@@ -363,6 +359,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">General</string>
     <string name="settings_help">Help</string>
+    <string name="settings_jit_enabled">Enable JavaScript Just-in-time Compilation (JIT)</string>
+    <string name="settings_jit_enabled_summary">When disabled, performance may be reduced for complex webpages - Changing this setting will restart your browser</string>
     <string name="settings_license">Licenses</string>
     <string name="settings_light_theme">Light</string>
     <string name="settings_lock_15_min">15 minutes inactivity</string>
@@ -395,6 +393,10 @@
     <string name="settings_tabs_archive_title">Auto-close tabs</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_version">Version</string>
+    <string name="settings_webgl_disabled">Disable WebGL</string>
+    <string name="settings_webgl_disabled_summary">Blocks GPU fingerprinting; may break 3D content</string>
+    <string name="settings_webrtc_enabled">Enable WebRTC</string>
+    <string name="settings_webrtc_enabled_summary">Required for P2P calls; can leak your real IP</string>
     <string name="share">Share</string>
     <string name="share_image">Share IMAGE</string>
     <string name="share_url">Share URL</string>

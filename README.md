@@ -17,6 +17,7 @@
 - 4K downloads and background YouTube playback, no Premium needed
 - uBlock Origin ad blocking, configured out of the box
 - Private Vault — PIN/biometric-locked encrypted storage for sensitive files
+- Convert to MP3, AAC, GIF
 - GeckoView-based, not Chromium
 - No accounts, no ads, no telemetry
 
@@ -25,7 +26,7 @@
 - **[GitHub Releases](https://github.com/solarizeddev/firedown/releases)** — signed APKs with changelogs
 - **[Direct download](https://firedown.app/download)** from the website
 - **[Zapstore](https://zapstore.dev/apps/com.solarized.firedown)** from Zapstore
-- **[Obtainium](https://github.com/ImranR98/Obtainium)** Coming soon
+- **[Obtainium](https://github.com/ImranR98/Obtainium)** Add repo https://github.com/solarizeddev/firedown
 
 Not on the Play Store. Not currently submitted to F-Droid.
 

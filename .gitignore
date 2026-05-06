@@ -70,6 +70,8 @@ fabric.properties
 # *.iml
 # modules.xml
 
+*.kate-swp
+
 # Prebuilt FFmpeg artifacts (fetched from GitHub Releases at build time)
 /external/ffmpeg/*
 !/external/ffmpeg/.gitkeep

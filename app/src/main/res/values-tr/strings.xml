@@ -145,7 +145,7 @@
     <string name="lock_biometric">Biyometrik kimlik bilgilerinizi kullanarak kilidi açın</string>
     <string name="lock_cipher">Güvenli klasöre taşı</string>
     <string name="lock_decipher">Güvenli klasörden taşı</string>
-    <string name="lock_empty">Güvenli Klasör\'deki tüm dosyalar kriptografik olarak korunmaktadır.\n\nGüvenli Klasör\'ün kilidini açmak için biyometrik kimlik bilgilerinizi veya kilit ekranı kimlik bilgilerinizi kullanın.</string>
+    <string name="lock_empty">Güvenli Klasör, hassas dosyalar için biyometrik kilitli bir depolama alanıdır; galeriden ve diğer uygulamalardan gizlenmiştir.\n\nKilidini açmak için biyometrik veya kilit ekranı kimlik bilgilerinizi kullanın.</string>
     <string name="lock_enroll_accept">Şimdi kur</string>
     <string name="lock_enroll_cancel">Daha sonra</string>
     <string name="lock_enroll_message">Cihazınız başkasının eline geçtiğinde dosyalarınıza erişilmesini önlemek için bir cihaz kilidi deseni, PIN veya şifre ayarlayın.</string>

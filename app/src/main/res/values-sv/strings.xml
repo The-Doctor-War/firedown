@@ -115,7 +115,7 @@
     <string name="lock_biometric">Lås upp med dina biometriska referenser</string>
     <string name="lock_cipher">Flytta till Säker mapp</string>
     <string name="lock_decipher">Flytta från Säker mapp</string>
-    <string name="lock_empty">Alla filer i Safe Folder är kryptografiskt skyddade.\n\nAnvänd dina biometriska autentiseringsuppgifter eller låsskärmsuppgifter för att låsa upp Safe Folder.</string>
+    <string name="lock_empty">Safe Folder är biometriskt låst lagring för känsliga filer, dold för galleriet och andra appar.\n\nAnvänd dina biometriska uppgifter eller låsskärmsuppgifter för att låsa upp.</string>
     <string name="lock_enroll_accept">Ställ in nu</string>
     <string name="lock_enroll_cancel">Senare</string>
     <string name="lock_enroll_message">Konfigurera ett enhetslåsmönster, PIN-kod eller lösenord för att skydda dina filers åtkomst om någon annan har din enhet.</string>

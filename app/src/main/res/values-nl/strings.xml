@@ -145,7 +145,7 @@
     <string name="lock_biometric">Ontgrendel met uw biometrische gegevens</string>
     <string name="lock_cipher">Naar beveiligde map verplaatsen</string>
     <string name="lock_decipher">Uit beveiligde map halen</string>
-    <string name="lock_empty">Alle bestanden in de Veilige map zijn cryptografisch beveiligd.\n\nGebruik uw biometrische gegevens of vergrendelschermgegevens om Veilige map te ontgrendelen.</string>
+    <string name="lock_empty">De Veilige map is biometrisch vergrendelde opslag voor gevoelige bestanden, verborgen voor de galerij en andere apps.\n\nGebruik je biometrische gegevens of vergrendelschermgegevens om hem te ontgrendelen.</string>
     <string name="lock_enroll_accept">Nu instellen</string>
     <string name="lock_enroll_cancel">Later</string>
     <string name="lock_enroll_message">Stel een apparaatvergrendelingspatroon, pincode of wachtwoord in om te voorkomen dat uw bestanden worden geopend als iemand anders uw apparaat heeft.</string>

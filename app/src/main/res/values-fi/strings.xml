@@ -145,7 +145,7 @@
     <string name="lock_biometric">Avaa lukitus biometristen tunnistetiedoillasi</string>
     <string name="lock_cipher">Siirrä turvakansioon</string>
     <string name="lock_decipher">Siirrä pois turvakansiosta</string>
-    <string name="lock_empty">Kaikki Turvakansiossa olevat tiedostot ovat kryptografisesti suojattuja.\n\nKäytä biometrisiä kirjautumistietojasi tai lukitusnäytön kirjautumistietojasi turvakansion avaamiseen.</string>
+    <string name="lock_empty">Turvakansio on biometrisesti lukittu säilytys arkaluontoisille tiedostoille, piilossa galleriasta ja muista sovelluksista.\n\nAvaa lukitus biometrisillä tunnistetiedoilla tai lukitusnäytön tunnistetiedoilla.</string>
     <string name="lock_enroll_accept">Määritä nyt</string>
     <string name="lock_enroll_cancel">Myöhemmin</string>
     <string name="lock_enroll_message">Määritä laitteen lukituskuvio, PIN-koodi tai salasana suojataksesi tiedostojasi pääsyltä, jos laitteesi on jollain muulla.</string>

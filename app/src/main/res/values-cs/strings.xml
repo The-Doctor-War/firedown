@@ -145,7 +145,7 @@
     <string name="lock_biometric">Odemkněte pomocí svých biometrických údajů</string>
     <string name="lock_cipher">Přesunout do bezpečné složky</string>
     <string name="lock_decipher">Vyjmout z bezpečné složky</string>
-    <string name="lock_empty">Všechny soubory v Safe Folder jsou kryptograficky chráněny.\n\nK odemknutí bezpečné složky použijte své biometrické údaje nebo přihlašovací údaje na obrazovce uzamčení.</string>
+    <string name="lock_empty">Bezpečná složka je úložiště zamčené biometrií pro citlivé soubory, skryté před galerií a dalšími aplikacemi.\n\nK odemčení použijte biometrické údaje nebo přihlašovací údaje obrazovky uzamčení.</string>
     <string name="lock_enroll_accept">Nastavit nyní</string>
     <string name="lock_enroll_cancel">Později</string>
     <string name="lock_enroll_message">Nastavte gesto zámku zařízení, PIN nebo heslo pro ochranu vašich souborů před přístupem, pokud má vaše zařízení někdo jiný.</string>

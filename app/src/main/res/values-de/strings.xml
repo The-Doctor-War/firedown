@@ -218,7 +218,7 @@
     <string name="lock_biometric">Entsperren Sie es mit Ihren biometrischen Daten</string>
     <string name="lock_cipher">In sicheren Ordner verschieben</string>
     <string name="lock_decipher">Aus sicherem Ordner entfernen</string>
-    <string name="lock_empty">Alle Dateien im sicheren Ordner sind kryptografisch geschützt.\n\nVerwenden Sie Ihre biometrischen Anmeldeinformationen oder Anmeldeinformationen für den Sperrbildschirm, um den sicheren Ordner zu entsperren.</string>
+    <string name="lock_empty">Der sichere Ordner ist biometrisch gesperrter Speicher für sensible Dateien, vor der Galerie und anderen Apps verborgen.\n\nVerwende deine biometrischen Daten oder die Sperrbildschirm-Anmeldedaten, um ihn zu entsperren.</string>
     <string name="lock_enroll_accept">Jetzt einrichten</string>
     <string name="lock_enroll_cancel">Später</string>
     <string name="lock_enroll_message">Richten Sie ein Gerätesperrmuster, eine PIN oder ein Passwort ein, um den Zugriff auf Ihre Dateien zu verhindern, wenn jemand anderes Ihr Gerät benutzt.</string>

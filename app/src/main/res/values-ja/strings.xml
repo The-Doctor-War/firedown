@@ -218,7 +218,7 @@
     <string name="lock_biometric">生体認証資格情報を使用してロックを解除</string>
     <string name="lock_cipher">安全なフォルダに移動</string>
     <string name="lock_decipher">安全なフォルダから移動</string>
-    <string name="lock_empty">セーフフォルダ内のすべてのファイルは暗号化で保護されています。\n\n生体認証資格情報またはロック画面資格情報を使用して、セーフフォルダのロックを解除します。</string>
+    <string name="lock_empty">セーフフォルダは機密ファイルを保管する生体認証ロック付きの領域で、ギャラリーや他のアプリからは見えません。\n\n生体認証またはロック画面の認証情報で解除してください。</string>
     <string name="lock_enroll_accept">今すぐセットアップ</string>
     <string name="lock_enroll_cancel">後で</string>
     <string name="lock_enroll_message">デバイスのロックパターン、PIN、またはパスワードを設定して、他人がデバイスを所有した場合にファイルにアクセスできないようにします。</string>

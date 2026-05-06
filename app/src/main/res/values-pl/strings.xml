@@ -145,7 +145,7 @@
     <string name="lock_biometric">Odblokuj za pomocą danych biometrycznych</string>
     <string name="lock_cipher">Przenieś do bezpiecznego folderu</string>
     <string name="lock_decipher">Przenieś z bezpiecznego folderu</string>
-    <string name="lock_empty">Wszystkie pliki w Bezpiecznym Folderze są chronione kryptograficznie.\n\nUżyj danych biometrycznych lub danych logowania na ekranie blokady, aby odblokować Bezpieczny folder.</string>
+    <string name="lock_empty">Bezpieczny folder to biometrycznie zablokowane miejsce na pliki, ukryte przed galerią i innymi aplikacjami.\n\nUżyj danych biometrycznych lub danych logowania ekranu blokady, aby go odblokować.</string>
     <string name="lock_enroll_accept">Skonfiguruj teraz</string>
     <string name="lock_enroll_cancel">Później</string>
     <string name="lock_enroll_message">Skonfiguruj wzór blokady urządzenia, kod PIN lub hasło, aby chronić swoje pliki przed dostępem, jeśli ktoś inny będzie miał Twoje urządzenie.</string>

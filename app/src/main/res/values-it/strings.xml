@@ -144,7 +144,7 @@
     <string name="lock_biometric">Sblocca utilizzando le tue credenziali biometriche</string>
     <string name="lock_cipher">Sposta nella Cartella di sicurezza</string>
     <string name="lock_decipher">Sposta fuori dalla Cartella di sicurezza</string>
-    <string name="lock_empty">Tutti i file nella cartella sicura sono protetti crittograficamente.\n\nUtilizza le tue credenziali biometriche o le credenziali della schermata di blocco per sbloccare la cartella di sicurezza.</string>
+    <string name="lock_empty">La Cartella sicura è uno spazio di archiviazione bloccato con biometria per file sensibili, nascosto alla galleria e alle altre app.\n\nUsa le tue credenziali biometriche o quelle della schermata di blocco per sbloccarla.</string>
     <string name="lock_enroll_accept">Configura ora</string>
     <string name="lock_enroll_cancel">Dopo</string>
     <string name="lock_enroll_message">Configura una sequenza di blocco del dispositivo, un PIN o una password per proteggere i tuoi file dall\'accesso se qualcun altro ha il tuo dispositivo.</string>

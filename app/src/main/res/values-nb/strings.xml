@@ -115,7 +115,7 @@
     <string name="lock_biometric">Lås opp med din biometriske legitimasjon</string>
     <string name="lock_cipher">Flytt til den sikre mappen</string>
     <string name="lock_decipher">Flytt ut av den sikre mappen</string>
-    <string name="lock_empty">Alle filer i Sikker mappe er kryptografisk beskyttet.\n\nBruk din biometriske legitimasjon eller legitimasjon på låseskjermen for å låse opp Safe Folder.</string>
+    <string name="lock_empty">Sikker mappe er biometrisk låst lagring for sensitive filer, skjult fra galleriet og andre apper.\n\nBruk biometrisk legitimasjon eller låseskjermlegitimasjon for å låse opp.</string>
     <string name="lock_enroll_accept">Sett opp nå</string>
     <string name="lock_enroll_cancel">Senere</string>
     <string name="lock_enroll_message">Konfigurer et enhetslåsmønster, PIN-kode eller passord for å beskytte filene dine mot tilgang hvis noen andre har enheten din.</string>

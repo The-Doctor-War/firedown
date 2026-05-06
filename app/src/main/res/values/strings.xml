@@ -218,7 +218,7 @@
     <string name="lock_biometric">Unlock using your biometric credentials</string>
     <string name="lock_cipher">Move to Safe Folder</string>
     <string name="lock_decipher">Move out of Safe Folder</string>
-    <string name="lock_empty">All files in Safe Folder are cryptographically protected.\n\nUse your biometric credentials or lock screen credentials to unlock Safe Folder.</string>
+    <string name="lock_empty">Safe Folder is biometric-locked storage for sensitive files — hidden from the gallery and other apps.\n\nUse your biometric or lock screen credentials to unlock.</string>
     <string name="lock_enroll_accept">Set up now</string>
     <string name="lock_enroll_cancel">Later</string>
     <string name="lock_enroll_message">Set up a device lock pattern, PIN, or password to protect your files from being accessed if someone else has your device.</string>

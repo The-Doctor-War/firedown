@@ -218,7 +218,7 @@
     <string name="lock_biometric">使用您的生物识别凭据解锁</string>
     <string name="lock_cipher">移至安全文件夹</string>
     <string name="lock_decipher">移出安全文件夹</string>
-    <string name="lock_empty">安全文件夹中的所有文件均受到加密保护。\n使用您的生物识别凭据或锁屏凭据解锁安全文件夹。</string>
+    <string name="lock_empty">安全文件夹是用于存放敏感文件的生物识别锁定存储，对相册和其他应用不可见。\n\n使用生物识别或锁屏凭据来解锁。</string>
     <string name="lock_enroll_accept">立即设置</string>
     <string name="lock_enroll_cancel">之后</string>
     <string name="lock_enroll_message">设置设备锁定图案、PIN 或密码，以防止您的文件在其他人拥有您的设备时被访问。</string>

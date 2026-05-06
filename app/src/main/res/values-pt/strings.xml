@@ -116,7 +116,7 @@
     <string name="lock_biometric">Desbloqueie usando suas credenciais biométricas</string>
     <string name="lock_cipher">Mover para pasta segura</string>
     <string name="lock_decipher">Sair da pasta segura</string>
-    <string name="lock_empty">Todos os arquivos na Pasta Segura são protegidos criptograficamente.\n\nUse suas credenciais biométricas ou credenciais da tela de bloqueio para desbloquear a Pasta Segura.</string>
+    <string name="lock_empty">A Pasta Segura é um armazenamento bloqueado por biometria para ficheiros sensíveis, oculto da galeria e de outras apps.\n\nUsa as tuas credenciais biométricas ou do ecrã de bloqueio para a desbloquear.</string>
     <string name="lock_enroll_accept">Configurar agora</string>
     <string name="lock_enroll_cancel">Mais tarde</string>
     <string name="lock_enroll_message">Configure um padrão de bloqueio do dispositivo, PIN ou senha para proteger seus arquivos contra acesso se outra pessoa estiver com seu dispositivo.</string>

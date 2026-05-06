@@ -144,7 +144,7 @@
     <string name="lock_biometric">생체 인식 자격 증명을 사용하여 잠금 해제</string>
     <string name="lock_cipher">보안 폴더로 이동</string>
     <string name="lock_decipher">보안 폴더에서 꺼내기</string>
-    <string name="lock_empty">안전 폴더의 모든 파일은 암호화되어 보호됩니다.\n\n생체 인식 자격 증명이나 잠금 화면 자격 증명을 사용하여 안전 폴더를 잠금 해제하세요.</string>
+    <string name="lock_empty">안전 폴더는 민감한 파일을 위한 생체 인식 잠금 저장소이며, 갤러리와 다른 앱에서는 보이지 않습니다.\n\n생체 인증 또는 잠금 화면 자격 증명으로 잠금을 해제하세요.</string>
     <string name="lock_enroll_accept">지금 설정</string>
     <string name="lock_enroll_cancel">나중에</string>
     <string name="lock_enroll_message">다른 사람이 귀하의 장치를 가지고 있는 경우 귀하의 파일에 액세스하지 못하도록 장치 잠금 패턴, PIN 또는 비밀번호를 설정하십시오.</string>

@@ -144,7 +144,7 @@
     <string name="lock_biometric">פתח את הנעילה באמצעות האישורים הביומטריים שלך</string>
     <string name="lock_cipher">העבר לתיקייה הבטוחה</string>
     <string name="lock_decipher">הוצא מהתיקייה הבטוחה</string>
-    <string name="lock_empty">כל הקבצים בתיקייה בטוחה מוגנים קריפטוגרפית.\n\nהשתמש באישורים הביומטריים שלך או באישורים של מסך הנעילה כדי לפתוח את הנעילה של תיקייה בטוחה.</string>
+    <string name="lock_empty">התיקייה הבטוחה היא אזור אחסון נעול בביומטריה לקבצים רגישים, מוסתר מהגלריה ומאפליקציות אחרות.\n\nהשתמש באישורים הביומטריים שלך או באישורי מסך הנעילה כדי לפתוח.</string>
     <string name="lock_enroll_accept">הגדר עכשיו</string>
     <string name="lock_enroll_cancel">יותר מאוחר</string>
     <string name="lock_enroll_message">הגדר דפוס נעילת מכשיר, PIN או סיסמה כדי להגן על הקבצים שלך מפני גישה אם למישהו אחר יש את המכשיר שלך.</string>

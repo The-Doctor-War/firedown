@@ -218,7 +218,7 @@
     <string name="lock_biometric">Desbloquear usando tus credenciales biométricas</string>
     <string name="lock_cipher">Mover a la carpeta segura</string>
     <string name="lock_decipher">Sacar de la carpeta segura</string>
-    <string name="lock_empty">Todos los archivos de Safe Folder están protegidos criptográficamente.\n\nUtiliza tus credenciales biométricas o de pantalla de bloqueo para desbloquear la Carpeta Segura.</string>
+    <string name="lock_empty">La Carpeta Segura es almacenamiento bloqueado por biometría para archivos sensibles, oculto de la galería y de otras apps.\n\nUsa tus credenciales biométricas o de pantalla de bloqueo para desbloquearla.</string>
     <string name="lock_enroll_accept">Configurar ahora</string>
     <string name="lock_enroll_cancel">Más tarde</string>
     <string name="lock_enroll_message">Configura un patrón de bloqueo, PIN o contraseña del dispositivo para proteger el acceso a tus archivos si alguien más tiene su dispositivo.</string>

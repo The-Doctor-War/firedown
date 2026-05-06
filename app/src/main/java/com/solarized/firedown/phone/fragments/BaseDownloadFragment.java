@@ -205,11 +205,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             handleItemAction(IntentActions.DOWNLOAD_START_AUDIO_ENCODE, entity);
             mOperationActive = true;
             startActionMode(option.getPosition());
-        } else if (iconId == R.drawable.ic_movie_24) {
-            /* Hand off to GifMakerFragment so the user can pick a trim
-             * range and frame rate before the encode kicks off. The
-             * fragment itself starts TaskManager once the user confirms,
-             * so we don't flip mOperationActive / startActionMode here. */
+        } else if (iconId == R.drawable.ic_gif_box_24) {
             NavigationUtils.navigateSafe(mNavController, R.id.gif_maker, bundle);
         } else if (iconId == R.drawable.ic_lock_24) {
             handleItemAction(IntentActions.LOCK_FOR_ENCRYPTION, entity);

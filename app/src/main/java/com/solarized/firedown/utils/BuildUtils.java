@@ -9,6 +9,10 @@ public class BuildUtils {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R;
     }
 
+    public static boolean hasAndroid27() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1;
+    }
+
 
     public static boolean hasAndroidS() {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.S;

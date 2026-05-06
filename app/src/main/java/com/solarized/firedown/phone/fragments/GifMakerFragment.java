@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -42,6 +41,7 @@ import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegGifMaker;
 import com.solarized.firedown.manager.tasks.TaskManager;
 import com.solarized.firedown.ui.FilmstripTrimSlider;
+import com.solarized.firedown.utils.BuildUtils;
 import com.solarized.firedown.utils.NavigationUtils;
 
 import java.util.ArrayList;
@@ -393,7 +393,7 @@ public class GifMakerFragment extends BaseFocusFragment {
      *  dimensions in both axes (Android sizing contract), so we still
      *  run scaleDown afterwards as a safety cap. */
     private static Bitmap extractFrame(MediaMetadataRetriever retriever, long posUs) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+        if (BuildUtils.hasAndroid27()) {
             return retriever.getScaledFrameAtTime(posUs,
                     MediaMetadataRetriever.OPTION_CLOSEST_SYNC,
                     THUMB_MAX_DIM, THUMB_MAX_DIM);

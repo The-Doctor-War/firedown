@@ -57,7 +57,6 @@
 -keep class com.solarized.firedown.ffmpegutils.FFmpegSVGDecoder
 -keep class com.solarized.firedown.ffmpegutils.FFmpegOkhttp
 
-
 -keepclassmembers class com.solarized.firedown.ffmpegutils.FFmpegStreamInfo {
 	private <methods>;
     public <methods>;
@@ -66,6 +65,12 @@
 -keepclassmembers class com.solarized.firedown.ffmpegutils.FFmpegMetaData {
 	private <methods>;
     public <methods>;
+}
+
+-keepclassmembers class com.solarized.firedown.ffmpegutils.FFmpegGifMaker {
+	private <methods>;
+    public <methods>;
+    *** mNativeGifMaker;
 }
 
 -keepclassmembers class com.solarized.firedown.ffmpegutils.FFmpegDownloader {

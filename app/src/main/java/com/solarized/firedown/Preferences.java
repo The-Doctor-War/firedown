@@ -63,6 +63,8 @@ public class Preferences {
 
     public static final String SETTINGS_ANTI_TRACKING_STRIP_LIST = "com.solarized.firedown.preferences.browser.tracking.strip.list";
 
+    public static final String SETTINGS_ANTI_TRACKING_USER_PARAMS = "com.solarized.firedown.preferences.browser.tracking.strip.user.params";
+
     // Default tracking query parameter strip list. Whitespace-separated.
     // Union of Brave's curated kSimpleQueryStringTrackers
     // (brave-core/components/query_filter/browser/utils.cc), Firefox's

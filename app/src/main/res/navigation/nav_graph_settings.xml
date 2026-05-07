@@ -100,7 +100,18 @@
         android:name="com.solarized.firedown.settings.LockFragment" />
     <fragment
         android:id="@+id/settings_tracking"
-        android:name="com.solarized.firedown.settings.TrackingFragment" />
+        android:name="com.solarized.firedown.settings.TrackingFragment">
+        <action
+            android:id="@+id/action_tracking_to_query_params"
+            app:destination="@id/settings_query_params"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+    <fragment
+        android:id="@+id/settings_query_params"
+        android:name="com.solarized.firedown.settings.QueryParamsFragment" />
     <fragment
         android:id="@+id/settings_license"
         android:name="com.solarized.firedown.settings.LicenseFragment" />

@@ -248,6 +248,59 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/blocked_trackers_card"
+        style="@style/Widget.Material3.CardView.Filled"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:id="@+id/blocked_trackers_title"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:paddingBottom="8dp"
+                android:text="@string/blocked_trackers_title"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="15sp" />
+
+            <include
+                android:id="@+id/row_cross_site_cookies"
+                layout="@layout/item_blocked_tracker_row" />
+
+            <include
+                android:id="@+id/row_social_media"
+                layout="@layout/item_blocked_tracker_row" />
+
+            <include
+                android:id="@+id/row_fingerprinters"
+                layout="@layout/item_blocked_tracker_row" />
+
+            <include
+                android:id="@+id/row_cryptominers"
+                layout="@layout/item_blocked_tracker_row" />
+
+            <include
+                android:id="@+id/row_tracking_content"
+                layout="@layout/item_blocked_tracker_row" />
+
+        </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/host_secure"

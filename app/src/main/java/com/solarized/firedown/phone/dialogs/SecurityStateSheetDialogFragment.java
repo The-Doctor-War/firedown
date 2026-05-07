@@ -25,10 +25,13 @@ import com.solarized.firedown.data.models.GeckoStateViewModel;
 import com.solarized.firedown.data.models.IncognitoStateViewModel;
 import com.solarized.firedown.geckoview.GeckoResources;
 import com.solarized.firedown.geckoview.GeckoState;
+import com.solarized.firedown.geckoview.TrackingCategory;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.utils.NavigationUtils;
 import com.solarized.firedown.utils.UrlStringUtils;
 import com.solarized.firedown.utils.WebUtils;
+
+import java.util.Map;
 
 public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFragment
         implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -44,6 +47,12 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
     private TextView mHostText;
     private View mHostCert;
     private AppCompatImageView mTrackingIcon;
+    private View mBlockedTrackersCard;
+    private View mRowCrossSiteCookies;
+    private View mRowSocialMedia;
+    private View mRowFingerprinters;
+    private View mRowCryptominers;
+    private View mRowTrackingContent;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,6 +95,23 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         mAdsSwitch = mView.findViewById(R.id.ads_toogle);
         mHostText = mView.findViewById(R.id.host_secure_text);
         mHostCert = mView.findViewById(R.id.host_secure);
+        mBlockedTrackersCard = mView.findViewById(R.id.blocked_trackers_card);
+        mRowCrossSiteCookies = mView.findViewById(R.id.row_cross_site_cookies);
+        mRowSocialMedia = mView.findViewById(R.id.row_social_media);
+        mRowFingerprinters = mView.findViewById(R.id.row_fingerprinters);
+        mRowCryptominers = mView.findViewById(R.id.row_cryptominers);
+        mRowTrackingContent = mView.findViewById(R.id.row_tracking_content);
+
+        bindBlockedRow(mRowCrossSiteCookies, R.drawable.cookie_24,
+                R.string.blocked_trackers_cross_site_cookies);
+        bindBlockedRow(mRowSocialMedia, R.drawable.ic_shield_person_24,
+                R.string.blocked_trackers_social_media);
+        bindBlockedRow(mRowFingerprinters, R.drawable.fingerprint_24,
+                R.string.blocked_trackers_fingerprinters);
+        bindBlockedRow(mRowCryptominers, R.drawable.ic_memory_24,
+                R.string.blocked_trackers_cryptominers);
+        bindBlockedRow(mRowTrackingContent, R.drawable.footprint_24,
+                R.string.blocked_trackers_tracking_content);
 
         mTrackingSwitch.setOnCheckedChangeListener(this);
         mAdsSwitch.setOnCheckedChangeListener(this);
@@ -154,7 +180,61 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
 
         updateTrackingUI(trackingEnabled);
 
+        // Per-page blocked-trackers breakdown. The repository's LiveData
+        // is "current tab's counts" but it can carry a stale value from
+        // whichever tab last emitted before this one was activated, so
+        // ask the ViewModel to re-emit the snapshot for *this* tab
+        // before subscribing.
+        if (mIsIncognito) {
+            mIncognitoStateViewModel.refreshBlockedTrackerCounts();
+            mIncognitoStateViewModel.getBlockedTrackerCounts()
+                    .observe(getViewLifecycleOwner(), this::renderBlockedTrackerCounts);
+        } else {
+            mGeckoStateViewModel.refreshBlockedTrackerCounts();
+            mGeckoStateViewModel.getBlockedTrackerCounts()
+                    .observe(getViewLifecycleOwner(), this::renderBlockedTrackerCounts);
+        }
+
         return mView;
+    }
+
+
+    private void bindBlockedRow(View row, int iconRes, int labelRes) {
+        if (row == null) return;
+        AppCompatImageView icon = row.findViewById(R.id.row_icon);
+        TextView label = row.findViewById(R.id.row_label);
+        if (icon != null) icon.setImageResource(iconRes);
+        if (label != null) label.setText(labelRes);
+    }
+
+
+    private void renderBlockedTrackerCounts(Map<TrackingCategory, Integer> counts) {
+        if (mBlockedTrackersCard == null) return;
+        if (counts == null || counts.isEmpty()) {
+            mBlockedTrackersCard.setVisibility(View.GONE);
+            return;
+        }
+        mBlockedTrackersCard.setVisibility(View.VISIBLE);
+        applyRow(mRowCrossSiteCookies, counts.get(TrackingCategory.CROSS_SITE_COOKIES));
+        applyRow(mRowSocialMedia,      counts.get(TrackingCategory.SOCIAL_MEDIA));
+        applyRow(mRowFingerprinters,   counts.get(TrackingCategory.FINGERPRINTERS));
+        applyRow(mRowCryptominers,     counts.get(TrackingCategory.CRYPTOMINERS));
+        applyRow(mRowTrackingContent,  counts.get(TrackingCategory.TRACKING_CONTENT));
+    }
+
+
+    private void applyRow(View row, Integer count) {
+        if (row == null) return;
+        int n = count == null ? 0 : count;
+        // Hide categories with zero blocks — keeps the panel from looking
+        // padded with placeholders on pages where only one category fired.
+        if (n <= 0) {
+            row.setVisibility(View.GONE);
+            return;
+        }
+        row.setVisibility(View.VISIBLE);
+        TextView countView = row.findViewById(R.id.row_count);
+        if (countView != null) countView.setText(String.valueOf(n));
     }
 
 
@@ -250,6 +330,12 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         mAdsCounterTextView = null;
         mTrackingIcon = null;
         mTrackingSubtext = null;
+        mBlockedTrackersCard = null;
+        mRowCrossSiteCookies = null;
+        mRowSocialMedia = null;
+        mRowFingerprinters = null;
+        mRowCryptominers = null;
+        mRowTrackingContent = null;
         mView = null;
     }
 }

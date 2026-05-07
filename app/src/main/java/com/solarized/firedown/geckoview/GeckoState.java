@@ -13,6 +13,10 @@ import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoSessionSettings;
 import org.mozilla.geckoview.WebResponse;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
+
 public class GeckoState {
 
     private static final String TAG = GeckoState.class.getSimpleName();
@@ -36,6 +40,15 @@ public class GeckoState {
     private ContextElementEntity mContextElementEntity;
 
     private final GeckoStateEntity mGeckoStateEntity;
+
+    /**
+     * Per-page running counts of trackers blocked by GeckoView's
+     * ContentBlocking pipeline, bucketed via {@link TrackingCategory}.
+     * Reset on each {@code ProgressDelegate.onPageStart}; consumed by
+     * the security bottom sheet to surface what protection actually did.
+     */
+    private final EnumMap<TrackingCategory, Integer> mBlockedTrackerCounts =
+            new EnumMap<>(TrackingCategory.class);
 
     public GeckoState(GeckoStateEntity geckoStateEntity){
         mGeckoStateEntity = geckoStateEntity;
@@ -387,6 +400,49 @@ public class GeckoState {
     public WebResponse getWebResponse() {
         return mWebResponse;
     }
+
+    /**
+     * Increment the bucket matching {@code antiTrackingMask}, returning
+     * {@code true} if the count actually changed (the mask resolved to
+     * a tracked category). Lets the caller decide whether to bother
+     * notifying observers.
+     */
+    public boolean incrementBlockedTracker(int antiTrackingMask) {
+        TrackingCategory category = TrackingCategory.fromAntiTrackingMask(antiTrackingMask);
+        if (category == null) return false;
+        Integer current = mBlockedTrackerCounts.get(category);
+        mBlockedTrackerCounts.put(category, current == null ? 1 : current + 1);
+        return true;
+    }
+
+    /**
+     * Cross-site cookie rejections come through a different field on
+     * {@code ContentBlocking.BlockEvent} ({@code getCookieBehaviorCategory})
+     * and need their own bucket so the visible count matches what users
+     * intuit by "cross-site cookies blocked".
+     */
+    public boolean incrementBlockedCookie() {
+        Integer current = mBlockedTrackerCounts.get(TrackingCategory.CROSS_SITE_COOKIES);
+        mBlockedTrackerCounts.put(TrackingCategory.CROSS_SITE_COOKIES,
+                current == null ? 1 : current + 1);
+        return true;
+    }
+
+    public void resetBlockedTrackerCounts() {
+        mBlockedTrackerCounts.clear();
+    }
+
+    /**
+     * @return an unmodifiable snapshot suitable for passing to LiveData;
+     * keys present in the map have non-zero counts.
+     */
+    public Map<TrackingCategory, Integer> getBlockedTrackerCountsSnapshot() {
+        if (mBlockedTrackerCounts.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(new EnumMap<>(mBlockedTrackerCounts));
+    }
+
 
     public void setCachedThumb(Bitmap bitmap) {
         mCachedThumb = bitmap;

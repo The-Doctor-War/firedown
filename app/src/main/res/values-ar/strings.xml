@@ -181,6 +181,12 @@
     <string name="quick_settings_sheet_insecure_connection_2">الاتصال غير آمن</string>
     <string name="quick_settings_sheet_secure_connection_2">الاتصال آمن</string>
     <string name="quick_settings_sheet_tracking_site_title">الحماية من التتبع على هذا الموقع</string>
+    <string name="blocked_trackers_title">محظور في هذه الصفحة</string>
+    <string name="blocked_trackers_cross_site_cookies">ملفات تعريف الارتباط للتتبع عبر المواقع</string>
+    <string name="blocked_trackers_social_media">متعقبو وسائل التواصل الاجتماعي</string>
+    <string name="blocked_trackers_fingerprinters">أدوات بصمات الجهاز</string>
+    <string name="blocked_trackers_cryptominers">أدوات تعدين العملات المشفرة</string>
+    <string name="blocked_trackers_tracking_content">محتوى التتبع</string>
     <string name="quit_application">يُغلَق التطبيق الآن لتطبيق التغييرات…</string>
     <string name="remove_top_site">أزِل</string>
     <string name="rename">إعادة تسمية</string>

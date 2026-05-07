@@ -52,7 +52,9 @@ public class Preferences {
     public static final String SETTINGS_ENABLE_RESIST_FINGERPRINTING = "com.solarized.firedown.preferences.browser.enable.resist.fingerprinting";
 
     public static final String SETTINGS_ENABLE_WEBRTC = "com.solarized.firedown.preferences.browser.enable.webrtc";
-    
+
+    public static final String SETTINGS_DISABLE_DRM = "com.solarized.firedown.preferences.browser.disable.drm";
+
     public static final String SETTINGS_ANTI_TRACKING = "com.solarized.firedown.preferences.browser.tracking";
 
     public static final String SETTINGS_ANTI_TRACKING_DEFAULT = "com.solarized.firedown.preferences.browser.tracking.default";

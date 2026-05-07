@@ -408,6 +408,8 @@
     <string name="settings_version">バージョン</string>
     <string name="settings_webgl_disabled">WebGLを無効にする</string>
     <string name="settings_webgl_disabled_summary">GPUフィンガープリントを防止、3Dコンテンツが動作しない場合があります</string>
+    <string name="settings_drm_disabled">DRM 再生を無効にする</string>
+    <string name="settings_drm_disabled_summary">Widevine と DRM のアクセス許可ダイアログを無効にします。DRM が必要なサイト（Netflix、Spotify など）は再生できません</string>
     <string name="settings_webrtc_enabled">WebRTCを有効にする</string>
     <string name="settings_webrtc_enabled_summary">P2P通話に必要、実IPアドレスが漏れる可能性があります</string>
     <string name="share">共有</string>

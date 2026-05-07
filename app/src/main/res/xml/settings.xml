@@ -163,6 +163,15 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            android:key="com.solarized.firedown.preferences.browser.disable.drm"
+            android:summary="@string/settings_drm_disabled_summary"
+            android:title="@string/settings_drm_disabled"
+            app:icon="@drawable/ic_movie_24"
+            app:singleLineTitle="false" />
+
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
             android:key="com.solarized.firedown.preferences.browser.enable.webrtc"
             android:summary="@string/settings_webrtc_enabled_summary"
             android:title="@string/settings_webrtc_enabled"

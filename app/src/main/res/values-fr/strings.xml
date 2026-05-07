@@ -408,6 +408,8 @@
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">Désactiver WebGL</string>
     <string name="settings_webgl_disabled_summary">Bloque le fingerprinting GPU, peut casser les contenus 3D</string>
+    <string name="settings_drm_disabled">Désactiver la lecture DRM</string>
+    <string name="settings_drm_disabled_summary">Bloque Widevine et l\'invite d\'autorisation DRM ; les sites nécessitant le DRM (Netflix, Spotify, …) ne fonctionneront pas</string>
     <string name="settings_webrtc_enabled">Activer WebRTC</string>
     <string name="settings_webrtc_enabled_summary">Nécessaire pour les appels P2P, peut révéler votre IP réelle</string>
     <string name="share">Partager</string>

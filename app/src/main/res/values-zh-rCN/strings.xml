@@ -408,6 +408,8 @@
     <string name="settings_version">版本</string>
     <string name="settings_webgl_disabled">禁用 WebGL</string>
     <string name="settings_webgl_disabled_summary">阻止GPU指纹识别，可能影响3D内容</string>
+    <string name="settings_drm_disabled">禁用 DRM 播放</string>
+    <string name="settings_drm_disabled_summary">阻止 Widevine 和 DRM 权限请求；需要 DRM 的网站（Netflix、Spotify 等）将无法播放</string>
     <string name="settings_webrtc_enabled">启用 WebRTC</string>
     <string name="settings_webrtc_enabled_summary">P2P通话所需，可能泄露你的真实IP</string>
     <string name="share">分享</string>

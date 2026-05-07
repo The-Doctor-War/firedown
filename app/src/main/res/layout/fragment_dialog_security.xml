@@ -185,7 +185,9 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp">
 
                 <View
                     android:id="@+id/tracking_middle"
@@ -230,7 +232,6 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginStart="16dp"
                     android:layout_marginEnd="16dp"
-                    android:paddingBottom="12dp"
                     android:maxLines="2"
                     android:text="@string/protection_panel_etp_toggle_enabled_description_2"
                     android:textColor="?attr/colorOnSurfaceVariant"

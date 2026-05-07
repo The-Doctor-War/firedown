@@ -72,6 +72,13 @@ struct Thumbnail{
      * a global ref sized to the largest seen request and reuse it. */
     jbyteArray read_buf;
     int read_buf_size;
+
+    /* Optional target dimensions. When both > 0, create_thumbnail scales
+     * the output to fit-within target preserving aspect ratio (downscale
+     * only — never enlarges). Zero means "no hint, use codec dimensions",
+     * preserving the original behavior for callers that don't set this. */
+    int target_width;
+    int target_height;
 };
 
 
@@ -229,6 +236,30 @@ int create_thumbnail(JNIEnv *env, jobject thiz, struct Thumbnail *thumbnail, AVF
 
     thumbnail_wdith = codec_ctx->width;
     thumbnail_height = codec_ctx->height;
+
+    /* If a target size hint was set from Java, downscale to fit-within
+     * preserving aspect ratio. sws_scale already does the work; we just
+     * change the destination dims so the destination buffer + bitmap are
+     * allocated at the smaller size and one less full-res bitmap copy
+     * happens. We never enlarge — small sources stay as-is. */
+    if (thumbnail->target_width > 0 && thumbnail->target_height > 0
+            && thumbnail_wdith > 0 && thumbnail_height > 0) {
+        double scale_w = (double) thumbnail->target_width  / (double) thumbnail_wdith;
+        double scale_h = (double) thumbnail->target_height / (double) thumbnail_height;
+        double scale = scale_w < scale_h ? scale_w : scale_h;
+        if (scale < 1.0) {
+            int new_w = (int) (thumbnail_wdith  * scale);
+            int new_h = (int) (thumbnail_height * scale);
+            /* Round down to even dims — friendlier to the YUV pipelines
+             * sws_scale uses internally, and avoids odd-line artefacts. */
+            new_w &= ~1;
+            new_h &= ~1;
+            if (new_w >= 2 && new_h >= 2) {
+                thumbnail_wdith = new_w;
+                thumbnail_height = new_h;
+            }
+        }
+    }
 
     LOGI(3, "create_thumbnail width: %d, height: %d, pix_fmt: %d", frame->linesize[0], frame->linesize[1], frame->linesize[2]);
 
@@ -504,6 +535,19 @@ struct Thumbnail *thumbnail_get_thumbnailer_field(JNIEnv *env, jobject thiz) {
     jlong pointer = (*env)->GetLongField(env, thiz, thumbnail_m_native_thumbnailer_field);
 
     return (struct Thumbnail *) pointer;
+}
+
+
+void jni_set_target_size(JNIEnv *env, jobject thiz, jint width, jint height) {
+
+    struct Thumbnail *thumbnail = thumbnail_get_thumbnailer_field(env, thiz);
+
+    if (thumbnail == NULL) {
+        return;
+    }
+
+    thumbnail->target_width  = (int) width;
+    thumbnail->target_height = (int) height;
 }
 
 

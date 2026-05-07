@@ -22,6 +22,7 @@ int jni_extract_bitmap_setdata_source(JNIEnv * env, jobject thiz, jstring uri, j
 int jni_extract_bitmap_setdata_source_inputstream(JNIEnv * env, jobject thiz, jobject stream, jobject dict);
 int jni_extract_bitmap_setdata_source_fd(JNIEnv * env, jobject thiz, jobject jdescriptor, jobject dict);
 int jni_init_thumbnailer(JNIEnv* env, jobject thiz);
+void jni_set_target_size(JNIEnv *env, jobject thiz, jint width, jint height);
 
 
 static char *thumbnail_runnable_class_path_name = "com/solarized/firedown/ffmpegutils/FFmpegThumbnailer";
@@ -39,6 +40,7 @@ static JNINativeMethod thumbnail_methods[] = {
 		{"bitmapSetDataSourceInputStream", "(Ljava/io/InputStream;Ljava/util/Map;)I", (void*) jni_extract_bitmap_setdata_source_inputstream},
 		{"bitmapSetDataSourceFileDescriptor", "(Ljava/io/FileDescriptor;Ljava/util/Map;)I", (void*) jni_extract_bitmap_setdata_source_fd},
 		{"bitmapExtract", "(J)I", (void*) jni_extract_bitmap},
+		{"setTargetSize", "(II)V", (void*) jni_set_target_size},
 		{"deallocThumbnailer", "()V", (void*) jni_dealloc_thumbnailer},
 };
 

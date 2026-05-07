@@ -29,8 +29,12 @@ public class DownloadEntityUriModelLoader implements ModelLoader<DownloadEntity,
     @Nullable
     @Override
     public LoadData<Uri> buildLoadData(@NonNull DownloadEntity downloadEntity, int width, int height, @NonNull Options options) {
-
-        return new LoadData<>(new ObjectKey(downloadEntity), new DownloadEnitityDataFetcher(downloadEntity));
+        // See DownloadEntityModelLoader for the rationale: ObjectKey hashes
+        // through Object.toString(), which on DownloadEntity is identity-based
+        // and changes every process restart, defeating Glide's disk cache.
+        return new LoadData<>(
+                new ObjectKey("download_entity:" + downloadEntity.getId()),
+                new DownloadEnitityDataFetcher(downloadEntity));
     }
 
     @Override

@@ -365,6 +365,14 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
     protected void configureRecyclerView(DownloadItemAdapter adapter, boolean isGrid) {
         if (mRecyclerView == null) return;
 
+        // RecyclerView's own size doesn't depend on adapter contents (it's
+        // match_parent in the layout). Telling it so skips extra measure passes.
+        mRecyclerView.setHasFixedSize(true);
+        // Default off-screen view cache is 2; bumping it means a quick
+        // scroll-back doesn't re-bind (and re-trigger Glide loads) for the
+        // rows that just left the viewport.
+        mRecyclerView.setItemViewCacheSize(8);
+
         // 1. Get or Create LayoutManager
         int spans = getResources().getInteger(isGrid ? R.integer.image_grid_number : R.integer.image_list_number);
 

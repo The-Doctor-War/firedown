@@ -30,8 +30,15 @@ public class DownloadEntityModelLoader implements ModelLoader<DownloadEntity, Pa
     @Nullable
     @Override
     public LoadData<ParcelFileDescriptor> buildLoadData(@NonNull DownloadEntity downloadEntity, int width, int height, @NonNull Options options) {
-
-        return new LoadData<>(new ObjectKey(downloadEntity), new DownloadEnitityDataFetcher(downloadEntity));
+        // ObjectKey hashes via object.toString().getBytes(). DownloadEntity does
+        // not override toString(), so Object.toString() includes
+        // System.identityHashCode — a per-process value that differs every cold
+        // start, causing Glide's RESOURCE disk cache to never hit. Use a stable
+        // string key derived from the row id; the per-frame ".signature(...)"
+        // applied at the call site discriminates regenerate-thumbnail changes.
+        return new LoadData<>(
+                new ObjectKey("download_entity:" + downloadEntity.getId()),
+                new DownloadEnitityDataFetcher(downloadEntity));
     }
 
     @Override

@@ -96,6 +96,15 @@ public class FFmpegUriDecoder implements ResourceDecoder<Uri, Bitmap> {
                 throw new IOException("FFmpegThumbnailer setDataSource error");
             }
 
+            // Tell the native side our target size up front so sws_scale
+            // produces a smaller bitmap directly, instead of allocating at
+            // codec resolution and letting us re-scale in Java. The hint is
+            // a "fit-within" cap preserving aspect ratio; if the source is
+            // already smaller, native ignores it.
+            if (outWidth > 0 && outHeight > 0) {
+                mFFmepgThumbnailer.setTargetSizeHint(outWidth, outHeight);
+            }
+
             Bitmap bitmap = mFFmepgThumbnailer.getBitmap(length);
 
             if (bitmap == null) {
@@ -119,6 +128,14 @@ public class FFmpegUriDecoder implements ResourceDecoder<Uri, Bitmap> {
             int decodeWidth = Math.round(scaleFactor * originalWidth);
 
             int decodeHeight = Math.round(scaleFactor * originalHeight);
+
+            // Native may have already produced a bitmap at (or below) the
+            // requested size via the target-size hint. Skip the no-op
+            // re-scale — getResizedBitmap unconditionally allocates a new
+            // Bitmap and recycles the input.
+            if (decodeWidth == originalWidth && decodeHeight == originalHeight) {
+                return BitmapResource.obtain(bitmap, mBitmapPool);
+            }
 
             Bitmap resizedBitmap = BitmapUtils.getResizedBitmap(bitmap, decodeWidth, decodeHeight);
 

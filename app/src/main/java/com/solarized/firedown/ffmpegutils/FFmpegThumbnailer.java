@@ -73,6 +73,19 @@ public class FFmpegThumbnailer {
         return mBitmap;
     }
 
+    /**
+     * Hint the maximum output dimensions. The native side scales down to fit
+     * within (width, height) preserving aspect ratio. Pass 0 to disable the
+     * hint and fall back to the codec's full resolution. Must be called
+     * before {@link #getBitmap(long)}.
+     */
+    public void setTargetSizeHint(int width, int height) {
+        if(!SUPPORTED){
+            return;
+        }
+        setTargetSize(width, height);
+    }
+
     public void release(){
         try{
             if(mInputStream != null){
@@ -206,6 +219,8 @@ public class FFmpegThumbnailer {
     private native int initThumbnailer();
 
     private native void deallocThumbnailer();
+
+    private native void setTargetSize(int width, int height);
 
 
 }

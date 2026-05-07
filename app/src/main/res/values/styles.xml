@@ -330,6 +330,18 @@
     </style>
 
 
+    <!-- Hairline divider that sits between rows of a Material3 filled
+         card. Insets so the line stops at the same start/end as the
+         text content above and below it. -->
+    <style name="Firedown.Divider.InCard">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">1dp</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:layout_marginEnd">16dp</item>
+        <item name="android:background">?attr/colorOutlineVariant</item>
+    </style>
+
+
     <style name="Theme.FireDown.Play.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
         <!-- Customize color of navigation drawer icon and back arrow -->
         <item name="colorOnPrimary">@color/white</item>

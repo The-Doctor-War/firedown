@@ -50,7 +50,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
     private TextView mHostText;
     private View mHostCert;
     private AppCompatImageView mTrackingIcon;
-    private View mBlockedTrackersSeparator;
+    private View mBlockedTrackersSection;
     private View mBlockedTrackersSummaryRow;
     private TextView mBlockedTrackersSummaryText;
     private AppCompatImageView mBlockedTrackersChevron;
@@ -104,7 +104,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         mAdsSwitch = mView.findViewById(R.id.ads_toogle);
         mHostText = mView.findViewById(R.id.host_secure_text);
         mHostCert = mView.findViewById(R.id.host_secure);
-        mBlockedTrackersSeparator = mView.findViewById(R.id.blocked_trackers_separator);
+        mBlockedTrackersSection = mView.findViewById(R.id.blocked_trackers_section);
         mBlockedTrackersSummaryRow = mView.findViewById(R.id.blocked_trackers_summary_row);
         mBlockedTrackersSummaryText = mView.findViewById(R.id.blocked_trackers_summary_text);
         mBlockedTrackersChevron = mView.findViewById(R.id.blocked_trackers_chevron);
@@ -224,7 +224,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
 
 
     private void renderBlockedTrackerCounts(Map<TrackingCategory, Integer> counts) {
-        if (mBlockedTrackersSummaryRow == null) return;
+        if (mBlockedTrackersSection == null) return;
 
         int total = 0;
         if (counts != null) {
@@ -240,14 +240,11 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         // The toggle row above keeps showing the existing subtext in
         // both cases, so the dialog still has something useful in it.
         if (!mTrackingEnabledForSite || total == 0) {
-            mBlockedTrackersSeparator.setVisibility(View.GONE);
-            mBlockedTrackersSummaryRow.setVisibility(View.GONE);
-            mBlockedTrackersList.setVisibility(View.GONE);
+            mBlockedTrackersSection.setVisibility(View.GONE);
             return;
         }
 
-        mBlockedTrackersSeparator.setVisibility(View.VISIBLE);
-        mBlockedTrackersSummaryRow.setVisibility(View.VISIBLE);
+        mBlockedTrackersSection.setVisibility(View.VISIBLE);
         mBlockedTrackersSummaryText.setText(getResources().getQuantityString(
                 R.plurals.blocked_trackers_summary, total, total));
 
@@ -350,10 +347,8 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         // breakdown immediately — its counts are stale the moment we
         // stop applying ETP, and re-showing them would look like an
         // exception is still being protected.
-        if (!isEnabled && mBlockedTrackersSummaryRow != null) {
-            mBlockedTrackersSeparator.setVisibility(View.GONE);
-            mBlockedTrackersSummaryRow.setVisibility(View.GONE);
-            mBlockedTrackersList.setVisibility(View.GONE);
+        if (!isEnabled && mBlockedTrackersSection != null) {
+            mBlockedTrackersSection.setVisibility(View.GONE);
         }
     }
 
@@ -403,7 +398,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         mAdsCounterTextView = null;
         mTrackingIcon = null;
         mTrackingSubtext = null;
-        mBlockedTrackersSeparator = null;
+        mBlockedTrackersSection = null;
         mBlockedTrackersSummaryRow = null;
         mBlockedTrackersSummaryText = null;
         mBlockedTrackersChevron = null;

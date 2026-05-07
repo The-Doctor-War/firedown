@@ -15,161 +15,59 @@
         android:background="@drawable/dialog_rounded_divider" />
 
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <!-- Site header. Stays as a separate block above the controls card —
+         it's site identity, not a control, so distinct hierarchy. -->
+    <LinearLayout
         android:id="@+id/host_domain"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="16dp">
-
-        <View
-            android:id="@+id/host_middle"
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginBottom="16dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/host_image"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_marginEnd="16dp" />
 
-        <TextView
-            android:id="@+id/host"
-            style="@style/TextAppearance.Material3.TitleSmall.Emphasized"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:ellipsize="marquee"
-            android:maxLines="1"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintBottom_toTopOf="@id/host_middle"
-            app:layout_constraintStart_toEndOf="@id/host_image"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="CNN" />
-
-        <TextView
-            android:id="@+id/host_url"
-            style="@style/TextAppearance.Material3.BodyMedium"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
-            android:maxLines="1"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            app:layout_constraintStart_toEndOf="@id/host_image"
-            app:layout_constraintTop_toBottomOf="@id/host_middle"
-            app:layout_constraintEnd_toEndOf="parent"
-            tools:text="www.cnn.com" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-    <com.google.android.material.card.MaterialCardView
-        style="@style/Widget.Material3.CardView.Filled"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="horizontal">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <View
-                android:id="@+id/ads_middle"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/ads_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ads_click_24" />
+            android:layout_weight="1"
+            android:orientation="vertical">
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/security_ads"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="15sp"
-                app:layout_constraintBottom_toTopOf="@id/ads_middle"
-                app:layout_constraintEnd_toStartOf="@id/ads_toogle"
-                app:layout_constraintStart_toEndOf="@id/ads_icon" />
-
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/ads_toogle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-
-            <TextView
-                android:id="@+id/ads_subtext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:maxLines="2"
-                android:paddingBottom="16dp"
-                android:text="@string/security_blocked_in_this_page"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toStartOf="@id/ads_counter"
-                app:layout_constraintStart_toEndOf="@id/ads_icon"
-                app:layout_constraintTop_toBottomOf="@id/ads_middle" />
-
-
-            <TextView
-                android:id="@+id/ads_counter"
+                android:id="@+id/host"
                 style="@style/TextAppearance.Material3.TitleSmall.Emphasized"
-                android:layout_width="24dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:gravity="center"
-                android:layout_marginEnd="16dp"
-                android:layout_marginStart="8dp"
+                android:ellipsize="marquee"
                 android:maxLines="1"
-                android:background="@drawable/rounded_primary"
-                android:textColor="?attr/colorOnPrimaryContainer"
-                android:textSize="12sp"
-                android:paddingStart="4dp"
-                android:paddingEnd="4dp"
-                app:layout_constraintStart_toEndOf="@id/ads_subtext"
-                app:layout_constraintTop_toTopOf="@id/ads_subtext"/>
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="CNN" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/host_url"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="www.cnn.com" />
 
-    </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
 
+    </LinearLayout>
+
+
+    <!-- One filled card holds every per-site control. Sections are
+         separated by colorOutlineVariant rules instead of stacking
+         multiple elevated surfaces, matching Material3 list-in-card
+         guidance. -->
     <com.google.android.material.card.MaterialCardView
         style="@style/Widget.Material3.CardView.Filled"
         android:layout_width="match_parent"
@@ -183,203 +81,314 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="12dp"
-                android:paddingBottom="12dp">
 
-                <View
-                    android:id="@+id/tracking_middle"
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:layout_marginBottom="4dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/tracking_icon"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:layout_marginEnd="16dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/ic_shield_24" />
-
-                <TextView
-                    android:id="@+id/tracking_text"
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:text="@string/quick_settings_sheet_tracking_site_title"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
-                    app:layout_constraintBottom_toTopOf="@id/tracking_middle"
-                    app:layout_constraintEnd_toStartOf="@id/tracking_toogle"
-                    app:layout_constraintStart_toEndOf="@id/tracking_icon" />
-
-                <TextView
-                    android:id="@+id/tracking_subtext"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginEnd="16dp"
-                    android:maxLines="2"
-                    android:text="@string/protection_panel_etp_toggle_enabled_description_2"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="12sp"
-                    app:layout_constraintEnd_toStartOf="@id/tracking_toogle"
-                    app:layout_constraintStart_toEndOf="@id/tracking_icon"
-                    app:layout_constraintTop_toBottomOf="@id/tracking_middle" />
-
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/tracking_toogle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-            </androidx.constraintlayout.widget.ConstraintLayout>
-
-            <View
-                android:id="@+id/blocked_trackers_separator"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="?attr/colorOutlineVariant"
-                android:visibility="gone" />
-
+            <!-- Connection status. Tap to open the cert details. -->
             <LinearLayout
-                android:id="@+id/blocked_trackers_summary_row"
+                android:id="@+id/host_secure"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
                 android:paddingStart="16dp"
-                android:paddingEnd="8dp"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                android:visibility="gone">
+                android:paddingEnd="16dp">
 
                 <TextView
-                    android:id="@+id/blocked_trackers_summary_text"
+                    android:id="@+id/host_secure_text"
+                    style="@style/TextAppearance.Material3.TitleMedium"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="13sp"
+                    android:drawablePadding="16dp"
                     android:maxLines="1"
-                    android:ellipsize="end" />
+                    android:ellipsize="end"
+                    android:text="@string/connection_secure"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="15sp"
+                    app:drawableStartCompat="@drawable/encryption_light_24" />
 
                 <androidx.appcompat.widget.AppCompatImageView
-                    android:id="@+id/blocked_trackers_chevron"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    app:srcCompat="@drawable/expand_more_24" />
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 
+            <View
+                style="@style/Firedown.Divider.InCard" />
+
+
+            <!-- Ads / uBlock counter + per-site toggle. -->
             <LinearLayout
-                android:id="@+id/blocked_trackers_list"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingBottom="6dp"
-                android:visibility="gone">
+                android:gravity="center_vertical"
+                android:minHeight="64dp"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
 
-                <include
-                    android:id="@+id/row_cross_site_cookies"
-                    layout="@layout/item_blocked_tracker_row" />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/ads_icon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="16dp"
+                    app:srcCompat="@drawable/ads_click_24" />
 
-                <include
-                    android:id="@+id/row_social_media"
-                    layout="@layout/item_blocked_tracker_row" />
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
 
-                <include
-                    android:id="@+id/row_fingerprinters"
-                    layout="@layout/item_blocked_tracker_row" />
+                    <TextView
+                        style="@style/TextAppearance.Material3.TitleMedium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/security_ads"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:textSize="15sp" />
 
-                <include
-                    android:id="@+id/row_cryptominers"
-                    layout="@layout/item_blocked_tracker_row" />
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                <include
-                    android:id="@+id/row_tracking_content"
-                    layout="@layout/item_blocked_tracker_row" />
+                        <TextView
+                            android:id="@+id/ads_subtext"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:maxLines="1"
+                            android:ellipsize="end"
+                            android:text="@string/security_blocked_in_this_page"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/ads_counter"
+                            style="@style/TextAppearance.Material3.TitleSmall.Emphasized"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="28dp"
+                            android:gravity="center"
+                            android:layout_marginStart="8dp"
+                            android:background="@drawable/rounded_primary"
+                            android:maxLines="1"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingTop="2dp"
+                            android:paddingBottom="2dp"
+                            android:textColor="?attr/colorOnPrimaryContainer"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/ads_toogle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp" />
+
+            </LinearLayout>
+
+            <View
+                style="@style/Firedown.Divider.InCard" />
+
+
+            <!-- Tracking-protection section. Toggle row at top, then an
+                 expandable per-page breakdown that lights up only when
+                 ETP is on AND something has actually been blocked. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:minHeight="64dp"
+                    android:orientation="horizontal"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/tracking_icon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="16dp"
+                        app:srcCompat="@drawable/ic_shield_24" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tracking_text"
+                            style="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/quick_settings_sheet_tracking_site_title"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="15sp" />
+
+                        <TextView
+                            android:id="@+id/tracking_subtext"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:maxLines="2"
+                            android:text="@string/protection_panel_etp_toggle_enabled_description_2"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:textSize="12sp" />
+
+                    </LinearLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/tracking_toogle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp" />
+
+                </LinearLayout>
+
+                <!-- Visually distinct expandable region. Sits on
+                     colorSurfaceContainerHighest so the breakdown reads
+                     as a sub-area of the tracking row above, not just
+                     more list items. Hidden until counts > 0. -->
+                <LinearLayout
+                    android:id="@+id/blocked_trackers_section"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorSurfaceContainerHighest"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <View
+                        android:id="@+id/blocked_trackers_separator"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="?attr/colorOutlineVariant" />
+
+                    <LinearLayout
+                        android:id="@+id/blocked_trackers_summary_row"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp">
+
+                        <TextView
+                            android:id="@+id/blocked_trackers_summary_text"
+                            style="@style/TextAppearance.Material3.LabelLarge"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <androidx.appcompat.widget.AppCompatImageView
+                            android:id="@+id/blocked_trackers_chevron"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="8dp"
+                            app:srcCompat="@drawable/expand_more_24"
+                            app:tint="?attr/colorOnSurfaceVariant" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/blocked_trackers_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:paddingBottom="8dp"
+                        android:visibility="gone">
+
+                        <include
+                            android:id="@+id/row_cross_site_cookies"
+                            layout="@layout/item_blocked_tracker_row" />
+
+                        <include
+                            android:id="@+id/row_social_media"
+                            layout="@layout/item_blocked_tracker_row" />
+
+                        <include
+                            android:id="@+id/row_fingerprinters"
+                            layout="@layout/item_blocked_tracker_row" />
+
+                        <include
+                            android:id="@+id/row_cryptominers"
+                            layout="@layout/item_blocked_tracker_row" />
+
+                        <include
+                            android:id="@+id/row_tracking_content"
+                            layout="@layout/item_blocked_tracker_row" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <View
+                style="@style/Firedown.Divider.InCard" />
+
+
+            <!-- Clear cookies / site data for this hostname. -->
+            <LinearLayout
+                android:id="@+id/host_clear"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp">
+
+                <TextView
+                    style="@style/TextAppearance.Material3.TitleMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawablePadding="16dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:text="@string/settings_clear_browsing"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="15sp"
+                    app:drawableStartCompat="@drawable/ic_baseline_delete_24" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 
         </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/host_secure"
-        style="@style/Widget.Material3.CardView.Filled"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/host_secure_text"
-            style="@style/TextAppearance.Material3.TitleMedium"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="@dimen/list_spacing"
-            android:layout_marginEnd="@dimen/list_spacing"
-            android:drawablePadding="16dp"
-            android:text="@string/connection_secure"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp"
-            app:drawableStartCompat="@drawable/encryption_light_24" />
-
-    </com.google.android.material.card.MaterialCardView>
-
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/host_clear"
-        style="@style/Widget.Material3.CardView.Filled"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="horizontal">
-
-        <TextView
-            style="@style/TextAppearance.Material3.TitleMedium"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="@dimen/list_spacing"
-            android:layout_marginEnd="@dimen/list_spacing"
-            android:drawablePadding="16dp"
-            android:text="@string/settings_clear_browsing"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp"
-            app:drawableStartCompat="@drawable/ic_baseline_delete_24" />
-
 
     </com.google.android.material.card.MaterialCardView>
 

@@ -63,13 +63,26 @@ public class Preferences {
 
     public static final String SETTINGS_ANTI_TRACKING_STRIP_LIST = "com.solarized.firedown.preferences.browser.tracking.strip.list";
 
-    // Default tracking query parameter list, mirrored from Firefox's
-    // privacy.query_stripping.strip_list. Whitespace-separated.
+    // Default tracking query parameter strip list. Whitespace-separated.
+    // Union of Brave's curated kSimpleQueryStringTrackers
+    // (brave-core/components/query_filter/browser/utils.cc), Firefox's
+    // privacy.query_stripping.strip_list defaults, and standard utm_*
+    // campaign parameters. Conditional / host-scoped entries (mkt_tok,
+    // igsh on instagram, si on youtube, ...) are intentionally excluded
+    // — GeckoView's flat strip list cannot evaluate URL context, and
+    // stripping them globally would break legitimate flows like
+    // unsubscribe links.
     public static final String DEFAULT_QUERY_STRIP_LIST =
-            "__hsfp __hssc __hstc __s _hsenc _openstat dclid fbclid gbraid gclid hsCtaTracking " +
-            "igshid mc_eid ml_subscriber ml_subscriber_hash msclkid oft_c oft_ck oft_d oft_id " +
-            "oft_ids oft_k oft_lk oft_sk oly_anon_id oly_enc_id rb_clickid s_cid twclid vero_conv " +
-            "vero_id wbraid wickedid yclid utm_source utm_medium utm_campaign utm_term utm_content";
+            "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc " +
+            "_openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid " +
+            "et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer " +
+            "guce_referrer_sig hsCtaTracking igshid irclickid mc_eid ml_subscriber " +
+            "ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k " +
+            "oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer " +
+            "sc_eh sc_uid sfmc_activityid sfmc_id sms_click sms_source sms_uph srsltid " +
+            "ss_email_id syclid ttclid twclid unicorn_click_id utm_campaign utm_content " +
+            "utm_medium utm_source utm_term vero_conv vero_id vgo_ee wbraid wickedid yclid " +
+            "ymclid ysclid";
 
     public static final String SETTINGS_CLEAR_DATA = "com.solarized.firedown.preferences.browser.clear";
 

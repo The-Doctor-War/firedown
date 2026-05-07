@@ -6,12 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
-    <include
-        layout="@layout/dialog_drag_handle"
-        android:layout_width="60dp"
-        android:layout_height="4dp"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginBottom="0dp" />
+    <include layout="@layout/dialog_drag_handle" />
 
 
     <!-- Site header. Stays as a separate block above the controls card —

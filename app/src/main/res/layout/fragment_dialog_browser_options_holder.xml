@@ -4,13 +4,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <View
-        android:id="@+id/divider"
-        android:background="@drawable/dialog_rounded_divider"
-        android:layout_width="@dimen/divider_width"
-        android:layout_height="@dimen/divider_height"
-        android:layout_gravity="top|center_horizontal"
-        android:layout_marginTop="@dimen/divider_margin_top" />
+    <include layout="@layout/dialog_drag_handle" />
 
 
     <androidx.fragment.app.FragmentContainerView

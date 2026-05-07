@@ -12,14 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Drag handle -->
-        <View
-            android:id="@+id/divider"
-            android:background="@drawable/dialog_rounded_divider"
-            android:layout_width="60dp"
-            android:layout_height="4dp"
-            android:layout_marginTop="6dp"
-            android:layout_gravity="top|center_horizontal" />
+        <include layout="@layout/dialog_drag_handle" />
 
         <!-- ============================================================ -->
         <!-- Header: Security Status Banner                               -->

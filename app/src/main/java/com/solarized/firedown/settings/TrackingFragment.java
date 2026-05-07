@@ -1,14 +1,13 @@
 package com.solarized.firedown.settings;
 
 import android.os.Bundle;
-import android.text.InputType;
 
 import androidx.annotation.NonNull;
-import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
 import com.solarized.firedown.settings.ui.RadioButtonPreference;
+import dagger.hilt.android.AndroidEntryPoint;
 import org.mozilla.geckoview.ContentBlocking;
 
 import dagger.hilt.android.AndroidEntryPoint;
@@ -18,13 +17,16 @@ public class TrackingFragment extends BasePreferenceFragment implements Preferen
 
     private static final String TAG = TrackingFragment.class.getName();
 
+    private static final String KEY_STRIP_LIST_NAV =
+            "com.solarized.firedown.preferences.browser.tracking.strip.list.nav";
+
     private RadioButtonPreference mDefaultPreference;
 
     private RadioButtonPreference mStrictPreference;
 
     private RadioButtonPreference mCustomPreference;
 
-    private EditTextPreference mStripListPreference;
+    private Preference mStripListNavPreference;
 
 
     @Override
@@ -39,7 +41,7 @@ public class TrackingFragment extends BasePreferenceFragment implements Preferen
 
         mCustomPreference = getPreferenceScreen().findPreference(Preferences.SETTINGS_ANTI_TRACKING_CUSTOM);
 
-        mStripListPreference = getPreferenceScreen().findPreference(Preferences.SETTINGS_ANTI_TRACKING_STRIP_LIST);
+        mStripListNavPreference = getPreferenceScreen().findPreference(KEY_STRIP_LIST_NAV);
 
         mDefaultPreference.addToRadioGroup(mStrictPreference);
         mDefaultPreference.addToRadioGroup(mCustomPreference);
@@ -57,17 +59,9 @@ public class TrackingFragment extends BasePreferenceFragment implements Preferen
         if(mCustomPreference != null)
             mCustomPreference.setOnPreferenceClickListener(this);
 
-        if(mStripListPreference != null) {
-            mStripListPreference.setOnBindEditTextListener(editText -> {
-                editText.setInputType(InputType.TYPE_CLASS_TEXT
-                        | InputType.TYPE_TEXT_FLAG_MULTI_LINE
-                        | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
-                editText.setSingleLine(false);
-                editText.setMinLines(4);
-            });
-            mStripListPreference.setOnPreferenceChangeListener((preference, newValue) -> {
-                String raw = newValue == null ? "" : newValue.toString();
-                applyStripList(raw);
+        if(mStripListNavPreference != null) {
+            mStripListNavPreference.setOnPreferenceClickListener(p -> {
+                mNavController.navigate(R.id.action_tracking_to_query_params);
                 return true;
             });
         }
@@ -92,18 +86,10 @@ public class TrackingFragment extends BasePreferenceFragment implements Preferen
 
 
     private void updateStripListEnabled() {
-        if(mStripListPreference != null) {
-            mStripListPreference.setEnabled(
+        if(mStripListNavPreference != null) {
+            mStripListNavPreference.setEnabled(
                     mSharedPreferences.getBoolean(Preferences.SETTINGS_ANTI_TRACKING_CUSTOM, false));
         }
-    }
-
-
-    private void applyStripList(String raw) {
-        String trimmed = raw == null ? "" : raw.trim();
-        String[] list = trimmed.isEmpty() ? new String[0] : trimmed.split("\\s+");
-        mGeckoRuntimeHelper.getGeckoRuntime().getSettings().getContentBlocking()
-                .setQueryParameterStrippingStripList(list);
     }
 
 
@@ -128,9 +114,8 @@ public class TrackingFragment extends BasePreferenceFragment implements Preferen
             cb.setEnhancedTrackingProtectionLevel(ContentBlocking.EtpLevel.DEFAULT);
             cb.setQueryParameterStrippingEnabled(true);
             cb.setQueryParameterStrippingPrivateBrowsingEnabled(true);
-            applyStripList(mSharedPreferences.getString(
-                    Preferences.SETTINGS_ANTI_TRACKING_STRIP_LIST,
-                    Preferences.DEFAULT_QUERY_STRIP_LIST));
+            cb.setQueryParameterStrippingStripList(
+                    Preferences.getQueryParameterStripList(mSharedPreferences));
         }
         updateStripListEnabled();
         return false;

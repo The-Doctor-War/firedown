@@ -1,0 +1,19 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <EditTextPreference
+        android:key="com.solarized.firedown.preferences.browser.tracking.strip.add"
+        android:title="@string/settings_query_param_add"
+        android:summary="@string/settings_query_param_add_summary"
+        android:dialogTitle="@string/settings_query_param_add"
+        android:dialogMessage="@string/settings_query_param_add_message"
+        android:persistent="false"
+        app:icon="@drawable/add_24" />
+
+    <PreferenceCategory
+        android:key="com.solarized.firedown.preferences.browser.tracking.strip.category"
+        android:title="@string/settings_query_param_block_list" />
+
+
+</PreferenceScreen>

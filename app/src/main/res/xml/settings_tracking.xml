@@ -29,13 +29,10 @@
         app:icon="@drawable/ic_shield_person_24" />
 
 
-    <EditTextPreference
-        android:key="com.solarized.firedown.preferences.browser.tracking.strip.list"
+    <Preference
+        android:key="com.solarized.firedown.preferences.browser.tracking.strip.list.nav"
         android:title="@string/settings_query_param_block_list"
-        android:summary="@string/settings_query_param_block_list_description"
-        android:dialogTitle="@string/settings_query_param_block_list"
-        android:dialogMessage="@string/settings_query_param_block_list_dialog_message"
-        android:defaultValue="@string/default_query_strip_list" />
+        android:summary="@string/settings_query_param_block_list_description" />
 
 
 </PreferenceScreen>

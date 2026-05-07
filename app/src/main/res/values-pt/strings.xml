@@ -210,7 +210,16 @@
     <string name="settings_enhanced_tracking_protection_custom_description_1">Proteção padrão e remoção de parâmetros de rastreamento das URLs.</string>
     <string name="settings_query_param_block_list">Parâmetros de rastreamento</string>
     <string name="settings_query_param_block_list_description">Parâmetros removidos das URLs (por ex.: utm_source, fbclid). Ativo quando a proteção personalizada é selecionada.</string>
-    <string name="settings_query_param_block_list_dialog_message">Lista de parâmetros separados por espaços a remover das URLs.</string>
+    <string name="settings_query_param_add">Adicionar parâmetro</string>
+    <string name="settings_query_param_add_summary">Adicione um parâmetro de consulta personalizado para remover.</string>
+    <string name="settings_query_param_add_message">Digite um nome de parâmetro. Apenas letras, dígitos, ponto, traço e sublinhado.</string>
+    <string name="settings_query_param_add_hint">ex.: ref</string>
+    <string name="settings_query_param_user_summary">Mantenha pressionado para remover</string>
+    <string name="settings_query_param_invalid">Nome de parâmetro inválido.</string>
+    <string name="settings_query_param_already_exists">%1$s já está na lista.</string>
+    <string name="settings_query_param_remove_title">Remover parâmetro?</string>
+    <string name="settings_query_param_remove_message">Remover %1$s da lista?</string>
+    <string name="settings_query_param_remove_confirm">Remover</string>
     <string name="settings_exceptions">Exceções</string>
     <string name="settings_general">Em geral</string>
     <string name="settings_license">Licenças</string>

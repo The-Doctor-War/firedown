@@ -66,6 +66,8 @@ public class SettingsActivity extends BaseActivity {
                 mToolbar.setTitle(R.string.settings_doh_title);
             else if(id == R.id.settings_tracking)
                 mToolbar.setTitle(R.string.settings_enhanced_tracking_protection);
+            else if(id == R.id.settings_query_params)
+                mToolbar.setTitle(R.string.settings_query_param_block_list);
             else if(id == R.id.settings_search)
                 mToolbar.setTitle(R.string.settings_search_engine);
             else if(id == R.id.settings_donate)

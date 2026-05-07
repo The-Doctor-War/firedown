@@ -24,7 +24,15 @@ import androidx.navigation.NavDestination;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.google.android.material.snackbar.Snackbar;
+import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.R;
@@ -41,7 +49,11 @@ import com.solarized.firedown.ui.EqualSpacingItemDecoration;
 import com.solarized.firedown.ui.adapters.DownloadItemAdapter;
 import com.solarized.firedown.utils.NavigationUtils;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -63,6 +75,12 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
     protected GridLayoutManager mGridLayoutManager;
 
     protected boolean mEnableGrid;
+
+    /** RecyclerView that {@link #installThumbnailPreloader} last attached the
+     *  preload OnScrollListener to. configureRecyclerView() runs repeatedly on
+     *  grid/list toggle (don't double-attach), but rotation rebuilds the
+     *  fragment view and gives us a fresh RecyclerView (do attach again). */
+    private RecyclerView mPreloaderInstalledOn;
 
     protected boolean mPaused;
 
@@ -373,6 +391,8 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         // rows that just left the viewport.
         mRecyclerView.setItemViewCacheSize(8);
 
+        installThumbnailPreloader(adapter);
+
         // 1. Get or Create LayoutManager
         int spans = getResources().getInteger(isGrid ? R.integer.image_grid_number : R.integer.image_list_number);
 
@@ -411,6 +431,67 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
 
         // 3. Update Adapter state
         adapter.enableGrid(isGrid);
+    }
+
+
+    /**
+     * Warms Glide's memory cache 8 items ahead of the scroll direction so
+     * the FFmpeg-decoded video frames (and image / PDF / APK thumbnails)
+     * for rows about to enter the viewport are already in memory by the
+     * time {@code onBindViewHolder} fires. Big win for fast scroll-back
+     * after a long scroll: without preloading, the original top-row
+     * bitmaps have been LRU-evicted and bind has to redo the FFmpeg
+     * decode.
+     *
+     * No-op for non-thumbnail mime types — {@link GlideHelper#preloadDownload}
+     * returns null for those and the preloader skips them.
+     *
+     * Mirrors the BrowserOptionFragment pattern but keyed on the paging
+     * adapter's {@code peek(position)} rather than {@code getCurrentList()}
+     * (PagingDataAdapter doesn't expose the latter).
+     */
+    private void installThumbnailPreloader(DownloadItemAdapter adapter) {
+        if (mRecyclerView == null || mPreloaderInstalledOn == mRecyclerView) return;
+
+        RequestManager glide = Glide.with(this);
+        RequestOptions baseOptions = new RequestOptions();
+
+        RecyclerViewPreloader<DownloadEntity> preloader = new RecyclerViewPreloader<>(
+                glide,
+                new ListPreloader.PreloadModelProvider<DownloadEntity>() {
+                    @NonNull
+                    @Override
+                    public List<DownloadEntity> getPreloadItems(int position) {
+                        if (position < 0 || position >= adapter.getItemCount()) {
+                            return Collections.emptyList();
+                        }
+                        // peek() — like get() but never triggers placeholder
+                        // resolution, so it's safe from a scroll listener.
+                        Object item = adapter.peek(position);
+                        if (!(item instanceof DownloadEntity entity)) {
+                            return Collections.emptyList();
+                        }
+                        // Only finished downloads have a real thumbnail to
+                        // warm; in-progress / errored / queued rows render
+                        // a sync mime-type drawable in the bind path.
+                        if (entity.getFileStatus() != Download.FINISHED) {
+                            return Collections.emptyList();
+                        }
+                        return Collections.singletonList(entity);
+                    }
+
+                    @Nullable
+                    @Override
+                    public RequestBuilder<?> getPreloadRequestBuilder(@NonNull DownloadEntity entity) {
+                        return GlideHelper.preloadDownload(glide, entity, baseOptions);
+                    }
+                },
+                new FixedPreloadSizeProvider<>(
+                        GlideHelper.downloadThumbWidth(),
+                        GlideHelper.downloadThumbHeight()),
+                8);
+        mRecyclerView.addOnScrollListener(preloader);
+        mPreloaderInstalledOn = mRecyclerView;
     }
 
 

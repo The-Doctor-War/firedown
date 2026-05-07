@@ -241,6 +241,65 @@ public class GlideHelper {
         }
     }
 
+
+    /**
+     * Mirror of {@link #load(DownloadEntity, RequestOptions, AppCompatImageView)}'s
+     * Glide setup but without an ImageView target — for warming Glide's
+     * memory cache via RecyclerViewPreloader. Returns {@code null} when
+     * the load path renders a static drawable instead of a thumbnail
+     * (nothing to preload).
+     *
+     * Cache key + signature must match the load path exactly so the
+     * subsequent bind hits the warmed bitmap. Listener is omitted —
+     * preloads have no ImageView to apply a fallback drawable to.
+     */
+    @Nullable
+    public static RequestBuilder<?> preloadDownload(@NonNull RequestManager glide,
+                                                    @NonNull DownloadEntity entity,
+                                                    @NonNull RequestOptions requestOptions) {
+
+        String mimeType = entity.getFileMimeType();
+        long interval = entity.getThumbnailDuration();
+
+        RequestOptions options = requestOptions
+                .frame(interval)
+                .override(THUMB_WIDTH, THUMB_HEIGHT)
+                .set(GlideRequestOptions.FRAME, interval)
+                .set(GlideRequestOptions.MIMETYPE, mimeType)
+                .set(GlideRequestOptions.FILEPATH, entity.getFilePath());
+
+        if (FileUriHelper.isGIF(mimeType) || FileUriHelper.isWEP(mimeType) || FileUriHelper.isSVG(mimeType)) {
+            return glide.load(entity.getFilePath()).apply(options);
+        }
+
+        if (FileUriHelper.isImage(mimeType) || FileUriHelper.isPdf(mimeType)) {
+            return glide.load(entity).apply(options);
+        }
+
+        if (FileUriHelper.isVideo(mimeType)) {
+            return glide.load(entity)
+                    .signature(new ObjectKey(interval + entity.getFileUrl().hashCode()))
+                    .apply(options);
+        }
+
+        if (FileUriHelper.isApk(mimeType)) {
+            return glide.load(entity.getFilePath())
+                    .signature(new ObjectKey(entity.getId()))
+                    .apply(options);
+        }
+
+        return null;
+    }
+
+
+    public static int downloadThumbWidth() {
+        return THUMB_WIDTH;
+    }
+
+    public static int downloadThumbHeight() {
+        return THUMB_HEIGHT;
+    }
+
     // ── BrowserDownloadEntity thumbnail ─────────────────────────────────
 
     public static void load(BrowserDownloadEntity entity, RequestOptions requestOptions,

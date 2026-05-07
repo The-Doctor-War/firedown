@@ -270,6 +270,12 @@
     <string name="quick_settings_sheet_insecure_connection_2">Connexion non sécurisée</string>
     <string name="quick_settings_sheet_secure_connection_2">Connexion sécurisée</string>
     <string name="quick_settings_sheet_tracking_site_title">Protection de suivi sur ce site</string>
+    <string name="blocked_trackers_title">Bloqués sur cette page</string>
+    <string name="blocked_trackers_cross_site_cookies">Cookies de suivi intersites</string>
+    <string name="blocked_trackers_social_media">Traqueurs des réseaux sociaux</string>
+    <string name="blocked_trackers_fingerprinters">Détecteurs d\'empreintes</string>
+    <string name="blocked_trackers_cryptominers">Cryptomineurs</string>
+    <string name="blocked_trackers_tracking_content">Contenu de pistage</string>
     <string name="quit_application">Fermeture de l’application pour appliquer les modifications…</string>
     <string name="remove_top_site">Supprimer</string>
     <string name="rename">Renommer</string>

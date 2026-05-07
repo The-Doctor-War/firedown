@@ -23,6 +23,12 @@
     <string name="clipboard">Copiado para a área de transferência</string>
     <string name="connection_enhanced_protection">Proteção aprimorada contra rastreamento</string>
     <string name="quick_settings_sheet_tracking_site_title">Proteção de rastreamento neste site</string>
+    <string name="blocked_trackers_title">Bloqueados nesta página</string>
+    <string name="blocked_trackers_cross_site_cookies">Cookies de rastreamento entre sites</string>
+    <string name="blocked_trackers_social_media">Rastreadores de redes sociais</string>
+    <string name="blocked_trackers_fingerprinters">Identificadores digitais</string>
+    <string name="blocked_trackers_cryptominers">Criptomineradores</string>
+    <string name="blocked_trackers_tracking_content">Conteúdo de rastreamento</string>
     <string name="connection_secure">A conexão é segura</string>
     <string name="delete">Excluir</string>
     <string name="delete_all_bookmarks">Isso excluirá todos os dados dos seus favoritos.</string>

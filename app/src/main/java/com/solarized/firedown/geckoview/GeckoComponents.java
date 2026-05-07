@@ -776,9 +776,18 @@ public class GeckoComponents {
 
             geckoState.setInitialLoad(false);           // no longer a brand new tab
             geckoState.setFirstContentFulPaint(false);  // reset — new page hasn't painted yet
+            geckoState.resetBlockedTrackerCounts();     // counts are per-page
 
-            if(isCurrentGeckoState(geckoState))
+            if(isCurrentGeckoState(geckoState)) {
                 mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.START, geckoState);
+                if (geckoState.getGeckoStateEntity().isIncognito()) {
+                    mIncognitoStateRepository.postBlockedTrackerCounts(
+                            geckoState.getBlockedTrackerCountsSnapshot());
+                } else {
+                    mGeckoStateDataRepository.postBlockedTrackerCounts(
+                            geckoState.getBlockedTrackerCountsSnapshot());
+                }
+            }
 
         }
 
@@ -877,12 +886,38 @@ public class GeckoComponents {
     }
 
 
-    public static class ContentBlockingDelegate implements ContentBlocking.Delegate{
+    public class ContentBlockingDelegate implements ContentBlocking.Delegate{
 
         @Override
         public void onContentBlocked(
                 @NonNull final GeckoSession session, @NonNull final ContentBlocking.BlockEvent event) {
-            Log.d(TAG, "onContentBlocked: " + event.uri);
+            final GeckoState geckoState = findGeckoState(session);
+            if (geckoState == null) return;
+
+            // BlockEvent fires for cookie behaviour reasons too — those carry
+            // a non-zero cookieBehaviorReason but no AntiTracking bits, so the
+            // category mapper returns null for them and we just skip. The
+            // common case (Ad/Analytic/Content/Social/Fingerprint/Crypto)
+            // does have AntiTracking bits.
+            int categoryMask = event.getAntiTrackingCategory();
+            int cookieReason = event.getCookieBehaviorCategory();
+
+            boolean changed = false;
+            if (categoryMask != 0) {
+                changed = geckoState.incrementBlockedTracker(categoryMask);
+            } else if (cookieReason != 0) {
+                changed = geckoState.incrementBlockedCookie();
+            }
+
+            if (changed && isCurrentGeckoState(geckoState)) {
+                if (geckoState.getGeckoStateEntity().isIncognito()) {
+                    mIncognitoStateRepository.postBlockedTrackerCounts(
+                            geckoState.getBlockedTrackerCountsSnapshot());
+                } else {
+                    mGeckoStateDataRepository.postBlockedTrackerCounts(
+                            geckoState.getBlockedTrackerCountsSnapshot());
+                }
+            }
         }
 
         /**

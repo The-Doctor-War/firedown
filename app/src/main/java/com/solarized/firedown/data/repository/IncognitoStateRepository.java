@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.solarized.firedown.data.entity.CertificateInfoEntity;
 import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.geckoview.GeckoState;
+import com.solarized.firedown.geckoview.TrackingCategory;
 import com.solarized.firedown.geckoview.media.GeckoMediaController;
 
 import org.mozilla.geckoview.GeckoSession;
@@ -16,6 +17,7 @@ import org.mozilla.geckoview.GeckoSession;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -41,6 +43,7 @@ public class IncognitoStateRepository {
     private final MutableLiveData<List<GeckoStateEntity>> mGeckoStatesLiveData;
     private final MutableLiveData<Integer> mCountLiveData;
     private final MutableLiveData<CertificateInfoEntity> mCertLiveData;
+    private final MutableLiveData<Map<TrackingCategory, Integer>> mBlockedTrackerLiveData;
     private final GeckoMediaController mGeckoMediaController;
     private final IncognitoTrackingPermissionRepository mTrackingRepository;
     private int mCurrentId = GeckoState.NULL_SESSION_ID;
@@ -51,6 +54,7 @@ public class IncognitoStateRepository {
         this.mGeckoStates = Collections.synchronizedList(new ArrayList<>());
         this.mGeckoStatesLiveData = new MutableLiveData<>(Collections.emptyList());
         this.mCountLiveData = new MutableLiveData<>(0);
+        this.mBlockedTrackerLiveData = new MutableLiveData<>(Collections.emptyMap());
         this.mGeckoMediaController = geckoMediaController;
         this.mTrackingRepository = new IncognitoTrackingPermissionRepository();
     }
@@ -114,6 +118,14 @@ public class IncognitoStateRepository {
 
     public void notifyCert(CertificateInfoEntity value){
         mCertLiveData.postValue(value);
+    }
+
+    public LiveData<Map<TrackingCategory, Integer>> getBlockedTrackerLiveData(){
+        return mBlockedTrackerLiveData;
+    }
+
+    public void postBlockedTrackerCounts(Map<TrackingCategory, Integer> counts){
+        mBlockedTrackerLiveData.postValue(counts);
     }
 
     public boolean isCurrentGeckoState(GeckoState geckoState) {

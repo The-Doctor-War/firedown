@@ -353,6 +353,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Las páginas se cargarán normalmente, pero bloquearán menos rastreadores.</string>
     <string name="settings_enhanced_tracking_protection_strict">Estricto</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Protección de seguimiento más fuerte y un rendimiento más rápido, pero algunos sitios pueden no funcionar correctamente.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Personalizada</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Protección estándar y eliminación de parámetros de seguimiento de las URL.</string>
+    <string name="settings_query_param_block_list">Parámetros de seguimiento</string>
+    <string name="settings_query_param_block_list_description">Parámetros eliminados de las URL (p. ej. utm_source, fbclid). Activo cuando se selecciona la protección personalizada.</string>
+    <string name="settings_query_param_block_list_dialog_message">Lista de parámetros separados por espacios que se eliminarán de las URL.</string>
     <string name="settings_exceptions">Excepciones</string>
     <string name="settings_follow_device_theme">Seguir tema del dispositivo</string>
     <string name="settings_gecko_version">GeckoView</string>

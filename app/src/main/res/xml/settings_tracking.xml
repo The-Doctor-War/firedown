@@ -20,5 +20,22 @@
         app:icon="@drawable/local_police_24" />
 
 
+    <com.solarized.firedown.settings.ui.RadioButtonPreference
+        android:defaultValue="false"
+        android:key="com.solarized.firedown.preferences.browser.tracking.custom"
+        android:title="@string/settings_enhanced_tracking_protection_custom"
+        android:summary="@string/settings_enhanced_tracking_protection_custom_description_1"
+        app:enabled="true"
+        app:icon="@drawable/footprint_24" />
+
+
+    <EditTextPreference
+        android:key="com.solarized.firedown.preferences.browser.tracking.strip.list"
+        android:title="@string/settings_query_param_block_list"
+        android:summary="@string/settings_query_param_block_list_description"
+        android:dialogTitle="@string/settings_query_param_block_list"
+        android:dialogMessage="@string/settings_query_param_block_list_dialog_message"
+        android:defaultValue="@string/default_query_strip_list" />
+
 
 </PreferenceScreen>

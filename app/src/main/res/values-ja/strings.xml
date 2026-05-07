@@ -353,6 +353,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">ページは正常に読み込まれますが、ブロックされるトラッカーは少なくなります。</string>
     <string name="settings_enhanced_tracking_protection_strict">厳格</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">追跡保護が強化され、パフォーマンスが高速化されますが、一部のサイトが正しく動作しない可能性があります。</string>
+    <string name="settings_enhanced_tracking_protection_custom">カスタム</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">標準保護に加え、URL から追跡用クエリパラメータを削除します。</string>
+    <string name="settings_query_param_block_list">追跡クエリパラメータ</string>
+    <string name="settings_query_param_block_list_description">URL から削除するパラメータ（例: utm_source、fbclid）。カスタム保護を選択しているときに有効です。</string>
+    <string name="settings_query_param_block_list_dialog_message">URL から削除するクエリパラメータ名をスペース区切りで指定してください。</string>
     <string name="settings_exceptions">例外</string>
     <string name="settings_follow_device_theme">端末のテーマに従う</string>
     <string name="settings_gecko_version">GeckoView</string>

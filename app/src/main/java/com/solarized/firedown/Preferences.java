@@ -59,6 +59,31 @@ public class Preferences {
 
     public static final String SETTINGS_ANTI_TRACKING_STRICT = "com.solarized.firedown.preferences.browser.tracking.strict";
 
+    public static final String SETTINGS_ANTI_TRACKING_CUSTOM = "com.solarized.firedown.preferences.browser.tracking.custom";
+
+    public static final String SETTINGS_ANTI_TRACKING_STRIP_LIST = "com.solarized.firedown.preferences.browser.tracking.strip.list";
+
+    // Default tracking query parameter strip list. Whitespace-separated.
+    // Union of Brave's curated kSimpleQueryStringTrackers
+    // (brave-core/components/query_filter/browser/utils.cc), Firefox's
+    // privacy.query_stripping.strip_list defaults, and standard utm_*
+    // campaign parameters. Conditional / host-scoped entries (mkt_tok,
+    // igsh on instagram, si on youtube, ...) are intentionally excluded
+    // — GeckoView's flat strip list cannot evaluate URL context, and
+    // stripping them globally would break legitimate flows like
+    // unsubscribe links.
+    public static final String DEFAULT_QUERY_STRIP_LIST =
+            "__hsfp __hssc __hstc __s _bhlid _branch_match_id _branch_referrer _gl _hsenc " +
+            "_openstat at_recipient_id at_recipient_list bbeml bsft_clkid bsft_uid dclid " +
+            "et_rid fb_action_ids fb_comment_id fbclid gbraid gclid guce_referrer " +
+            "guce_referrer_sig hsCtaTracking igshid irclickid mc_eid ml_subscriber " +
+            "ml_subscriber_hash msclkid mtm_cid oft_c oft_ck oft_d oft_id oft_ids oft_k " +
+            "oft_lk oft_sk oly_anon_id oly_enc_id pk_cid rb_clickid s_cid sc_customer " +
+            "sc_eh sc_uid sfmc_activityid sfmc_id sms_click sms_source sms_uph srsltid " +
+            "ss_email_id syclid ttclid twclid unicorn_click_id utm_campaign utm_content " +
+            "utm_medium utm_source utm_term vero_conv vero_id vgo_ee wbraid wickedid yclid " +
+            "ymclid ysclid";
+
     public static final String SETTINGS_CLEAR_DATA = "com.solarized.firedown.preferences.browser.clear";
 
     public static final String SETTINGS_DOWNLOADS = "com.solarized.firedown.preferences.downloads.location";
@@ -169,20 +194,22 @@ public class Preferences {
     }
 
     public static int getAntiTrackingCategories(SharedPreferences sharedPreferences){
-        if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_DEFAULT, true)){
-            return ContentBlocking.AntiTracking.DEFAULT;
-        }else if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_STRICT, false)){
+        if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_STRICT, false)){
             return ContentBlocking.AntiTracking.STRICT;
+        }else if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_DEFAULT, true)
+                || sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_CUSTOM, false)){
+            return ContentBlocking.AntiTracking.DEFAULT;
         }else{
             return ContentBlocking.AntiTracking.NONE;
         }
     }
 
     public static int getEnhancedTrackingProtectionLevel(SharedPreferences sharedPreferences){
-        if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_DEFAULT, true)){
-            return ContentBlocking.EtpLevel.DEFAULT;
-        }else if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_STRICT, false)){
+        if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_STRICT, false)){
             return ContentBlocking.EtpLevel.STRICT;
+        }else if(sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_DEFAULT, true)
+                || sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_CUSTOM, false)){
+            return ContentBlocking.EtpLevel.DEFAULT;
         }else{
             return ContentBlocking.EtpLevel.NONE;
         }
@@ -194,6 +221,18 @@ public class Preferences {
         }else{
             return ContentBlocking.EtpCategory.STANDARD;
         }
+    }
+
+    public static boolean getQueryParameterStrippingEnabled(SharedPreferences sharedPreferences){
+        return sharedPreferences.getBoolean(SETTINGS_ANTI_TRACKING_CUSTOM, false);
+    }
+
+    public static String[] getQueryParameterStripList(SharedPreferences sharedPreferences){
+        String raw = sharedPreferences.getString(SETTINGS_ANTI_TRACKING_STRIP_LIST, DEFAULT_QUERY_STRIP_LIST);
+        if(raw == null) return new String[0];
+        String trimmed = raw.trim();
+        if(trimmed.isEmpty()) return new String[0];
+        return trimmed.split("\\s+");
     }
 
 

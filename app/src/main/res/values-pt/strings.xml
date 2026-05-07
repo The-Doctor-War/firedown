@@ -206,6 +206,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">As páginas serão carregadas normalmente, mas bloquearão menos rastreadores.</string>
     <string name="settings_enhanced_tracking_protection_strict">Estrito</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Proteção de rastreamento mais forte e desempenho mais rápido, mas alguns sites podem não funcionar corretamente.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Personalizada</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Proteção padrão e remoção de parâmetros de rastreamento das URLs.</string>
+    <string name="settings_query_param_block_list">Parâmetros de rastreamento</string>
+    <string name="settings_query_param_block_list_description">Parâmetros removidos das URLs (por ex.: utm_source, fbclid). Ativo quando a proteção personalizada é selecionada.</string>
+    <string name="settings_query_param_block_list_dialog_message">Lista de parâmetros separados por espaços a remover das URLs.</string>
     <string name="settings_exceptions">Exceções</string>
     <string name="settings_general">Em geral</string>
     <string name="settings_license">Licenças</string>

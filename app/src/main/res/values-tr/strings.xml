@@ -256,6 +256,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Sayfalar normal şekilde yüklenecek, ancak daha az izleyiciyi engelleyecek.</string>
     <string name="settings_enhanced_tracking_protection_strict">Sıkı</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Daha güçlü izleme koruması ve daha hızlı performans, ancak bazı siteler düzgün çalışmayabilir.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Özel</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Standart koruma ve URL\'lerden takip sorgu parametrelerinin kaldırılması.</string>
+    <string name="settings_query_param_block_list">Takip sorgu parametreleri</string>
+    <string name="settings_query_param_block_list_description">URL\'lerden kaldırılan parametreler (ör. utm_source, fbclid). Özel koruma seçildiğinde etkindir.</string>
+    <string name="settings_query_param_block_list_dialog_message">URL\'lerden kaldırılacak boşlukla ayrılmış sorgu parametresi adları listesi.</string>
     <string name="settings_exceptions">İstisnalar</string>
     <string name="settings_follow_device_theme">Cihaz temasına uy</string>
     <string name="settings_general">Genel</string>

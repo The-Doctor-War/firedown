@@ -353,6 +353,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">页面将正常加载，但会阻止较少的跟踪器。</string>
     <string name="settings_enhanced_tracking_protection_strict">严格的</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">更强的跟踪保护和更快的性能，但某些网站可能无法正常运行。</string>
+    <string name="settings_enhanced_tracking_protection_custom">自定义</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">标准保护，并从网址中移除跟踪查询参数。</string>
+    <string name="settings_query_param_block_list">跟踪查询参数</string>
+    <string name="settings_query_param_block_list_description">从网址中移除的参数（例如 utm_source、fbclid）。选择自定义保护时生效。</string>
+    <string name="settings_query_param_block_list_dialog_message">以空格分隔的查询参数名称列表，将从网址中移除。</string>
     <string name="settings_exceptions">例外</string>
     <string name="settings_follow_device_theme">跟随设备主题</string>
     <string name="settings_gecko_version">GeckoView</string>

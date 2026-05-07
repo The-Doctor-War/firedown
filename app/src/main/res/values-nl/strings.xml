@@ -256,6 +256,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Pagina\'s worden normaal geladen, maar er worden minder trackers geblokkeerd.</string>
     <string name="settings_enhanced_tracking_protection_strict">Streng</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Sterkere bescherming tegen tracking en snellere prestaties, maar sommige sites werken mogelijk niet goed.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Aangepast</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Standaardbescherming met het verwijderen van tracking-parameters uit URL\'s.</string>
+    <string name="settings_query_param_block_list">Tracking-queryparameters</string>
+    <string name="settings_query_param_block_list_description">Parameters die uit URL\'s worden verwijderd (bijv. utm_source, fbclid). Actief wanneer Aangepast is geselecteerd.</string>
+    <string name="settings_query_param_block_list_dialog_message">Door spaties gescheiden lijst met queryparameters die uit URL\'s worden verwijderd.</string>
     <string name="settings_exceptions">Uitzonderingen</string>
     <string name="settings_follow_device_theme">Apparaatthema volgen</string>
     <string name="settings_general">Algemeen</string>

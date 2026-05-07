@@ -243,6 +243,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">سيتم تحميل الصفحات بشكل طبيعي، ولكنها ستمنع عددًا أقل من المتتبعين.</string>
     <string name="settings_enhanced_tracking_protection_strict">حازم</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">حماية تتبع أقوى وأداء أسرع، ولكن بعض المواقع قد لا تعمل بشكل صحيح.</string>
+    <string name="settings_enhanced_tracking_protection_custom">مخصص</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">الحماية القياسية مع إزالة معلمات التتبع من عناوين URL.</string>
+    <string name="settings_query_param_block_list">معلمات التتبع في الاستعلام</string>
+    <string name="settings_query_param_block_list_description">المعلمات التي تُزال من عناوين URL (مثل utm_source و fbclid). نشط عند اختيار الحماية المخصصة.</string>
+    <string name="settings_query_param_block_list_dialog_message">قائمة بأسماء معلمات الاستعلام مفصولة بمسافات لإزالتها من عناوين URL.</string>
     <string name="settings_exceptions">الاستثناءات</string>
     <string name="settings_follow_device_theme">اتبع سمة الجهاز</string>
     <string name="settings_general">عام</string>

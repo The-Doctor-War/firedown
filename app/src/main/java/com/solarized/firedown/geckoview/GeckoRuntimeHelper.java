@@ -150,6 +150,7 @@ public class GeckoRuntimeHelper {
         setWebGL(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WEBGL, false));
         setGeo(sharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION, false));
         setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING, false));
+        setDRM(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_DRM, false));
     }
 
     private void setupWebExtensions() {
@@ -713,6 +714,39 @@ public class GeckoRuntimeHelper {
 
         geckoResult.accept(unused -> {
             Log.d(TAG, "setGeo: " + unused);
+        });
+    }
+
+
+    /**
+     * Toggle DRM (Encrypted Media Extensions). When disabled, sites that
+     * require Widevine/EME (Netflix, Spotify Web, ...) won't play and the
+     * "request_media_key_system_access" prompt is suppressed entirely.
+     * Pairs media.eme.enabled with the Widevine plugin toggle so re-enabling
+     * EME from a different surface can't re-load Widevine without this
+     * setting also flipping back.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    public void setDRM(boolean disable) {
+
+        boolean enable = !disable;
+
+        List<GeckoPreferenceController.SetGeckoPreference<?>> preferenceList = new ArrayList<>();
+
+        preferenceList.add(GeckoPreferenceController.SetGeckoPreference
+                .setBoolPref("media.eme.enabled", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+
+        preferenceList.add(GeckoPreferenceController.SetGeckoPreference
+                .setBoolPref("media.gmp-widevinecdm.enabled", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+
+        GeckoResult<Map<String, Boolean>> geckoResult = GeckoPreferenceController.setGeckoPrefs(preferenceList);
+
+        geckoResult.accept(map -> {
+            if (map == null)
+                return;
+            for (Map.Entry<String, Boolean> entry : map.entrySet()) {
+                Log.d(TAG, "setDRM: " + entry.getKey() + "/" + entry.getValue());
+            }
         });
     }
 

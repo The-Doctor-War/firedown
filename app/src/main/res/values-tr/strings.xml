@@ -185,6 +185,8 @@
     <string name="settings_jit_enabled">"JavaScript Just-in-time Dermelesi'ni (JIT) etkinleştir"</string>
     <string name="settings_jit_enabled_summary">Devre dışı bırakıldığında, komplex web sayfalarında performansı azaltabilir - Bunu değiştirmek tarayıcınızı yeniden başlatır</string>
     <string name="settings_webgl_disabled">"WebGL'i devre dışı bırak"</string>
+    <string name="settings_drm_disabled">DRM oynatmayı devre dışı bırak</string>
+    <string name="settings_drm_disabled_summary">Widevine\'ı ve DRM izin istemini engeller; DRM gerektiren siteler (Netflix, Spotify, …) oynatılmaz</string>
     <string name="settings_webrtc_enabled">"WebRTC'yi etkinleştir"</string>
     <string name="prompt_update_confirmation">Güncelle</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">İzlenme korumasını açmanız önerilir.</string>

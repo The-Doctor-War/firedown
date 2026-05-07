@@ -185,6 +185,8 @@
     <string name="settings_jit_enabled">JavaScript Just-in-time Compilation (JIT) inschakelen</string>
     <string name="settings_jit_enabled_summary">"Wanneer uitgeschakeld, kan de prestatie van complexe webpagina's verminderd zijn - Na wijziging zal de browser opnieuw opstarten"</string>
     <string name="settings_webgl_disabled">WebGL uitschakelen</string>
+    <string name="settings_drm_disabled">DRM-weergave uitschakelen</string>
+    <string name="settings_drm_disabled_summary">Blokkeert Widevine en de DRM-machtigingsaanvraag; sites die DRM vereisen (Netflix, Spotify, …) werken niet</string>
     <string name="settings_webrtc_enabled">WebRTC inschakelen</string>
     <string name="prompt_update_confirmation">Bijwerken</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Inschakelen van Bescherming tegen volgen wordt aanbevolen.</string>

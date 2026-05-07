@@ -184,6 +184,8 @@
     <string name="settings_doh_provider_custom_dialog_error_invalid">Nieprawidłowy adres</string>
     <string name="settings_jit_enabled">Włącz kompilację JavaScript Just-in-time (JIT)</string>
     <string name="settings_jit_enabled_summary">Po wyłączeniu, wydajność może być zmniejszona dla bardziej rozbudowanych stron internetowych - zmiana tego ustawienia spowoduje ponowne uruchomienie przeglądarki</string>
+    <string name="settings_drm_disabled">Wyłącz odtwarzanie DRM</string>
+    <string name="settings_drm_disabled_summary">Blokuje Widevine i prośbę o uprawnienia DRM; witryny wymagające DRM (Netflix, Spotify, …) nie będą działać</string>
     <string name="settings_webrtc_enabled">Włącz WebRTC</string>
     <string name="prompt_update_confirmation">Aktualizuj</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Zalecane jest włączenie ochrony przed śledzeniem.</string>

@@ -251,6 +251,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Le pagine verranno caricate normalmente, ma verranno bloccati meno tracker.</string>
     <string name="settings_enhanced_tracking_protection_strict">Rigorosa</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Protezione antitracciamento più efficace e prestazioni più rapide, ma alcuni siti potrebbero non funzionare correttamente.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Personalizzata</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Protezione standard e rimozione dei parametri di tracciamento dagli URL.</string>
+    <string name="settings_query_param_block_list">Parametri di tracciamento</string>
+    <string name="settings_query_param_block_list_description">Parametri rimossi dagli URL (es. utm_source, fbclid). Attivo quando è selezionata la protezione personalizzata.</string>
+    <string name="settings_query_param_block_list_dialog_message">Elenco di parametri separati da spazi da rimuovere dagli URL.</string>
     <string name="settings_exceptions">Eccezioni</string>
     <string name="settings_follow_device_theme">Usa il tema del dispositivo</string>
     <string name="settings_general">Generale</string>

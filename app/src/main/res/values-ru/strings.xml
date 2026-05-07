@@ -256,6 +256,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Страницы будут загружаться нормально, но блокировать меньше трекеров.</string>
     <string name="settings_enhanced_tracking_protection_strict">Строгий</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Более надежная защита от отслеживания и более высокая производительность, но некоторые сайты могут работать некорректно.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Пользовательская</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Стандартная защита и удаление отслеживающих параметров из URL-адресов.</string>
+    <string name="settings_query_param_block_list">Отслеживающие параметры запроса</string>
+    <string name="settings_query_param_block_list_description">Параметры, удаляемые из URL-адресов (например, utm_source, fbclid). Активно при выборе пользовательской защиты.</string>
+    <string name="settings_query_param_block_list_dialog_message">Список имён параметров запроса для удаления из URL-адресов, разделённых пробелами.</string>
     <string name="settings_exceptions">Исключения</string>
     <string name="settings_follow_device_theme">Использовать тему устройства</string>
     <string name="settings_general">Общий</string>

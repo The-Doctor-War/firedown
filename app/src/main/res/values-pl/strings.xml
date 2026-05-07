@@ -255,6 +255,11 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Strony będą ładować się normalnie, ale będą blokować mniej modułów śledzących.</string>
     <string name="settings_enhanced_tracking_protection_strict">Ścisły</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Silniejsza ochrona przed śledzeniem i szybsza wydajność, ale niektóre witryny mogą nie działać prawidłowo.</string>
+    <string name="settings_enhanced_tracking_protection_custom">Niestandardowa</string>
+    <string name="settings_enhanced_tracking_protection_custom_description_1">Ochrona standardowa oraz usuwanie parametrów śledzących z adresów URL.</string>
+    <string name="settings_query_param_block_list">Parametry śledzące</string>
+    <string name="settings_query_param_block_list_description">Parametry usuwane z adresów URL (np. utm_source, fbclid). Aktywne, gdy wybrana jest ochrona niestandardowa.</string>
+    <string name="settings_query_param_block_list_dialog_message">Rozdzielona spacjami lista nazw parametrów do usunięcia z adresów URL.</string>
     <string name="settings_exceptions">Wyjątki</string>
     <string name="settings_follow_device_theme">Motyw urządzenia</string>
     <string name="settings_general">Ogólny</string>

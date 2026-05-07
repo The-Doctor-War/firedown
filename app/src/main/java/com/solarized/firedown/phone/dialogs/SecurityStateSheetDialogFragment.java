@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 
@@ -14,6 +15,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.transition.AutoTransition;
+import androidx.transition.TransitionManager;
 
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
@@ -47,12 +50,18 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
     private TextView mHostText;
     private View mHostCert;
     private AppCompatImageView mTrackingIcon;
-    private View mBlockedTrackersCard;
+    private View mBlockedTrackersSeparator;
+    private View mBlockedTrackersSummaryRow;
+    private TextView mBlockedTrackersSummaryText;
+    private AppCompatImageView mBlockedTrackersChevron;
+    private View mBlockedTrackersList;
     private View mRowCrossSiteCookies;
     private View mRowSocialMedia;
     private View mRowFingerprinters;
     private View mRowCryptominers;
     private View mRowTrackingContent;
+    private boolean mBlockedTrackersExpanded;
+    private boolean mTrackingEnabledForSite;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -95,12 +104,18 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         mAdsSwitch = mView.findViewById(R.id.ads_toogle);
         mHostText = mView.findViewById(R.id.host_secure_text);
         mHostCert = mView.findViewById(R.id.host_secure);
-        mBlockedTrackersCard = mView.findViewById(R.id.blocked_trackers_card);
+        mBlockedTrackersSeparator = mView.findViewById(R.id.blocked_trackers_separator);
+        mBlockedTrackersSummaryRow = mView.findViewById(R.id.blocked_trackers_summary_row);
+        mBlockedTrackersSummaryText = mView.findViewById(R.id.blocked_trackers_summary_text);
+        mBlockedTrackersChevron = mView.findViewById(R.id.blocked_trackers_chevron);
+        mBlockedTrackersList = mView.findViewById(R.id.blocked_trackers_list);
         mRowCrossSiteCookies = mView.findViewById(R.id.row_cross_site_cookies);
         mRowSocialMedia = mView.findViewById(R.id.row_social_media);
         mRowFingerprinters = mView.findViewById(R.id.row_fingerprinters);
         mRowCryptominers = mView.findViewById(R.id.row_cryptominers);
         mRowTrackingContent = mView.findViewById(R.id.row_tracking_content);
+
+        mBlockedTrackersSummaryRow.setOnClickListener(v -> toggleBlockedTrackersExpanded());
 
         bindBlockedRow(mRowCrossSiteCookies, R.drawable.cookie_24,
                 R.string.blocked_trackers_cross_site_cookies);
@@ -209,17 +224,43 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
 
 
     private void renderBlockedTrackerCounts(Map<TrackingCategory, Integer> counts) {
-        if (mBlockedTrackersCard == null) return;
-        if (counts == null || counts.isEmpty()) {
-            mBlockedTrackersCard.setVisibility(View.GONE);
+        if (mBlockedTrackersSummaryRow == null) return;
+
+        int total = 0;
+        if (counts != null) {
+            for (Integer v : counts.values()) {
+                if (v != null) total += v;
+            }
+        }
+
+        // Hide the whole expandable section when:
+        //   - the user has added a tracking exception for this site
+        //     (counts wouldn't be meaningful — events stop firing), or
+        //   - the page hasn't blocked anything yet.
+        // The toggle row above keeps showing the existing subtext in
+        // both cases, so the dialog still has something useful in it.
+        if (!mTrackingEnabledForSite || total == 0) {
+            mBlockedTrackersSeparator.setVisibility(View.GONE);
+            mBlockedTrackersSummaryRow.setVisibility(View.GONE);
+            mBlockedTrackersList.setVisibility(View.GONE);
             return;
         }
-        mBlockedTrackersCard.setVisibility(View.VISIBLE);
+
+        mBlockedTrackersSeparator.setVisibility(View.VISIBLE);
+        mBlockedTrackersSummaryRow.setVisibility(View.VISIBLE);
+        mBlockedTrackersSummaryText.setText(getResources().getQuantityString(
+                R.plurals.blocked_trackers_summary, total, total));
+
         applyRow(mRowCrossSiteCookies, counts.get(TrackingCategory.CROSS_SITE_COOKIES));
         applyRow(mRowSocialMedia,      counts.get(TrackingCategory.SOCIAL_MEDIA));
         applyRow(mRowFingerprinters,   counts.get(TrackingCategory.FINGERPRINTERS));
         applyRow(mRowCryptominers,     counts.get(TrackingCategory.CRYPTOMINERS));
         applyRow(mRowTrackingContent,  counts.get(TrackingCategory.TRACKING_CONTENT));
+
+        // Apply the latest expanded state to the list — the user could
+        // have toggled it open before more blocks streamed in, in which
+        // case we want the list to stay open and just re-render.
+        applyExpandedState(false);
     }
 
 
@@ -235,6 +276,28 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         row.setVisibility(View.VISIBLE);
         TextView countView = row.findViewById(R.id.row_count);
         if (countView != null) countView.setText(String.valueOf(n));
+    }
+
+
+    private void toggleBlockedTrackersExpanded() {
+        mBlockedTrackersExpanded = !mBlockedTrackersExpanded;
+        applyExpandedState(true);
+    }
+
+
+    private void applyExpandedState(boolean animate) {
+        if (mBlockedTrackersList == null) return;
+        if (animate) {
+            ViewParent parent = mBlockedTrackersList.getParent();
+            if (parent instanceof ViewGroup) {
+                TransitionManager.beginDelayedTransition(
+                        (ViewGroup) parent, new AutoTransition().setDuration(180));
+            }
+        }
+        mBlockedTrackersList.setVisibility(mBlockedTrackersExpanded ? View.VISIBLE : View.GONE);
+        mBlockedTrackersChevron.setImageResource(mBlockedTrackersExpanded
+                ? R.drawable.expand_less_24
+                : R.drawable.expand_more_24);
     }
 
 
@@ -277,11 +340,21 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
     }
 
     private void updateTrackingUI(boolean isEnabled) {
+        mTrackingEnabledForSite = isEnabled;
         mTrackingSwitch.setChecked(isEnabled);
         mTrackingIcon.setImageResource(isEnabled ? R.drawable.ic_shield_24 : R.drawable.ic_shield_privacy_tip_24);
         mTrackingSubtext.setText(isEnabled ?
                 R.string.protection_panel_etp_toggle_enabled_description_2 :
                 R.string.protection_panel_etp_toggle_disabled_description_2);
+        // When the user flips the per-site toggle off we drop the
+        // breakdown immediately — its counts are stale the moment we
+        // stop applying ETP, and re-showing them would look like an
+        // exception is still being protected.
+        if (!isEnabled && mBlockedTrackersSummaryRow != null) {
+            mBlockedTrackersSeparator.setVisibility(View.GONE);
+            mBlockedTrackersSummaryRow.setVisibility(View.GONE);
+            mBlockedTrackersList.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -330,7 +403,11 @@ public class SecurityStateSheetDialogFragment extends BaseBottomResizedDialogFra
         mAdsCounterTextView = null;
         mTrackingIcon = null;
         mTrackingSubtext = null;
-        mBlockedTrackersCard = null;
+        mBlockedTrackersSeparator = null;
+        mBlockedTrackersSummaryRow = null;
+        mBlockedTrackersSummaryText = null;
+        mBlockedTrackersChevron = null;
+        mBlockedTrackersList = null;
         mRowCrossSiteCookies = null;
         mRowSocialMedia = null;
         mRowFingerprinters = null;

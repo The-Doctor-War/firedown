@@ -187,7 +187,9 @@
     <string name="quick_settings_sheet_insecure_connection_2">연결이 안전하지 않음</string>
     <string name="quick_settings_sheet_secure_connection_2">연결이 안전함</string>
     <string name="quick_settings_sheet_tracking_site_title">이 사이트의 추적 방지</string>
-    <string name="blocked_trackers_title">이 페이지에서 차단됨</string>
+    <plurals name="blocked_trackers_summary">
+        <item quantity="other">이 페이지에서 %d개 차단됨</item>
+    </plurals>
     <string name="blocked_trackers_cross_site_cookies">교차 사이트 추적 쿠키</string>
     <string name="blocked_trackers_social_media">소셜 미디어 추적기</string>
     <string name="blocked_trackers_fingerprinters">핑거프린터</string>

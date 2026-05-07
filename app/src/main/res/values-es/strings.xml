@@ -270,7 +270,10 @@
     <string name="quick_settings_sheet_insecure_connection_2">Conexión no segura</string>
     <string name="quick_settings_sheet_secure_connection_2">Conexión segura</string>
     <string name="quick_settings_sheet_tracking_site_title">Protección de seguimiento en este sitio</string>
-    <string name="blocked_trackers_title">Bloqueados en esta página</string>
+    <plurals name="blocked_trackers_summary">
+        <item quantity="one">%d bloqueado en esta página</item>
+        <item quantity="other">%d bloqueados en esta página</item>
+    </plurals>
     <string name="blocked_trackers_cross_site_cookies">Cookies de seguimiento entre sitios</string>
     <string name="blocked_trackers_social_media">Rastreadores de redes sociales</string>
     <string name="blocked_trackers_fingerprinters">Identificadores digitales</string>

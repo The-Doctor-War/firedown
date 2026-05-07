@@ -194,7 +194,10 @@
     <string name="quick_settings_sheet_insecure_connection_2">Bağlantı güvenli değil</string>
     <string name="quick_settings_sheet_secure_connection_2">Bağlantı güvenli</string>
     <string name="quick_settings_sheet_tracking_site_title">Bu sitedeki izleme koruması</string>
-    <string name="blocked_trackers_title">Bu sayfada engellenenler</string>
+    <plurals name="blocked_trackers_summary">
+        <item quantity="one">Bu sayfada %d tane engellendi</item>
+        <item quantity="other">Bu sayfada %d tane engellendi</item>
+    </plurals>
     <string name="blocked_trackers_cross_site_cookies">Siteler arası takip çerezleri</string>
     <string name="blocked_trackers_social_media">Sosyal medya takipçileri</string>
     <string name="blocked_trackers_fingerprinters">Parmak izi çıkarıcılar</string>

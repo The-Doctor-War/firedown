@@ -178,124 +178,151 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="8dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <View
-                android:id="@+id/tracking_middle"
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginBottom="4dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/tracking_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_shield_24" />
-
-            <TextView
-                android:id="@+id/tracking_text"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:text="@string/quick_settings_sheet_tracking_site_title"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="15sp"
-                app:layout_constraintBottom_toTopOf="@id/tracking_middle"
-                app:layout_constraintEnd_toStartOf="@id/tracking_toogle"
-                app:layout_constraintStart_toEndOf="@id/tracking_icon" />
-
-            <TextView
-                android:id="@+id/tracking_subtext"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:paddingBottom="12dp"
-                android:maxLines="2"
-                android:text="@string/protection_panel_etp_toggle_enabled_description_2"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="12sp"
-                app:layout_constraintEnd_toStartOf="@id/tracking_toogle"
-                app:layout_constraintStart_toEndOf="@id/tracking_icon"
-                app:layout_constraintTop_toBottomOf="@id/tracking_middle" />
-
-
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/tracking_toogle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/blocked_trackers_card"
-        style="@style/Widget.Material3.CardView.Filled"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="8dp"
-        android:visibility="gone">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp">
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/blocked_trackers_title"
-                style="@style/TextAppearance.Material3.TitleMedium"
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="wrap_content">
+
+                <View
+                    android:id="@+id/tracking_middle"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginBottom="4dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/tracking_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_shield_24" />
+
+                <TextView
+                    android:id="@+id/tracking_text"
+                    style="@style/TextAppearance.Material3.TitleMedium"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:text="@string/quick_settings_sheet_tracking_site_title"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toTopOf="@id/tracking_middle"
+                    app:layout_constraintEnd_toStartOf="@id/tracking_toogle"
+                    app:layout_constraintStart_toEndOf="@id/tracking_icon" />
+
+                <TextView
+                    android:id="@+id/tracking_subtext"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:paddingBottom="12dp"
+                    android:maxLines="2"
+                    android:text="@string/protection_panel_etp_toggle_enabled_description_2"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="12sp"
+                    app:layout_constraintEnd_toStartOf="@id/tracking_toogle"
+                    app:layout_constraintStart_toEndOf="@id/tracking_icon"
+                    app:layout_constraintTop_toBottomOf="@id/tracking_middle" />
+
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/tracking_toogle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <View
+                android:id="@+id/blocked_trackers_separator"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:paddingBottom="8dp"
-                android:text="@string/blocked_trackers_title"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:textSize="15sp" />
+                android:background="?attr/colorOutlineVariant"
+                android:visibility="gone" />
 
-            <include
-                android:id="@+id/row_cross_site_cookies"
-                layout="@layout/item_blocked_tracker_row" />
+            <LinearLayout
+                android:id="@+id/blocked_trackers_summary_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:focusable="true"
+                android:paddingStart="16dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:visibility="gone">
 
-            <include
-                android:id="@+id/row_social_media"
-                layout="@layout/item_blocked_tracker_row" />
+                <TextView
+                    android:id="@+id/blocked_trackers_summary_text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    android:textSize="13sp"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
 
-            <include
-                android:id="@+id/row_fingerprinters"
-                layout="@layout/item_blocked_tracker_row" />
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/blocked_trackers_chevron"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    app:srcCompat="@drawable/expand_more_24" />
 
-            <include
-                android:id="@+id/row_cryptominers"
-                layout="@layout/item_blocked_tracker_row" />
+            </LinearLayout>
 
-            <include
-                android:id="@+id/row_tracking_content"
-                layout="@layout/item_blocked_tracker_row" />
+            <LinearLayout
+                android:id="@+id/blocked_trackers_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="6dp"
+                android:visibility="gone">
+
+                <include
+                    android:id="@+id/row_cross_site_cookies"
+                    layout="@layout/item_blocked_tracker_row" />
+
+                <include
+                    android:id="@+id/row_social_media"
+                    layout="@layout/item_blocked_tracker_row" />
+
+                <include
+                    android:id="@+id/row_fingerprinters"
+                    layout="@layout/item_blocked_tracker_row" />
+
+                <include
+                    android:id="@+id/row_cryptominers"
+                    layout="@layout/item_blocked_tracker_row" />
+
+                <include
+                    android:id="@+id/row_tracking_content"
+                    layout="@layout/item_blocked_tracker_row" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

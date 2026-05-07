@@ -193,7 +193,12 @@
     <string name="quick_settings_sheet_insecure_connection_2">Połączenie nie jest zabezpieczone</string>
     <string name="quick_settings_sheet_secure_connection_2">Połączenie jest zabezpieczone</string>
     <string name="quick_settings_sheet_tracking_site_title">Ochrona przed śledzeniem na tej stronie</string>
-    <string name="blocked_trackers_title">Zablokowane na tej stronie</string>
+    <plurals name="blocked_trackers_summary">
+        <item quantity="one">%d zablokowany na tej stronie</item>
+        <item quantity="few">%d zablokowane na tej stronie</item>
+        <item quantity="many">%d zablokowanych na tej stronie</item>
+        <item quantity="other">%d zablokowanych na tej stronie</item>
+    </plurals>
     <string name="blocked_trackers_cross_site_cookies">Międzywitrynowe ciasteczka śledzące</string>
     <string name="blocked_trackers_social_media">Skrypty śledzące mediów społecznościowych</string>
     <string name="blocked_trackers_fingerprinters">Wykrywacze odcisków palca przeglądarki</string>

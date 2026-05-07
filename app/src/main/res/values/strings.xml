@@ -269,6 +269,7 @@
     <string name="protection_panel_etp_toggle_enabled_description_2">If something looks broken on this site, try turning it off.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Connection is not secure</string>
     <string name="quick_settings_sheet_secure_connection_2">Connection is secure</string>
+    <string name="quick_settings_sheet_tracking_site_title">Tracking protection on this site</string>
     <string name="quit_application">Quitting the application to apply changes…</string>
     <string name="remove_top_site">Remove</string>
     <string name="rename">Rename</string>

@@ -193,6 +193,7 @@
     <string name="protection_panel_etp_toggle_enabled_description_2">Als iets op deze website niet werkt, probeer het dan uit te schakelen.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Verbinding is niet beveiligd</string>
     <string name="quick_settings_sheet_secure_connection_2">Verbinding is beveiligd</string>
+    <string name="quick_settings_sheet_tracking_site_title">Tracking-bescherming op deze site</string>
     <string name="quit_application">De toepassing wordt afgesloten om wijzigingen toe te passen…</string>
     <string name="remove_top_site">Verwijderen</string>
     <string name="rename">Hernoemen</string>

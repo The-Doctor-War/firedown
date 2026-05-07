@@ -180,6 +180,7 @@
     <string name="prompt_update_confirmation">حدّث</string>
     <string name="quick_settings_sheet_insecure_connection_2">الاتصال غير آمن</string>
     <string name="quick_settings_sheet_secure_connection_2">الاتصال آمن</string>
+    <string name="quick_settings_sheet_tracking_site_title">الحماية من التتبع على هذا الموقع</string>
     <string name="quit_application">يُغلَق التطبيق الآن لتطبيق التغييرات…</string>
     <string name="remove_top_site">أزِل</string>
     <string name="rename">إعادة تسمية</string>

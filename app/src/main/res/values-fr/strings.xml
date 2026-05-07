@@ -269,6 +269,7 @@
     <string name="protection_panel_etp_toggle_enabled_description_2">Si quelque chose semble ne pas fonctionner sur ce site, tentez de désactiver cette fonctionnalité.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Connexion non sécurisée</string>
     <string name="quick_settings_sheet_secure_connection_2">Connexion sécurisée</string>
+    <string name="quick_settings_sheet_tracking_site_title">Protection de suivi sur ce site</string>
     <string name="quit_application">Fermeture de l’application pour appliquer les modifications…</string>
     <string name="remove_top_site">Supprimer</string>
     <string name="rename">Renommer</string>

@@ -211,7 +211,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="16dp"
                 android:layout_marginEnd="16dp"
-                android:text="@string/connection_enhanced_protection"
+                android:text="@string/quick_settings_sheet_tracking_site_title"
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="15sp"
                 app:layout_constraintBottom_toTopOf="@id/tracking_middle"

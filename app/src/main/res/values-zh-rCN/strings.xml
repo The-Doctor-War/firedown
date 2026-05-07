@@ -269,6 +269,7 @@
     <string name="protection_panel_etp_toggle_enabled_description_2">若网站功能异常，请尝试关闭保护。</string>
     <string name="quick_settings_sheet_insecure_connection_2">连接不安全</string>
     <string name="quick_settings_sheet_secure_connection_2">连接安全</string>
+    <string name="quick_settings_sheet_tracking_site_title">此网站的跟踪保护</string>
     <string name="quit_application">退出应用程序以应用更改…</string>
     <string name="remove_top_site">移除</string>
     <string name="rename">重命名</string>

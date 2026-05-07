@@ -193,6 +193,7 @@
     <string name="protection_panel_etp_toggle_enabled_description_2">Site bozuk görünüyorsa kapatmayı deneyin.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Bağlantı güvenli değil</string>
     <string name="quick_settings_sheet_secure_connection_2">Bağlantı güvenli</string>
+    <string name="quick_settings_sheet_tracking_site_title">Bu sitedeki izleme koruması</string>
     <string name="quit_application">Değişiklikleri uygulamak için uygulamadan çıkılıyor…</string>
     <string name="remove_top_site">Kaldır</string>
     <string name="rename">Yeniden isimlendirmek</string>

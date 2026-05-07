@@ -194,7 +194,10 @@
     <string name="quick_settings_sheet_insecure_connection_2">Verbinding is niet beveiligd</string>
     <string name="quick_settings_sheet_secure_connection_2">Verbinding is beveiligd</string>
     <string name="quick_settings_sheet_tracking_site_title">Tracking-bescherming op deze site</string>
-    <string name="blocked_trackers_title">Geblokkeerd op deze pagina</string>
+    <plurals name="blocked_trackers_summary">
+        <item quantity="one">%d geblokkeerd op deze pagina</item>
+        <item quantity="other">%d geblokkeerd op deze pagina</item>
+    </plurals>
     <string name="blocked_trackers_cross_site_cookies">Cross-site tracking-cookies</string>
     <string name="blocked_trackers_social_media">Social media-trackers</string>
     <string name="blocked_trackers_fingerprinters">Fingerprinters</string>

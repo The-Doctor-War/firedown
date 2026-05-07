@@ -23,7 +23,17 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.ListPreloader;
+import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.google.android.material.chip.ChipGroup;
+import com.solarized.firedown.GlideHelper;
+import com.solarized.firedown.GlideRequestOptions;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
@@ -45,6 +55,7 @@ import com.solarized.firedown.ui.diffs.BrowserDownloadsDiffCallback;
 import com.solarized.firedown.utils.NavigationUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -116,6 +127,69 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
         mAdapter = new BrowserOptionAdapter(mActivity, new BrowserDownloadsDiffCallback(), this, mEnableGrid);
         mRecyclerView.setAdapter(mAdapter);
+
+        // The RecyclerView's own dimensions don't depend on the adapter
+        // (it's match_parent inside the LCEE wrapper) — paging-driven
+        // inserts can't resize it, so skip the outer remeasure pass.
+        mRecyclerView.setHasFixedSize(true);
+        // Default off-screen view cache is 2; bumping it to 8 keeps
+        // viewholders that just left the viewport hot, so a quick
+        // scroll-back doesn't go through onBindViewHolder again
+        // (which would null the ImageView via clearSafe and re-fire
+        // a Glide load).
+        mRecyclerView.setItemViewCacheSize(8);
+
+        // Glide's memory cache evicts older bitmaps as the user scrolls
+        // through a long list, so the original top-row thumbnails are
+        // gone by the time the user scrolls back up — leaving a brief
+        // empty frame plus a disk/network round-trip on rebind. Preload
+        // 8 items ahead of the scroll direction so the cache stays
+        // warm for the rows about to enter the viewport.
+        RoundedCorners roundedCorners = new RoundedCorners(
+                getResources().getDimensionPixelOffset(R.dimen.card_radius));
+        RequestOptions baseOptions = new RequestOptions()
+                .apply(RequestOptions.bitmapTransform(roundedCorners));
+
+        RequestManager glide = Glide.with(this);
+
+        RecyclerViewPreloader<BrowserDownloadEntity> preloader = new RecyclerViewPreloader<>(
+                glide,
+                new ListPreloader.PreloadModelProvider<BrowserDownloadEntity>() {
+                    @NonNull
+                    @Override
+                    public List<BrowserDownloadEntity> getPreloadItems(int position) {
+                        if (position < 0 || position >= mAdapter.getItemCount()) {
+                            return Collections.emptyList();
+                        }
+                        BrowserDownloadEntity entity = mAdapter.getCurrentList().get(position);
+                        return entity == null
+                                ? Collections.emptyList()
+                                : Collections.singletonList(entity);
+                    }
+
+                    @Nullable
+                    @Override
+                    public RequestBuilder<?> getPreloadRequestBuilder(@NonNull BrowserDownloadEntity entity) {
+                        // Match the per-item options the adapter builds
+                        // at bind time so the preload-warmed bitmap and
+                        // the bind-time request resolve to the same
+                        // Glide cache key.
+                        String fileUrl = entity.getFileUrl();
+                        String mimeType = BrowserOptionAdapter.resolveMimeType(
+                                entity.getMimeType(), fileUrl);
+                        RequestOptions options = baseOptions
+                                .set(GlideRequestOptions.MIMETYPE, mimeType)
+                                .set(GlideRequestOptions.FILEPATH, fileUrl)
+                                .set(GlideRequestOptions.HEADERS, entity.getFileHeaders())
+                                .set(GlideRequestOptions.KEY, String.valueOf(entity.getUid()));
+                        return GlideHelper.preloadBrowser(glide, entity, options);
+                    }
+                },
+                new FixedPreloadSizeProvider<>(
+                        GlideHelper.browserThumbWidth(),
+                        GlideHelper.browserThumbHeight()),
+                8);
+        mRecyclerView.addOnScrollListener(preloader);
 
         Log.d("SpanDebug", "listMode=" + mEnableGrid
                 + " span=" + getSpanCount()

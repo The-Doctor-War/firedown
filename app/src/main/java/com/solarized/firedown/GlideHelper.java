@@ -13,6 +13,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
+import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
@@ -272,6 +273,56 @@ public class GlideHelper {
         } else {
             image.setImageDrawable(generateThumbnail(mimeType, image));
         }
+    }
+
+
+    /**
+     * Mirror of {@link #load(BrowserDownloadEntity, RequestOptions, AppCompatImageView)}'s
+     * Glide setup but without an ImageView target — for warming Glide's
+     * memory cache via RecyclerViewPreloader. Returns {@code null} for
+     * mime types that don't have a thumbnail (the load path renders a
+     * static drawable for those, nothing to preload).
+     *
+     * Cache key + signature must match the load path exactly so the
+     * subsequent bind hits the warmed bitmap. Listener is omitted —
+     * preloads have no ImageView to apply a fallback drawable to.
+     */
+    @Nullable
+    public static RequestBuilder<?> preloadBrowser(@NonNull RequestManager glide,
+                                                   @NonNull BrowserDownloadEntity entity,
+                                                   @NonNull RequestOptions requestOptions) {
+
+        String mimeType = entity.getMimeType();
+        ObjectKey signature = new ObjectKey(entity.getUid());
+
+        if (FileUriHelper.isGIF(mimeType) || FileUriHelper.isSVG(mimeType) || FileUriHelper.isWEP(mimeType)) {
+            GlideUrl url = buildGlideUrl(entity);
+            RequestBuilder<?> builder = glide.load(url).signature(signature);
+            if (FileUriHelper.isSVG(mimeType)) {
+                return builder.apply(requestOptions).fitCenter();
+            }
+            return builder;
+        }
+
+        if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isImage(mimeType)) {
+            String thumbnail = entity.getFileThumbnail();
+            String source = TextUtils.isEmpty(thumbnail) ? entity.getFileUrl() : thumbnail;
+            return glide.load(Uri.parse(source))
+                    .override(THUMB_WIDTH, THUMB_HEIGHT)
+                    .signature(signature)
+                    .apply(requestOptions).centerCrop();
+        }
+
+        return null;
+    }
+
+
+    public static int browserThumbWidth() {
+        return THUMB_WIDTH;
+    }
+
+    public static int browserThumbHeight() {
+        return THUMB_HEIGHT;
     }
 
     private static GlideUrl buildGlideUrl(@NonNull BrowserDownloadEntity entity) {

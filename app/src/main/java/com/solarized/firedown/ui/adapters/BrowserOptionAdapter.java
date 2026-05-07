@@ -267,7 +267,14 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
-    private static String resolveMimeType(@Nullable String mimeType, String fileUrl) {
+    /**
+     * Falls back to extension-based detection when the entity's stored
+     * mime type is missing or generic. Public so the RecyclerView
+     * preloader in BrowserOptionFragment can compute the same RequestOptions
+     * key the bind path uses — otherwise the preload-warmed bitmap and
+     * the bind-time request resolve to different cache keys.
+     */
+    public static String resolveMimeType(@Nullable String mimeType, String fileUrl) {
         if (TextUtils.isEmpty(mimeType) || FileUriHelper.isMimeTypeUnknown(mimeType)) {
             return FileUriHelper.getMimeTypeFromFile(fileUrl);
         }

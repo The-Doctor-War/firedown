@@ -408,8 +408,8 @@
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">WebGL deaktivieren</string>
     <string name="settings_webgl_disabled_summary">Blockiert GPU-Fingerprinting, 3D-Inhalte können kaputt erscheinen</string>
-    <string name="settings_drm_disabled">DRM-Wiedergabe deaktivieren</string>
-    <string name="settings_drm_disabled_summary">Blockiert Widevine und die DRM-Berechtigungsanfrage; Seiten, die DRM benötigen (Netflix, Spotify, …), werden nicht abgespielt</string>
+    <string name="settings_drm_enabled">DRM-Wiedergabe aktivieren</string>
+    <string name="settings_drm_enabled_summary">Erlaubt Widevine auf Seiten, die DRM benötigen (Netflix, Spotify, …). Firedown kann DRM-geschützte Inhalte trotzdem nicht herunterladen.</string>
     <string name="settings_webrtc_enabled">WebRTC aktivieren</string>
     <string name="settings_webrtc_enabled_summary">Nötig für P2P-Anrufe, kann deine echte IP preisgeben</string>
     <string name="share">Teilen</string>

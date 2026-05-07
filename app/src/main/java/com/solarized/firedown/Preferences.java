@@ -1,6 +1,9 @@
 package com.solarized.firedown;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.mozilla.geckoview.ContentBlocking;
@@ -53,7 +56,15 @@ public class Preferences {
 
     public static final String SETTINGS_ENABLE_WEBRTC = "com.solarized.firedown.preferences.browser.enable.webrtc";
 
+    /**
+     * Legacy disable-DRM key from PR #26. Read once on first launch after
+     * upgrade so users who explicitly opted in to "disable" don't have
+     * their choice lost when we flip to an enable-by-opt-in default.
+     * No new code should reference this — use {@link #SETTINGS_ENABLE_DRM}.
+     */
     public static final String SETTINGS_DISABLE_DRM = "com.solarized.firedown.preferences.browser.disable.drm";
+
+    public static final String SETTINGS_ENABLE_DRM = "com.solarized.firedown.preferences.browser.enable.drm";
 
     public static final String SETTINGS_ANTI_TRACKING = "com.solarized.firedown.preferences.browser.tracking";
 
@@ -236,6 +247,44 @@ public class Preferences {
         String trimmed = raw.trim();
         if(trimmed.isEmpty()) return new String[0];
         return trimmed.split("\\s+");
+    }
+
+    /**
+     * Effective DRM-enabled state, with one-shot migration from PR #26's
+     * {@link #SETTINGS_DISABLE_DRM} pref. New default is OFF (Firedown can't
+     * download DRM-protected content anyway, so the prompt is dead-end noise);
+     * existing users who relied on the previous always-on behaviour get
+     * carried over so streaming sites don't silently break on update.
+     *
+     * Resolution order:
+     *  1. New pref already written → trust it.
+     *  2. Legacy "disable" pref present → invert and persist.
+     *  3. Neither present → check {@code firstInstallTime != lastUpdateTime}
+     *     to distinguish "upgraded from a build that always had DRM on" from
+     *     "fresh install on the new default-off behaviour".
+     */
+    public static boolean getDRMEnabled(SharedPreferences sharedPreferences, Context context){
+        if (sharedPreferences.contains(SETTINGS_ENABLE_DRM)) {
+            return sharedPreferences.getBoolean(SETTINGS_ENABLE_DRM, false);
+        }
+
+        boolean enabled;
+        if (sharedPreferences.contains(SETTINGS_DISABLE_DRM)) {
+            enabled = !sharedPreferences.getBoolean(SETTINGS_DISABLE_DRM, false);
+        } else {
+            boolean isUpgrade = false;
+            try {
+                PackageInfo info = context.getPackageManager()
+                        .getPackageInfo(context.getPackageName(), 0);
+                isUpgrade = info.firstInstallTime != info.lastUpdateTime;
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "getDRMEnabled: could not query package info", e);
+            }
+            enabled = isUpgrade;
+        }
+
+        sharedPreferences.edit().putBoolean(SETTINGS_ENABLE_DRM, enabled).apply();
+        return enabled;
     }
 
 

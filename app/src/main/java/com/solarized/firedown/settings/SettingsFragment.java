@@ -331,11 +331,11 @@ public class SettingsFragment extends BasePreferenceFragment
 
             mGeckoRuntimeHelper.setWebGL(value);
 
-        } else if (Preferences.SETTINGS_DISABLE_DRM.equals(key)) {
+        } else if (Preferences.SETTINGS_ENABLE_DRM.equals(key)) {
 
-            boolean value = sharedPreferences.getBoolean(key, false);
+            boolean enabled = sharedPreferences.getBoolean(key, false);
 
-            mGeckoRuntimeHelper.setDRM(value);
+            mGeckoRuntimeHelper.setDRM(!enabled);
 
         } else if (Preferences.SETTINGS_ENABLE_JIT.equals(key)) {
 

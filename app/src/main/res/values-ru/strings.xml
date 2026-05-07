@@ -185,8 +185,8 @@
     <string name="settings_jit_enabled">Включить JavaScript Just-in-time Compilation (JIT)</string>
     <string name="settings_jit_enabled_summary">При отключении этой опции может снизиться производительность на сложных веб-страницах. Изменение этой настройки приведет к перезапуску браузера</string>
     <string name="settings_webgl_disabled">Отключить WebGL</string>
-    <string name="settings_drm_disabled">Отключить воспроизведение DRM</string>
-    <string name="settings_drm_disabled_summary">Блокирует Widevine и запрос разрешения DRM; сайты, требующие DRM (Netflix, Spotify, …), не будут воспроизводиться</string>
+    <string name="settings_drm_enabled">Включить воспроизведение DRM</string>
+    <string name="settings_drm_enabled_summary">Разрешает Widevine на сайтах, требующих DRM (Netflix, Spotify, …). Firedown по-прежнему не может загружать контент, защищённый DRM.</string>
     <string name="settings_webrtc_enabled">Включить WebRTC</string>
     <string name="prompt_update_confirmation">Обновить</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Рекомендуется включить защиту от отслеживания.</string>

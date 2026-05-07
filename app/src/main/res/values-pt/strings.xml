@@ -151,8 +151,8 @@
     <string name="popup_toggle">Alternar visualização</string>
     <string name="settings_jit_enabled">Ativar compilação Just-In-Time do JavaScript (JIT)</string>
     <string name="settings_jit_enabled_summary">Ao desativar, a performance pode ser reduzida em páginas complexas - Ao alterar esta configuração, o seu navegador será reiniciado</string>
-    <string name="settings_drm_disabled">Desativar reprodução DRM</string>
-    <string name="settings_drm_disabled_summary">Bloqueia o Widevine e a solicitação de permissão DRM; sites que exigem DRM (Netflix, Spotify, …) não serão reproduzidos</string>
+    <string name="settings_drm_enabled">Ativar reprodução DRM</string>
+    <string name="settings_drm_enabled_summary">Permite o Widevine em sites que exigem DRM (Netflix, Spotify, …). O Firedown ainda não pode baixar conteúdo protegido por DRM.</string>
     <string name="settings_webrtc_enabled">Ativar WebRTC</string>
     <string name="rename">Renomear</string>
     <string name="rename_file">Renomear arquivo</string>

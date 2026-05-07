@@ -150,7 +150,7 @@ public class GeckoRuntimeHelper {
         setWebGL(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WEBGL, false));
         setGeo(sharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION, false));
         setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING, false));
-        setDRM(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_DRM, false));
+        setDRM(!Preferences.getDRMEnabled(sharedPreferences, context));
     }
 
     private void setupWebExtensions() {

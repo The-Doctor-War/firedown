@@ -60,6 +60,7 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.downloads.save.ask"
             android:title="@string/settings_save_file_title"
             android:summary="@string/settings_save_file_summary"
@@ -88,6 +89,7 @@
         <Preference
             android:key="com.solarized.firedown.preferences.browser.doh.pref"
             android:title="@string/settings_doh_title"
+            app:singleLineTitle="false"
             android:summary="@string/settings_doh_summary"
             app:icon="@drawable/dns_24" />
 
@@ -101,6 +103,7 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.browser.enable.resist.fingerprinting"
             android:summary="@string/spoof_timezone_summary"
             android:title="@string/fingerprint_protection"
@@ -108,6 +111,7 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.ublock.block.cookie.notices"
             android:summary="@string/settings_block_cookie_notices_summary"
             android:title="@string/settings_block_cookie_notices_title"
@@ -116,6 +120,7 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
+            app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.browser.block.location"
             android:summary="@string/settings_block_location_summary"
             android:title="@string/settings_block_location_title"

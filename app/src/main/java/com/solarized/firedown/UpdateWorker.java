@@ -1,7 +1,6 @@
 package com.solarized.firedown;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
@@ -41,20 +40,16 @@ public class UpdateWorker extends Worker {
 
     private final int mCurrentVersion;
 
-    private final SharedPreferences mSharedPreferences;
-
     private final Context mContext;
 
     @AssistedInject
     public UpdateWorker(
             @Assisted @NonNull Context context,
             @Assisted @NonNull WorkerParameters params,
-            SharedPreferences sharedPreferences,
             @Qualifiers.AppVersion int currentVersion,
             OkHttpClient okHttpClient
     ){
         super(context, params);
-        this.mSharedPreferences = sharedPreferences;
         this.mContext = context;
         this.okHttpClient = okHttpClient;
         this.mCurrentVersion = currentVersion;
@@ -70,8 +65,6 @@ public class UpdateWorker extends Worker {
             // 1. Fetch Status (Synchronous)
             Request statusRequest = new Request.Builder()
                     .url(Preferences.UPDATE_URL)
-                    .addHeader(BrowserHeaders.X_REQUEST_ID,
-                            mSharedPreferences.getString(Preferences.UNIQUE_ID, ""))
                     .addHeader(BrowserHeaders.X_APP_VERSION, App.getVersionName())
                     .build();
 
@@ -104,8 +97,7 @@ public class UpdateWorker extends Worker {
     }
 
     private Result downloadApk(String url, String remoteSha, String name) throws IOException {
-        Request downloadRequest = new Request.Builder().url(url).addHeader(BrowserHeaders.X_REQUEST_ID,
-                mSharedPreferences.getString(Preferences.UNIQUE_ID, "")).build();
+        Request downloadRequest = new Request.Builder().url(url).build();
 
         try (Response response = okHttpClient.newCall(downloadRequest).execute()) {
             if (!response.isSuccessful() || response.body() == null) return Result.retry();

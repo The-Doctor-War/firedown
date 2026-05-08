@@ -86,7 +86,6 @@ public class App extends Application implements Configuration.Provider{
             // situation where we create a GeckoRuntime from the Gecko child process (
             return;
         }
-        generateId();
         setTheme();
         purgeDatabases();
         registerActivityLifecycleCallbacks(lifeCycleHandler);
@@ -203,28 +202,6 @@ public class App extends Application implements Configuration.Provider{
         }
     }
 
-    public synchronized static void generateId() {
-
-        SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
-
-        String uniqueId = mSharedPreferences.getString(Preferences.UNIQUE_ID, null);
-
-        if(uniqueId == null){
-            uniqueId = UUID.randomUUID().toString();
-            mSharedPreferences.edit().putString(Preferences.UNIQUE_ID, uniqueId).apply();
-        }
-
-        String key = mSharedPreferences.getString(Preferences.KEY_ID, null);
-
-        if(key == null){
-            byte[] result = new byte[32];
-            SecureRandom secureRandom = new SecureRandom();
-            secureRandom.nextBytes(result);
-            String encoded = Base64.encodeToString(result, Base64.NO_WRAP);
-            mSharedPreferences.edit().putString(Preferences.KEY_ID, encoded).apply();
-        }
-
-    }
 
     public static String getNativeLibraryDir(Context context) {
         ApplicationInfo appInfo = context.getApplicationInfo();

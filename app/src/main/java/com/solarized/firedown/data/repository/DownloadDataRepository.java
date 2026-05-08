@@ -192,15 +192,19 @@ public class DownloadDataRepository {
             if (path == null) continue;
 
             File file = new File(path);
-            if (file.exists()) {
-                if (file.isDirectory()) {
-                    Utils.deleteDirectory(file);
-                }
-                if (file.delete()) {
-                    Log.d(TAG, "Deleted file: " + path);
-                } else {
-                    Log.w(TAG, "Failed to delete file: " + path);
-                }
+            if (!file.exists()) continue;
+
+            // Mutually exclusive — directory deletion is recursive and
+            // already removes the entry, so falling through to file.delete()
+            // afterwards would always return false and log a misleading
+            // "Failed to delete file" warning for every directory we cleaned.
+            if (file.isDirectory()) {
+                Utils.deleteDirectory(file);
+                Log.d(TAG, "Deleted directory: " + path);
+            } else if (file.delete()) {
+                Log.d(TAG, "Deleted file: " + path);
+            } else {
+                Log.w(TAG, "Failed to delete file: " + path);
             }
         }
     }

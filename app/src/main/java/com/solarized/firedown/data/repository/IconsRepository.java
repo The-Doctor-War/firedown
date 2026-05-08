@@ -64,15 +64,28 @@ public class IconsRepository {
 
             @Override
             public void onResponse(@NonNull Call call, @NonNull Response response) {
-                int estimatedRes = 0;
-                if (response.isSuccessful()) {
-                    String length = response.header("Content-Length");
-                    if (length != null) {
-                        estimatedRes = estimateResolution(Long.parseLong(length));
+                // try-with-resources so the response body is always closed,
+                // even if estimateResolution / parseLong throws (a malformed
+                // Content-Length is a NumberFormatException → previously
+                // OkHttp's dispatcher swallowed it, the syncToDatabases call
+                // below was skipped, AND response.close() was never reached,
+                // leaking the connection back into the pool until eviction).
+                try (Response r = response) {
+                    int estimatedRes = 0;
+                    if (r.isSuccessful()) {
+                        String length = r.header("Content-Length");
+                        if (length != null) {
+                            try {
+                                estimatedRes = estimateResolution(Long.parseLong(length));
+                            } catch (NumberFormatException ignored) {
+                                // Fall through with estimatedRes = 0 — the
+                                // syncToDatabases logic treats 0 as "unknown"
+                                // and stores the icon without a resolution hint.
+                            }
+                        }
                     }
+                    syncToDatabases(url, iconUrl, estimatedRes);
                 }
-                syncToDatabases(url, iconUrl, estimatedRes);
-                response.close();
             }
         });
     }

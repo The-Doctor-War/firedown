@@ -9,6 +9,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 
 import com.bumptech.glide.Glide;

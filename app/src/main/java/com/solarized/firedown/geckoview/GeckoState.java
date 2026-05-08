@@ -3,6 +3,7 @@ package com.solarized.firedown.geckoview;
 import android.graphics.Bitmap;
 import android.webkit.URLUtil;
 import androidx.annotation.NonNull;
+import androidx.annotation.UiThread;
 
 import com.solarized.firedown.data.entity.CertificateInfoEntity;
 import com.solarized.firedown.data.entity.ContextElementEntity;
@@ -406,7 +407,14 @@ public class GeckoState {
      * {@code true} if the count actually changed (the mask resolved to
      * a tracked category). Lets the caller decide whether to bother
      * notifying observers.
+     *
+     * <p>Main-thread only — the backing {@link EnumMap} is not synchronized.
+     * Safe today because GeckoView's
+     * {@code ContentBlocking.Delegate.onContentBlocked} (the only caller)
+     * is annotated {@code @UiThread} in the runtime, and the security
+     * sheet's snapshot reader runs on the main thread too.
      */
+    @UiThread
     public boolean incrementBlockedTracker(int antiTrackingMask) {
         TrackingCategory category = TrackingCategory.fromAntiTrackingMask(antiTrackingMask);
         if (category == null) return false;
@@ -420,7 +428,10 @@ public class GeckoState {
      * {@code ContentBlocking.BlockEvent} ({@code getCookieBehaviorCategory})
      * and need their own bucket so the visible count matches what users
      * intuit by "cross-site cookies blocked".
+     *
+     * <p>Main-thread only — see {@link #incrementBlockedTracker(int)}.
      */
+    @UiThread
     public boolean incrementBlockedCookie() {
         Integer current = mBlockedTrackerCounts.get(TrackingCategory.CROSS_SITE_COOKIES);
         mBlockedTrackerCounts.put(TrackingCategory.CROSS_SITE_COOKIES,
@@ -428,6 +439,8 @@ public class GeckoState {
         return true;
     }
 
+    /** Main-thread only — see {@link #incrementBlockedTracker(int)}. */
+    @UiThread
     public void resetBlockedTrackerCounts() {
         mBlockedTrackerCounts.clear();
     }
@@ -435,7 +448,10 @@ public class GeckoState {
     /**
      * @return an unmodifiable snapshot suitable for passing to LiveData;
      * keys present in the map have non-zero counts.
+     *
+     * <p>Main-thread only — see {@link #incrementBlockedTracker(int)}.
      */
+    @UiThread
     public Map<TrackingCategory, Integer> getBlockedTrackerCountsSnapshot() {
         if (mBlockedTrackerCounts.isEmpty()) {
             return Collections.emptyMap();

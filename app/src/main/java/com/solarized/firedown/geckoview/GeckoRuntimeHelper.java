@@ -741,13 +741,16 @@ public class GeckoRuntimeHelper {
 
         GeckoResult<Map<String, Boolean>> geckoResult = GeckoPreferenceController.setGeckoPrefs(preferenceList);
 
+        // accept(success, error) — the success-only overload swallows any
+        // exception from setGeckoPrefs (runtime not ready, IPC error,
+        // unknown pref name) and we'd never know DRM toggling failed.
         geckoResult.accept(map -> {
             if (map == null)
                 return;
             for (Map.Entry<String, Boolean> entry : map.entrySet()) {
                 Log.d(TAG, "setDRM: " + entry.getKey() + "/" + entry.getValue());
             }
-        });
+        }, throwable -> Log.w(TAG, "setDRM failed", throwable));
     }
 
 

@@ -103,8 +103,9 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
             layoutParams.height = mFrameDecorHeight - mActionBarSize;
         }
 
+        // setLayoutParams already schedules a layout pass — the explicit
+        // requestLayout() forced a redundant measure-and-layout cycle.
         mFrameHolder.setLayoutParams(layoutParams);
-        mFrameHolder.requestLayout();
     }
 
     @Override
@@ -168,8 +169,9 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
         mFrameDecorWidth = visibleRect.width();
 
         layoutParams.height = visibleRect.height() - mActionBarSize;
+        // setLayoutParams already schedules a layout pass — the explicit
+        // requestLayout() forced a redundant measure-and-layout cycle.
         mFrameHolder.setLayoutParams(layoutParams);
-        mFrameHolder.requestLayout();
 
         return mView;
     }
@@ -178,15 +180,28 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        BrowserOptionFragment browserOptionFragment = new BrowserOptionFragment();
+        // Defer the child fragment commit to the next frame so the bottom
+        // sheet's slide-in animation paints the holder layout first; the
+        // child's onCreateView (RecyclerView setup, adapter, ViewModel
+        // observers, menu provider) is heavy and otherwise lands inside
+        // the same UI tick as the dialog show, making the animation
+        // visibly stutter on launch.
+        mFrameHolder.post(() -> {
+            // mIsIncognito is captured at observation time, so re-check
+            // the host state — if the dialog was dismissed before the
+            // post fires (rapid back-press), skip the transaction.
+            if (!isAdded() || isStateSaved()) return;
 
-        Bundle childArgs = new Bundle();
-        childArgs.putBoolean(Keys.IS_INCOGNITO, mIsIncognito);
-        browserOptionFragment.setArguments(childArgs);
+            BrowserOptionFragment browserOptionFragment = new BrowserOptionFragment();
 
-        getChildFragmentManager().beginTransaction()
-                .replace(R.id.content_frame, browserOptionFragment, BrowserOptionFragment.class.getSimpleName())
-                .commit();
+            Bundle childArgs = new Bundle();
+            childArgs.putBoolean(Keys.IS_INCOGNITO, mIsIncognito);
+            browserOptionFragment.setArguments(childArgs);
+
+            getChildFragmentManager().beginTransaction()
+                    .replace(R.id.content_frame, browserOptionFragment, BrowserOptionFragment.class.getSimpleName())
+                    .commit();
+        });
 
         mFragmentsViewModel.getOptionsEvent().observe(getViewLifecycleOwner(), optionEntity -> {
             int id = optionEntity.getId();

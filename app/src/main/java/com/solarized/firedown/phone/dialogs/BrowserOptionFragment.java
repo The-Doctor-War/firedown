@@ -110,8 +110,11 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
             if (navIcon != null) DrawableCompat.setTint(navIcon, onSurface);
         }
 
-        mChipGroup.setOnCheckedStateChangeListener(this);
+        // Set the initial checked chip BEFORE attaching the listener so
+        // the synthetic onCheckedChange callback that ChipGroup fires on
+        // .check() doesn't run our sort/filter pipeline once on launch.
         mChipGroup.check(mBrowserDownloadViewModel.getCurrentSortBrowserId());
+        mChipGroup.setOnCheckedStateChangeListener(this);
 
         mToolbar.setContentInsetsAbsolute(getResources().getDimensionPixelSize(R.dimen.list_spacing), 0);
 
@@ -139,79 +142,83 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         // a Glide load).
         mRecyclerView.setItemViewCacheSize(8);
 
-        // Glide's memory cache evicts older bitmaps as the user scrolls
-        // through a long list, so the original top-row thumbnails are
-        // gone by the time the user scrolls back up — leaving a brief
-        // empty frame plus a disk/network round-trip on rebind. Preload
-        // 8 items ahead of the scroll direction so the cache stays
-        // warm for the rows about to enter the viewport.
-        RoundedCorners roundedCorners = new RoundedCorners(
-                getResources().getDimensionPixelOffset(R.dimen.card_radius));
-        RequestOptions baseOptions = new RequestOptions()
-                .apply(RequestOptions.bitmapTransform(roundedCorners));
+        // Defer the preloader and the load-more scroll listener via
+        // RecyclerView.post — they have nothing to contribute to first
+        // frame, and the bottom sheet's slide-in animation makes any
+        // work scheduled here visibly stutter. Building Glide options,
+        // RoundedCorners, and the RecyclerViewPreloader callback chain
+        // all run AFTER the dialog has painted instead of during it.
+        mRecyclerView.post(() -> {
+            if (mRecyclerView == null || mAdapter == null) return;
 
-        RequestManager glide = Glide.with(this);
+            // Glide's memory cache evicts older bitmaps as the user scrolls
+            // through a long list, so the original top-row thumbnails are
+            // gone by the time the user scrolls back up — leaving a brief
+            // empty frame plus a disk/network round-trip on rebind. Preload
+            // 8 items ahead of the scroll direction so the cache stays
+            // warm for the rows about to enter the viewport.
+            RoundedCorners roundedCorners = new RoundedCorners(
+                    getResources().getDimensionPixelOffset(R.dimen.card_radius));
+            RequestOptions baseOptions = new RequestOptions()
+                    .apply(RequestOptions.bitmapTransform(roundedCorners));
 
-        RecyclerViewPreloader<BrowserDownloadEntity> preloader = new RecyclerViewPreloader<>(
-                glide,
-                new ListPreloader.PreloadModelProvider<BrowserDownloadEntity>() {
-                    @NonNull
-                    @Override
-                    public List<BrowserDownloadEntity> getPreloadItems(int position) {
-                        if (position < 0 || position >= mAdapter.getItemCount()) {
-                            return Collections.emptyList();
+            RequestManager glide = Glide.with(this);
+
+            RecyclerViewPreloader<BrowserDownloadEntity> preloader = new RecyclerViewPreloader<>(
+                    glide,
+                    new ListPreloader.PreloadModelProvider<BrowserDownloadEntity>() {
+                        @NonNull
+                        @Override
+                        public List<BrowserDownloadEntity> getPreloadItems(int position) {
+                            if (position < 0 || position >= mAdapter.getItemCount()) {
+                                return Collections.emptyList();
+                            }
+                            BrowserDownloadEntity entity = mAdapter.getCurrentList().get(position);
+                            return entity == null
+                                    ? Collections.emptyList()
+                                    : Collections.singletonList(entity);
                         }
-                        BrowserDownloadEntity entity = mAdapter.getCurrentList().get(position);
-                        return entity == null
-                                ? Collections.emptyList()
-                                : Collections.singletonList(entity);
-                    }
 
-                    @Nullable
-                    @Override
-                    public RequestBuilder<?> getPreloadRequestBuilder(@NonNull BrowserDownloadEntity entity) {
-                        // Match the per-item options the adapter builds
-                        // at bind time so the preload-warmed bitmap and
-                        // the bind-time request resolve to the same
-                        // Glide cache key.
-                        String fileUrl = entity.getFileUrl();
-                        String mimeType = BrowserOptionAdapter.resolveMimeType(
-                                entity.getMimeType(), fileUrl);
-                        // clone() — the lambda is called repeatedly with the
-                        // same shared baseOptions; .set() mutates in place,
-                        // so without the clone every prior preload request
-                        // ends up tagged with the latest item's metadata.
-                        RequestOptions options = baseOptions.clone()
-                                .set(GlideRequestOptions.MIMETYPE, mimeType)
-                                .set(GlideRequestOptions.FILEPATH, fileUrl)
-                                .set(GlideRequestOptions.HEADERS, entity.getFileHeaders())
-                                .set(GlideRequestOptions.KEY, String.valueOf(entity.getUid()));
-                        return GlideHelper.preloadBrowser(glide, entity, options);
-                    }
-                },
-                new FixedPreloadSizeProvider<>(
-                        GlideHelper.browserThumbWidth(),
-                        GlideHelper.browserThumbHeight()),
-                8);
-        mRecyclerView.addOnScrollListener(preloader);
+                        @Nullable
+                        @Override
+                        public RequestBuilder<?> getPreloadRequestBuilder(@NonNull BrowserDownloadEntity entity) {
+                            // Match the per-item options the adapter builds
+                            // at bind time so the preload-warmed bitmap and
+                            // the bind-time request resolve to the same
+                            // Glide cache key.
+                            String fileUrl = entity.getFileUrl();
+                            String mimeType = BrowserOptionAdapter.resolveMimeType(
+                                    entity.getMimeType(), fileUrl);
+                            // clone() — the lambda is called repeatedly with the
+                            // same shared baseOptions; .set() mutates in place,
+                            // so without the clone every prior preload request
+                            // ends up tagged with the latest item's metadata.
+                            RequestOptions options = baseOptions.clone()
+                                    .set(GlideRequestOptions.MIMETYPE, mimeType)
+                                    .set(GlideRequestOptions.FILEPATH, fileUrl)
+                                    .set(GlideRequestOptions.HEADERS, entity.getFileHeaders())
+                                    .set(GlideRequestOptions.KEY, String.valueOf(entity.getUid()));
+                            return GlideHelper.preloadBrowser(glide, entity, options);
+                        }
+                    },
+                    new FixedPreloadSizeProvider<>(
+                            GlideHelper.browserThumbWidth(),
+                            GlideHelper.browserThumbHeight()),
+                    8);
+            mRecyclerView.addOnScrollListener(preloader);
 
-        Log.d("SpanDebug", "listMode=" + mEnableGrid
-                + " span=" + getSpanCount()
-                + " adapter.mList=" + mAdapter.mList
-                + " listCount=" + mAdapter.getCurrentList().size());
+            mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                        mScrollLimit += Preferences.LIST_LIMIT;
+                        mBrowserDownloadViewModel.loadMore(mScrollLimit);
+                    }
+                }
+            });
+        });
 
         updateItemDecoration();
-
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
-                if (!recyclerView.canScrollVertically(1) && newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    mScrollLimit += Preferences.LIST_LIMIT;
-                    mBrowserDownloadViewModel.loadMore(mScrollLimit);
-                }
-            }
-        });
 
         mToolbar.invalidateMenu();
         mToolbar.addMenuProvider(new MenuProvider() {

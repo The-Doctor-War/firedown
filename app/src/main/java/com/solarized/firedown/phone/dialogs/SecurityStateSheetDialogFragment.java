@@ -117,15 +117,15 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
 
         mBlockedTrackersSummaryRow.setOnClickListener(v -> toggleBlockedTrackersExpanded());
 
-        bindBlockedRow(mRowCrossSiteCookies, R.drawable.cookie_24,
+        bindBlockedRow(mRowCrossSiteCookies,
                 R.string.blocked_trackers_cross_site_cookies);
-        bindBlockedRow(mRowSocialMedia, R.drawable.ic_shield_person_24,
+        bindBlockedRow(mRowSocialMedia,
                 R.string.blocked_trackers_social_media);
-        bindBlockedRow(mRowFingerprinters, R.drawable.fingerprint_24,
+        bindBlockedRow(mRowFingerprinters,
                 R.string.blocked_trackers_fingerprinters);
-        bindBlockedRow(mRowCryptominers, R.drawable.ic_memory_24,
+        bindBlockedRow(mRowCryptominers,
                 R.string.blocked_trackers_cryptominers);
-        bindBlockedRow(mRowTrackingContent, R.drawable.footprint_24,
+        bindBlockedRow(mRowTrackingContent,
                 R.string.blocked_trackers_tracking_content);
 
         mTrackingSwitch.setOnCheckedChangeListener(this);
@@ -214,11 +214,9 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     }
 
 
-    private void bindBlockedRow(View row, int iconRes, int labelRes) {
+    private void bindBlockedRow(View row, int labelRes) {
         if (row == null) return;
-        AppCompatImageView icon = row.findViewById(R.id.row_icon);
         TextView label = row.findViewById(R.id.row_label);
-        if (icon != null) icon.setImageResource(iconRes);
         if (label != null) label.setText(labelRes);
     }
 

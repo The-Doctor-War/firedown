@@ -267,11 +267,6 @@
                     android:orientation="vertical"
                     android:visibility="gone">
 
-                    <View
-                        android:id="@+id/blocked_trackers_separator"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="?attr/colorOutlineVariant" />
 
                     <LinearLayout
                         android:id="@+id/blocked_trackers_summary_row"
@@ -282,18 +277,19 @@
                         android:focusable="true"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingStart="16dp"
+                        android:paddingStart="54dp"
                         android:paddingEnd="16dp">
+
 
                         <TextView
                             android:id="@+id/blocked_trackers_summary_text"
-                            style="@style/TextAppearance.Material3.LabelLarge"
+                            style="@style/TextAppearance.Material3.TitleSmall"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:ellipsize="end"
                             android:maxLines="1"
-                            android:textColor="?attr/colorOnSurface" />
+                            android:textColor="?attr/colorOnSurfaceVariant" />
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:id="@+id/blocked_trackers_chevron"

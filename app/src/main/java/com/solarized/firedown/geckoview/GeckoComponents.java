@@ -695,6 +695,16 @@ public class GeckoComponents {
                 } else {
                     mGeckoStateDataRepository.closeGeckoState(geckoState);
                 }
+                // The repositories drop the GeckoState from the tab list
+                // and (for regular tabs) archive it to disk, but they do
+                // not close the GeckoSession itself — the UI tab-close
+                // paths (TabsFragment / TabsIncognitoFragment) call
+                // closeGeckoSession() separately. window.close() routes
+                // here instead, so without this the session stays open
+                // (and pinned in process memory) for every popup that
+                // closes itself. onCloseRequest is @UiThread, so the
+                // close call is safe on this thread.
+                geckoState.closeGeckoSession();
             }
             mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.CLOSE_SESSION, geckoState);
         }

@@ -274,18 +274,37 @@ public class GeckoStateDataRepository {
     public void deleteAll() {
         //Stop all media before clearing tabs
         mGeckoMediaController.clearMedia();
+        // Snapshot the list under the lock and clear it, then close the
+        // sessions outside the synchronized block. closeGeckoSession() must
+        // run on the main thread; if we're already there, do it inline,
+        // otherwise post — the previous implementation silently dropped
+        // sessions on the floor when called off main, which would leak
+        // them since clearing mGeckoStates was the last reference.
+        // Mirrors IncognitoStateRepository.deleteAll().
+        List<GeckoState> toClose;
         synchronized (mGeckoStates) {
+            toClose = new ArrayList<>(mGeckoStates);
             for (GeckoState state : mGeckoStates) {
                 state.clearCachedThumb();
-                if (Looper.getMainLooper().getThread() == Thread.currentThread()) {
-                    state.closeGeckoSession();
-                }
             }
             mGeckoStates.clear();
         }
+        mCurrentId = GeckoState.NULL_SESSION_ID;
+
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            for (GeckoState state : toClose) {
+                state.closeGeckoSession();
+            }
+        } else {
+            new android.os.Handler(Looper.getMainLooper()).post(() -> {
+                for (GeckoState state : toClose) {
+                    state.closeGeckoSession();
+                }
+            });
+        }
+
         mGeckoStatesLiveData.postValue(null);
         mCountLiveData.postValue(0);
-        mCurrentId = GeckoState.NULL_SESSION_ID;
     }
 
     public void closeGeckoState(GeckoState geckoState) {

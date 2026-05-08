@@ -17,6 +17,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.BaseActivity;
@@ -72,6 +73,33 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
             v.setPadding(insets.left, 0, insets.right, insets.bottom);
             return WindowInsetsCompat.CONSUMED;
         });
+    }
+
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (mView == null) return;
+        // The container we modify is the sheet's *parent* (the design_bottom_sheet
+        // FrameLayout that BottomSheetBehavior is attached to), not mView itself.
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) mView.getParent());
+
+        // Cap the width so landscape phones / tablets don't stretch the sheet
+        // edge-to-edge — BottomSheetBehavior centres horizontally when maxWidth
+        // is below parent width. 0dp in values/dimens.xml means "no cap" for
+        // phone-portrait (where full-width is the right affordance);
+        // values-land overrides to 480dp and values-sw600dp to 560dp.
+        int maxWidthPx = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_max_width);
+        if (maxWidthPx > 0) {
+            behavior.setMaxWidth(maxWidthPx);
+        }
+
+        // Skip the half-collapsed state on drag-down (user lands directly on
+        // dismissed) and open fully on first show. Without this, in landscape
+        // the sheet appears at its peek height — a tiny strip at the bottom
+        // of an already-short viewport that's hard to even see.
+        behavior.setSkipCollapsed(true);
+        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
     @Override

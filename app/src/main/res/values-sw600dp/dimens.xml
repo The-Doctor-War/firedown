@@ -2,4 +2,7 @@
 <resources>
     <dimen name="empty_image_height_big">200dp</dimen>
     <dimen name="empty_image_button_width">180dp</dimen>
+    <!-- Tablet (≥ sw600dp): wider sheet than the landscape-phone 480dp,
+         still capped so it doesn't span the full tablet width. -->
+    <dimen name="bottom_sheet_max_width">560dp</dimen>
 </resources>

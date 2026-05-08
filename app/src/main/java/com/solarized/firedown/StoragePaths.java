@@ -62,6 +62,36 @@ public final class StoragePaths {
         deleteRecursive(file);
     }
 
+
+    /**
+     * Sweep orphaned SABR temp directories ({@code .sabr_<timestamp>}) from
+     * the user's downloads folder. {@link com.solarized.firedown.manager.SabrStrategy}
+     * creates one of these per attempted SABR download and removes it via
+     * {@code try/finally}, but a process kill mid-download (OOM, ANR,
+     * uninstall-restart) still leaves them behind.
+     *
+     * <p>Safe to call any time the download manager is known to be
+     * idle — typically once at app startup (the {@code RunnableManager}
+     * Service dies with the process, so no SABR download is in flight
+     * when {@code App.onCreate} runs).
+     *
+     * <p>Disk I/O — call from a background thread.
+     */
+    public static void cleanupSabrTempDirs(@NonNull Context context) {
+        File downloads = new File(getDownloadPath(context));
+        File[] orphans = downloads.listFiles(
+                f -> f.isDirectory() && f.getName().startsWith(".sabr_"));
+        if (orphans == null) return;
+        for (File dir : orphans) {
+            try {
+                FileUtils.deleteDirectory(dir);
+                Log.d(TAG, "cleanupSabrTempDirs: removed " + dir.getName());
+            } catch (IOException e) {
+                Log.w(TAG, "cleanupSabrTempDirs: " + dir, e);
+            }
+        }
+    }
+
     public static void ensureThumbsPath(@NonNull Context context) {
         ensureFolder(new File(getThumbsPath(context)), "ensureThumbsPath");
     }

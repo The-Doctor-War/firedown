@@ -72,22 +72,27 @@ public class Preferences {
     public static final boolean DEFAULT_HTTPS_ONLY = true;
 
     /**
-     * Disk cache toggle. Off = in-memory cache only. Defeats cross-site
-     * cache fingerprinting and leaves no cached content on disk to recover,
-     * at the cost of slower repeat visits. Default OFF (= disk cache on)
-     * since the perf cost is the more visible of the two effects.
+     * Disk cache toggle. Off = on-disk caching (default), On = in-memory
+     * cache only. Disabling defeats cross-site cache fingerprinting and
+     * leaves no cached content on disk to recover, at the cost of slower
+     * repeat visits. Default OFF (= disk cache enabled) since the perf
+     * cost is the more visible of the two effects. Naming follows the
+     * "Disable X" convention used by SETTINGS_DISABLE_WEBGL — the switch
+     * ON means the privacy-preferring action.
      */
-    public static final String SETTINGS_DISK_CACHE = "com.solarized.firedown.preferences.browser.disk.cache";
-    public static final boolean DEFAULT_DISK_CACHE = true;
+    public static final String SETTINGS_DISABLE_DISK_CACHE = "com.solarized.firedown.preferences.browser.disable.disk.cache";
+    public static final boolean DEFAULT_DISABLE_DISK_CACHE = false;
 
     /**
-     * Google Safe Browsing — blocklist for malware / phishing URLs. Sends
-     * URL hash prefixes to Google for matching. Default ON because the
-     * security benefit is concrete and the privacy leak is hash-prefixes
-     * not full URLs; users who care can flip it off.
+     * Disable Google Safe Browsing — its blocklist of malware / phishing
+     * URLs sends URL hash prefixes to Google for matching. The switch ON
+     * stops those network calls but loses warnings on known-bad sites.
+     * Default OFF (= Safe Browsing on) because the security benefit is
+     * concrete and the privacy leak is hash-prefixes not full URLs.
+     * Naming follows the "Disable X" convention.
      */
-    public static final String SETTINGS_SAFE_BROWSING = "com.solarized.firedown.preferences.browser.safebrowsing";
-    public static final boolean DEFAULT_SAFE_BROWSING = true;
+    public static final String SETTINGS_DISABLE_SAFE_BROWSING = "com.solarized.firedown.preferences.browser.disable.safebrowsing";
+    public static final boolean DEFAULT_DISABLE_SAFE_BROWSING = false;
 
     public static final String SETTINGS_ANTI_TRACKING = "com.solarized.firedown.preferences.browser.tracking";
 

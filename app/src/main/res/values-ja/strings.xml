@@ -421,6 +421,12 @@
     <string name="settings_drm_enabled_summary">DRM が必要なサイト（Netflix、Spotify など）で Widevine 再生を許可します。Firedown では DRM で保護されたコンテンツのダウンロードはできません。</string>
     <string name="settings_webrtc_enabled">WebRTCを有効にする</string>
     <string name="settings_webrtc_enabled_summary">P2P通話に必要、実IPアドレスが漏れる可能性があります</string>
+    <string name="settings_https_only_title">HTTPSのみモード</string>
+    <string name="settings_https_only_summary">プレーンテキストのHTTP読み込みをブロックし、サイトごとの上書き設定が可能な警告ページを表示します</string>
+    <string name="settings_disk_cache_disabled">ディスクキャッシュを無効にする</string>
+    <string name="settings_disk_cache_disabled_summary">メモリ内にのみキャッシュします。クロスサイトキャッシュフィンガープリンティングを防ぎ、ディスクには何も残しませんが、再訪問が遅くなります</string>
+    <string name="settings_safe_browsing_disabled">セーフブラウジングを無効にする</string>
+    <string name="settings_safe_browsing_disabled_summary">GoogleへのURLハッシュプレフィックスの送信を停止します。既知のマルウェアやフィッシングサイトの警告が失われます</string>
     <string name="share">共有</string>
     <string name="share_image">画像を共有</string>
     <string name="share_url">URL を共有</string>

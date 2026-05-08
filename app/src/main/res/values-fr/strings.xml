@@ -422,6 +422,12 @@
     <string name="settings_drm_enabled_summary">Autorise Widevine sur les sites nécessitant le DRM (Netflix, Spotify, …). Firedown ne peut toujours pas télécharger les contenus protégés par DRM.</string>
     <string name="settings_webrtc_enabled">Activer WebRTC</string>
     <string name="settings_webrtc_enabled_summary">Nécessaire pour les appels P2P, peut révéler votre IP réelle</string>
+    <string name="settings_https_only_title">Mode HTTPS uniquement</string>
+    <string name="settings_https_only_summary">Bloque les chargements HTTP en clair et affiche une page d\'avertissement avec dérogation par site</string>
+    <string name="settings_disk_cache_disabled">Désactiver le cache disque</string>
+    <string name="settings_disk_cache_disabled_summary">Met les pages en cache uniquement en mémoire. Empêche l\'empreinte par cache inter-sites et ne laisse rien sur le disque, mais ralentit les visites répétées</string>
+    <string name="settings_safe_browsing_disabled">Désactiver la Navigation sécurisée</string>
+    <string name="settings_safe_browsing_disabled_summary">N\'envoie plus de préfixes de hachage d\'URL à Google. Vous perdez les avertissements pour les sites de logiciels malveillants et d\'hameçonnage connus</string>
     <string name="share">Partager</string>
     <string name="share_image">Partager l\'image</string>
     <string name="share_url">Partager l\'URL</string>

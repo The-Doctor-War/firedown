@@ -345,4 +345,10 @@
     <string name="vault_encrypting">Szyfrowanie pliku, proszę czekać…</string>
     <string name="vault_unsupported">Nie można otworzyć tego pliku. Aby otworzyć, przenieś go z bezpiecznego folderu i spróbuj ponownie.</string>
     <string name="bookmark_name">Nazwa</string>
+    <string name="settings_https_only_title">Tryb tylko HTTPS</string>
+    <string name="settings_https_only_summary">Blokuje ładowanie zwykłego HTTP, pokazuje stronę ostrzeżenia z opcją wyjątku dla witryny</string>
+    <string name="settings_disk_cache_disabled">Wyłącz pamięć podręczną dysku</string>
+    <string name="settings_disk_cache_disabled_summary">Buforuj strony tylko w pamięci. Niweluje odcisk pamięci podręcznej między witrynami i nie zostawia niczego na dysku, ale spowalnia ponowne odwiedziny</string>
+    <string name="settings_safe_browsing_disabled">Wyłącz bezpieczne przeglądanie</string>
+    <string name="settings_safe_browsing_disabled_summary">Przestań wysyłać prefiksy skrótów URL do Google. Utracisz ostrzeżenia o znanych witrynach ze złośliwym oprogramowaniem i phishingiem</string>
 </resources>

@@ -347,4 +347,10 @@
     <string name="vault_encrypting">Шифрование файла, пожалуйста, подождите…</string>
     <string name="vault_unsupported">Не могу открыть этот файл. Чтобы открыть, переместите его из безопасной папки и повторите попытку.</string>
     <string name="bookmark_name">Имя</string>
+    <string name="settings_https_only_title">Режим HTTPS</string>
+    <string name="settings_https_only_summary">Блокировать незащищённый HTTP, показывать страницу-предупреждение с возможностью разрешить сайт</string>
+    <string name="settings_disk_cache_disabled">Отключить дисковый кеш</string>
+    <string name="settings_disk_cache_disabled_summary">Кешировать страницы только в памяти. Препятствует межсайтовому отпечатку кеша и не оставляет следов на диске, но замедляет повторные посещения</string>
+    <string name="settings_safe_browsing_disabled">Отключить безопасный просмотр</string>
+    <string name="settings_safe_browsing_disabled_summary">Прекратить отправку префиксов хешей URL в Google. Вы лишаетесь предупреждений о вредоносных и фишинговых сайтах</string>
 </resources>

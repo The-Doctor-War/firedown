@@ -372,17 +372,19 @@ public class SettingsFragment extends BasePreferenceFragment
 
             mGeckoRuntimeHelper.setHttpsOnly(enable);
 
-        } else if (Preferences.SETTINGS_DISK_CACHE.equals(key)) {
+        } else if (Preferences.SETTINGS_DISABLE_DISK_CACHE.equals(key)) {
 
-            boolean enable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_DISK_CACHE);
+            // "Disable X" convention — switch ON means privacy-preferring,
+            // so invert when calling the underlying enable-sense setter.
+            boolean disable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_DISABLE_DISK_CACHE);
 
-            mGeckoRuntimeHelper.setDiskCacheEnabled(enable);
+            mGeckoRuntimeHelper.setDiskCacheEnabled(!disable);
 
-        } else if (Preferences.SETTINGS_SAFE_BROWSING.equals(key)) {
+        } else if (Preferences.SETTINGS_DISABLE_SAFE_BROWSING.equals(key)) {
 
-            boolean enable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_SAFE_BROWSING);
+            boolean disable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_DISABLE_SAFE_BROWSING);
 
-            mGeckoRuntimeHelper.setSafeBrowsing(enable);
+            mGeckoRuntimeHelper.setSafeBrowsing(!disable);
 
         }
 

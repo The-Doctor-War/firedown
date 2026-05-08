@@ -425,10 +425,10 @@
     <string name="settings_webrtc_enabled_summary">Required for P2P calls, can leak your real IP</string>
     <string name="settings_https_only_title">HTTPS-only mode</string>
     <string name="settings_https_only_summary">Block plaintext HTTP loads, show a warning page with a per-site override</string>
-    <string name="settings_disk_cache_title">Disk cache</string>
-    <string name="settings_disk_cache_summary">Cache pages on disk for faster repeat visits. Disable for stronger privacy — no cross-site cache fingerprinting and nothing left on disk to recover</string>
-    <string name="settings_safe_browsing_title">Safe Browsing</string>
-    <string name="settings_safe_browsing_summary">Block known malware and phishing sites. Sends URL hash prefixes to Google for matching</string>
+    <string name="settings_disk_cache_disabled">Disable disk cache</string>
+    <string name="settings_disk_cache_disabled_summary">Cache pages only in memory. Defeats cross-site cache fingerprinting and leaves nothing on disk, but slows repeat visits</string>
+    <string name="settings_safe_browsing_disabled">Disable Safe Browsing</string>
+    <string name="settings_safe_browsing_disabled_summary">Stop sending URL hash prefixes to Google. Loses warnings for known malware and phishing sites</string>
     <string name="share">Share</string>
     <string name="share_image">Share IMAGE</string>
     <string name="share_url">Share URL</string>

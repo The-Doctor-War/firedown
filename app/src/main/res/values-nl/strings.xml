@@ -345,4 +345,10 @@
     <string name="vault_encrypting">Bestand versleutelen, even geduld a.u.b....</string>
     <string name="vault_unsupported">Kan dit bestand niet openen. Om het te openen, verplaatst u het uit de Veilige map en probeert u het opnieuw.</string>
     <string name="bookmark_name">Naam</string>
+    <string name="settings_https_only_title">Alleen-HTTPS-modus</string>
+    <string name="settings_https_only_summary">Blokkeert HTTP-laden in platte tekst, toont een waarschuwingspagina met overschrijving per site</string>
+    <string name="settings_disk_cache_disabled">Schijfcache uitschakelen</string>
+    <string name="settings_disk_cache_disabled_summary">Pagina\'s alleen in geheugen cachen. Verijdelt cross-site cachefingerprinting en laat niets achter op schijf, maar vertraagt herhaalde bezoeken</string>
+    <string name="settings_safe_browsing_disabled">Veilig browsen uitschakelen</string>
+    <string name="settings_safe_browsing_disabled_summary">Stop met het verzenden van URL-hashvoorvoegsels naar Google. Waarschuwingen voor bekende malware- en phishingsites gaan verloren</string>
 </resources>

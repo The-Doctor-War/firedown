@@ -345,4 +345,10 @@
     <string name="vault_encrypting">Dosya şifreleniyor, lütfen bekleyin…</string>
     <string name="vault_unsupported">Bu dosya açılamıyor. Açmak için onu Güvenli Klasörün dışına taşıyın ve tekrar deneyin.</string>
     <string name="bookmark_name">Adı</string>
+    <string name="settings_https_only_title">Yalnızca HTTPS modu</string>
+    <string name="settings_https_only_summary">Düz metin HTTP yüklemelerini engeller, site başına geçersiz kılma seçeneğiyle bir uyarı sayfası gösterir</string>
+    <string name="settings_disk_cache_disabled">Disk önbelleğini devre dışı bırak</string>
+    <string name="settings_disk_cache_disabled_summary">Sayfaları yalnızca bellekte önbellekler. Siteler arası önbellek parmak izini engeller ve diskte hiçbir şey bırakmaz, ancak tekrarlanan ziyaretleri yavaşlatır</string>
+    <string name="settings_safe_browsing_disabled">Güvenli Tarama\'yı devre dışı bırak</string>
+    <string name="settings_safe_browsing_disabled_summary">URL karma öneklerini Google\'a göndermeyi durdurur. Bilinen kötü amaçlı yazılım ve kimlik avı siteleri için uyarıları kaybedersiniz</string>
 </resources>

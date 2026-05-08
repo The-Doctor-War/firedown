@@ -137,20 +137,20 @@
 
 
         <SwitchPreferenceCompat
-            android:defaultValue="true"
+            android:defaultValue="false"
             app:singleLineTitle="false"
-            android:key="com.solarized.firedown.preferences.browser.disk.cache"
-            android:summary="@string/settings_disk_cache_summary"
-            android:title="@string/settings_disk_cache_title"
+            android:key="com.solarized.firedown.preferences.browser.disable.disk.cache"
+            android:summary="@string/settings_disk_cache_disabled_summary"
+            android:title="@string/settings_disk_cache_disabled"
             app:icon="@drawable/ic_memory_24" />
 
 
         <SwitchPreferenceCompat
-            android:defaultValue="true"
+            android:defaultValue="false"
             app:singleLineTitle="false"
-            android:key="com.solarized.firedown.preferences.browser.safebrowsing"
-            android:summary="@string/settings_safe_browsing_summary"
-            android:title="@string/settings_safe_browsing_title"
+            android:key="com.solarized.firedown.preferences.browser.disable.safebrowsing"
+            android:summary="@string/settings_safe_browsing_disabled_summary"
+            android:title="@string/settings_safe_browsing_disabled"
             app:icon="@drawable/ic_shield_24" />
 
 

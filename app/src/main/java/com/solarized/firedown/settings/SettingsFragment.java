@@ -366,6 +366,24 @@ public class SettingsFragment extends BasePreferenceFragment
 
             mGeckoRuntimeHelper.setGeo(block);
 
+        } else if (Preferences.SETTINGS_HTTPS_ONLY.equals(key)) {
+
+            boolean enable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_HTTPS_ONLY);
+
+            mGeckoRuntimeHelper.setHttpsOnly(enable);
+
+        } else if (Preferences.SETTINGS_DISK_CACHE.equals(key)) {
+
+            boolean enable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_DISK_CACHE);
+
+            mGeckoRuntimeHelper.setDiskCacheEnabled(enable);
+
+        } else if (Preferences.SETTINGS_SAFE_BROWSING.equals(key)) {
+
+            boolean enable = sharedPreferences.getBoolean(key, Preferences.DEFAULT_SAFE_BROWSING);
+
+            mGeckoRuntimeHelper.setSafeBrowsing(enable);
+
         }
 
         GeckoState geckoState = mGeckoStateViewModel.getCurrentGeckoState();

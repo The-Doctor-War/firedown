@@ -151,6 +151,18 @@ public class GeckoRuntimeHelper {
         setGeo(sharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION, false));
         setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING, false));
         setDRM(!Preferences.getDRMEnabled(sharedPreferences, context));
+        // User-facing privacy toggles — defaults pick the privacy-preferring
+        // value but every one of them can be flipped from settings.
+        setHttpsOnly(sharedPreferences.getBoolean(
+                Preferences.SETTINGS_HTTPS_ONLY, Preferences.DEFAULT_HTTPS_ONLY));
+        setDiskCacheEnabled(sharedPreferences.getBoolean(
+                Preferences.SETTINGS_DISK_CACHE, Preferences.DEFAULT_DISK_CACHE));
+        setSafeBrowsing(sharedPreferences.getBoolean(
+                Preferences.SETTINGS_SAFE_BROWSING, Preferences.DEFAULT_SAFE_BROWSING));
+        // Always-on hardening prefs (clusters A/B/C from the IronFox audit).
+        // These have no UI toggle — the privacy gain is high enough and the
+        // breakage low enough that it's not a meaningful choice to expose.
+        applyHardeningPrefs();
     }
 
     private void setupWebExtensions() {
@@ -751,6 +763,145 @@ public class GeckoRuntimeHelper {
                 Log.d(TAG, "setDRM: " + entry.getKey() + "/" + entry.getValue());
             }
         }, throwable -> Log.w(TAG, "setDRM failed", throwable));
+    }
+
+
+    /**
+     * Apply privacy-hardening Gecko prefs that don't need a UI toggle.
+     * Called once from {@link #applySharedPreferences} so they're set before
+     * any GeckoSession runs. Three groups:
+     *
+     * <ul>
+     *   <li><b>A — telemetry / speculative network:</b> disables Mozilla
+     *       connectivity & captive-portal probes, DNS / link / predictor
+     *       prefetch, sendBeacon analytics, AMO web API; trims cross-site
+     *       Referer to origin only.</li>
+     *   <li><b>B — Local Network Access:</b> blocks public sites from
+     *       probing the user's home router / NAS / IoT via JS.</li>
+     *   <li><b>C — fingerprinting belt-and-braces:</b> disables battery /
+     *       gamepad / VR / sensor / SpeechSynthesis APIs that
+     *       privacy.resistFingerprinting already neutralises, so the
+     *       protection survives RFP being toggled off.</li>
+     * </ul>
+     *
+     * Mapped from IronFox's {@code templates/gecko/ironfox.cfg}; values
+     * picked for "high privacy gain, near-zero site breakage". User-facing
+     * toggles for HTTPS-only, disk cache, and Safe Browsing live separately
+     * because each has user-visible consequences.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    private void applyHardeningPrefs() {
+        List<GeckoPreferenceController.SetGeckoPreference<?>> prefs = new ArrayList<>();
+
+        // ── Cluster A: telemetry / speculative network ─────────────────────
+        // Mozilla background probes — silent fetches the user never asked for
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.connectivity-service.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.captive-portal-service.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        // DNS / link / predictor prefetch — speculative connections leak
+        // visited sites to the resolver before the user actually clicks
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.dns.disablePrefetch", true, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.predictor.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.prefetch-next", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        // sendBeacon — fire-and-forget analytics on page leave
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "beacon.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        // navigator.mozAddonManager — sites probing for installed extensions
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "extensions.webapi.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        // Referer trimming — cross-site only when base-domains match,
+        // path/query stripped on every Referer (= origin only)
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setIntPref(
+                "network.http.referer.XOriginPolicy", 2, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setIntPref(
+                "network.http.referer.trimmingPolicy", 2, GeckoPreferenceController.PREF_BRANCH_USER));
+
+        // ── Cluster B: Local Network Access blocking ───────────────────────
+        // Stops public-internet sites from probing 192.168.x.x / 10.x / etc.
+        // through the browser. Recent Firefox feature; IronFox enables all.
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.lna.enabled", true, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.lna.blocking", true, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "network.lna.block_trackers", true, GeckoPreferenceController.PREF_BRANCH_USER));
+
+        // ── Cluster C: fingerprinting belt-and-braces ──────────────────────
+        // RFP already neutralises most of these, but they're hard-disables
+        // here so the protection persists if RFP is toggled off.
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "dom.battery.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "dom.gamepad.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "dom.vr.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "device.sensors.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "media.webspeech.synth.enabled", false, GeckoPreferenceController.PREF_BRANCH_USER));
+
+        GeckoResult<Map<String, Boolean>> result = GeckoPreferenceController.setGeckoPrefs(prefs);
+        result.accept(
+                map -> Log.d(TAG, "applyHardeningPrefs: applied " + (map != null ? map.size() : 0) + " prefs"),
+                throwable -> Log.w(TAG, "applyHardeningPrefs failed", throwable));
+    }
+
+
+    /**
+     * HTTPS-only mode — refuse plaintext HTTP loads, show a warning page
+     * with a per-site override option. Setting both regular and PBM
+     * (incognito) variants so the choice applies in both browsing modes.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    public void setHttpsOnly(boolean enable) {
+        List<GeckoPreferenceController.SetGeckoPreference<?>> prefs = new ArrayList<>();
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "dom.security.https_only_mode", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "dom.security.https_only_mode_pbm", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+        GeckoResult<Map<String, Boolean>> result = GeckoPreferenceController.setGeckoPrefs(prefs);
+        result.accept(
+                map -> Log.d(TAG, "setHttpsOnly: " + enable),
+                throwable -> Log.w(TAG, "setHttpsOnly failed", throwable));
+    }
+
+
+    /**
+     * Disk-cache toggle. When disabled, Gecko keeps only an in-memory
+     * cache — eliminates cross-site cache fingerprinting and leftover
+     * tracking traces, at a noticeable repeat-visit perf cost.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    public void setDiskCacheEnabled(boolean enable) {
+        GeckoResult<Void> result = GeckoPreferenceController.setGeckoPref(
+                "browser.cache.disk.enable", enable, GeckoPreferenceController.PREF_BRANCH_USER);
+        result.accept(
+                unused -> Log.d(TAG, "setDiskCacheEnabled: " + enable),
+                throwable -> Log.w(TAG, "setDiskCacheEnabled failed", throwable));
+    }
+
+
+    /**
+     * Safe Browsing — Google's URL-blocklist for malware/phishing. The
+     * privacy/security tradeoff is that URL hash prefixes are sent to
+     * Google for matching. LibreWolf disables, IronFox keeps on; expose
+     * the choice rather than picking one for the user.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    public void setSafeBrowsing(boolean enable) {
+        List<GeckoPreferenceController.SetGeckoPreference<?>> prefs = new ArrayList<>();
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "browser.safebrowsing.malware.enabled", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "browser.safebrowsing.phishing.enabled", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+        GeckoResult<Map<String, Boolean>> result = GeckoPreferenceController.setGeckoPrefs(prefs);
+        result.accept(
+                map -> Log.d(TAG, "setSafeBrowsing: " + enable),
+                throwable -> Log.w(TAG, "setSafeBrowsing failed", throwable));
     }
 
 

@@ -62,6 +62,33 @@ public class Preferences {
 
     public static final String SETTINGS_ENABLE_DRM = "com.solarized.firedown.preferences.browser.enable.drm";
 
+    /**
+     * HTTPS-only mode — refuse plaintext HTTP loads, show a warning page
+     * with a per-site override option. Default ON: the privacy gain is
+     * substantial and modern sites are nearly all HTTPS; the warning page
+     * makes the rare HTTP-only site one click to allow.
+     */
+    public static final String SETTINGS_HTTPS_ONLY = "com.solarized.firedown.preferences.browser.https.only";
+    public static final boolean DEFAULT_HTTPS_ONLY = true;
+
+    /**
+     * Disk cache toggle. Off = in-memory cache only. Defeats cross-site
+     * cache fingerprinting and leaves no cached content on disk to recover,
+     * at the cost of slower repeat visits. Default OFF (= disk cache on)
+     * since the perf cost is the more visible of the two effects.
+     */
+    public static final String SETTINGS_DISK_CACHE = "com.solarized.firedown.preferences.browser.disk.cache";
+    public static final boolean DEFAULT_DISK_CACHE = true;
+
+    /**
+     * Google Safe Browsing — blocklist for malware / phishing URLs. Sends
+     * URL hash prefixes to Google for matching. Default ON because the
+     * security benefit is concrete and the privacy leak is hash-prefixes
+     * not full URLs; users who care can flip it off.
+     */
+    public static final String SETTINGS_SAFE_BROWSING = "com.solarized.firedown.preferences.browser.safebrowsing";
+    public static final boolean DEFAULT_SAFE_BROWSING = true;
+
     public static final String SETTINGS_ANTI_TRACKING = "com.solarized.firedown.preferences.browser.tracking";
 
     public static final String SETTINGS_ANTI_TRACKING_DEFAULT = "com.solarized.firedown.preferences.browser.tracking.default";

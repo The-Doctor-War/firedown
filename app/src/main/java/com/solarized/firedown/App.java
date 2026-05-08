@@ -23,6 +23,7 @@ import androidx.hilt.work.HiltWorkerFactory;
 import androidx.preference.PreferenceManager;
 import androidx.work.Configuration;
 
+import com.solarized.firedown.data.di.Qualifiers;
 import com.solarized.firedown.data.repository.WebHistoryDataRepository;
 import com.solarized.firedown.phone.BrowserActivity;
 
@@ -30,6 +31,7 @@ import com.solarized.firedown.phone.BrowserActivity;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import dagger.hilt.android.HiltAndroidApp;
@@ -57,6 +59,9 @@ public class App extends Application implements Configuration.Provider{
     HiltWorkerFactory workerFactory;
     @Inject
     UpdateScheduler updateScheduler;
+    @Inject
+    @Qualifiers.DiskIO
+    Executor mDiskExecutor;
 
     @Override
     public void onCreate() {
@@ -88,6 +93,11 @@ public class App extends Application implements Configuration.Provider{
         }
         setTheme();
         purgeDatabases();
+        // Sweep orphaned SABR temp dirs (.sabr_<timestamp>) left behind by
+        // process kills mid-download. Safe to do unconditionally here
+        // because RunnableManager is a Service that died with the previous
+        // process — no SABR download is in flight at this point.
+        mDiskExecutor.execute(() -> StoragePaths.cleanupSabrTempDirs(mAppContext));
         registerActivityLifecycleCallbacks(lifeCycleHandler);
         registerComponentCallbacks(lifeCycleHandler);
         createMediaNotificationChannel(mAppContext);

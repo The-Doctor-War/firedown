@@ -3,6 +3,7 @@ package com.solarized.firedown.phone.dialogs;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.view.View;
 import androidx.activity.result.ActivityResult;
@@ -79,20 +80,9 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
     @Override
     public void onStart() {
         super.onStart();
+        applyBottomSheetWidth();
         if (mView == null) return;
-        // The container we modify is the sheet's *parent* (the design_bottom_sheet
-        // FrameLayout that BottomSheetBehavior is attached to), not mView itself.
         BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) mView.getParent());
-
-        // Cap the width so landscape phones / tablets don't stretch the sheet
-        // edge-to-edge — BottomSheetBehavior centres horizontally when maxWidth
-        // is below parent width. 0dp in values/dimens.xml means "no cap" for
-        // phone-portrait (where full-width is the right affordance);
-        // values-land overrides to 480dp and values-sw600dp to 560dp.
-        int maxWidthPx = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_max_width);
-        if (maxWidthPx > 0) {
-            behavior.setMaxWidth(maxWidthPx);
-        }
 
         // Skip the half-collapsed state on drag-down (user lands directly on
         // dismissed) and open fully on first show. Without this, in landscape
@@ -100,6 +90,39 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
         // of an already-short viewport that's hard to even see.
         behavior.setSkipCollapsed(true);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+    }
+
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        // Activities are declared android:configChanges="orientation|screenSize|..."
+        // in the manifest, so rotation doesn't recreate the activity / fragment
+        // and onStart never re-runs. Without this hook, the maxWidth picked up
+        // when the sheet first opened (e.g. portrait → no cap) sticks across
+        // the rotation and the user sees an edge-to-edge sheet in landscape
+        // until they dismiss and reopen. Re-resolve the dimen against the new
+        // configuration's resources and re-apply.
+        applyBottomSheetWidth();
+    }
+
+
+    /**
+     * Reads {@code R.dimen.bottom_sheet_max_width} from the current
+     * configuration and applies it to the sheet's {@link BottomSheetBehavior}.
+     * A value of 0 (the portrait default sentinel) clears the cap by
+     * passing {@code -1} (BottomSheetBehavior's NO_MAX_SIZE), which is
+     * what we want when transitioning landscape → portrait.
+     */
+    private void applyBottomSheetWidth() {
+        if (mView == null || mView.getParent() == null) return;
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from((View) mView.getParent());
+        int maxWidthPx = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_max_width);
+        behavior.setMaxWidth(maxWidthPx > 0 ? maxWidthPx : -1);
+        // setMaxWidth doesn't trigger a relayout itself in current Material
+        // versions; nudge the parent to remeasure so the new cap takes
+        // effect immediately rather than on the next layout pass.
+        ((View) mView.getParent()).requestLayout();
     }
 
     @Override

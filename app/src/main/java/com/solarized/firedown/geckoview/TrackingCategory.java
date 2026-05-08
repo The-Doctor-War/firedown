@@ -38,9 +38,15 @@ public enum TrackingCategory {
                 | ContentBlocking.AntiTracking.STP)) != 0) {
             return SOCIAL_MEDIA;
         }
+        // EMAIL trackers (AntiTracking.EMAIL = 1<<9) ship in the STRICT
+        // ETP set users actually enable, so an unmapped EMAIL block
+        // would silently never reach the visible total. Bucket under
+        // tracking-content rather than minting a sixth UI row — fits
+        // the same "non-specific tracker" mental model.
         if ((mask & (ContentBlocking.AntiTracking.AD
                 | ContentBlocking.AntiTracking.ANALYTIC
-                | ContentBlocking.AntiTracking.CONTENT)) != 0) {
+                | ContentBlocking.AntiTracking.CONTENT
+                | ContentBlocking.AntiTracking.EMAIL)) != 0) {
             return TRACKING_CONTENT;
         }
         return null;

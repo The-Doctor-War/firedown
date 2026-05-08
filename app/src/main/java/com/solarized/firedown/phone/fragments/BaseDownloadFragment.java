@@ -495,6 +495,17 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
     }
 
 
+    @Override
+    public void onDestroyView() {
+        // Drop the cached pointer to the destroyed RecyclerView before
+        // BaseFocusFragment nulls mRecyclerView — otherwise this field
+        // pins the dead view subtree until the fragment instance dies
+        // (or until the next configureRecyclerView re-installs).
+        mPreloaderInstalledOn = null;
+        super.onDestroyView();
+    }
+
+
     protected  void handleTaskStart(ServiceActions action) {
         mNotificationAction = action.getValue();
         mRecyclerView.suppressLayout(true);

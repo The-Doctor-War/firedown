@@ -147,7 +147,17 @@ public class GeckoStateDataRepository {
     }
 
     public void postBlockedTrackerCounts(Map<TrackingCategory, Integer> counts){
-        mBlockedTrackerLiveData.postValue(counts);
+        // setValue when called from main so the security sheet's
+        // observer, which is registered immediately after the refresh
+        // call in onCreateView, sees this value as its initial emission
+        // — postValue would land one frame later via the Looper, and
+        // the observer would receive whichever stale tab's snapshot
+        // was last there before this one.
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            mBlockedTrackerLiveData.setValue(counts);
+        } else {
+            mBlockedTrackerLiveData.postValue(counts);
+        }
     }
 
     public void setCurrentTabId(int tabId){

@@ -204,7 +204,12 @@ public class GlideHelper {
         String mimeType = entity.getFileMimeType();
         long interval = entity.getThumbnailDuration();
 
-        RequestOptions options = requestOptions
+        // clone() so we don't mutate the caller's shared RequestOptions —
+        // .frame()/.override()/.set() return `this` (in-place mutation),
+        // and the adapter / preloader both reuse a single options instance
+        // across every call, so without the clone the most-recent item's
+        // mime/filepath/frame leak into every prior in-flight request.
+        RequestOptions options = requestOptions.clone()
                 .frame(interval)
                 .override(THUMB_WIDTH, THUMB_HEIGHT)
                 .set(GlideRequestOptions.FRAME, interval)
@@ -262,7 +267,12 @@ public class GlideHelper {
         String mimeType = entity.getFileMimeType();
         long interval = entity.getThumbnailDuration();
 
-        RequestOptions options = requestOptions
+        // clone() so we don't mutate the caller's shared RequestOptions —
+        // .frame()/.override()/.set() return `this` (in-place mutation),
+        // and the adapter / preloader both reuse a single options instance
+        // across every call, so without the clone the most-recent item's
+        // mime/filepath/frame leak into every prior in-flight request.
+        RequestOptions options = requestOptions.clone()
                 .frame(interval)
                 .override(THUMB_WIDTH, THUMB_HEIGHT)
                 .set(GlideRequestOptions.FRAME, interval)

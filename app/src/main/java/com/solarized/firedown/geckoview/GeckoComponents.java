@@ -894,6 +894,14 @@ public class GeckoComponents {
             final GeckoState geckoState = findGeckoState(session);
             if (geckoState == null) return;
 
+            // BlockEvent also fires for "cookie loaded" notifications
+            // (STATE_COOKIES_LOADED_*) which carry a non-zero
+            // cookieBehaviorCategory but represent allowed traffic, not
+            // a block. isBlocking() is true only for STATE_COOKIES_BLOCKED_*
+            // (and any antiTracking/safeBrowsing match), so gating here
+            // keeps loaded-cookie chatter out of the visible total.
+            if (!event.isBlocking()) return;
+
             // BlockEvent fires for cookie behaviour reasons too — those carry
             // a non-zero cookieBehaviorReason but no AntiTracking bits, so the
             // category mapper returns null for them and we just skip. The

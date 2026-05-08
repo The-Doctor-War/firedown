@@ -177,7 +177,11 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                         String fileUrl = entity.getFileUrl();
                         String mimeType = BrowserOptionAdapter.resolveMimeType(
                                 entity.getMimeType(), fileUrl);
-                        RequestOptions options = baseOptions
+                        // clone() — the lambda is called repeatedly with the
+                        // same shared baseOptions; .set() mutates in place,
+                        // so without the clone every prior preload request
+                        // ends up tagged with the latest item's metadata.
+                        RequestOptions options = baseOptions.clone()
                                 .set(GlideRequestOptions.MIMETYPE, mimeType)
                                 .set(GlideRequestOptions.FILEPATH, fileUrl)
                                 .set(GlideRequestOptions.HEADERS, entity.getFileHeaders())

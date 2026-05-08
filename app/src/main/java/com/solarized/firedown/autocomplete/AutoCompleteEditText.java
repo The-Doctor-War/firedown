@@ -249,6 +249,19 @@ public class AutoCompleteEditText extends FocusEditText {
 
 
     @Override
+    protected void onDetachedFromWindow() {
+        // addTextChangedListener is additive — without a matching
+        // remove on detach, a view that gets attached/detached
+        // repeatedly (e.g. ViewPager + retained fragment, config
+        // change with the view in a back-stack) accumulates duplicate
+        // watchers and TextChangeListener fires N times per keystroke.
+        // setOnKeyListener is a setter so it doesn't need a clear.
+        removeTextChangedListener(TextChangeListener);
+        super.onDetachedFromWindow();
+    }
+
+
+    @Override
     public InputConnection onCreateInputConnection(@NonNull EditorInfo outAttrs) {
         return new MyInputConnection(super.onCreateInputConnection(outAttrs),
                 true);

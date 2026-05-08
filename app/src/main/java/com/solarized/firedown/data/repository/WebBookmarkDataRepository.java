@@ -9,8 +9,10 @@ import com.solarized.firedown.data.di.Qualifiers;
 import com.solarized.firedown.data.entity.WebBookmarkEntity;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.utils.Utils;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,7 +21,16 @@ import javax.inject.Singleton;
 public class WebBookmarkDataRepository {
 
     private final WebBookmarkDao mWebBookmarkDao;
-    private final HashSet<Integer> mSyncEntities = new HashSet<>();
+    // Read on the caller thread (getCount, contains) and written on a
+    // mix of caller thread (add/delete/deleteAll) and disk executor
+    // (initial population from DAO). HashSet is not thread-safe, and
+    // an unsynchronized add() racing with the init addAll() leaks
+    // bookmarks into "saved but absent from sync set" state. Wrap in
+    // a synchronized view — every operation we use is single-call
+    // (add/remove/contains/clear/size), so no need for compound
+    // synchronized blocks at call sites.
+    private final Set<Integer> mSyncEntities =
+            Collections.synchronizedSet(new HashSet<>());
 
     private final Executor mDiskExecutor;
 

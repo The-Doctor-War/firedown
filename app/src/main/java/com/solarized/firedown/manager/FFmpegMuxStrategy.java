@@ -197,7 +197,12 @@ public class FFmpegMuxStrategy implements DownloadStrategy, FFmpegListener {
             if (body != null) body.close();
             if (httpResponse != null) httpResponse.close();
             try { if (input != null) input.close(); } catch (IOException ignored) {}
-            try { if (output != null) { output.flush(); output.close(); } } catch (IOException ignored) {}
+            // Separate try blocks: if flush() throws (disk full mid-write —
+            // exactly when this finally matters), the previous single-try
+            // variant skipped close() and leaked the underlying FileOutputStream's
+            // file descriptor until GC finalised it.
+            try { if (output != null) output.flush(); } catch (IOException ignored) {}
+            try { if (output != null) output.close(); } catch (IOException ignored) {}
         }
     }
 

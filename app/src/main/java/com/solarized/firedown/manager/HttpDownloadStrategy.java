@@ -239,7 +239,12 @@ public class HttpDownloadStrategy implements DownloadStrategy {
 
     private static void closeQuietly(InputStream in, OutputStream out, ResponseBody body, Response response) {
         try { if (in != null) in.close(); } catch (IOException ignored) {}
-        try { if (out != null) { out.flush(); out.close(); } } catch (IOException ignored) {}
+        // Separate try blocks: if flush() throws (disk full mid-write — exactly
+        // when this finally matters), the previous single-try variant skipped
+        // close() and leaked the underlying FileOutputStream's file descriptor
+        // until GC finalised it.
+        try { if (out != null) out.flush(); } catch (IOException ignored) {}
+        try { if (out != null) out.close(); } catch (IOException ignored) {}
         if (body != null) body.close();
         if (response != null) response.close();
     }

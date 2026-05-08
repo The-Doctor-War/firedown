@@ -91,9 +91,25 @@ public class SabrStrategy implements DownloadStrategy {
             return;
         }
 
+        // try/finally so tempDir is removed on every exit path including
+        // the uncaught IOException from sabrDownloader.download() (network
+        // / disk error) and any exception out of the FFmpeg mux step. The
+        // previous structure relied on inline cleanupTempDir() calls and
+        // missed at least the IOException case, leaving .sabr_<ts> dirs
+        // accumulating under /Download/Firedown.
+        try {
+            executeInternal(request, file, tempDir);
+        } finally {
+            cleanupTempDir(tempDir);
+        }
+    }
+
+
+    private void executeInternal(DownloadRequest request, File file, File tempDir)
+            throws IOException {
         sabrDownloader = new SabrDownloader(context.getOkHttpClient());
-        sabrDownloader.setStreamingUrl(sabrUrl);
-        sabrDownloader.setUstreamerConfig(sabrConfig);
+        sabrDownloader.setStreamingUrl(request.getSabrUrl());
+        sabrDownloader.setUstreamerConfig(request.getSabrConfig());
 
         // PO token from BotGuard — enables full download without attestation wall
         String poToken = request.getSabrPoToken();
@@ -160,7 +176,6 @@ public class SabrStrategy implements DownloadStrategy {
             Log.e(TAG, "SABR download failed: " + e.getMessage(), e);
 
             if (isDeleted()) {
-                cleanupTempDir(tempDir);
                 if (file.exists()) file.delete();
                 return;
             }
@@ -169,7 +184,6 @@ public class SabrStrategy implements DownloadStrategy {
             File videoTemp = new File(tempDir, "video_sabr.mp4");
             File audioTemp = new File(tempDir, "audio_sabr.m4a");
             if (!videoTemp.exists() || videoTemp.length() == 0) {
-                cleanupTempDir(tempDir);
                 callback.onError(MessageHelper.IOEXCEPTION);
                 return;
             }
@@ -179,12 +193,11 @@ public class SabrStrategy implements DownloadStrategy {
         }
 
         // ====================================================================
-        // 4. Handle delete — abort, clean up everything, no mux
+        // 4. Handle delete — abort, no mux
         // ====================================================================
 
         if (isDeleted()) {
             Log.d(TAG, "Download deleted, cleaning up");
-            cleanupTempDir(tempDir);
             if (file.exists()) file.delete();
             return;
         }
@@ -193,7 +206,6 @@ public class SabrStrategy implements DownloadStrategy {
         if (result.videoFile == null || !result.videoFile.exists()
                 || result.videoFile.length() == 0) {
             Log.w(TAG, "No video data downloaded");
-            cleanupTempDir(tempDir);
             if (!stopped) {
                 callback.onError(MessageHelper.IOEXCEPTION);
             }
@@ -251,9 +263,6 @@ public class SabrStrategy implements DownloadStrategy {
         );
 
         ffmpegDownloader.free();
-
-        // Always clean temp files after mux
-        cleanupTempDir(tempDir);
 
         // Delete arrived during mux
         if (isDeleted()) {

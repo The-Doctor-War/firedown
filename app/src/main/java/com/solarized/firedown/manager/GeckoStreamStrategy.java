@@ -6,6 +6,7 @@ import com.solarized.firedown.data.Download;
 import com.solarized.firedown.data.di.RepositoryEntryPoint;
 import com.solarized.firedown.data.repository.GeckoStateDataRepository;
 import com.solarized.firedown.geckoview.GeckoState;
+import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.MessageHelper;
 
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.util.HashMap;
+import java.util.Map;
 
 import dagger.hilt.android.EntryPointAccessors;
 import okhttp3.Headers;
@@ -97,9 +100,14 @@ public class GeckoStreamStrategy implements DownloadStrategy {
                         + " (webResponse=" + (webResponse == null ? "null" : "non-null")
                         + " body=" + (webResponse == null ? "n/a" : (webResponse.body == null ? "null" : "non-null")) + ")");
                 // Fall back to OkHttp — pulled from the context, not a static field.
+                // Strip any inherited Range header so we don't download the
+                // tiny slice the original player request was asking for; we
+                // want the whole file from byte 0.
+                Map<String, String> headers = new HashMap<>(context.getHeaders());
+                headers.remove(BrowserHeaders.RANGES);
                 Request httpRequest = new Request.Builder()
                         .url(request.getUrl())
-                        .headers(Headers.of(context.getHeaders()))
+                        .headers(Headers.of(headers))
                         .build();
 
                 httpResponse = context.getOkHttpClient().newCall(httpRequest).execute();

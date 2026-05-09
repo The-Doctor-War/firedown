@@ -176,7 +176,7 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
         // notification "Close all" action), navigate to regular home.
         mIncognitoStateViewModel.getTabsCount().observe(getViewLifecycleOwner(), count -> {
             mBottomNavigationBar.onTabsCount(count);
-            if (count != null && count == 0) {
+            if (count == 0) {
                 Log.d(TAG, "All incognito tabs closed externally, navigating to regular home");
                 resetWindowTheme();
                 NavigationUtils.navigateSafe(mNavController, R.id.action_home_incognito_to_home);
@@ -431,7 +431,8 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
 
     // ── Navigation helpers ──────────────────────────────────────────
 
-    private void openUri(String url) {
+    private void openUri(String text) {
+        String url = mSearchRepository.parseUri(text);
         Log.d(TAG, "openUri: url=" + url);
         GeckoState geckoState = mIncognitoStateViewModel.getCurrentGeckoState();
         GeckoStateEntity entity = geckoState.getGeckoStateEntity();

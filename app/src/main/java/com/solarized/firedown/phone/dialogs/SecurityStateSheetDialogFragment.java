@@ -21,6 +21,7 @@ import com.google.android.material.materialswitch.MaterialSwitch;
 import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.CertificateInfoEntity;
+import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
 import com.solarized.firedown.data.models.IncognitoStateViewModel;
 import com.solarized.firedown.geckoview.GeckoResources;
@@ -31,7 +32,9 @@ import com.solarized.firedown.utils.NavigationUtils;
 import com.solarized.firedown.utils.UrlStringUtils;
 import com.solarized.firedown.utils.WebUtils;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragment
         implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -47,6 +50,9 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     private TextView mHostText;
     private View mHostCert;
     private AppCompatImageView mTrackingIcon;
+    private AppCompatImageView mHostImage;
+    private String mDomain;
+    private String mLastIconUrl;
     private View mBlockedTrackersSummaryRow;
     private TextView mBlockedTrackersSummaryText;
     private boolean mTrackingEnabledForSite;
@@ -115,7 +121,11 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         TextView host = mView.findViewById(R.id.host);
         TextView hostUrl = mView.findViewById(R.id.host_url);
 
-        AppCompatImageView hostImage = mView.findViewById(R.id.host_image);
+        // Field-scoped: the tabs LiveData observer in onViewCreated
+        // re-binds the favicon when the icon arrives after the sheet
+        // has already painted (favicon resolution is async and routinely
+        // races the user opening this dialog).
+        mHostImage = mView.findViewById(R.id.host_image);
 
         View hostClear = mView.findViewById(R.id.host_clear);
 
@@ -123,30 +133,29 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         mHostCert.setOnClickListener(this);
 
         String url;
-        String domain;
-
         if (mCertificateInfoEntity != null) {
             url = mCertificateInfoEntity.url;
-            domain = mCertificateInfoEntity.host;
+            mDomain = mCertificateInfoEntity.host;
         } else {
             url = mGeckoState.getEntityUri();
-            domain = WebUtils.getDomainName(url);
+            mDomain = WebUtils.getDomainName(url);
         }
 
         mHostCert.setEnabled(mCertificateInfoEntity != null);
 
         host.setText(GeckoResources.isOnboarding(url) ? GeckoResources.ABOUT_ONBOARDING : mGeckoState.getEntityTitle());
-        hostUrl.setText(domain);
+        hostUrl.setText(mDomain);
 
         boolean isSecure = mCertificateInfoEntity != null && mCertificateInfoEntity.isSecure;
 
-        hostClear.setEnabled(isUrlValidForCleaning(domain));
+        hostClear.setEnabled(isUrlValidForCleaning(mDomain));
 
         mHostText.setText(isSecure ? R.string.quick_settings_sheet_secure_connection_2 : R.string.quick_settings_sheet_insecure_connection_2);
         mHostText.setCompoundDrawablesRelativeWithIntrinsicBounds(
                 isSecure ? R.drawable.encryption_light_24 : R.drawable.no_encryption_light_24, 0, 0, 0);
 
-        loadFavicon(hostImage, domain);
+        mLastIconUrl = mGeckoState.getEntityIcon();
+        loadFavicon(mHostImage, mDomain);
 
         // Ads count — routed to the correct per-mode stream so the incognito
         // sheet never reflects counts from regular browsing and vice versa.
@@ -246,6 +255,32 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
                     isSecure ? R.drawable.encryption_light_24 : R.drawable.no_encryption_light_24, 0, 0, 0);
             mHostCert.setEnabled(true);
         });
+
+        // Favicon resolution is async and routinely races the user opening
+        // this sheet — the GeckoSession's icon callback can land seconds
+        // later. Observe the existing tabs LiveData (already updated by
+        // GeckoStateDataRepository.updateIcon → notifyTabs) and rebind the
+        // host_image whenever our entity's icon string actually changes.
+        // The equality short-circuit makes per-emission work O(1) so other
+        // tab-list events (new tab / close tab / title update) are free.
+        LiveData<List<GeckoStateEntity>> tabsLive = mIsIncognito
+                ? mIncognitoStateViewModel.getTabs()
+                : mGeckoStateViewModel.getTabs();
+
+        tabsLive.observe(getViewLifecycleOwner(), tabs -> {
+            if (tabs == null || mGeckoState == null || mHostImage == null) return;
+            int id = mGeckoState.getEntityId();
+            for (GeckoStateEntity entity : tabs) {
+                if (entity.getId() != id) continue;
+                String icon = entity.getIcon();
+                if (!Objects.equals(icon, mLastIconUrl)) {
+                    mLastIconUrl = icon;
+                    mGeckoState.setEntityIcon(icon);
+                    loadFavicon(mHostImage, mDomain);
+                }
+                break;
+            }
+        });
     }
 
     @Override
@@ -327,6 +362,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         mAdsCounterTextView = null;
         mTrackingIcon = null;
         mTrackingSubtext = null;
+        mHostImage = null;
         mBlockedTrackersSummaryRow = null;
         mBlockedTrackersSummaryText = null;
         mView = null;

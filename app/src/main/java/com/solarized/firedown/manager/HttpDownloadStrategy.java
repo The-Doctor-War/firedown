@@ -146,14 +146,27 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                 file = new File(resolvedPath);
             }
 
-            // Download
+            // Download.
+            //
+            // Append mode is derived from downloadedLength, NOT the original
+            // isResume snapshot. makeRequest may internally fall back from a
+            // 416 (e.g. resume against a file that's already complete on
+            // disk, or whose stored partial length exceeds the server's
+            // current size) by stripping the Range header and resetting
+            // downloadedLength to 0. If we still opened the output in append
+            // mode here, we'd write a fresh full body on top of the existing
+            // partial bytes and double the file. Keying off downloadedLength
+            // makes the 416 fallback truncate-and-rewrite, which is what we
+            // actually want.
+            boolean appendMode = downloadedLength > 0;
+
             Log.d(TAG, "execute: starting copy file=" + file.getAbsolutePath()
-                    + " appendMode=" + isResume
+                    + " appendMode=" + appendMode
                     + " startAt=" + downloadedLength
                     + " totalLength=" + totalLength);
 
             input = new BufferedInputStream(body.byteStream());
-            output = new BufferedOutputStream(new FileOutputStream(file, isResume));
+            output = new BufferedOutputStream(new FileOutputStream(file, appendMode));
 
             byte[] data = new byte[BYTE_SIZE];
             int count;

@@ -334,7 +334,8 @@ public class SettingsFragment extends BasePreferenceFragment
         } else if (Preferences.SETTINGS_ENABLE_DRM.equals(key)) {
 
             boolean enabled = sharedPreferences.getBoolean(key, false);
-
+            Log.d(TAG, "SETTINGS_ENABLE_DRM toggle changed: enabled=" + enabled
+                    + " → setDRM(disable=" + (!enabled) + ")");
             mGeckoRuntimeHelper.setDRM(!enabled);
 
         } else if (Preferences.SETTINGS_ENABLE_JIT.equals(key)) {

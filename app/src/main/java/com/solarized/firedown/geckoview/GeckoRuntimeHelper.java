@@ -162,7 +162,10 @@ public class GeckoRuntimeHelper {
                 Preferences.DEFAULT_BLOCK_LOCATION));
         setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING,
                 Preferences.DEFAULT_RESIST_FINGERPRINTING));
-        setDRM(!Preferences.getDRMEnabled(sharedPreferences));
+        boolean drmEnabledPref = Preferences.getDRMEnabled(sharedPreferences);
+        Log.d(TAG, "init: SETTINGS_ENABLE_DRM resolved to " + drmEnabledPref
+                + " → setDRM(disable=" + (!drmEnabledPref) + ")");
+        setDRM(!drmEnabledPref);
         setHttpsOnly(sharedPreferences.getBoolean(
                 Preferences.SETTINGS_HTTPS_ONLY, Preferences.DEFAULT_HTTPS_ONLY));
         setDiskCacheEnabled(!sharedPreferences.getBoolean(
@@ -763,6 +766,9 @@ public class GeckoRuntimeHelper {
 
         boolean enable = !disable;
 
+        Log.d(TAG, "setDRM: enter disable=" + disable
+                + " → media.eme.enabled=true media.gmp-widevinecdm.enabled=" + enable);
+
         List<GeckoPreferenceController.SetGeckoPreference<?>> preferenceList = new ArrayList<>();
 
         preferenceList.add(GeckoPreferenceController.SetGeckoPreference
@@ -776,11 +782,23 @@ public class GeckoRuntimeHelper {
         // accept(success, error) — the success-only overload swallows any
         // exception from setGeckoPrefs (runtime not ready, IPC error,
         // unknown pref name) and we'd never know DRM toggling failed.
+        //
+        // The Boolean in the result map is "did Gecko accept this pref
+        // change". A pref returning false means the runtime refused our
+        // value (e.g. locked pref, unknown name, branch mismatch) and the
+        // pref retains whatever it was before — that's exactly the
+        // scenario we want surfaced when video stops working.
         geckoResult.accept(map -> {
-            if (map == null)
+            if (map == null) {
+                Log.w(TAG, "setDRM: setGeckoPrefs returned null map (runtime not ready?)");
                 return;
+            }
+            if (map.isEmpty()) {
+                Log.w(TAG, "setDRM: setGeckoPrefs returned an empty map");
+                return;
+            }
             for (Map.Entry<String, Boolean> entry : map.entrySet()) {
-                Log.d(TAG, "setDRM: " + entry.getKey() + "/" + entry.getValue());
+                Log.d(TAG, "setDRM: applied " + entry.getKey() + " accepted=" + entry.getValue());
             }
         }, throwable -> Log.w(TAG, "setDRM failed", throwable));
     }

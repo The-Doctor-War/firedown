@@ -239,6 +239,19 @@ static int64_t seek_input_stream(void *opaque, int64_t seekPos, int whence){
     struct MetadataReader *metadata = sc->reader;
     JNIEnv *env;
 
+    /* [BUG FIX] Honour interrupt before re-entering Java.
+     *
+     * The AVIOInterruptCB on the format context fires between AVIO
+     * calls but doesn't break an in-flight Java InputStream call. If
+     * a stop arrives while we're sitting in CallLongMethod, the
+     * current call won't return until Java does — but the *next*
+     * callback invocation can short-circuit. Without this check
+     * FFmpeg's HLS/DASH demuxers keep re-entering Java even after
+     * the user has cancelled. */
+    if (metadata == NULL || metadata->interrupt) {
+        return AVERROR_EXIT;
+    }
+
     env = get_jni_env(metadata->get_javavm);
 
     if (!env)
@@ -276,6 +289,12 @@ static int read_input_stream(void *opaque, uint8_t *buf, int buf_size) {
     struct StreamContext *sc = (struct StreamContext *) opaque;
     struct MetadataReader *metadata = sc->reader;
     JNIEnv *env;
+
+    /* [BUG FIX] Honour interrupt before re-entering Java — see
+     * seek_input_stream above for the same rationale. */
+    if (metadata == NULL || metadata->interrupt) {
+        return AVERROR_EXIT;
+    }
 
     env = get_jni_env(metadata->get_javavm);
 
@@ -561,6 +580,24 @@ void jni_dealloc_metadatareader(JNIEnv *env, jobject thiz) {
     LOGI(6, "jni_dealloc_metadatareader");
 
     if (metadataReader != NULL) {
+
+        /* [BUG FIX] Set interrupt BEFORE closing inputs.
+         *
+         * The HLS / DASH / mov demuxers FFmpeg may have spawned during
+         * extraction can outlive the synchronous JNI extraction call —
+         * they sit inside our AVIO read/seek callbacks waiting on a
+         * Java InputStream call to return. avformat_close_input waits
+         * for those threads, but only the interrupt callback can tell
+         * them to bail. Without setting `interrupt` first, the auxiliary
+         * thread keeps blocking in Java I/O, the close hangs, and any
+         * later access to `sc->reader` from the still-running callback
+         * would dereference the freed MetadataReader. Also covers the
+         * residual case where the close races a pending callback the
+         * AVIO context still has queued.
+         *
+         * `interrupt` is volatile, so the write is visible to the
+         * extraction thread without locking. */
+        metadataReader->interrupt = TRUE;
 
         /* [OOM FIX] Clean up any lingering DirectByteBuffer global refs */
         for (int i = 0; i < MAX_METADATA_STREAMS; i++) {

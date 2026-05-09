@@ -1212,7 +1212,7 @@ public class GeckoComponents {
 
             switch (perm.permission) {
                 case PERMISSION_GEOLOCATION:
-                    if(mSharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION, false)){
+                    if(mSharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION, Preferences.DEFAULT_BLOCK_LOCATION)){
                         return GeckoResult.fromValue(ContentPermission.VALUE_DENY);
                     }
                     resId = R.string.request_geolocation;
@@ -1224,6 +1224,19 @@ public class GeckoComponents {
                 case PERMISSION_AUTOPLAY_INAUDIBLE:
                     return GeckoResult.fromValue(ContentPermission.VALUE_ALLOW);
                 case PERMISSION_MEDIA_KEY_SYSTEM_ACCESS:
+                    // The EME pref cluster (media.eme.enabled,
+                    // media.gmp-widevinecdm.*, media.gmp-manager.*,
+                    // browser.eme.ui.enabled) doesn't gate this prompt —
+                    // PERMISSION_MEDIA_KEY_SYSTEM_ACCESS is a separate
+                    // per-page content permission that fires every time
+                    // a page calls navigator.requestMediaKeySystemAccess,
+                    // regardless of whether we have a CDM to grant. With
+                    // the DRM toggle off, auto-deny silently so the user
+                    // doesn't see a prompt for a feature they explicitly
+                    // turned off.
+                    if (!mSharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_DRM, false)) {
+                        return GeckoResult.fromValue(ContentPermission.VALUE_DENY);
+                    }
                     resId = R.string.request_media_key_system_access;
                     break;
                 case PERMISSION_STORAGE_ACCESS:

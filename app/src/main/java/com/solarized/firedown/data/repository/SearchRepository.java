@@ -16,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -128,10 +130,29 @@ public class SearchRepository {
         }
     }
 
+    /**
+     * Resolves user input to a URL.
+     *
+     * URL-like or valid-search-query input is returned normalised. Anything
+     * else is treated as a search term and embedded into the configured
+     * search engine's URL after URL-encoding — without the encoding,
+     * queries with spaces (e.g. "cnn cnn") produced URLs containing
+     * literal whitespace, which then failed {@link UrlStringUtils#isURLLike}
+     * on a subsequent call to this method and got re-wrapped in the search
+     * format on each pass. URL-encoding makes parseUri idempotent and
+     * matches what {@code AutoCompleteSearch.encodeSearch} already does
+     * for the autocomplete dropdown's URLs.
+     */
     public String parseUri(String currentUri) {
         String uri = currentUri;
         if (!UrlStringUtils.isURLLike(uri) && !UrlStringUtils.isValidSearchQueryUrl(uri)) {
-            uri = String.format(getSearchFormat(), uri);
+            String encoded;
+            try {
+                encoded = URLEncoder.encode(uri, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                encoded = uri;
+            }
+            uri = String.format(getSearchFormat(), encoded);
         }
         return UrlStringUtils.toNormalizedURL(uri);
     }

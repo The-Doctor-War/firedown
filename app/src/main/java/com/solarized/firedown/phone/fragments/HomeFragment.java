@@ -424,7 +424,12 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     }
 
 
-    private void openUri(String url){
+    private void openUri(String text){
+        // Format here, not downstream. BrowserFragment.setGeckoViewSession
+        // only runs parseUri when opening a brand-new GeckoSession, so a
+        // toolbar commit that lands on an already-open session would
+        // otherwise pass the raw query straight to loadUri.
+        String url = mSearchRepository.parseUri(text);
         Log.d(TAG, "openUri: url=" + url);
         GeckoState geckoState = mGeckoStateViewModel.getCurrentGeckoState();
         GeckoStateEntity geckoStateEntity = geckoState.getGeckoStateEntity();

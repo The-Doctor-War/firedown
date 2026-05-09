@@ -229,6 +229,13 @@ public class HttpDownloadStrategy implements DownloadStrategy {
         OkHttpClient client = context.getOkHttpClient();
 
         Map<String, String> perCallHeaders = new HashMap<>(context.getHeaders());
+        // Strip any inherited Range header. context.getHeaders() carries the
+        // headers from the original request that GeckoView intercepted, which
+        // for a video element is typically a partial-range request from the
+        // player (e.g. bytes=4068494-4358829). Without this we'd download the
+        // tiny slice the player was streaming and report success at EOF —
+        // exactly the "first bytes only" truncation we were chasing.
+        perCallHeaders.remove(BrowserHeaders.RANGES);
         if (isResume) {
             perCallHeaders.put(BrowserHeaders.RANGES, "bytes=" + downloadedLength + "-");
         }

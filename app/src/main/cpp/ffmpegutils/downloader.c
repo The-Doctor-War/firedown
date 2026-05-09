@@ -715,7 +715,16 @@ static int downloader_ctx_interrupt_callback(void *p) {
 
 int downloader_create_interrupt_callback(struct Downloader *downloader) {
     LOGI(3, "downloader_create_interrupt_callback");
-    downloader->interrupt = FALSE;
+    /* [BUG FIX] Do NOT reset `interrupt` here. This function is called
+     * from inside the downloader_set_data_source pipeline, which checks
+     * `interrupt` between every step. Clearing the flag here silently
+     * undid a stop request that arrived between alloc_input_contexts
+     * and create_interrupt_callback — the rest of the pipeline (open
+     * inputs, find streams, alloc queues, start mux thread) then ran
+     * in spite of the user having requested cancellation. Mirrors the
+     * same fix already applied to metadatareader.c — the flag is now
+     * cleared exactly once, in jni_downloader_start, before the
+     * mutex_operation acquire. */
     downloader->interrupt_callback = (AVIOInterruptCB) {
             downloader_ctx_interrupt_callback, downloader
     };
@@ -1628,11 +1637,18 @@ int jni_downloader_start(JNIEnv *env, jobject thiz, jobjectArray jurls, jobjectA
 
     pthread_mutex_lock(&downloader->mutex_operation);
 
+    /* Clear `interrupt` once here, under mutex_operation, after we've
+     * checked for a stop request that arrived before we acquired the
+     * lock. Anything that arrives during set_data_source / prepare /
+     * read needs to honour the flag, so this is the only place that
+     * resets it — the create_interrupt_callback step downstream used
+     * to clear it per-input and silently lost stop requests. */
     if (downloader->interrupt) {
         LOGE(2, "jni_downloader_start interrupted before start");
         pthread_mutex_unlock(&downloader->mutex_operation);
         goto end;
     }
+    downloader->interrupt = FALSE;
 
     ret = downloader_set_data_source(&state, dicts, nb_urls, met,
                                      file_paths, nb_urls, output_path,

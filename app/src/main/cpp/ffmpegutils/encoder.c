@@ -791,7 +791,13 @@ static int encoder_ctx_interrupt_callback(void *p) {
 
 int encoder_create_interrupt_callback(struct Encoder *encoder) {
     LOGI (3, "encoder_ctx_interrupt_setup");
-    encoder->interrupt = FALSE;
+    /* [BUG FIX] Do NOT reset `interrupt` here. encoder_set_data_source
+     * checks `interrupt` between every step; clearing the flag mid-
+     * pipeline silently undid a stop request that arrived between
+     * alloc_input_context and create_interrupt_callback. The flag is
+     * now cleared exactly once, in jni_encoder_start, before the
+     * mutex_operation acquire. Mirrors the same fix in downloader.c
+     * and metadatareader.c:169. */
     encoder->interrupt_callback = (AVIOInterruptCB) {encoder_ctx_interrupt_callback, encoder};
     encoder->input_format_ctx->interrupt_callback = encoder->interrupt_callback;
     encoder->input_format_ctx->flags |= AVFMT_FLAG_NONBLOCK;
@@ -1381,6 +1387,19 @@ int encoder_read(struct Encoder *encoder) {
 
     for (;;) {
 
+        /* Top-of-loop interrupt check. Same trap PR #66 fixed in
+         * downloader_read: once av_read_frame has returned EOF and
+         * encoder->eof is set, subsequent iterations of this loop
+         * skip the per-iteration interrupt checks scattered below
+         * (they sit after av_read_frame, which never gets called
+         * for an already-EOF input). A stop arriving at-or-after
+         * EOF would leave the loop spinning until something else
+         * forced it out. */
+        if (encoder->interrupt) {
+            LOGI(3, "encoder_read interrupt at top of loop");
+            break;
+        }
+
         ret = av_read_frame(input_format_ctx, pkt);
 
         if (ret < 0) {
@@ -1873,8 +1892,19 @@ int jni_encoder_start(JNIEnv *env, jobject thiz, jobject dictionary, jobject met
     pthread_mutex_lock(&encoder->mutex_operation);
     locked = TRUE;
 
-    if (encoder->interrupt ||
-        (ret = encoder_set_data_source(&state, &dict, &met, file_path, output_path, video_stream_no,
+    if (encoder->interrupt) {
+        LOGE (2, "jni_encoder_start interrupted before start");
+        ret = -ERROR_COULD_NOT_READ;
+        goto end;
+    }
+    /* Clear `interrupt` once here, after the early-arrived check.
+     * encoder_set_data_source / encoder_read assume the flag is
+     * monotonic from the moment we start until stop arrives — used
+     * to be cleared per-input in encoder_create_interrupt_callback,
+     * which silently dropped stops racing the open path. */
+    encoder->interrupt = FALSE;
+
+    if ((ret = encoder_set_data_source(&state, &dict, &met, file_path, output_path, video_stream_no,
                                        audio_stream_no)) < 0) {
         LOGE (2, "jni_encoder_start prepare error");
         goto end;

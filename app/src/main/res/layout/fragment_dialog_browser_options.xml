@@ -1,38 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Single vertical LinearLayout: the previous design wrapped the
+     toolbar + filter chips in a second LinearLayout that carried only
+     elevation="0dp" (no actual elevation) and forced an extra measure
+     pass on every inflation. Flattened. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <LinearLayout
-        android:id="@+id/elevation"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="0dp"
-        android:orientation="vertical">
+        android:theme="@style/ThemeOverlay.FireDown.Toolbar"
+        app:navigationIconTint="?attr/colorOnSurface"
+        app:popupTheme="@style/Theme.FireDown.Popup"
+        app:title="@string/navigation_captured" />
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:theme="@style/ThemeOverlay.FireDown.Toolbar"
-            app:navigationIconTint="?attr/colorOnSurface"
-            app:popupTheme="@style/Theme.FireDown.Popup"
-            app:title="@string/navigation_captured" />
-
-        <include
-            layout="@layout/fragment_dialog_browser_options_list_options"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
+    <include
+        layout="@layout/fragment_dialog_browser_options_list_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <com.solarized.firedown.ui.LCEERecyclerView
         android:id="@+id/list_recycler_lcee"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 
 </LinearLayout>

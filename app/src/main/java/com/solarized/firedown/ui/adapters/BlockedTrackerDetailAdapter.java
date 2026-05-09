@@ -6,24 +6,40 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.solarized.firedown.R;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Objects;
 
 /**
  * Mixed-type adapter for the blocked-trackers detail sheet — alternates
  * between category headers (label + total) and per-host rows (host +
- * per-host block-count). Designed to be rebuilt wholesale on each data
- * refresh: the security sheet's underlying counts churn fast enough that
- * a ListAdapter+DiffUtil dance buys nothing.
+ * per-host block-count).
+ *
+ * <p>Backed by {@link ListAdapter} + {@link DiffUtil} so each
+ * counts-LiveData emission only re-binds the rows whose content
+ * actually changed. New hosts animate in; existing rows whose count
+ * went up rebind cleanly. The detail sheet refires often on
+ * tracker-heavy pages (~10/sec while a YouTube ad loads) — without
+ * DiffUtil every emission was a notifyDataSetChanged that dropped
+ * scroll position transitions and rebuilt every visible row.
  */
-public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class BlockedTrackerDetailAdapter
+        extends ListAdapter<BlockedTrackerDetailAdapter.Item, RecyclerView.ViewHolder> {
 
     private static final int TYPE_HEADER = 0;
     private static final int TYPE_HOST = 1;
+
+    /** Common base so the adapter's generic parameter is concrete. */
+    public abstract static class Item {
+        /** Stable key that survives content changes — used by DiffUtil's
+         *  areItemsTheSame so a host whose count went from 2 to 3 stays
+         *  the same row instead of being treated as a remove + add. */
+        abstract String key();
+    }
 
     /**
      * Header item — one per category that has at least one blocked host.
@@ -31,7 +47,7 @@ public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerVi
      * may exceed {@code hosts.size()} when a single host fired multiple
      * times.
      */
-    public static final class Header {
+    public static final class Header extends Item {
         public final CharSequence label;
         public final int total;
 
@@ -39,10 +55,17 @@ public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerVi
             this.label = label;
             this.total = total;
         }
+
+        @Override
+        String key() {
+            // Headers are unique per category — label is the only thing
+            // distinguishing them and never changes mid-session.
+            return "h:" + label;
+        }
     }
 
     /** Per-host row — host string + per-host count. */
-    public static final class HostRow {
+    public static final class HostRow extends Item {
         public final String host;
         public final int count;
 
@@ -50,19 +73,38 @@ public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerVi
             this.host = host;
             this.count = count;
         }
+
+        @Override
+        String key() {
+            return "r:" + host;
+        }
     }
 
-    private final List<Object> mItems = new ArrayList<>();
+    private static final DiffUtil.ItemCallback<Item> DIFF = new DiffUtil.ItemCallback<>() {
+        @Override
+        public boolean areItemsTheSame(@NonNull Item oldItem, @NonNull Item newItem) {
+            return oldItem.key().equals(newItem.key());
+        }
 
-    public void submit(@NonNull List<Object> items) {
-        mItems.clear();
-        mItems.addAll(items);
-        notifyDataSetChanged();
+        @Override
+        public boolean areContentsTheSame(@NonNull Item oldItem, @NonNull Item newItem) {
+            if (oldItem instanceof Header oh && newItem instanceof Header nh) {
+                return oh.total == nh.total && Objects.equals(oh.label, nh.label);
+            }
+            if (oldItem instanceof HostRow oh && newItem instanceof HostRow nh) {
+                return oh.count == nh.count && Objects.equals(oh.host, nh.host);
+            }
+            return false;
+        }
+    };
+
+    public BlockedTrackerDetailAdapter() {
+        super(DIFF);
     }
 
     @Override
     public int getItemViewType(int position) {
-        return mItems.get(position) instanceof Header ? TYPE_HEADER : TYPE_HOST;
+        return getItem(position) instanceof Header ? TYPE_HEADER : TYPE_HOST;
     }
 
     @NonNull
@@ -79,7 +121,7 @@ public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        Object item = mItems.get(position);
+        Item item = getItem(position);
         if (holder instanceof HeaderViewHolder vh && item instanceof Header h) {
             vh.label.setText(h.label);
             vh.count.setText(String.valueOf(h.total));
@@ -95,11 +137,6 @@ public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerVi
                 vh.count.setVisibility(View.GONE);
             }
         }
-    }
-
-    @Override
-    public int getItemCount() {
-        return mItems.size();
     }
 
 

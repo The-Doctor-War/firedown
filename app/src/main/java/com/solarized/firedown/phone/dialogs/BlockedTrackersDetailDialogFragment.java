@@ -118,7 +118,7 @@ public class BlockedTrackersDetailDialogFragment extends BaseBottomSheetDialogFr
             return;
         }
 
-        List<Object> items = new ArrayList<>();
+        List<BlockedTrackerDetailAdapter.Item> items = new ArrayList<>();
         int grandTotal = 0;
 
         for (TrackingCategory category : CATEGORY_ORDER) {
@@ -153,7 +153,7 @@ public class BlockedTrackersDetailDialogFragment extends BaseBottomSheetDialogFr
 
         mEmptyView.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
-        mAdapter.submit(items);
+        mAdapter.submitList(items);
 
         mSubtitle.setText(getResources().getQuantityString(
                 R.plurals.blocked_trackers_summary, grandTotal, grandTotal));

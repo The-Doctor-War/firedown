@@ -7,7 +7,6 @@ import com.solarized.firedown.Preferences;
 import com.solarized.firedown.data.dao.WebHistoryDao;
 import com.solarized.firedown.data.di.Qualifiers;
 import com.solarized.firedown.data.entity.WebHistoryEntity;
-import com.solarized.firedown.utils.WebUtils;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -67,11 +66,6 @@ public class WebHistoryDataRepository {
     public void purgeDatabase() {
         // Purge records older than 180 days
         mDiskExecutor.execute(() -> mDao.purgeDatabase(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(180)));
-    }
-
-    public void updateIconData(String url, String icon, int iconResolution) {
-        String domainQuery = WebUtils.getSchemeDomainName(url) + "%";
-        mDao.updateIconData(domainQuery, icon, iconResolution);
     }
 
     public void add(WebHistoryEntity web) {

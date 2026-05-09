@@ -38,18 +38,6 @@ public class TabStateArchivedRepository {
     }
 
     /**
-     * Maps a GeckoStateEntity to an Archive entity and saves it asynchronously.
-     */
-    public void addAsync(GeckoStateEntity geckoStateEntity) {
-        if (shouldSkip(geckoStateEntity)) {
-            return;
-        }
-
-        TabStateArchivedEntity archivedEntity = mapToArchivedEntity(geckoStateEntity);
-        mTabStateDao.insert(archivedEntity);
-    }
-
-    /**
      * Maps a GeckoStateEntity to an Archive entity and saves it synchronously.
      * Useful for calls within background Tasks or Workers.
      */
@@ -65,13 +53,6 @@ public class TabStateArchivedRepository {
 
         TabStateArchivedEntity archivedEntity = mapToArchivedEntity(geckoStateEntity);
         mTabStateDao.insertSync(archivedEntity);
-    }
-
-    /**
-     * Inserts a raw archived entity asynchronously.
-     */
-    public void addAsync(TabStateArchivedEntity tabStateArchivedEntity) {
-        mTabStateDao.insert(tabStateArchivedEntity);
     }
 
     /**

@@ -87,6 +87,11 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             // Clear tag too — a bind after recycle calls setTag(null) and relies on it,
             // and any future caller reading the tag should not see a stale key.
             h.image.setTag(null);
+            // Drop the FINISHED-row label cache. The id-mismatch check in
+            // getFinishedLabel would already rebuild on the next bind, but
+            // nulling here lets the String be GC'd while the holder sits
+            // in the RecycledViewPool.
+            h.cachedFinishedLabel = null;
         }
     }
 
@@ -398,8 +403,6 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     }
 
     private void bindFinished(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
-        String size = Utils.getFileSize(entity.getFileSize());
-        String date = DateUtils.getFileDate(entity.getFileDate());
         String mimeType = entity.getFileMimeType();
         String durationFormat = entity.getDurationFormatted();
         boolean hasDuration = !TextUtils.isEmpty(durationFormat)
@@ -414,12 +417,38 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         }
 
         if (holder.finishedText != null) {
-            holder.finishedText.setVisibility(isGrid ? View.GONE: View.VISIBLE);
-            holder.finishedText.setText(String.format("%s - %s", size, date));
+            holder.finishedText.setVisibility(isGrid ? View.GONE : View.VISIBLE);
+            holder.finishedText.setText(getFinishedLabel(holder, entity));
         }
 
         // Finished items always load the real thumbnail
         GlideHelper.load(entity, mRequestOptions, holder.image);
+    }
+
+
+    /**
+     * Returns the cached "<size> - <date>" label, rebuilding only when
+     * the holder is bound to a different entity or the row's size /
+     * date actually changed (rare for FINISHED — these are terminal
+     * fields). Saves one Utils.getFileSize, one DateUtils.getFileDate,
+     * and one String concatenation per scroll re-bind of the same row.
+     */
+    private static String getFinishedLabel(DownloadViewHolder holder, DownloadEntity entity) {
+        long id = entity.getId();
+        long size = entity.getFileSize();
+        long date = entity.getFileDate();
+        if (holder.cachedFinishedLabel != null
+                && holder.cachedFinishedKeyId == id
+                && holder.cachedFinishedKeySize == size
+                && holder.cachedFinishedKeyDate == date) {
+            return holder.cachedFinishedLabel;
+        }
+        String label = Utils.getFileSize(size) + " - " + DateUtils.getFileDate(date);
+        holder.cachedFinishedKeyId = id;
+        holder.cachedFinishedKeySize = size;
+        holder.cachedFinishedKeyDate = date;
+        holder.cachedFinishedLabel = label;
+        return label;
     }
 
     private void bindError(DownloadViewHolder holder, DownloadEntity entity) {
@@ -480,6 +509,18 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         final @Nullable TextView queuedText;
         final @Nullable TextView mimeDuration;
         final @Nullable View topScrim;
+
+        // Cache for the FINISHED row's "<size> - <date>" label. Built
+        // from Utils.getFileSize + DateUtils.getFileDate, both of
+        // which allocate; without the cache every bindFinished call
+        // re-formats the same string. Keyed by id+size+date so a
+        // size update (rare for FINISHED rows) invalidates cleanly,
+        // and a recycled holder bound to a different entity rebuilds
+        // on the first id mismatch. Cleared in onViewRecycled too.
+        long cachedFinishedKeyId = Long.MIN_VALUE;
+        long cachedFinishedKeySize = Long.MIN_VALUE;
+        long cachedFinishedKeyDate = Long.MIN_VALUE;
+        @Nullable String cachedFinishedLabel;
 
         DownloadViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);

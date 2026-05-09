@@ -1287,16 +1287,6 @@ public class BrowserFragment extends BaseBrowserFragment implements OnItemClickL
         mActivity.setRequestedOrientation(screenOrientation);
     }
 
-    @Override
-    public void onPromptLoginSave(GeckoState geckoState,
-                                  GeckoSession.PromptDelegate.AutocompleteRequest<?> request,
-                                  boolean contains) {
-        geckoState.setPendingAutoCompleteRequest(request);
-        Bundle bundle = new Bundle();
-        bundle.putInt(Keys.ITEM_ID, geckoState.getEntityId());
-        bundle.putBoolean(Keys.ITEM_CONTAINS, contains);
-        NavigationUtils.navigateSafe(mNavController, R.id.dialog_save_login, R.id.browser, bundle);
-    }
 
     @Override
     public void onPromptFile(GeckoState geckoState,

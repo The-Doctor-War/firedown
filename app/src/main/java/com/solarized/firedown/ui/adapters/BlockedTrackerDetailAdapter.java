@@ -80,14 +80,10 @@ public class BlockedTrackerDetailAdapter extends RecyclerView.Adapter<RecyclerVi
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         Object item = mItems.get(position);
-        if (holder instanceof HeaderViewHolder && item instanceof Header) {
-            HeaderViewHolder vh = (HeaderViewHolder) holder;
-            Header h = (Header) item;
+        if (holder instanceof HeaderViewHolder vh && item instanceof Header h) {
             vh.label.setText(h.label);
             vh.count.setText(String.valueOf(h.total));
-        } else if (holder instanceof HostViewHolder && item instanceof HostRow) {
-            HostViewHolder vh = (HostViewHolder) holder;
-            HostRow r = (HostRow) item;
+        } else if (holder instanceof HostViewHolder vh && item instanceof HostRow r) {
             vh.host.setText(r.host);
             // ×N suffix only when the same host fired more than once —
             // a single hit reads cleaner without the count.

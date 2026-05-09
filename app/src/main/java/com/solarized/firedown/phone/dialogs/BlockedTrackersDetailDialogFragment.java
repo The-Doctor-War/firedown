@@ -169,18 +169,12 @@ public class BlockedTrackersDetailDialogFragment extends BaseBottomSheetDialogFr
 
 
     private static int labelResForCategory(@NonNull TrackingCategory category) {
-        switch (category) {
-            case CROSS_SITE_COOKIES:
-                return R.string.blocked_trackers_cross_site_cookies;
-            case SOCIAL_MEDIA:
-                return R.string.blocked_trackers_social_media;
-            case FINGERPRINTERS:
-                return R.string.blocked_trackers_fingerprinters;
-            case CRYPTOMINERS:
-                return R.string.blocked_trackers_cryptominers;
-            case TRACKING_CONTENT:
-            default:
-                return R.string.blocked_trackers_tracking_content;
-        }
+        return switch (category) {
+            case CROSS_SITE_COOKIES -> R.string.blocked_trackers_cross_site_cookies;
+            case SOCIAL_MEDIA -> R.string.blocked_trackers_social_media;
+            case FINGERPRINTERS -> R.string.blocked_trackers_fingerprinters;
+            case CRYPTOMINERS -> R.string.blocked_trackers_cryptominers;
+            default -> R.string.blocked_trackers_tracking_content;
+        };
     }
 }

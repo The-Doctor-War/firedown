@@ -1257,9 +1257,11 @@ int downloader_read(struct Downloader *downloader) {
     int ret;
     int all_eof;
 
-    pthread_mutex_lock(&downloader->mutex_queue);
-    downloader->read_thread_created = TRUE;
-    pthread_mutex_unlock(&downloader->mutex_queue);
+    /* read_thread_created is now set by jni_downloader_start before
+     * it releases mutex_operation, so dealloc's threads-free wait sees
+     * us in time. The previous set-on-entry here left a window where
+     * a racing dealloc would skip the wait and destroy mutex_queue
+     * out from under the lock at line 1303. */
 
     LOGI(3, "downloader_read output=%s nb_inputs=%d",
          downloader->output_format_ctx->url, downloader->nb_inputs);
@@ -1647,6 +1649,27 @@ int jni_downloader_start(JNIEnv *env, jobject thiz, jobjectArray jurls, jobjectA
         pthread_mutex_unlock(&downloader->mutex_operation);
         goto end;
     }
+
+    /* [BUG FIX] Mark the read thread alive BEFORE releasing
+     * mutex_operation, mirroring how muxing_thread_created is set
+     * before pthread_create.
+     *
+     * Race window the previous code left open:
+     *   1. jni_downloader_start unlocks mutex_operation here.
+     *   2. Another thread enters jni_downloader_dealloc, takes
+     *      mutex_operation, calls downloader_threads_free, sees
+     *      read_thread_created == FALSE (the read fn hasn't reached
+     *      its own set yet), returns immediately, then runs
+     *      pthread_cond_destroy / pthread_mutex_destroy and av_free.
+     *   3. We reach downloader_read, which tries
+     *      pthread_mutex_lock(&downloader->mutex_queue) — destroyed
+     *      mutex → FORTIFY abort.
+     *
+     * Setting the flag under mutex_operation ties it into the same
+     * happens-before chain dealloc waits on. */
+    pthread_mutex_lock(&downloader->mutex_queue);
+    downloader->read_thread_created = TRUE;
+    pthread_mutex_unlock(&downloader->mutex_queue);
 
     pthread_mutex_unlock(&downloader->mutex_operation);
 

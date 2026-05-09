@@ -278,6 +278,9 @@
     <string name="blocked_trackers_fingerprinters">フィンガープリンター</string>
     <string name="blocked_trackers_cryptominers">暗号通貨マイナー</string>
     <string name="blocked_trackers_tracking_content">トラッキングコンテンツ</string>
+    <string name="blocked_trackers_detail_title">ブロックされたトラッカー</string>
+    <string name="blocked_trackers_detail_empty">このページではまだトラッカーがブロックされていません。</string>
+    <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">変更を適用するためアプリケーションを終了します...</string>
     <string name="remove_top_site">削除</string>
     <string name="rename">名前の変更</string>

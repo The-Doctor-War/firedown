@@ -1268,6 +1268,21 @@ int downloader_read(struct Downloader *downloader) {
         downloader->input_eof[i] = FALSE;
 
     for (;;) {
+        /* Top-of-loop interrupt check.
+         *
+         * The per-input check below sits AFTER the input_eof skip, so if
+         * every input has already EOF'd (e.g. okhttp got InterruptedIOException
+         * and av_read_frame returned AVERROR_EOF for the only input) we'd
+         * never reach the interrupt check inside the inner loop. The
+         * post-loop "all-eof, push EOS and exit" block also wouldn't fire
+         * because it requires !interrupt && !stop. Net result: infinite
+         * busy-spin after a stop request that arrives at-or-after EOF on
+         * every input. Catch the wakeup signal here at the top so the loop
+         * can exit before re-entering the inputs.
+         */
+        if (downloader->interrupt || downloader->stop)
+            goto exit_loop_lock;
+
         int any_read = FALSE;
 
         for (int input_idx = 0; input_idx < downloader->nb_inputs; input_idx++) {

@@ -81,10 +81,6 @@ public class DownloadDataRepository {
         return mDatabase.downloadDao().getDownloadsLimit(limit);
     }
 
-    public List<DownloadEntity> getAllRaw() {
-        return mDatabase.downloadDao().getAllRaw();
-    }
-
     public List<DownloadEntity> getAllRawList() {
         return mDatabase.downloadDao().getAllRawList();
     }

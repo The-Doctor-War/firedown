@@ -38,7 +38,9 @@ import com.solarized.firedown.utils.Utils;
 import com.solarized.firedown.utils.WebUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 
 public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.ViewHolder> {
@@ -93,9 +95,19 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     // Positions shift when PagingData refreshes or separators are inserted/removed,
     // causing position-based selection to point at wrong items.
 
+    /**
+     * Sentinel passed in {@code payloads} so {@link #onBindViewHolder(
+     * RecyclerView.ViewHolder, int, List)} can update selection chrome
+     * (action mode + checkmark + stroke + action-button visibility)
+     * without re-running the full bind path — the full bind allocates,
+     * resolves mime text, kicks Glide loads, and rebuilds status views,
+     * none of which change when the user enters action mode.
+     */
+    private static final Object PAYLOAD_SELECTION = new Object();
+
     public void setActionMode(boolean value) {
         mActionMode = value;
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_SELECTION);
     }
 
     public void setSelected(int position) {
@@ -106,7 +118,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             mSelected.remove(id);
         else
             mSelected.add(id);
-        notifyItemChanged(position);
+        notifyItemChanged(position, PAYLOAD_SELECTION);
     }
 
     public boolean isSelected(int entityId) {
@@ -123,7 +135,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
 
     public void setEnabled(boolean enabled) {
         mEnabled = enabled;
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_SELECTION);
     }
 
     public void selectAll() {
@@ -132,12 +144,12 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 mSelected.add(entity.getId());
             }
         }
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_SELECTION);
     }
 
     public void deselectAll() {
         mSelected.clear();
-        notifyItemRangeChanged(0, getItemCount());
+        notifyItemRangeChanged(0, getItemCount(), PAYLOAD_SELECTION);
     }
 
     /**
@@ -243,6 +255,46 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     }
 
     // ── Bind ────────────────────────────────────────────────────────────
+
+    /**
+     * Partial bind path. setActionMode / selectAll / deselectAll /
+     * setEnabled all flip selection chrome on every visible row; the
+     * full bind would re-resolve mime text, rebuild status views, and
+     * fire Glide loads (which re-decode FFmpeg thumbnails on miss).
+     * When the only payload is {@link #PAYLOAD_SELECTION}, just update
+     * the selection-related views and skip the rest.
+     */
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder,
+                                 int position,
+                                 @NonNull List<Object> payloads) {
+        if (!payloads.isEmpty()
+                && Collections.frequency(payloads, PAYLOAD_SELECTION) == payloads.size()
+                && viewHolder instanceof DownloadViewHolder holder) {
+            Object item = peek(position);
+            if (!(item instanceof DownloadEntity entity)) return;
+            boolean contains = mSelected.contains(entity.getId());
+            int viewType = getItemViewType(position);
+            int status = getStatus(viewType);
+            boolean isGrid = isGridType(viewType);
+
+            holder.item.setEnabled(mEnabled);
+            holder.item.setStrokeColor(mActionMode && contains ? mColorSelected : mColorNormal);
+            holder.selected.setVisibility(mActionMode ? View.VISIBLE : View.GONE);
+            holder.selected.setImageDrawable(mActionMode ? (contains ? mChecked : mUnChecked) : null);
+            holder.actionButton.setVisibility(mActionMode ? View.INVISIBLE : View.VISIBLE);
+            // Action icon depends on status (queued = clear, otherwise more)
+            // — re-set so we don't end up showing the wrong glyph after a
+            // status update raced with an action-mode toggle.
+            setActionIcon(holder, isGrid,
+                    status == Download.QUEUED
+                            ? R.drawable.ic_clear_24
+                            : R.drawable.ic_baseline_more_vert_24);
+            return;
+        }
+        // Anything else (or no payload, or mixed payloads) → full rebind.
+        super.onBindViewHolder(viewHolder, position, payloads);
+    }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {

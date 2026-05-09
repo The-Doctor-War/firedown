@@ -244,10 +244,6 @@ public class DownloadsViewModel extends ViewModel {
         mRepository.updateDownloadThumb(download);
     }
 
-    public List<DownloadEntity> getAllRaw() {
-        return mRepository.getAllRaw();
-    }
-
     public int getCurrentSorting() {
         return mSorting.getCurrentSortLocal();
     }

@@ -145,25 +145,30 @@ public class GeckoRuntimeHelper {
 
         setupWebExtensions();
 
-        setWebRTC(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_WEBRTC, false));
-        setJITCompiler(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_JIT, false));
-        setWebGL(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WEBGL, false));
-        setGeo(sharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION, false));
-        setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING, false));
-        setDRM(!Preferences.getDRMEnabled(sharedPreferences, context));
         // User-facing privacy toggles — defaults pick the privacy-preferring
         // value but every one of them can be flipped from settings. Disk
         // cache and Safe Browsing follow the "Disable X" convention used
         // by WebGL (switch ON = privacy-preferring action), so invert when
         // calling the underlying setter which still takes the runtime's
         // "is this feature enabled" sense.
+
+        setWebRTC(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_WEBRTC,
+                Preferences. DEFAULT_ENABLE_WEBRTC));
+        setJITCompiler(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_JIT,
+                Preferences.DEFAULT_ENABLE_JIT));
+        setWebGL(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WEBGL,
+                Preferences.DEFAULT_DISABLE_WEBGL));
+        setGeo(sharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION,
+                Preferences.DEFAULT_BLOCK_LOCATION));
+        setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING,
+                Preferences.DEFAULT_RESIST_FINGERPRINTING));
+        setDRM(!Preferences.getDRMEnabled(sharedPreferences, context));
         setHttpsOnly(sharedPreferences.getBoolean(
                 Preferences.SETTINGS_HTTPS_ONLY, Preferences.DEFAULT_HTTPS_ONLY));
         setDiskCacheEnabled(!sharedPreferences.getBoolean(
                 Preferences.SETTINGS_DISABLE_DISK_CACHE, Preferences.DEFAULT_DISABLE_DISK_CACHE));
         setSafeBrowsing(!sharedPreferences.getBoolean(
                 Preferences.SETTINGS_DISABLE_SAFE_BROWSING, Preferences.DEFAULT_DISABLE_SAFE_BROWSING));
-        // Always-on hardening prefs (clusters A/B/C from the IronFox audit).
         // These have no UI toggle — the privacy gain is high enough and the
         // breakage low enough that it's not a meaningful choice to expose.
         applyHardeningPrefs();

@@ -36,6 +36,8 @@ public class Preferences {
 
     public static final String SETTINGS_BLOCK_LOCATION = "com.solarized.firedown.preferences.browser.block.location";
 
+    public static final boolean DEFAULT_BLOCK_LOCATION = false;
+
     public static final String SETTINGS_THEME = "com.solarized.firedown.preferences.theme";
 
     public static final String SETTINGS_THEME_DEFAULT = "com.solarized.firedown.preferences.theme.default";
@@ -46,11 +48,19 @@ public class Preferences {
 
     public static final String SETTINGS_ENABLE_JIT = "com.solarized.firedown.preferences.browser.enable.jit";
 
+    public static final boolean DEFAULT_ENABLE_JIT = false;
+
     public static final String SETTINGS_DISABLE_WEBGL = "com.solarized.firedown.preferences.browser.disable.webgl";
+
+    public static final boolean DEFAULT_DISABLE_WEBGL = false;
 
     public static final String SETTINGS_ENABLE_RESIST_FINGERPRINTING = "com.solarized.firedown.preferences.browser.enable.resist.fingerprinting";
 
+    public static final boolean DEFAULT_RESIST_FINGERPRINTING = false;
+
     public static final String SETTINGS_ENABLE_WEBRTC = "com.solarized.firedown.preferences.browser.enable.webrtc";
+
+    public static final boolean DEFAULT_ENABLE_WEBRTC = false;
 
     /**
      * Legacy disable-DRM key from PR #26. Read once on first launch after
@@ -81,7 +91,7 @@ public class Preferences {
      * ON means the privacy-preferring action.
      */
     public static final String SETTINGS_DISABLE_DISK_CACHE = "com.solarized.firedown.preferences.browser.disable.disk.cache";
-    public static final boolean DEFAULT_DISABLE_DISK_CACHE = false;
+    public static final boolean DEFAULT_DISABLE_DISK_CACHE = true;
 
     /**
      * Disable Google Safe Browsing — its blocklist of malware / phishing

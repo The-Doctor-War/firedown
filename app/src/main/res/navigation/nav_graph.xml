@@ -99,11 +99,17 @@
             app:popUpTo="@+id/dialog_security_info"
             app:popUpToInclusive="true"
             app:destination="@id/dialog_security_clear" />
-        <!-- Drill-down to per-host detail sheet. Does NOT popUp the
-             security sheet — the user taps "Show domains", reads, then
-             back-presses to return to the security sheet. -->
+        <!-- Drill-down to per-host detail sheet. Pops the security sheet
+             on the way through, mirroring how action_security_to_cert
+             and action_security_to_clear already work — the user is
+             drilling into one specific concern, the parent sheet is
+             redundant once we're in the detail. Back-press from the
+             detail sheet returns to the browser, not the security
+             sheet (consistent with the rest of the security drill-downs). -->
         <action
             android:id="@+id/action_security_to_blocked_trackers_detail"
+            app:popUpTo="@+id/dialog_security_info"
+            app:popUpToInclusive="true"
             app:destination="@id/dialog_blocked_trackers_detail" />
     </dialog>
     <dialog

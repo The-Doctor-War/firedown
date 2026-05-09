@@ -922,9 +922,9 @@ public class GeckoComponents {
 
             boolean changed = false;
             if (categoryMask != 0) {
-                changed = geckoState.incrementBlockedTracker(categoryMask);
+                changed = geckoState.incrementBlockedTracker(categoryMask, event.uri);
             } else if (cookieReason != 0) {
-                changed = geckoState.incrementBlockedCookie();
+                changed = geckoState.incrementBlockedCookie(event.uri);
             }
 
             if (changed && isCurrentGeckoState(geckoState)) {

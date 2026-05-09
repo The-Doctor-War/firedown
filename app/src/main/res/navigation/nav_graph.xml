@@ -99,7 +99,16 @@
             app:popUpTo="@+id/dialog_security_info"
             app:popUpToInclusive="true"
             app:destination="@id/dialog_security_clear" />
+        <!-- Drill-down to per-host detail sheet. Does NOT popUp the
+             security sheet — the user taps "Show domains", reads, then
+             back-presses to return to the security sheet. -->
+        <action
+            android:id="@+id/action_security_to_blocked_trackers_detail"
+            app:destination="@id/dialog_blocked_trackers_detail" />
     </dialog>
+    <dialog
+        android:id="@+id/dialog_blocked_trackers_detail"
+        android:name="com.solarized.firedown.phone.dialogs.BlockedTrackersDetailDialogFragment" />
     <dialog
         android:id="@+id/dialog_search_engine"
         android:name="com.solarized.firedown.phone.dialogs.SearchEngineSheetDialogFragment" />

@@ -279,6 +279,9 @@
     <string name="blocked_trackers_fingerprinters">Fingerprinters</string>
     <string name="blocked_trackers_cryptominers">Cryptominers</string>
     <string name="blocked_trackers_tracking_content">Tracking content</string>
+    <string name="blocked_trackers_detail_title">Blocked trackers</string>
+    <string name="blocked_trackers_detail_empty">No trackers blocked yet on this page.</string>
+    <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">Quitting the application to apply changes…</string>
     <string name="remove_top_site">Remove</string>
     <string name="rename">Rename</string>

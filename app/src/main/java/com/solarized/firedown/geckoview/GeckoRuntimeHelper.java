@@ -740,12 +740,23 @@ public class GeckoRuntimeHelper {
 
 
     /**
-     * Toggle DRM (Encrypted Media Extensions). When disabled, sites that
-     * require Widevine/EME (Netflix, Spotify Web, ...) won't play and the
-     * "request_media_key_system_access" prompt is suppressed entirely.
-     * Pairs media.eme.enabled with the Widevine plugin toggle so re-enabling
-     * EME from a different surface can't re-load Widevine without this
-     * setting also flipping back.
+     * Toggle DRM (Encrypted Media Extensions).
+     *
+     * Only the Widevine plugin is gated. {@code media.eme.enabled} stays
+     * on unconditionally so that {@code navigator.requestMediaKeySystemAccess}
+     * remains a callable JavaScript API — turning it off entirely makes
+     * any DASH/HLS player (or any page that probes EME defensively at
+     * load) throw before playback can start, breaking even non-DRM video
+     * on hybrid sites like Max where the manifest offers both encrypted
+     * and clear renditions.
+     *
+     * With DRM disabled, requestMediaKeySystemAccess('com.widevine.alpha')
+     * resolves to a rejection (no key system available), so:
+     *   - Sites with a non-DRM fallback rendition play the clear stream.
+     *   - Pure-DRM sites (Netflix, Spotify Web) still fail, which is the
+     *     intended behaviour — Firedown can't download those anyway.
+     *   - The "request_media_key_system_access" prompt is suppressed
+     *     because Widevine isn't there to be granted.
      */
     @OptIn(markerClass = ExperimentalGeckoViewApi.class)
     public void setDRM(boolean disable) {
@@ -755,7 +766,7 @@ public class GeckoRuntimeHelper {
         List<GeckoPreferenceController.SetGeckoPreference<?>> preferenceList = new ArrayList<>();
 
         preferenceList.add(GeckoPreferenceController.SetGeckoPreference
-                .setBoolPref("media.eme.enabled", enable, GeckoPreferenceController.PREF_BRANCH_USER));
+                .setBoolPref("media.eme.enabled", true, GeckoPreferenceController.PREF_BRANCH_USER));
 
         preferenceList.add(GeckoPreferenceController.SetGeckoPreference
                 .setBoolPref("media.gmp-widevinecdm.enabled", enable, GeckoPreferenceController.PREF_BRANCH_USER));

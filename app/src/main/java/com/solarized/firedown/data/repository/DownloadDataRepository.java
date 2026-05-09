@@ -127,6 +127,9 @@ public class DownloadDataRepository {
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Failed to read stream info for thumb update", e);
+                } finally {
+                    reader.stop();
+                    reader.release();
                 }
             }
 

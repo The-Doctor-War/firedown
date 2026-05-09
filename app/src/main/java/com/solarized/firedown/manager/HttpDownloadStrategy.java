@@ -2,6 +2,7 @@ package com.solarized.firedown.manager;
 
 import android.text.TextUtils;
 import android.util.Base64;
+import android.util.Log;
 
 import com.solarized.firedown.StoragePaths;
 import com.solarized.firedown.data.Download;
@@ -73,11 +74,26 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                 downloadedLength = file.length();
             }
 
+            Log.d(TAG, "execute: url=" + downloadUrl
+                    + " file=" + file.getAbsolutePath()
+                    + " exists=" + file.exists()
+                    + " existingLen=" + (file.exists() ? file.length() : -1)
+                    + " isResume=" + isResume
+                    + " downloadedLength=" + downloadedLength);
+
             httpResponse = makeRequest(context, downloadUrl, isResume);
 
             int status = httpResponse.code();
+            Log.d(TAG, "execute: response status=" + status
+                    + " contentLength=" + httpResponse.body().contentLength()
+                    + " contentRange=" + httpResponse.header("Content-Range")
+                    + " acceptRanges=" + httpResponse.header("Accept-Ranges")
+                    + " transferEncoding=" + httpResponse.header("Transfer-Encoding")
+                    + " contentEncoding=" + httpResponse.header("Content-Encoding"));
+
             if (status >= HttpURLConnection.HTTP_BAD_REQUEST
                     && status <= HttpURLConnection.HTTP_VERSION) {
+                Log.w(TAG, "execute: HTTP error status=" + status + ", aborting");
                 callback.onError(status);
                 return;
             }
@@ -131,29 +147,60 @@ public class HttpDownloadStrategy implements DownloadStrategy {
             }
 
             // Download
+            Log.d(TAG, "execute: starting copy file=" + file.getAbsolutePath()
+                    + " appendMode=" + isResume
+                    + " startAt=" + downloadedLength
+                    + " totalLength=" + totalLength);
+
             input = new BufferedInputStream(body.byteStream());
             output = new BufferedOutputStream(new FileOutputStream(file, isResume));
 
             byte[] data = new byte[BYTE_SIZE];
             int count;
+            long readCalls = 0;
             while ((count = input.read(data)) != -1) {
-                if (stopped || context.isInterrupted()) return;
+                if (stopped || context.isInterrupted()) {
+                    Log.w(TAG, "execute: loop aborted"
+                            + " stopped=" + stopped
+                            + " interrupted=" + context.isInterrupted()
+                            + " downloadedLength=" + downloadedLength
+                            + " totalLength=" + totalLength
+                            + " readCalls=" + readCalls);
+                    return;
+                }
                 downloadedLength += count;
+                readCalls++;
                 output.write(data, 0, count);
                 reportProgress(callback, downloadedLength, totalLength);
             }
+
+            Log.d(TAG, "execute: read loop ended (EOF)"
+                    + " downloadedLength=" + downloadedLength
+                    + " totalLength=" + totalLength
+                    + " readCalls=" + readCalls
+                    + " truncated=" + (totalLength > 0 && downloadedLength < totalLength));
+
             output.flush();
             output.close();
             output = null; // prevent double-close in finally
+
+            long onDiskLen = file.length();
+            Log.d(TAG, "execute: finished file=" + file.getAbsolutePath()
+                    + " onDiskLen=" + onDiskLen
+                    + " expected=" + totalLength
+                    + " match=" + (totalLength <= 0 || onDiskLen == totalLength));
 
             String fileMime = request.getMimeType();
             if (FileUriHelper.isVideo(fileMime) || FileUriHelper.isImage(fileMime)) {
                 callback.onImgResolved(file.getAbsolutePath());
             }
 
-            callback.onFileSizeKnown(file.length());
+            callback.onFileSizeKnown(onDiskLen);
             callback.onStatusChanged(Download.FINISHED);
 
+        } catch (IOException e) {
+            Log.e(TAG, "execute: IOException at downloadedLength=" + downloadedLength, e);
+            throw e;
         } finally {
             closeQuietly(input, output, body, httpResponse);
         }
@@ -161,6 +208,8 @@ public class HttpDownloadStrategy implements DownloadStrategy {
 
     @Override
     public void stop() {
+        Log.d(TAG, "stop: invoked at downloadedLength=" + downloadedLength
+                + " by " + Thread.currentThread().getName(), new Throwable("stop trace"));
         stopped = true;
     }
 
@@ -188,9 +237,14 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                 .url(url)
                 .headers(Headers.of(perCallHeaders))
                 .build();
+        Log.d(TAG, "makeRequest: url=" + url
+                + " isResume=" + isResume
+                + " range=" + perCallHeaders.get(BrowserHeaders.RANGES));
         Response response = client.newCall(request).execute();
 
         if (response.code() == 416) {
+            Log.w(TAG, "makeRequest: 416 Range Not Satisfiable, retrying without Range"
+                    + " (was bytes=" + downloadedLength + "-)");
             response.close();
             downloadedLength = 0;
             perCallHeaders.remove(BrowserHeaders.RANGES);

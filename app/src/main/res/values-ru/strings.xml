@@ -205,6 +205,9 @@
     <string name="blocked_trackers_fingerprinters">Идентификаторы устройств</string>
     <string name="blocked_trackers_cryptominers">Криптомайнеры</string>
     <string name="blocked_trackers_tracking_content">Отслеживающий контент</string>
+    <string name="blocked_trackers_detail_title">Заблокированные трекеры</string>
+    <string name="blocked_trackers_detail_empty">На этой странице ещё не заблокировано ни одного трекера.</string>
+    <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">Выход из приложения для применения изменений…</string>
     <string name="remove_top_site">Удалить</string>
     <string name="rename">Переименовать</string>

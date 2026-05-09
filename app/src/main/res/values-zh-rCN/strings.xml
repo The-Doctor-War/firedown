@@ -278,6 +278,9 @@
     <string name="blocked_trackers_fingerprinters">指纹识别器</string>
     <string name="blocked_trackers_cryptominers">加密货币挖矿</string>
     <string name="blocked_trackers_tracking_content">跟踪内容</string>
+    <string name="blocked_trackers_detail_title">已拦截的跟踪器</string>
+    <string name="blocked_trackers_detail_empty">此页面尚未拦截任何跟踪器。</string>
+    <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">退出应用程序以应用更改…</string>
     <string name="remove_top_site">移除</string>
     <string name="rename">重命名</string>

@@ -203,6 +203,9 @@
     <string name="blocked_trackers_fingerprinters">Fingerprinters</string>
     <string name="blocked_trackers_cryptominers">Cryptominers</string>
     <string name="blocked_trackers_tracking_content">Tracking-inhoud</string>
+    <string name="blocked_trackers_detail_title">Geblokkeerde trackers</string>
+    <string name="blocked_trackers_detail_empty">Op deze pagina zijn nog geen trackers geblokkeerd.</string>
+    <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">De toepassing wordt afgesloten om wijzigingen toe te passen…</string>
     <string name="remove_top_site">Verwijderen</string>
     <string name="rename">Hernoemen</string>

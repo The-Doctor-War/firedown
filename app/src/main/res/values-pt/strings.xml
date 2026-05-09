@@ -32,6 +32,9 @@
     <string name="blocked_trackers_fingerprinters">Identificadores digitais</string>
     <string name="blocked_trackers_cryptominers">Criptomineradores</string>
     <string name="blocked_trackers_tracking_content">Conteúdo de rastreamento</string>
+    <string name="blocked_trackers_detail_title">Rastreadores bloqueados</string>
+    <string name="blocked_trackers_detail_empty">Ainda não foram bloqueados rastreadores nesta página.</string>
+    <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="connection_secure">A conexão é segura</string>
     <string name="delete">Excluir</string>
     <string name="delete_all_bookmarks">Isso excluirá todos os dados dos seus favoritos.</string>

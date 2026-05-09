@@ -38,7 +38,15 @@ public class GeckoInspectTask implements Runnable {
 
     private static final Set<String> BLOCKED_HEADERS = Set.of(
             BrowserHeaders.HOST, BrowserHeaders.CONNECTION,
-            BrowserHeaders.ACCEPT_ENCODING, BrowserHeaders.ACCEPT
+            BrowserHeaders.ACCEPT_ENCODING, BrowserHeaders.ACCEPT,
+            // The intercepted request from a <video> element is typically a
+            // partial-range chunk request from the player (e.g.
+            // bytes=4068494-4358829). If we forwarded that into a download
+            // we'd only get the slice the player was streaming, hit EOF at
+            // the slice boundary, and report success. Strip it here so
+            // every downstream consumer (HTTP/Gecko strategies, FFmpeg
+            // probes) starts from a clean header set.
+            BrowserHeaders.RANGES
     );
 
     private final BrowserDownloadRepository mBrowserDownloadRepository;

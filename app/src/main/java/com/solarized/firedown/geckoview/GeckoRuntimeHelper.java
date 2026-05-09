@@ -162,7 +162,7 @@ public class GeckoRuntimeHelper {
                 Preferences.DEFAULT_BLOCK_LOCATION));
         setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING,
                 Preferences.DEFAULT_RESIST_FINGERPRINTING));
-        setDRM(!Preferences.getDRMEnabled(sharedPreferences, context));
+        setDRM(!Preferences.getDRMEnabled(sharedPreferences));
         setHttpsOnly(sharedPreferences.getBoolean(
                 Preferences.SETTINGS_HTTPS_ONLY, Preferences.DEFAULT_HTTPS_ONLY));
         setDiskCacheEnabled(!sharedPreferences.getBoolean(

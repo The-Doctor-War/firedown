@@ -1,9 +1,6 @@
 package com.solarized.firedown;
 
-import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.util.Log;
 
 import org.mozilla.geckoview.ContentBlocking;
@@ -36,7 +33,7 @@ public class Preferences {
 
     public static final String SETTINGS_BLOCK_LOCATION = "com.solarized.firedown.preferences.browser.block.location";
 
-    public static final boolean DEFAULT_BLOCK_LOCATION = false;
+    public static final boolean DEFAULT_BLOCK_LOCATION = true;
 
     public static final String SETTINGS_THEME = "com.solarized.firedown.preferences.theme";
 
@@ -61,14 +58,6 @@ public class Preferences {
     public static final String SETTINGS_ENABLE_WEBRTC = "com.solarized.firedown.preferences.browser.enable.webrtc";
 
     public static final boolean DEFAULT_ENABLE_WEBRTC = false;
-
-    /**
-     * Legacy disable-DRM key from PR #26. Read once on first launch after
-     * upgrade so users who explicitly opted in to "disable" don't have
-     * their choice lost when we flip to an enable-by-opt-in default.
-     * No new code should reference this — use {@link #SETTINGS_ENABLE_DRM}.
-     */
-    public static final String SETTINGS_DISABLE_DRM = "com.solarized.firedown.preferences.browser.disable.drm";
 
     public static final String SETTINGS_ENABLE_DRM = "com.solarized.firedown.preferences.browser.enable.drm";
 
@@ -288,41 +277,13 @@ public class Preferences {
     }
 
     /**
-     * Effective DRM-enabled state, with one-shot migration from PR #26's
-     * {@link #SETTINGS_DISABLE_DRM} pref. New default is OFF (Firedown can't
-     * download DRM-protected content anyway, so the prompt is dead-end noise);
-     * existing users who relied on the previous always-on behaviour get
-     * carried over so streaming sites don't silently break on update.
-     *
-     * Resolution order:
-     *  1. New pref already written → trust it.
-     *  2. Legacy "disable" pref present → invert and persist.
-     *  3. Neither present → check {@code firstInstallTime != lastUpdateTime}
-     *     to distinguish "upgraded from a build that always had DRM on" from
-     *     "fresh install on the new default-off behaviour".
+     * DRM defaults to off. Firedown can't download DRM-protected content,
+     * so the request_media_key_system_access prompt is dead-end noise for
+     * the few sites that still gate playback on it. Users who want DRM
+     * playback flip the toggle in settings.
      */
-    public static boolean getDRMEnabled(SharedPreferences sharedPreferences, Context context){
-        if (sharedPreferences.contains(SETTINGS_ENABLE_DRM)) {
-            return sharedPreferences.getBoolean(SETTINGS_ENABLE_DRM, false);
-        }
-
-        boolean enabled;
-        if (sharedPreferences.contains(SETTINGS_DISABLE_DRM)) {
-            enabled = !sharedPreferences.getBoolean(SETTINGS_DISABLE_DRM, false);
-        } else {
-            boolean isUpgrade = false;
-            try {
-                PackageInfo info = context.getPackageManager()
-                        .getPackageInfo(context.getPackageName(), 0);
-                isUpgrade = info.firstInstallTime != info.lastUpdateTime;
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.w(TAG, "getDRMEnabled: could not query package info", e);
-            }
-            enabled = isUpgrade;
-        }
-
-        sharedPreferences.edit().putBoolean(SETTINGS_ENABLE_DRM, enabled).apply();
-        return enabled;
+    public static boolean getDRMEnabled(SharedPreferences sharedPreferences){
+        return sharedPreferences.getBoolean(SETTINGS_ENABLE_DRM, false);
     }
 
 

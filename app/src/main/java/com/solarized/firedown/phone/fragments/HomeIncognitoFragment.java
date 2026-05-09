@@ -431,14 +431,15 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
 
     // ── Navigation helpers ──────────────────────────────────────────
 
-    private void openUri(String text) {
-        String url = mSearchRepository.parseUri(text);
+    private void openUri(String url) {;
         Log.d(TAG, "openUri: url=" + url);
         GeckoState geckoState = mIncognitoStateViewModel.getCurrentGeckoState();
-        GeckoStateEntity entity = geckoState.getGeckoStateEntity();
-        entity.setHome(false);
-        entity.setUri(url);
-        mBrowserURIViewModel.onEventSelected(entity, IntentActions.OPEN_URI);
+        GeckoStateEntity geckoStateEntity = geckoState.getGeckoStateEntity();
+        Log.d(TAG, "openUri: using geckoState id=" + geckoStateEntity.getId()
+                + " wasHome=" + geckoStateEntity.isHome());
+        geckoStateEntity.setHome(false);
+        geckoStateEntity.setUri(url);
+        mBrowserURIViewModel.onEventSelected(geckoStateEntity, IntentActions.OPEN_URI);
         NavigationUtils.navigateSafe(mNavController, R.id.browser);
     }
 

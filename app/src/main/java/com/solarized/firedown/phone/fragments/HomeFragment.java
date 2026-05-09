@@ -424,8 +424,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     }
 
 
-    private void openUri(String text){
-        String url = mSearchRepository.parseUri(text);
+    private void openUri(String url){
         Log.d(TAG, "openUri: url=" + url);
         GeckoState geckoState = mGeckoStateViewModel.getCurrentGeckoState();
         GeckoStateEntity geckoStateEntity = geckoState.getGeckoStateEntity();

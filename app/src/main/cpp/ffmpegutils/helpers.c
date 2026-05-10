@@ -34,6 +34,17 @@ JavaMethod iterator_has_next = {"hasNext", "()Z"};
 
 jfieldID java_get_field(JNIEnv *env, char * class_name, JavaField field) {
 	jclass clazz = (*env)->FindClass(env, class_name);
+	if (clazz == NULL) {
+		/* FindClass leaves a pending ClassNotFoundException / NoClassDefFoundError;
+		 * GetFieldID(NULL, ...) is undefined behaviour and on Android JNI it
+		 * triggers an assertion abort. Clear the exception and bail with NULL —
+		 * callers all check the return value. Path normally only fires under
+		 * a misconfigured ProGuard / R8 rename. */
+		if ((*env)->ExceptionCheck(env)) {
+			(*env)->ExceptionClear(env);
+		}
+		return NULL;
+	}
 	jfieldID jField = (*env)->GetFieldID(env, clazz, field.name, field.signature);
 	(*env)->DeleteLocalRef(env, clazz);
 	return jField;

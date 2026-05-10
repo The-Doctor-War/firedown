@@ -39,7 +39,7 @@
     <dimen name="list_download_image_height">64dp</dimen>
     <dimen name="list_download_image_height_grid">110dp</dimen>
     <dimen name="list_margin">8dp</dimen>
-    <dimen name="list_web_image_height">24dp</dimen>
+    <dimen name="list_web_image_height">28dp</dimen>
     <dimen name="list_web_empty_height">37dp</dimen>
     <dimen name="list_item_margin">6dp</dimen>
     <dimen name="list_spacing">8dp</dimen>

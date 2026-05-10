@@ -16,4 +16,7 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="other">%d 个最近关闭的标签页</item>
+    </plurals>
+</resources>

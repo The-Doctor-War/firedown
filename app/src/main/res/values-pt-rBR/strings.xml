@@ -1,4 +1,5 @@
 <resources>
+    <string name="archive_banner_subtitle">Toque para visualizar ou reabrir</string>
     <string name="browser_find_in_page">Procurar na página</string>
     <string name="browser_menu_add_to_shortcuts">Adicionar aos atalhos</string>
     <string name="browser_menu_back">Voltar</string>

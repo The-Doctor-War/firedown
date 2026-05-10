@@ -3,7 +3,7 @@
     <string name="app_lock">ロックを解除して Firedown を使用</string>
     <string name="app_name">Firedown</string>
     <string name="app_unlock">ロックを解除</string>
-    <string name="archive_banner_subtitle">非アクティブなタブをアーカイブに移動しました</string>
+    <string name="archive_banner_subtitle">タップして表示または再度開く</string>
     <string name="browser_bookmark_added">ブックマークが保存されました!</string>
     <string name="browser_cache_cleared">閲覧データが消去されました</string>
     <string name="browser_desktop">デスクトップサイト</string>

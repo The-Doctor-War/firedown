@@ -12,4 +12,8 @@
         <item quantity="other">ਫ਼ਾਈਲਾਂ ਨੂੰ ਲਿਜਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। %1$s</item>
         <item quantity="one">ਫ਼ਾਈਲ ਨੂੰ ਲਿਜਾਇਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। %1$s</item>
     </plurals>
+    <plurals name="archive_banner_title">
+        <item quantity="one">%d aba fechada recentemente</item>
+        <item quantity="other">%d abas fechadas recentemente</item>
+    </plurals>
 </resources>

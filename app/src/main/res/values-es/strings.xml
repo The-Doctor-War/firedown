@@ -3,7 +3,7 @@
     <string name="app_lock">Desbloquear para usar Firedown</string>
     <string name="app_name">Firedown</string>
     <string name="app_unlock">Desbloquear</string>
-    <string name="archive_banner_subtitle">Pestañas inactivas movidas a tu archivo</string>
+    <string name="archive_banner_subtitle">Toca para ver o reabrir</string>
     <string name="browser_bookmark_added">¡Marcador guardado!</string>
     <string name="browser_cache_cleared">Datos de navegación borrados</string>
     <string name="browser_desktop">Sitio de escritorio</string>

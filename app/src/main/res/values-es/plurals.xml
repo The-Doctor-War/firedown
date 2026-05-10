@@ -15,4 +15,8 @@
         <item quantity="one">%1$dh</item>
         <item quantity="other">%1$dh</item>
     </plurals>
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d pestaña cerrada recientemente</item>
+        <item quantity="other">%d pestañas cerradas recientemente</item>
+    </plurals>
+</resources>

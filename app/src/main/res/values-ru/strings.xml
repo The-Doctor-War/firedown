@@ -1,4 +1,5 @@
 <resources>
+    <string name="archive_banner_subtitle">Нажмите, чтобы просмотреть или открыть снова</string>
     <string name="action_mode_selected">%d выбрано</string>
     <string name="app_lock">Разблокируйте, чтобы использовать Firedown</string>
     <string name="app_name">Firedown</string>

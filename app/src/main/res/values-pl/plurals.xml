@@ -25,4 +25,10 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d niedawno zamknięta karta</item>
+        <item quantity="few">%d niedawno zamknięte karty</item>
+        <item quantity="many">%d niedawno zamkniętych kart</item>
+        <item quantity="other">%d niedawno zamkniętych kart</item>
+    </plurals>
+</resources>

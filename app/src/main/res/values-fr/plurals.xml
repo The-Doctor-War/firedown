@@ -16,4 +16,8 @@
         <item quantity="other">%1$d h</item>
     </plurals>
 
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d onglet récemment fermé</item>
+        <item quantity="other">%d onglets récemment fermés</item>
+    </plurals>
+</resources>

@@ -1,4 +1,5 @@
 <resources>
+    <string name="archive_banner_subtitle">Tocca per visualizzare o riaprire</string>
     <string name="action_mode_selected">%d selezionato</string>
     <string name="app_lock">Sblocca per usare Firedown</string>
     <string name="app_name">Firedown</string>

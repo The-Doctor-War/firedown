@@ -17,4 +17,8 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d recent gesloten tabblad</item>
+        <item quantity="other">%d recent gesloten tabbladen</item>
+    </plurals>
+</resources>

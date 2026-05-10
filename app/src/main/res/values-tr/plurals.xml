@@ -17,4 +17,8 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d yakın zamanda kapatılan sekme</item>
+        <item quantity="other">%d yakın zamanda kapatılan sekme</item>
+    </plurals>
+</resources>

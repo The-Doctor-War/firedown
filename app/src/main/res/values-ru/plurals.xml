@@ -25,4 +25,10 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d недавно закрытая вкладка</item>
+        <item quantity="few">%d недавно закрытые вкладки</item>
+        <item quantity="many">%d недавно закрытых вкладок</item>
+        <item quantity="other">%d недавно закрытых вкладок</item>
+    </plurals>
+</resources>

@@ -3,7 +3,7 @@
     <string name="app_lock">Freischalten, um Firedown zu verwenden</string>
     <string name="app_name">Firedown</string>
     <string name="app_unlock">Freischalten</string>
-    <string name="archive_banner_subtitle">Inaktive Tabs ins Archiv verschoben</string>
+    <string name="archive_banner_subtitle">Tippen, um anzuzeigen oder erneut zu öffnen</string>
     <string name="browser_bookmark_added">Lesezeichen gespeichert!</string>
     <string name="browser_cache_cleared">Browserdaten gelöscht</string>
     <string name="browser_desktop">Desktop-Site</string>

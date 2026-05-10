@@ -1,4 +1,5 @@
 <resources>
+    <string name="archive_banner_subtitle">Görüntülemek veya yeniden açmak için dokunun</string>
     <string name="action_mode_selected">%d seçildi</string>
     <string name="app_lock">Firedown\'ı kullanmak için kilidi açın</string>
     <string name="app_name">Firedown</string>

@@ -3,7 +3,7 @@
     <string name="app_lock">解锁使用 Firedown</string>
     <string name="app_name">Firedown</string>
     <string name="app_unlock">解锁</string>
-    <string name="archive_banner_subtitle">未活动的标签页已移至归档</string>
+    <string name="archive_banner_subtitle">点按以查看或重新打开</string>
     <string name="browser_bookmark_added">书签已保存！</string>
     <string name="browser_cache_cleared">浏览数据已清除</string>
     <string name="browser_desktop">桌面版网站</string>

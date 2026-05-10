@@ -1,4 +1,5 @@
 <resources>
+    <string name="archive_banner_subtitle">Tik om te bekijken of opnieuw te openen</string>
     <string name="action_mode_selected">%d geselecteerd</string>
     <string name="app_lock">Ontgrendelen om Firedown te gebruiken</string>
     <string name="app_name">Firedown</string>

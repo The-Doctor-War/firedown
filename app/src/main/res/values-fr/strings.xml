@@ -3,7 +3,7 @@
     <string name="app_lock">Déverrouiller pour utiliser Firedown</string>
     <string name="app_name">Firedown</string>
     <string name="app_unlock">Ouvrir</string>
-    <string name="archive_banner_subtitle">Onglets inactifs déplacés vers vos archives</string>
+    <string name="archive_banner_subtitle">Appuyez pour voir ou rouvrir</string>
     <string name="browser_bookmark_added">Marque-page enregistré !</string>
     <string name="browser_cache_cleared">Données de navigation effacées</string>
     <string name="browser_desktop">Site de bureau</string>

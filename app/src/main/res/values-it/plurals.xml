@@ -17,4 +17,8 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d scheda chiusa di recente</item>
+        <item quantity="other">%d schede chiuse di recente</item>
+    </plurals>
+</resources>

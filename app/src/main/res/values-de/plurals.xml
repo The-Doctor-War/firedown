@@ -17,4 +17,8 @@
     </plurals>
 
     
-    </resources>
+        <plurals name="archive_banner_title">
+        <item quantity="one">%d kürzlich geschlossener Tab</item>
+        <item quantity="other">%d kürzlich geschlossene Tabs</item>
+    </plurals>
+</resources>

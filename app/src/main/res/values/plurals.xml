@@ -20,8 +20,8 @@
         <item quantity="other">%dh</item>
     </plurals>
     <plurals name="archive_banner_title">
-        <item quantity="one">%d tab archived</item>
-        <item quantity="other">%d tabs archived</item>
+        <item quantity="one">%d recently closed tab</item>
+        <item quantity="other">%d recently closed tabs</item>
     </plurals>
     <plurals name="incognito_notification_title">
         <item quantity="one">%d private tab open</item>

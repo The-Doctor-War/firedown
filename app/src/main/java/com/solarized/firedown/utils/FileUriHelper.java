@@ -146,6 +146,7 @@ public class FileUriHelper {
 
     public static final String MIMETYPE_AUDIO_X_MPEGURL = "audio/x-mpegurl";
     public static final String MIMETYPE_AUDIO_WAV = "audio/wav";
+    public static final String MIMETYPE_AUDIO_FLAC = "audio/flac";
 
     public static final String MIMETYPE_APPLICATION_MPEGURL = "application/mpegurl";
 
@@ -814,6 +815,8 @@ public class FileUriHelper {
                     extension = "xpi";
                 }else if (mime.contains(MIMETYPE_AUDIO_WAV)) {
                     extension = "wav";
+                } else if (mime.contains(MIMETYPE_AUDIO_FLAC)) {
+                    extension = "flac";
                 } else if (mime.contains(MIMETYPE_WEBM_AUDIO)) {
                     extension = "weba";
                 } else if (mime.contains(MIMETYPE_BMP)) {

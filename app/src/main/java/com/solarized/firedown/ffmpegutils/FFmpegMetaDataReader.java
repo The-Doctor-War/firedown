@@ -387,6 +387,19 @@ public class FFmpegMetaDataReader {
             return FileUriHelper.MIMETYPE_MP4;
         } else if (mFormatName.contains("mp3"))
             return FileUriHelper.AUDIO_MP3;
+        // Raw audio formats — FFmpeg's format probe reports the codec
+        // name directly (no container) for ADTS AAC, FLAC, WAV, Opus.
+        // Without these branches the chain falls through to the trailing
+        // else and returns MIMETYPE_MP4, which then drives the download
+        // strategy to write the file as .mp4 even though the bytes on
+        // disk are raw AAC / FLAC / WAV — losing the correct extension
+        // and breaking media-player association.
+        else if (mFormatName.contains("aac"))
+            return FileUriHelper.MIMETYPE_AUDIO_AAC;
+        else if (mFormatName.contains("flac"))
+            return FileUriHelper.MIMETYPE_AUDIO_FLAC;
+        else if (mFormatName.contains("wav"))
+            return FileUriHelper.MIMETYPE_AUDIO_WAV;
         else if (mFormatName.contains("webm")) {
             if (!hasVideo)
                 return FileUriHelper.MIMETYPE_WEBM_AUDIO;

@@ -534,6 +534,34 @@ async function processResponse(data, listenerName) {
 
   delete message.timestamp;
 
+  // For media types, ask the page's content script for its live title +
+  // meta description so the native side can build a descriptive filename
+  // instead of the URL slug. We only do this for "media" (audio/video
+  // elements) and "object" (some streaming players use <object> tags) —
+  // images get their alt-text / URL slug, scripts/styles/etc. are not
+  // user-saveable. The query is fire-and-forget with a short timeout;
+  // if the content script isn't there yet or the page blocks messaging,
+  // the message just goes without the enriched fields.
+  if ((data.type === 'media' || data.type === 'object') && tabId >= 0) {
+    try {
+      const meta = await Promise.race([
+        browser.tabs.sendMessage(tabId, { kind: 'get-page-metadata' }),
+        new Promise((resolve) => setTimeout(() => resolve(null), 300)),
+      ]);
+      if (meta) {
+        // name → og:title > twitter:title > document.title.
+        // description → meta description > og:description > twitter:description.
+        // Native side sanitises both; we keep them as the raw page strings here.
+        const name = meta.ogTitle || meta.twitterTitle || meta.title || '';
+        const description = meta.description || meta.ogDescription || meta.twitterDescription || '';
+        if (name && !message.name) message.name = name;
+        if (description && !message.description) message.description = description;
+      }
+    } catch (e) {
+      // Content script not loaded (file://, about:, restricted) — fine, skip.
+    }
+  }
+
   if (interesting) {
     const hdrCount = (message.requestHeaders || []).length;
     dlog('forward', data.url, `tabId=${tabId} type=${data.type} headers=${hdrCount} listener=${listenerName}`);

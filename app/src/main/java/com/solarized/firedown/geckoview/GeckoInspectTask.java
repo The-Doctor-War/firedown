@@ -284,9 +284,31 @@ public class GeckoInspectTask implements Runnable {
         String current = entity.getFileName();
         if (!TextUtils.isEmpty(current) && !WebUtils.isUrlDerivedName(current)) return;
 
+        // Variant flow (Twitter / IG / YouTube) already populates mName +
+        // mDescription from the parser extension. For these we keep the
+        // existing "author - text" build to preserve the established
+        // filename shape downstream code may depend on.
         String name = buildFileName(mName, mDescription);
         if (!TextUtils.isEmpty(name)) {
             entity.setFileName(name);
+            return;
+        }
+
+        // Generic captured-media flow: the webrequests content script pushed
+        // the live page title into mName (and optional meta description into
+        // mDescription). Only apply for audio/video — image filenames take
+        // their cue from alt text / URL slug, not the page they appeared on.
+        String mime = entity.getMimeType();
+        if (!FileUriHelper.isVideo(mime) && !FileUriHelper.isAudio(mime)) return;
+
+        String hostname = null;
+        try {
+            hostname = android.net.Uri.parse(entity.getFileOrigin()).getHost();
+        } catch (Exception ignored) {
+        }
+        String descriptive = WebUtils.sanitizeTitleForFilename(mName, hostname);
+        if (descriptive != null) {
+            entity.setFileName(descriptive);
         }
     }
 

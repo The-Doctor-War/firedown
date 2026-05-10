@@ -1,8 +1,34 @@
 // content-script.js — runs in every page
 // Scans the DOM for image URLs (including those served from service-worker
 // cache, which webRequest cannot see) and forwards them to the background.
+// Also exposes a "get-page-metadata" message endpoint that the background
+// uses to enrich intercepted media downloads with a descriptive filename
+// (page title + meta description). Lives in the page context so it sees
+// JS-rendered titles that a server-side fetch wouldn't.
 
 console.log('[cs] loaded', location.href);
+
+// Top-frame metadata responder. We only answer in the top frame so the
+// background's tabs.sendMessage (which broadcasts to all frames in a tab
+// by default) doesn't return an iframe's title instead of the page's.
+if (window === window.top) {
+  browser.runtime.onMessage.addListener((msg, sender) => {
+    if (!msg || msg.kind !== 'get-page-metadata') return;
+    const meta = (selector, attr) => {
+      const el = document.querySelector(selector);
+      return el && el.getAttribute(attr) ? el.getAttribute(attr) : '';
+    };
+    return Promise.resolve({
+      url: location.href,
+      title: document.title || '',
+      description: meta('meta[name="description"]', 'content'),
+      ogTitle: meta('meta[property="og:title"]', 'content'),
+      ogDescription: meta('meta[property="og:description"]', 'content'),
+      twitterTitle: meta('meta[name="twitter:title"]', 'content'),
+      twitterDescription: meta('meta[name="twitter:description"]', 'content'),
+    });
+  });
+}
 
 (() => {
   const seen = new Set();

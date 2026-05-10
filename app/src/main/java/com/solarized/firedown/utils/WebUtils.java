@@ -74,6 +74,98 @@ public class WebUtils {
         return !name.contains(" ");
     }
 
+    /**
+     * Maximum number of characters we keep from a page title before
+     * truncating. 80 is a balance between "still readable" and "won't
+     * trip the 255-byte filesystem limit even after UTF-8 expansion".
+     */
+    private static final int MAX_TITLE_FILENAME_LEN = 80;
+
+    /**
+     * Cleans a page title so it's safe to use as (or as part of) a
+     * filename across Android, Windows, macOS, and common cloud-sync
+     * targets (Google Drive / OneDrive / Dropbox round-trip).
+     *
+     * Operations, in order:
+     *   1. Strip control chars and zero-width unicode (a lot of CMSes
+     *      emit U+200B / U+FEFF / trailing emoji modifiers).
+     *   2. Replace Windows-reserved characters (\ / : * ? " &lt; &gt; |)
+     *      with a single space. Android allows ":" but external sync
+     *      to Windows/SD/cloud doesn't.
+     *   3. Strip common site-name suffix tails ("— YouTube",
+     *      "- Twitter", "| Vimeo"). Driven off the page's hostname so
+     *      we don't mis-strip legitimate text.
+     *   4. Collapse whitespace runs.
+     *   5. Cap length to {@value #MAX_TITLE_FILENAME_LEN} chars on a
+     *      word boundary where possible.
+     *
+     * Returns null if the input is empty, becomes empty after cleaning,
+     * or — after sanitisation — looks indistinguishable from a URL slug
+     * (callers fall back to the resource name in that case).
+     */
+    public static String sanitizeTitleForFilename(String title, String hostname) {
+        if (TextUtils.isEmpty(title)) return null;
+
+        // 1. Strip control + zero-width.
+        String s = title.replaceAll("[\\p{Cntrl}\\u200B-\\u200D\\uFEFF]", "");
+
+        // 2. Replace filesystem-illegal chars with a space.
+        s = s.replaceAll("[\\\\/:*?\"<>|]", " ");
+
+        // 3. Site-name suffix tail. Pulled off the hostname's middle label
+        //    (youtube.com → "youtube"). Match against the end of the title
+        //    only, separated by common dash / pipe / colon variants.
+        String siteName = extractSiteName(hostname);
+        if (siteName != null) {
+            // (?i) for case-insensitive; allow surrounding whitespace.
+            // \\s*[-—|:·]\\s* matches the separator. Anchor to end.
+            String pattern = "(?i)\\s*[-—|:·]\\s*" + java.util.regex.Pattern.quote(siteName) + "\\s*$";
+            s = s.replaceAll(pattern, "");
+        }
+
+        // 4. Collapse whitespace.
+        s = s.replaceAll("\\s+", " ").trim();
+        if (s.isEmpty()) return null;
+
+        // 5. Length cap on word boundary.
+        if (s.length() > MAX_TITLE_FILENAME_LEN) {
+            String trunc = s.substring(0, MAX_TITLE_FILENAME_LEN);
+            int lastSpace = trunc.lastIndexOf(' ');
+            if (lastSpace > MAX_TITLE_FILENAME_LEN / 2) {
+                trunc = trunc.substring(0, lastSpace);
+            }
+            s = trunc.trim();
+        }
+
+        // Title that survived but still looks slug-y (no spaces, all
+        // lowercase ASCII, ≤ 16 chars) — caller is better off with the
+        // URL-derived resource name. isUrlDerivedName checks the
+        // no-spaces invariant we already use elsewhere.
+        if (isUrlDerivedName(s)) return null;
+        return s;
+    }
+
+    /**
+     * Extracts the human-meaningful label from a hostname for
+     * suffix stripping. youtube.com → "YouTube", x.com → "X",
+     * www.bbc.co.uk → "BBC". Returns null on garbage.
+     */
+    private static String extractSiteName(String hostname) {
+        if (TextUtils.isEmpty(hostname)) return null;
+        String host = hostname.toLowerCase();
+        if (host.startsWith("www.")) host = host.substring(4);
+        if (host.startsWith("m.")) host = host.substring(2);
+        int dot = host.indexOf('.');
+        if (dot <= 0) return null;
+        String label = host.substring(0, dot);
+        if (label.length() < 2) return null;
+        // Special-case "x" since it's not very evocative as a suffix
+        // and would mis-match on a lot of titles ending with " - X".
+        // Drop the suffix-stripping for it.
+        if ("x".equals(label)) return null;
+        return label.substring(0, 1).toUpperCase() + label.substring(1);
+    }
+
     public static String decodeString(String URL)
     {
 

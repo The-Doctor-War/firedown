@@ -61,39 +61,74 @@ public class UpdateWorker extends Worker {
     public Result doWork() {
         Log.d("UpdateWorker", "Checking for updates...");
 
+        String body = fetchStatusJson();
+        if (body == null) {
+            // Every fallback failed (already logged per-attempt). Let WorkManager
+            // re-schedule with backoff — transient network issues recover on the
+            // next attempt; persistent ISP blocks fall through and the worker
+            // retries quietly until the user goes through a non-blocking network.
+            return Result.retry();
+        }
+
         try {
-            // 1. Fetch Status (Synchronous)
-            Request statusRequest = new Request.Builder()
-                    .url(Preferences.UPDATE_URL)
-                    .addHeader(BrowserHeaders.X_APP_VERSION, App.getVersionName())
-                    .build();
+            JSONObject json = new JSONObject(body);
+            int remoteVersion = json.getInt("versionCode");
+            String updateUrl = json.getString("updateUrl");
+            String remoteSha = json.getString("sha256");
+            String versionName = json.getString("versionName");
 
-            try (Response response = okHttpClient.newCall(statusRequest).execute()) {
-
-                if (!response.isSuccessful() || response.body() == null)
-                    return Result.retry();
-
-                JSONObject json = new JSONObject(response.body().string());
-                int remoteVersion = json.getInt("versionCode");
-                String updateUrl = json.getString("updateUrl");
-                String remoteSha = json.getString("sha256");
-                String versionName = json.getString("versionName");
-
-                // 2. Logic Flow
-                if (remoteVersion > mCurrentVersion) {
-                    if (isUpdateAlreadyDownloaded(remoteVersion)) {
-                        UpdateNotification.showInstallPrompt(mContext, versionName);
-                    } else {
-                        return downloadApk(updateUrl, remoteSha, versionName);
-                    }
+            if (remoteVersion > mCurrentVersion) {
+                if (isUpdateAlreadyDownloaded(remoteVersion)) {
+                    UpdateNotification.showInstallPrompt(mContext, versionName);
+                } else {
+                    return downloadApk(updateUrl, remoteSha, versionName);
                 }
             }
             return Result.success();
 
         } catch (Exception e) {
-            Log.e("UpdateWorker", "Update check failed", e);
+            Log.e("UpdateWorker", "Update check failed (parse)", e);
             return Result.retry();
         }
+    }
+
+    /**
+     * Walks the configured update-status endpoints in order, returning the
+     * first response body that comes back 2xx. Returns null if every
+     * endpoint fails — caller schedules a retry.
+     *
+     * Why a fallback chain at all: the primary firedown.app endpoint sits
+     * behind Cloudflare. Spain's LaLiga court orders force major ISPs to
+     * IP-block large blocks of Cloudflare ranges during match windows
+     * (the block hits every Cloudflare-fronted service, not just LaLiga
+     * targets); affected users see TCP SYN drops to those IPs and the
+     * worker would otherwise retry forever against an unreachable host.
+     * The fallback mirror is hosted on GitHub Raw (Azure IPs), which
+     * isn't caught by those blocks.
+     */
+    private String fetchStatusJson() {
+        for (String url : Preferences.UPDATE_URL_FALLBACKS) {
+            if (url == null || url.isEmpty()) continue;
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader(BrowserHeaders.X_APP_VERSION, App.getVersionName())
+                    .build();
+
+            try (Response response = okHttpClient.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    Log.w("UpdateWorker", "status fetch " + url + " → " + response.code());
+                    continue;
+                }
+                return response.body().string();
+            } catch (IOException e) {
+                // Most common case here is SocketTimeoutException from an
+                // ISP-level IP block (LaLiga / similar). Try the next
+                // fallback; only escalate if every endpoint fails.
+                Log.w("UpdateWorker", "status fetch " + url + " failed: " + e.getMessage());
+            }
+        }
+        return null;
     }
 
     private Result downloadApk(String url, String remoteSha, String name) throws IOException {

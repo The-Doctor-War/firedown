@@ -13,7 +13,31 @@ public class Preferences {
 
     public static final String UPDATE_APK = "firedown.apk";
 
+    /**
+     * Primary update-check endpoint. Sits behind Cloudflare. UpdateWorker
+     * tries each URL in {@link #UPDATE_URL_FALLBACKS} until one succeeds.
+     */
     public static final String UPDATE_URL = "https://www.firedown.app/status.json";
+
+    /**
+     * Fallback endpoints, tried in order after {@link #UPDATE_URL} fails.
+     *
+     * Spain's LaLiga court orders force major ISPs to block large blocks
+     * of Cloudflare IPs during match windows (the Cloudflare-front blast
+     * radius affects every Cloudflare-hosted service whether or not it's
+     * related to piracy). The primary firedown.app endpoint becomes
+     * unreachable for those users — TCP SYN is dropped, DNS-over-HTTPS
+     * can't help because the block is IP-level, not DNS-level.
+     *
+     * The GitHub Raw mirror is hosted on Microsoft Azure IPs, not on
+     * Cloudflare's, so the block doesn't catch it. The file is a
+     * straight copy of status.json committed to the repo's main branch
+     * — keep it updated alongside the firedown.app one.
+     */
+    public static final String[] UPDATE_URL_FALLBACKS = new String[]{
+            UPDATE_URL,
+            "https://raw.githubusercontent.com/solarizeddev/firedown/main/status.json",
+    };
 
     public static final int EXTRA_TOUCH_AREA_DP = 12;
 

@@ -1,43 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Controller layout for PlayerView. Used via app:controller_layout_id
-  on @id/player_view in fragment_media_viewer.xml.
+  Custom controller layout for PlayerView. Modelled after Media3
+  1.10.0's exo_player_control_view.xml
+  (libraries/ui/src/main/res/layout/), stripped to the elements this
+  single-video viewer actually uses.
 
-  PlayerView is hidden by default at launch (autoShow=false in
-  MediaViewerFragment); a user tap brings it up. The fragment attaches
-  an OnApplyWindowInsetsListener to media_viewer_controller_root so
-  bottom padding matches the navigation-bar inset whenever the system
-  bars are visible — the view stays above the nav bar while the video
-  TextureView behind it remains edge-to-edge.
+  Root is <merge>: children are added directly to PlayerControlView
+  (a FrameLayout) — same shape as Media3's default. Sticking to
+  Media3's region IDs means PlayerControlView's built-in show/hide
+  animations (slide exo_bottom_bar, fade exo_top_controls, scale
+  exo_center_controls) keep working with no extra code.
 
-  Three rows:
-    1. Utility row (top-right): PiP, rotate. App-defined IDs; the
-       fragment wires their click handlers to PlayerActivity.
-    2. Playback row (centre): prev, play/pause, next. Standard Media3
-       view IDs (exo_prev / exo_play_pause / exo_next) so Media3
-       binds playback behaviour.
-    3. Scrubber row: exo_position, exo_progress (DefaultTimeBar in
-       brand orange), exo_duration. Also Media3-managed.
+  Three regions, each declared once with @+id so the resource merger
+  uniques the name against Media3's library copy:
 
-  Do not rename the exo_* IDs — Media3 looks them up by name.
+    - @id/exo_top_controls — top-end. PiP + rotate. App-defined
+      child IDs (media_viewer_btn_pip, media_viewer_btn_rotate);
+      MediaViewerFragment wires the click handlers in onCreateView.
+    - @id/exo_center_controls — centre. prev / play_pause / next.
+      Media3 finds these by reflection and wires playback behaviour
+      automatically.
+    - @id/exo_bottom_bar — bottom. Time text + DefaultTimeBar +
+      duration, all wrapped so the gradient background covers the
+      whole row. Bottom padding is applied dynamically by
+      MediaViewerFragment from WindowInsets.navigationBars().bottom,
+      so the row clears the system nav bar when the bars are shown.
+
+  Dropped from Media3's default (not useful in this viewer):
+    exo_controls_background (replaced by gradient on exo_bottom_bar),
+    exo_basic_controls (vr / shuffle / repeat / subtitle / settings /
+    fullscreen / overflow_show), exo_extra_controls_scroll_view,
+    exo_minimal_controls + exo_minimal_fullscreen,
+    exo_media_route_button_placeholder, exo_progress_placeholder
+    (we declare exo_progress directly so we can style it),
+    exo_rew_with_amount / exo_ffwd_with_amount (and the include
+    layouts exo_player_control_rewind_button /
+    exo_player_control_ffwd_button).
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/media_viewer_controller_root"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom"
-    android:background="@drawable/bg_media_viewer_controller"
-    android:orientation="vertical"
-    android:paddingTop="8dp">
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Utility row -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/exo_top_controls"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="end|center_vertical"
+        android:layout_gravity="top|end"
         android:orientation="horizontal"
-        android:paddingStart="8dp"
+        android:paddingTop="8dp"
         android:paddingEnd="8dp">
 
         <ImageButton
@@ -60,14 +69,13 @@
             android:src="@drawable/ic_media_pip_white_24" />
     </LinearLayout>
 
-    <!-- Playback row -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/exo_center_controls"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingTop="8dp"
-        android:paddingBottom="4dp">
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@id/exo_prev"
@@ -99,41 +107,48 @@
             android:src="@drawable/ic_media_skip_next_white_24" />
     </LinearLayout>
 
-    <!-- Scrubber row -->
-    <LinearLayout
+    <FrameLayout
+        android:id="@+id/exo_bottom_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp">
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_media_viewer_controller"
+        android:paddingTop="16dp">
 
-        <TextView
-            android:id="@id/exo_position"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp">
 
-        <androidx.media3.ui.DefaultTimeBar
-            android:id="@id/exo_progress"
-            android:layout_width="0dp"
-            android:layout_height="28dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1"
-            app:played_color="@color/brand_orange"
-            app:scrubber_color="@color/brand_orange" />
+            <TextView
+                android:id="@id/exo_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
 
-        <TextView
-            android:id="@id/exo_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:textSize="12sp" />
-    </LinearLayout>
-</LinearLayout>
+            <androidx.media3.ui.DefaultTimeBar
+                android:id="@id/exo_progress"
+                android:layout_width="0dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                app:played_color="@color/brand_orange"
+                app:scrubber_color="@color/brand_orange" />
+
+            <TextView
+                android:id="@id/exo_duration"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                android:textColor="@android:color/white"
+                android:textSize="12sp" />
+        </LinearLayout>
+    </FrameLayout>
+</merge>

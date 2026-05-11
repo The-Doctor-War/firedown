@@ -200,24 +200,26 @@ public class MediaViewerFragment extends Fragment {
                 (PlayerView.ControllerVisibilityListener) visibility ->
                         setChromeVisible(visibility == View.VISIBLE));
 
-        // Inset handling on the custom controller root. When the
-        // controller and bars are hidden (cold launch / after auto-
-        // hide) WindowInsets.navigationBars().bottom is 0 and the
-        // controller wouldn't be visible anyway, so this is a no-op.
-        // When the user taps and the bars are shown, the framework
-        // re-dispatches insets with the real nav-bar height and we
-        // pad the controller up by exactly that much. No resource
-        // fallback, no synchronous read, no race — the controller
-        // and the bars share a single trigger (the tap).
-        final View controllerRoot = mPlayerView.findViewById(R.id.media_viewer_controller_root);
-        if (controllerRoot != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(controllerRoot, (cv, insets) -> {
+        // Inset handling. The custom controller layout follows Media3's
+        // <merge>-rooted structure now (#PR), so there's no single
+        // controller-root view to pad. The only region that needs the
+        // navigation-bar inset is exo_bottom_bar (time + scrubber);
+        // exo_top_controls is at top|end and exo_center_controls is
+        // centred, neither needs bottom clearance. While bars are
+        // hidden (cold launch / after auto-hide) navigationBars().bottom
+        // is 0 and the bar isn't visible anyway, so the write is a
+        // no-op. When the user taps and the bars are shown, the
+        // framework re-dispatches insets with the real nav-bar height
+        // and we pad the bar up by exactly that much.
+        final View bottomBar = mPlayerView.findViewById(R.id.exo_bottom_bar);
+        if (bottomBar != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v1, insets) -> {
                 int bottom = insets.getInsets(
                         WindowInsetsCompat.Type.navigationBars()).bottom;
-                cv.setPadding(
-                        cv.getPaddingLeft(),
-                        cv.getPaddingTop(),
-                        cv.getPaddingRight(),
+                v1.setPadding(
+                        v1.getPaddingLeft(),
+                        v1.getPaddingTop(),
+                        v1.getPaddingRight(),
                         bottom);
                 return insets;
             });

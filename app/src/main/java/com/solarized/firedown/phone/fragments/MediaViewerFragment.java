@@ -242,18 +242,7 @@ public class MediaViewerFragment extends Fragment {
                 int rightInset = Math.max(navBars.right, cutout.right);
                 int bottomInset = Math.max(navBars.bottom, cutout.bottom);
 
-                Log.d(TAG, "[exo_bottom_bar inset] navBars=" + navBars
-                        + " cutout=" + cutout
-                        + " writing padding L=" + leftInset
-                        + " T=" + xmlPaddingTop
-                        + " R=" + rightInset
-                        + " B=" + bottomInset
-                        + " | barH(pre)=" + v1.getHeight()
-                        + " topY(pre)=" + v1.getTop()
-                        + " bottomY(pre)=" + v1.getBottom());
-
                 v1.setPadding(leftInset, xmlPaddingTop, rightInset, bottomInset);
-                dumpBottomBarStructure("[inset-post]");
                 return windowInsets;
             });
         }
@@ -460,146 +449,21 @@ public class MediaViewerFragment extends Fragment {
     @OptIn(markerClass = UnstableApi.class)
     @OptIn(markerClass = UnstableApi.class)
     public void onPipModeChanged(boolean inPip) {
-        Log.d(TAG, "[onPipModeChanged] inPip=" + inPip);
         if (mPlayerView == null) return;
         if (inPip) {
             mPlayerView.hideController();
             setChromeVisible(false);
-        } else {
-            // #102's log proved the inner LinearLayout reports
-            // measuredH=247 while its three children sum to max=78 —
-            // mathematically impossible for a wrap_content horizontal
-            // LinearLayout unless something has set minimumHeight on
-            // it (or its parent FrameLayout). Media3's PlayerControlView
-            // appears to apply that during PiP transitions and not
-            // reset it on return to fullscreen. Aggressively clear it
-            // on both the bar and the LinearLayout, plus re-assert
-            // wrap_content LayoutParams to force a fresh measure pass.
-            resetBottomBarSizing();
         }
-        dumpBottomBarStructure("[onPipModeChanged inPip=" + inPip + "]");
-    }
-
-    /**
-     * Aggressive reset for the bar-grew-after-PiP-exit bug. Wipes
-     * minimumHeight on exo_bottom_bar AND its inner LinearLayout,
-     * re-asserts LayoutParams.height = WRAP_CONTENT, and requests a
-     * layout pass. setLayoutParams is the cheapest way to invalidate
-     * cached measure state.
-     */
-    private void resetBottomBarSizing() {
-        if (mPlayerView == null) return;
-        View bottomBar = mPlayerView.findViewById(R.id.exo_bottom_bar);
-        if (!(bottomBar instanceof android.view.ViewGroup)) return;
-        android.view.ViewGroup bottomBarGroup = (android.view.ViewGroup) bottomBar;
-
-        int barMinHbefore = bottomBar.getMinimumHeight();
-        bottomBar.setMinimumHeight(0);
-        android.view.ViewGroup.LayoutParams barLp = bottomBar.getLayoutParams();
-        int barLpHbefore = (barLp != null) ? barLp.height : Integer.MIN_VALUE;
-        if (barLp != null) {
-            barLp.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-            bottomBar.setLayoutParams(barLp);
-        }
-
-        View inner = bottomBarGroup.getChildCount() > 0
-                ? bottomBarGroup.getChildAt(0) : null;
-        int innerMinHbefore = -1;
-        int innerLpHbefore = Integer.MIN_VALUE;
-        if (inner != null) {
-            innerMinHbefore = inner.getMinimumHeight();
-            inner.setMinimumHeight(0);
-            android.view.ViewGroup.LayoutParams innerLp = inner.getLayoutParams();
-            if (innerLp != null) {
-                innerLpHbefore = innerLp.height;
-                innerLp.height = android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
-                inner.setLayoutParams(innerLp);
-            }
-        }
-
-        Log.d(TAG, "[resetBottomBarSizing]"
-                + " bar minH " + barMinHbefore + " → 0"
-                + " bar lpH " + lpHName(barLpHbefore) + " → WRAP"
-                + " | inner minH " + innerMinHbefore + " → 0"
-                + " inner lpH " + lpHName(innerLpHbefore) + " → WRAP");
-    }
-
-    private String lpHName(int v) {
-        if (v == android.view.ViewGroup.LayoutParams.MATCH_PARENT) return "MATCH";
-        if (v == android.view.ViewGroup.LayoutParams.WRAP_CONTENT) return "WRAP";
-        if (v == Integer.MIN_VALUE) return "n/a";
-        return String.valueOf(v);
-    }
-
-    /**
-     * Diagnostic — dumps the height and child tree of exo_bottom_bar so
-     * the "bar grows after PiP exit" symptom can be tracked on-device.
-     * Recursion goes one level deeper than the first version (now also
-     * walks the inner LinearLayout's children) because #101's log
-     * proved the growth is *inside* the LinearLayout (it went 102 →
-     * 248 with the same cc=3). The candidate is exo_progress — Media3
-     * DefaultTimeBar measures its scrubber thumb / touch-target area
-     * dynamically. Logging the declared layoutParams.height alongside
-     * the measured getHeight() will tell us exactly which child
-     * ballooned.
-     */
-    private void dumpBottomBarStructure(@NonNull String tag) {
-        if (mPlayerView == null) return;
-        final View bottomBar = mPlayerView.findViewById(R.id.exo_bottom_bar);
-        if (!(bottomBar instanceof android.view.ViewGroup)) return;
-        android.view.ViewGroup bottomBarGroup = (android.view.ViewGroup) bottomBar;
-        StringBuilder sb = new StringBuilder();
-        sb.append(tag).append(" exo_bottom_bar h=").append(bottomBar.getHeight())
-                .append(" measuredH=").append(bottomBar.getMeasuredHeight())
-                .append(" minH=").append(bottomBar.getMinimumHeight())
-                .append(" topY=").append(bottomBar.getTop())
-                .append(" bottomY=").append(bottomBar.getBottom())
-                .append(" pT=").append(bottomBar.getPaddingTop())
-                .append(" pB=").append(bottomBar.getPaddingBottom())
-                .append(" lpH=").append(lpHName(
-                        bottomBar.getLayoutParams() == null ? Integer.MIN_VALUE
-                                : bottomBar.getLayoutParams().height))
-                .append(" cc=").append(bottomBarGroup.getChildCount());
-        for (int i = 0; i < bottomBarGroup.getChildCount(); i++) {
-            View c = bottomBarGroup.getChildAt(i);
-            appendViewSummary(sb, "child[" + i + "]", c);
-            if (c instanceof android.view.ViewGroup) {
-                android.view.ViewGroup cg = (android.view.ViewGroup) c;
-                for (int j = 0; j < cg.getChildCount(); j++) {
-                    appendViewSummary(sb, "  inner[" + j + "]", cg.getChildAt(j));
-                }
-            }
-        }
-        Log.d(TAG, sb.toString());
-    }
-
-    private void appendViewSummary(StringBuilder sb, String prefix, View v) {
-        sb.append(" | ").append(prefix).append(" ")
-                .append(v.getClass().getSimpleName())
-                .append(" id=").append(idName(v.getId()))
-                .append(" h=").append(v.getHeight())
-                .append(" measuredH=").append(v.getMeasuredHeight())
-                .append(" minH=").append(v.getMinimumHeight());
-        android.view.ViewGroup.LayoutParams lp = v.getLayoutParams();
-        if (lp != null) {
-            sb.append(" lpH=").append(lp.height == android.view.ViewGroup.LayoutParams.MATCH_PARENT
-                    ? "MATCH"
-                    : (lp.height == android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-                            ? "WRAP"
-                            : String.valueOf(lp.height)));
-        }
-        if (v instanceof android.view.ViewGroup) {
-            sb.append(" cc=").append(((android.view.ViewGroup) v).getChildCount());
-        }
-    }
-
-    private String idName(int id) {
-        if (id == View.NO_ID) return "no-id";
-        try {
-            return getResources().getResourceEntryName(id);
-        } catch (android.content.res.Resources.NotFoundException e) {
-            return "0x" + Integer.toHexString(id);
-        }
+        // No reset on exit. The bottom-bar inner row is now pinned at
+        // android:layout_height="44dp" in
+        // exo_media_viewer_controller.xml, which is what stops
+        // PlayerControlView from inflating its measurement to ~248 px
+        // during the PiP slide-in animation. Any setLayoutParams()
+        // call here that wrote WRAP_CONTENT back onto the inner row
+        // would re-open the wrap_content vulnerability and the bar
+        // would re-inflate on the next layout pass — exactly what
+        // #104's log showed when resetBottomBarSizing() was still
+        // wired up alongside the XML pin.
     }
 
     @Override

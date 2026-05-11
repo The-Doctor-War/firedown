@@ -192,138 +192,48 @@ public class MediaViewerFragment extends Fragment {
         );
 
 
-        // Pad the fragment root by the bottom system-bar inset so the
-        // PlayerView controller (and the thumbnail on the cold-launch
-        // path) stays clear of the navigation bar. Theme.FireDown.Play
-        // now uses transparent navigationBarColor / statusBarColor
-        // instead of the legacy windowTranslucent{Status,Navigation}
-        // flags, so WindowInsets dispatch reports the real values —
-        // navigationBars().bottom is the nav bar height when 3-button
-        // nav is at the bottom, the gesture-pill height on full gesture
-        // nav, and 0 in landscape with a side-edge nav bar. When the
-        // user taps to hide chrome we call hide(systemBars()) below —
-        // that re-dispatches insets with bottom=0 and the listener
-        // automatically removes the padding so the video reclaims the
-        // full screen.
-        // ===== DEBUG: nav-bar inset diagnostics =====
-        // Several previous PRs (#85, #86, #87, #88, #89) attempted to
-        // keep the PlayerView controller above the system nav bar on
-        // cold launch. Each one reproduced the bug differently. This
-        // pass exists to capture concrete numbers from the failing
-        // device — adb logcat -s MediaViewerFragment will show every
-        // input we have at each point of the launch sequence so we
-        // can finally see which source returns 0 and which returns
-        // the real height. Strip these logs once the right path is
-        // identified.
+        // Apply the bottom nav-bar inset as padding on the fragment
+        // root SYNCHRONOUSLY here, before returning the view. The
+        // listener below also writes the same value on every dispatch
+        // — but at cold launch the listener fires after the fragment
+        // view has been attached but BEFORE it's been measured. The
+        // logs from #90 confirmed that setPadding(135) was being
+        // written correctly at that point, yet Media3's
+        // PlayerControlView still rendered its progress / time row
+        // behind the nav bar. It evidently snapshots its layout
+        // position from the parent's content-area bottom during its
+        // first measure pass and does not pick up the post-measure
+        // setPadding via requestLayout — so by the time the dispatch
+        // arrives, the controller has already been positioned against
+        // an unpadded parent.
+        //
+        // Reading insets directly from the activity decor view here
+        // sidesteps that. The decor view is already attached and has
+        // populated insets (PR #90's [decor-read] probe confirmed 135
+        // both before attach and at all timing points). Writing the
+        // padding NOW means the very first measure/layout pass on the
+        // fragment root and PlayerView already accounts for the nav
+        // bar, and PlayerControlView positions correctly the first
+        // time round.
+        //
+        // After this, the listener handles subsequent changes
+        // (chrome toggle re-runs WindowInsetsController.show/hide
+        // and the framework re-dispatches), removing the padding
+        // when bars hide and restoring it when they show again.
+        WindowInsetsCompat decorInsets = ViewCompat.getRootWindowInsets(
+                mActivity.getWindow().getDecorView());
+        if (decorInsets != null) {
+            int navBars = decorInsets.getInsets(
+                    WindowInsetsCompat.Type.navigationBars()).bottom;
+            v.setPadding(0, 0, 0, navBars);
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(v, (rv, insets) -> {
-            int statusBars = insets.getInsets(
-                    WindowInsetsCompat.Type.statusBars()).bottom;
             int navBars = insets.getInsets(
                     WindowInsetsCompat.Type.navigationBars()).bottom;
-            int systemBars = insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars()).bottom;
-            int tappable = insets.getInsets(
-                    WindowInsetsCompat.Type.tappableElement()).bottom;
-            int mandatoryGestures = insets.getInsets(
-                    WindowInsetsCompat.Type.mandatorySystemGestures()).bottom;
-            int ime = insets.getInsets(
-                    WindowInsetsCompat.Type.ime()).bottom;
-            boolean barsVisible = insets.isVisible(
-                    WindowInsetsCompat.Type.navigationBars());
-            Log.d(TAG, "[insets-listener@root] navBars.bottom=" + navBars
-                    + " systemBars.bottom=" + systemBars
-                    + " tappable.bottom=" + tappable
-                    + " mandatoryGestures.bottom=" + mandatoryGestures
-                    + " ime.bottom=" + ime
-                    + " statusBars.bottom=" + statusBars
-                    + " navVisible=" + barsVisible
-                    + " attached=" + rv.isAttachedToWindow()
-                    + " width=" + rv.getWidth()
-                    + " height=" + rv.getHeight());
             rv.setPadding(0, 0, 0, navBars);
             return insets;
         });
-
-        // Three timing probes for the same decor-view read:
-        //  - post() — runs on the next message-queue drain, typically
-        //    after attach but before the first frame.
-        //  - postDelayed(50) — gives the framework one more vsync to
-        //    settle (sometimes the very first dispatch lands AFTER
-        //    the first post drains).
-        //  - addOnAttachStateChangeListener.onViewAttachedToWindow —
-        //    runs the moment the view is actually attached, which is
-        //    the earliest point getRootWindowInsets returns non-null.
-        // Each one logs what it sees AND applies the padding (the
-        // last write wins). We expect one of them to capture a
-        // non-zero value at launch.
-
-        final View root = v;
-
-        Runnable readDecor = () -> {
-            if (mActivity == null) {
-                Log.d(TAG, "[decor-read] mActivity == null, skipping");
-                return;
-            }
-            View decor = mActivity.getWindow().getDecorView();
-            WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(decor);
-            if (rootInsets == null) {
-                Log.d(TAG, "[decor-read] getRootWindowInsets returned null");
-                return;
-            }
-            int statusBars = rootInsets.getInsets(
-                    WindowInsetsCompat.Type.statusBars()).bottom;
-            int navBars = rootInsets.getInsets(
-                    WindowInsetsCompat.Type.navigationBars()).bottom;
-            int systemBars = rootInsets.getInsets(
-                    WindowInsetsCompat.Type.systemBars()).bottom;
-            int tappable = rootInsets.getInsets(
-                    WindowInsetsCompat.Type.tappableElement()).bottom;
-            int mandatoryGestures = rootInsets.getInsets(
-                    WindowInsetsCompat.Type.mandatorySystemGestures()).bottom;
-            boolean barsVisible = rootInsets.isVisible(
-                    WindowInsetsCompat.Type.navigationBars());
-            Log.d(TAG, "[decor-read] navBars.bottom=" + navBars
-                    + " systemBars.bottom=" + systemBars
-                    + " tappable.bottom=" + tappable
-                    + " mandatoryGestures.bottom=" + mandatoryGestures
-                    + " statusBars.bottom=" + statusBars
-                    + " navVisible=" + barsVisible
-                    + " decorAttached=" + decor.isAttachedToWindow()
-                    + " decorWidth=" + decor.getWidth()
-                    + " decorHeight=" + decor.getHeight()
-                    + " rootCurrentPaddingBottom=" + root.getPaddingBottom());
-            root.setPadding(0, 0, 0, navBars);
-        };
-
-        root.post(() -> {
-            Log.d(TAG, "[probe] post() draining");
-            readDecor.run();
-        });
-        root.postDelayed(() -> {
-            Log.d(TAG, "[probe] postDelayed(50) draining");
-            readDecor.run();
-        }, 50);
-        root.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
-            @Override
-            public void onViewAttachedToWindow(@NonNull View view) {
-                Log.d(TAG, "[probe] onViewAttachedToWindow firing");
-                readDecor.run();
-                view.removeOnAttachStateChangeListener(this);
-            }
-            @Override
-            public void onViewDetachedFromWindow(@NonNull View view) {}
-        });
-
-        // Also log what's in WindowInsetsController at this point so
-        // we can see whether the system thinks the bars are visible
-        // when our padding is computed.
-        Log.d(TAG, "[probe] onCreateView end — controller="
-                + mWindowInsetsController
-                + " behavior=" + mWindowInsetsController.getSystemBarsBehavior()
-                + " vAttached=" + v.isAttachedToWindow()
-                + " vRootInsetsNull="
-                + (ViewCompat.getRootWindowInsets(v) == null));
 
 
         // Single sink for the chrome-visibility decision: PlayerView's
@@ -346,8 +256,6 @@ public class MediaViewerFragment extends Fragment {
      * if we add one later (e.g. drag-down-to-dismiss).
      */
     private void setChromeVisible(boolean visible) {
-        Log.d(TAG, "[setChromeVisible] visible=" + visible
-                + " controllerNull=" + (mWindowInsetsController == null));
         if (mWindowInsetsController == null) return;
         ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
         if (visible) {

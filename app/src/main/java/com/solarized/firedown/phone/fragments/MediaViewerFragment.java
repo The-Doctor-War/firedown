@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -192,48 +193,120 @@ public class MediaViewerFragment extends Fragment {
         );
 
 
-        // Apply the bottom nav-bar inset as padding on the fragment
-        // root SYNCHRONOUSLY here, before returning the view. The
-        // listener below also writes the same value on every dispatch
-        // — but at cold launch the listener fires after the fragment
-        // view has been attached but BEFORE it's been measured. The
-        // logs from #90 confirmed that setPadding(135) was being
-        // written correctly at that point, yet Media3's
-        // PlayerControlView still rendered its progress / time row
-        // behind the nav bar. It evidently snapshots its layout
-        // position from the parent's content-area bottom during its
-        // first measure pass and does not pick up the post-measure
-        // setPadding via requestLayout — so by the time the dispatch
-        // arrives, the controller has already been positioned against
-        // an unpadded parent.
+        // Belt-and-braces nav-bar padding. The empirical fact from
+        // #90's logs: at cold launch the WindowInsets listener fires
+        // with the correct value (e.g. 135 px) and we write
+        // setPadding(135) — but at that moment v.width == v.height
+        // == 0, so the layout pass that will follow is the FIRST one
+        // and Media3's PlayerControlView captures its bottom from the
+        // unpadded parent during that pass. The 135 padding sits
+        // there but the controller is already nailed to the wrong
+        // bottom. Subsequent dispatches (chrome toggle going
+        // padding=0 → padding=135 on an already-measured view)
+        // bounce the controller into the right place — which is why
+        // "successive taps work" but the very first launch doesn't.
         //
-        // Reading insets directly from the activity decor view here
-        // sidesteps that. The decor view is already attached and has
-        // populated insets (PR #90's [decor-read] probe confirmed 135
-        // both before attach and at all timing points). Writing the
-        // padding NOW means the very first measure/layout pass on the
-        // fragment root and PlayerView already accounts for the nav
-        // bar, and PlayerControlView positions correctly the first
-        // time round.
+        // Three layers below, ordered from earliest to latest:
         //
-        // After this, the listener handles subsequent changes
-        // (chrome toggle re-runs WindowInsetsController.show/hide
-        // and the framework re-dispatches), removing the padding
-        // when bars hide and restoring it when they show again.
+        //   1. SYNCHRONOUS apply from the decor view's insets — the
+        //      decor view is already attached at fragment.onCreateView
+        //      time, so its WindowInsets are populated and we write
+        //      the right padding before v ever enters the hierarchy.
+        //
+        //   2. WindowInsets listener — covers chrome-toggle and
+        //      orientation changes; writes the same padding on every
+        //      subsequent dispatch.
+        //
+        //   3. OnGlobalLayoutListener (your suggestion) — fires after
+        //      the FIRST real layout pass when v has non-zero width /
+        //      height. At that point we replay the tap-cycle on
+        //      mPlayerView itself (setPadding 0 → navBars) which is
+        //      what makes PlayerControlView reposition correctly.
+        //      Without this step (1) and (2) keep getting the right
+        //      number to the wrong moment.
+
         WindowInsetsCompat decorInsets = ViewCompat.getRootWindowInsets(
                 mActivity.getWindow().getDecorView());
         if (decorInsets != null) {
             int navBars = decorInsets.getInsets(
                     WindowInsetsCompat.Type.navigationBars()).bottom;
+            Log.d(TAG, "[sync-apply] decorInsets navBars.bottom=" + navBars
+                    + " — writing padding before view attach");
             v.setPadding(0, 0, 0, navBars);
+        } else {
+            Log.d(TAG, "[sync-apply] decorInsets == null at onCreateView");
         }
 
         ViewCompat.setOnApplyWindowInsetsListener(v, (rv, insets) -> {
             int navBars = insets.getInsets(
                     WindowInsetsCompat.Type.navigationBars()).bottom;
+            int systemBars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()).bottom;
+            boolean barsVisible = insets.isVisible(
+                    WindowInsetsCompat.Type.navigationBars());
+            Log.d(TAG, "[insets-listener] navBars.bottom=" + navBars
+                    + " systemBars.bottom=" + systemBars
+                    + " navVisible=" + barsVisible
+                    + " attached=" + rv.isAttachedToWindow()
+                    + " width=" + rv.getWidth()
+                    + " height=" + rv.getHeight());
             rv.setPadding(0, 0, 0, navBars);
             return insets;
         });
+
+        final View root = v;
+        final ViewTreeObserver.OnGlobalLayoutListener firstLayoutListener =
+                new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        // One-shot — remove before doing anything so
+                        // any setPadding-induced re-layouts don't
+                        // recurse back into us.
+                        root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+
+                        // At this point root is measured (logs from
+                        // #90 showed every earlier probe ran at
+                        // width=0 height=0; by now the framework has
+                        // gone through at least one layout pass).
+                        WindowInsetsCompat freshInsets =
+                                ViewCompat.getRootWindowInsets(root);
+                        int navBars = (freshInsets != null)
+                                ? freshInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+                                : 0;
+                        Log.d(TAG, "[first-layout] root width=" + root.getWidth()
+                                + " height=" + root.getHeight()
+                                + " currentPaddingBottom=" + root.getPaddingBottom()
+                                + " navBars=" + navBars
+                                + " playerView.height="
+                                + (mPlayerView != null ? mPlayerView.getHeight() : -1));
+
+                        // Replay the tap-cycle: padding=0 then
+                        // padding=navBars, on the now-measured view.
+                        // Empirically this is the only sequence that
+                        // gets PlayerControlView to recompute its
+                        // bottom edge — a no-op same-value setPadding
+                        // doesn't trigger requestLayout, and a plain
+                        // requestLayout() on mPlayerView wasn't enough
+                        // in earlier attempts because Media3 caches
+                        // the controller's position past
+                        // measure/layout. The 0 → navBars transition
+                        // mirrors exactly what hide(systemBars()) →
+                        // show(systemBars()) does on the user's tap.
+                        Log.d(TAG, "[first-layout] cycling padding 0 → " + navBars);
+                        root.setPadding(0, 0, 0, 0);
+                        root.post(() -> {
+                            if (mPlayerView == null) return;
+                            Log.d(TAG, "[first-layout-post] applying padding=" + navBars
+                                    + " (replay)");
+                            root.setPadding(0, 0, 0, navBars);
+                        });
+                    }
+                };
+        v.getViewTreeObserver().addOnGlobalLayoutListener(firstLayoutListener);
+
+        Log.d(TAG, "[onCreateView-end] decorInsetsNull=" + (decorInsets == null)
+                + " vAttached=" + v.isAttachedToWindow()
+                + " currentPaddingBottom=" + v.getPaddingBottom());
 
 
         // Single sink for the chrome-visibility decision: PlayerView's
@@ -256,6 +329,7 @@ public class MediaViewerFragment extends Fragment {
      * if we add one later (e.g. drag-down-to-dismiss).
      */
     private void setChromeVisible(boolean visible) {
+        Log.d(TAG, "[setChromeVisible] visible=" + visible);
         if (mWindowInsetsController == null) return;
         ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
         if (visible) {

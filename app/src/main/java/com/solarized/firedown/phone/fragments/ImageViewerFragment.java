@@ -47,11 +47,19 @@ public class ImageViewerFragment extends Fragment {
 
     private CircularProgressIndicator mProgress;
 
+    /**
+     * Cached so {@link #setChromeVisible(boolean)} can fire without
+     * re-resolving from the activity each time. Nulled in onDestroyView
+     * along with the rest of the view fields.
+     */
+    private WindowInsetsControllerCompat mWindowInsetsController;
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         mPhotoView= null;
         mProgress = null;
+        mWindowInsetsController = null;
     }
 
     @Override
@@ -98,39 +106,53 @@ public class ImageViewerFragment extends Fragment {
 
         ViewCompat.setTransitionName(mPhotoView, "image_view");
 
-        WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
+        mWindowInsetsController = WindowCompat.getInsetsController(
+                mActivity.getWindow(), mActivity.getWindow().getDecorView());
 
         // Configure the behavior of the hidden system bars.
-        windowInsetsController.setSystemBarsBehavior(
+        mWindowInsetsController.setSystemBarsBehavior(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
 
+        // [BUG FIX] Click listener used to also call the legacy
+        // decorView.setSystemUiVisibility(SYSTEM_UI_FLAG_FULLSCREEN),
+        // which duplicated what WindowInsetsController.hide already does
+        // and, on Android 11+, conflicted with it (legacy flag layered
+        // on top of the modern controller produced a one-frame status-bar
+        // flash). Dropped. WindowInsetsController is the single source
+        // of truth now, matching the MediaViewerFragment refactor in
+        // PR #79.
+        //
+        // The click itself was also broken until the matching
+        // ZoomableImageView fix in this PR: the custom onTouchEvent
+        // there consumed all events without calling performClick, so
+        // this listener never fired even before. Now it does.
         mPhotoView.setOnClickListener(v1 -> {
-            View decorView = mActivity.getWindow().getDecorView();
-            // Hide the status bar.
-            int uiOptions = View.SYSTEM_UI_FLAG_FULLSCREEN;
-            decorView.setSystemUiVisibility(uiOptions);
-            // Remember that you should never show the action bar if the
-            // status bar is hidden, so hide that too if necessary.
-            ActionBar actionBar = mActivity.getSupportActionBar();
-
-            if(actionBar != null){
-
-               // actionBar.setBackgroundDrawable(new ColorDrawable(ContextCompat.getColor(mActivity, R.color.black_black_transparent)));
-
-                if(actionBar.isShowing()){
-                    windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-                    actionBar.hide();
-                }else{
-                    windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
-                    actionBar.show();
-                }
-            }
+            ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
+            boolean wasVisible = actionBar != null && actionBar.isShowing();
+            setChromeVisible(!wasVisible);
         });
 
 
         return v;
 
+    }
+
+    /**
+     * Show or hide the activity chrome — system bars and action bar —
+     * in lockstep. Mirrors MediaViewerFragment.setChromeVisible from
+     * PR #79 so both viewer fragments use the same helper shape.
+     */
+    private void setChromeVisible(boolean visible) {
+        if (mWindowInsetsController == null) return;
+        ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
+        if (visible) {
+            mWindowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            if (actionBar != null) actionBar.show();
+        } else {
+            if (actionBar != null) actionBar.hide();
+            mWindowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+        }
     }
 
     @Override

@@ -92,7 +92,35 @@ public class ZoomableImageView extends AppCompatImageView {
                 clampTranslation();
                 return true;
             }
+
+            /**
+             * [BUG FIX] Route confirmed single taps to performClick() so
+             * setOnClickListener still works. The custom onTouchEvent
+             * below returns true without calling super or performClick,
+             * which means the View's default click-detection plumbing
+             * never sees the tap and any registered listener is dead
+             * (notably ImageViewerFragment's chrome-toggle listener).
+             * Using onSingleTapConfirmed (not onSingleTapUp) so a tap
+             * that's actually the first half of a double-tap doesn't
+             * fire the listener.
+             */
+            @Override
+            public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
+                performClick();
+                return true;
+            }
         });
+    }
+
+    /**
+     * Required by the lint rule: any view that emits performClick from
+     * onTouchEvent must override performClick so accessibility services
+     * can fire the action programmatically. Default implementation is
+     * already enough; the override exists for the announcement.
+     */
+    @Override
+    public boolean performClick() {
+        return super.performClick();
     }
 
     /**

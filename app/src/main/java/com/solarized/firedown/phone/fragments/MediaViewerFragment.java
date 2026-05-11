@@ -11,7 +11,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -177,20 +176,7 @@ public class MediaViewerFragment extends Fragment {
         // same regardless of which PlayerView default the bundled Media3
         // version ships with.
         mPlayerView.setUseController(true);
-        // Auto-show is intentionally OFF here. Logs from #90 / #92
-        // proved the controller's first show happens BEFORE the
-        // fragment root is measured (controller becomes visible at
-        // 33.968, padding lands at 33.979, first layout at 33.984).
-        // PlayerControlView locks its bottom-Y from that pre-measure
-        // moment and ignores subsequent padding changes — that's why
-        // every previous attempt to chase the padding write into
-        // earlier and earlier callbacks still left the controller
-        // sitting behind the nav bar. With autoShow=false the
-        // controller stays hidden through onCreateView, then
-        // OnGlobalLayoutListener below calls showController() AFTER
-        // the first layout pass, so its very first show happens
-        // against a fully-measured, padded parent.
-        mPlayerView.setControllerAutoShow(false);
+        mPlayerView.setControllerAutoShow(true);
         mPlayerView.setControllerHideOnTouch(true);
         // Default is ~3 s. 5 s matches VLC / Plex and gives the user a
         // realistic window to reach the play/pause / scrubber without
@@ -206,98 +192,57 @@ public class MediaViewerFragment extends Fragment {
         );
 
 
-        // Bottom inset handling. Empirical findings from #85 → #93:
+        // Nav-bar inset handling — owned by the controller view.
         //
-        //   1. Logs from #90/#93 confirmed WindowInsets.dispatch arrives
-        //      with the correct nav-bar height (135 px on the failing
-        //      device) but at view.width=0 view.height=0 — i.e. BEFORE
-        //      the fragment view is measured.
+        // Previous PRs #85..#94 each tried to keep Media3's built-in
+        // PlayerControlView above the nav bar by writing setPadding to
+        // the fragment root, mPlayerView, or mPhotoView at various
+        // points in the lifecycle. None of them stuck on cold launch
+        // because PlayerControlView snapshots its bottom-Y during its
+        // first measure pass and doesn't reposition on subsequent
+        // padding writes; tap-cycle worked only because hide/show
+        // re-instantiates the controller's measure.
         //
-        //   2. ViewCompat.getRootWindowInsets(decorView) returns null
-        //      at fragment.onCreateView time on this device — so #91's
-        //      synchronous decor-view read was a no-op. (Confirmed in
-        //      #93's log: "[sync-apply] decorInsets == null".)
-        //
-        //   3. PR #84 made player_view VISIBLE from the start (instead
-        //      of GONE until the shared-element transition ended). The
-        //      pre-#84 code padded mPlayerView and that worked because
-        //      mPlayerView was GONE during the racy window — by the
-        //      time it became VISIBLE and was measured, padding was
-        //      already in place. With #84's always-VISIBLE player_view
-        //      that race re-opened.
-        //
-        // This pass restores the original padding target (mPlayerView,
-        // not the fragment root) and supplies the value SYNCHRONOUSLY
-        // in onCreateView using android.R.dimen.navigation_bar_height —
-        // a system resource that's available at any point during the
-        // fragment lifecycle, unlike decor-view insets. With the value
-        // on mPlayerView before the first measure pass,
-        // PlayerControlView's first layout uses the padded
-        // content-area bottom and lands above the nav bar.
-        //
-        // Listener still updates mPlayerView on subsequent dispatches
-        // (chrome toggle / orientation) so the padding tracks the
-        // bar visibility correctly.
+        // This PR replaces PlayerControlView with our own layout
+        // (exo_media_viewer_controller.xml, wired via
+        // app:controller_layout_id on the PlayerView). The custom
+        // root carries an id we control and reacts to WindowInsets
+        // directly — synchronous initial padding from the system
+        // resource, plus a listener for runtime changes (orientation,
+        // chrome toggle). PlayerView's TextureView underneath stays
+        // edge-to-edge; only the controller insets itself.
+        final View controllerRoot = mPlayerView.findViewById(R.id.media_viewer_controller_root);
+        if (controllerRoot != null) {
+            int initialNavBarHeight = readSystemNavigationBarHeight();
+            Log.d(TAG, "[sync-apply] resource navigation_bar_height="
+                    + initialNavBarHeight
+                    + " — padding custom controller synchronously");
+            controllerRoot.setPadding(
+                    controllerRoot.getPaddingLeft(),
+                    controllerRoot.getPaddingTop(),
+                    controllerRoot.getPaddingRight(),
+                    initialNavBarHeight);
 
-        final int initialNavBarHeight = readSystemNavigationBarHeight();
-        Log.d(TAG, "[sync-apply] resource navigation_bar_height=" + initialNavBarHeight
-                + " — padding mPlayerView synchronously");
-        mPlayerView.setPadding(0, 0, 0, initialNavBarHeight);
-        mPhotoView.setPadding(0, 0, 0, initialNavBarHeight);
-
-        ViewCompat.setOnApplyWindowInsetsListener(v, (rv, insets) -> {
-            int navBars = insets.getInsets(
-                    WindowInsetsCompat.Type.navigationBars()).bottom;
-            boolean barsVisible = insets.isVisible(
-                    WindowInsetsCompat.Type.navigationBars());
-            Log.d(TAG, "[insets-listener] navBars.bottom=" + navBars
-                    + " navVisible=" + barsVisible
-                    + " attached=" + rv.isAttachedToWindow()
-                    + " width=" + rv.getWidth()
-                    + " height=" + rv.getHeight());
-            // Apply to mPlayerView / mPhotoView (the actual content),
-            // not to the fragment root — pre-#84 this is what worked.
-            if (mPlayerView != null) {
-                mPlayerView.setPadding(0, 0, 0, navBars);
-                mPlayerView.requestLayout();
-            }
-            if (mPhotoView != null) {
-                mPhotoView.setPadding(0, 0, 0, navBars);
-                mPhotoView.requestLayout();
-            }
-            return insets;
-        });
-
-        final View root = v;
-        final ViewTreeObserver.OnGlobalLayoutListener firstLayoutListener =
-                new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        // One-shot.
-                        root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        Log.d(TAG, "[first-layout] root width=" + root.getWidth()
-                                + " height=" + root.getHeight()
-                                + " playerView.height="
-                                + (mPlayerView != null ? mPlayerView.getHeight() : -1)
-                                + " playerView.paddingBottom="
-                                + (mPlayerView != null ? mPlayerView.getPaddingBottom() : -1));
-
-                        // Show the controller for the first time AFTER
-                        // the first layout pass — by now mPlayerView
-                        // has been measured with its bottom padding,
-                        // so PlayerControlView's first
-                        // measure / layout uses the correct
-                        // content-area bottom.
-                        if (mPlayerView != null) {
-                            Log.d(TAG, "[first-layout] showController()");
-                            mPlayerView.showController();
-                        }
-                    }
-                };
-        v.getViewTreeObserver().addOnGlobalLayoutListener(firstLayoutListener);
+            ViewCompat.setOnApplyWindowInsetsListener(controllerRoot, (cv, insets) -> {
+                int navBars = insets.getInsets(
+                        WindowInsetsCompat.Type.navigationBars()).bottom;
+                Log.d(TAG, "[insets-listener@controller] navBars.bottom=" + navBars
+                        + " attached=" + cv.isAttachedToWindow()
+                        + " width=" + cv.getWidth() + " height=" + cv.getHeight());
+                cv.setPadding(
+                        cv.getPaddingLeft(),
+                        cv.getPaddingTop(),
+                        cv.getPaddingRight(),
+                        navBars);
+                return insets;
+            });
+        } else {
+            Log.w(TAG, "[sync-apply] controller root view not found in PlayerView — "
+                    + "is app:controller_layout_id wired in fragment_media_viewer.xml?");
+        }
 
         Log.d(TAG, "[onCreateView-end] vAttached=" + v.isAttachedToWindow()
-                + " mPlayerView.paddingBottom=" + mPlayerView.getPaddingBottom());
+                + " controllerRootNull=" + (controllerRoot == null));
 
 
         // Single sink for the chrome-visibility decision: PlayerView's

@@ -200,11 +200,18 @@ public class App extends Application implements Configuration.Provider{
     public static void setTheme(){
         SharedPreferences mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mAppContext);
         int preferenceTheme = mSharedPreferences.getInt(Preferences.SETTINGS_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        // Translate the OLED sentinel into MODE_NIGHT_YES — AppCompatDelegate
+        // doesn't know about THEME_OLED. The actual true-black overlay is
+        // applied per-activity in BaseActivity.onCreate, which reads the
+        // raw pref value before super.onCreate runs.
+        int nightMode = (preferenceTheme == Preferences.THEME_OLED)
+                ? AppCompatDelegate.MODE_NIGHT_YES
+                : preferenceTheme;
         int currentTheme = AppCompatDelegate.getDefaultNightMode();
-        if(currentTheme != preferenceTheme){
-            if(preferenceTheme == AppCompatDelegate.MODE_NIGHT_NO){
+        if(currentTheme != nightMode){
+            if(nightMode == AppCompatDelegate.MODE_NIGHT_NO){
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            }else if(preferenceTheme == AppCompatDelegate.MODE_NIGHT_YES){
+            }else if(nightMode == AppCompatDelegate.MODE_NIGHT_YES){
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
             }else{
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);

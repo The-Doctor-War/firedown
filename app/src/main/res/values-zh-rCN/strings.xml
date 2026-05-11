@@ -1,4 +1,6 @@
 <resources>
+    <string name="settings_oled_theme">AMOLED 纯黑</string>
+    <string name="settings_oled_theme_summary">纯黑背景 — 在 OLED 屏幕上省电</string>
     <string name="action_mode_selected">已选择 %d</string>
     <string name="app_lock">解锁使用 Firedown</string>
     <string name="app_name">Firedown</string>

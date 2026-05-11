@@ -93,6 +93,19 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        // Apply the AMOLED true-black overlay BEFORE super.onCreate so the
+        // window background, status bar, and view inflation in super pick
+        // up the overridden surface tokens. App.setTheme already coerced
+        // the night mode to YES for the OLED sentinel; this layers the
+        // pure-black surfaces on top of the dark theme that just came up.
+        int themePref = androidx.preference.PreferenceManager
+                .getDefaultSharedPreferences(this)
+                .getInt(Preferences.SETTINGS_THEME,
+                        androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
+        if (themePref == Preferences.THEME_OLED) {
+            getTheme().applyStyle(R.style.ThemeOverlay_App_OLED, true);
+        }
+
         super.onCreate(savedInstanceState);
 
         if(BuildUtils.hasAndroidQ()){

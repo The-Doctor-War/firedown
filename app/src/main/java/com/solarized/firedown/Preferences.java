@@ -67,6 +67,17 @@ public class Preferences {
 
     public static final String SETTINGS_THEME_LIGHT = "com.solarized.firedown.preferences.theme.light";
 
+    public static final String SETTINGS_THEME_OLED = "com.solarized.firedown.preferences.theme.oled";
+
+    /**
+     * Sentinel value stored in {@link #SETTINGS_THEME} when the user picks
+     * AMOLED mode. Distinct from {@link androidx.appcompat.app.AppCompatDelegate}
+     * MODE_NIGHT_* constants (which are -1, 1, 2, 3) so it survives a
+     * round-trip through getInt without colliding. App.onCreate translates
+     * this to MODE_NIGHT_YES + the OLED theme overlay.
+     */
+    public static final int THEME_OLED = -100;
+
     public static final String SETTINGS_ENABLE_JIT = "com.solarized.firedown.preferences.browser.enable.jit";
 
     public static final boolean DEFAULT_ENABLE_JIT = false;

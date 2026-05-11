@@ -1,4 +1,6 @@
 <resources>
+    <string name="settings_oled_theme">AMOLED 블랙</string>
+    <string name="settings_oled_theme_summary">순수 검정 배경 — OLED 화면에서 배터리 절약</string>
     <string name="archive_banner_subtitle">탭하여 보거나 다시 열기</string>
     <string name="action_mode_selected">%d개 선택됨</string>
     <string name="app_lock">Firedown을 사용하려면 잠금 해제하세요</string>

@@ -390,6 +390,8 @@
     <string name="settings_jit_enabled_summary">When disabled, performance may be reduced for complex webpages - Changing this setting will restart your browser</string>
     <string name="settings_license">Licenses</string>
     <string name="settings_light_theme">Light</string>
+    <string name="settings_oled_theme">AMOLED black</string>
+    <string name="settings_oled_theme_summary">Pure black surfaces — saves battery on OLED screens</string>
     <string name="settings_lock_15_min">15 minutes inactivity</string>
     <string name="settings_lock_1_day">1 day inactivity</string>
     <string name="settings_lock_1_hour">1 hour inactivity</string>

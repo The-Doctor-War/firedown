@@ -1,4 +1,6 @@
 <resources>
+    <string name="settings_oled_theme">Чёрный AMOLED</string>
+    <string name="settings_oled_theme_summary">Чисто чёрный фон — экономит батарею на OLED-экранах</string>
     <string name="archive_banner_subtitle">Нажмите, чтобы просмотреть или открыть снова</string>
     <string name="action_mode_selected">%d выбрано</string>
     <string name="app_lock">Разблокируйте, чтобы использовать Firedown</string>

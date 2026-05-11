@@ -1,4 +1,6 @@
 <resources>
+    <string name="settings_oled_theme">AMOLED negro</string>
+    <string name="settings_oled_theme_summary">Superficies negras puras — ahorra batería en pantallas OLED</string>
     <string name="action_mode_selected">%d seleccionado</string>
     <string name="app_lock">Desbloquear para usar Firedown</string>
     <string name="app_name">Firedown</string>

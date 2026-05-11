@@ -1,4 +1,6 @@
 <resources>
+    <string name="settings_oled_theme">AMOLED siyah</string>
+    <string name="settings_oled_theme_summary">Saf siyah yüzeyler — OLED ekranlarda pil tasarrufu sağlar</string>
     <string name="archive_banner_subtitle">Görüntülemek veya yeniden açmak için dokunun</string>
     <string name="action_mode_selected">%d seçildi</string>
     <string name="app_lock">Firedown\'ı kullanmak için kilidi açın</string>

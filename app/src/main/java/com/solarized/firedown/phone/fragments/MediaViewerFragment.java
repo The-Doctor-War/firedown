@@ -172,87 +172,56 @@ public class MediaViewerFragment extends Fragment {
             mPlayerView.setDefaultArtwork(mFallbackDrawable);
         }
 
-        // Explicit configuration so the tap-toggle behaviour stays the
-        // same regardless of which PlayerView default the bundled Media3
-        // version ships with.
+        // PlayerView / controller behaviour. autoShow is deliberately
+        // false: at launch we want the activity fully immersive (no
+        // system bars, no controller — same UX as YouTube, VLC,
+        // Netflix). The user taps to bring the controller up;
+        // setControllerVisibilityListener below mirrors that into the
+        // system bars. With autoShow=true Media3 re-shows the
+        // controller on every player-state change (buffering ↔ ready)
+        // which kept resetting the auto-hide timeout — that was the
+        // "auto-hide doesn't work" symptom reported on #95/#96.
         mPlayerView.setUseController(true);
-        mPlayerView.setControllerAutoShow(true);
+        mPlayerView.setControllerAutoShow(false);
         mPlayerView.setControllerHideOnTouch(true);
-        // Default is ~3 s. 5 s matches VLC / Plex and gives the user a
-        // realistic window to reach the play/pause / scrubber without
-        // feeling rushed. Tap-on-empty hides immediately as before.
         mPlayerView.setControllerShowTimeoutMs(CONTROLLER_TIMEOUT_MS);
 
         mWindowInsetsController = WindowCompat.getInsetsController(
                 mActivity.getWindow(), mActivity.getWindow().getDecorView());
-
-        // Configure the behavior of the hidden system bars.
         mWindowInsetsController.setSystemBarsBehavior(
-                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-        );
+                WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
 
+        // Lockstep: controller visibility ↔ system-bar visibility.
+        // First user tap shows the controller, the listener fires
+        // with VISIBLE and we show the bars. The auto-hide timeout
+        // (or another tap) hides the controller, the listener fires
+        // with GONE and we hide the bars.
+        mPlayerView.setControllerVisibilityListener(
+                (PlayerView.ControllerVisibilityListener) visibility ->
+                        setChromeVisible(visibility == View.VISIBLE));
 
-        // Nav-bar inset handling — owned by the controller view.
-        //
-        // Previous PRs #85..#94 each tried to keep Media3's built-in
-        // PlayerControlView above the nav bar by writing setPadding to
-        // the fragment root, mPlayerView, or mPhotoView at various
-        // points in the lifecycle. None of them stuck on cold launch
-        // because PlayerControlView snapshots its bottom-Y during its
-        // first measure pass and doesn't reposition on subsequent
-        // padding writes; tap-cycle worked only because hide/show
-        // re-instantiates the controller's measure.
-        //
-        // This PR replaces PlayerControlView with our own layout
-        // (exo_media_viewer_controller.xml, wired via
-        // app:controller_layout_id on the PlayerView). The custom
-        // root carries an id we control and reacts to WindowInsets
-        // directly — synchronous initial padding from the system
-        // resource, plus a listener for runtime changes (orientation,
-        // chrome toggle). PlayerView's TextureView underneath stays
-        // edge-to-edge; only the controller insets itself.
+        // Inset handling on the custom controller root. When the
+        // controller and bars are hidden (cold launch / after auto-
+        // hide) WindowInsets.navigationBars().bottom is 0 and the
+        // controller wouldn't be visible anyway, so this is a no-op.
+        // When the user taps and the bars are shown, the framework
+        // re-dispatches insets with the real nav-bar height and we
+        // pad the controller up by exactly that much. No resource
+        // fallback, no synchronous read, no race — the controller
+        // and the bars share a single trigger (the tap).
         final View controllerRoot = mPlayerView.findViewById(R.id.media_viewer_controller_root);
         if (controllerRoot != null) {
-            int initialNavBarHeight = readSystemNavigationBarHeight();
-            Log.d(TAG, "[sync-apply] resource navigation_bar_height="
-                    + initialNavBarHeight
-                    + " — padding custom controller synchronously");
-            controllerRoot.setPadding(
-                    controllerRoot.getPaddingLeft(),
-                    controllerRoot.getPaddingTop(),
-                    controllerRoot.getPaddingRight(),
-                    initialNavBarHeight);
-
             ViewCompat.setOnApplyWindowInsetsListener(controllerRoot, (cv, insets) -> {
-                int navBars = insets.getInsets(
+                int bottom = insets.getInsets(
                         WindowInsetsCompat.Type.navigationBars()).bottom;
-                Log.d(TAG, "[insets-listener@controller] navBars.bottom=" + navBars
-                        + " attached=" + cv.isAttachedToWindow()
-                        + " width=" + cv.getWidth() + " height=" + cv.getHeight());
                 cv.setPadding(
                         cv.getPaddingLeft(),
                         cv.getPaddingTop(),
                         cv.getPaddingRight(),
-                        navBars);
+                        bottom);
                 return insets;
             });
-        } else {
-            Log.w(TAG, "[sync-apply] controller root view not found in PlayerView — "
-                    + "is app:controller_layout_id wired in fragment_media_viewer.xml?");
         }
-
-        Log.d(TAG, "[onCreateView-end] vAttached=" + v.isAttachedToWindow()
-                + " controllerRootNull=" + (controllerRoot == null));
-
-
-        // Single sink for the chrome-visibility decision: PlayerView's
-        // controller visibility drives whether the system bars + action
-        // bar are shown. Keeping all three in one helper avoids the
-        // "show bars but actionbar lags one frame" race the inline
-        // listener used to have if the listener was invoked re-entrantly.
-        mPlayerView.setControllerVisibilityListener(
-                (PlayerView.ControllerVisibilityListener) visibility ->
-                        setChromeVisible(visibility == View.VISIBLE));
 
         return v;
 
@@ -265,7 +234,6 @@ public class MediaViewerFragment extends Fragment {
      * if we add one later (e.g. drag-down-to-dismiss).
      */
     private void setChromeVisible(boolean visible) {
-        Log.d(TAG, "[setChromeVisible] visible=" + visible);
         if (mWindowInsetsController == null) return;
         ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
         if (visible) {
@@ -366,6 +334,12 @@ public class MediaViewerFragment extends Fragment {
             }
         }
 
+        // Start fully immersive. The controller is already hidden
+        // (setControllerAutoShow(false) in onCreateView), this matches
+        // the system bars to it. First user tap shows the controller
+        // → setChromeVisible(true) via the visibility listener → bars
+        // come back.
+        setChromeVisible(false);
     }
 
 
@@ -397,22 +371,6 @@ public class MediaViewerFragment extends Fragment {
 
     private boolean isActivityInPip() {
         return mActivity != null && mActivity.isInPictureInPictureMode();
-    }
-
-    /**
-     * Read the system navigation-bar height from android.R.dimen.
-     * navigation_bar_height. This works at fragment.onCreateView time
-     * even when ViewCompat.getRootWindowInsets(decorView) still returns
-     * null (which #93's log proved happens on the failing device).
-     * Returns 0 on devices that don't reserve a bottom strip (full
-     * gesture navigation).
-     */
-    private int readSystemNavigationBarHeight() {
-        int resourceId = getResources()
-                .getIdentifier("navigation_bar_height", "dimen", "android");
-        return (resourceId > 0)
-                ? getResources().getDimensionPixelSize(resourceId)
-                : 0;
     }
 
     /**

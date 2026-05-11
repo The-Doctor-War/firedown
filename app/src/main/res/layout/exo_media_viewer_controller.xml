@@ -1,85 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Custom controller layout for the PlayerView in MediaViewerFragment.
+  Controller layout for PlayerView. Used via app:controller_layout_id
+  on @id/player_view in fragment_media_viewer.xml.
 
-  Self-contained: no references to Media3's @style/ExoStyledControls
-  tree (those styles aren't guaranteed public across Media3 versions
-  — using them broke the build in #95). All sizing / background /
-  ripple is inline. Icons are vector drawables in our own res folder.
+  PlayerView is hidden by default at launch (autoShow=false in
+  MediaViewerFragment); a user tap brings it up. The MediaViewerFragment
+  attaches an OnApplyWindowInsetsListener to media_viewer_controller_root
+  to set bottom padding equal to the navigation-bar inset whenever the
+  system bars are visible — so this view is always above the nav bar
+  while the video TextureView behind it stays edge-to-edge.
 
-  Required view IDs (Media3 wires up the playback behaviour on
-  these — keep the names exactly):
-    exo_progress         – DefaultTimeBar (scrubber)
-    exo_position         – current playback time text
-    exo_duration         – total duration text
-    exo_play_pause       – combined play/pause button (Media3 swaps
-                           the drawable based on player state at
-                           runtime; we only set an initial src)
-    exo_prev / exo_next  – previous / next track
-    exo_rew_with_amount  – rewind by the configured seek-back amount
-    exo_ffwd_with_amount – fast-forward by the configured seek-forward
-                           amount
-
-  Bottom padding is applied programmatically in MediaViewerFragment
-  from android.R.dimen.navigation_bar_height (synchronous, decor-view
-  insets are null at onCreateView on Samsung One UI) and updated by
-  an OnApplyWindowInsetsListener on this root for chrome / rotation.
+  The view IDs (exo_progress, exo_play_pause, exo_position, exo_duration,
+  exo_prev, exo_next, exo_rew_with_amount, exo_ffwd_with_amount) are
+  required by Media3's PlayerControlView reflection lookup — do not
+  rename them.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/media_viewer_controller_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
-    android:background="#80000000"
+    android:background="@drawable/bg_media_viewer_controller"
     android:orientation="vertical"
-    android:paddingTop="8dp">
+    android:paddingTop="16dp">
 
-    <!-- Top row: position, scrubber, duration -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp">
-
-        <TextView
-            android:id="@id/exo_position"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:minWidth="56dp"
-            android:textColor="@android:color/white"
-            android:textSize="13sp" />
-
-        <androidx.media3.ui.DefaultTimeBar
-            android:id="@id/exo_progress"
-            android:layout_width="0dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:layout_weight="1" />
-
-        <TextView
-            android:id="@id/exo_duration"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:minWidth="56dp"
-            android:textColor="@android:color/white"
-            android:textSize="13sp" />
-    </LinearLayout>
-
-    <!-- Bottom row: prev / rewind / play_pause / forward / next -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingTop="4dp"
-        android:paddingBottom="8dp">
+        android:orientation="horizontal">
 
         <ImageButton
             android:id="@id/exo_prev"
@@ -90,17 +39,11 @@
             android:scaleType="centerInside"
             android:src="@drawable/ic_media_skip_previous_white_24" />
 
-        <!--
-          exo_rew_with_amount is consumed by Media3 as a TextView so
-          it can draw the seek-amount number ("5", "10", etc.) on the
-          icon. The background drawable provides the rewind glyph;
-          Media3 overlays the amount on top at runtime.
-        -->
         <TextView
             android:id="@id/exo_rew_with_amount"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="12dp"
             android:background="@drawable/ic_media_replay_white_24"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
@@ -111,8 +54,8 @@
             android:id="@id/exo_play_pause"
             android:layout_width="64dp"
             android:layout_height="64dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="16dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/play"
             android:scaleType="centerInside"
@@ -122,7 +65,7 @@
             android:id="@id/exo_ffwd_with_amount"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="12dp"
             android:background="@drawable/ic_media_fast_forward_white_24"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
@@ -137,5 +80,40 @@
             android:contentDescription="@string/next"
             android:scaleType="centerInside"
             android:src="@drawable/ic_media_skip_next_white_24" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
+
+        <TextView
+            android:id="@id/exo_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" />
+
+        <androidx.media3.ui.DefaultTimeBar
+            android:id="@id/exo_progress"
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@id/exo_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:textColor="@android:color/white"
+            android:textSize="12sp" />
     </LinearLayout>
 </LinearLayout>

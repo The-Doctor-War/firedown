@@ -253,6 +253,7 @@ public class MediaViewerFragment extends Fragment {
                         + " bottomY(pre)=" + v1.getBottom());
 
                 v1.setPadding(leftInset, xmlPaddingTop, rightInset, bottomInset);
+                dumpBottomBarStructure("[inset-post]");
                 return windowInsets;
             });
         }
@@ -461,15 +462,54 @@ public class MediaViewerFragment extends Fragment {
         Log.d(TAG, "[onPipModeChanged] inPip=" + inPip);
         if (mPlayerView == null) return;
         if (inPip) {
+            // While in PiP we just want the controller invisible. The
+            // previous setUseController(false) here was redundant
+            // (hideController already hides it) AND caused
+            // PlayerControlView to dirty its internal layout state —
+            // when setUseController(true) reattached the player on
+            // exit, the inner LinearLayout inside exo_bottom_bar
+            // ended up ~280 px taller than before PiP (#100 log:
+            // 282 px → 428 px). The bar's bottom edge stays anchored
+            // to the screen so the top edge moves UP by that amount
+            // = visible "slide up after PiP" bug.
             mPlayerView.hideController();
-            mPlayerView.setUseController(false);
             setChromeVisible(false);
         } else {
-            mPlayerView.setUseController(true);
-            // Don't force the controller back on exit — let the user tap
-            // to bring it up. Chrome visibility follows the controller
-            // listener as before.
+            // Symmetry: no setUseController(true) needed because we
+            // never called setUseController(false) on entry. Chrome
+            // visibility follows the controller listener as before.
         }
+        dumpBottomBarStructure("[onPipModeChanged inPip=" + inPip + "]");
+    }
+
+    /**
+     * Diagnostic — dumps the height and child tree of exo_bottom_bar so
+     * #100's "bar grows after PiP exit" symptom can be confirmed (or
+     * ruled out) on-device. Filter with `adb logcat -s MediaViewerFragment`.
+     * Will be removed once the PiP-exit resize is fully resolved.
+     */
+    private void dumpBottomBarStructure(@NonNull String tag) {
+        if (mPlayerView == null) return;
+        final View bottomBar = mPlayerView.findViewById(R.id.exo_bottom_bar);
+        if (!(bottomBar instanceof android.view.ViewGroup)) return;
+        android.view.ViewGroup bottomBarGroup = (android.view.ViewGroup) bottomBar;
+        StringBuilder sb = new StringBuilder();
+        sb.append(tag).append(" exo_bottom_bar h=").append(bottomBar.getHeight())
+                .append(" topY=").append(bottomBar.getTop())
+                .append(" bottomY=").append(bottomBar.getBottom())
+                .append(" pT=").append(bottomBar.getPaddingTop())
+                .append(" pB=").append(bottomBar.getPaddingBottom())
+                .append(" childCount=").append(bottomBarGroup.getChildCount());
+        for (int i = 0; i < bottomBarGroup.getChildCount(); i++) {
+            View c = bottomBarGroup.getChildAt(i);
+            sb.append(" | child[").append(i).append("] ")
+                    .append(c.getClass().getSimpleName())
+                    .append(" h=").append(c.getHeight());
+            if (c instanceof android.view.ViewGroup) {
+                sb.append(" cc=").append(((android.view.ViewGroup) c).getChildCount());
+            }
+        }
+        Log.d(TAG, sb.toString());
     }
 
     @Override

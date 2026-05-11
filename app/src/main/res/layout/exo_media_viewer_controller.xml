@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Custom controller layout for the PlayerView in MediaViewerFragment.
+
+  Media3's built-in exo_player_control_view.xml positions itself
+  against PlayerView's content-area bottom but doesn't reposition on
+  parent-padding changes after its first measure (observed across
+  Media3 1.10 / Samsung One UI). PRs #85..#94 each tried to write
+  the right padding to the right view at the right moment and all
+  came back to the same launch-only clipping bug.
+
+  Owning the controller layout sidesteps that entirely: we read
+  the navigation-bar inset directly on this view in
+  MediaViewerFragment.onCreateView and apply it as bottom padding.
+  The view sits at the bottom of PlayerView (layout_gravity=bottom)
+  with semi-transparent background. The video TextureView underneath
+  stays edge-to-edge — only the controls inset.
+
+  Required view IDs (Media3 wires up the playback behaviour on
+  these — keep the names exactly):
+    exo_progress         – DefaultTimeBar (scrubber)
+    exo_position         – current playback time
+    exo_duration         – total duration
+    exo_play_pause       – combined play/pause button
+    exo_prev / exo_next  – previous / next track
+    exo_rew_with_amount  – rewind with skip-amount badge
+    exo_ffwd_with_amount – fast-forward with skip-amount badge
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/media_viewer_controller_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="bottom"
+    android:background="#80000000"
+    android:orientation="vertical"
+    android:paddingTop="8dp">
+
+    <!-- Top row: position, scrubber, duration -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
+
+        <TextView
+            android:id="@id/exo_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:minWidth="56dp"
+            android:textColor="@android:color/white"
+            android:textSize="13sp" />
+
+        <androidx.media3.ui.DefaultTimeBar
+            android:id="@id/exo_progress"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@id/exo_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:minWidth="56dp"
+            android:textColor="@android:color/white"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Bottom row: prev / rewind / play_pause / forward / next -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp">
+
+        <ImageButton
+            android:id="@id/exo_prev"
+            style="@style/ExoStyledControls.Button.Bottom.Previous" />
+
+        <ImageButton
+            android:id="@id/exo_rew_with_amount"
+            style="@style/ExoStyledControls.Button.Bottom.RewWithAmount" />
+
+        <ImageButton
+            android:id="@id/exo_play_pause"
+            style="@style/ExoStyledControls.Button.Center.PlayPause" />
+
+        <ImageButton
+            android:id="@id/exo_ffwd_with_amount"
+            style="@style/ExoStyledControls.Button.Bottom.FfwdWithAmount" />
+
+        <ImageButton
+            android:id="@id/exo_next"
+            style="@style/ExoStyledControls.Button.Bottom.Next" />
+    </LinearLayout>
+</LinearLayout>

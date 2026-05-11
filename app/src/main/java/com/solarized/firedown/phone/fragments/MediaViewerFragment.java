@@ -125,9 +125,9 @@ public class MediaViewerFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Log.d(TAG, "[flash-trace] onCreateView enter → postponeEnterTransition()");
         postponeEnterTransition();
 
-        Log.d(TAG, "onCreateView");
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_media_viewer, container, false);
 
@@ -155,39 +155,13 @@ public class MediaViewerFragment extends Fragment {
         // TextureView has something opaque to display.
         mPlayerView.setVisibility(View.VISIBLE);
 
-        // Reported flash bug: on cold launch from Downloads, the user
-        // sees a brief full-screen frame of the video before the
-        // shared-element transition (animating photo_view from
-        // thumbnail to full size) completes. PlayerView is declared
-        // AFTER photo_view in fragment_media_viewer.xml so its
-        // TextureView sits on top (FrameLayout z-order = declaration
-        // order, last wins). The TextureView attaches a surface as
-        // soon as it's laid out, ExoPlayer decodes the first frame,
-        // and that frame is composited over the still-transitioning
-        // photo_view.
-        //
-        // Fix: keep PlayerView in the layout tree (so the
-        // TextureView's surface still attaches and decoding can
-        // proceed in the background) but draw it as alpha=0 until
-        // the player actually has a frame ready. onRenderedFirstFrame
-        // (in the Player.Listener we install in onViewCreated) flips
-        // it back to alpha=1 and hides photo_view in the same step,
-        // so the swap is atomic.
-        //
-        // Audio files never fire onRenderedFirstFrame, so a 1-second
-        // fallback timer reveals PlayerView unconditionally — by
-        // then the transition has long finished and the controls
-        // (now visible) become tappable. The check inside the
-        // runnable avoids stepping on the listener if it already
-        // revealed the view.
-        mPlayerView.setAlpha(0f);
-        mPlayerView.postDelayed(() -> {
-            if (mPlayerView != null && mPlayerView.getAlpha() == 0f) {
-                mPlayerView.setAlpha(1f);
-            }
-        }, 1000);
-
         mPhotoView.setVisibility(!mAvoidTransition ? View.VISIBLE : View.GONE);
+        Log.d(TAG, "[flash-trace] onCreateView/visibility set"
+                + " mAvoidTransition=" + mAvoidTransition
+                + " player.visibility=" + visName(mPlayerView.getVisibility())
+                + " player.alpha=" + mPlayerView.getAlpha()
+                + " photo.visibility=" + visName(mPhotoView.getVisibility())
+                + " photo.hasDrawable=" + (mPhotoView.getDrawable() != null));
 
         ViewCompat.setTransitionName(mPhotoView, "video_view");
 
@@ -357,7 +331,12 @@ public class MediaViewerFragment extends Fragment {
              */
             @Override
             public void onRenderedFirstFrame() {
-                if (mPlayerView != null) mPlayerView.setAlpha(1f);
+                Log.d(TAG, "[flash-trace] onRenderedFirstFrame"
+                        + " player.alpha=" + (mPlayerView != null ? mPlayerView.getAlpha() : -1)
+                        + " photo.visibility="
+                        + (mPhotoView != null ? visName(mPhotoView.getVisibility()) : "null")
+                        + " photo.attachedToWindow="
+                        + (mPhotoView != null && mPhotoView.isAttachedToWindow()));
                 if (mPhotoView != null) mPhotoView.setVisibility(View.GONE);
             }
         });
@@ -378,6 +357,12 @@ public class MediaViewerFragment extends Fragment {
 
         mExoPlayer.prepare();
 
+        Log.d(TAG, "[flash-trace] before setPlayWhenReady(true)"
+                + " player.alpha=" + mPlayerView.getAlpha()
+                + " photo.visibility=" + visName(mPhotoView.getVisibility())
+                + " photo.hasDrawable=" + (mPhotoView.getDrawable() != null)
+                + " player.attached=" + mPlayerView.isAttachedToWindow()
+                + " photo.attached=" + mPhotoView.isAttachedToWindow());
         mExoPlayer.setPlayWhenReady(true);
 
         if(!mAvoidTransition){
@@ -585,6 +570,15 @@ public class MediaViewerFragment extends Fragment {
         }
     }
 
+    private static String visName(int v) {
+        switch (v) {
+            case View.VISIBLE:   return "VISIBLE";
+            case View.INVISIBLE: return "INVISIBLE";
+            case View.GONE:      return "GONE";
+            default:             return String.valueOf(v);
+        }
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -620,7 +614,17 @@ public class MediaViewerFragment extends Fragment {
 
         @Override
         public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull com.bumptech.glide.load.DataSource dataSource, boolean isFirstResource) {
-            Log.d(TAG, "onResourceReady");
+            Log.d(TAG, "[flash-trace] Glide.onResourceReady dataSource=" + dataSource
+                    + " isFirstResource=" + isFirstResource
+                    + " photo.visibility="
+                    + (mPhotoView != null ? visName(mPhotoView.getVisibility()) : "null")
+                    + " photo.attached="
+                    + (mPhotoView != null && mPhotoView.isAttachedToWindow())
+                    + " player.alpha="
+                    + (mPlayerView != null ? mPlayerView.getAlpha() : -1)
+                    + " player.attached="
+                    + (mPlayerView != null && mPlayerView.isAttachedToWindow())
+                    + " → startPostponedEnterTransition");
             if(mActivity == null)
                 return false;
             startPostponedEnterTransition();

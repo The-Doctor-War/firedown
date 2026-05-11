@@ -41,12 +41,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
-import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
-import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.App;
-import com.solarized.firedown.GlideRequestOptions;
 import com.solarized.firedown.glide.MimeTypeThumbnail;
 import com.solarized.firedown.phone.PlayerActivity;
 import com.solarized.firedown.R;
@@ -296,10 +293,6 @@ public class MediaViewerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        long interval = mDownloadEntity.getThumbnailDuration();
-
-        String url = mDownloadEntity.getFileUrl();
-
         String mimeType = mDownloadEntity.getFileMimeType();
 
         mExoPlayer = new ExoPlayer.Builder(mActivity).build();
@@ -356,21 +349,16 @@ public class MediaViewerFragment extends Fragment {
                         .listener(mRequestListener)
                         .into(mPhotoView);
             } else {
-                RequestOptions options =
-                        new RequestOptions().frame(interval)
-                                .set(GlideRequestOptions.MIMETYPE, mDownloadEntity.getFileMimeType())
-                                .set(GlideRequestOptions.FILEPATH, mDownloadEntity.getFilePath())
-                                .set(GlideRequestOptions.LENGTH, mDownloadEntity.getFileSize())
-                                .set(GlideRequestOptions.FRAME, mDownloadEntity.getThumbnailDuration());
-
-                Glide.with(App.getAppContext()).load(mDownloadEntity)
-                        .dontTransform()
-                        .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .signature(new ObjectKey(interval + url.hashCode()))
-                        .listener(mRequestListener)
-                        .apply(options)
-                        .into(mPhotoView);
+                // Video: no poster. PlayerView's shutter is configured
+                // transparent (app:shutter_background_color in
+                // fragment_media_viewer.xml) so the brief gap between
+                // the activity opening and ExoPlayer rendering its
+                // first frame just shows the window background — no
+                // black flash, no stale thumbnail morph. Skipping the
+                // Glide round-trip also drops a frame-extraction
+                // ModelLoader off the cold-launch hot path.
+                mPhotoView.setVisibility(View.GONE);
+                startPostponedEnterTransition();
             }
         }else{
             if (FileUriHelper.isAudio(mimeType)) {

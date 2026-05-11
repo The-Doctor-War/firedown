@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -35,6 +36,7 @@ import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.ProgressiveMediaSource;
 import androidx.media3.extractor.DefaultExtractorsFactory;
 import androidx.media3.extractor.ExtractorsFactory;
+import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
 
 import com.bumptech.glide.Glide;
@@ -335,6 +337,18 @@ public class MediaViewerFragment extends Fragment {
 
         mExoPlayer.setMediaSource(videoSource);
 
+        // Pre-set PlayerView's inner AspectRatioFrameLayout from the
+        // file's own video dimensions, BEFORE prepare(). Without
+        // this, the content frame stays at MATCH_PARENT until
+        // Player.Listener.onVideoSizeChanged fires — which can land
+        // AFTER the first frame has painted to the TextureView at
+        // full-screen dimensions, producing a brief stretched-frame
+        // flash. See androidx/media#536 (closed as "question", no
+        // upstream fix in 1.10.0).
+        if (!FileUriHelper.isAudio(mimeType)) {
+            presetVideoAspectRatio(mDownloadEntity.getFilePath());
+        }
+
         mExoPlayer.prepare();
 
         mPlayerView.setPlayer(mExoPlayer);
@@ -558,6 +572,53 @@ public class MediaViewerFragment extends Fragment {
     private void setErrorRes(int res){
         Drawable drawable = ContextCompat.getDrawable(mActivity, res);
         mPlayerView.setDefaultArtwork(drawable);
+    }
+
+    /**
+     * Reach into PlayerView, find its inner exo_content_frame
+     * (an AspectRatioFrameLayout), and set the aspect ratio
+     * synchronously from the file's metadata so the layout pass
+     * with the correct dimensions runs BEFORE ExoPlayer starts
+     * decoding. Eliminates the stretched first-frame flash caused
+     * by media3 only updating the aspect from onVideoSizeChanged
+     * (which can land after the surface has already painted).
+     *
+     * MediaMetadataRetriever on a local file is a few-ms metadata
+     * read (no frame decode), safe on the UI thread for cold
+     * launch. Failure is silent — we just fall through to media3's
+     * normal runtime resize.
+     */
+    @OptIn(markerClass = UnstableApi.class)
+    private void presetVideoAspectRatio(String filePath) {
+        if (filePath == null || mPlayerView == null || mActivity == null) return;
+        View contentFrame = mPlayerView.findViewById(androidx.media3.ui.R.id.exo_content_frame);
+        if (!(contentFrame instanceof AspectRatioFrameLayout)) return;
+
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(mActivity, Uri.parse(filePath));
+            String wStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
+            String hStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
+            String rStr = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+            if (wStr == null || hStr == null) return;
+            int w = Integer.parseInt(wStr);
+            int h = Integer.parseInt(hStr);
+            if (w <= 0 || h <= 0) return;
+            int rotation = 0;
+            if (rStr != null) {
+                try { rotation = Integer.parseInt(rStr); } catch (NumberFormatException ignored) {}
+            }
+            // 90 / 270 rotation means the displayed aspect is the
+            // inverse of the encoded one.
+            if (rotation == 90 || rotation == 270) {
+                int tmp = w; w = h; h = tmp;
+            }
+            ((AspectRatioFrameLayout) contentFrame).setAspectRatio((float) w / (float) h);
+        } catch (Exception e) {
+            Log.w(TAG, "presetVideoAspectRatio failed", e);
+        } finally {
+            try { retriever.release(); } catch (Exception ignored) {}
+        }
     }
 
     private final RequestListener<Drawable> mRequestListener = new RequestListener<>() {

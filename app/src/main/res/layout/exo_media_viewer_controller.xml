@@ -101,9 +101,21 @@
           the position / duration TextViews (12 sp font ≈ 16 dp),
           so center_vertical still centres them on the scrubber.
         -->
+        <!--
+          layout_gravity="bottom" anchors this row to the BOTTOM of
+          exo_bottom_bar. PlayerControlView's slide-in animation
+          inflates the bar itself (we can't override that from outside
+          — confirmed across PR #100..#105) but with the row anchored
+          to the bottom, the inflation just makes the gradient extend
+          further UP; the controls stay flush above the system nav
+          bar where the user expects them. The 44 dp pin from #104
+          keeps the row's own height stable; combined, the inflated
+          bar can't drag the controls upward anymore.
+        -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="44dp"
+            android:layout_gravity="bottom"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="16dp"

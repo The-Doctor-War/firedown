@@ -207,6 +207,20 @@ public class MediaViewerFragment extends Fragment {
             }
         });
 
+        // Force an initial insets dispatch once the view is attached.
+        // Insets are dispatched during the activity's first layout, which
+        // races against the async FragmentTransaction.replace().commit()
+        // — on cold launch the fragment's view is typically attached
+        // AFTER that first dispatch, so the listener registered above
+        // never fires until the system bars next change (e.g. user taps
+        // to hide chrome). Until then mPlayerView has zero bottom
+        // padding and the controller bar sits behind the navigation bar.
+        // post() defers until after attachment; requestApplyInsets on a
+        // not-yet-attached view is a no-op.
+        mPlayerView.post(() -> {
+            if (mPlayerView != null) ViewCompat.requestApplyInsets(mPlayerView);
+        });
+
 
         // Single sink for the chrome-visibility decision: PlayerView's
         // controller visibility drives whether the system bars + action

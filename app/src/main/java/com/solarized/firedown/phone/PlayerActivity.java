@@ -1,17 +1,32 @@
 package com.solarized.firedown.phone;
 
+import android.app.PendingIntent;
+import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Configuration;
+import android.graphics.Rect;
+import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Rational;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ShareCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.R;
@@ -32,7 +47,40 @@ public class PlayerActivity extends AppCompatActivity {
 
     private static final String TAG = PlayerActivity.class.getSimpleName();
 
+    /**
+     * Action sent by the PiP RemoteAction PendingIntents and consumed by
+     * {@link #mPipReceiver}. Kept package-internal — the receiver is
+     * registered as not-exported, so a unique string here is enough.
+     */
+    private static final String ACTION_PIP_CONTROL =
+            "com.solarized.firedown.phone.PlayerActivity.PIP_CONTROL";
+
+    /**
+     * Extra slot on the PiP control intent that selects which control
+     * was tapped. Only one control today (play/pause) but the constant
+     * makes adding rewind/forward later a one-line change.
+     */
+    private static final String EXTRA_CONTROL = "extra_control";
+
+    private static final int CONTROL_PLAY_PAUSE = 1;
+
+    /**
+     * Distinct request codes for the PendingIntents — Android caches
+     * PendingIntents by (action, requestCode), and a single shared code
+     * would let a "pause" intent overwrite a "play" intent that's still
+     * referenced by the PiP window.
+     */
+    private static final int REQUEST_PLAY = 100;
+    private static final int REQUEST_PAUSE = 101;
+
     private DownloadEntity mDownloadEntity;
+
+    /**
+     * Receiver registered only while in PiP. The PiP RemoteAction fires
+     * a broadcast (not an activity intent) so the click handler can run
+     * without bringing the activity back to the foreground.
+     */
+    private BroadcastReceiver mPipReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -143,6 +191,155 @@ public class PlayerActivity extends AppCompatActivity {
         return downloadEntity;
     }
 
+
+    /**
+     * Called when the user presses Home (or otherwise sends the activity
+     * to the background) without explicitly closing it. PiP only enters
+     * here, not from onPause — that path also fires on lock-screen and
+     * configuration changes where slipping into PiP would be surprising.
+     */
+    @Override
+    protected void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        MediaViewerFragment fragment = getMediaFragment();
+        if (fragment != null && fragment.isVideoMime() && fragment.isPlaying()) {
+            enterPipMode();
+        }
+    }
+
+    /**
+     * Build PiP params (aspect ratio + play/pause RemoteAction) and ask
+     * the framework to enter PiP. Failures are swallowed because PiP
+     * entry can be denied for reasons outside our control (e.g. system
+     * setting disabled, low memory) and there's nothing useful to do.
+     */
+    private void enterPipMode() {
+        MediaViewerFragment fragment = getMediaFragment();
+        if (fragment == null) return;
+        try {
+            enterPictureInPictureMode(buildPipParams(fragment.isPlaying()));
+        } catch (IllegalStateException ignored) {
+            // PiP not supported on this device / config — no-op.
+        }
+    }
+
+    /**
+     * Refresh the PiP action set without re-entering PiP. Called by the
+     * fragment when the player toggles between playing and paused so the
+     * action icon reflects current state. setPictureInPictureParams is
+     * a no-op when not in PiP, so unconditional calls are safe.
+     */
+    public void updatePipParams() {
+        MediaViewerFragment fragment = getMediaFragment();
+        if (fragment == null) return;
+        try {
+            setPictureInPictureParams(buildPipParams(fragment.isPlaying()));
+        } catch (IllegalStateException ignored) {
+        }
+    }
+
+    private PictureInPictureParams buildPipParams(boolean isPlaying) {
+        Rational aspect = computeAspectRatio();
+        List<RemoteAction> actions = new ArrayList<>();
+        actions.add(buildPlayPauseAction(isPlaying));
+        PictureInPictureParams.Builder builder = new PictureInPictureParams.Builder()
+                .setAspectRatio(aspect)
+                .setActions(actions);
+        return builder.build();
+    }
+
+    /**
+     * Clamp the aspect ratio to the framework's accepted range
+     * (roughly 0.42 to 2.39). Outside that range setAspectRatio throws
+     * IllegalArgumentException and the whole PiP entry fails.
+     */
+    private Rational computeAspectRatio() {
+        MediaViewerFragment fragment = getMediaFragment();
+        Rect videoRect = (fragment != null) ? fragment.getVideoBounds() : null;
+        int w = (videoRect != null) ? videoRect.width() : 16;
+        int h = (videoRect != null) ? videoRect.height() : 9;
+        if (w <= 0 || h <= 0) { w = 16; h = 9; }
+
+        // Framework limits: 100/239 .. 239/100. Clamp by adjusting the
+        // smaller side rather than swapping aspect entirely — keeps the
+        // PiP window oriented the same way as the source video.
+        double ratio = (double) w / (double) h;
+        if (ratio < 100.0 / 239.0) { h = (int) Math.round(w * 239.0 / 100.0); }
+        else if (ratio > 239.0 / 100.0) { w = (int) Math.round(h * 239.0 / 100.0); }
+        return new Rational(w, h);
+    }
+
+    private RemoteAction buildPlayPauseAction(boolean isPlaying) {
+        int iconRes = isPlaying ? R.drawable.media_action_pause : R.drawable.media_action_play;
+        int titleRes = isPlaying ? R.string.pip_pause : R.string.pip_play;
+        int requestCode = isPlaying ? REQUEST_PAUSE : REQUEST_PLAY;
+
+        Intent intent = new Intent(ACTION_PIP_CONTROL)
+                .setPackage(getPackageName())
+                .putExtra(EXTRA_CONTROL, CONTROL_PLAY_PAUSE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                this, requestCode, intent,
+                PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+
+        String title = getString(titleRes);
+        return new RemoteAction(
+                Icon.createWithResource(this, iconRes), title, title, pendingIntent);
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode,
+                                              @NonNull Configuration newConfig) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode, newConfig);
+
+        if (isInPictureInPictureMode) {
+            mPipReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    if (intent == null || !ACTION_PIP_CONTROL.equals(intent.getAction())) return;
+                    int control = intent.getIntExtra(EXTRA_CONTROL, 0);
+                    if (control == CONTROL_PLAY_PAUSE) {
+                        MediaViewerFragment fragment = getMediaFragment();
+                        if (fragment != null) fragment.togglePlayPause();
+                    }
+                }
+            };
+            // RECEIVER_NOT_EXPORTED keeps the receiver inaccessible to other
+            // apps — the only legitimate sender is our own PendingIntent.
+            ContextCompat.registerReceiver(this, mPipReceiver,
+                    new IntentFilter(ACTION_PIP_CONTROL),
+                    ContextCompat.RECEIVER_NOT_EXPORTED);
+        } else {
+            if (mPipReceiver != null) {
+                unregisterReceiver(mPipReceiver);
+                mPipReceiver = null;
+            }
+        }
+
+        MediaViewerFragment fragment = getMediaFragment();
+        if (fragment != null) fragment.onPipModeChanged(isInPictureInPictureMode);
+
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (isInPictureInPictureMode) actionBar.hide();
+            else actionBar.show();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (mPipReceiver != null) {
+            unregisterReceiver(mPipReceiver);
+            mPipReceiver = null;
+        }
+    }
+
+    @Nullable
+    private MediaViewerFragment getMediaFragment() {
+        androidx.fragment.app.Fragment f = getSupportFragmentManager()
+                .findFragmentByTag(MediaViewerFragment.class.getSimpleName());
+        return (f instanceof MediaViewerFragment) ? (MediaViewerFragment) f : null;
+    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

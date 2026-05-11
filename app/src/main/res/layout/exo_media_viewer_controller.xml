@@ -86,9 +86,24 @@
         android:background="@drawable/bg_media_viewer_controller"
         android:paddingTop="16dp">
 
+        <!--
+          Inner row height is PINNED to 44 dp (not wrap_content) so
+          Media3's PlayerControlView can't reshape it during the
+          PiP slide animation. With wrap_content, PlayerControlView
+          passes a MeasureSpec.EXACTLY=N to the LinearLayout during
+          the slide-in animation after PiP exit, which made it
+          measure ~248 px even though its children are only ~79 px
+          tall (#103's logs confirmed: minH=0, lpH=WRAP, cc=3, no
+          stale state we could clear from outside).
+
+          44 dp = exo_progress (28 dp DefaultTimeBar) + 8 dp inner
+          paddingBottom + a few px of breathing room. Larger than
+          the position / duration TextViews (12 sp font ≈ 16 dp),
+          so center_vertical still centres them on the scrubber.
+        -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="44dp"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingStart="16dp"

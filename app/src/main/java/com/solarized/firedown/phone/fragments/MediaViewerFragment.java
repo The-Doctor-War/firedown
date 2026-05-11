@@ -2,6 +2,7 @@ package com.solarized.firedown.phone.fragments;
 
 import android.content.Context;
 
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -26,6 +27,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.Player;
+import androidx.media3.common.VideoSize;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.DataSource;
 import androidx.media3.datasource.FileDataSource;
@@ -238,6 +241,21 @@ public class MediaViewerFragment extends Fragment {
 
         mExoPlayer = new ExoPlayer.Builder(mActivity).build();
 
+        // Notify the activity when play-state or video size changes so
+        // it can refresh the PiP action icon / aspect ratio. Listener is
+        // released in onDestroy along with the player.
+        mExoPlayer.addListener(new Player.Listener() {
+            @Override
+            public void onIsPlayingChanged(boolean isPlaying) {
+                if (mActivity != null) mActivity.updatePipParams();
+            }
+
+            @Override
+            public void onVideoSizeChanged(@NonNull VideoSize videoSize) {
+                if (mActivity != null) mActivity.updatePipParams();
+            }
+        });
+
         mPlayerView.setPlayer(mExoPlayer);
 
         final DataSource.Factory dataSourceFactory = new FileDataSource.Factory();
@@ -293,7 +311,10 @@ public class MediaViewerFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (mExoPlayer != null)
+        // While the activity is in PiP it still receives onPause but
+        // playback must keep running — that's the whole point of PiP.
+        // onStop / onDestroy still pause/release when PiP is dismissed.
+        if (mExoPlayer != null && !isActivityInPip())
             mExoPlayer.pause();
     }
 
@@ -301,8 +322,75 @@ public class MediaViewerFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Glide.with(App.getAppContext()).clear(mPhotoView);
-        if (mExoPlayer != null)
+        // Same guard as onPause: PiP keeps the activity in started state
+        // for as long as the floating window is visible, but Android can
+        // still fire onStop on some OEM ROMs when the launcher recents
+        // takes focus. Skip the stop if we're still in PiP — onDestroy
+        // does the real cleanup.
+        if (mExoPlayer != null && !isActivityInPip())
             mExoPlayer.stop();
+    }
+
+    private boolean isActivityInPip() {
+        return mActivity != null && mActivity.isInPictureInPictureMode();
+    }
+
+    /**
+     * True when the fragment is rendering a video file (as opposed to
+     * audio with cover art). PiP entry is gated on this — entering PiP
+     * for a pure audio file would just show a static thumbnail.
+     */
+    public boolean isVideoMime() {
+        return mDownloadEntity != null
+                && FileUriHelper.isVideo(mDownloadEntity.getFileMimeType());
+    }
+
+    public boolean isPlaying() {
+        return mExoPlayer != null && mExoPlayer.isPlaying();
+    }
+
+    /**
+     * Toggle play / pause from the PiP action receiver. Called on the
+     * main thread (BroadcastReceiver dispatch runs there by default).
+     */
+    public void togglePlayPause() {
+        if (mExoPlayer == null) return;
+        if (mExoPlayer.isPlaying()) mExoPlayer.pause();
+        else mExoPlayer.play();
+    }
+
+    /**
+     * Current video size, in pixels, for PiP aspect-ratio calculation.
+     * Returns null until ExoPlayer has decoded the first frame — the
+     * activity falls back to 16:9 when null.
+     */
+    @Nullable
+    public Rect getVideoBounds() {
+        if (mExoPlayer == null) return null;
+        VideoSize size = mExoPlayer.getVideoSize();
+        if (size.width <= 0 || size.height <= 0) return null;
+        return new Rect(0, 0, size.width, size.height);
+    }
+
+    /**
+     * Activity callback that flips between PiP-mode UI (no controller,
+     * no chrome) and inline UI. Setting setUseController(false) while
+     * in PiP is the documented way to suppress the floating controls
+     * Android renders separately inside the PiP window.
+     */
+    @OptIn(markerClass = UnstableApi.class)
+    public void onPipModeChanged(boolean inPip) {
+        if (mPlayerView == null) return;
+        if (inPip) {
+            mPlayerView.hideController();
+            mPlayerView.setUseController(false);
+            setChromeVisible(false);
+        } else {
+            mPlayerView.setUseController(true);
+            // Don't force the controller back on exit — let the user tap
+            // to bring it up. Chrome visibility follows the controller
+            // listener as before.
+        }
     }
 
     @Override

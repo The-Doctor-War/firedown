@@ -497,4 +497,6 @@
     <string name="vault_encrypting">Encrypting file, please wait…</string>
     <string name="vault_unsupported">Can\'t open this file. To open, move it out of Safe Folder and try again.</string>
     <string name="bookmark_name">Name</string>
+    <string name="pip_play">Play</string>
+    <string name="pip_pause">Pause</string>
 </resources>

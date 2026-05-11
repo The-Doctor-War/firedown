@@ -131,8 +131,11 @@
 
         <activity
             android:name="com.solarized.firedown.phone.PlayerActivity"
-            android:configChanges="keyboardHidden|orientation|screenLayout|screenSize"
+            android:configChanges="keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize"
             android:exported="true"
+            android:supportsPictureInPicture="true"
+            android:resizeableActivity="true"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.FireDown.Play">
         </activity>
 

@@ -71,6 +71,20 @@ public class MediaViewerFragment extends Fragment {
 
     private boolean mAvoidTransition;
 
+    /**
+     * Controller (and chrome) auto-hide timeout while playing. VLC /
+     * Plex use 5 s; PlayerView's default is ~3 s which feels rushed
+     * for reaching the scrubber on a phone screen.
+     */
+    private static final int CONTROLLER_TIMEOUT_MS = 5000;
+
+    /**
+     * Cached so {@link #setChromeVisible(boolean)} can fire without
+     * re-resolving from the activity each time. Nulled out by the
+     * view-creation path being re-entered on configuration change.
+     */
+    private WindowInsetsControllerCompat mWindowInsetsController;
+
 
 
     @Override
@@ -146,10 +160,22 @@ public class MediaViewerFragment extends Fragment {
             mPlayerView.setDefaultArtwork(mFallbackDrawable);
         }
 
-        WindowInsetsControllerCompat windowInsetsController = WindowCompat.getInsetsController(mActivity.getWindow(), mActivity.getWindow().getDecorView());
+        // Explicit configuration so the tap-toggle behaviour stays the
+        // same regardless of which PlayerView default the bundled Media3
+        // version ships with.
+        mPlayerView.setUseController(true);
+        mPlayerView.setControllerAutoShow(true);
+        mPlayerView.setControllerHideOnTouch(true);
+        // Default is ~3 s. 5 s matches VLC / Plex and gives the user a
+        // realistic window to reach the play/pause / scrubber without
+        // feeling rushed. Tap-on-empty hides immediately as before.
+        mPlayerView.setControllerShowTimeoutMs(CONTROLLER_TIMEOUT_MS);
+
+        mWindowInsetsController = WindowCompat.getInsetsController(
+                mActivity.getWindow(), mActivity.getWindow().getDecorView());
 
         // Configure the behavior of the hidden system bars.
-        windowInsetsController.setSystemBarsBehavior(
+        mWindowInsetsController.setSystemBarsBehavior(
                 WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
         );
 
@@ -168,25 +194,35 @@ public class MediaViewerFragment extends Fragment {
         });
 
 
-
-        ActionBar actionBar = mActivity.getSupportActionBar();
-
-        mPlayerView.setControllerVisibilityListener((PlayerView.ControllerVisibilityListener) visibility -> {
-            Log.d(TAG, "onVisibilityChange: " + (visibility == View.VISIBLE));
-            boolean isControllerVisible = visibility == View.VISIBLE;
-            if (isControllerVisible) {
-                windowInsetsController.show(WindowInsetsCompat.Type.systemBars());
-                if (actionBar != null)
-                    actionBar.show();
-            } else {
-                if (actionBar != null)
-                    actionBar.hide();
-                windowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
-            }
-        });
+        // Single sink for the chrome-visibility decision: PlayerView's
+        // controller visibility drives whether the system bars + action
+        // bar are shown. Keeping all three in one helper avoids the
+        // "show bars but actionbar lags one frame" race the inline
+        // listener used to have if the listener was invoked re-entrantly.
+        mPlayerView.setControllerVisibilityListener(
+                (PlayerView.ControllerVisibilityListener) visibility ->
+                        setChromeVisible(visibility == View.VISIBLE));
 
         return v;
 
+    }
+
+    /**
+     * Show or hide the activity chrome — system bars and action bar —
+     * in lockstep with the PlayerView controller. Called from the
+     * controller-visibility listener; safe to call from any tap path
+     * if we add one later (e.g. drag-down-to-dismiss).
+     */
+    private void setChromeVisible(boolean visible) {
+        if (mWindowInsetsController == null) return;
+        ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
+        if (visible) {
+            mWindowInsetsController.show(WindowInsetsCompat.Type.systemBars());
+            if (actionBar != null) actionBar.show();
+        } else {
+            if (actionBar != null) actionBar.hide();
+            mWindowInsetsController.hide(WindowInsetsCompat.Type.systemBars());
+        }
     }
 
     @OptIn(markerClass = UnstableApi.class)
@@ -279,6 +315,7 @@ public class MediaViewerFragment extends Fragment {
             mExoPlayer.release();
         mExoPlayer = null;
         mPlayerView = null;
+        mWindowInsetsController = null;
     }
 
 

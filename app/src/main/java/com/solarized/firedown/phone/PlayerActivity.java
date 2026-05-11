@@ -40,7 +40,13 @@ public class PlayerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_player);
 
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // FLAG_FULLSCREEN was here previously. Removed because it was
+        // deprecated in API 30 and overlaps with the per-fragment
+        // WindowInsetsController calls (MediaViewerFragment toggles
+        // the system bars there). Keeping both layered the legacy flag
+        // on top of the modern controller and confused which source of
+        // truth held the immersive state on Android 11+. Fullscreen is
+        // now entirely managed by the fragment via WindowInsetsController.
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 

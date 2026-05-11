@@ -205,45 +205,125 @@ public class MediaViewerFragment extends Fragment {
         // that re-dispatches insets with bottom=0 and the listener
         // automatically removes the padding so the video reclaims the
         // full screen.
+        // ===== DEBUG: nav-bar inset diagnostics =====
+        // Several previous PRs (#85, #86, #87, #88, #89) attempted to
+        // keep the PlayerView controller above the system nav bar on
+        // cold launch. Each one reproduced the bug differently. This
+        // pass exists to capture concrete numbers from the failing
+        // device — adb logcat -s MediaViewerFragment will show every
+        // input we have at each point of the launch sequence so we
+        // can finally see which source returns 0 and which returns
+        // the real height. Strip these logs once the right path is
+        // identified.
+
         ViewCompat.setOnApplyWindowInsetsListener(v, (rv, insets) -> {
-            int bottom = insets.getInsets(
+            int statusBars = insets.getInsets(
+                    WindowInsetsCompat.Type.statusBars()).bottom;
+            int navBars = insets.getInsets(
                     WindowInsetsCompat.Type.navigationBars()).bottom;
-            rv.setPadding(0, 0, 0, bottom);
+            int systemBars = insets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()).bottom;
+            int tappable = insets.getInsets(
+                    WindowInsetsCompat.Type.tappableElement()).bottom;
+            int mandatoryGestures = insets.getInsets(
+                    WindowInsetsCompat.Type.mandatorySystemGestures()).bottom;
+            int ime = insets.getInsets(
+                    WindowInsetsCompat.Type.ime()).bottom;
+            boolean barsVisible = insets.isVisible(
+                    WindowInsetsCompat.Type.navigationBars());
+            Log.d(TAG, "[insets-listener@root] navBars.bottom=" + navBars
+                    + " systemBars.bottom=" + systemBars
+                    + " tappable.bottom=" + tappable
+                    + " mandatoryGestures.bottom=" + mandatoryGestures
+                    + " ime.bottom=" + ime
+                    + " statusBars.bottom=" + statusBars
+                    + " navVisible=" + barsVisible
+                    + " attached=" + rv.isAttachedToWindow()
+                    + " width=" + rv.getWidth()
+                    + " height=" + rv.getHeight());
+            rv.setPadding(0, 0, 0, navBars);
             return insets;
         });
-        // Initial-apply path. The listener above handles every
-        // subsequent dispatch correctly (chrome toggle re-runs through
-        // WindowInsetsController.show / hide(systemBars()) and the
-        // framework re-dispatches insets — that's why every tap after
-        // the first one positions the controller right). On COLD
-        // LAUNCH the dispatch still arrives at the listener with
-        // bottom=0 on this theme: android:windowActionBarOverlay=true
-        // makes AppCompat insert an ActionBarOverlayLayout between
-        // the decor view and our fragment root, and on the first
-        // pass it transforms / consumes the bottom inset for its own
-        // action-bar bookkeeping before the dispatch reaches us.
-        // Subsequent dispatches (system-side, after the first
-        // WindowInsetsController call) bypass that consumption, which
-        // is why the bug is launch-only.
-        //
-        // Workaround: post a one-shot read directly from
-        // ViewCompat.getRootWindowInsets(decorView). The decor view
-        // always holds the window's CURRENT insets regardless of how
-        // ActionBarOverlayLayout transformed them on the way down. PR
-        // #88's theme switch (transparent bar colours instead of
-        // windowTranslucent*) means that read now returns the real
-        // nav-bar height, so applying it as padding clears the
-        // controller from the first frame.
+
+        // Three timing probes for the same decor-view read:
+        //  - post() — runs on the next message-queue drain, typically
+        //    after attach but before the first frame.
+        //  - postDelayed(50) — gives the framework one more vsync to
+        //    settle (sometimes the very first dispatch lands AFTER
+        //    the first post drains).
+        //  - addOnAttachStateChangeListener.onViewAttachedToWindow —
+        //    runs the moment the view is actually attached, which is
+        //    the earliest point getRootWindowInsets returns non-null.
+        // Each one logs what it sees AND applies the padding (the
+        // last write wins). We expect one of them to capture a
+        // non-zero value at launch.
+
         final View root = v;
-        root.post(() -> {
-            if (mActivity == null) return;
-            WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(
-                    mActivity.getWindow().getDecorView());
-            if (rootInsets == null) return;
-            int bottom = rootInsets.getInsets(
+
+        Runnable readDecor = () -> {
+            if (mActivity == null) {
+                Log.d(TAG, "[decor-read] mActivity == null, skipping");
+                return;
+            }
+            View decor = mActivity.getWindow().getDecorView();
+            WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(decor);
+            if (rootInsets == null) {
+                Log.d(TAG, "[decor-read] getRootWindowInsets returned null");
+                return;
+            }
+            int statusBars = rootInsets.getInsets(
+                    WindowInsetsCompat.Type.statusBars()).bottom;
+            int navBars = rootInsets.getInsets(
                     WindowInsetsCompat.Type.navigationBars()).bottom;
-            root.setPadding(0, 0, 0, bottom);
+            int systemBars = rootInsets.getInsets(
+                    WindowInsetsCompat.Type.systemBars()).bottom;
+            int tappable = rootInsets.getInsets(
+                    WindowInsetsCompat.Type.tappableElement()).bottom;
+            int mandatoryGestures = rootInsets.getInsets(
+                    WindowInsetsCompat.Type.mandatorySystemGestures()).bottom;
+            boolean barsVisible = rootInsets.isVisible(
+                    WindowInsetsCompat.Type.navigationBars());
+            Log.d(TAG, "[decor-read] navBars.bottom=" + navBars
+                    + " systemBars.bottom=" + systemBars
+                    + " tappable.bottom=" + tappable
+                    + " mandatoryGestures.bottom=" + mandatoryGestures
+                    + " statusBars.bottom=" + statusBars
+                    + " navVisible=" + barsVisible
+                    + " decorAttached=" + decor.isAttachedToWindow()
+                    + " decorWidth=" + decor.getWidth()
+                    + " decorHeight=" + decor.getHeight()
+                    + " rootCurrentPaddingBottom=" + root.getPaddingBottom());
+            root.setPadding(0, 0, 0, navBars);
+        };
+
+        root.post(() -> {
+            Log.d(TAG, "[probe] post() draining");
+            readDecor.run();
         });
+        root.postDelayed(() -> {
+            Log.d(TAG, "[probe] postDelayed(50) draining");
+            readDecor.run();
+        }, 50);
+        root.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(@NonNull View view) {
+                Log.d(TAG, "[probe] onViewAttachedToWindow firing");
+                readDecor.run();
+                view.removeOnAttachStateChangeListener(this);
+            }
+            @Override
+            public void onViewDetachedFromWindow(@NonNull View view) {}
+        });
+
+        // Also log what's in WindowInsetsController at this point so
+        // we can see whether the system thinks the bars are visible
+        // when our padding is computed.
+        Log.d(TAG, "[probe] onCreateView end — controller="
+                + mWindowInsetsController
+                + " behavior=" + mWindowInsetsController.getSystemBarsBehavior()
+                + " vAttached=" + v.isAttachedToWindow()
+                + " vRootInsetsNull="
+                + (ViewCompat.getRootWindowInsets(v) == null));
 
 
         // Single sink for the chrome-visibility decision: PlayerView's
@@ -266,6 +346,8 @@ public class MediaViewerFragment extends Fragment {
      * if we add one later (e.g. drag-down-to-dismiss).
      */
     private void setChromeVisible(boolean visible) {
+        Log.d(TAG, "[setChromeVisible] visible=" + visible
+                + " controllerNull=" + (mWindowInsetsController == null));
         if (mWindowInsetsController == null) return;
         ActionBar actionBar = (mActivity != null) ? mActivity.getSupportActionBar() : null;
         if (visible) {

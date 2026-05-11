@@ -7,7 +7,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.transition.Transition;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -119,12 +118,6 @@ public class MediaViewerFragment extends Fragment {
             mDownloadEntity = new DownloadEntity();
 
         mAvoidTransition = mDownloadEntity.isFileEncrypted() || mDownloadEntity.isFileSafe();
-
-        if (!mAvoidTransition) {
-            addTransitionListener();
-        }
-
-
     }
 
 
@@ -143,7 +136,25 @@ public class MediaViewerFragment extends Fragment {
 
         mPhotoView = v.findViewById(R.id.photo_view);
 
-        mPlayerView.setVisibility(!mAvoidTransition ? View.GONE : View.VISIBLE);
+        // player_view stays VISIBLE from the start regardless of how the
+        // activity was launched. The previous "GONE until onTransitionEnd"
+        // dance relied on the shared-element scene transition firing —
+        // but with android:launchMode="singleTask" the framework does not
+        // re-run that transition when the activity is reused via
+        // onNewIntent (e.g. open a second video after closing PiP). The
+        // listener attached to nothing, the TextureView was never laid
+        // out, ExoPlayer played audio with no rendering surface, and the
+        // user was left with a static thumbnail.
+        //
+        // Layout safety: the PlayerView's shutter is configured
+        // transparent (app:shutter_background_color in
+        // fragment_media_viewer.xml) so player_view doesn't flash black
+        // before the first video frame. photo_view sits underneath and
+        // shows through until frames render — exactly the placeholder
+        // role it already had, just without the transition dependency.
+        // onRenderedFirstFrame (below) hides photo_view once the
+        // TextureView has something opaque to display.
+        mPlayerView.setVisibility(View.VISIBLE);
 
         mPhotoView.setVisibility(!mAvoidTransition ? View.VISIBLE : View.GONE);
 
@@ -253,6 +264,18 @@ public class MediaViewerFragment extends Fragment {
             @Override
             public void onVideoSizeChanged(@NonNull VideoSize videoSize) {
                 if (mActivity != null) mActivity.updatePipParams();
+            }
+
+            /**
+             * Hide the thumbnail placeholder once the video surface has
+             * actually painted a frame. Before this point the
+             * TextureView is transparent and photo_view shows through;
+             * after this point the TextureView is opaque so photo_view
+             * is redundant. Hiding it also frees the decoded bitmap.
+             */
+            @Override
+            public void onRenderedFirstFrame() {
+                if (mPhotoView != null) mPhotoView.setVisibility(View.GONE);
             }
         });
 
@@ -439,44 +462,5 @@ public class MediaViewerFragment extends Fragment {
         }
     };
 
-    private void addTransitionListener() {
-        final Transition transition = mActivity.getWindow().getSharedElementEnterTransition();
-
-        if (transition != null) {
-            // There is an entering shared element transition so add a listener to it
-            transition.addListener(new Transition.TransitionListener() {
-                @Override
-                public void onTransitionEnd(Transition transition) {
-                    // As the transition has ended, we can now load the full-size image
-                    if(mPlayerView != null) {
-                        mPlayerView.post(() -> mPlayerView.setVisibility(View.VISIBLE));
-                    }
-                    // Make sure we remove ourselves as a listener
-                    transition.removeListener(this);
-                }
-
-                @Override
-                public void onTransitionStart(Transition transition) {
-                    // No-op
-                }
-
-                @Override
-                public void onTransitionCancel(Transition transition) {
-                    // Make sure we remove ourselves as a listener
-                    transition.removeListener(this);
-                }
-
-                @Override
-                public void onTransitionPause(Transition transition) {
-                    // No-op
-                }
-
-                @Override
-                public void onTransitionResume(Transition transition) {
-                    // No-op
-                }
-            });
-        }
-    }
 
 }

@@ -14,10 +14,10 @@
         android:id="@+id/player_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         app:resize_mode="fit"
         app:played_color="@color/md_theme_primaryContainer"
         app:repeat_toggle_modes="one|all"
+        app:shutter_background_color="@android:color/transparent"
         app:surface_type="texture_view" />
 
 </androidx.media3.ui.AspectRatioFrameLayout>

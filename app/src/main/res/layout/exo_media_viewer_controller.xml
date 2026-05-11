@@ -2,29 +2,28 @@
 <!--
   Custom controller layout for the PlayerView in MediaViewerFragment.
 
-  Media3's built-in exo_player_control_view.xml positions itself
-  against PlayerView's content-area bottom but doesn't reposition on
-  parent-padding changes after its first measure (observed across
-  Media3 1.10 / Samsung One UI). PRs #85..#94 each tried to write
-  the right padding to the right view at the right moment and all
-  came back to the same launch-only clipping bug.
-
-  Owning the controller layout sidesteps that entirely: we read
-  the navigation-bar inset directly on this view in
-  MediaViewerFragment.onCreateView and apply it as bottom padding.
-  The view sits at the bottom of PlayerView (layout_gravity=bottom)
-  with semi-transparent background. The video TextureView underneath
-  stays edge-to-edge — only the controls inset.
+  Self-contained: no references to Media3's @style/ExoStyledControls
+  tree (those styles aren't guaranteed public across Media3 versions
+  — using them broke the build in #95). All sizing / background /
+  ripple is inline. Icons are vector drawables in our own res folder.
 
   Required view IDs (Media3 wires up the playback behaviour on
   these — keep the names exactly):
     exo_progress         – DefaultTimeBar (scrubber)
-    exo_position         – current playback time
-    exo_duration         – total duration
-    exo_play_pause       – combined play/pause button
+    exo_position         – current playback time text
+    exo_duration         – total duration text
+    exo_play_pause       – combined play/pause button (Media3 swaps
+                           the drawable based on player state at
+                           runtime; we only set an initial src)
     exo_prev / exo_next  – previous / next track
-    exo_rew_with_amount  – rewind with skip-amount badge
-    exo_ffwd_with_amount – fast-forward with skip-amount badge
+    exo_rew_with_amount  – rewind by the configured seek-back amount
+    exo_ffwd_with_amount – fast-forward by the configured seek-forward
+                           amount
+
+  Bottom padding is applied programmatically in MediaViewerFragment
+  from android.R.dimen.navigation_bar_height (synchronous, decor-view
+  insets are null at onCreateView on Samsung One UI) and updated by
+  an OnApplyWindowInsetsListener on this root for chrome / rotation.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/media_viewer_controller_root"
@@ -84,22 +83,59 @@
 
         <ImageButton
             android:id="@id/exo_prev"
-            style="@style/ExoStyledControls.Button.Bottom.Previous" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/previous"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_media_skip_previous_white_24" />
 
-        <ImageButton
+        <!--
+          exo_rew_with_amount is consumed by Media3 as a TextView so
+          it can draw the seek-amount number ("5", "10", etc.) on the
+          icon. The background drawable provides the rewind glyph;
+          Media3 overlays the amount on top at runtime.
+        -->
+        <TextView
             android:id="@id/exo_rew_with_amount"
-            style="@style/ExoStyledControls.Button.Bottom.RewWithAmount" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/ic_media_replay_white_24"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="10sp" />
 
         <ImageButton
             android:id="@id/exo_play_pause"
-            style="@style/ExoStyledControls.Button.Center.PlayPause" />
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/play"
+            android:scaleType="centerInside"
+            android:src="@drawable/media_action_play" />
 
-        <ImageButton
+        <TextView
             android:id="@id/exo_ffwd_with_amount"
-            style="@style/ExoStyledControls.Button.Bottom.FfwdWithAmount" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/ic_media_fast_forward_white_24"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="10sp" />
 
         <ImageButton
             android:id="@id/exo_next"
-            style="@style/ExoStyledControls.Button.Bottom.Next" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_media_skip_next_white_24" />
     </LinearLayout>
 </LinearLayout>

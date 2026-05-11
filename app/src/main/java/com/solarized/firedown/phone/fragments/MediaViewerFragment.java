@@ -155,6 +155,38 @@ public class MediaViewerFragment extends Fragment {
         // TextureView has something opaque to display.
         mPlayerView.setVisibility(View.VISIBLE);
 
+        // Reported flash bug: on cold launch from Downloads, the user
+        // sees a brief full-screen frame of the video before the
+        // shared-element transition (animating photo_view from
+        // thumbnail to full size) completes. PlayerView is declared
+        // AFTER photo_view in fragment_media_viewer.xml so its
+        // TextureView sits on top (FrameLayout z-order = declaration
+        // order, last wins). The TextureView attaches a surface as
+        // soon as it's laid out, ExoPlayer decodes the first frame,
+        // and that frame is composited over the still-transitioning
+        // photo_view.
+        //
+        // Fix: keep PlayerView in the layout tree (so the
+        // TextureView's surface still attaches and decoding can
+        // proceed in the background) but draw it as alpha=0 until
+        // the player actually has a frame ready. onRenderedFirstFrame
+        // (in the Player.Listener we install in onViewCreated) flips
+        // it back to alpha=1 and hides photo_view in the same step,
+        // so the swap is atomic.
+        //
+        // Audio files never fire onRenderedFirstFrame, so a 1-second
+        // fallback timer reveals PlayerView unconditionally — by
+        // then the transition has long finished and the controls
+        // (now visible) become tappable. The check inside the
+        // runnable avoids stepping on the listener if it already
+        // revealed the view.
+        mPlayerView.setAlpha(0f);
+        mPlayerView.postDelayed(() -> {
+            if (mPlayerView != null && mPlayerView.getAlpha() == 0f) {
+                mPlayerView.setAlpha(1f);
+            }
+        }, 1000);
+
         mPhotoView.setVisibility(!mAvoidTransition ? View.VISIBLE : View.GONE);
 
         ViewCompat.setTransitionName(mPhotoView, "video_view");
@@ -315,13 +347,17 @@ public class MediaViewerFragment extends Fragment {
 
             /**
              * Hide the thumbnail placeholder once the video surface has
-             * actually painted a frame. Before this point the
-             * TextureView is transparent and photo_view shows through;
-             * after this point the TextureView is opaque so photo_view
-             * is redundant. Hiding it also frees the decoded bitmap.
+             * actually painted a frame. We keep PlayerView at alpha=0
+             * from onCreateView until this fires, so the brief window
+             * between TextureView attaching its surface and the
+             * shared-element transition completing doesn't leak a
+             * full-screen frame in front of photo_view. Flipping
+             * alpha + hiding photo_view in the same callback keeps
+             * the swap atomic from the user's perspective.
              */
             @Override
             public void onRenderedFirstFrame() {
+                if (mPlayerView != null) mPlayerView.setAlpha(1f);
                 if (mPhotoView != null) mPhotoView.setVisibility(View.GONE);
             }
         });

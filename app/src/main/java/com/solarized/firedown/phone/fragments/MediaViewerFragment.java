@@ -223,6 +223,23 @@ public class MediaViewerFragment extends Fragment {
             });
         }
 
+        // Custom utility buttons (PiP, rotate). Media3 doesn't know
+        // about these IDs — we own the click handlers and delegate to
+        // PlayerActivity, which already implements PiP entry (used by
+        // onUserLeaveHint) and now exposes a public orientation flip.
+        View pipButton = mPlayerView.findViewById(R.id.media_viewer_btn_pip);
+        if (pipButton != null) {
+            pipButton.setOnClickListener(b -> {
+                if (mActivity != null) mActivity.enterPipMode();
+            });
+        }
+        View rotateButton = mPlayerView.findViewById(R.id.media_viewer_btn_rotate);
+        if (rotateButton != null) {
+            rotateButton.setOnClickListener(b -> {
+                if (mActivity != null) mActivity.toggleOrientation();
+            });
+        }
+
         return v;
 
     }

@@ -502,4 +502,6 @@
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="play">Play</string>
+    <string name="picture_in_picture">Picture in picture</string>
+    <string name="rotate">Rotate</string>
 </resources>

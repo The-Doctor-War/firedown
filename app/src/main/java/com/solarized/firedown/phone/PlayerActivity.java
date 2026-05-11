@@ -247,7 +247,7 @@ public class PlayerActivity extends AppCompatActivity {
      * entry can be denied for reasons outside our control (e.g. system
      * setting disabled, low memory) and there's nothing useful to do.
      */
-    private void enterPipMode() {
+    public void enterPipMode() {
         MediaViewerFragment fragment = getMediaFragment();
         if (fragment == null) return;
         try {
@@ -270,6 +270,24 @@ public class PlayerActivity extends AppCompatActivity {
             setPictureInPictureParams(buildPipParams(fragment.isPlaying()));
         } catch (IllegalStateException ignored) {
         }
+    }
+
+    /**
+     * Flip the activity between landscape and portrait. Invoked from
+     * the rotate button in the custom controller. Once requestedOrientation
+     * is set the framework keeps the activity in that orientation until
+     * the next call — tapping the button a second time returns to the
+     * other one. PlayerActivity declares orientation /
+     * screenSize / screenLayout / smallestScreenSize in
+     * android:configChanges, so the activity isn't recreated; the
+     * fragment / player / inset listener all survive the rotation.
+     */
+    public void toggleOrientation() {
+        int requested = getRequestedOrientation();
+        int target = (requested == android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+                ? android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+                : android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        setRequestedOrientation(target);
     }
 
     private PictureInPictureParams buildPipParams(boolean isPlaying) {

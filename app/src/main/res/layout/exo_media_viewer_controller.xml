@@ -4,84 +4,102 @@
   on @id/player_view in fragment_media_viewer.xml.
 
   PlayerView is hidden by default at launch (autoShow=false in
-  MediaViewerFragment); a user tap brings it up. The MediaViewerFragment
-  attaches an OnApplyWindowInsetsListener to media_viewer_controller_root
-  to set bottom padding equal to the navigation-bar inset whenever the
-  system bars are visible — so this view is always above the nav bar
-  while the video TextureView behind it stays edge-to-edge.
+  MediaViewerFragment); a user tap brings it up. The fragment attaches
+  an OnApplyWindowInsetsListener to media_viewer_controller_root so
+  bottom padding matches the navigation-bar inset whenever the system
+  bars are visible — the view stays above the nav bar while the video
+  TextureView behind it remains edge-to-edge.
 
-  The view IDs (exo_progress, exo_play_pause, exo_position, exo_duration,
-  exo_prev, exo_next, exo_rew_with_amount, exo_ffwd_with_amount) are
-  required by Media3's PlayerControlView reflection lookup — do not
-  rename them.
+  Three rows:
+    1. Utility row (top-right): PiP, rotate. App-defined IDs; the
+       fragment wires their click handlers to PlayerActivity.
+    2. Playback row (centre): prev, play/pause, next. Standard Media3
+       view IDs (exo_prev / exo_play_pause / exo_next) so Media3
+       binds playback behaviour.
+    3. Scrubber row: exo_position, exo_progress (DefaultTimeBar in
+       brand orange), exo_duration. Also Media3-managed.
+
+  Do not rename the exo_* IDs — Media3 looks them up by name.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/media_viewer_controller_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="bottom"
     android:background="@drawable/bg_media_viewer_controller"
     android:orientation="vertical"
-    android:paddingTop="16dp">
+    android:paddingTop="8dp">
 
+    <!-- Utility row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end|center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp">
+
+        <ImageButton
+            android:id="@+id/media_viewer_btn_rotate"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/rotate"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_media_screen_rotation_white_24" />
+
+        <ImageButton
+            android:id="@+id/media_viewer_btn_pip"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="4dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/picture_in_picture"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_media_pip_white_24" />
+    </LinearLayout>
+
+    <!-- Playback row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp">
 
         <ImageButton
             android:id="@id/exo_prev"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/previous"
             android:scaleType="centerInside"
             android:src="@drawable/ic_media_skip_previous_white_24" />
 
-        <TextView
-            android:id="@id/exo_rew_with_amount"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="12dp"
-            android:background="@drawable/ic_media_replay_white_24"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="10sp" />
-
         <ImageButton
             android:id="@id/exo_play_pause"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:layout_marginStart="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/play"
             android:scaleType="centerInside"
             android:src="@drawable/media_action_play" />
 
-        <TextView
-            android:id="@id/exo_ffwd_with_amount"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/ic_media_fast_forward_white_24"
-            android:fontFamily="sans-serif-medium"
-            android:gravity="center"
-            android:textColor="@android:color/white"
-            android:textSize="10sp" />
-
         <ImageButton
             android:id="@id/exo_next"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/next"
             android:scaleType="centerInside"
             android:src="@drawable/ic_media_skip_next_white_24" />
     </LinearLayout>
 
+    <!-- Scrubber row -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -106,7 +124,9 @@
             android:layout_height="28dp"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            app:played_color="@color/brand_orange"
+            app:scrubber_color="@color/brand_orange" />
 
         <TextView
             android:id="@id/exo_duration"

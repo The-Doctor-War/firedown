@@ -341,8 +341,6 @@ public class MediaViewerFragment extends Fragment {
             }
         });
 
-        mPlayerView.setPlayer(mExoPlayer);
-
         final DataSource.Factory dataSourceFactory = new FileDataSource.Factory();
 
         ExtractorsFactory extractorsFactory = new DefaultExtractorsFactory()
@@ -357,13 +355,90 @@ public class MediaViewerFragment extends Fragment {
 
         mExoPlayer.prepare();
 
-        Log.d(TAG, "[flash-trace] before setPlayWhenReady(true)"
-                + " player.alpha=" + mPlayerView.getAlpha()
-                + " photo.visibility=" + visName(mPhotoView.getVisibility())
-                + " photo.hasDrawable=" + (mPhotoView.getDrawable() != null)
-                + " player.attached=" + mPlayerView.isAttachedToWindow()
-                + " photo.attached=" + mPhotoView.isAttachedToWindow());
-        mExoPlayer.setPlayWhenReady(true);
+        // Surface-attachment is deferred until the shared-element
+        // enter transition ends. Why: #108's trace proved that
+        // Android sets photo_view to INVISIBLE between
+        // startPostponedEnterTransition and the animation finishing,
+        // and onRenderedFirstFrame fires ~150 ms in — well before
+        // the animation ends. Without a visible photo_view to mask
+        // it, the user sees PlayerView's first frame leaking through
+        // around the still-animating transition overlay.
+        //
+        // ExoPlayer.prepare() above starts buffering immediately,
+        // but the player has no video Surface yet because
+        // mPlayerView.setPlayer hasn't been called. Decoded frames
+        // are held in the pipeline. When the transition ends and we
+        // attach the player to PlayerView, the held frame is pushed
+        // to the now-visible TextureView surface in a single step,
+        // photo_view turns GONE in onRenderedFirstFrame, and the
+        // swap is clean.
+        //
+        // Two trigger paths for the deferred attach:
+        //   1. Shared-element enter transition's onTransitionEnd /
+        //      onTransitionCancel (cold launch path).
+        //   2. A fallback 800 ms postDelayed for the onNewIntent
+        //      singleTask reuse path where the framework doesn't
+        //      schedule a fresh shared-element animation (#83 / #84
+        //      symptom) — without the timer the player would never
+        //      get a surface in that case.
+        //
+        // The encrypted / safe-folder path (mAvoidTransition=true)
+        // and audio files skip the deferral and attach immediately
+        // — there's no thumbnail / no transition to wait for.
+        final java.util.concurrent.atomic.AtomicBoolean attached =
+                new java.util.concurrent.atomic.AtomicBoolean(false);
+        final Runnable attachPlayer = () -> {
+            if (!attached.compareAndSet(false, true)) return;
+            if (mPlayerView == null || mExoPlayer == null) return;
+            Log.d(TAG, "[flash-trace] attachPlayer fires"
+                    + " photo.visibility=" + visName(mPhotoView.getVisibility()));
+            mPlayerView.setPlayer(mExoPlayer);
+            mExoPlayer.setPlayWhenReady(true);
+        };
+
+        if (mAvoidTransition || FileUriHelper.isAudio(mimeType)) {
+            Log.d(TAG, "[flash-trace] attaching player immediately"
+                    + " (mAvoidTransition=" + mAvoidTransition
+                    + " isAudio=" + FileUriHelper.isAudio(mimeType) + ")");
+            attachPlayer.run();
+        } else {
+            android.transition.Transition sharedEnter = (mActivity != null)
+                    ? mActivity.getWindow().getSharedElementEnterTransition()
+                    : null;
+            Log.d(TAG, "[flash-trace] deferring attach"
+                    + " sharedEnter=" + sharedEnter);
+            if (sharedEnter != null) {
+                sharedEnter.addListener(new android.transition.Transition.TransitionListener() {
+                    @Override
+                    public void onTransitionStart(@NonNull android.transition.Transition transition) {
+                        Log.d(TAG, "[flash-trace] sharedEnter onTransitionStart");
+                    }
+                    @Override
+                    public void onTransitionEnd(@NonNull android.transition.Transition transition) {
+                        Log.d(TAG, "[flash-trace] sharedEnter onTransitionEnd → attach");
+                        transition.removeListener(this);
+                        attachPlayer.run();
+                    }
+                    @Override
+                    public void onTransitionCancel(@NonNull android.transition.Transition transition) {
+                        Log.d(TAG, "[flash-trace] sharedEnter onTransitionCancel → attach");
+                        transition.removeListener(this);
+                        attachPlayer.run();
+                    }
+                    @Override
+                    public void onTransitionPause(@NonNull android.transition.Transition transition) {}
+                    @Override
+                    public void onTransitionResume(@NonNull android.transition.Transition transition) {}
+                });
+            }
+            // Fallback for the onNewIntent / no-transition path.
+            mPlayerView.postDelayed(() -> {
+                if (!attached.get()) {
+                    Log.d(TAG, "[flash-trace] fallback timer → attach");
+                    attachPlayer.run();
+                }
+            }, 800);
+        }
 
         if(!mAvoidTransition){
             if (FileUriHelper.isAudio(mimeType)) {

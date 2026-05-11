@@ -211,13 +211,39 @@ public class MediaViewerFragment extends Fragment {
             rv.setPadding(0, 0, 0, bottom);
             return insets;
         });
-        // Force a dispatch once the view is attached. WindowInsets are
-        // dispatched during the activity's first layout, which races
-        // against the async FragmentTransaction.replace().commit() — on
-        // cold launch the fragment view is attached after that dispatch,
-        // so the listener wouldn't fire until the next system-bar
-        // visibility change. post() defers until after attachment.
-        v.post(() -> ViewCompat.requestApplyInsets(v));
+        // Initial-apply path. The listener above handles every
+        // subsequent dispatch correctly (chrome toggle re-runs through
+        // WindowInsetsController.show / hide(systemBars()) and the
+        // framework re-dispatches insets — that's why every tap after
+        // the first one positions the controller right). On COLD
+        // LAUNCH the dispatch still arrives at the listener with
+        // bottom=0 on this theme: android:windowActionBarOverlay=true
+        // makes AppCompat insert an ActionBarOverlayLayout between
+        // the decor view and our fragment root, and on the first
+        // pass it transforms / consumes the bottom inset for its own
+        // action-bar bookkeeping before the dispatch reaches us.
+        // Subsequent dispatches (system-side, after the first
+        // WindowInsetsController call) bypass that consumption, which
+        // is why the bug is launch-only.
+        //
+        // Workaround: post a one-shot read directly from
+        // ViewCompat.getRootWindowInsets(decorView). The decor view
+        // always holds the window's CURRENT insets regardless of how
+        // ActionBarOverlayLayout transformed them on the way down. PR
+        // #88's theme switch (transparent bar colours instead of
+        // windowTranslucent*) means that read now returns the real
+        // nav-bar height, so applying it as padding clears the
+        // controller from the first frame.
+        final View root = v;
+        root.post(() -> {
+            if (mActivity == null) return;
+            WindowInsetsCompat rootInsets = ViewCompat.getRootWindowInsets(
+                    mActivity.getWindow().getDecorView());
+            if (rootInsets == null) return;
+            int bottom = rootInsets.getInsets(
+                    WindowInsetsCompat.Type.navigationBars()).bottom;
+            root.setPadding(0, 0, 0, bottom);
+        });
 
 
         // Single sink for the chrome-visibility decision: PlayerView's

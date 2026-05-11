@@ -177,7 +177,20 @@ public class MediaViewerFragment extends Fragment {
         // same regardless of which PlayerView default the bundled Media3
         // version ships with.
         mPlayerView.setUseController(true);
-        mPlayerView.setControllerAutoShow(true);
+        // Auto-show is intentionally OFF here. Logs from #90 / #92
+        // proved the controller's first show happens BEFORE the
+        // fragment root is measured (controller becomes visible at
+        // 33.968, padding lands at 33.979, first layout at 33.984).
+        // PlayerControlView locks its bottom-Y from that pre-measure
+        // moment and ignores subsequent padding changes — that's why
+        // every previous attempt to chase the padding write into
+        // earlier and earlier callbacks still left the controller
+        // sitting behind the nav bar. With autoShow=false the
+        // controller stays hidden through onCreateView, then
+        // OnGlobalLayoutListener below calls showController() AFTER
+        // the first layout pass, so its very first show happens
+        // against a fully-measured, padded parent.
+        mPlayerView.setControllerAutoShow(false);
         mPlayerView.setControllerHideOnTouch(true);
         // Default is ~3 s. 5 s matches VLC / Plex and gives the user a
         // realistic window to reach the play/pause / scrubber without
@@ -259,15 +272,9 @@ public class MediaViewerFragment extends Fragment {
                 new ViewTreeObserver.OnGlobalLayoutListener() {
                     @Override
                     public void onGlobalLayout() {
-                        // One-shot — remove before doing anything so
-                        // any setPadding-induced re-layouts don't
-                        // recurse back into us.
+                        // One-shot.
                         root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
 
-                        // At this point root is measured (logs from
-                        // #90 showed every earlier probe ran at
-                        // width=0 height=0; by now the framework has
-                        // gone through at least one layout pass).
                         WindowInsetsCompat freshInsets =
                                 ViewCompat.getRootWindowInsets(root);
                         int navBars = (freshInsets != null)
@@ -280,26 +287,23 @@ public class MediaViewerFragment extends Fragment {
                                 + " playerView.height="
                                 + (mPlayerView != null ? mPlayerView.getHeight() : -1));
 
-                        // Replay the tap-cycle: padding=0 then
-                        // padding=navBars, on the now-measured view.
-                        // Empirically this is the only sequence that
-                        // gets PlayerControlView to recompute its
-                        // bottom edge — a no-op same-value setPadding
-                        // doesn't trigger requestLayout, and a plain
-                        // requestLayout() on mPlayerView wasn't enough
-                        // in earlier attempts because Media3 caches
-                        // the controller's position past
-                        // measure/layout. The 0 → navBars transition
-                        // mirrors exactly what hide(systemBars()) →
-                        // show(systemBars()) does on the user's tap.
-                        Log.d(TAG, "[first-layout] cycling padding 0 → " + navBars);
-                        root.setPadding(0, 0, 0, 0);
-                        root.post(() -> {
-                            if (mPlayerView == null) return;
-                            Log.d(TAG, "[first-layout-post] applying padding=" + navBars
-                                    + " (replay)");
-                            root.setPadding(0, 0, 0, navBars);
-                        });
+                        // Now that the root is measured and PlayerView
+                        // has been laid out at the padded height,
+                        // explicitly show the controller for the very
+                        // first time. Because we set
+                        // setControllerAutoShow(false) above, the
+                        // controller has been hidden up to this point
+                        // and its first measure/layout pass will use
+                        // the current (correct) PlayerView bounds. The
+                        // CONTROLLER_TIMEOUT_MS auto-hide starts now
+                        // and works normally — the previous padding-
+                        // cycle approach kept resetting it via
+                        // requestLayout, which is why the controls
+                        // never auto-hid at launch.
+                        if (mPlayerView != null) {
+                            Log.d(TAG, "[first-layout] showController() — first show after layout");
+                            mPlayerView.showController();
+                        }
                     }
                 };
         v.getViewTreeObserver().addOnGlobalLayoutListener(firstLayoutListener);

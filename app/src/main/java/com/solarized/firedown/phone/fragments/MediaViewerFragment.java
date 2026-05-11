@@ -212,19 +212,48 @@ public class MediaViewerFragment extends Fragment {
         // no-op. When the user taps and the bars are shown, the
         // framework re-dispatches insets with the real nav-bar height
         // and we pad the bar up by exactly that much.
+        // Inset handling on exo_bottom_bar. The bar lives at the
+        // bottom of PlayerControlView (layout_gravity=bottom), so it
+        // only needs the navigation-bar inset on its bottom edge — and
+        // the display-cutout left/right insets in landscape so the
+        // scrubber doesn't slide under a notch.
+        //
+        // DO NOT write systemBars().top here. systemBars() includes
+        // the STATUS BAR height as top inset. Writing that to
+        // paddingTop grows the bar by ~status-bar-height pixels — and
+        // because the bar is anchored bottom, its TOP edge moves up by
+        // that much, which looks like the bar "sliding up". That's
+        // exactly what was happening after PiP → maximize: the
+        // post-exit insets re-dispatch arrives with both top and
+        // bottom non-zero, the old listener wrote both, the bar grew.
+        // (Pre-PiP it looked OK only because in fully-immersive launch
+        // state both insets were 0.)
+        //
+        // Returning windowInsets (not CONSUMED) keeps the dispatch
+        // alive for the action bar and any other listeners further
+        // down the tree.
         final View bottomBar = mPlayerView.findViewById(R.id.exo_bottom_bar);
         if (bottomBar != null) {
+            final int xmlPaddingTop = bottomBar.getPaddingTop();
             ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v1, windowInsets) -> {
-                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() |
-                        WindowInsetsCompat.Type.displayCutout());
-                // Apply the insets as padding to the view. Here, set all the dimensions
-                // as appropriate to your layout. You can also update the view's margin if
-                // more appropriate.
-                v1.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+                Insets navBars = windowInsets.getInsets(WindowInsetsCompat.Type.navigationBars());
+                Insets cutout = windowInsets.getInsets(WindowInsetsCompat.Type.displayCutout());
+                int leftInset = Math.max(navBars.left, cutout.left);
+                int rightInset = Math.max(navBars.right, cutout.right);
+                int bottomInset = Math.max(navBars.bottom, cutout.bottom);
 
-                // Return CONSUMED if you don't want the window insets to keep passing down
-                // to descendant views.
-                return WindowInsetsCompat.CONSUMED;
+                Log.d(TAG, "[exo_bottom_bar inset] navBars=" + navBars
+                        + " cutout=" + cutout
+                        + " writing padding L=" + leftInset
+                        + " T=" + xmlPaddingTop
+                        + " R=" + rightInset
+                        + " B=" + bottomInset
+                        + " | barH(pre)=" + v1.getHeight()
+                        + " topY(pre)=" + v1.getTop()
+                        + " bottomY(pre)=" + v1.getBottom());
+
+                v1.setPadding(leftInset, xmlPaddingTop, rightInset, bottomInset);
+                return windowInsets;
             });
         }
 
@@ -429,6 +458,7 @@ public class MediaViewerFragment extends Fragment {
      */
     @OptIn(markerClass = UnstableApi.class)
     public void onPipModeChanged(boolean inPip) {
+        Log.d(TAG, "[onPipModeChanged] inPip=" + inPip);
         if (mPlayerView == null) return;
         if (inPip) {
             mPlayerView.hideController();

@@ -462,31 +462,71 @@ public class MediaViewerFragment extends Fragment {
         Log.d(TAG, "[onPipModeChanged] inPip=" + inPip);
         if (mPlayerView == null) return;
         if (inPip) {
-            // While in PiP we just want the controller invisible. The
-            // previous setUseController(false) here was redundant
-            // (hideController already hides it) AND caused
-            // PlayerControlView to dirty its internal layout state —
-            // when setUseController(true) reattached the player on
-            // exit, the inner LinearLayout inside exo_bottom_bar
-            // ended up ~280 px taller than before PiP (#100 log:
-            // 282 px → 428 px). The bar's bottom edge stays anchored
-            // to the screen so the top edge moves UP by that amount
-            // = visible "slide up after PiP" bug.
             mPlayerView.hideController();
             setChromeVisible(false);
         } else {
-            // Symmetry: no setUseController(true) needed because we
-            // never called setUseController(false) on entry. Chrome
-            // visibility follows the controller listener as before.
+            // PiP exit. The previous log proved the inner LinearLayout
+            // inside exo_bottom_bar comes back ~146 px taller than it
+            // went in (102 → 248), with the same child count, so the
+            // growth is inside one of the LinearLayout's children
+            // (exo_position / exo_progress / exo_duration). The
+            // declared XML heights are wrap_content / 28dp / wrap_content,
+            // so the likely culprit is DefaultTimeBar (exo_progress)
+            // holding an inflated measured height after the small PiP
+            // window. Re-assigning the LayoutParams here forces a
+            // fresh measure pass with the original 28dp constraint.
+            resetTimeBarLayoutParams();
         }
         dumpBottomBarStructure("[onPipModeChanged inPip=" + inPip + "]");
     }
 
     /**
+     * Force exo_progress (DefaultTimeBar) and its parent row back to
+     * the XML-declared sizing after PiP exit. setLayoutParams is the
+     * cheapest way to invalidate Media3's cached measure state — it
+     * triggers requestLayout on the parent chain and the next pass
+     * uses the LayoutParams we just wrote.
+     */
+    private void resetTimeBarLayoutParams() {
+        if (mPlayerView == null) return;
+        View timeBar = mPlayerView.findViewById(R.id.exo_progress);
+        if (timeBar != null) {
+            int target28dp = (int) (28 * getResources().getDisplayMetrics().density);
+            android.view.ViewGroup.LayoutParams lp = timeBar.getLayoutParams();
+            if (lp != null) {
+                Log.d(TAG, "[resetTimeBar] before lpH="
+                        + (lp.height == android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                                ? "WRAP"
+                                : String.valueOf(lp.height))
+                        + " measuredH=" + timeBar.getMeasuredHeight()
+                        + " writing lpH=" + target28dp);
+                lp.height = target28dp;
+                timeBar.setLayoutParams(lp);
+            }
+            // Walk up to the LinearLayout that holds the row and force
+            // it to remeasure too — without this the bar's parent
+            // FrameLayout keeps the stale wrap_content height it
+            // computed before the PiP-state measurement leaked.
+            View parent = (timeBar.getParent() instanceof View)
+                    ? (View) timeBar.getParent() : null;
+            if (parent != null) parent.requestLayout();
+            View grandparent = (parent != null && parent.getParent() instanceof View)
+                    ? (View) parent.getParent() : null;
+            if (grandparent != null) grandparent.requestLayout();
+        }
+    }
+
+    /**
      * Diagnostic — dumps the height and child tree of exo_bottom_bar so
-     * #100's "bar grows after PiP exit" symptom can be confirmed (or
-     * ruled out) on-device. Filter with `adb logcat -s MediaViewerFragment`.
-     * Will be removed once the PiP-exit resize is fully resolved.
+     * the "bar grows after PiP exit" symptom can be tracked on-device.
+     * Recursion goes one level deeper than the first version (now also
+     * walks the inner LinearLayout's children) because #101's log
+     * proved the growth is *inside* the LinearLayout (it went 102 →
+     * 248 with the same cc=3). The candidate is exo_progress — Media3
+     * DefaultTimeBar measures its scrubber thumb / touch-target area
+     * dynamically. Logging the declared layoutParams.height alongside
+     * the measured getHeight() will tell us exactly which child
+     * ballooned.
      */
     private void dumpBottomBarStructure(@NonNull String tag) {
         if (mPlayerView == null) return;
@@ -499,17 +539,46 @@ public class MediaViewerFragment extends Fragment {
                 .append(" bottomY=").append(bottomBar.getBottom())
                 .append(" pT=").append(bottomBar.getPaddingTop())
                 .append(" pB=").append(bottomBar.getPaddingBottom())
-                .append(" childCount=").append(bottomBarGroup.getChildCount());
+                .append(" cc=").append(bottomBarGroup.getChildCount());
         for (int i = 0; i < bottomBarGroup.getChildCount(); i++) {
             View c = bottomBarGroup.getChildAt(i);
-            sb.append(" | child[").append(i).append("] ")
-                    .append(c.getClass().getSimpleName())
-                    .append(" h=").append(c.getHeight());
+            appendViewSummary(sb, "child[" + i + "]", c);
             if (c instanceof android.view.ViewGroup) {
-                sb.append(" cc=").append(((android.view.ViewGroup) c).getChildCount());
+                android.view.ViewGroup cg = (android.view.ViewGroup) c;
+                for (int j = 0; j < cg.getChildCount(); j++) {
+                    appendViewSummary(sb, "  inner[" + j + "]", cg.getChildAt(j));
+                }
             }
         }
         Log.d(TAG, sb.toString());
+    }
+
+    private void appendViewSummary(StringBuilder sb, String prefix, View v) {
+        sb.append(" | ").append(prefix).append(" ")
+                .append(v.getClass().getSimpleName())
+                .append(" id=").append(idName(v.getId()))
+                .append(" h=").append(v.getHeight())
+                .append(" measuredH=").append(v.getMeasuredHeight());
+        android.view.ViewGroup.LayoutParams lp = v.getLayoutParams();
+        if (lp != null) {
+            sb.append(" lpH=").append(lp.height == android.view.ViewGroup.LayoutParams.MATCH_PARENT
+                    ? "MATCH"
+                    : (lp.height == android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+                            ? "WRAP"
+                            : String.valueOf(lp.height)));
+        }
+        if (v instanceof android.view.ViewGroup) {
+            sb.append(" cc=").append(((android.view.ViewGroup) v).getChildCount());
+        }
+    }
+
+    private String idName(int id) {
+        if (id == View.NO_ID) return "no-id";
+        try {
+            return getResources().getResourceEntryName(id);
+        } catch (android.content.res.Resources.NotFoundException e) {
+            return "0x" + Integer.toHexString(id);
+        }
     }
 
     @Override

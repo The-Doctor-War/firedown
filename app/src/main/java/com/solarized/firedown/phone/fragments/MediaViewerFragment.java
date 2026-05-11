@@ -206,64 +206,65 @@ public class MediaViewerFragment extends Fragment {
         );
 
 
-        // Belt-and-braces nav-bar padding. The empirical fact from
-        // #90's logs: at cold launch the WindowInsets listener fires
-        // with the correct value (e.g. 135 px) and we write
-        // setPadding(135) — but at that moment v.width == v.height
-        // == 0, so the layout pass that will follow is the FIRST one
-        // and Media3's PlayerControlView captures its bottom from the
-        // unpadded parent during that pass. The 135 padding sits
-        // there but the controller is already nailed to the wrong
-        // bottom. Subsequent dispatches (chrome toggle going
-        // padding=0 → padding=135 on an already-measured view)
-        // bounce the controller into the right place — which is why
-        // "successive taps work" but the very first launch doesn't.
+        // Bottom inset handling. Empirical findings from #85 → #93:
         //
-        // Three layers below, ordered from earliest to latest:
+        //   1. Logs from #90/#93 confirmed WindowInsets.dispatch arrives
+        //      with the correct nav-bar height (135 px on the failing
+        //      device) but at view.width=0 view.height=0 — i.e. BEFORE
+        //      the fragment view is measured.
         //
-        //   1. SYNCHRONOUS apply from the decor view's insets — the
-        //      decor view is already attached at fragment.onCreateView
-        //      time, so its WindowInsets are populated and we write
-        //      the right padding before v ever enters the hierarchy.
+        //   2. ViewCompat.getRootWindowInsets(decorView) returns null
+        //      at fragment.onCreateView time on this device — so #91's
+        //      synchronous decor-view read was a no-op. (Confirmed in
+        //      #93's log: "[sync-apply] decorInsets == null".)
         //
-        //   2. WindowInsets listener — covers chrome-toggle and
-        //      orientation changes; writes the same padding on every
-        //      subsequent dispatch.
+        //   3. PR #84 made player_view VISIBLE from the start (instead
+        //      of GONE until the shared-element transition ended). The
+        //      pre-#84 code padded mPlayerView and that worked because
+        //      mPlayerView was GONE during the racy window — by the
+        //      time it became VISIBLE and was measured, padding was
+        //      already in place. With #84's always-VISIBLE player_view
+        //      that race re-opened.
         //
-        //   3. OnGlobalLayoutListener (your suggestion) — fires after
-        //      the FIRST real layout pass when v has non-zero width /
-        //      height. At that point we replay the tap-cycle on
-        //      mPlayerView itself (setPadding 0 → navBars) which is
-        //      what makes PlayerControlView reposition correctly.
-        //      Without this step (1) and (2) keep getting the right
-        //      number to the wrong moment.
+        // This pass restores the original padding target (mPlayerView,
+        // not the fragment root) and supplies the value SYNCHRONOUSLY
+        // in onCreateView using android.R.dimen.navigation_bar_height —
+        // a system resource that's available at any point during the
+        // fragment lifecycle, unlike decor-view insets. With the value
+        // on mPlayerView before the first measure pass,
+        // PlayerControlView's first layout uses the padded
+        // content-area bottom and lands above the nav bar.
+        //
+        // Listener still updates mPlayerView on subsequent dispatches
+        // (chrome toggle / orientation) so the padding tracks the
+        // bar visibility correctly.
 
-        WindowInsetsCompat decorInsets = ViewCompat.getRootWindowInsets(
-                mActivity.getWindow().getDecorView());
-        if (decorInsets != null) {
-            int navBars = decorInsets.getInsets(
-                    WindowInsetsCompat.Type.navigationBars()).bottom;
-            Log.d(TAG, "[sync-apply] decorInsets navBars.bottom=" + navBars
-                    + " — writing padding before view attach");
-            v.setPadding(0, 0, 0, navBars);
-        } else {
-            Log.d(TAG, "[sync-apply] decorInsets == null at onCreateView");
-        }
+        final int initialNavBarHeight = readSystemNavigationBarHeight();
+        Log.d(TAG, "[sync-apply] resource navigation_bar_height=" + initialNavBarHeight
+                + " — padding mPlayerView synchronously");
+        mPlayerView.setPadding(0, 0, 0, initialNavBarHeight);
+        mPhotoView.setPadding(0, 0, 0, initialNavBarHeight);
 
         ViewCompat.setOnApplyWindowInsetsListener(v, (rv, insets) -> {
             int navBars = insets.getInsets(
                     WindowInsetsCompat.Type.navigationBars()).bottom;
-            int systemBars = insets.getInsets(
-                    WindowInsetsCompat.Type.systemBars()).bottom;
             boolean barsVisible = insets.isVisible(
                     WindowInsetsCompat.Type.navigationBars());
             Log.d(TAG, "[insets-listener] navBars.bottom=" + navBars
-                    + " systemBars.bottom=" + systemBars
                     + " navVisible=" + barsVisible
                     + " attached=" + rv.isAttachedToWindow()
                     + " width=" + rv.getWidth()
                     + " height=" + rv.getHeight());
-            rv.setPadding(0, 0, 0, navBars);
+            // Apply to mPlayerView / mPhotoView (the actual content),
+            // not to the fragment root — pre-#84 this is what worked.
+            if (mPlayerView != null) {
+                mPlayerView.setPadding(0, 0, 0, navBars);
+                mPlayerView.requestLayout();
+            }
+            if (mPhotoView != null) {
+                mPhotoView.setPadding(0, 0, 0, navBars);
+                mPhotoView.requestLayout();
+            }
             return insets;
         });
 
@@ -274,43 +275,29 @@ public class MediaViewerFragment extends Fragment {
                     public void onGlobalLayout() {
                         // One-shot.
                         root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                        WindowInsetsCompat freshInsets =
-                                ViewCompat.getRootWindowInsets(root);
-                        int navBars = (freshInsets != null)
-                                ? freshInsets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-                                : 0;
                         Log.d(TAG, "[first-layout] root width=" + root.getWidth()
                                 + " height=" + root.getHeight()
-                                + " currentPaddingBottom=" + root.getPaddingBottom()
-                                + " navBars=" + navBars
                                 + " playerView.height="
-                                + (mPlayerView != null ? mPlayerView.getHeight() : -1));
+                                + (mPlayerView != null ? mPlayerView.getHeight() : -1)
+                                + " playerView.paddingBottom="
+                                + (mPlayerView != null ? mPlayerView.getPaddingBottom() : -1));
 
-                        // Now that the root is measured and PlayerView
-                        // has been laid out at the padded height,
-                        // explicitly show the controller for the very
-                        // first time. Because we set
-                        // setControllerAutoShow(false) above, the
-                        // controller has been hidden up to this point
-                        // and its first measure/layout pass will use
-                        // the current (correct) PlayerView bounds. The
-                        // CONTROLLER_TIMEOUT_MS auto-hide starts now
-                        // and works normally — the previous padding-
-                        // cycle approach kept resetting it via
-                        // requestLayout, which is why the controls
-                        // never auto-hid at launch.
+                        // Show the controller for the first time AFTER
+                        // the first layout pass — by now mPlayerView
+                        // has been measured with its bottom padding,
+                        // so PlayerControlView's first
+                        // measure / layout uses the correct
+                        // content-area bottom.
                         if (mPlayerView != null) {
-                            Log.d(TAG, "[first-layout] showController() — first show after layout");
+                            Log.d(TAG, "[first-layout] showController()");
                             mPlayerView.showController();
                         }
                     }
                 };
         v.getViewTreeObserver().addOnGlobalLayoutListener(firstLayoutListener);
 
-        Log.d(TAG, "[onCreateView-end] decorInsetsNull=" + (decorInsets == null)
-                + " vAttached=" + v.isAttachedToWindow()
-                + " currentPaddingBottom=" + v.getPaddingBottom());
+        Log.d(TAG, "[onCreateView-end] vAttached=" + v.isAttachedToWindow()
+                + " mPlayerView.paddingBottom=" + mPlayerView.getPaddingBottom());
 
 
         // Single sink for the chrome-visibility decision: PlayerView's
@@ -465,6 +452,22 @@ public class MediaViewerFragment extends Fragment {
 
     private boolean isActivityInPip() {
         return mActivity != null && mActivity.isInPictureInPictureMode();
+    }
+
+    /**
+     * Read the system navigation-bar height from android.R.dimen.
+     * navigation_bar_height. This works at fragment.onCreateView time
+     * even when ViewCompat.getRootWindowInsets(decorView) still returns
+     * null (which #93's log proved happens on the failing device).
+     * Returns 0 on devices that don't reserve a bottom strip (full
+     * gesture navigation).
+     */
+    private int readSystemNavigationBarHeight() {
+        int resourceId = getResources()
+                .getIdentifier("navigation_bar_height", "dimen", "android");
+        return (resourceId > 0)
+                ? getResources().getDimensionPixelSize(resourceId)
+                : 0;
     }
 
     /**

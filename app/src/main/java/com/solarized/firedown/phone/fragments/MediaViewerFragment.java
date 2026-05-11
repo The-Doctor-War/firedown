@@ -18,6 +18,7 @@ import androidx.annotation.OptIn;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -213,38 +214,29 @@ public class MediaViewerFragment extends Fragment {
         // and we pad the bar up by exactly that much.
         final View bottomBar = mPlayerView.findViewById(R.id.exo_bottom_bar);
         if (bottomBar != null) {
-            ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v1, insets) -> {
-                int bottom = insets.getInsets(
-                        WindowInsetsCompat.Type.navigationBars()).bottom;
-                v1.setPadding(
-                        v1.getPaddingLeft(),
-                        v1.getPaddingTop(),
-                        v1.getPaddingRight(),
-                        bottom);
-                return insets;
+            ViewCompat.setOnApplyWindowInsetsListener(bottomBar, (v1, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() |
+                        WindowInsetsCompat.Type.displayCutout());
+                // Apply the insets as padding to the view. Here, set all the dimensions
+                // as appropriate to your layout. You can also update the view's margin if
+                // more appropriate.
+                v1.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+
+                // Return CONSUMED if you don't want the window insets to keep passing down
+                // to descendant views.
+                return WindowInsetsCompat.CONSUMED;
             });
         }
 
-        // Custom utility buttons (PiP, rotate). Media3 doesn't know
-        // about these IDs — we own the click handlers and delegate to
-        // PlayerActivity, which already implements PiP entry (used by
-        // onUserLeaveHint) and now exposes a public orientation flip.
-        View pipButton = mPlayerView.findViewById(R.id.media_viewer_btn_pip);
-        if (pipButton != null) {
-            pipButton.setOnClickListener(b -> {
-                if (mActivity != null) mActivity.enterPipMode();
-            });
-        }
-        View rotateButton = mPlayerView.findViewById(R.id.media_viewer_btn_rotate);
-        if (rotateButton != null) {
-            rotateButton.setOnClickListener(b -> {
-                if (mActivity != null) mActivity.toggleOrientation();
-            });
-        }
+
+
 
         return v;
 
     }
+
+
+
 
     /**
      * Show or hide the activity chrome — system bars and action bar —

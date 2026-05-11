@@ -44,11 +44,11 @@ android {
         minSdkVersion 26
         targetSdkVersion 36
         compileSdk = 36
-        versionCode 1167
-        versionName "1.1.67"
+        versionCode 1168
+        versionName "1.1.68"
 
         ndk {
-            abiFilters  "arm64-v8a"
+            abiFilters  "arm64-v8a", "x86_64"
         }
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

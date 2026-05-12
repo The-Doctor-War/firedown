@@ -357,15 +357,25 @@ public class MediaViewerFragment extends Fragment {
                         .listener(mRequestListener)
                         .into(mPhotoView);
             } else {
-                // Video: no poster. PlayerView's shutter is configured
-                // transparent (app:shutter_background_color in
-                // fragment_media_viewer.xml) so the brief gap between
-                // the activity opening and ExoPlayer rendering its
-                // first frame just shows the window background — no
-                // black flash, no stale thumbnail morph. Skipping the
-                // Glide round-trip also drops a frame-extraction
-                // ModelLoader off the cold-launch hot path.
-                mPhotoView.setVisibility(View.GONE);
+                // Video: no thumbnail poster behind the morph
+                // (user preference, #115 re-dropped the Glide
+                // load that #114 had restored). photo_view stays
+                // VISIBLE — with transitionName "video_view" set
+                // in onCreateView — so the shared-element morph
+                // from BaseFocusFragment's list thumbnail has a
+                // measurable destination view to animate to.
+                // ImageViewerFragment does the same: photo_view
+                // is the destination, never set GONE before the
+                // transition starts; only Glide finishing flips
+                // postponeEnterTransition → startPostponed.
+                //
+                // Without a poster the destination is transparent
+                // during the morph, so what the user sees is the
+                // list thumbnail expanding to full-screen bounds,
+                // and the video frame appearing through it as the
+                // decoder produces it. photo_view itself is
+                // hidden by onRenderedFirstFrame so it stops
+                // occupying the layout once playback starts.
                 startPostponedEnterTransition();
             }
         }else{

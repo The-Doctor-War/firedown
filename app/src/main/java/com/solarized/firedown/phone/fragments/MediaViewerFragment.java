@@ -158,13 +158,7 @@ public class MediaViewerFragment extends Fragment {
 
         mPhotoView.setVisibility(!mAvoidTransition ? View.VISIBLE : View.GONE);
 
-        // No setTransitionName on photo_view: BaseFocusFragment.openItem
-        // no longer launches PlayerActivity with a "video_view"
-        // shared-element option, so there is nothing on the source
-        // side that would match. photo_view is now purely a static
-        // poster image — Glide loads the thumbnail into it during
-        // onViewCreated; onRenderedFirstFrame hides it once the
-        // player has a frame.
+        ViewCompat.setTransitionName(mPhotoView, "video_view");
 
         String fileMime = mDownloadEntity.getFileMimeType();
 

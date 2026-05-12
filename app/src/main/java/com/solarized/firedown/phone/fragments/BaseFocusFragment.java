@@ -493,24 +493,18 @@ public class BaseFocusFragment extends Fragment {
                     startPlayerActivity(downloadEntity);
                 }
             } else if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isAudio(mimeType)) {
-                // No scene-transition animation for video / audio.
-                // ImageViewerFragment (the "image_view" branch above) is
-                // an ImageView → ImageView morph, identical pixels on
-                // both sides, the framework handles it cleanly.
-                // PlayerActivity's MediaViewerFragment renders through
-                // PlayerView's TextureView, which has a completely
-                // different lifecycle (surface attach, decode, posted
-                // visibility-restore) than the source thumbnail's
-                // ImageView. Three independent timelines were fighting
-                // each other across PRs #84-#110, producing a first-
-                // frame "flash" through the still-INVISIBLE destination
-                // photo_view. Dropping the shared-element animation
-                // here removes the whole class of bug — the activity
-                // opens with the default window animation, photo_view
-                // shows the Glide-loaded poster image at full size,
-                // onRenderedFirstFrame atomically swaps it for the
-                // video frame. No race.
-                startPlayerActivity(downloadEntity);
+                if(viewHolder != null){
+                    View image = viewHolder.itemView.findViewById(R.id.image);
+                    if(image != null){
+                        ActivityOptionsCompat options = ActivityOptionsCompat
+                                .makeSceneTransitionAnimation(mActivity, image, "video_view");
+                        startPlayerActivity(downloadEntity, options);
+                    }else{
+                        startPlayerActivity(downloadEntity);
+                    }
+                }else{
+                    startPlayerActivity(downloadEntity);
+                }
             } else if(FileUriHelper.isText(mimeType) || FileUriHelper.isSubtitle(mimeType)){
                 Intent textIntent = new Intent(getContext(), HtmlViewerActivity.class);
                 textIntent.setDataAndType(uri, FileUriHelper.MIMETYPE_TXT);

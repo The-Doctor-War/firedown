@@ -39,15 +39,14 @@
             android:background="@drawable/top_scrim"
             android:elevation="12dp" />
 
-        <!-- Tag row: mime + quality + duration (static TextViews, no RecyclerView) -->
-        <LinearLayout
+        <!-- Tag row: mime + duration chained at start, quality at end (ellipsized
+             on long-translation locales so duration stays rigid). -->
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/tag_row"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_margin="6dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:layout_gravity="bottom"
+            android:layout_margin="6dp">
 
             <TextView
                 android:id="@+id/mime_text"
@@ -56,18 +55,10 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
                 tools:text="mp4" />
-
-            <TextView
-                android:id="@+id/tag_quality"
-                style="@style/MimeTertiary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:visibility="gone"
-                tools:text="1080p" />
 
             <TextView
                 android:id="@+id/tag_duration"
@@ -78,9 +69,35 @@
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
                 android:visibility="gone"
-                tools:text="03:45" />
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mime_text"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="03:45"
+                tools:visibility="visible" />
 
-        </LinearLayout>
+            <TextView
+                android:id="@+id/tag_quality"
+                style="@style/MimeTertiary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:ellipsize="end"
+                android:gravity="end"
+                android:maxLines="1"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:visibility="gone"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1"
+                app:layout_constraintStart_toEndOf="@id/tag_duration"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_default="wrap"
+                tools:text="Uyarlanabilir"
+                tools:visibility="visible" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- Variant / more button -->
         <com.google.android.material.button.MaterialButton

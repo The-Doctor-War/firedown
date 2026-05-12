@@ -459,9 +459,14 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
             mSearchTextDefaultColor = onSurfaceVariant;
         }
 
-        // 9. Update the animation colors so focus/unfocus uses the right palette
+        // 9. Update the animation colors so focus/unfocus uses the right palette.
+        // surfaceBright collapses to the same value as surface in the light M3
+        // palette (#FBF9FB), which made the focused pill disappear against the
+        // address-bar holder. surfaceContainerHighest is one M3 step above the
+        // resting surfaceContainerHigh tone in both themes, so focus stays
+        // visible without breaking the dark-theme appearance.
         mAnimColorFrom = surfaceContainerHigh;
-        mAnimColorTo = IncognitoColors.getSurfaceBright(activity, incognito);
+        mAnimColorTo = IncognitoColors.getSurfaceContainerHighest(activity, incognito);
     }
 
     public void updateViewVisibility(final boolean hasFocus) {

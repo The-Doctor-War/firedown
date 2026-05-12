@@ -17,6 +17,7 @@ import com.solarized.firedown.data.repository.WebHistoryDataRepository;
 import com.solarized.firedown.geckoview.GeckoResources;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.utils.BrowserHeaders;
+import com.solarized.firedown.utils.UrlStringUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -122,7 +123,7 @@ public class AutoCompleteSearch {
             // is useless (the user already sees the start page when they open
             // a new tab). isHome() isn't always set on restored sessions, so
             // also match the URL directly as a backstop.
-            if (tab.isActive() || tab.isHome() || GeckoResources.isAboutOnboarding(uri)) continue;
+            if (tab.isActive() || tab.isHome() || GeckoResources.isAboutOnboarding(uri) || UrlStringUtils.isURLResouceLike(uri)) continue;
 
             boolean matchesUri = !TextUtils.isEmpty(uri) && uri.toLowerCase().contains(lowerInput);
             boolean matchesTitle = !TextUtils.isEmpty(title) && title.toLowerCase().contains(lowerInput);

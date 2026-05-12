@@ -41,11 +41,11 @@
 
         <!-- Tag row: mime + duration chained at start, quality at end (ellipsized
              on long-translation locales so duration stays rigid). -->
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <LinearLayout
             android:id="@+id/tag_row"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
+            android:layout_gravity="bottom|end"
             android:layout_margin="6dp">
 
             <TextView
@@ -55,9 +55,6 @@
                 android:layout_height="wrap_content"
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:text="mp4" />
 
             <TextView
@@ -69,16 +66,13 @@
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
                 android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/mime_text"
-                app:layout_constraintTop_toTopOf="parent"
                 tools:text="03:45"
                 tools:visibility="visible" />
 
             <TextView
                 android:id="@+id/tag_quality"
                 style="@style/MimeTertiary"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
                 android:ellipsize="end"
@@ -87,17 +81,10 @@
                 android:paddingLeft="4dp"
                 android:paddingRight="4dp"
                 android:visibility="gone"
-                app:layout_constrainedWidth="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1"
-                app:layout_constraintStart_toEndOf="@id/tag_duration"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintWidth_default="wrap"
                 tools:text="Uyarlanabilir"
                 tools:visibility="visible" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </LinearLayout>
 
         <!-- Variant / more button -->
         <com.google.android.material.button.MaterialButton

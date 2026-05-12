@@ -44,6 +44,8 @@
     <string name="settings_jit_enabled_summary">Ao desativar, o desempenho pode ser reduzido em páginas complexas - Ao alterar esta configuração, seu navegador será reiniciado</string>
     <string name="settings_webgl_disabled">Desativar WebGL</string>
     <string name="settings_webrtc_enabled">Ativar WebRTC</string>
+    <string name="settings_webassembly_enabled">Ativar WebAssembly</string>
+    <string name="settings_webassembly_enabled_summary">Permite que os sites executem módulos WASM compilados. Desativar reduz a superfície de ataque, mas pode quebrar alguns aplicativos web modernos</string>
     <string name="prompt_update_confirmation">Atualizar</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">É recomendado ativar a proteção contra rastreamento.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se algo parecer não funcionar neste site, experimente desativar.</string>

@@ -167,6 +167,8 @@
     <string name="settings_drm_enabled">Ativar reprodução DRM</string>
     <string name="settings_drm_enabled_summary">Permite o Widevine em sites que exigem DRM (Netflix, Spotify, …). O Firedown ainda não pode baixar conteúdo protegido por DRM.</string>
     <string name="settings_webrtc_enabled">Ativar WebRTC</string>
+    <string name="settings_webassembly_enabled">Ativar WebAssembly</string>
+    <string name="settings_webassembly_enabled_summary">Permite que os sites executem módulos WASM compilados. Desativar reduz a superfície de ataque, mas pode quebrar alguns aplicativos web modernos</string>
     <string name="rename">Renomear</string>
     <string name="rename_file">Renomear arquivo</string>
     <string name="request_geolocation">Compartilhar a localização do seu dispositivo com &lt;b&gt;%s&lt;/b&gt;?</string>

@@ -191,6 +191,8 @@
     <string name="settings_drm_enabled">DRM oynatmayı etkinleştir</string>
     <string name="settings_drm_enabled_summary">DRM gerektiren sitelerde (Netflix, Spotify, …) Widevine oynatmasına izin verir. Firedown DRM korumalı içerikleri yine de indiremez.</string>
     <string name="settings_webrtc_enabled">"WebRTC'yi etkinleştir"</string>
+    <string name="settings_webassembly_enabled">"WebAssembly'yi etkinleştir"</string>
+    <string name="settings_webassembly_enabled_summary">Sitelerin derlenmiş WASM modüllerini çalıştırmasına izin verir. Devre dışı bırakmak saldırı yüzeyini azaltır ancak bazı modern web uygulamalarını bozabilir</string>
     <string name="prompt_update_confirmation">Güncelle</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">İzlenme korumasını açmanız önerilir.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Site bozuk görünüyorsa kapatmayı deneyin.</string>

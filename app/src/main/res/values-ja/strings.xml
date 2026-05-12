@@ -424,6 +424,8 @@
     <string name="settings_drm_enabled_summary">DRM が必要なサイト（Netflix、Spotify など）で Widevine 再生を許可します。Firedown では DRM で保護されたコンテンツのダウンロードはできません。</string>
     <string name="settings_webrtc_enabled">WebRTCを有効にする</string>
     <string name="settings_webrtc_enabled_summary">P2P通話に必要、実IPアドレスが漏れる可能性があります</string>
+    <string name="settings_webassembly_enabled">WebAssemblyを有効にする</string>
+    <string name="settings_webassembly_enabled_summary">サイトがコンパイル済みのWASMモジュールを実行できるようにします。無効にすると攻撃対象領域が減りますが、一部の最新のWebアプリが動作しなくなる可能性があります</string>
     <string name="settings_https_only_title">HTTPSのみモード</string>
     <string name="settings_https_only_summary">プレーンテキストのHTTP読み込みをブロックし、サイトごとの上書き設定が可能な警告ページを表示します</string>
     <string name="settings_disk_cache_disabled">ディスクキャッシュを無効にする</string>

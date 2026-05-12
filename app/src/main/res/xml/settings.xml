@@ -206,6 +206,15 @@
             app:singleLineTitle="false" />
 
 
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:key="com.solarized.firedown.preferences.browser.enable.webassembly"
+            android:summary="@string/settings_webassembly_enabled_summary"
+            android:title="@string/settings_webassembly_enabled"
+            app:icon="@drawable/ic_memory_24"
+            app:singleLineTitle="false" />
+
+
     </PreferenceCategory>
 
 

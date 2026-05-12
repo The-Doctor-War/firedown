@@ -94,6 +94,10 @@ public class Preferences {
 
     public static final boolean DEFAULT_ENABLE_WEBRTC = false;
 
+    public static final String SETTINGS_ENABLE_WEBASSEMBLY = "com.solarized.firedown.preferences.browser.enable.webassembly";
+
+    public static final boolean DEFAULT_ENABLE_WEBASSEMBLY = false;
+
     public static final String SETTINGS_ENABLE_DRM = "com.solarized.firedown.preferences.browser.enable.drm";
 
     /**

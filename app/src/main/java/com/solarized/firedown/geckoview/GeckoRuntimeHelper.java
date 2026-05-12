@@ -154,6 +154,8 @@ public class GeckoRuntimeHelper {
 
         setWebRTC(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_WEBRTC,
                 Preferences. DEFAULT_ENABLE_WEBRTC));
+        setWebAssembly(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_WEBASSEMBLY,
+                Preferences.DEFAULT_ENABLE_WEBASSEMBLY));
         setJITCompiler(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_JIT,
                 Preferences.DEFAULT_ENABLE_JIT));
         setWebGL(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WEBGL,
@@ -720,6 +722,17 @@ public class GeckoRuntimeHelper {
 
         geckoResult.accept(unused -> {
             Log.d(TAG, "setWebGL: " + unused);
+        });
+    }
+
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    public void setWebAssembly(boolean enable) {
+
+        GeckoResult<Void> geckoResult = GeckoPreferenceController
+                .setGeckoPref("javascript.options.wasm", enable, GeckoPreferenceController.PREF_BRANCH_USER);
+
+        geckoResult.accept(unused -> {
+            Log.d(TAG, "setWebAssembly: " + unused + " enable: " + enable);
         });
     }
 

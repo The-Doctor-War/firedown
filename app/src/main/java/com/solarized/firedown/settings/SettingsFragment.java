@@ -325,6 +325,12 @@ public class SettingsFragment extends BasePreferenceFragment
 
             mGeckoRuntimeHelper.setWebRTC(value);
 
+        } else if (Preferences.SETTINGS_ENABLE_WEBASSEMBLY.equals(key)) {
+
+            boolean value = sharedPreferences.getBoolean(key, Preferences.DEFAULT_ENABLE_WEBASSEMBLY);
+
+            mGeckoRuntimeHelper.setWebAssembly(value);
+
         } else if (Preferences.SETTINGS_DISABLE_WEBGL.equals(key)) {
 
             boolean value = sharedPreferences.getBoolean(key, false);

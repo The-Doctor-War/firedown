@@ -191,6 +191,8 @@
     <string name="settings_drm_enabled">DRM-weergave inschakelen</string>
     <string name="settings_drm_enabled_summary">Staat Widevine toe op sites die DRM vereisen (Netflix, Spotify, …). Firedown kan DRM-beveiligde inhoud nog steeds niet downloaden.</string>
     <string name="settings_webrtc_enabled">WebRTC inschakelen</string>
+    <string name="settings_webassembly_enabled">WebAssembly inschakelen</string>
+    <string name="settings_webassembly_enabled_summary">Staat sites toe om gecompileerde WASM-modules uit te voeren. Uitschakelen verkleint het aanvalsoppervlak, maar kan sommige moderne webapps onbruikbaar maken</string>
     <string name="prompt_update_confirmation">Bijwerken</string>
     <string name="protection_panel_etp_toggle_disabled_description_2">Inschakelen van Bescherming tegen volgen wordt aanbevolen.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Als iets op deze website niet werkt, probeer het dan uit te schakelen.</string>

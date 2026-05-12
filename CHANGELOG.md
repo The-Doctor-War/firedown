@@ -1,8 +1,10 @@
-# Changelog
+## [1.1.69] - 2026-05-12
 
-All notable changes to this project will be documented in this file.
+- Fix video playback transition
+- Added option to disable WebAssembly
+- Bump Gecko to version 150.0.20260511200624
 
-## Update## [1.1.68] - 2026-05-11
+## [1.1.68] - 2026-05-11
 
 - Added Pip mode in the video player
 - Added AMOLED Theme

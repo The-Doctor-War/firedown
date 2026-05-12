@@ -14,6 +14,7 @@ import com.solarized.firedown.data.repository.GeckoStateDataRepository;
 import com.solarized.firedown.data.repository.IncognitoStateRepository;
 import com.solarized.firedown.data.repository.SearchRepository;
 import com.solarized.firedown.data.repository.WebHistoryDataRepository;
+import com.solarized.firedown.geckoview.GeckoResources;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.utils.BrowserHeaders;
 
@@ -116,7 +117,12 @@ public class AutoCompleteSearch {
         for (GeckoStateEntity tab : tabs) {
             String uri = tab.getUri();
             String title = tab.getTitle();
-            if (tab.isActive() || tab.isHome()) continue;
+            // The home/start page tab is an internal about: URL — exposing it
+            // as a switch-to-tab match leaks the internal scheme and the entry
+            // is useless (the user already sees the start page when they open
+            // a new tab). isHome() isn't always set on restored sessions, so
+            // also match the URL directly as a backstop.
+            if (tab.isActive() || tab.isHome() || GeckoResources.isAboutOnboarding(uri)) continue;
 
             boolean matchesUri = !TextUtils.isEmpty(uri) && uri.toLowerCase().contains(lowerInput);
             boolean matchesTitle = !TextUtils.isEmpty(title) && title.toLowerCase().contains(lowerInput);

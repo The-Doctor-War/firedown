@@ -246,21 +246,22 @@ public class TabsHolderFragment extends BaseFocusFragment {
         mViewPager.setCurrentItem(initialPage, false);
         updateToggle(initialPage);
 
-        // Belt-and-suspenders for the postponed enter transition. The visible
-        // child will normally release it as soon as its RecyclerView is
-        // positioned, but if the tab list is empty, the page never becomes
-        // visible, or the child errors out, we must still render the holder.
-        //
-        // Captured TabsScrollDbg logs put the LM's setInitialPosition
-        // convergence at ~330 ms after TabsFragment.onCreateView, which is
-        // ~400 ms after this holder is laid out. Any fallback shorter than
-        // that ends up firing *before* convergence — bypassing the
-        // visibility check (caller=null) and releasing the postpone while
-        // the visible page is still showing firstVis=0, producing the
-        // visible "scroll after open" the user reports. 1 s is comfortably
-        // past observed convergence and short enough that genuinely-stuck
-        // cases (no insets ever dispatched, etc) still render quickly.
-        view.postDelayed(() -> markChildReadyToShow(null), 1000);
+        // Postpone-release is fully driven by causal signals now:
+        //   • BaseTabsFragment's own 200 ms inset fallback ensures the
+        //     two-gate flow opens even when the system never dispatches
+        //     insets to the RV.
+        //   • TabsGridLayoutManager.setInitialPosition fires its onReached
+        //     callback when the row is actually first-visible *or* gives
+        //     up if the data set ever shrinks below the target.
+        //   • The empty / no-active-tab paths in runGatedInitialScroll
+        //     call releaseHolderPostpone() directly.
+        // So every BaseTabsFragment lifecycle reaches markChildReadyToShow
+        // without needing a timing-based safety net here. A wall-clock
+        // postDelayed is processor- and load-dependent — when it fires
+        // *before* convergence it bypasses the visibility check
+        // (caller=null) and releases the postpone while the visible page
+        // is still showing firstVis=0, which is exactly the "scroll after
+        // open" we were chasing. Drop it.
 
         return view;
     }

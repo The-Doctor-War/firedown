@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  Root uses AspectRatioConstraintLayout so item height is purely a
+  function of item width (3:4 → aspectRatio=0.75). A thumbnail load
+  inside the card calls requestLayout to re-evaluate its bounds; with a
+  plain wrap_content root + child dimension-ratio chain that re-evaluation
+  could nudge the measured item height and let GridLayoutManager re-anchor
+  the grid a few hundred ms after the page appeared — the "active tab
+  slides down" the user reports. Clamping the height at the root with
+  EXACTLY MeasureSpec stops that propagation.
+-->
+<com.solarized.firedown.ui.AspectRatioConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:aspectRatio="0.75">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/tab_item"
@@ -13,7 +24,7 @@
         android:layout_margin="4dp"
         android:clickable="true"
         android:focusable="true"
-        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -115,4 +126,4 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.solarized.firedown.ui.AspectRatioConstraintLayout>

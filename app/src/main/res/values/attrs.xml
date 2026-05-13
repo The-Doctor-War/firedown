@@ -26,4 +26,8 @@
         <attr name="expandableChildView" format="reference" />
         <attr name="expandableIcon" format="reference" />
     </declare-styleable>
+    <declare-styleable name="AspectRatioConstraintLayout">
+        <!-- width / height — e.g. 0.75 for 3:4 (taller than wide). -->
+        <attr name="aspectRatio" format="float" />
+    </declare-styleable>
 </resources>

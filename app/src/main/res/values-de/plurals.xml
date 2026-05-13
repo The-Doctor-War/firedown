@@ -21,4 +21,16 @@
         <item quantity="one">%d kürzlich geschlossener Tab</item>
         <item quantity="other">%d kürzlich geschlossene Tabs</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d Tab heute archiviert</item>
+        <item quantity="other">%d Tabs heute archiviert</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d Tab diese Woche archiviert</item>
+        <item quantity="other">%d Tabs diese Woche archiviert</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d Tab diesen Monat archiviert</item>
+        <item quantity="other">%d Tabs diesen Monat archiviert</item>
+    </plurals>
 </resources>

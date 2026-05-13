@@ -31,4 +31,22 @@
         <item quantity="many">%d niedawno zamkniętych kart</item>
         <item quantity="other">%d niedawno zamkniętych kart</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d karta zarchiwizowana dzisiaj</item>
+        <item quantity="few">%d karty zarchiwizowane dzisiaj</item>
+        <item quantity="many">%d kart zarchiwizowanych dzisiaj</item>
+        <item quantity="other">%d kart zarchiwizowanych dzisiaj</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d karta zarchiwizowana w tym tygodniu</item>
+        <item quantity="few">%d karty zarchiwizowane w tym tygodniu</item>
+        <item quantity="many">%d kart zarchiwizowanych w tym tygodniu</item>
+        <item quantity="other">%d kart zarchiwizowanych w tym tygodniu</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d karta zarchiwizowana w tym miesiącu</item>
+        <item quantity="few">%d karty zarchiwizowane w tym miesiącu</item>
+        <item quantity="many">%d kart zarchiwizowanych w tym miesiącu</item>
+        <item quantity="other">%d kart zarchiwizowanych w tym miesiącu</item>
+    </plurals>
 </resources>

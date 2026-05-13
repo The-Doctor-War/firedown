@@ -31,4 +31,22 @@
         <item quantity="many">%d недавно закрытых вкладок</item>
         <item quantity="other">%d недавно закрытых вкладок</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d вкладка архивирована сегодня</item>
+        <item quantity="few">%d вкладки архивированы сегодня</item>
+        <item quantity="many">%d вкладок архивировано сегодня</item>
+        <item quantity="other">%d вкладок архивировано сегодня</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d вкладка архивирована на этой неделе</item>
+        <item quantity="few">%d вкладки архивированы на этой неделе</item>
+        <item quantity="many">%d вкладок архивировано на этой неделе</item>
+        <item quantity="other">%d вкладок архивировано на этой неделе</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d вкладка архивирована в этом месяце</item>
+        <item quantity="few">%d вкладки архивированы в этом месяце</item>
+        <item quantity="many">%d вкладок архивировано в этом месяце</item>
+        <item quantity="other">%d вкладок архивировано в этом месяце</item>
+    </plurals>
 </resources>

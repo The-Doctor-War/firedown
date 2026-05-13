@@ -540,9 +540,13 @@ public class GeckoStateDataRepository {
 
         // Persist outside the critical section isn't needed here because
         // we're already on the disk executor thread during initialization
+        long nowMs = System.currentTimeMillis();
         for (GeckoState state : toArchive) {
             state.clearCachedThumb();
-            mArchivedRepository.addSync(state.getGeckoStateEntity());
+            // Stamp the actual archive time so the tabs page banner can
+            // count "X tabs archived in the last [user's interval]"
+            // regardless of when the auto-archive job actually ran.
+            mArchivedRepository.addSync(state.getGeckoStateEntity(), nowMs);
 
             File thumbsDir = new File(StoragePaths.getThumbsPath(mContext));
             File[] existing = thumbsDir.listFiles(f ->

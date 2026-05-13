@@ -28,6 +28,17 @@ public interface TabStateArchivedDao {
     LiveData<Integer> getCountLive();
 
     /**
+     * Live count of tabs archived at or after {@code sinceMs}. Powers the
+     * "X tabs archived in the last [interval]" banner — TabsFragment
+     * passes {@code now - interval} so the banner reflects only tabs
+     * archived inside the user's chosen window. Rows from before the
+     * v1 → v2 migration carry {@code archived_at = 0} and so never
+     * count, even when the user's window extends to epoch-zero.
+     */
+    @Query("SELECT COUNT(*) FROM tabstate WHERE archived_at >= :sinceMs AND archived_at > 0")
+    LiveData<Integer> getCountSinceLive(long sinceMs);
+
+    /**
      * PagingSource for Paging 3.
      * Uses file_date DESC to show the most recent tabs first.
      */

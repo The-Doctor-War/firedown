@@ -21,4 +21,16 @@
         <item quantity="one">%d scheda chiusa di recente</item>
         <item quantity="other">%d schede chiuse di recente</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d scheda archiviata oggi</item>
+        <item quantity="other">%d schede archiviate oggi</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d scheda archiviata questa settimana</item>
+        <item quantity="other">%d schede archiviate questa settimana</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d scheda archiviata questo mese</item>
+        <item quantity="other">%d schede archiviate questo mese</item>
+    </plurals>
 </resources>

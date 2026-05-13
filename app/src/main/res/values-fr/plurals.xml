@@ -20,4 +20,16 @@
         <item quantity="one">%d onglet récemment fermé</item>
         <item quantity="other">%d onglets récemment fermés</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d onglet archivé aujourd\'hui</item>
+        <item quantity="other">%d onglets archivés aujourd\'hui</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d onglet archivé cette semaine</item>
+        <item quantity="other">%d onglets archivés cette semaine</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d onglet archivé ce mois-ci</item>
+        <item quantity="other">%d onglets archivés ce mois-ci</item>
+    </plurals>
 </resources>

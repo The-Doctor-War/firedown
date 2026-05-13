@@ -21,4 +21,16 @@
         <item quantity="one">%d recent gesloten tabblad</item>
         <item quantity="other">%d recent gesloten tabbladen</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d tabblad vandaag gearchiveerd</item>
+        <item quantity="other">%d tabbladen vandaag gearchiveerd</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d tabblad deze week gearchiveerd</item>
+        <item quantity="other">%d tabbladen deze week gearchiveerd</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d tabblad deze maand gearchiveerd</item>
+        <item quantity="other">%d tabbladen deze maand gearchiveerd</item>
+    </plurals>
 </resources>

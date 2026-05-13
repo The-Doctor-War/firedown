@@ -19,4 +19,16 @@
         <item quantity="one">%d pestaña cerrada recientemente</item>
         <item quantity="other">%d pestañas cerradas recientemente</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d pestaña archivada hoy</item>
+        <item quantity="other">%d pestañas archivadas hoy</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d pestaña archivada esta semana</item>
+        <item quantity="other">%d pestañas archivadas esta semana</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d pestaña archivada este mes</item>
+        <item quantity="other">%d pestañas archivadas este mes</item>
+    </plurals>
 </resources>

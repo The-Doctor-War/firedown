@@ -19,4 +19,13 @@
         <plurals name="archive_banner_title">
         <item quantity="other">최근에 닫은 탭 %d개</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="other">오늘 보관된 탭 %d개</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="other">이번 주에 보관된 탭 %d개</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="other">이번 달에 보관된 탭 %d개</item>
+    </plurals>
 </resources>

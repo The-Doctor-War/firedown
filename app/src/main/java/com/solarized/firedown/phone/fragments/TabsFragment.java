@@ -164,19 +164,28 @@ public class TabsFragment extends BaseTabsFragment {
 
         Log.d(TAG, "onViewCreated");
 
-        // Archive banner observer — count-driven. Show whenever the
-        // current archived-tab count exceeds the user's last "I saw
-        // this" snapshot; hide once they catch up to it.
-        mGeckoStateViewModel.getArchivedTabCount().observe(getViewLifecycleOwner(), count -> {
-            int current = count != null ? count : 0;
-            int dismissedAt = mSharedPreferences.getInt(
-                    Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
-            if (current > dismissedAt) {
-                mBannerAdapter.show(current);
-            } else {
-                mBannerAdapter.dismiss();
-            }
-        });
+        // Archive banner observer — windowed by the user's auto-archive
+        // interval (day / week / month). The banner shows the count of
+        // tabs archived within that window so it stays small and
+        // actionable, instead of growing forever with the all-time
+        // archive count.
+        long intervalMs = mSharedPreferences.getLong(
+                Preferences.SETTINGS_TABS_ARCHIVE_INTERVAL,
+                Preferences.ONE_WEEK_INTERVAL);
+        long sinceMs = System.currentTimeMillis() - intervalMs;
+        final int titlePluralsRes = bannerTitlePluralsFor(intervalMs);
+
+        mGeckoStateViewModel.getArchivedTabCountSince(sinceMs)
+                .observe(getViewLifecycleOwner(), count -> {
+                    int current = count != null ? count : 0;
+                    int dismissedAt = mSharedPreferences.getInt(
+                            Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
+                    if (current > dismissedAt) {
+                        mBannerAdapter.show(current, titlePluralsRes);
+                    } else {
+                        mBannerAdapter.dismiss();
+                    }
+                });
 
         // Debounced auto-archive trigger
         boolean autoArchiveEnabled = mSharedPreferences.getBoolean(
@@ -210,6 +219,22 @@ public class TabsFragment extends BaseTabsFragment {
         mSharedPreferences.edit()
                 .putInt(Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, current)
                 .apply();
+    }
+
+    /**
+     * Maps the user's auto-archive interval to the matching plurals
+     * resource for the banner title. Falls through to "this week" for
+     * any unusual / custom interval value so translators only have to
+     * cover the three canonical periods.
+     */
+    private static int bannerTitlePluralsFor(long intervalMs) {
+        if (intervalMs <= Preferences.ONE_DAY_INTERVAL) {
+            return R.plurals.archive_banner_title_day;
+        }
+        if (intervalMs >= Preferences.THIRTY_DAYS_INTERVAL) {
+            return R.plurals.archive_banner_title_month;
+        }
+        return R.plurals.archive_banner_title_week;
     }
 
     // ── Snackbar helper ─────────────────────────────────────────────

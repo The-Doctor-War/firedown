@@ -48,10 +48,31 @@ public class TabStateArchivedRepository {
     }
 
     /**
+     * Live count of tabs archived since {@code sinceMs}. Used to drive the
+     * "X tabs archived in the last [interval]" banner — TabsFragment
+     * computes sinceMs as {@code now - interval} where interval is the
+     * user's auto-archive setting.
+     */
+    public LiveData<Integer> getArchivedSinceCountLive(long sinceMs) {
+        return mTabStateDao.getCountSinceLive(sinceMs);
+    }
+
+    /**
      * Maps a GeckoStateEntity to an Archive entity and saves it synchronously.
      * Useful for calls within background Tasks or Workers.
      */
     public void addSync(GeckoStateEntity geckoStateEntity) {
+        addSync(geckoStateEntity, System.currentTimeMillis());
+    }
+
+    /**
+     * Maps a GeckoStateEntity to an Archive entity and saves it
+     * synchronously, stamping the archive time as {@code archivedAtMs}.
+     * Callers archiving multiple tabs in a batch should pass the same
+     * timestamp so they all show up in the banner's recent-window
+     * count together.
+     */
+    public void addSync(GeckoStateEntity geckoStateEntity, long archivedAtMs) {
         if (shouldSkip(geckoStateEntity)) {
             return;
         }
@@ -62,6 +83,7 @@ public class TabStateArchivedRepository {
         }
 
         TabStateArchivedEntity archivedEntity = mapToArchivedEntity(geckoStateEntity);
+        archivedEntity.setArchivedAt(archivedAtMs);
         mTabStateDao.insertSync(archivedEntity);
     }
 

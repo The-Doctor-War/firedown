@@ -23,6 +23,18 @@
         <item quantity="one">%d recently closed tab</item>
         <item quantity="other">%d recently closed tabs</item>
     </plurals>
+    <plurals name="archive_banner_title_day">
+        <item quantity="one">%d tab archived today</item>
+        <item quantity="other">%d tabs archived today</item>
+    </plurals>
+    <plurals name="archive_banner_title_week">
+        <item quantity="one">%d tab archived this week</item>
+        <item quantity="other">%d tabs archived this week</item>
+    </plurals>
+    <plurals name="archive_banner_title_month">
+        <item quantity="one">%d tab archived this month</item>
+        <item quantity="other">%d tabs archived this month</item>
+    </plurals>
     <plurals name="incognito_notification_title">
         <item quantity="one">%d private tab open</item>
         <item quantity="other">%d private tabs open</item>

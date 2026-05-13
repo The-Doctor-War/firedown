@@ -224,6 +224,15 @@ public class GeckoStateViewModel extends ViewModel {
     }
 
     /**
+     * Live count of tabs archived at or after {@code sinceMs}. Drives the
+     * "X tabs archived in the last [interval]" banner — TabsFragment
+     * passes {@code now - autoArchiveInterval}.
+     */
+    public LiveData<Integer> getArchivedTabCountSince(long sinceMs) {
+        return mArchivedRepository.getArchivedSinceCountLive(sinceMs);
+    }
+
+    /**
      * Archives tabs inactive for longer than {@code maxInactiveMillis}.
      * Runs on the disk I/O executor so it never blocks the main thread.
      * Banner visibility is now driven by the live archived-tab count

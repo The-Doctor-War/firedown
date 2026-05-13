@@ -32,6 +32,20 @@ public class TabStateArchivedEntity implements TabStateArchived, Parcelable {
     @ColumnInfo(name = "file_date")
     public long mCreationDate;
 
+    /**
+     * Wall-clock time (ms since epoch) at which this tab was actually moved
+     * to the archive. Distinct from {@link #mCreationDate}, which carries
+     * the tab's lastUsed timestamp. Drives the "X tabs archived in the
+     * last [interval]" banner — counting on this column gives an exact
+     * answer regardless of when the auto-archive job actually ran.
+     *
+     * <p>Defaults to 0 for rows that pre-date this column (v1 → v2
+     * migration). The banner query ignores zero values, so legacy rows
+     * never show up in the windowed count.</p>
+     */
+    @ColumnInfo(name = "archived_at", defaultValue = "0")
+    public long mArchivedAt;
+
 
     protected TabStateArchivedEntity(Parcel in) {
         uid = in.readInt();
@@ -40,6 +54,7 @@ public class TabStateArchivedEntity implements TabStateArchived, Parcelable {
         mIcon = in.readString();
         mSessionState = in.readString();
         mCreationDate = in.readLong();
+        mArchivedAt = in.readLong();
     }
 
     public static final Creator<TabStateArchivedEntity> CREATOR = new Creator<TabStateArchivedEntity>() {
@@ -77,6 +92,14 @@ public class TabStateArchivedEntity implements TabStateArchived, Parcelable {
 
     public void setCreationDate(long mCreationDate) {
         this.mCreationDate = mCreationDate;
+    }
+
+    public void setArchivedAt(long archivedAt) {
+        this.mArchivedAt = archivedAt;
+    }
+
+    public long getArchivedAt() {
+        return mArchivedAt;
     }
 
     @Override
@@ -128,6 +151,7 @@ public class TabStateArchivedEntity implements TabStateArchived, Parcelable {
         this.mIcon = tabStateEntity.getIcon();
         this.mCreationDate = tabStateEntity.getCreationDate();
         this.mSessionState = tabStateEntity.getSessionState();
+        this.mArchivedAt = tabStateEntity.getArchivedAt();
     }
 
     public TabStateArchivedEntity(){
@@ -147,6 +171,7 @@ public class TabStateArchivedEntity implements TabStateArchived, Parcelable {
         dest.writeString(mIcon);
         dest.writeLong(mCreationDate);
         dest.writeString(mSessionState);
+        dest.writeLong(mArchivedAt);
     }
 
 }

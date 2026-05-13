@@ -8,16 +8,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import androidx.annotation.PluralsRes;
+
 import com.solarized.firedown.R;
 
 /**
- * A single-item adapter that shows an "X tabs archived" banner
- * at the top of the tabs RecyclerView via ConcatAdapter.
+ * A single-item adapter that shows an "X tabs archived in the last
+ * [interval]" banner at the top of the tabs RecyclerView via
+ * ConcatAdapter. The interval is whatever the user picked for
+ * auto-archive (day / week / month); the caller passes the matching
+ * plurals resource id so the banner can render natural per-locale
+ * copy ("archived today" / "this week" / "this month").
  *
- * <p>Call {@link #show(int)} to display the banner with a count,
- * and {@link #dismiss()} to hide it.  The adapter reports 0 or 1
- * items, so the RecyclerView handles insertion/removal animations
- * automatically.</p>
+ * <p>Call {@link #show(int, int)} to display the banner with a count
+ * and the period's title plurals id; {@link #dismiss()} to hide it.</p>
  */
 public class ArchiveBannerAdapter extends RecyclerView.Adapter<ArchiveBannerAdapter.BannerViewHolder> {
 
@@ -27,6 +31,7 @@ public class ArchiveBannerAdapter extends RecyclerView.Adapter<ArchiveBannerAdap
     }
 
     private int mArchivedCount = 0;
+    @PluralsRes private int mTitleResId = R.plurals.archive_banner_title;
     private boolean mVisible = false;
     private final OnBannerActionListener mListener;
 
@@ -36,11 +41,15 @@ public class ArchiveBannerAdapter extends RecyclerView.Adapter<ArchiveBannerAdap
         setHasStableIds(true);
     }
 
-    /** Show the banner with the given archived tab count. */
-    public void show(int count) {
+    /**
+     * Show the banner with {@code count} archived tabs and a per-period
+     * plurals resource (e.g. {@link R.plurals#archive_banner_title_week}).
+     */
+    public void show(int count, @PluralsRes int titleResId) {
         if (count <= 0) return;
         boolean wasVisible = mVisible;
         mArchivedCount = count;
+        mTitleResId = titleResId;
         mVisible = true;
         if (wasVisible) {
             notifyItemChanged(0);
@@ -77,7 +86,7 @@ public class ArchiveBannerAdapter extends RecyclerView.Adapter<ArchiveBannerAdap
 
     @Override
     public void onBindViewHolder(@NonNull BannerViewHolder holder, int position) {
-        holder.bind(mArchivedCount, mListener);
+        holder.bind(mArchivedCount, mTitleResId, mListener);
     }
 
     public static class BannerViewHolder extends RecyclerView.ViewHolder {
@@ -93,9 +102,8 @@ public class ArchiveBannerAdapter extends RecyclerView.Adapter<ArchiveBannerAdap
             mDismiss = itemView.findViewById(R.id.archive_banner_dismiss);
         }
 
-        void bind(int count, OnBannerActionListener listener) {
-            String title = itemView.getResources().getQuantityString(
-                    R.plurals.archive_banner_title, count, count);
+        void bind(int count, @PluralsRes int titleResId, OnBannerActionListener listener) {
+            String title = itemView.getResources().getQuantityString(titleResId, count, count);
             mTitle.setText(title);
             mSubtitle.setText(R.string.archive_banner_subtitle);
 

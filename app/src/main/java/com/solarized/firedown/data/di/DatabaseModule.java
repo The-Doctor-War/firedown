@@ -80,6 +80,7 @@ public class DatabaseModule {
                         TabStateArchivedDatabase.DATABASE_NAME
                 )
                 .setJournalMode(RoomDatabase.JournalMode.AUTOMATIC)
+                .addMigrations(TabStateArchivedDatabase.MIGRATION_1_2)
                 .fallbackToDestructiveMigration(false)
                 .build();
     }

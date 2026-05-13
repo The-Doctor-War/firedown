@@ -137,6 +137,15 @@ public class TabsHolderFragment extends BaseFocusFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Hold the enter transition until the visible child tabs page has
+        // scrolled to the active tab. Without this, RecyclerView paints
+        // position 0 first and then jumps to the active row, which the
+        // user perceives as a visible scroll. The visible child calls
+        // markChildReadyToShow() once it has placed itself; a fallback
+        // posted on the next frame releases the postpone if the child
+        // never reports back (empty list, error path, etc).
+        postponeEnterTransition();
+
         mEnabledGrid = mSharedPreferences.getBoolean(Preferences.SORT_TABS_LIST, false);
 
         mGeckoStateViewModel = new ViewModelProvider(mActivity).get(GeckoStateViewModel.class);
@@ -236,6 +245,12 @@ public class TabsHolderFragment extends BaseFocusFragment {
 
         mViewPager.setCurrentItem(initialPage, false);
         updateToggle(initialPage);
+
+        // Belt-and-suspenders for the postponed enter transition. The visible
+        // child will normally release it as soon as its RecyclerView is
+        // positioned, but if the tab list is empty, the page never becomes
+        // visible, or the child errors out, we must still render the holder.
+        view.postDelayed(this::markChildReadyToShow, 300);
 
         return view;
     }
@@ -428,6 +443,20 @@ public class TabsHolderFragment extends BaseFocusFragment {
      */
     void refreshAppBarLiftFor(@NonNull RecyclerView rv) {
         if (rv == mLiftTarget) updateScrimFor(rv);
+    }
+
+    /**
+     * Released by the visible child tabs fragment once its RecyclerView has
+     * been positioned at the active tab. Calling startPostponedEnterTransition
+     * more than once is a no-op, so it is safe for both children (regular and
+     * incognito) to invoke this — only the first call has effect.
+     */
+    private boolean mEnterTransitionStarted = false;
+    void markChildReadyToShow() {
+        if (mEnterTransitionStarted) return;
+        if (!isAdded()) return;
+        mEnterTransitionStarted = true;
+        startPostponedEnterTransition();
     }
 
     /** Kept for API compatibility with child fragment callsites. No-ops. */

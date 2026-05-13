@@ -339,5 +339,6 @@
     <string name="vault_decrypting">Decifratura file, attendere…</string>
     <string name="vault_encrypting">Crittografia file, attendere…</string>
     <string name="vault_unsupported">Impossibile aprire questo file. Per aprirlo, spostalo fuori dalla Cartella di sicurezza e riprova.</string>
-    <string name="bookmark_name">Nome</string>
+    <string name="bookmark_name">Nome</string>    <string name="pip_enter">Picture in picture</string>
+
 </resources>

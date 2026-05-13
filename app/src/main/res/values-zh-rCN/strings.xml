@@ -494,5 +494,6 @@
     <string name="vault_decrypting">正在解密文件，请稍候…</string>
     <string name="vault_encrypting">正在加密文件，请稍候…</string>
     <string name="vault_unsupported">无法打开该文件。如要打开，请将其移出安全文件夹，然后重试。</string>
-    <string name="bookmark_name">名称</string>
+    <string name="bookmark_name">名称</string>    <string name="pip_enter">画中画</string>
+
 </resources>

@@ -277,5 +277,6 @@
     <string name="settings_disk_cache_disabled">Desativar cache em disco</string>
     <string name="settings_disk_cache_disabled_summary">Apenas em memória. Impede o fingerprinting de cache entre sites e não deixa nada em disco, mas torna as visitas repetidas mais lentas</string>
     <string name="settings_safe_browsing_disabled">Desativar Navegação Segura</string>
-    <string name="settings_safe_browsing_disabled_summary">Deixa de enviar prefixos de hash de URL para o Google. Perde os avisos para sites de malware e phishing conhecidos</string>
+    <string name="settings_safe_browsing_disabled_summary">Deixa de enviar prefixos de hash de URL para o Google. Perde os avisos para sites de malware e phishing conhecidos</string>    <string name="pip_enter">Imagem na imagem</string>
+
 </resources>

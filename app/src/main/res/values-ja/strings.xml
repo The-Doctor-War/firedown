@@ -494,5 +494,6 @@
     <string name="vault_decrypting">ファイルを復号化しています。お待ちください…</string>
     <string name="vault_encrypting">ファイルを暗号化しています。お待ちください…</string>
     <string name="vault_unsupported">このファイルを開けません。開くには、セーフフォルダの外に移動して、もう一度試してください。</string>
-    <string name="bookmark_name">名前</string>
+    <string name="bookmark_name">名前</string>    <string name="pip_enter">ピクチャー・イン・ピクチャー</string>
+
 </resources>

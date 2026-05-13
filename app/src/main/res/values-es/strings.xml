@@ -495,5 +495,6 @@
     <string name="vault_decrypting">Descifrando archivo, espere…</string>
     <string name="vault_encrypting">Cifrando archivo, espera…</string>
     <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sáCalo de la Carpeta segura y vuelve a intentarlo.</string>
-    <string name="bookmark_name">Nombre</string>
+    <string name="bookmark_name">Nombre</string>    <string name="pip_enter">Imagen sobre imagen</string>
+
 </resources>

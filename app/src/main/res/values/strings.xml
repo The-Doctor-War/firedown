@@ -501,6 +501,7 @@
     <string name="bookmark_name">Name</string>
     <string name="pip_play">Play</string>
     <string name="pip_pause">Pause</string>
+    <string name="pip_enter">Picture in picture</string>
     <string name="previous">Previous</string>
     <string name="next">Next</string>
     <string name="play">Play</string>

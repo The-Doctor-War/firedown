@@ -358,5 +358,6 @@
     <string name="settings_disk_cache_disabled">Disk önbelleğini devre dışı bırak</string>
     <string name="settings_disk_cache_disabled_summary">Sayfaları yalnızca bellekte önbellekler. Siteler arası önbellek parmak izini engeller ve diskte hiçbir şey bırakmaz, ancak tekrarlanan ziyaretleri yavaşlatır</string>
     <string name="settings_safe_browsing_disabled">Güvenli Tarama\'yı devre dışı bırak</string>
-    <string name="settings_safe_browsing_disabled_summary">URL karma öneklerini Google\'a göndermeyi durdurur. Bilinen kötü amaçlı yazılım ve kimlik avı siteleri için uyarıları kaybedersiniz</string>
+    <string name="settings_safe_browsing_disabled_summary">URL karma öneklerini Google\'a göndermeyi durdurur. Bilinen kötü amaçlı yazılım ve kimlik avı siteleri için uyarıları kaybedersiniz</string>    <string name="pip_enter">Resim içinde resim</string>
+
 </resources>

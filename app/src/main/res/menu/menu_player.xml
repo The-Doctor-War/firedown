@@ -5,6 +5,13 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
     <item
+        android:id="@+id/action_pip"
+        android:title="@string/pip_enter"
+        android:icon="@drawable/ic_media_pip_white_24"
+        android:visible="false"
+        app:iconTint="?attr/colorControlNormal"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/action_share"
         android:title="@string/share"
         android:icon="@drawable/ic_share_24"

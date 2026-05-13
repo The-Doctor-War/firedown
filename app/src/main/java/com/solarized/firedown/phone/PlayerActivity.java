@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.Icon;
@@ -191,6 +192,27 @@ public class PlayerActivity extends AppCompatActivity {
         if(mDownloadEntity != null && !mDownloadEntity.isFileEncrypted())
             getMenuInflater().inflate(R.menu.menu_player, menu);
         return true;
+    }
+
+    /**
+     * PiP toolbar item is visible only when:
+     *   • the device supports PiP (system feature), AND
+     *   • the current fragment is the video viewer (image viewer
+     *     has nothing to PiP).
+     * Visibility refreshes via invalidateOptionsMenu() on entity
+     * replace and on the video-ready event from MediaViewerFragment.
+     */
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        MenuItem pipItem = menu.findItem(R.id.action_pip);
+        if (pipItem != null) {
+            boolean pipSupported = getPackageManager()
+                    .hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE);
+            MediaViewerFragment fragment = getMediaFragment();
+            boolean isVideo = fragment != null && fragment.isVideoMime();
+            pipItem.setVisible(pipSupported && isVideo);
+        }
+        return super.onPrepareOptionsMenu(menu);
     }
 
     @NonNull
@@ -408,6 +430,9 @@ public class PlayerActivity extends AppCompatActivity {
 
         if (id == android.R.id.home) {
             finish();
+        }else if (id == R.id.action_pip) {
+            enterPipMode();
+            return true;
         }else if(id == R.id.action_share) {//add the function to perform here
             String mimeType = mDownloadEntity.getFileMimeType();
             String filePath = mDownloadEntity.getFilePath();

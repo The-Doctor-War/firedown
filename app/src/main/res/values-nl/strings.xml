@@ -358,5 +358,6 @@
     <string name="settings_disk_cache_disabled">Schijfcache uitschakelen</string>
     <string name="settings_disk_cache_disabled_summary">Pagina\'s alleen in geheugen cachen. Verijdelt cross-site cachefingerprinting en laat niets achter op schijf, maar vertraagt herhaalde bezoeken</string>
     <string name="settings_safe_browsing_disabled">Veilig browsen uitschakelen</string>
-    <string name="settings_safe_browsing_disabled_summary">Stop met het verzenden van URL-hashvoorvoegsels naar Google. Waarschuwingen voor bekende malware- en phishingsites gaan verloren</string>
+    <string name="settings_safe_browsing_disabled_summary">Stop met het verzenden van URL-hashvoorvoegsels naar Google. Waarschuwingen voor bekende malware- en phishingsites gaan verloren</string>    <string name="pip_enter">Beeld in beeld</string>
+
 </resources>

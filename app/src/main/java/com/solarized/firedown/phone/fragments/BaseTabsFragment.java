@@ -72,6 +72,19 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      *  on subsequent diffs (title changes, thumbs, etc). */
     private boolean mInitialScrollPending = true;
 
+    /** Data-space position of the most recently observed active tab. -1 when
+     *  no active tab is known. Used by {@link #realignActiveTabAfterLeadingChange()}
+     *  to re-pin the row after an out-of-band leading-adapter insertion
+     *  (e.g. the archive banner appearing on its own LiveData). */
+    private int mLastActiveDataPosition = -1;
+
+    /** Wall-clock timestamp of the last programmatic scroll-to-active. Used
+     *  as a "we still own the scroll" window so that an asynchronous header
+     *  change (banner show/dismiss) within ~1.5s of the initial scroll
+     *  re-aligns the active tab, but a banner dismiss long after the user
+     *  has manually scrolled the list does not yank them around. */
+    private long mLastAutoScrollUptime = 0L;
+
     @Inject
     GeckoRuntimeHelper mGeckoRuntimeHelper;
 
@@ -188,6 +201,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
 
         if (activeId != -1) {
             mLastTabActive = activeId;
+            mLastActiveDataPosition = activePosition;
         }
 
         if (activeChanged
@@ -219,6 +233,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             // a GridLayoutManager can leave the target half-clipped at the
             // viewport edge.
             glm.scrollToPositionWithOffset(scrollTarget, 0);
+            mLastAutoScrollUptime = android.os.SystemClock.uptimeMillis();
 
             // scrollToPositionWithOffset doesn't fire onScrolled, so the
             // holder's scroll listener won't see this move. Nudge the holder
@@ -253,6 +268,37 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         if (parent instanceof TabsHolderFragment holder) {
             holder.markChildReadyToShow();
         }
+    }
+
+    /**
+     * Re-pins the active tab to its scroll offset after the count of leading
+     * adapter rows changed (banner appeared / dismissed) on a *different*
+     * LiveData than the tab list.
+     *
+     * <p>Without this, the initial scroll places the active tab correctly,
+     * then a banner inserted at position 0 a few frames later pushes the
+     * active row down by one row, partially clipping it at the viewport
+     * bottom. Re-running the same scrollToPositionWithOffset call —
+     * recalculated against the new {@link #getLeadingAdapterCount()} — keeps
+     * the active row pinned where the user first saw it.</p>
+     *
+     * <p>Guarded by a short freshness window so the call is a no-op once
+     * the user has had time to take over the scroll position themselves.</p>
+     */
+    protected void realignActiveTabAfterLeadingChange() {
+        if (mRecyclerView == null) return;
+        if (mLastActiveDataPosition < 0) return;
+        if (mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE) return;
+        if (!(mRecyclerView.getLayoutManager() instanceof GridLayoutManager glm)) return;
+        // Only realign while our auto-scroll is still "fresh". Past this
+        // window we assume the user owns the scroll position.
+        if (android.os.SystemClock.uptimeMillis() - mLastAutoScrollUptime > 1500L) return;
+
+        final int spanCount = glm.getSpanCount();
+        final int adapterTarget = mLastActiveDataPosition + getLeadingAdapterCount();
+        final int scrollTarget = Math.max(0, adapterTarget - spanCount);
+        glm.scrollToPositionWithOffset(scrollTarget, 0);
+        mLastAutoScrollUptime = android.os.SystemClock.uptimeMillis();
     }
 
 

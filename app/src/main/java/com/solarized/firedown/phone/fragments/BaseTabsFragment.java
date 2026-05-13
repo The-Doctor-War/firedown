@@ -358,7 +358,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                 Fragment parent = getParentFragment();
                 if (parent instanceof TabsHolderFragment holder) {
                     holder.refreshAppBarLiftFor(target);
-                    holder.markChildReadyToShow();
+                    holder.markChildReadyToShow(this);
                 }
             });
         } else {
@@ -375,7 +375,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private void releaseHolderPostpone() {
         Fragment parent = getParentFragment();
         if (parent instanceof TabsHolderFragment holder) {
-            holder.markChildReadyToShow();
+            holder.markChildReadyToShow(this);
         }
     }
 

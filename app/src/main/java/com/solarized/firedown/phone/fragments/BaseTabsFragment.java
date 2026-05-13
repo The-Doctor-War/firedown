@@ -249,6 +249,23 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                     holder.markChildReadyToShow();
                 }
             });
+
+            // Defensive realignment within the freshness window: several
+            // asynchronous reflow sources land *after* this initial scroll
+            // and would otherwise push the active tab around — the system
+            // dispatching window insets (changing RecyclerView bottom
+            // padding via BaseFocusFragment's listener), the AppBar /
+            // toolbar settling under inset application, the archive
+            // banner appearing on its own LiveData, etc. Each is hard to
+            // hook causally from a base class, but they all complete
+            // within a few hundred ms of view creation. realignActive...()
+            // is idempotent — when the active row is already pinned to
+            // the right offset the second call is a no-op visually — and
+            // self-guards via its 1.5 s freshness window and user-touch
+            // check, so two staggered posts cover the practical window
+            // without yanking a user who starts scrolling early.
+            target.postDelayed(this::realignActiveTabAfterLeadingChange, 50L);
+            target.postDelayed(this::realignActiveTabAfterLeadingChange, 350L);
         } else if (mInitialScrollPending) {
             // No scroll was needed on the first submission (active tab is
             // already in view, or no active tab) — still release the holder

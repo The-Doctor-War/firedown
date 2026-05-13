@@ -176,12 +176,10 @@ public class TabsFragment extends BaseTabsFragment {
             } else {
                 mBannerAdapter.dismiss();
             }
-            // Banner show/dismiss changes getLeadingAdapterCount() and so
-            // shifts every tab row by one. The archive count LiveData
-            // typically fires *after* the initial tab-list submission, so
-            // an unfixed banner appearance pushes the just-placed active
-            // tab down (sometimes off the viewport bottom). Re-pin it.
-            realignActiveTabAfterLeadingChange();
+            // Banner show/dismiss shifts every tab row by one. When this
+            // happens shortly after page open the staggered post-initial-
+            // scroll realignment in BaseTabsFragment re-pins the active
+            // tab on its own; we no longer need a banner-specific call.
         });
 
         // Debounced auto-archive trigger

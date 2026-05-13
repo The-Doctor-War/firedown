@@ -250,7 +250,7 @@ public class TabsHolderFragment extends BaseFocusFragment {
         // child will normally release it as soon as its RecyclerView is
         // positioned, but if the tab list is empty, the page never becomes
         // visible, or the child errors out, we must still render the holder.
-        view.postDelayed(this::markChildReadyToShow, 300);
+        view.postDelayed(() -> markChildReadyToShow(null), 300);
 
         return view;
     }
@@ -447,17 +447,39 @@ public class TabsHolderFragment extends BaseFocusFragment {
 
     /**
      * Released by the visible child tabs fragment once its RecyclerView has
-     * been positioned at the active tab. Calling startPostponedEnterTransition
-     * more than once is a no-op, so it is safe for both children (regular and
-     * incognito) to invoke this — only the first call has effect.
+     * been positioned at the active tab. Only the call from the
+     * currently-visible ViewPager2 page is honored — the off-screen
+     * sibling reaches its "ready" state immediately (its tab list is
+     * empty / shrunk to size 0) and would otherwise unblock the
+     * postpone while the visible page is still scrolling its
+     * RecyclerView to the active row, producing the visible scroll
+     * the user reports.
+     *
+     * <p>{@code caller == null} bypasses the visibility check — used by
+     * the {@code onCreateView} timeout fallback so the page still
+     * renders if no child ever reports.</p>
      */
     private boolean mEnterTransitionStarted = false;
-    void markChildReadyToShow() {
+    void markChildReadyToShow(@Nullable Fragment caller) {
         if (mEnterTransitionStarted) return;
         if (!isAdded()) return;
+        if (caller != null && mViewPager != null) {
+            int currentPage = mViewPager.getCurrentItem();
+            boolean isVisible =
+                    (currentPage == PAGE_REGULAR && caller instanceof TabsFragment)
+                            || (currentPage == PAGE_INCOGNITO && caller instanceof TabsIncognitoFragment);
+            if (!isVisible) {
+                android.util.Log.d("TabsScrollDbg",
+                        "[TabsHolderFragment] markChildReadyToShow ignored: caller="
+                                + caller.getClass().getSimpleName()
+                                + " currentPage=" + currentPage);
+                return;
+            }
+        }
         mEnterTransitionStarted = true;
         android.util.Log.d("TabsScrollDbg",
-                "+? [TabsHolderFragment] markChildReadyToShow -> startPostponedEnterTransition()");
+                "+? [TabsHolderFragment] markChildReadyToShow -> startPostponedEnterTransition() caller="
+                        + (caller == null ? "fallback" : caller.getClass().getSimpleName()));
         startPostponedEnterTransition();
     }
 

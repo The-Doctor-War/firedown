@@ -266,14 +266,13 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             // read as "flush to the top". For lists spanCount is 1.
             final int scrollTarget = Math.max(0, adapterTarget - spanCount);
             final RecyclerView target = mRecyclerView;
-            // Sticky initial-position request: the LM re-issues the scroll
-            // on each onLayoutCompleted until either findFirstVisibleItem
-            // == scrollTarget OR the active row sits inside the visible
-            // range (handles the "active is near the end so the LM
-            // clamps short of scrollTarget" case — without the
-            // visibleAnchor escape the LM would spin forever and the
-            // postpone would never release).
-            mGridLayoutManager.setInitialPosition(scrollTarget, adapterTarget, () -> {
+            // One-shot initial-position request: the LM queues the
+            // scroll and fires the callback on the very next
+            // non-pre-layout pass. With predictive animations off
+            // there's only ever one layout per scroll request, so
+            // whatever the LM produces is the final placement — we
+            // trust it, release the postpone, and don't loop.
+            mGridLayoutManager.setInitialPosition(scrollTarget, () -> {
                 if (target != mRecyclerView) return;
                 Fragment parent = getParentFragment();
                 if (parent instanceof TabsHolderFragment holder) {

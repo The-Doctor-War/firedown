@@ -13,7 +13,6 @@ import android.view.ViewTreeObserver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.graphics.Insets;
-import androidx.core.view.OneShotPreDrawListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
@@ -62,7 +61,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     protected IncognitoStateViewModel mIncognitoStateViewModel;
     protected BrowserURIViewModel mBrowserURIViewModel;
     protected BrowserTabsAdapter mBrowserTabsAdapter;
-    protected GridLayoutManager mGridLayoutManager;
+    protected TabsGridLayoutManager mGridLayoutManager;
     protected boolean mEnableGrid;
 
     /** Tracks the most recently seen active tab id so onTabListSubmitted can
@@ -336,21 +335,26 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                 mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE;
 
         if (activeId != -1 && !userTouching && activePosition >= 0
-                && mRecyclerView.getLayoutManager() instanceof GridLayoutManager glm) {
-            int spanCount = glm.getSpanCount();
-            int adapterTarget = activePosition + getLeadingAdapterCount();
+                && mGridLayoutManager != null) {
+            final int spanCount = mGridLayoutManager.getSpanCount();
+            final int adapterTarget = activePosition + getLeadingAdapterCount();
             // Keep one row of context above the active tab so it doesn't
             // read as "flush to the top". For lists spanCount is 1.
-            int scrollTarget = Math.max(0, adapterTarget - spanCount);
-            dbg("INITIAL SCROLL scrollToPositionWithOffset(" + scrollTarget + ", 0)"
+            final int scrollTarget = Math.max(0, adapterTarget - spanCount);
+            dbg("INITIAL SCROLL setInitialPosition(" + scrollTarget + ")"
                     + " activePosition=" + activePosition + " activeId=" + activeId
                     + " spanCount=" + spanCount + " adapterTarget=" + adapterTarget);
-            glm.scrollToPositionWithOffset(scrollTarget, 0);
             mLastAutoScrollUptime = SystemClock.uptimeMillis();
 
             final RecyclerView target = mRecyclerView;
-            OneShotPreDrawListener.add(target, () -> {
+            // Sticky initial-position request: the LM re-issues the scroll
+            // on each onLayoutCompleted until findFirstVisibleItemPosition
+            // confirms the row is in view, then fires this callback. That's
+            // when we release the postponed holder transition — so the
+            // first frame the user actually sees is already at the target.
+            mGridLayoutManager.setInitialPosition(scrollTarget, () -> {
                 if (target != mRecyclerView) return;
+                dbg("initial position reached, releasing postpone");
                 Fragment parent = getParentFragment();
                 if (parent instanceof TabsHolderFragment holder) {
                     holder.refreshAppBarLiftFor(target);
@@ -490,7 +494,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
 
         mBrowserTabsAdapter = new BrowserTabsAdapter(mActivity, new GeckoStateDiffCallback(), this, mEnableGrid);
 
-        mGridLayoutManager = new GridLayoutManager(requireContext(), getSpanCount());
+        mGridLayoutManager = new TabsGridLayoutManager(requireContext(), getSpanCount());
 
         setupRecyclerView();
 

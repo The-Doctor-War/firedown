@@ -456,6 +456,8 @@ public class TabsHolderFragment extends BaseFocusFragment {
         if (mEnterTransitionStarted) return;
         if (!isAdded()) return;
         mEnterTransitionStarted = true;
+        android.util.Log.d("TabsScrollDbg",
+                "+? [TabsHolderFragment] markChildReadyToShow -> startPostponedEnterTransition()");
         startPostponedEnterTransition();
     }
 

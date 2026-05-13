@@ -3,10 +3,12 @@ package com.solarized.firedown.phone.fragments;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -105,6 +107,27 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private boolean mTabsArrived = false;
     private boolean mInsetsApplied = false;
     @Nullable private List<GeckoStateEntity> mPendingInitialTabs = null;
+
+    // ── Scroll-debug instrumentation ─────────────────────────────────
+    // Temporary instrumentation to root-cause a post-initial scroll
+    // shift the user reports after #125. Filter logcat with the DBG tag
+    // to see a timeline of every relevant event: gate signals, inset
+    // dispatch, adapter notifies, scrolls, layout/padding changes, and
+    // per-frame state sampling for the first 3 s after view creation.
+    private static final String DBG = "TabsScrollDbg";
+    private long mDbgT0 = 0L;
+    @Nullable private RecyclerView.AdapterDataObserver mDbgAdapterObserver;
+    @Nullable private RecyclerView.OnScrollListener mDbgScrollListener;
+    @Nullable private View.OnLayoutChangeListener mDbgLayoutListener;
+    @Nullable private ViewTreeObserver.OnPreDrawListener mDbgPreDrawListener;
+
+    /** Milliseconds since this view was created, for ordering logs. */
+    private long dbgT() { return SystemClock.uptimeMillis() - mDbgT0; }
+
+    /** Prepend the current side (regular/incognito) + elapsed ms to a log. */
+    private void dbg(String msg) {
+        Log.d(DBG, "+" + dbgT() + "ms [" + getClass().getSimpleName() + "] " + msg);
+    }
 
     @Inject
     GeckoRuntimeHelper mGeckoRuntimeHelper;
@@ -253,6 +276,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private void markInsetsApplied() {
         if (mInsetsApplied) return;
         mInsetsApplied = true;
+        dbg("markInsetsApplied -> insetsApplied=true tabsArrived=" + mTabsArrived);
         runGatedInitialScroll();
     }
 
@@ -263,9 +287,24 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      * user sees a single fully-positioned frame — no visible reflow.
      */
     private void runGatedInitialScroll() {
-        if (!mInitialScrollPending) return;
-        if (!mTabsArrived || !mInsetsApplied) return;
-        if (mRecyclerView == null) return;
+        if (!mInitialScrollPending) {
+            dbg("runGatedInitialScroll skipped: initialScrollPending=false");
+            return;
+        }
+        if (!mTabsArrived || !mInsetsApplied) {
+            dbg("runGatedInitialScroll waiting: tabsArrived=" + mTabsArrived
+                    + " insetsApplied=" + mInsetsApplied);
+            return;
+        }
+        if (mRecyclerView == null) {
+            dbg("runGatedInitialScroll skipped: mRecyclerView=null");
+            return;
+        }
+        dbg("runGatedInitialScroll BOTH gates open, RV size=" + mRecyclerView.getWidth() + "x"
+                + mRecyclerView.getHeight() + " paddingBottom=" + mRecyclerView.getPaddingBottom()
+                + " adapter.itemCount=" + (mRecyclerView.getAdapter() == null ? -1
+                        : mRecyclerView.getAdapter().getItemCount())
+                + " leadingAdapter=" + getLeadingAdapterCount());
 
         List<GeckoStateEntity> tabs = mPendingInitialTabs;
         mPendingInitialTabs = null;
@@ -303,11 +342,11 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             // Keep one row of context above the active tab so it doesn't
             // read as "flush to the top". For lists spanCount is 1.
             int scrollTarget = Math.max(0, adapterTarget - spanCount);
-            Log.d(TAG, "runGatedInitialScroll: scrollToPositionWithOffset("
-                    + scrollTarget + ", 0) dataPos=" + activePosition
-                    + " activeId=" + activeId);
+            dbg("INITIAL SCROLL scrollToPositionWithOffset(" + scrollTarget + ", 0)"
+                    + " activePosition=" + activePosition + " activeId=" + activeId
+                    + " spanCount=" + spanCount + " adapterTarget=" + adapterTarget);
             glm.scrollToPositionWithOffset(scrollTarget, 0);
-            mLastAutoScrollUptime = android.os.SystemClock.uptimeMillis();
+            mLastAutoScrollUptime = SystemClock.uptimeMillis();
 
             final RecyclerView target = mRecyclerView;
             OneShotPreDrawListener.add(target, () -> {
@@ -394,6 +433,34 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        // Detach debug instrumentation before nulling the RV ref so the
+        // listeners' weak handles to GridLayoutManager etc. don't outlive
+        // the view.
+        if (mRecyclerView != null) {
+            if (mDbgScrollListener != null) {
+                mRecyclerView.removeOnScrollListener(mDbgScrollListener);
+            }
+            if (mDbgLayoutListener != null) {
+                mRecyclerView.removeOnLayoutChangeListener(mDbgLayoutListener);
+            }
+            if (mDbgPreDrawListener != null
+                    && mRecyclerView.getViewTreeObserver().isAlive()) {
+                mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(mDbgPreDrawListener);
+            }
+            if (mDbgAdapterObserver != null && mRecyclerView.getAdapter() != null) {
+                try {
+                    mRecyclerView.getAdapter().unregisterAdapterDataObserver(mDbgAdapterObserver);
+                } catch (IllegalStateException ignored) {
+                    // Observer wasn't registered (e.g. adapter swapped); fine.
+                }
+            }
+        }
+        mDbgScrollListener = null;
+        mDbgLayoutListener = null;
+        mDbgPreDrawListener = null;
+        mDbgAdapterObserver = null;
+        dbg("onDestroyView");
+
         mLCEERecyclerView = null;
         mRecyclerView = null;
         mGridLayoutManager = null;
@@ -430,7 +497,122 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(mSwipeCallback);
         itemTouchHelper.attachToRecyclerView(mRecyclerView);
 
+        installDebugInstrumentation();
+
         return view;
+    }
+
+    /**
+     * Wires up scroll/layout/adapter/pre-draw observers that log everything
+     * relevant to the post-initial-scroll shift bug. Removed in
+     * onDestroyView; logs taper off after ~3 s.
+     */
+    private void installDebugInstrumentation() {
+        mDbgT0 = SystemClock.uptimeMillis();
+        dbg("onCreateView: RV initial size=" + mRecyclerView.getWidth() + "x"
+                + mRecyclerView.getHeight() + " paddingBottom="
+                + mRecyclerView.getPaddingBottom() + " spanCount=" + getSpanCount());
+
+        // Every scroll the RV experiences, programmatic or finger-driven.
+        mDbgScrollListener = new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                if (dy == 0 && dx == 0) return;
+                if (mGridLayoutManager == null) return;
+                dbg("onScrolled dy=" + dy + " dx=" + dx
+                        + " firstVis=" + mGridLayoutManager.findFirstVisibleItemPosition()
+                        + " lastVis=" + mGridLayoutManager.findLastVisibleItemPosition()
+                        + " state=" + rv.getScrollState());
+            }
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
+                dbg("onScrollStateChanged state=" + newState);
+            }
+        };
+        mRecyclerView.addOnScrollListener(mDbgScrollListener);
+
+        // Every adapter notification (insert/remove/change/move). Watch
+        // for an unexpected notifyDataSetChanged or item-range-changed
+        // that could reset scroll position.
+        mDbgAdapterObserver = new RecyclerView.AdapterDataObserver() {
+            @Override public void onChanged() {
+                dbg("adapter onChanged (whole-set)");
+            }
+            @Override public void onItemRangeChanged(int start, int count) {
+                dbg("adapter onItemRangeChanged start=" + start + " count=" + count);
+            }
+            @Override public void onItemRangeChanged(int start, int count, @Nullable Object payload) {
+                dbg("adapter onItemRangeChanged start=" + start + " count=" + count
+                        + " payload=" + payload);
+            }
+            @Override public void onItemRangeInserted(int start, int count) {
+                dbg("adapter onItemRangeInserted start=" + start + " count=" + count);
+            }
+            @Override public void onItemRangeRemoved(int start, int count) {
+                dbg("adapter onItemRangeRemoved start=" + start + " count=" + count);
+            }
+            @Override public void onItemRangeMoved(int from, int to, int count) {
+                dbg("adapter onItemRangeMoved from=" + from + " to=" + to + " count=" + count);
+            }
+        };
+        if (mRecyclerView.getAdapter() != null) {
+            mRecyclerView.getAdapter().registerAdapterDataObserver(mDbgAdapterObserver);
+        }
+
+        // RV bounds changes (size / position in parent). Padding changes
+        // don't fire this — they're caught by the pre-draw poll below.
+        mDbgLayoutListener = (v, l, t, r, b, ol, ot, or, ob) -> {
+            if (l == ol && t == ot && r == or && b == ob) return;
+            dbg("onLayoutChange bounds=(" + l + "," + t + "," + r + "," + b
+                    + ") was=(" + ol + "," + ot + "," + or + "," + ob + ")");
+        };
+        mRecyclerView.addOnLayoutChangeListener(mDbgLayoutListener);
+
+        // Per-frame state sampler — runs for 3 s, logs whenever something
+        // about the RV's visible state changes (firstVisible, padding,
+        // height, adapter count). Catches padding changes that don't
+        // fire onLayoutChange, and reveals any drift in firstVisible
+        // even when no scroll listener has fired.
+        mDbgPreDrawListener = new ViewTreeObserver.OnPreDrawListener() {
+            int lastFirstVisible = Integer.MIN_VALUE;
+            int lastLastVisible = Integer.MIN_VALUE;
+            int lastPaddingBottom = Integer.MIN_VALUE;
+            int lastHeight = Integer.MIN_VALUE;
+            int lastItemCount = Integer.MIN_VALUE;
+
+            @Override
+            public boolean onPreDraw() {
+                if (mRecyclerView == null) {
+                    return true;
+                }
+                long elapsed = dbgT();
+                if (elapsed > 3000) {
+                    if (mRecyclerView.getViewTreeObserver().isAlive()) {
+                        mRecyclerView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    }
+                    return true;
+                }
+                if (mGridLayoutManager == null) return true;
+                int fv = mGridLayoutManager.findFirstVisibleItemPosition();
+                int lv = mGridLayoutManager.findLastVisibleItemPosition();
+                int padB = mRecyclerView.getPaddingBottom();
+                int h = mRecyclerView.getHeight();
+                int items = mRecyclerView.getAdapter() == null ? -1
+                        : mRecyclerView.getAdapter().getItemCount();
+                if (fv != lastFirstVisible || lv != lastLastVisible
+                        || padB != lastPaddingBottom || h != lastHeight
+                        || items != lastItemCount) {
+                    dbg("preDraw sample: firstVis=" + fv + " lastVis=" + lv
+                            + " paddingBottom=" + padB + " height=" + h
+                            + " itemCount=" + items);
+                    lastFirstVisible = fv; lastLastVisible = lv;
+                    lastPaddingBottom = padB; lastHeight = h;
+                    lastItemCount = items;
+                }
+                return true;
+            }
+        };
+        mRecyclerView.getViewTreeObserver().addOnPreDrawListener(mDbgPreDrawListener);
     }
 
     /**
@@ -459,7 +641,11 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             ViewCompat.setOnApplyWindowInsetsListener(gatedRv, (v, windowInsets) -> {
                 Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()
                         | WindowInsetsCompat.Type.displayCutout());
+                int oldPadB = v.getPaddingBottom();
                 v.setPadding(insets.left, 0, insets.right, insets.bottom);
+                dbg("insetListener fired: insets=(l=" + insets.left + ",t=" + insets.top
+                        + ",r=" + insets.right + ",b=" + insets.bottom
+                        + ") oldPaddingBottom=" + oldPadB + " newPaddingBottom=" + insets.bottom);
                 markInsetsApplied();
                 return WindowInsetsCompat.CONSUMED;
             });
@@ -469,16 +655,25 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             // after a short delay so the page still renders. By 200 ms
             // every real-device first dispatch we've measured has landed.
             gatedRv.postDelayed(() -> {
-                if (gatedRv == mRecyclerView) markInsetsApplied();
+                if (gatedRv == mRecyclerView) {
+                    dbg("insetListener fallback (200ms) fired insetsApplied=" + mInsetsApplied);
+                    markInsetsApplied();
+                }
             }, 200L);
         }
 
         // Media indicator
         mGeckoMediaController.getActiveSessionIdsLiveData().observe(getViewLifecycleOwner(),
-                sessionIds -> mBrowserTabsAdapter.setMediaSessionIds(sessionIds));
+                sessionIds -> {
+                    dbg("mediaSessionIds observer fired count="
+                            + (sessionIds == null ? "null" : String.valueOf(sessionIds.size())));
+                    mBrowserTabsAdapter.setMediaSessionIds(sessionIds);
+                });
 
         // Tab list
         getTabsLiveData().observe(getViewLifecycleOwner(), tabs -> {
+            dbg("tabsLiveData observer fired size="
+                    + (tabs == null ? "null" : String.valueOf(tabs.size())));
             if (tabs == null || tabs.isEmpty()) {
                 mLCEERecyclerView.showEmpty();
             } else {
@@ -486,6 +681,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             }
             mBrowserTabsAdapter.submitList(tabs, () -> {
                 if (mRecyclerView == null) return;
+                dbg("submitList commit cb fired");
                 onTabListSubmitted(tabs);
             });
         });

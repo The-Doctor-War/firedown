@@ -171,15 +171,15 @@ public class TabsFragment extends BaseTabsFragment {
             int current = count != null ? count : 0;
             int dismissedAt = mSharedPreferences.getInt(
                     Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
+            android.util.Log.d("TabsScrollDbg",
+                    "[TabsFragment] archivedTabCount observer count=" + current
+                            + " dismissedAt=" + dismissedAt
+                            + " action=" + (current > dismissedAt ? "show" : "dismiss"));
             if (current > dismissedAt) {
                 mBannerAdapter.show(current);
             } else {
                 mBannerAdapter.dismiss();
             }
-            // Banner show/dismiss shifts every tab row by one. When this
-            // happens shortly after page open the staggered post-initial-
-            // scroll realignment in BaseTabsFragment re-pins the active
-            // tab on its own; we no longer need a banner-specific call.
         });
 
         // Debounced auto-archive trigger

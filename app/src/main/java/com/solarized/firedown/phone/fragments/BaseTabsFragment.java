@@ -10,12 +10,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.view.OneShotPreDrawListener;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.solarized.firedown.Preferences;
@@ -65,6 +65,12 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      *  switched tabs elsewhere, etc.) versus when the list is just being
      *  re-submitted for unrelated reasons (title updates, thumb loads). */
     protected int mLastTabActive;
+
+    /** True until the first non-empty list submission completes. Drives the
+     *  one-time hand-off that releases the holder's postponed enter
+     *  transition: we only want to wait on the *initial* positioning, not
+     *  on subsequent diffs (title changes, thumbs, etc). */
+    private boolean mInitialScrollPending = true;
 
     @Inject
     GeckoRuntimeHelper mGeckoRuntimeHelper;
@@ -143,8 +149,11 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     protected void onTabListSubmitted(List<GeckoStateEntity> tabs) {
         if (tabs == null || tabs.isEmpty() || mRecyclerView == null) {
             // Empty list → reset tracking so the next populated emission
-            // registers its active tab as a change.
+            // registers its active tab as a change. Also release the
+            // holder's postponed enter transition: there is nothing to
+            // position, so the page is "ready" by definition.
             mLastTabActive = 0;
+            releaseHolderPostpone();
             return;
         }
 
@@ -184,27 +193,65 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         if (activeChanged
                 && !userTouching
                 && activePosition >= 0
-                && mRecyclerView.getLayoutManager() instanceof LinearLayoutManager) {
+                && mRecyclerView.getLayoutManager() instanceof GridLayoutManager glm) {
             final int adapterTarget = activePosition + getLeadingAdapterCount();
-            Log.d(TAG, "scrollToPosition(" + adapterTarget + ") "
-                    + "dataPos=" + activePosition + " activeId=" + activeId);
-            final RecyclerView target = mRecyclerView;
-            target.post(() -> {
-                if (target != mRecyclerView) return;
-                target.scrollToPosition(adapterTarget);
 
-                // scrollToPosition doesn't fire onScrolled, so the holder's
-                // scroll listener won't see this move. Nudge the holder to
-                // re-sample after the layout pass settles so the lift scrim
-                // reflects the new scroll position.
-                target.post(() -> {
-                    if (target != mRecyclerView) return;
-                    Fragment parent = getParentFragment();
-                    if (parent instanceof TabsHolderFragment) {
-                        ((TabsHolderFragment) parent).refreshAppBarLiftFor(target);
-                    }
-                });
+            // Keep one row of context above the active tab so it doesn't read
+            // as "flush to the top, am I at the start?". For lists spanCount
+            // is 1 so this is "one item above"; for grids, "one row above".
+            // Clamp to 0 — when the active tab is near the top, we just
+            // scroll to the top.
+            final int spanCount = glm.getSpanCount();
+            final int scrollTarget = Math.max(0, adapterTarget - spanCount);
+
+            Log.d(TAG, "scrollToPositionWithOffset(" + scrollTarget + ", 0) "
+                    + "dataPos=" + activePosition + " activeId=" + activeId);
+
+            // Run synchronously, not via post(): the diff commit callback
+            // fires after items are in the adapter but before the next
+            // layout pass. scrollToPositionWithOffset queues the target
+            // for that pending layout, so the first frame the user sees
+            // already has the active row in view — no visible scroll. The
+            // previous post() implementation deferred the scroll by a frame,
+            // causing the RV to paint at position 0 first and then jump.
+            // Using scrollToPositionWithOffset (rather than scrollToPosition)
+            // also guarantees the row is fully visible — scrollToPosition on
+            // a GridLayoutManager can leave the target half-clipped at the
+            // viewport edge.
+            glm.scrollToPositionWithOffset(scrollTarget, 0);
+
+            // scrollToPositionWithOffset doesn't fire onScrolled, so the
+            // holder's scroll listener won't see this move. Nudge the holder
+            // to re-sample the lift scrim after the layout pass settles, and
+            // release the postponed enter transition on the same pre-draw —
+            // by then items are placed and the first visible frame is correct.
+            final RecyclerView target = mRecyclerView;
+            OneShotPreDrawListener.add(target, () -> {
+                if (target != mRecyclerView) return;
+                Fragment parent = getParentFragment();
+                if (parent instanceof TabsHolderFragment holder) {
+                    holder.refreshAppBarLiftFor(target);
+                    holder.markChildReadyToShow();
+                }
             });
+        } else if (mInitialScrollPending) {
+            // No scroll was needed on the first submission (active tab is
+            // already in view, or no active tab) — still release the holder
+            // postpone so the page renders.
+            releaseHolderPostpone();
+        }
+
+        mInitialScrollPending = false;
+    }
+
+    /**
+     * Releases the postponed enter transition on the parent holder, if any.
+     * Safe to call multiple times — the holder de-duplicates.
+     */
+    private void releaseHolderPostpone() {
+        Fragment parent = getParentFragment();
+        if (parent instanceof TabsHolderFragment holder) {
+            holder.markChildReadyToShow();
         }
     }
 

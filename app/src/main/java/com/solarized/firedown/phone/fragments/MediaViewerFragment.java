@@ -506,6 +506,16 @@ public class MediaViewerFragment extends Fragment {
                     @Override
                     public boolean onDoubleTap(@NonNull MotionEvent e) {
                         if (mPlayerView == null || mExoPlayer == null) return false;
+                        // Hide the controller before the burst animates in.
+                        // In portrait the prev / next buttons sit on the
+                        // same vertical band as the seek labels — without
+                        // hiding the controller, "− 10 s" overlaps the
+                        // prev icon and "+ 10 s" overlaps next. Matches
+                        // YouTube's behaviour: a double-tap is a seek,
+                        // not a controller interaction.
+                        if (mPlayerView.isControllerFullyVisible()) {
+                            mPlayerView.hideController();
+                        }
                         boolean leftHalf = e.getX() < mPlayerView.getWidth() / 2f;
                         seekByDelta(leftHalf ? -SEEK_DELTA_MS : SEEK_DELTA_MS, leftHalf);
                         return true;

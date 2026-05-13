@@ -10,7 +10,10 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.Insets;
 import androidx.core.view.OneShotPreDrawListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
@@ -84,6 +87,24 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      *  re-aligns the active tab, but a banner dismiss long after the user
      *  has manually scrolled the list does not yank them around. */
     private long mLastAutoScrollUptime = 0L;
+
+    // ── Initial-scroll gate ──────────────────────────────────────────
+    // The initial scroll-to-active waits for two asynchronous signals
+    // before running, so it executes exactly once with the viewport in
+    // its final shape:
+    //   • mTabsArrived — tab list has been diffed into the adapter
+    //   • mInsetsApplied — first window-insets dispatch has applied the
+    //                      bottom system-bar padding to mRecyclerView
+    // Without this gate, the scroll runs against the pre-inset viewport
+    // and the late padding shrinks the visible area from the bottom,
+    // pushing the just-placed active row into the clipped region. Any
+    // reactive "re-pin after the shift" approach makes the user see
+    // two visible jumps — the inset-driven shift and the re-pin — so
+    // the only clean fix is to defer the scroll until both signals
+    // have landed.
+    private boolean mTabsArrived = false;
+    private boolean mInsetsApplied = false;
+    @Nullable private List<GeckoStateEntity> mPendingInitialTabs = null;
 
     @Inject
     GeckoRuntimeHelper mGeckoRuntimeHelper;
@@ -160,29 +181,44 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      * typically still call {@code super}.</p>
      */
     protected void onTabListSubmitted(List<GeckoStateEntity> tabs) {
-        if (tabs == null || tabs.isEmpty() || mRecyclerView == null) {
-            // Empty list → reset tracking so the next populated emission
-            // registers its active tab as a change. Also release the
-            // holder's postponed enter transition: there is nothing to
-            // position, so the page is "ready" by definition.
+        if (mRecyclerView == null) {
             mLastTabActive = 0;
-            releaseHolderPostpone();
             return;
         }
 
         // DIAGNOSTIC — how many tabs are flagged active?
-        int activeCount = 0;
-        StringBuilder activeIds = new StringBuilder();
-        for (GeckoStateEntity e : tabs) {
-            if (e.isActive()) {
-                activeCount++;
-                activeIds.append(e.getId()).append(" ");
+        if (tabs != null) {
+            int activeCount = 0;
+            StringBuilder activeIds = new StringBuilder();
+            for (GeckoStateEntity e : tabs) {
+                if (e.isActive()) {
+                    activeCount++;
+                    activeIds.append(e.getId()).append(" ");
+                }
             }
+            Log.d("BaseTabsFragment", "onTabListSubmitted: " + tabs.size() + " tabs, "
+                    + activeCount + " active (ids: " + activeIds + ")");
         }
-        Log.d("BaseTabsFragment", "onTabListSubmitted: " + tabs.size() + " tabs, "
-                + activeCount + " active (ids: " + activeIds + ")");
 
-        // Locate the active tab in data-space.
+        // First populated submission of this view lifecycle: route through
+        // the initial-scroll gate. The scroll itself only runs once both
+        // gates (tabs + insets) have opened — see runGatedInitialScroll.
+        if (mInitialScrollPending) {
+            mPendingInitialTabs = tabs;
+            mTabsArrived = true;
+            runGatedInitialScroll();
+            return;
+        }
+
+        // Subsequent submission (after the initial scroll has happened):
+        // small re-emissions for title / thumb updates or active-tab
+        // changes triggered while the user is on the tabs page. Scroll
+        // immediately when the active id actually changes and the user
+        // isn't currently dragging.
+        if (tabs == null || tabs.isEmpty()) {
+            mLastTabActive = 0;
+            return;
+        }
         int activePosition = -1;
         int activeId = -1;
         for (int i = 0; i < tabs.size(); i++) {
@@ -193,53 +229,86 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                 break;
             }
         }
-
-        // Snapshot BEFORE updating mLastTabActive so the comparison works.
         boolean activeChanged = activeId != -1 && activeId != mLastTabActive;
         boolean userTouching =
                 mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE;
+        if (activeId != -1) {
+            mLastTabActive = activeId;
+            mLastActiveDataPosition = activePosition;
+        }
+        if (activeChanged && !userTouching && activePosition >= 0
+                && mRecyclerView.getLayoutManager() instanceof GridLayoutManager glm) {
+            int spanCount = glm.getSpanCount();
+            int adapterTarget = activePosition + getLeadingAdapterCount();
+            int scrollTarget = Math.max(0, adapterTarget - spanCount);
+            glm.scrollToPositionWithOffset(scrollTarget, 0);
+            mLastAutoScrollUptime = android.os.SystemClock.uptimeMillis();
+        }
+    }
 
+    /**
+     * Marks insets as applied; runs the gated initial scroll if the tab
+     * list has already arrived. Idempotent.
+     */
+    private void markInsetsApplied() {
+        if (mInsetsApplied) return;
+        mInsetsApplied = true;
+        runGatedInitialScroll();
+    }
+
+    /**
+     * Executes the one-time initial scroll once both the tab list and
+     * first window-insets dispatch have landed. After this runs, the
+     * holder fragment's postponed enter transition is released so the
+     * user sees a single fully-positioned frame — no visible reflow.
+     */
+    private void runGatedInitialScroll() {
+        if (!mInitialScrollPending) return;
+        if (!mTabsArrived || !mInsetsApplied) return;
+        if (mRecyclerView == null) return;
+
+        List<GeckoStateEntity> tabs = mPendingInitialTabs;
+        mPendingInitialTabs = null;
+        mInitialScrollPending = false;
+
+        if (tabs == null || tabs.isEmpty()) {
+            // Empty list — nothing to scroll, just reveal the page.
+            mLastTabActive = 0;
+            releaseHolderPostpone();
+            return;
+        }
+
+        int activePosition = -1;
+        int activeId = -1;
+        for (int i = 0; i < tabs.size(); i++) {
+            GeckoStateEntity entity = tabs.get(i);
+            if (entity.isActive()) {
+                activePosition = i;
+                activeId = entity.getId();
+                break;
+            }
+        }
         if (activeId != -1) {
             mLastTabActive = activeId;
             mLastActiveDataPosition = activePosition;
         }
 
-        if (activeChanged
-                && !userTouching
-                && activePosition >= 0
+        boolean userTouching =
+                mRecyclerView.getScrollState() != RecyclerView.SCROLL_STATE_IDLE;
+
+        if (activeId != -1 && !userTouching && activePosition >= 0
                 && mRecyclerView.getLayoutManager() instanceof GridLayoutManager glm) {
-            final int adapterTarget = activePosition + getLeadingAdapterCount();
-
-            // Keep one row of context above the active tab so it doesn't read
-            // as "flush to the top, am I at the start?". For lists spanCount
-            // is 1 so this is "one item above"; for grids, "one row above".
-            // Clamp to 0 — when the active tab is near the top, we just
-            // scroll to the top.
-            final int spanCount = glm.getSpanCount();
-            final int scrollTarget = Math.max(0, adapterTarget - spanCount);
-
-            Log.d(TAG, "scrollToPositionWithOffset(" + scrollTarget + ", 0) "
-                    + "dataPos=" + activePosition + " activeId=" + activeId);
-
-            // Run synchronously, not via post(): the diff commit callback
-            // fires after items are in the adapter but before the next
-            // layout pass. scrollToPositionWithOffset queues the target
-            // for that pending layout, so the first frame the user sees
-            // already has the active row in view — no visible scroll. The
-            // previous post() implementation deferred the scroll by a frame,
-            // causing the RV to paint at position 0 first and then jump.
-            // Using scrollToPositionWithOffset (rather than scrollToPosition)
-            // also guarantees the row is fully visible — scrollToPosition on
-            // a GridLayoutManager can leave the target half-clipped at the
-            // viewport edge.
+            int spanCount = glm.getSpanCount();
+            int adapterTarget = activePosition + getLeadingAdapterCount();
+            // Keep one row of context above the active tab so it doesn't
+            // read as "flush to the top". For lists spanCount is 1.
+            int scrollTarget = Math.max(0, adapterTarget - spanCount);
+            Log.d(TAG, "runGatedInitialScroll: scrollToPositionWithOffset("
+                    + scrollTarget + ", 0) dataPos=" + activePosition
+                    + " activeId=" + activeId);
             glm.scrollToPositionWithOffset(scrollTarget, 0);
             mLastAutoScrollUptime = android.os.SystemClock.uptimeMillis();
 
-            // scrollToPositionWithOffset doesn't fire onScrolled, so the
-            // holder's scroll listener won't see this move. Nudge the holder
-            // to re-sample the lift scrim after the layout pass settles, and
-            // release the postponed enter transition on the same pre-draw —
-            // by then items are placed and the first visible frame is correct.
             final RecyclerView target = mRecyclerView;
             OneShotPreDrawListener.add(target, () -> {
                 if (target != mRecyclerView) return;
@@ -249,31 +318,11 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                     holder.markChildReadyToShow();
                 }
             });
-
-            // Defensive realignment within the freshness window: several
-            // asynchronous reflow sources land *after* this initial scroll
-            // and would otherwise push the active tab around — the system
-            // dispatching window insets (changing RecyclerView bottom
-            // padding via BaseFocusFragment's listener), the AppBar /
-            // toolbar settling under inset application, the archive
-            // banner appearing on its own LiveData, etc. Each is hard to
-            // hook causally from a base class, but they all complete
-            // within a few hundred ms of view creation. realignActive...()
-            // is idempotent — when the active row is already pinned to
-            // the right offset the second call is a no-op visually — and
-            // self-guards via its 1.5 s freshness window and user-touch
-            // check, so two staggered posts cover the practical window
-            // without yanking a user who starts scrolling early.
-            target.postDelayed(this::realignActiveTabAfterLeadingChange, 50L);
-            target.postDelayed(this::realignActiveTabAfterLeadingChange, 350L);
-        } else if (mInitialScrollPending) {
-            // No scroll was needed on the first submission (active tab is
-            // already in view, or no active tab) — still release the holder
-            // postpone so the page renders.
+        } else {
+            // No active tab to scroll to (or user is already interacting):
+            // release the postpone so the page still renders.
             releaseHolderPostpone();
         }
-
-        mInitialScrollPending = false;
     }
 
     /**
@@ -349,6 +398,13 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         mRecyclerView = null;
         mGridLayoutManager = null;
         mBrowserTabsAdapter = null;
+        // Reset the initial-scroll gate so a re-created view (config
+        // change, ViewPager2 page recycle) runs the gate again on its
+        // own first inset + tab signals rather than firing immediately.
+        mInitialScrollPending = true;
+        mTabsArrived = false;
+        mInsetsApplied = false;
+        mPendingInitialTabs = null;
     }
 
     @Nullable
@@ -391,6 +447,31 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // Wrap the RecyclerView's inset listener registered by super so we
+        // know when the bottom system-bar padding has been applied. The
+        // padding application itself mirrors BaseFocusFragment exactly;
+        // the addition is the markInsetsApplied() call that opens the
+        // initial-scroll gate. Replacing the listener is intentional —
+        // there can only be one onApplyWindowInsetsListener per view.
+        final RecyclerView gatedRv = mRecyclerView;
+        if (gatedRv != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(gatedRv, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars()
+                        | WindowInsetsCompat.Type.displayCutout());
+                v.setPadding(insets.left, 0, insets.right, insets.bottom);
+                markInsetsApplied();
+                return WindowInsetsCompat.CONSUMED;
+            });
+            // Belt-and-suspenders: if the system never dispatches insets
+            // to the RV (e.g. unusual window-attach paths, no system bars
+            // such as some TV / fullscreen contexts), release the gate
+            // after a short delay so the page still renders. By 200 ms
+            // every real-device first dispatch we've measured has landed.
+            gatedRv.postDelayed(() -> {
+                if (gatedRv == mRecyclerView) markInsetsApplied();
+            }, 200L);
+        }
 
         // Media indicator
         mGeckoMediaController.getActiveSessionIdsLiveData().observe(getViewLifecycleOwner(),

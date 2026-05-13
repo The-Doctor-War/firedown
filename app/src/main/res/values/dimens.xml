@@ -66,12 +66,14 @@
     <!-- Media-viewer double-tap-to-seek feedback. Burst is a circle
          whose centre sits off the screen edge so only the inner
          half-disc is visible inside the viewport (mirroring
-         YouTube's seek feedback). Label margin pulls labels close
-         to the screen edges so they clear the controller's prev /
-         next icons (which sit ~64dp / ~240dp from the left in a
-         360dp-wide portrait — the tightest layout case). -->
+         YouTube's seek feedback). Label margin sits the labels
+         inside the visible half-disc but clear of the controller's
+         centred exo_play_pause button (72dp wide at screen centre).
+         In the tightest layout case (360dp-wide portrait): play
+         spans x=144–216, left label spans x=72–~122, right label
+         spans x=~238–288. No collision. -->
     <dimen name="seek_feedback_burst_size">560dp</dimen>
     <dimen name="seek_feedback_burst_offset_start">-280dp</dimen>
     <dimen name="seek_feedback_burst_offset_end">280dp</dimen>
-    <dimen name="seek_feedback_label_margin">8dp</dimen>
+    <dimen name="seek_feedback_label_margin">72dp</dimen>
 </resources>

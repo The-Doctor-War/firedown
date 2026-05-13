@@ -17,9 +17,10 @@
     - @id/exo_top_controls — top-end. PiP + rotate. App-defined
       child IDs (media_viewer_btn_pip, media_viewer_btn_rotate);
       MediaViewerFragment wires the click handlers in onCreateView.
-    - @id/exo_center_controls — centre. prev / play_pause / next.
-      Media3 finds these by reflection and wires playback behaviour
-      automatically.
+    - @id/exo_center_controls — centre. Just exo_play_pause; Media3
+      finds it by reflection and wires playback behaviour
+      automatically. prev / next were removed (this is a single-
+      file viewer with no playlist to navigate).
     - @id/exo_bottom_bar — bottom. Time text + DefaultTimeBar +
       duration, all wrapped so the gradient background covers the
       whole row. Bottom padding is applied dynamically by
@@ -48,34 +49,22 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@id/exo_prev"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/previous"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_media_skip_previous_white_24" />
-
+        <!-- exo_prev / exo_next removed: this viewer plays one file
+             at a time, so Media3's playlist-navigation buttons have
+             nothing to navigate to. exo_prev was just seeking to 0
+             (a confusing "restart" gesture) and exo_next was always
+             disabled. Their absence also frees up the centre row so
+             the double-tap-to-seek labels can sit in their natural
+             position inside the half-disc burst without overlapping
+             a button. -->
         <ImageButton
             android:id="@id/exo_play_pause"
             android:layout_width="72dp"
             android:layout_height="72dp"
-            android:layout_marginStart="24dp"
-            android:layout_marginEnd="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/play"
             android:scaleType="centerInside"
             android:src="@drawable/media_action_play" />
-
-        <ImageButton
-            android:id="@id/exo_next"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/next"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_media_skip_next_white_24" />
     </LinearLayout>
 
     <FrameLayout

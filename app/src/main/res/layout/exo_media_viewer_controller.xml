@@ -64,8 +64,8 @@
         -->
         <ImageButton
             android:id="@+id/media_viewer_btn_seek_back"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/media_seek_back_10s_desc"
             android:scaleType="centerInside"
@@ -84,8 +84,8 @@
 
         <ImageButton
             android:id="@+id/media_viewer_btn_seek_forward"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@string/media_seek_forward_10s_desc"
             android:scaleType="centerInside"

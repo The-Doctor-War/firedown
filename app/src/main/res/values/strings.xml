@@ -502,11 +502,6 @@
     <string name="pip_play">Play</string>
     <string name="pip_pause">Pause</string>
     <string name="pip_enter">Picture in picture</string>
-    <!-- Double-tap-to-seek labels in MediaViewerFragment. %d is
-         seconds (currently always 10). Unicode − = minus sign so
-         it renders aligned with the +; ASCII "-" looks lighter. -->
-    <string name="media_seek_backward_label">− %d s</string>
-    <string name="media_seek_forward_label">+ %d s</string>
     <!-- Content descriptions for the ±10 s skip buttons in
          MediaViewerFragment's controller. Used by TalkBack. -->
     <string name="media_seek_back_10s_desc">Skip back 10 seconds</string>

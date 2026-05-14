@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.media3.ui.AspectRatioFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/player_view_holder"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -21,64 +20,5 @@
         app:repeat_toggle_modes="one|all"
         app:shutter_background_color="@android:color/transparent"
         app:surface_type="texture_view" />
-
-    <!--
-      Double-tap-to-seek feedback overlay. Sits above PlayerView in
-      z-order so the burst and label render on top of the video, but
-      with clickable/focusable=false so touches still go to PlayerView
-      (its GestureDetector picks up the double-tap from there). Both
-      sides start at alpha=0; MediaViewerFragment animates them in on
-      double-tap.
-    -->
-    <FrameLayout
-        android:id="@+id/seek_feedback_layer"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="false"
-        android:focusable="false">
-
-        <View
-            android:id="@+id/seek_burst_left"
-            android:layout_width="@dimen/seek_feedback_burst_size"
-            android:layout_height="@dimen/seek_feedback_burst_size"
-            android:layout_gravity="center_vertical|start"
-            android:translationX="@dimen/seek_feedback_burst_offset_start"
-            android:background="@drawable/seek_feedback_burst"
-            android:alpha="0" />
-
-        <TextView
-            android:id="@+id/seek_label_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:layout_marginStart="@dimen/seek_feedback_label_margin"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:alpha="0"
-            tools:text="− 10 s" />
-
-        <View
-            android:id="@+id/seek_burst_right"
-            android:layout_width="@dimen/seek_feedback_burst_size"
-            android:layout_height="@dimen/seek_feedback_burst_size"
-            android:layout_gravity="center_vertical|end"
-            android:translationX="@dimen/seek_feedback_burst_offset_end"
-            android:background="@drawable/seek_feedback_burst"
-            android:alpha="0" />
-
-        <TextView
-            android:id="@+id/seek_label_right"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:layout_marginEnd="@dimen/seek_feedback_label_margin"
-            android:fontFamily="sans-serif-medium"
-            android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:alpha="0"
-            tools:text="+ 10 s" />
-
-    </FrameLayout>
 
 </androidx.media3.ui.AspectRatioFrameLayout>

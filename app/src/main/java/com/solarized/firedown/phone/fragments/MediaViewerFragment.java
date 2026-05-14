@@ -15,7 +15,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -100,10 +99,6 @@ public class MediaViewerFragment extends Fragment {
      */
     private WindowInsetsControllerCompat mWindowInsetsController;
 
-    private View mSeekBurstLeft;
-    private View mSeekBurstRight;
-    private TextView mSeekLabelLeft;
-    private TextView mSeekLabelRight;
     private GestureDetector mPlayerGestureDetector;
 
 
@@ -219,10 +214,6 @@ public class MediaViewerFragment extends Fragment {
         mPlayerView.setControllerHideOnTouch(false);
         mPlayerView.setControllerShowTimeoutMs(CONTROLLER_TIMEOUT_MS);
 
-        mSeekBurstLeft = v.findViewById(R.id.seek_burst_left);
-        mSeekBurstRight = v.findViewById(R.id.seek_burst_right);
-        mSeekLabelLeft = v.findViewById(R.id.seek_label_left);
-        mSeekLabelRight = v.findViewById(R.id.seek_label_right);
         setupDoubleTapSeek();
         setupSeekButtons();
 
@@ -490,10 +481,11 @@ public class MediaViewerFragment extends Fragment {
     /**
      * Wire a GestureDetector on the PlayerView so a double-tap on the
      * left half seeks back {@value #SEEK_DELTA_MS} ms and a double-tap
-     * on the right half seeks forward by the same amount, with a
-     * YouTube-style burst + label as visual feedback. A single
-     * confirmed tap toggles the playback controller (replacing the
-     * built-in PlayerView behaviour we disabled).
+     * on the right half seeks forward by the same amount. The seek is
+     * silent — the scrubber jump (and the visible ±10 s buttons in the
+     * controller) provide sufficient feedback. A single confirmed tap
+     * toggles the playback controller (replacing the built-in
+     * PlayerView behaviour we disabled).
      *
      * <p>The listener returns {@code false} from
      * {@code onTouch} so PlayerView's children (notably the scrubber
@@ -507,18 +499,8 @@ public class MediaViewerFragment extends Fragment {
                     @Override
                     public boolean onDoubleTap(@NonNull MotionEvent e) {
                         if (mPlayerView == null || mExoPlayer == null) return false;
-                        // Hide the controller before the burst animates in.
-                        // In portrait the prev / next buttons sit on the
-                        // same vertical band as the seek labels — without
-                        // hiding the controller, "− 10 s" overlaps the
-                        // prev icon and "+ 10 s" overlaps next. Matches
-                        // YouTube's behaviour: a double-tap is a seek,
-                        // not a controller interaction.
-                        if (mPlayerView.isControllerFullyVisible()) {
-                            mPlayerView.hideController();
-                        }
                         boolean leftHalf = e.getX() < mPlayerView.getWidth() / 2f;
-                        seekByDelta(leftHalf ? -SEEK_DELTA_MS : SEEK_DELTA_MS, leftHalf);
+                        applySeek(leftHalf ? -SEEK_DELTA_MS : SEEK_DELTA_MS);
                         return true;
                     }
 
@@ -543,8 +525,7 @@ public class MediaViewerFragment extends Fragment {
     /**
      * Wire the ±10 s seek buttons that flank exo_play_pause in the
      * controller. Button taps seek silently — the button itself is
-     * the feedback. The half-disc burst is reserved for the
-     * double-tap gesture path.
+     * the feedback.
      */
     private void setupSeekButtons() {
         View btnBack = mPlayerView.findViewById(R.id.media_viewer_btn_seek_back);
@@ -559,8 +540,8 @@ public class MediaViewerFragment extends Fragment {
 
     /**
      * Apply {@code deltaMs} to the current playback position, clamped
-     * to {@code [0, duration]}. The actual seek; visual feedback (if
-     * any) is the caller's responsibility.
+     * to {@code [0, duration]}. Shared by the ±10 s buttons and the
+     * double-tap gesture; both seek silently.
      */
     private void applySeek(long deltaMs) {
         if (mExoPlayer == null) return;
@@ -569,63 +550,6 @@ public class MediaViewerFragment extends Fragment {
         long upper = dur > 0 ? dur : Long.MAX_VALUE;
         long target = Math.max(0L, Math.min(upper, pos + deltaMs));
         mExoPlayer.seekTo(target);
-    }
-
-    /**
-     * Seek + animate the half-disc burst on the indicated side.
-     * Used by the gestural double-tap path where the user needs
-     * visual reassurance that their tap registered. The button path
-     * uses {@link #applySeek} directly — the button itself is the
-     * feedback.
-     */
-    private void seekByDelta(long deltaMs, boolean leftSide) {
-        applySeek(deltaMs);
-        showSeekFeedback(leftSide);
-    }
-
-    /**
-     * Animate the half-disc burst + ±10 s label on the requested side.
-     * Burst fades in to ~25 % alpha while scaling 0.6 → 1.0, then fades
-     * back out. Label fades in to full alpha, holds briefly, fades out.
-     * Pending animations are cancelled and the views reset so rapid
-     * re-taps always start from the at-rest state.
-     */
-    private void showSeekFeedback(boolean leftSide) {
-        View burst = leftSide ? mSeekBurstLeft : mSeekBurstRight;
-        TextView label = leftSide ? mSeekLabelLeft : mSeekLabelRight;
-        if (burst == null || label == null) return;
-
-        int seconds = (int) (SEEK_DELTA_MS / 1000L);
-        label.setText(getString(leftSide
-                ? R.string.media_seek_backward_label
-                : R.string.media_seek_forward_label, seconds));
-
-        burst.animate().cancel();
-        label.animate().cancel();
-
-        burst.setAlpha(0f);
-        burst.setScaleX(0.6f);
-        burst.setScaleY(0.6f);
-        label.setAlpha(0f);
-
-        burst.animate()
-                .alpha(0.25f)
-                .scaleX(1f).scaleY(1f)
-                .setDuration(200L)
-                .withEndAction(() -> {
-                    if (burst.getParent() == null) return;
-                    burst.animate().alpha(0f).setDuration(300L).start();
-                })
-                .start();
-
-        label.animate()
-                .alpha(1f)
-                .setDuration(150L)
-                .withEndAction(() -> {
-                    if (label.getParent() == null) return;
-                    label.animate().alpha(0f).setStartDelay(150L).setDuration(200L).start();
-                })
-                .start();
     }
 
     /**

@@ -338,8 +338,7 @@
     <string name="vault_decrypting">파일을 해독하는 중입니다. 잠시 기다려 주십시오…</string>
     <string name="vault_encrypting">파일을 암호화하는 중입니다. 잠시 기다려 주세요…</string>
     <string name="vault_unsupported">이 파일을 열 수 없습니다. 열려면 안전 폴더 밖으로 이동한 후 다시 시도하세요.</string>
-    <string name="bookmark_name">이름</string>    <string name="media_seek_backward_label">− %d초</string>
-    <string name="media_seek_forward_label">+ %d초</string>    <string name="media_seek_back_10s_desc">10초 뒤로</string>
+    <string name="bookmark_name">이름</string>    <string name="media_seek_back_10s_desc">10초 뒤로</string>
     <string name="media_seek_forward_10s_desc">10초 앞으로</string>
 
 

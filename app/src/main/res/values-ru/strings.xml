@@ -360,8 +360,7 @@
     <string name="settings_disk_cache_disabled">Отключить дисковый кеш</string>
     <string name="settings_disk_cache_disabled_summary">Кешировать страницы только в памяти. Препятствует межсайтовому отпечатку кеша и не оставляет следов на диске, но замедляет повторные посещения</string>
     <string name="settings_safe_browsing_disabled">Отключить безопасный просмотр</string>
-    <string name="settings_safe_browsing_disabled_summary">Прекратить отправку префиксов хешей URL в Google. Вы лишаетесь предупреждений о вредоносных и фишинговых сайтах</string>    <string name="pip_enter">Картинка в картинке</string>    <string name="media_seek_backward_label">− %d с</string>
-    <string name="media_seek_forward_label">+ %d с</string>    <string name="media_seek_back_10s_desc">Назад на 10 секунд</string>
+    <string name="settings_safe_browsing_disabled_summary">Прекратить отправку префиксов хешей URL в Google. Вы лишаетесь предупреждений о вредоносных и фишинговых сайтах</string>    <string name="pip_enter">Картинка в картинке</string>    <string name="media_seek_back_10s_desc">Назад на 10 секунд</string>
     <string name="media_seek_forward_10s_desc">Вперёд на 10 секунд</string>
 
 

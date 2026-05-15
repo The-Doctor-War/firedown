@@ -732,6 +732,26 @@ public class GeckoComponents {
             mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.CRASH, geckoState);
         }
 
+        /**
+         * The content process for this session was killed by the OS — typically
+         * because Android reclaimed it while the app was backgrounded under
+         * memory pressure. Per the GeckoView contract the session is now
+         * closed and unusable (isOpen() returns false); the documented
+         * recovery is to call {@code open(GeckoRuntime)} and then
+         * {@code load} or {@code restoreState}. Route through the same
+         * observer that handles onCrash so {@link BrowserFragment#onKill}
+         * can drive the reopen.
+         */
+        @Override
+        public void onKill(@NonNull GeckoSession session) {
+            Log.w(TAG, "Killed by OS, reopening session");
+            final GeckoState geckoState = findGeckoState(session);
+            if (geckoState == null) {
+                return;
+            }
+            mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.KILL_SESSION, geckoState);
+        }
+
 
 
         @Override

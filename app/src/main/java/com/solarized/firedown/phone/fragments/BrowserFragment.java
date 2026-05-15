@@ -1462,6 +1462,18 @@ public class BrowserFragment extends BaseBrowserFragment implements OnItemClickL
     public void onKill(GeckoState geckoState) {
         super.onKill(geckoState);
         stopMedia(mGeckoMediaController, geckoState);
+        // Mirror onCrash recovery. The GeckoSession wrapper is now in the
+        // "closed" state (isOpen() == false per the GeckoView contract);
+        // openSession -> setGeckoViewSession's !isOpen() branch will call
+        // open(GeckoRuntime) and reload the entity's URI — exactly the
+        // documented recovery path for both onCrash and onKill. Only
+        // proactively reopen the current tab; killed background tabs
+        // recover lazily on tab switch (the same !isOpen() check fires
+        // in setGeckoViewSession), matching Fenix's behaviour and
+        // avoiding waking up tabs the user isn't looking at.
+        if (geckoState == peekCurrentGeckoState()) {
+            openSession(geckoState);
+        }
     }
 
     // ─────────────────────────────────────────────────────────────────────────────────────────────

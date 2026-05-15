@@ -1,3 +1,9 @@
+## [1.1.71] - 2026-05-15
+
+- Added double tap on video playing
+- Added experimental webp support on libavcodec
+- Minor bugfixes
+
 ## [1.1.69] - 2026-05-13
 
 - Fix video playback transition

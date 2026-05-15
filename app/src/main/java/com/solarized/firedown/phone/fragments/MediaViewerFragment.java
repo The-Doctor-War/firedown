@@ -1,5 +1,6 @@
 package com.solarized.firedown.phone.fragments;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import android.graphics.Rect;
@@ -493,6 +494,7 @@ public class MediaViewerFragment extends Fragment {
      * top-level tap/double-tap decisions are routed through the
      * GestureDetector.</p>
      */
+    @SuppressLint("ClickableViewAccessibility")
     private void setupDoubleTapSeek() {
         mPlayerGestureDetector = new GestureDetector(mActivity,
                 new GestureDetector.SimpleOnGestureListener() {
@@ -505,6 +507,7 @@ public class MediaViewerFragment extends Fragment {
                         return true;
                     }
 
+                    @OptIn(markerClass = UnstableApi.class)
                     @Override
                     public boolean onSingleTapConfirmed(@NonNull MotionEvent e) {
                         if (mPlayerView == null) return false;
@@ -568,7 +571,7 @@ public class MediaViewerFragment extends Fragment {
         icon.animate().cancel();
         icon.setRotation(0f);
         icon.animate()
-                .rotationBy(leftSide ? -90f : 90f)
+                .rotationBy(leftSide ? -45f : 45f)
                 .setDuration(220L)
                 .withEndAction(() -> {
                     if (icon.getParent() == null) return;

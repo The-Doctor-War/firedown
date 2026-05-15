@@ -501,6 +501,7 @@ public class MediaViewerFragment extends Fragment {
                         if (mPlayerView == null || mExoPlayer == null) return false;
                         boolean leftHalf = e.getX() < mPlayerView.getWidth() / 2f;
                         applySeek(leftHalf ? -SEEK_DELTA_MS : SEEK_DELTA_MS);
+                        spinSeekIcon(leftHalf);
                         return true;
                     }
 
@@ -550,6 +551,30 @@ public class MediaViewerFragment extends Fragment {
         long upper = dur > 0 ? dur : Long.MAX_VALUE;
         long target = Math.max(0L, Math.min(upper, pos + deltaMs));
         mExoPlayer.seekTo(target);
+    }
+
+    /**
+     * Spin the ±10 s icon a quarter turn in the direction of the seek as
+     * feedback for the double-tap gesture (replay_10 curls
+     * counter-clockwise, forward_10 clockwise — the rotation reads as
+     * the arrow continuing its swirl). 90 ° out, snaps back to 0 °.
+     */
+    private void spinSeekIcon(boolean leftSide) {
+        if (mPlayerView == null) return;
+        View icon = mPlayerView.findViewById(leftSide
+                ? R.id.media_viewer_btn_seek_back
+                : R.id.media_viewer_btn_seek_forward);
+        if (icon == null) return;
+        icon.animate().cancel();
+        icon.setRotation(0f);
+        icon.animate()
+                .rotationBy(leftSide ? -90f : 90f)
+                .setDuration(220L)
+                .withEndAction(() -> {
+                    if (icon.getParent() == null) return;
+                    icon.animate().rotation(0f).setDuration(180L).start();
+                })
+                .start();
     }
 
     /**

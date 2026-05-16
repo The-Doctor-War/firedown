@@ -141,6 +141,17 @@ public class TabsFragment extends BaseTabsFragment {
     // though only TabsFragment ever shows a banner.
 
     @Override
+    protected boolean awaitsBannerSignal() {
+        // The archived-tab-count LiveData is a separate Room query
+        // that lands after the tab-list LiveData, so the initial
+        // scroll has to hold until we know whether the banner row
+        // will be present at adapter position 0 — otherwise we
+        // place the active row, then the banner inserts, then every
+        // tab shifts down by one and the user sees a one-row jump.
+        return true;
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -174,6 +185,12 @@ public class TabsFragment extends BaseTabsFragment {
                     // and dismissing the banner with no tabs flips us back
                     // to the empty placeholder.
                     refreshEmptyVisibility();
+                    // Release the initial-scroll gate now that the banner
+                    // state is known. Idempotent — only the first emission
+                    // here actually opens the gate; later changes (banner
+                    // dismissed via tap, count refreshed) skip the gate
+                    // path entirely.
+                    markBannerResolved();
                 });
 
         // Debounced auto-archive trigger

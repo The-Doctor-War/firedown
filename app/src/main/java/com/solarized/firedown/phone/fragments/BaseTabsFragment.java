@@ -75,18 +75,44 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private boolean mInitialScrollPending = true;
 
     // ── Initial-scroll gate ──────────────────────────────────────────
-    // The initial scroll-to-active waits for two asynchronous signals
+    // The initial scroll-to-active waits for three asynchronous signals
     // before running, so it executes exactly once with the viewport in
     // its final shape:
-    //   • mTabsArrived — tab list has been diffed into the adapter
+    //   • mTabsArrived  — tab list has been diffed into the adapter
     //   • mInsetsApplied — first window-insets dispatch has applied the
     //                      bottom system-bar padding to mRecyclerView
-    // Without this gate, the scroll runs against the pre-inset viewport
-    // and the late padding shrinks the visible area from the bottom,
-    // pushing the just-placed active row into the clipped region.
+    //   • mBannerResolved — subclasses that show a banner row (only
+    //                      regular tabs today) signal once they know
+    //                      whether the banner is going to occupy
+    //                      adapter position 0. Without this gate the
+    //                      scroll runs against an adapter with no
+    //                      banner, then the banner LiveData fires
+    //                      half a frame later, shifts every row down
+    //                      by one, and the active row ends up one row
+    //                      below where the LM placed it. Default is
+    //                      true (incognito has no banner — no signal
+    //                      to wait for); subclasses with a banner
+    //                      override {@link #awaitsBannerSignal()} and
+    //                      call {@link #markBannerResolved()} when the
+    //                      observer first fires.
+    // Without these gates, the scroll runs against the pre-inset / pre-
+    // banner viewport and any later change drags the just-placed row.
     private boolean mTabsArrived = false;
     private boolean mInsetsApplied = false;
+    private boolean mBannerResolved = false;
     @Nullable private List<GeckoStateEntity> mPendingInitialTabs = null;
+
+    /**
+     * Hard ceiling on how long we'll wait for the banner LiveData before
+     * giving up and running the initial scroll without it. Sized to
+     * cover the slow path of an archived-count query against a fresh
+     * Room database; on a populated install the observer typically
+     * fires in &lt; 50 ms. After the timeout the gate opens and the
+     * scroll proceeds — if the banner subsequently materializes it'll
+     * cause a one-row shift, which is no worse than what we had before
+     * the gate existed.
+     */
+    private static final long BANNER_GATE_TIMEOUT_MS = 500L;
 
     @Inject
     GeckoRuntimeHelper mGeckoRuntimeHelper;
@@ -223,6 +249,25 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     }
 
     /**
+     * Subclasses with a banner row (TabsFragment) override to return
+     * true; the base then holds the initial scroll until
+     * {@link #markBannerResolved()} fires. Incognito has no banner so
+     * the default false skips the wait entirely.
+     */
+    protected boolean awaitsBannerSignal() {
+        return false;
+    }
+
+    /** Subclasses call this from their banner observer's first
+     *  emission. Idempotent — subsequent banner state changes don't
+     *  re-trigger the gate. */
+    protected void markBannerResolved() {
+        if (mBannerResolved) return;
+        mBannerResolved = true;
+        runGatedInitialScroll();
+    }
+
+    /**
      * Executes the one-time initial scroll once both the tab list and
      * first window-insets dispatch have landed. After this runs, the
      * holder fragment's postponed enter transition is released so the
@@ -231,6 +276,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private void runGatedInitialScroll() {
         if (!mInitialScrollPending) return;
         if (!mTabsArrived || !mInsetsApplied) return;
+        if (awaitsBannerSignal() && !mBannerResolved) return;
         if (mRecyclerView == null) return;
 
         List<GeckoStateEntity> tabs = mPendingInitialTabs;
@@ -339,10 +385,12 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         mBrowserTabsAdapter = null;
         // Reset the initial-scroll gate so a re-created view (config
         // change, ViewPager2 page recycle) runs the gate again on its
-        // own first inset + tab signals rather than firing immediately.
+        // own first inset + tab + banner signals rather than firing
+        // immediately.
         mInitialScrollPending = true;
         mTabsArrived = false;
         mInsetsApplied = false;
+        mBannerResolved = false;
         mPendingInitialTabs = null;
     }
 
@@ -453,6 +501,18 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                     markInsetsApplied();
                 }
             }, 200L);
+            // Banner-gate timeout — if the subclass advertises it'll
+            // signal but the LiveData never produces (cold Room cache,
+            // empty archive, observer racing fragment destruction)
+            // release the gate so the scroll still runs. See
+            // {@link #BANNER_GATE_TIMEOUT_MS} for the rationale.
+            if (awaitsBannerSignal()) {
+                gatedRv.postDelayed(() -> {
+                    if (gatedRv == mRecyclerView) {
+                        markBannerResolved();
+                    }
+                }, BANNER_GATE_TIMEOUT_MS);
+            }
         }
 
         // Media indicator

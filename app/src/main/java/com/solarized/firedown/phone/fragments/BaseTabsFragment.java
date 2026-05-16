@@ -54,6 +54,26 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
 
     private static final String TAG = BaseTabsFragment.class.getSimpleName();
 
+    /**
+     * Dedicated tag for the initial-layout jump investigation. Filter
+     * with {@code adb logcat -s TabsJump} to get a chronological trace
+     * of: gate signals, banner show/dismiss, submitList commits, the
+     * gated scroll request, LM layout completions, ItemAnimator
+     * suppression/restore, and RecyclerView scroll-state changes. All
+     * lines include a millisecond timestamp relative to the fragment's
+     * onCreate so you can read the timeline directly.
+     */
+    private static final String JUMP_TAG = "TabsJump";
+
+    /** Wall-clock anchor captured in onCreate; subsequent log lines
+     *  show ms-since-anchor for easy timeline reading. */
+    private long mJumpAnchorMs;
+
+    private void jlog(String msg) {
+        long t = System.currentTimeMillis() - mJumpAnchorMs;
+        Log.d(JUMP_TAG, "[" + getClass().getSimpleName() + " +" + t + "ms] " + msg);
+    }
+
     public static final String ARG_ENABLE_GRID = "enable_grid";
 
     protected GeckoStateViewModel mGeckoStateViewModel;
@@ -192,6 +212,10 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      * typically still call {@code super}.</p>
      */
     protected void onTabListSubmitted(List<GeckoStateEntity> tabs) {
+        jlog("submitList committed: size=" + (tabs == null ? -1 : tabs.size())
+                + " initialPending=" + mInitialScrollPending
+                + " adapterCount=" + (mBrowserTabsAdapter == null ? -1 : mBrowserTabsAdapter.getItemCount())
+                + " bannerVisible=" + (mBrowserTabsAdapter != null && mBrowserTabsAdapter.isBannerVisible()));
         if (mRecyclerView == null) {
             mLastTabActive = 0;
             return;
@@ -203,6 +227,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         if (mInitialScrollPending) {
             mPendingInitialTabs = tabs;
             mTabsArrived = true;
+            jlog("gate: tabs arrived (size=" + (tabs == null ? -1 : tabs.size()) + ")");
             runGatedInitialScroll();
             return;
         }
@@ -246,6 +271,8 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private void markInsetsApplied() {
         if (mInsetsApplied) return;
         mInsetsApplied = true;
+        jlog("gate: insets applied (rvPaddingBottom="
+                + (mRecyclerView != null ? mRecyclerView.getPaddingBottom() : -1) + ")");
         runGatedInitialScroll();
     }
 
@@ -265,6 +292,8 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     protected void markBannerResolved() {
         if (mBannerResolved) return;
         mBannerResolved = true;
+        jlog("gate: banner resolved (visible="
+                + (mBrowserTabsAdapter != null && mBrowserTabsAdapter.isBannerVisible()) + ")");
         runGatedInitialScroll();
     }
 
@@ -275,10 +304,16 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
      * user sees a single fully-positioned frame — no visible reflow.
      */
     private void runGatedInitialScroll() {
+        jlog("runGatedInitialScroll check: tabs=" + mTabsArrived
+                + " insets=" + mInsetsApplied
+                + " bannerResolved=" + mBannerResolved
+                + " awaitsBanner=" + awaitsBannerSignal()
+                + " pending=" + mInitialScrollPending);
         if (!mInitialScrollPending) return;
         if (!mTabsArrived || !mInsetsApplied) return;
         if (awaitsBannerSignal() && !mBannerResolved) return;
         if (mRecyclerView == null) return;
+        jlog("runGatedInitialScroll PROCEED");
 
         List<GeckoStateEntity> tabs = mPendingInitialTabs;
         mPendingInitialTabs = null;
@@ -317,6 +352,13 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             // read as "flush to the top". For lists spanCount is 1.
             final int scrollTarget = Math.max(0, adapterTarget - spanCount);
             final RecyclerView target = mRecyclerView;
+            jlog("setInitialPosition: activeIdx=" + activePosition
+                    + " leading=" + getLeadingAdapterCount()
+                    + " adapterTarget=" + adapterTarget
+                    + " spanCount=" + spanCount
+                    + " scrollTarget=" + scrollTarget
+                    + " rvHeight=" + target.getHeight()
+                    + " rvPadBottom=" + target.getPaddingBottom());
             // One-shot initial-position request: the LM queues the
             // scroll and fires the callback on the very next
             // non-pre-layout pass. We restore the ItemAnimator right
@@ -326,16 +368,27 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             // its animation back.
             mGridLayoutManager.setInitialPosition(scrollTarget, () -> {
                 if (target != mRecyclerView) return;
+                jlog("setInitialPosition CALLBACK: firstVisible="
+                        + mGridLayoutManager.findFirstVisibleItemPosition()
+                        + " firstCompletelyVisible="
+                        + mGridLayoutManager.findFirstCompletelyVisibleItemPosition()
+                        + " lastVisible="
+                        + mGridLayoutManager.findLastVisibleItemPosition()
+                        + " adapterCount=" + mBrowserTabsAdapter.getItemCount()
+                        + " bannerVisible=" + mBrowserTabsAdapter.isBannerVisible());
                 restoreItemAnimator();
                 Fragment parent = getParentFragment();
                 if (parent instanceof TabsHolderFragment holder) {
                     holder.refreshAppBarLiftFor(target);
                     holder.markChildReadyToShow(this);
+                    jlog("markChildReadyToShow called");
                 }
             });
         } else {
             // No active tab to scroll to (or user is already interacting):
             // release the postpone so the page still renders.
+            jlog("runGatedInitialScroll: empty-or-touching branch (activeId="
+                    + activeId + " userTouching=" + userTouching + ")");
             restoreItemAnimator();
             releaseHolderPostpone();
         }
@@ -353,6 +406,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     private void restoreItemAnimator() {
         if (mRecyclerView == null) return;
         if (mRecyclerView.getItemAnimator() != null) return;
+        jlog("restoreItemAnimator: installing DefaultItemAnimator");
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
@@ -371,6 +425,8 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mJumpAnchorMs = System.currentTimeMillis();
+        jlog("onCreate enableGrid=" + mEnableGrid + " awaitsBanner=" + awaitsBannerSignal());
         if (getArguments() != null && getArguments().containsKey(ARG_ENABLE_GRID)) {
             mEnableGrid = getArguments().getBoolean(ARG_ENABLE_GRID, false);
         } else {
@@ -464,6 +520,35 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         mRecyclerView.setAdapter(mBrowserTabsAdapter);
         mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.list_item_margin)));
+
+        // DEBUG instrumentation for the initial-jump investigation.
+        // Logs every scroll-state change and every non-zero dy so we
+        // can see whether a programmatic scroll fires after the gate
+        // callback (which would be the user-visible jump). Tag
+        // "TabsJump" — strip in release if it ever gets noisy.
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
+                jlog("rv onScrollStateChanged state=" + newState);
+            }
+            @Override
+            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
+                if (dy != 0) {
+                    jlog("rv onScrolled dy=" + dy
+                            + " firstVisible=" + mGridLayoutManager.findFirstVisibleItemPosition()
+                            + " offsetY=" + rv.computeVerticalScrollOffset());
+                }
+            }
+        });
+        mRecyclerView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (ob - ot != b - t || ol != l || or != r) {
+                jlog("rv layout-changed: was=" + (or - ol) + "x" + (ob - ot)
+                        + " now=" + (r - l) + "x" + (b - t)
+                        + " padding=[" + v.getPaddingLeft() + "," + v.getPaddingTop()
+                        + "," + v.getPaddingRight() + "," + v.getPaddingBottom() + "]");
+            }
+        });
+
         // Suppress the ItemAnimator while the initial-scroll gate is
         // closed. Without this, the late banner-insertion notify (see
         // {@link #awaitsBannerSignal()}) makes DefaultItemAnimator

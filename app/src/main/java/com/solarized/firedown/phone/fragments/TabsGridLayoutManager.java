@@ -68,6 +68,12 @@ public class TabsGridLayoutManager extends GridLayoutManager {
     @Override
     public void onLayoutCompleted(RecyclerView.State state) {
         super.onLayoutCompleted(state);
+        android.util.Log.d("TabsJump",
+                "[TabsGridLayoutManager] onLayoutCompleted preLayout=" + state.isPreLayout()
+                        + " itemCount=" + state.getItemCount()
+                        + " waiting=" + mWaitingForFirstLayout
+                        + " firstVisible=" + findFirstVisibleItemPosition()
+                        + " firstCompletelyVisible=" + findFirstCompletelyVisibleItemPosition());
         if (!mWaitingForFirstLayout) return;
         if (state.isPreLayout()) return;
 

@@ -108,6 +108,10 @@ public class BrowserTabsAdapter extends GridListBaseAdapter<GeckoStateEntity, Re
         mBannerCount = count;
         mBannerTitleResId = titleResId;
         mBannerVisible = true;
+        Log.d("TabsJump", "[BrowserTabsAdapter] showBanner count=" + count
+                + " wasVisible=" + wasVisible
+                + " differSize=" + super.getItemCount()
+                + " -> " + (wasVisible ? "notifyItemChanged(0)" : "notifyItemInserted(0)"));
         if (wasVisible) {
             notifyItemChanged(0);
         } else {
@@ -123,6 +127,8 @@ public class BrowserTabsAdapter extends GridListBaseAdapter<GeckoStateEntity, Re
         if (!mBannerVisible) return;
         mBannerVisible = false;
         mBannerCount = 0;
+        Log.d("TabsJump", "[BrowserTabsAdapter] dismissBanner differSize="
+                + super.getItemCount() + " -> notifyItemRemoved(0)");
         notifyItemRemoved(0);
     }
 

@@ -245,23 +245,6 @@ public class TabsHolderFragment extends BaseFocusFragment {
         mViewPager.setCurrentItem(initialPage, false);
         updateToggle(initialPage);
 
-        // Postpone-release is fully driven by causal signals now:
-        //   • BaseTabsFragment's own 200 ms inset fallback ensures the
-        //     two-gate flow opens even when the system never dispatches
-        //     insets to the RV.
-        //   • TabsGridLayoutManager.setInitialPosition fires its onReached
-        //     callback when the row is actually first-visible *or* gives
-        //     up if the data set ever shrinks below the target.
-        //   • The empty / no-active-tab paths in runGatedInitialScroll
-        //     call releaseHolderPostpone() directly.
-        // So every BaseTabsFragment lifecycle reaches markChildReadyToShow
-        // without needing a timing-based safety net here. A wall-clock
-        // postDelayed is processor- and load-dependent — when it fires
-        // *before* convergence it bypasses the visibility check
-        // (caller=null) and releases the postpone while the visible page
-        // is still showing firstVis=0, which is exactly the "scroll after
-        // open" we were chasing. Drop it.
-
         return view;
     }
 
@@ -454,24 +437,6 @@ public class TabsHolderFragment extends BaseFocusFragment {
     void refreshAppBarLiftFor(@NonNull RecyclerView rv) {
         if (rv == mLiftTarget) updateScrimFor(rv);
     }
-
-    /**
-     * Released by the visible child tabs fragment once its RecyclerView has
-     * been positioned at the active tab. Only the call from the
-     * currently-visible ViewPager2 page is honored — the off-screen
-     * sibling reaches its "ready" state immediately (its tab list is
-     * empty / shrunk to size 0) and would otherwise unblock the
-     * postpone while the visible page is still scrolling its
-     * RecyclerView to the active row, producing the visible scroll
-     * the user reports.
-     *
-     * <p>{@code caller == null} bypasses the visibility check — used by
-     * the {@code onCreateView} timeout fallback so the page still
-     * renders if no child ever reports.</p>
-     */
-    /** No-op since postponeEnterTransition was dropped. Kept for API
-     *  compatibility with BaseTabsFragment callsites pending cleanup. */
-    void markChildReadyToShow(@Nullable Fragment caller) { /* no-op */ }
 
     /** Kept for API compatibility with child fragment callsites. No-ops. */
     void suspendAppBarLift() { /* no-op */ }

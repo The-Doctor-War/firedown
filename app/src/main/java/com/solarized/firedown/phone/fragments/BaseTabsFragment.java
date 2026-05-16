@@ -52,26 +52,6 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
 
     private static final String TAG = BaseTabsFragment.class.getSimpleName();
 
-    /**
-     * Dedicated tag for the initial-layout jump investigation. Filter
-     * with {@code adb logcat -s TabsJump} to get a chronological trace
-     * of: gate signals, banner show/dismiss, submitList commits, the
-     * gated scroll request, LM layout completions, ItemAnimator
-     * suppression/restore, and RecyclerView scroll-state changes. All
-     * lines include a millisecond timestamp relative to the fragment's
-     * onCreate so you can read the timeline directly.
-     */
-    private static final String JUMP_TAG = "TabsJump";
-
-    /** Wall-clock anchor captured in onCreate; subsequent log lines
-     *  show ms-since-anchor for easy timeline reading. */
-    private long mJumpAnchorMs;
-
-    private void jlog(String msg) {
-        long t = System.currentTimeMillis() - mJumpAnchorMs;
-        Log.d(JUMP_TAG, "[" + getClass().getSimpleName() + " +" + t + "ms] " + msg);
-    }
-
     public static final String ARG_ENABLE_GRID = "enable_grid";
 
     protected GeckoStateViewModel mGeckoStateViewModel;
@@ -244,7 +224,6 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     protected void signalBannerReady() {
         if (mPendingBannerSignalled) return;
         mPendingBannerSignalled = true;
-        jlog("banner signal received");
         tryApplyFirstSnapshot();
     }
 
@@ -322,13 +301,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             int spanCount = mGridLayoutManager.getSpanCount();
             int adapterTarget = activePosition + getLeadingAdapterCount();
             int scrollTarget = Math.max(0, adapterTarget - spanCount);
-            jlog("applyFirstSnapshot: activeIdx=" + activePosition
-                    + " leading=" + getLeadingAdapterCount()
-                    + " adapterTarget=" + adapterTarget
-                    + " scrollTarget=" + scrollTarget);
             mGridLayoutManager.scrollToPositionWithOffset(scrollTarget, 0);
-        } else {
-            jlog("applyFirstSnapshot: no active tab");
         }
 
         // 4. Reveal LCEE state. hideAll if there's content (tab rows
@@ -342,8 +315,6 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mJumpAnchorMs = System.currentTimeMillis();
-        jlog("onCreate enableGrid=" + mEnableGrid + " awaitsBanner=" + awaitsBannerSignal());
         if (getArguments() != null && getArguments().containsKey(ARG_ENABLE_GRID)) {
             mEnableGrid = getArguments().getBoolean(ARG_ENABLE_GRID, false);
         } else {
@@ -442,34 +413,6 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         // its initial anchor.
         mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.list_item_margin)));
-
-        // DEBUG instrumentation for the initial-jump investigation.
-        // Logs every scroll-state change and every non-zero dy so we
-        // can see whether a programmatic scroll fires after the gate
-        // callback (which would be the user-visible jump). Tag
-        // "TabsJump" — strip in release if it ever gets noisy.
-        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(@NonNull RecyclerView rv, int newState) {
-                jlog("rv onScrollStateChanged state=" + newState);
-            }
-            @Override
-            public void onScrolled(@NonNull RecyclerView rv, int dx, int dy) {
-                if (dy != 0) {
-                    jlog("rv onScrolled dy=" + dy
-                            + " firstVisible=" + mGridLayoutManager.findFirstVisibleItemPosition()
-                            + " offsetY=" + rv.computeVerticalScrollOffset());
-                }
-            }
-        });
-        mRecyclerView.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
-            if (ob - ot != b - t || ol != l || or != r) {
-                jlog("rv layout-changed: was=" + (or - ol) + "x" + (ob - ot)
-                        + " now=" + (r - l) + "x" + (b - t)
-                        + " padding=[" + v.getPaddingLeft() + "," + v.getPaddingTop()
-                        + "," + v.getPaddingRight() + "," + v.getPaddingBottom() + "]");
-            }
-        });
     }
 
     /**

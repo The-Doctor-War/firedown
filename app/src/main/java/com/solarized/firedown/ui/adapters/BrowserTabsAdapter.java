@@ -108,10 +108,6 @@ public class BrowserTabsAdapter extends GridListBaseAdapter<GeckoStateEntity, Re
         mBannerCount = count;
         mBannerTitleResId = titleResId;
         mBannerVisible = true;
-        Log.d("TabsJump", "[BrowserTabsAdapter] showBanner count=" + count
-                + " wasVisible=" + wasVisible
-                + " differSize=" + super.getItemCount()
-                + " -> " + (wasVisible ? "notifyItemChanged(0)" : "notifyItemInserted(0)"));
         if (wasVisible) {
             notifyItemChanged(0);
         } else {
@@ -127,8 +123,6 @@ public class BrowserTabsAdapter extends GridListBaseAdapter<GeckoStateEntity, Re
         if (!mBannerVisible) return;
         mBannerVisible = false;
         mBannerCount = 0;
-        Log.d("TabsJump", "[BrowserTabsAdapter] dismissBanner differSize="
-                + super.getItemCount() + " -> notifyItemRemoved(0)");
         notifyItemRemoved(0);
     }
 
@@ -149,8 +143,6 @@ public class BrowserTabsAdapter extends GridListBaseAdapter<GeckoStateEntity, Re
         mBannerCount = mBannerVisible ? count : 0;
         if (mBannerVisible) mBannerTitleResId = titleResId;
         if (listener != null) mBannerListener = listener;
-        Log.d("TabsJump", "[BrowserTabsAdapter] setBannerSilently visible=" + mBannerVisible
-                + " count=" + mBannerCount);
     }
 
     public boolean isBannerVisible() {

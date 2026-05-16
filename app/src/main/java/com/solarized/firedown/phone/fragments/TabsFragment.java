@@ -203,8 +203,6 @@ public class TabsFragment extends BaseTabsFragment {
             int effectiveCount = force ? Math.max(cachedCount, 7) : cachedCount;
             mBrowserTabsAdapter.setBannerSilently(shouldShow, effectiveCount,
                     titlePluralsRes, mBannerListener);
-            Log.d("TabsJump", "[TabsFragment] banner cache hit count=" + cachedCount
-                    + " dismissedAt=" + dismissedAt + " shouldShow=" + shouldShow);
             // Snapshot gate opens here, so applyFirstSnapshot can fire
             // as soon as the tabs LiveData emits (~60 ms) without
             // waiting on the count query (~280 ms).
@@ -235,9 +233,7 @@ public class TabsFragment extends BaseTabsFragment {
                     boolean force = BuildConfig.DEBUG && FORCE_BANNER_FOR_DEBUG;
                     boolean shouldShow = force || current > dismissedAt;
                     int effectiveCount = force ? Math.max(current, 7) : current;
-                    Log.d("TabsJump", "[TabsFragment] banner observer emitted count="
-                            + current + " dismissedAt=" + dismissedAt + " force=" + force
-                            + " shouldShow=" + shouldShow);
+
 
                     if (!isFirstSnapshotApplied()) {
                         // Pre-snapshot: still no cache hit. Set state

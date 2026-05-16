@@ -471,6 +471,20 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         mLCEERecyclerView.setEmptyImageView(R.drawable.ill_small_tabs2);
 
         mRecyclerView = mLCEERecyclerView.getRecyclerView();
+        // LCEE's showLoading() (called from its constructor) sets the
+        // recycler to GONE, which makes Android skip onMeasure /
+        // onLayout for it entirely — and that means the LM never runs
+        // onLayoutCompleted, so setInitialPosition's callback never
+        // fires and the gate's terminal path (which calls
+        // markChildReadyToShow and updateEmptyVisibility) never
+        // executes. The fragment ends up stuck behind the holder's
+        // postponed enter transition and the user sees nothing.
+        //
+        // Switch to INVISIBLE so the RV stays measured / laid-out (LM
+        // runs, callback fires) while still being invisible behind
+        // LCEE's loading view. updateEmptyVisibility's eventual call
+        // to hideAll() will flip it to VISIBLE at the right moment.
+        mRecyclerView.setVisibility(View.INVISIBLE);
 
         mBrowserTabsAdapter = new BrowserTabsAdapter(mActivity, new GeckoStateDiffCallback(), this, mEnableGrid);
 

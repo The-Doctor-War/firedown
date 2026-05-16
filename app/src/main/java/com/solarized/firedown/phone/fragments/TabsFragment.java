@@ -170,9 +170,9 @@ public class TabsFragment extends BaseTabsFragment {
 
         Log.d(TAG, "onViewCreated");
 
-        // Archive banner observer — windowed by the user's auto-archive
-        // interval (day / week / month). The banner shows the count of
-        // tabs archived within that window so it stays small and
+        // Archive banner — windowed by the user's auto-archive interval
+        // (day / week / month). The banner shows the count of tabs
+        // archived within that window so it stays small and
         // actionable, instead of growing forever with the all-time
         // archive count.
         long intervalMs = mSharedPreferences.getLong(
@@ -181,10 +181,55 @@ public class TabsFragment extends BaseTabsFragment {
         long sinceMs = System.currentTimeMillis() - intervalMs;
         final int titlePluralsRes = bannerTitlePluralsFor(intervalMs);
 
+        // Synchronous cache read — the Room count query takes ~250 ms
+        // on a cold cache, which is exactly the duration of the LCEE
+        // spinner the user complained about. Chrome and Fenix avoid
+        // that gap by keeping their state in already-warm in-memory
+        // stores; the archive count lives in Room here, so we cache
+        // the last-known value in SharedPreferences and feed it into
+        // the snapshot synchronously. The LiveData fires asynchronously
+        // a beat later — if the fresh count disagrees the observer
+        // updates the banner through the post-snapshot path.
+        int cachedCount = mSharedPreferences.getInt(
+                Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_COUNT, -1);
+        long cachedInterval = mSharedPreferences.getLong(
+                Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_INTERVAL, 0L);
+        if (cachedCount >= 0 && cachedInterval == intervalMs
+                && mBrowserTabsAdapter != null) {
+            int dismissedAt = mSharedPreferences.getInt(
+                    Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
+            boolean force = BuildConfig.DEBUG && FORCE_BANNER_FOR_DEBUG;
+            boolean shouldShow = force || cachedCount > dismissedAt;
+            int effectiveCount = force ? Math.max(cachedCount, 7) : cachedCount;
+            mBrowserTabsAdapter.setBannerSilently(shouldShow, effectiveCount,
+                    titlePluralsRes, mBannerListener);
+            Log.d("TabsJump", "[TabsFragment] banner cache hit count=" + cachedCount
+                    + " dismissedAt=" + dismissedAt + " shouldShow=" + shouldShow);
+            // Snapshot gate opens here, so applyFirstSnapshot can fire
+            // as soon as the tabs LiveData emits (~60 ms) without
+            // waiting on the count query (~280 ms).
+            signalBannerReady();
+        }
+
         mGeckoStateViewModel.getArchivedTabCountSince(sinceMs)
                 .observe(getViewLifecycleOwner(), count -> {
                     if (mBrowserTabsAdapter == null) return;
                     int current = count != null ? count : 0;
+
+                    // Keep the cache fresh for the next fragment open.
+                    // Write only when the value or interval actually
+                    // changes so we don't churn SharedPreferences.
+                    int prevCached = mSharedPreferences.getInt(
+                            Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_COUNT, -1);
+                    long prevInterval = mSharedPreferences.getLong(
+                            Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_INTERVAL, 0L);
+                    if (prevCached != current || prevInterval != intervalMs) {
+                        mSharedPreferences.edit()
+                                .putInt(Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_COUNT, current)
+                                .putLong(Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_INTERVAL, intervalMs)
+                                .apply();
+                    }
+
                     int dismissedAt = mSharedPreferences.getInt(
                             Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
                     boolean force = BuildConfig.DEBUG && FORCE_BANNER_FOR_DEBUG;
@@ -194,24 +239,18 @@ public class TabsFragment extends BaseTabsFragment {
                             + current + " dismissedAt=" + dismissedAt + " force=" + force
                             + " shouldShow=" + shouldShow);
 
-                    if (mBrowserTabsAdapter.isBannerVisible() == shouldShow
-                            && !shouldShow) {
-                        // No state change, no need to notify. Still signal
-                        // the snapshot gate on first emission.
-                    } else if (!isFirstSnapshotApplied()) {
-                        // Pre-snapshot: set banner state silently so the
-                        // adapter carries it into setAdapter without
-                        // triggering a separate notify event after
-                        // attach. Chrome's tab-switcher pattern: include
-                        // the header row in the very first bind so the
-                        // first layout pass is the final layout pass.
+                    if (!isFirstSnapshotApplied()) {
+                        // Pre-snapshot: still no cache hit. Set state
+                        // silently so the adapter carries the banner row
+                        // (or its absence) into setAdapter without a
+                        // separate notify event after attach.
                         mBrowserTabsAdapter.setBannerSilently(shouldShow,
                                 effectiveCount, titlePluralsRes, mBannerListener);
                     } else {
                         // Post-snapshot: animate-style toggle. Adapter is
                         // attached; notify events go through. Predictive
-                        // animations are off (see TabsGridLayoutManager)
-                        // so this snaps without anchor drift.
+                        // animations are off so this snaps without
+                        // anchor drift.
                         if (shouldShow) {
                             mBrowserTabsAdapter.showBanner(effectiveCount,
                                     titlePluralsRes, mBannerListener);
@@ -220,8 +259,8 @@ public class TabsFragment extends BaseTabsFragment {
                         }
                         refreshEmptyVisibility();
                     }
-                    // Release the snapshot gate; idempotent. First call
-                    // opens it; later ones are no-ops.
+                    // Release the snapshot gate; idempotent — the cache
+                    // path above may have already opened it.
                     signalBannerReady();
                 });
 

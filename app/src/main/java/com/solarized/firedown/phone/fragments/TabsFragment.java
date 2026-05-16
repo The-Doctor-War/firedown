@@ -9,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
@@ -35,6 +36,16 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class TabsFragment extends BaseTabsFragment {
 
     private static final String TAG = TabsFragment.class.getSimpleName();
+
+    /**
+     * Flip to true when iterating on the banner UX to make the archive
+     * banner show unconditionally on debug builds — useful when there
+     * are no archived tabs yet but you want to verify the visual.
+     * Wrapped in {@code BuildConfig.DEBUG} at the call site so R8
+     * constant-folds it out of release. Default false so debug builds
+     * still exercise the real "current &gt; dismissedAt" gate.
+     */
+    private static final boolean FORCE_BANNER_FOR_DEBUG = false;
 
     private Snackbar mActiveSnackbar;
 
@@ -174,7 +185,14 @@ public class TabsFragment extends BaseTabsFragment {
                     int current = count != null ? count : 0;
                     int dismissedAt = mSharedPreferences.getInt(
                             Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
-                    if (current > dismissedAt) {
+                    // Debug-only forced banner: stripped from release
+                    // builds by the constant-folding R8 does on
+                    // BuildConfig.DEBUG. Floors the count to 7 so the
+                    // banner shows even when the archive is empty.
+                    if (BuildConfig.DEBUG && FORCE_BANNER_FOR_DEBUG) {
+                        mBrowserTabsAdapter.showBanner(
+                                Math.max(current, 7), titlePluralsRes, mBannerListener);
+                    } else if (current > dismissedAt) {
                         mBrowserTabsAdapter.showBanner(current, titlePluralsRes, mBannerListener);
                     } else {
                         mBrowserTabsAdapter.dismissBanner();

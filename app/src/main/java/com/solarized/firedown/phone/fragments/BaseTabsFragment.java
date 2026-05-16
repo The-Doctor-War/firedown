@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -286,6 +287,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         if (tabs == null || tabs.isEmpty()) {
             // Empty list — nothing to scroll, just reveal the page.
             mLastTabActive = 0;
+            restoreItemAnimator();
             releaseHolderPostpone();
             return;
         }
@@ -317,12 +319,14 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             final RecyclerView target = mRecyclerView;
             // One-shot initial-position request: the LM queues the
             // scroll and fires the callback on the very next
-            // non-pre-layout pass. With predictive animations off
-            // there's only ever one layout per scroll request, so
-            // whatever the LM produces is the final placement — we
-            // trust it, release the postpone, and don't loop.
+            // non-pre-layout pass. We restore the ItemAnimator right
+            // before releasing the postpone so the fragment becomes
+            // visible with the final layout already in place, and any
+            // subsequent operation (banner toggle, swipe close) gets
+            // its animation back.
             mGridLayoutManager.setInitialPosition(scrollTarget, () -> {
                 if (target != mRecyclerView) return;
+                restoreItemAnimator();
                 Fragment parent = getParentFragment();
                 if (parent instanceof TabsHolderFragment holder) {
                     holder.refreshAppBarLiftFor(target);
@@ -332,8 +336,24 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         } else {
             // No active tab to scroll to (or user is already interacting):
             // release the postpone so the page still renders.
+            restoreItemAnimator();
             releaseHolderPostpone();
         }
+    }
+
+    /**
+     * Re-arm the default ItemAnimator on the RecyclerView. Called once
+     * the initial scroll has settled so subsequent banner toggles, tab
+     * closes, and other notify events get their animations. Safe to
+     * call multiple times — overwriting with a new {@link
+     * DefaultItemAnimator} is idempotent in effect (the previous
+     * animator is replaced and its in-flight animations cancelled,
+     * which is fine because by this point there are none).
+     */
+    private void restoreItemAnimator() {
+        if (mRecyclerView == null) return;
+        if (mRecyclerView.getItemAnimator() != null) return;
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
     }
 
     /** Releases the postponed enter transition on the parent holder, if
@@ -444,6 +464,16 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         mRecyclerView.setAdapter(mBrowserTabsAdapter);
         mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.list_item_margin)));
+        // Suppress the ItemAnimator while the initial-scroll gate is
+        // closed. Without this, the late banner-insertion notify (see
+        // {@link #awaitsBannerSignal()}) makes DefaultItemAnimator
+        // translate every tab's Y from its old visual slot to its new
+        // one over 250 ms — the user perceives that as the active row
+        // "scrolling down" right after the page opens. Restored from
+        // {@link #runGatedInitialScroll()} once the LM has placed the
+        // final layout, so subsequent banner toggles and the swipe-
+        // close trailing animation still play.
+        mRecyclerView.setItemAnimator(null);
     }
 
     /**

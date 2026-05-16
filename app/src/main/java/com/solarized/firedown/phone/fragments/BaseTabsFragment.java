@@ -16,6 +16,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -121,27 +122,29 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     protected abstract int getEmptyTextRes();
 
     /**
-     * Adjusts the raw adapter position to account for any header adapters
-     * (e.g. banner in ConcatAdapter). Default returns position unchanged.
+     * Adapter-space → tab-list-index. The only header the adapter ever
+     * renders is the archive-banner row at position 0 (regular tabs
+     * only), and the adapter exposes that as
+     * {@link com.solarized.firedown.ui.adapters.BrowserTabsAdapter#getPositionOffset()}.
+     * Going through the adapter keeps "is the banner there?" in a single
+     * place — there's no second source of truth in the fragment to drift
+     * out of sync.
      *
-     * <p>Data-space → adapter-space conversion is the inverse: use
-     * {@link #getLeadingAdapterCount()}.</p>
+     * <p>A negative return means the click landed on the banner row;
+     * callers ({@link #onItemClick}, swipe) treat that as a no-op for
+     * the tab-list operations they own.</p>
      */
     protected int adjustPosition(int position) {
-        return position;
+        if (mBrowserTabsAdapter == null) return position;
+        return position - mBrowserTabsAdapter.getPositionOffset();
     }
 
     /**
-     * Number of rows the RecyclerView's adapter renders *before* the tab
-     * data starts — for ConcatAdapter setups with a banner/header. Used
-     * when translating a data-space index (e.g. active tab position) to
-     * an adapter-space index for {@code scrollToPosition}.
-     *
-     * <p>Default is 0. Subclasses that wrap {@code mBrowserTabsAdapter}
-     * in a ConcatAdapter override this.</p>
+     * Tab-list-index → adapter-space. Inverse of {@link #adjustPosition}.
      */
     protected int getLeadingAdapterCount() {
-        return 0;
+        if (mBrowserTabsAdapter == null) return 0;
+        return mBrowserTabsAdapter.getPositionOffset();
     }
 
     /**
@@ -370,14 +373,55 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     }
 
     /**
-     * Sets up the RecyclerView with layout manager, adapter, and decoration.
-     * Override to wrap the adapter in a ConcatAdapter, add scroll listeners, etc.
+     * Sets up the RecyclerView with layout manager, adapter, span lookup
+     * and item decoration. The banner row (if any) spans the full grid
+     * width; tab rows take a single span. Lookup is keyed off the
+     * adapter's view type so this works untouched in incognito (which
+     * never shows a banner) and in any future header types.
      */
     protected void setupRecyclerView() {
+        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                if (mBrowserTabsAdapter == null) return 1;
+                if (position < 0 || position >= mBrowserTabsAdapter.getItemCount()) return 1;
+                int viewType = mBrowserTabsAdapter.getItemViewType(position);
+                if (viewType == BrowserTabsAdapter.TYPE_BANNER) {
+                    return mGridLayoutManager.getSpanCount();
+                }
+                return 1;
+            }
+        });
         mRecyclerView.setLayoutManager(mGridLayoutManager);
         mRecyclerView.setAdapter(mBrowserTabsAdapter);
         mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(
                 getResources().getDimensionPixelSize(R.dimen.list_item_margin)));
+    }
+
+    /**
+     * Updates the LCEE empty-state visibility against the current tab
+     * list <em>plus</em> the adapter's banner state. The recycler is
+     * considered "empty" only when there are no tabs <em>and</em> the
+     * archive banner isn't showing — otherwise the banner row keeps the
+     * list non-empty even with zero tabs.
+     */
+    protected void updateEmptyVisibility(@Nullable List<GeckoStateEntity> tabs) {
+        if (mLCEERecyclerView == null) return;
+        boolean tabsEmpty = tabs == null || tabs.isEmpty();
+        boolean bannerVisible = mBrowserTabsAdapter != null
+                && mBrowserTabsAdapter.isBannerVisible();
+        if (tabsEmpty && !bannerVisible) {
+            mLCEERecyclerView.showEmpty();
+        } else {
+            mLCEERecyclerView.hideAll();
+        }
+    }
+
+    /** Re-check empty state using the adapter's current tab list — used
+     *  by subclasses after the banner shows / dismisses. */
+    protected void refreshEmptyVisibility() {
+        if (mBrowserTabsAdapter == null) return;
+        updateEmptyVisibility(mBrowserTabsAdapter.getCurrentList());
     }
 
     @Override
@@ -417,11 +461,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
 
         // Tab list
         getTabsLiveData().observe(getViewLifecycleOwner(), tabs -> {
-            if (tabs == null || tabs.isEmpty()) {
-                mLCEERecyclerView.showEmpty();
-            } else {
-                mLCEERecyclerView.hideAll();
-            }
+            updateEmptyVisibility(tabs);
             mBrowserTabsAdapter.submitList(tabs, () -> {
                 if (mRecyclerView == null) return;
                 onTabListSubmitted(tabs);
@@ -525,6 +565,18 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
 
     private final ItemTouchHelper.SimpleCallback mSwipeCallback =
             new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+                @Override
+                public int getSwipeDirs(@NonNull RecyclerView recyclerView,
+                                        @NonNull RecyclerView.ViewHolder viewHolder) {
+                    // Banner row is not a tab — block swipe so the user
+                    // can't drag it off-screen (it would just snap back,
+                    // and the onSwiped guard below would no-op anyway).
+                    if (viewHolder.getItemViewType() == BrowserTabsAdapter.TYPE_BANNER) {
+                        return 0;
+                    }
+                    return super.getSwipeDirs(recyclerView, viewHolder);
+                }
 
                 @Override
                 public boolean onMove(@NonNull RecyclerView recyclerView,

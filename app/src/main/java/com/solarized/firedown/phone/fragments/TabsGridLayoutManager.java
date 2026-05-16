@@ -8,38 +8,25 @@ import androidx.recyclerview.widget.RecyclerView;
 
 /**
  * GridLayoutManager that exposes a "scroll to this position on first
- * paint" hook and disables predictive item animations.
+ * paint" hook for the initial active-tab placement.
  *
- * <p><b>Disabling predictive animations.</b> The tabs grid doesn't
- * visually animate insertions or removals — cards just appear or
- * disappear. With predictive animations on,
- * {@code notifyItemRangeChanged} with a payload (e.g. an active tab's
- * thumbnail loading after the page is already on screen) triggers a
- * pre-layout pass followed by a real layout pass. Between the two
- * passes the LM resets {@code mAnchorInfo.mValid}, so the post-layout
- * pass re-runs {@code updateAnchorFromChildren} — which iterates
- * {@code mChildHelper} indices, not adapter positions. The
- * scrap/reattach of the changed view holder shuffles those indices,
- * the "first reference child" picked during step 2 isn't the same one
- * step 1 anchored on, and the viewport drifts by one row. Returning
- * {@code false} from {@code supportsPredictiveItemAnimations} tells
- * RecyclerView to skip step 1 entirely — single layout pass per
- * notify, no anchor drift.
+ * <p>Predictive item animations are left enabled (the default). The
+ * earlier anchor-drift workaround that disabled them was unblocking
+ * the {@code ConcatAdapter(banner, tabs)} setup — banner show/hide
+ * forced an insert/remove at adapter position 0 while the LM was
+ * mid-layout, and the pre/post-layout anchor recomputation drifted
+ * by one row. Now that the banner lives inside the tabs adapter as a
+ * view type, banner toggles dispatch through the same diff pipeline
+ * as everything else and the two-pass animation runs cleanly.
  *
- * <p><b>Trust-the-first-layout hook.</b> With predictive animations
- * off, every {@code scrollToPositionWithOffset} produces exactly one
- * layout pass that's free to honor the request, clamp it, or end up
- * wherever the LM thinks is best given the dataset and viewport
- * shape. We accept whatever it produces — there's no second pass
- * waiting to override it. {@code setInitialPosition} queues the
- * scroll and arms a one-shot waiting flag; the very next non-pre
- * {@code onLayoutCompleted} fires the {@code onReached} callback
- * regardless of {@code findFirstVisibleItemPosition()}'s value.
- * No retry loop, no convergence checks, no escape hatches: if the
- * LM can place the active row at the requested offset it will, and
- * if it has to clamp it'll still leave the active row in view
- * (that's what clamping does — the dataset's bottom-most rows are
- * shown).
+ * <p><b>Trust-the-first-layout hook.</b>
+ * {@code scrollToPositionWithOffset} queued from
+ * {@link #setInitialPosition(int, Runnable)} arms a one-shot waiting
+ * flag; the very next non-pre {@code onLayoutCompleted} fires the
+ * {@code onReached} callback regardless of where the LM ended up
+ * placing the row. If the LM has to clamp (target near the end of a
+ * short list), clamping still leaves the active row in view, which
+ * is the only invariant the caller cares about.
  */
 public class TabsGridLayoutManager extends GridLayoutManager {
 
@@ -49,11 +36,6 @@ public class TabsGridLayoutManager extends GridLayoutManager {
 
     public TabsGridLayoutManager(Context context, int spanCount) {
         super(context, spanCount);
-    }
-
-    @Override
-    public boolean supportsPredictiveItemAnimations() {
-        return false;
     }
 
     /**
@@ -89,11 +71,11 @@ public class TabsGridLayoutManager extends GridLayoutManager {
         if (!mWaitingForFirstLayout) return;
         if (state.isPreLayout()) return;
 
-        // The LM has now had its one chance to honor
-        // scrollToPositionWithOffset. With predictive animations off
-        // there's no second pass that can move us elsewhere, so
-        // whatever it produced is the final placement. Release the
-        // gate.
+        // First non-pre-layout pass after the scroll request: whatever
+        // the LM produced is the final placement (predictive animations
+        // do run a second pass, but it's restricted to running the
+        // animator on the already-positioned children — it can't shift
+        // the anchor). Release the gate.
         mWaitingForFirstLayout = false;
         Runnable cb = mOnReached;
         mScrollTarget = RecyclerView.NO_POSITION;

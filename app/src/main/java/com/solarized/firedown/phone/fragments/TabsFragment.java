@@ -7,8 +7,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
-import androidx.recyclerview.widget.ConcatAdapter;
-import androidx.recyclerview.widget.GridLayoutManager;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.IntentActions;
@@ -16,7 +14,7 @@ import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.geckoview.GeckoState;
-import com.solarized.firedown.ui.adapters.ArchiveBannerAdapter;
+import com.solarized.firedown.ui.adapters.BrowserTabsAdapter;
 import com.solarized.firedown.utils.NavigationUtils;
 
 
@@ -28,16 +26,40 @@ import dagger.hilt.android.AndroidEntryPoint;
 /**
  * Tab switcher for regular (non-incognito) tabs.
  *
- * <p>Adds archive banner via ConcatAdapter, undo-on-close snackbar,
- * scroll-to-active behavior, and auto-archive of inactive tabs.</p>
+ * <p>Adds an archive-banner row at adapter position 0 via the shared
+ * {@link BrowserTabsAdapter} (single adapter, two view types — no
+ * ConcatAdapter), undo-on-close snackbar, scroll-to-active behavior,
+ * and auto-archive of inactive tabs.</p>
  */
 @AndroidEntryPoint
 public class TabsFragment extends BaseTabsFragment {
 
     private static final String TAG = TabsFragment.class.getSimpleName();
 
-    private ArchiveBannerAdapter mBannerAdapter;
     private Snackbar mActiveSnackbar;
+
+    /**
+     * Listener installed on the adapter for the banner row. Held as a
+     * field so a single instance is reused across re-bind / re-show
+     * cycles instead of allocating a new one for every observer tick.
+     */
+    private final BrowserTabsAdapter.OnBannerActionListener mBannerListener =
+            new BrowserTabsAdapter.OnBannerActionListener() {
+                @Override
+                public void onViewArchive() {
+                    snapshotDismissedAt();
+                    if (mBrowserTabsAdapter != null) mBrowserTabsAdapter.dismissBanner();
+                    refreshEmptyVisibility();
+                    NavigationUtils.navigateSafe(mNavController, R.id.tabs_archive);
+                }
+
+                @Override
+                public void onDismiss() {
+                    snapshotDismissedAt();
+                    if (mBrowserTabsAdapter != null) mBrowserTabsAdapter.dismissBanner();
+                    refreshEmptyVisibility();
+                }
+            };
 
     @Override
     public void onDestroyView() {
@@ -45,7 +67,6 @@ public class TabsFragment extends BaseTabsFragment {
             mActiveSnackbar.dismiss();
             mActiveSnackbar = null;
         }
-        mBannerAdapter = null;
         mToolbar = null;
         super.onDestroyView();
     }
@@ -109,54 +130,15 @@ public class TabsFragment extends BaseTabsFragment {
         mActiveSnackbar.show();
     }
 
-    @Override
-    protected int adjustPosition(int position) {
-        return position - mBannerAdapter.getItemCount();  // negative means banner was clicked
-    }
+    // adjustPosition / getLeadingAdapterCount come from BaseTabsFragment now;
+    // both delegate to BrowserTabsAdapter#getPositionOffset which is the
+    // single source of truth for "is the banner row in the way?"
 
-    @Override
-    protected void setupRecyclerView() {
-        // Banner adapter — count-driven, persistent until dismissed
-        // (matches Fennec / Chrome / Edge inactive-tabs UX). Dismiss
-        // writes the current archived-tab count to a shared-pref so
-        // the banner stays gone until *more* tabs are archived.
-        mBannerAdapter = new ArchiveBannerAdapter(new ArchiveBannerAdapter.OnBannerActionListener() {
-            @Override
-            public void onViewArchive() {
-                snapshotDismissedAt();
-                mBannerAdapter.dismiss();
-                NavigationUtils.navigateSafe(mNavController, R.id.tabs_archive);
-            }
-
-            @Override
-            public void onDismiss() {
-                snapshotDismissedAt();
-                mBannerAdapter.dismiss();
-            }
-        });
-
-        // ConcatAdapter wraps banner + tabs
-        ConcatAdapter.Config config = new ConcatAdapter.Config.Builder()
-                .setIsolateViewTypes(true)
-                .build();
-        ConcatAdapter concatAdapter = new ConcatAdapter(config, mBannerAdapter, mBrowserTabsAdapter);
-
-        // Banner spans full width in grid mode
-        mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                if (position < mBannerAdapter.getItemCount()) {
-                    return mGridLayoutManager.getSpanCount();
-                }
-                return 1;
-            }
-        });
-
-        mRecyclerView.setLayoutManager(mGridLayoutManager);
-        mRecyclerView.setAdapter(concatAdapter);
-        mRecyclerView.addItemDecoration(new com.solarized.firedown.ui.EqualSpacingItemDecoration(
-                getResources().getDimensionPixelSize(R.dimen.list_item_margin)));
-    }
+    // setupRecyclerView is inherited unchanged — the base attaches the
+    // single BrowserTabsAdapter directly. The banner span-full-width
+    // rule lives in the base's SpanSizeLookup (keyed off the adapter's
+    // view type), so it works for both regular and incognito tabs even
+    // though only TabsFragment ever shows a banner.
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -177,14 +159,21 @@ public class TabsFragment extends BaseTabsFragment {
 
         mGeckoStateViewModel.getArchivedTabCountSince(sinceMs)
                 .observe(getViewLifecycleOwner(), count -> {
+                    if (mBrowserTabsAdapter == null) return;
                     int current = count != null ? count : 0;
                     int dismissedAt = mSharedPreferences.getInt(
                             Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
                     if (current > dismissedAt) {
-                        mBannerAdapter.show(current, titlePluralsRes);
+                        mBrowserTabsAdapter.showBanner(current, titlePluralsRes, mBannerListener);
                     } else {
-                        mBannerAdapter.dismiss();
+                        mBrowserTabsAdapter.dismissBanner();
                     }
+                    // The empty-state check has to be re-run whenever the
+                    // banner toggles: with no tabs and the banner showing
+                    // the recycler still has content (just the banner row),
+                    // and dismissing the banner with no tabs flips us back
+                    // to the empty placeholder.
+                    refreshEmptyVisibility();
                 });
 
         // Debounced auto-archive trigger

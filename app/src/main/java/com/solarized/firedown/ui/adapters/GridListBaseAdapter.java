@@ -4,10 +4,10 @@ import android.annotation.SuppressLint;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.AdapterListUpdateCallback;
 import androidx.recyclerview.widget.AsyncDifferConfig;
 import androidx.recyclerview.widget.AsyncListDiffer;
 import androidx.recyclerview.widget.DiffUtil;
+import androidx.recyclerview.widget.ListUpdateCallback;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
@@ -36,15 +36,31 @@ public abstract class GridListBaseAdapter<T, VH extends RecyclerView.ViewHolder>
 
     @SuppressWarnings("unused")
     protected GridListBaseAdapter(@NonNull DiffUtil.ItemCallback<T> diffCallback) {
-        mDiffer = new AsyncListDiffer<>(new AdapterListUpdateCallback(this),
+        mDiffer = new AsyncListDiffer<>(new OffsetListUpdateCallback(),
                 new AsyncDifferConfig.Builder<>(diffCallback).build());
         mDiffer.addListListener(mListener);
     }
 
     @SuppressWarnings("unused")
     protected GridListBaseAdapter(@NonNull AsyncDifferConfig<T> config) {
-        mDiffer = new AsyncListDiffer<>(new AdapterListUpdateCallback(this), config);
+        mDiffer = new AsyncListDiffer<>(new OffsetListUpdateCallback(), config);
         mDiffer.addListListener(mListener);
+    }
+
+    /**
+     * Number of header items the adapter renders before the diffed data.
+     * Default is 0 — subclasses that prepend their own rows (e.g. a
+     * single-shot banner) override this and keep its value in sync with
+     * {@link #getItemCount()} / {@link #getItemViewType(int)}.
+     *
+     * <p>The offset is folded into every DiffUtil-driven
+     * {@code notifyItem*} call so AsyncListDiffer's per-position updates
+     * line up with the adapter's actual layout — without this, an insert
+     * at differ-index 0 would notify position 0 (the banner row) and the
+     * RecyclerView would animate the wrong slot.</p>
+     */
+    protected int getPositionOffset() {
+        return 0;
     }
 
     /**
@@ -131,6 +147,34 @@ public abstract class GridListBaseAdapter<T, VH extends RecyclerView.ViewHolder>
         return mList ? TYPE_LIST : TYPE_GRID;
     }
 
+    /**
+     * Translates differ-space positions into adapter-space before calling
+     * the corresponding {@code notifyItem*} method. The stock
+     * {@code AdapterListUpdateCallback} passes positions through
+     * verbatim, which only works when the diffed list starts at adapter
+     * position 0 — see {@link #getPositionOffset()} for why we need the
+     * shift.
+     */
+    private final class OffsetListUpdateCallback implements ListUpdateCallback {
+        @Override
+        public void onInserted(int position, int count) {
+            notifyItemRangeInserted(position + getPositionOffset(), count);
+        }
 
+        @Override
+        public void onRemoved(int position, int count) {
+            notifyItemRangeRemoved(position + getPositionOffset(), count);
+        }
 
+        @Override
+        public void onMoved(int fromPosition, int toPosition) {
+            int offset = getPositionOffset();
+            notifyItemMoved(fromPosition + offset, toPosition + offset);
+        }
+
+        @Override
+        public void onChanged(int position, int count, @Nullable Object payload) {
+            notifyItemRangeChanged(position + getPositionOffset(), count, payload);
+        }
+    }
 }

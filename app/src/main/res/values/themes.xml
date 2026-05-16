@@ -70,6 +70,11 @@
 
     <style name="Theme.FireDown.Vault" parent="Theme.FireDown">
 
+        <!-- Tells BaseActivity to skip the AMOLED true-black overlay
+             for this theme — the overlay would otherwise overwrite
+             the incognito surface colors with pure black. -->
+        <item name="isIncognitoTheme">true</item>
+
         <!-- Primary -->
         <item name="colorPrimary">@color/incognito_primary</item>
         <item name="colorOnPrimary">@color/incognito_on_primary</item>

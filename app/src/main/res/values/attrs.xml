@@ -30,4 +30,10 @@
         <!-- width / height — e.g. 0.75 for 3:4 (taller than wide). -->
         <attr name="aspectRatio" format="float" />
     </declare-styleable>
+
+    <!-- Set true on themes that already use the incognito palette
+         (e.g. Theme.FireDown.Vault) so BaseActivity skips the AMOLED
+         true-black overlay for them. Without this guard the overlay's
+         pure-black surfaces clobber the incognito purple. -->
+    <attr name="isIncognitoTheme" format="boolean" />
 </resources>

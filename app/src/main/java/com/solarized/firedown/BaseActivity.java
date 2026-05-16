@@ -102,7 +102,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
                 .getDefaultSharedPreferences(this)
                 .getInt(Preferences.SETTINGS_THEME,
                         androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM);
-        if (themePref == Preferences.THEME_OLED) {
+        if (themePref == Preferences.THEME_OLED && !isIncognitoTheme()) {
             getTheme().applyStyle(R.style.ThemeOverlay_App_OLED, true);
         }
 
@@ -403,8 +403,19 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
         snackbar.show();
     }
 
-
-
-
-
+    /**
+     * True when the activity's resolved theme advertises
+     * {@code ?attr/isIncognitoTheme} (set on {@code Theme.FireDown.Vault}).
+     * Used to skip the AMOLED true-black overlay for incognito-themed
+     * activities — without this guard the overlay's pure-black
+     * surfaces would clobber the incognito purple set by the vault
+     * theme.
+     */
+    private boolean isIncognitoTheme() {
+        android.util.TypedValue tv = new android.util.TypedValue();
+        if (!getTheme().resolveAttribute(R.attr.isIncognitoTheme, tv, true)) {
+            return false;
+        }
+        return tv.type == android.util.TypedValue.TYPE_INT_BOOLEAN && tv.data != 0;
+    }
 }

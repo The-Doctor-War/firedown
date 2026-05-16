@@ -321,6 +321,7 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         if (tabs == null || tabs.isEmpty()) {
             // Empty list — nothing to scroll, just reveal the page.
             mLastTabActive = 0;
+            updateEmptyVisibility(tabs);
             releaseHolderPostpone();
             return;
         }
@@ -374,6 +375,12 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
                         + mGridLayoutManager.findLastVisibleItemPosition()
                         + " adapterCount=" + mBrowserTabsAdapter.getItemCount()
                         + " bannerVisible=" + mBrowserTabsAdapter.isBannerVisible());
+                // First reveal: LCEE was in loading state up to now so
+                // the user never saw the unsorted top of the list. Now
+                // the LM has placed the active row, flip LCEE to show
+                // the recycler — what the user sees is the final
+                // layout, not a top-of-list flash followed by a scroll.
+                updateEmptyVisibility(tabs);
                 Fragment parent = getParentFragment();
                 if (parent instanceof TabsHolderFragment holder) {
                     holder.refreshAppBarLiftFor(target);
@@ -383,9 +390,10 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
             });
         } else {
             // No active tab to scroll to (or user is already interacting):
-            // release the postpone so the page still renders.
+            // reveal the page and release the postpone.
             jlog("runGatedInitialScroll: empty-or-touching branch (activeId="
                     + activeId + " userTouching=" + userTouching + ")");
+            updateEmptyVisibility(tabs);
             releaseHolderPostpone();
         }
     }
@@ -550,9 +558,14 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
     }
 
     /** Re-check empty state using the adapter's current tab list — used
-     *  by subclasses after the banner shows / dismisses. */
+     *  by subclasses after the banner shows / dismisses. No-op while
+     *  the initial-scroll gate is still pending so an early banner
+     *  emission can't flip LCEE to VISIBLE before the LM has placed
+     *  the active row (would cause a top-of-list flash). The gate's
+     *  terminal paths handle the first reveal. */
     protected void refreshEmptyVisibility() {
         if (mBrowserTabsAdapter == null) return;
+        if (mInitialScrollPending) return;
         updateEmptyVisibility(mBrowserTabsAdapter.getCurrentList());
     }
 
@@ -603,9 +616,19 @@ public abstract class BaseTabsFragment extends BaseFocusFragment implements OnIt
         mGeckoMediaController.getActiveSessionIdsLiveData().observe(getViewLifecycleOwner(),
                 sessionIds -> mBrowserTabsAdapter.setMediaSessionIds(sessionIds));
 
-        // Tab list
+        // Tab list. While the initial-scroll gate is still closed we
+        // intentionally do NOT touch LCEE visibility: the recycler
+        // stays hidden behind LCEE's initial loading view so the user
+        // can't see tabs render at positions 0..N-1 before the gate
+        // releases and scrolls to the active tab. The gate's terminal
+        // paths (runGatedInitialScroll callback and the empty / no-
+        // active branches) call updateEmptyVisibility once the layout
+        // has settled, which is the first time the RV becomes
+        // visible. Subsequent emissions go through the normal path.
         getTabsLiveData().observe(getViewLifecycleOwner(), tabs -> {
-            updateEmptyVisibility(tabs);
+            if (!mInitialScrollPending) {
+                updateEmptyVisibility(tabs);
+            }
             mBrowserTabsAdapter.submitList(tabs, () -> {
                 if (mRecyclerView == null) return;
                 onTabListSubmitted(tabs);

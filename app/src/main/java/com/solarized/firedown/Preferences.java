@@ -248,6 +248,25 @@ public class Preferences {
      */
     public static final String SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT = "com.solarized.firedown.preferences.tabs.archive.banner.dismissed.at";
 
+    /**
+     * Cached archived-tab count windowed by {@link #SETTINGS_TABS_ARCHIVE_BANNER_LAST_INTERVAL}.
+     * Written by the banner observer in TabsFragment whenever the
+     * archived-count LiveData fires; read synchronously on the next
+     * fragment open so we can decide whether to show the banner row
+     * without waiting on the Room count query. Removes the ~250 ms
+     * spinner gap between "open tabs page" and "tabs visible". Matches
+     * how Chrome / Fenix avoid spinners on tab-switcher open — both
+     * keep their tab + chrome state in an already-warm in-memory
+     * store; for our archive count which lives in Room a small
+     * SharedPreferences cache is the equivalent.
+     *
+     * <p>Default {@code -1} means "no cache, fall back to async wait".
+     * The interval is stored alongside so a settings change
+     * (day / week / month) invalidates the cache.</p>
+     */
+    public static final String SETTINGS_TABS_ARCHIVE_BANNER_LAST_COUNT = "com.solarized.firedown.preferences.tabs.archive.banner.last.count";
+    public static final String SETTINGS_TABS_ARCHIVE_BANNER_LAST_INTERVAL = "com.solarized.firedown.preferences.tabs.archive.banner.last.interval";
+
     public static final String SETTINGS_BLOCK_COOKIE_NOTICES = "com.solarized.firedown.preferences.ublock.block.cookie.notices";
     public static final boolean DEFAULT_BLOCK_COOKIE_NOTICES = false;
 

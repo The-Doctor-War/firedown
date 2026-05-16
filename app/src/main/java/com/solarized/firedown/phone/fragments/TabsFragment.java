@@ -185,6 +185,9 @@ public class TabsFragment extends BaseTabsFragment {
                     int current = count != null ? count : 0;
                     int dismissedAt = mSharedPreferences.getInt(
                             Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, 0);
+                    Log.d("TabsJump", "[TabsFragment] banner observer emitted count="
+                            + current + " dismissedAt=" + dismissedAt
+                            + " force=" + (BuildConfig.DEBUG && FORCE_BANNER_FOR_DEBUG));
                     // Debug-only forced banner: stripped from release
                     // builds by the constant-folding R8 does on
                     // BuildConfig.DEBUG. Floors the count to 7 so the

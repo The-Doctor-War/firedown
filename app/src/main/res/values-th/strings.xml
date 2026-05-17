@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">ไม่มีวิดีโอที่ใช้ได้</string>
     <string name="clipboard">คัดลอกไปยังคลิปบอร์ดแล้ว</string>
     <string name="close_tab">ปิดแท็บ</string>
-    <string name="close_tab_title">ปิดแท็บ %s</string>
-    <string name="close_tabs_after_one_day">หลังจากผ่านไปหนึ่งวัน</string>
+<string name="close_tabs_after_one_day">หลังจากผ่านไปหนึ่งวัน</string>
     <string name="close_tabs_after_one_day_summary">ปิดหลังจากหนึ่งวัน</string>
     <string name="close_tabs_after_one_month">หลังจากผ่านไปหนึ่งเดือน</string>
     <string name="close_tabs_after_one_month_summary">ปิดหลังจากหนึ่งเดือน</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">ปิดหลังจากหนึ่งสัปดาห์</string>
     <string name="close_tabs_manually">กำหนดเอง</string>
     <string name="close_tabs_manually_summary">ปิดด้วยตนเอง</string>
-    <string name="connection_enhanced_protection">การป้องกันการติดตามที่ได้รับการปรับปรุง</string>
-    <string name="connection_secure">การเชื่อมต่อมีความปลอดภัย</string>
+<string name="connection_secure">การเชื่อมต่อมีความปลอดภัย</string>
     <string name="delete">ลบ</string>
     <string name="delete_all_bookmarks">การดำเนินการนี้จะลบข้อมูลบุ๊กมาร์กทั้งหมดของคุณ</string>
     <string name="delete_all_browsing">การล้างคุกกี้และข้อมูลไซต์ทั้งหมดอาจทำให้คุณออกจากระบบเว็บไซต์และลบเนื้อหาออฟไลน์</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">จำเป็นต้องเล่นไฟล์มีเดียบางไฟล์ก่อนที่ Firedown จะสามารถตรวจพบว่าเป็นไฟล์ที่ดาวน์โหลดได้</string>
     <string name="empty_media_help_title">เล่นสื่อก่อนดาวน์โหลด</string>
     <string name="empty_media_subtitle_help">กรุณาเล่นสื่อตามปกติ. จากนั้นควรปรากฏขึ้นพร้อมกับไฟล์มีเดียอื่น ๆ หลังจากกดปุ่มไฟ</string>
-    <string name="empty_password_exeception_list">การเข้าสู่ระบบและรหัสผ่านที่ไม่ได้รับการบันทึกจะแสดงที่นี่</string>
-    <string name="empty_password_list">รหัสผ่านที่คุณบันทึกไว้จะปรากฏที่นี่</string>
-    <string name="error_check_internet_connection">ข้อผิดพลาดในการเชื่อมต่ออินเทอร์เน็ต</string>
+<string name="error_check_internet_connection">ข้อผิดพลาดในการเชื่อมต่ออินเทอร์เน็ต</string>
     <string name="error_cipher">ข้อผิดพลาดการเข้ารหัสไฟล์</string>
     <string name="error_external_storage">ไม่มีที่จัดเก็บข้อมูลภายนอก</string>
     <string name="error_file">ไม่สามารถเปิดไฟล์ได้</string>
@@ -169,8 +165,7 @@
     <string name="popup_toggle">สลับมุมมอง</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL ต้องขึ้นต้นด้วย “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL ไม่ถูกต้อง</string>
-    <string name="prompt_update_confirmation">อัปเดต</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">แนะนำให้เปิดใช้งานการป้องกันการติดตาม</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">แนะนำให้เปิดใช้งานการป้องกันการติดตาม</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">หากมีบางอย่างดูเสียหายในไซต์นี้ ให้ลองปิดการป้องกัน</string>
     <string name="quick_settings_sheet_insecure_connection_2">การเชื่อมต่อไม่ปลอดภัย</string>
     <string name="quick_settings_sheet_secure_connection_2">การเชื่อมต่อปลอดภัย</string>
@@ -186,8 +181,7 @@
     <string name="restart_origin">เริ่มต้นใหม่</string>
     <string name="save_file">บันทึกไฟล์เป็น</string>
     <string name="save_file_name">ชื่อไฟล์</string>
-    <string name="scroll_up">เลื่อนขึ้น</string>
-    <string name="search">ค้นหา</string>
+<string name="search">ค้นหา</string>
     <string name="search_clip">กรอกลิงค์จากคลิปบอร์ด</string>
     <string name="search_for">ค้นหา %s</string>
     <string name="search_store">ค้นหาในร้านค้า</string>
@@ -217,8 +211,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">ใช้ DNS resolver เริ่มต้นของคุณถ้ามีปัญหากับผู้ให้บริการ secure DNS</string>
-    <string name="settings_doh_server_error_format">ป้อน URL ที่มีรูปแบบที่ถูกต้อง</string>
+<string name="settings_doh_server_error_format">ป้อน URL ที่มีรูปแบบที่ถูกต้อง</string>
     <string name="settings_doh_server_error_provider">โปรดตรวจสอบว่าเป็นผู้ให้บริการที่ถูกต้องหรือลองอีกครั้งในภายหลัง</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -239,8 +232,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">หน้าเพจจะโหลดตามปกติ แต่จะมีการบล็อคตัวติดตามน้อยลง</string>
     <string name="settings_enhanced_tracking_protection_strict">เข้มงวด</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">การป้องกันการติดตามที่แข็งแกร่งขึ้นและประสิทธิภาพที่เร็วขึ้น แต่บางเว็บไซต์อาจไม่ทำงานอย่างถูกต้อง</string>
-    <string name="settings_exceptions">ข้อยกเว้น</string>
-    <string name="settings_follow_device_theme">ตามชุดตกแต่งอุปกรณ์</string>
+<string name="settings_follow_device_theme">ตามชุดตกแต่งอุปกรณ์</string>
     <string name="settings_general">ทั่วไป</string>
     <string name="settings_license">ใบอนุญาต</string>
     <string name="settings_light_theme">สว่าง</string>
@@ -271,8 +263,7 @@
     <string name="sort">จัดเรียงตาม</string>
     <string name="sort_by_date_opt">วันที่</string>
     <string name="sort_by_size_opt">ขนาด</string>
-    <string name="sort_by_type_all">ทั้งหมด</string>
-    <string name="sort_by_type_alpha">ชื่อ</string>
+<string name="sort_by_type_alpha">ชื่อ</string>
     <string name="sort_by_type_apk">เอพีเค</string>
     <string name="sort_by_type_audio">เสียง</string>
     <string name="sort_by_type_docs">เอกสาร</string>
@@ -282,14 +273,7 @@
     <string name="sort_by_type_video">วีดีโอ</string>
     <string name="sort_by_type_zip">ซิป</string>
     <string name="switch_to_tab_description">สลับไปยังแท็บ</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s สามารถปิดแท็บที่คุณไม่ได้ดูในช่วงเดือนที่ผ่านมาได้</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">ปิด</string>
-    <string name="tab_tray_inactive_auto_close_title">ปิดอัตโนมัติหลังจากหนึ่งเดือน?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">ปิดในการตั้งค่า</string>
-    <string name="tab_tray_inactive_onboarding_message">แท็บที่คุณไม่ได้ดูเป็นเวลา 2 สัปดาห์จะถูกย้ายมาที่นี่</string>
-    <string name="tab_tray_inactive_recently_closed">เพิ่งปิดล่าสุด</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">เปิดการปิดอัตโนมัติ</string>
-    <string name="task_decryption_finished">การถอดรหัสเสร็จสิ้น</string>
+<string name="task_decryption_finished">การถอดรหัสเสร็จสิ้น</string>
     <string name="task_encryption_finished">การเข้ารหัสเสร็จสิ้น</string>
     <string name="top_sites_edit_dialog_save">บันทึก</string>
     <string name="top_sites_edit_dialog_title">แก้ไขทางลัด</string>

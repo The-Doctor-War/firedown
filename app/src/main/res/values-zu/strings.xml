@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Awekho ama-SVG atholakalayo.</string>
     <string name="capture_empty_video_message">Awekho amavidiyo atholakalayo.</string>
     <string name="clipboard">Ikopishelwe ebhodini lokunamathisela</string>
-    <string name="connection_enhanced_protection">Ukuvikelwa Kokulandelela Okuthuthukisiwe</string>
-    <string name="connection_secure">Uxhumano luvikelekile</string>
+<string name="connection_secure">Uxhumano luvikelekile</string>
     <string name="delete">Susa</string>
     <string name="delete_all_bookmarks">Lokhu kuzosusa yonke idatha yakho yamabhukumaka.</string>
     <string name="delete_all_browsing">Ukususa wonke amakhukhi nedatha yesayithi kungase kukukhiphe kumawebhusayithi futhi kususe okuqukethwe okungaxhunyiwe ku-inthanethi.</string>
@@ -64,9 +63,7 @@
     <string name="empty_media_help">Amanye amafayela emidiya adinga ukudlalwa ngaphambi kokuthi i-Firedown iwathole njengamafayela alandekayo.</string>
     <string name="empty_media_help_title">Dlala imidiya ngaphambi kokulanda</string>
     <string name="empty_media_subtitle_help">Sicela udlale imidiya njengenjwayelo. Kufanele-ke ivele namanye amafayela emidiya, ngemva kokucindezela Inkinobho Yomlilo.</string>
-    <string name="empty_password_exeception_list">Ukungena ngemvume namaphasiwedi angalondoloziwe azoboniswa lapha.</string>
-    <string name="empty_password_list">Iphasiwedi yakho elondoloziwe izovela lapha.</string>
-    <string name="error_check_internet_connection">Iphutha lokuxhumeka kwe-inthanethi.</string>
+<string name="error_check_internet_connection">Iphutha lokuxhumeka kwe-inthanethi.</string>
     <string name="error_cipher">Iphutha lokubethela ifayela</string>
     <string name="error_external_storage">Asikho isitoreji sangaphandle esitholakalayo</string>
     <string name="error_file">Ayikwazanga ukuvula ifayela.</string>
@@ -144,8 +141,7 @@
     <string name="restart_origin">Qala kabusha</string>
     <string name="save_file">Londoloza ifayela njenge</string>
     <string name="save_file_name">Igama lefayela</string>
-    <string name="scroll_up">Skrolela Phezulu</string>
-    <string name="search">Sesha</string>
+<string name="search">Sesha</string>
     <string name="search_clip">Gcwalisa isixhumanisi ebhodini lokunamathisela</string>
     <string name="search_for">Sesha i-%s</string>
     <string name="search_store">Sesha esitolo</string>
@@ -187,8 +183,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Amakhasi azolayisha ngokujwayelekile, kodwa avimbe ama-tracker ambalwa.</string>
     <string name="settings_enhanced_tracking_protection_strict">Iqinile</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Ukuvikelwa kokulandelela okuqinile nokusebenza okusheshayo, kodwa amanye amasayithi angase angasebenzi kahle.</string>
-    <string name="settings_exceptions">Okuhlukile</string>
-    <string name="settings_general">Okujwayelekile</string>
+<string name="settings_general">Okujwayelekile</string>
     <string name="settings_license">Amalayisense</string>
     <string name="settings_lock_summary">Khiya ukufinyelela ku-UI</string>
     <string name="settings_lock_title">Ukhiye wohlelo lokusebenza</string>
@@ -206,8 +201,7 @@
     <string name="sort">Hlunga nge</string>
     <string name="sort_by_date_opt">Usuku</string>
     <string name="sort_by_size_opt">Usayizi</string>
-    <string name="sort_by_type_all">Konke</string>
-    <string name="sort_by_type_alpha">Igama</string>
+<string name="sort_by_type_alpha">Igama</string>
     <string name="sort_by_type_apk">I-Apk</string>
     <string name="sort_by_type_audio">Umsindo</string>
     <string name="sort_by_type_docs">Amadokhumenti</string>

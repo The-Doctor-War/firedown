@@ -67,8 +67,7 @@
     <string name="clipboard">Copiado al portapapeles</string>
     <string name="clipboard_delete">¿Eliminar sugerencia del portapapeles?</string>
     <string name="close_tab">Cerrar pestaña</string>
-    <string name="close_tab_title">Cerrar pestaña %s</string>
-    <string name="close_tabs_after_one_day">Después de un día</string>
+<string name="close_tabs_after_one_day">Después de un día</string>
     <string name="close_tabs_after_one_day_summary">Cerrar después de un día</string>
     <string name="close_tabs_after_one_month">Después de un mes</string>
     <string name="close_tabs_after_one_month_summary">Cerrar después de un mes</string>
@@ -76,8 +75,7 @@
     <string name="close_tabs_after_one_week_summary">Cerrar después de una semana</string>
     <string name="close_tabs_manually">Manualmente</string>
     <string name="close_tabs_manually_summary">Cerrar manualmente</string>
-    <string name="connection_enhanced_protection">Protección de seguimiento mejorada</string>
-    <string name="connection_secure">La conexión es segura</string>
+<string name="connection_secure">La conexión es segura</string>
     <string name="delete">Borrar</string>
     <string name="delete_all_bookmarks">Esto eliminará todos los datos de tus marcadores.</string>
     <string name="delete_all_browsing">Borrar todas las cookies y los datos del sitio puede cerrar tu sesión en los sitios web y eliminar el contenido sin conexión.</string>
@@ -137,7 +135,7 @@
     <string name="download_quality">Calidad de descarga</string>
     <string name="download_queued">Pendiente…</string>
     <string name="download_rename_error">El nombre del archivo ya está en uso.</string>
-    <string name="download_saved_to_vault">Guardado en la Cámara</string>
+    <string name="download_saved_to_vault">Guardado en la caja fuerte</string>
     <string name="download_saving_audio">Extrayendo audio, espera…</string>
     <string name="download_saving_gif">Creando GIF, por favor espera…</string>
     <string name="downloading">Descargando…</string>
@@ -152,9 +150,7 @@
     <string name="empty_media_help">Algunos archivos multimedia deben reproducirse antes de que Firedown pueda detectarlos como archivos descargables.</string>
     <string name="empty_media_help_title">Reproducir el contenido multimedia antes de descargarlo</string>
     <string name="empty_media_subtitle_help">Por favor, reproduce los medios como de costumbre. Luego debería aparecer con los otros archivos multimedia, después de presionar el botón de Firedown.</string>
-    <string name="empty_password_exeception_list">Los inicios de sesión y contraseñas que no se guarden se mostrarán aquí.</string>
-    <string name="empty_password_list">Tu contraseña guardada aparecerá aquí.</string>
-    <string name="error_check_internet_connection">Error de conexión a Internet.</string>
+<string name="error_check_internet_connection">Error de conexión a Internet.</string>
     <string name="error_cipher">Error de cifrado de archivo</string>
     <string name="error_external_storage">Almacenamiento externo no disponible</string>
     <string name="error_file">No se pudo abrir el archivo.</string>
@@ -266,8 +262,7 @@
     <string name="popup_tabs_close">Cerrar todas las pestañas</string>
     <string name="popup_tabs_new">Nueva pestaña</string>
     <string name="popup_toggle">Cambiar vista</string>
-    <string name="prompt_update_confirmation">Actualizar</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Se recomienda activar la protección contra rastreo.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Se recomienda activar la protección contra rastreo.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Si algo parece roto en este sitio, prueba a desactivarla.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Conexión no segura</string>
     <string name="quick_settings_sheet_secure_connection_2">Conexión segura</string>
@@ -301,8 +296,7 @@
     <string name="restart_origin">Reanudar</string>
     <string name="save_file">Guardar archivo como</string>
     <string name="save_file_name">Nombre del archivo</string>
-    <string name="scroll_up">Desplazar hacia arriba</string>
-    <string name="search">Buscar</string>
+<string name="search">Buscar</string>
     <string name="search_clip">Rellenar enlace desde el portapapeles</string>
     <string name="search_for">Buscar %s</string>
     <string name="search_store">Buscar en la tienda</string>
@@ -348,8 +342,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Usa la resolución de DNS predeterminada si hay un problema con el proveedor de DNS seguro</string>
-    <string name="settings_doh_server_error_format">Introduce una URL con el formato correcto</string>
+<string name="settings_doh_server_error_format">Introduce una URL con el formato correcto</string>
     <string name="settings_doh_server_error_provider">Por favor, verifica que sea un proveedor válido o inténtalo nuevamente más tarde</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -361,8 +354,7 @@
     <string name="settings_doh_title">DNS sobre HTTPS</string>
     <string name="settings_donate">Donar</string>
     <string name="settings_donate_summary">Devuelve lo que Firedown valga para ti</string>
-    <string name="settings_donate_title">Valor por valor</string>
-    <string name="settings_downloads">Descargas</string>
+<string name="settings_downloads">Descargas</string>
     <string name="settings_downloads_free">Descargas &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_path">Ubicación de Descargas</string>
     <string name="settings_downloads_sdcard_free">Tarjeta SD &lt;small&gt;(%s)/small&gt;</string>
@@ -387,8 +379,7 @@
     <string name="settings_query_param_remove_title">¿Eliminar parámetro?</string>
     <string name="settings_query_param_remove_message">¿Eliminar %1$s de la lista?</string>
     <string name="settings_query_param_remove_confirm">Eliminar</string>
-    <string name="settings_exceptions">Excepciones</string>
-    <string name="settings_follow_device_theme">Seguir tema del dispositivo</string>
+<string name="settings_follow_device_theme">Seguir tema del dispositivo</string>
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">General</string>
     <string name="settings_help">Ayuda</string>
@@ -452,8 +443,7 @@
     <string name="sort_by_date_opt">Fecha</string>
     <string name="sort_by_origin_opt">Dominio</string>
     <string name="sort_by_size_opt">Tamaño</string>
-    <string name="sort_by_type_all">Todo</string>
-    <string name="sort_by_type_alpha">Nombre</string>
+<string name="sort_by_type_alpha">Nombre</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Documentos</string>
@@ -468,14 +458,7 @@
     <string name="stream_type_muxed">vídeo+audio</string>
     <string name="stream_type_video">vídeo</string>
     <string name="switch_to_tab_description">Cambiar a la pestaña</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s puede cerrar pestañas que no has visto durante el último mes.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Cerrar</string>
-    <string name="tab_tray_inactive_auto_close_title">¿Cerrar automáticamente después de un mes?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Desactivar en los ajustes</string>
-    <string name="tab_tray_inactive_onboarding_message">Aquí se mueven las pestañas que no has visto durante dos semanas.</string>
-    <string name="tab_tray_inactive_recently_closed">Cerradas recientemente</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Activar el cierre automático</string>
-    <string name="tabs_incognito">Privadas</string>
+<string name="tabs_incognito">Privadas</string>
     <string name="tabs_incognito_empty">No hay pestañas privadas</string>
     <string name="tabs_regular">Pestañas</string>
     <string name="task_audio_failed">No se pudo extraer el audio</string>
@@ -506,4 +489,7 @@
     <string name="media_seek_forward_10s_desc">Avanzar 10 segundos</string>
 
 
+    <string name="play">Reproducir</string>
+    <string name="pip_play">Reproducir</string>
+    <string name="pip_pause">Pausa</string>
 </resources>

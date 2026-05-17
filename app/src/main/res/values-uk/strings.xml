@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Немає доступних відео.</string>
     <string name="clipboard">Скопійовано в буфер обміну</string>
     <string name="close_tab">Закрити вкладку</string>
-    <string name="close_tab_title">Закрити вкладку %s</string>
-    <string name="close_tabs_after_one_day">Через день</string>
+<string name="close_tabs_after_one_day">Через день</string>
     <string name="close_tabs_after_one_day_summary">Закрити через день</string>
     <string name="close_tabs_after_one_month">Через місяць</string>
     <string name="close_tabs_after_one_month_summary">Закрити через місяць</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Закрити через тиждень</string>
     <string name="close_tabs_manually">Власноруч</string>
     <string name="close_tabs_manually_summary">Закривати власноруч</string>
-    <string name="connection_enhanced_protection">Покращений захист від відстеження</string>
-    <string name="connection_secure">Підключення захищене</string>
+<string name="connection_secure">Підключення захищене</string>
     <string name="delete">Видалити</string>
     <string name="delete_all_bookmarks">Це призведе до видалення всіх ваших закладок.</string>
     <string name="delete_all_browsing">Очистивши всі файли cookie та дані сайтів, ви можете вийти з веб-сайтів і видалити офлайн-контент.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">Деякі мультимедійні файли потрібно відтворити, перш ніж Firedown зможе визначити їх як файли для завантаження.</string>
     <string name="empty_media_help_title">Перед завантаженням відтворіть мультимедійний файл</string>
     <string name="empty_media_subtitle_help">Будь ласка, відтворюйте медіа як зазвичай. Потім він має з’явитися разом з іншими мультимедійними файлами після натискання кнопки Fire.</string>
-    <string name="empty_password_exeception_list">Тут будуть показані логіни та паролі, які не були збережені.</string>
-    <string name="empty_password_list">Тут з’явиться ваш збережений пароль.</string>
-    <string name="error_check_internet_connection">Помилка підключення до Інтернету.</string>
+<string name="error_check_internet_connection">Помилка підключення до Інтернету.</string>
     <string name="error_cipher">Помилка шифрування файлу</string>
     <string name="error_external_storage">Зовнішня пам’ять недоступна</string>
     <string name="error_file">Не вдалося відкрити файл.</string>
@@ -174,8 +170,7 @@
     <string name="settings_jit_enabled_summary">Якщо вимкнено, продуктивність складних веб-сторінок може бути знижена. Зміна цього налаштування перезавантажить ваш браузер</string>
     <string name="settings_webgl_disabled">Вимкнути WebGL</string>
     <string name="settings_webrtc_enabled">Увімкнути WebRTC</string>
-    <string name="prompt_update_confirmation">Оновити</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Рекомендовано ввімкнути захист від відстеження.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Рекомендовано ввімкнути захист від відстеження.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Якщо на цьому сайті щось не працює, спробуйте вимкнути захист.</string>
     <string name="quick_settings_sheet_insecure_connection_2">З’єднання не захищене</string>
     <string name="quick_settings_sheet_secure_connection_2">З’єднання захищене</string>
@@ -191,8 +186,7 @@
     <string name="restart_origin">Перезапустити</string>
     <string name="save_file">Зберегти файл як</string>
     <string name="save_file_name">Ім\'я файлу</string>
-    <string name="scroll_up">Прокрутити вгору</string>
-    <string name="search">Пошук</string>
+<string name="search">Пошук</string>
     <string name="search_clip">Заповнити посилання з буфера обміну</string>
     <string name="search_for">Шукати %s</string>
     <string name="search_store">Шукайте в магазині</string>
@@ -222,8 +216,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Використовувати ваш типовий DNS-перетворювач у разі проблем із провайдером захищеної DNS</string>
-    <string name="settings_doh_server_error_format">Введіть URL-адресу в правильному форматі</string>
+<string name="settings_doh_server_error_format">Введіть URL-адресу в правильному форматі</string>
     <string name="settings_doh_server_error_provider">Будь ласка, переконайтеся, що це дійсний постачальник, або повторіть спробу пізніше</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -244,8 +237,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Сторінки завантажуватимуться нормально, але блокуватимуть менше трекерів.</string>
     <string name="settings_enhanced_tracking_protection_strict">Суворий</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Сильніший захист від відстеження та швидша продуктивність, але деякі сайти можуть не працювати належним чином.</string>
-    <string name="settings_exceptions">Винятки</string>
-    <string name="settings_follow_device_theme">Тема пристрою</string>
+<string name="settings_follow_device_theme">Тема пристрою</string>
     <string name="settings_general">Загальний</string>
     <string name="settings_license">Ліцензії</string>
     <string name="settings_light_theme">Світла</string>
@@ -276,8 +268,7 @@
     <string name="sort">Параметри сортування</string>
     <string name="sort_by_date_opt">Дата</string>
     <string name="sort_by_size_opt">Розмір</string>
-    <string name="sort_by_type_all">Все</string>
-    <string name="sort_by_type_alpha">Ім\'я</string>
+<string name="sort_by_type_alpha">Ім\'я</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Аудіо</string>
     <string name="sort_by_type_docs">Документи</string>
@@ -288,14 +279,7 @@
     <string name="sort_by_type_zip">Zip</string>
     <string name="spoof_timezone_summary">Коли ввімкнено, посилює захист відбитків пальців</string>
     <string name="switch_to_tab_description">Перейти на вкладку</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s може закривати вкладки, які ви не переглядали впродовж останнього місяця.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Закрити</string>
-    <string name="tab_tray_inactive_auto_close_title">Закрити через місяць автоматично?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Вимкнути у налаштуваннях</string>
-    <string name="tab_tray_inactive_onboarding_message">Сюди переміщуються вкладки, які ви не переглядали впродовж двох тижнів.</string>
-    <string name="tab_tray_inactive_recently_closed">Недавно закриті</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Увімкнути автозакриття</string>
-    <string name="task_decryption_finished">Розшифровку завершено</string>
+<string name="task_decryption_finished">Розшифровку завершено</string>
     <string name="task_encryption_finished">Шифрування завершено</string>
     <string name="top_sites_edit_dialog_save">Зберегти</string>
     <string name="top_sites_edit_dialog_title">Редагувати ярлик</string>

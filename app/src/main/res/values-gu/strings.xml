@@ -20,8 +20,7 @@
     <string name="capture_empty_svgs_message">કોઈ SVG ઉપલબ્ધ નથી.</string>
     <string name="capture_empty_video_message">કોઈ વીડિયો ઉપલબ્ધ નથી.</string>
     <string name="clipboard">ક્લિપબોર્ડ પર કૉપિ કરી</string>
-    <string name="connection_enhanced_protection">ઉન્નત ટ્રેકિંગ સંરક્ષણ</string>
-    <string name="connection_secure">કનેક્શન સુરક્ષિત છે</string>
+<string name="connection_secure">કનેક્શન સુરક્ષિત છે</string>
     <string name="delete">કાઢી નાખો</string>
     <string name="delete_all_bookmarks">આ તમારા બધા બુકમાર્ક્સ ડેટાને કાઢી નાખશે.</string>
     <string name="delete_all_browsing">બધી કૂકીઝ અને સાઇટ ડેટા સાફ કરવાથી તમે વેબસાઇટ્સમાંથી સાઇન આઉટ થઈ શકો છો અને ઑફલાઇન સામગ્રી દૂર કરી શકો છો.</string>
@@ -63,9 +62,7 @@
     <string name="empty_media_help">ફાયરડાઉન ડાઉનલોડ કરી શકાય તેવી ફાઇલો તરીકે શોધી શકે તે પહેલાં કેટલીક મીડિયા ફાઇલોને ચલાવવાની જરૂર છે.</string>
     <string name="empty_media_help_title">ડાઉનલોડ કરતા પહેલા મીડિયા ચલાવો</string>
     <string name="empty_media_subtitle_help">કૃપા કરીને મીડિયાને હંમેશની જેમ ચલાવો. તે પછી ફાયર-બટન દબાવ્યા પછી, અન્ય મીડિયા ફાઇલો સાથે દેખાવું જોઈએ.</string>
-    <string name="empty_password_exeception_list">લૉગિન અને પાસવર્ડ જે સાચવવામાં આવ્યા નથી તે અહીં બતાવવામાં આવશે.</string>
-    <string name="empty_password_list">તમારો સાચવેલો પાસવર્ડ અહીં દેખાશે.</string>
-    <string name="error_check_internet_connection">ઇન્ટરનેટ કનેક્શન ભૂલ.</string>
+<string name="error_check_internet_connection">ઇન્ટરનેટ કનેક્શન ભૂલ.</string>
     <string name="error_cipher">ફાઇલ એન્ક્રિપ્શન ભૂલ</string>
     <string name="error_external_storage">કોઈ બાહ્ય સ્ટોરેજ ઉપલબ્ધ નથી</string>
     <string name="error_file">ફાઇલ ખોલી શકાઈ નથી.</string>
@@ -140,8 +137,7 @@
     <string name="restart_origin">પુનઃપ્રારંભ</string>
     <string name="save_file">ફાઇલ તરીકે સાચવો</string>
     <string name="save_file_name">ફાઈલનું નામ</string>
-    <string name="scroll_up">ઉપર સ્ક્રોલ કરો</string>
-    <string name="search">શોધો</string>
+<string name="search">શોધો</string>
     <string name="search_clip">ક્લિપબોર્ડ પરથી લિંક ભરો</string>
     <string name="search_for">%s માટે શોધો</string>
     <string name="search_store">સ્ટોર પર શોધો</string>
@@ -178,8 +174,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">પૃષ્ઠો સામાન્ય રીતે લોડ થશે, પરંતુ ઓછા ટ્રેકર્સને અવરોધિત કરશે.</string>
     <string name="settings_enhanced_tracking_protection_strict">કડક</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">મજબૂત ટ્રેકિંગ સુરક્ષા અને ઝડપી પ્રદર્શન, પરંતુ કેટલીક સાઇટ્સ યોગ્ય રીતે કામ કરી શકશે નહીં.</string>
-    <string name="settings_exceptions">અપવાદો</string>
-    <string name="settings_general">જનરલ</string>
+<string name="settings_general">જનરલ</string>
     <string name="settings_license">લાઇસન્સ</string>
     <string name="settings_lock_summary">UI ની ઍક્સેસ લૉક કરો</string>
     <string name="settings_lock_title">એપ લોક</string>
@@ -197,8 +192,7 @@
     <string name="sort">આનાથી સૉર્ટ કરો</string>
     <string name="sort_by_date_opt">તારીખ</string>
     <string name="sort_by_size_opt">કદ</string>
-    <string name="sort_by_type_all">બધા</string>
-    <string name="sort_by_type_alpha">નામ</string>
+<string name="sort_by_type_alpha">નામ</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">ઓડિયો</string>
     <string name="sort_by_type_docs">દસ્તાવેજો</string>

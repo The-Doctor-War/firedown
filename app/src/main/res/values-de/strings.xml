@@ -67,8 +67,7 @@
     <string name="clipboard">In die Zwischenablage kopiert</string>
     <string name="clipboard_delete">Vorschlag aus Zwischenablage entfernen?</string>
     <string name="close_tab">Tab schließen</string>
-    <string name="close_tab_title">Tab %s schließen</string>
-    <string name="close_tabs_after_one_day">Nach einem Tag</string>
+<string name="close_tabs_after_one_day">Nach einem Tag</string>
     <string name="close_tabs_after_one_day_summary">Nach einem Tag schließen</string>
     <string name="close_tabs_after_one_month">Nach einem Monat</string>
     <string name="close_tabs_after_one_month_summary">Nach einem Monat schließen</string>
@@ -76,8 +75,7 @@
     <string name="close_tabs_after_one_week_summary">Nach einer Woche schließen</string>
     <string name="close_tabs_manually">Nie</string>
     <string name="close_tabs_manually_summary">Manuell schließen</string>
-    <string name="connection_enhanced_protection">Verbesserter Tracking-Schutz</string>
-    <string name="connection_secure">Verbindung ist sicher</string>
+<string name="connection_secure">Verbindung ist sicher</string>
     <string name="delete">Löschen</string>
     <string name="delete_all_bookmarks">Dadurch werden alle Ihre Lesezeichendaten gelöscht.</string>
     <string name="delete_all_browsing">Durch das Löschen aller Cookies und Websitedaten werden Sie möglicherweise von Websites abgemeldet und Offlineinhalte entfernt.</string>
@@ -152,9 +150,7 @@
     <string name="empty_media_help">Einige Mediendateien müssen abgespielt werden, bevor Firedown sie als herunterladbare Dateien erkennen kann.</string>
     <string name="empty_media_help_title">Spielen Sie die Medien vor dem Herunterladen ab</string>
     <string name="empty_media_subtitle_help">Bitte spielen Sie die Medien wie gewohnt ab. Es sollte dann zusammen mit den anderen Mediendateien erscheinen, nachdem Sie den Feuer-Knopf gedrückt haben.</string>
-    <string name="empty_password_exeception_list">Nicht gespeicherte Logins und Passwörter werden hier angezeigt.</string>
-    <string name="empty_password_list">Ihr gespeichertes Passwort wird hier angezeigt.</string>
-    <string name="error_check_internet_connection">Fehler bei der Internetverbindung.</string>
+<string name="error_check_internet_connection">Fehler bei der Internetverbindung.</string>
     <string name="error_cipher">Fehler bei der Dateiverschlüsselung</string>
     <string name="error_external_storage">Kein externer Speicher verfügbar</string>
     <string name="error_file">Datei konnte nicht geöffnet werden.</string>
@@ -266,8 +262,7 @@
     <string name="popup_tabs_close">Alle Tabs schließen</string>
     <string name="popup_tabs_new">Neuer Tab</string>
     <string name="popup_toggle">Ansicht umschalten</string>
-    <string name="prompt_update_confirmation">Aktualisieren</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Es wird empfohlen, den Schutz vor Aktivitätenverfolgung zu aktivieren.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Es wird empfohlen, den Schutz vor Aktivitätenverfolgung zu aktivieren.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Wenn etwas auf dieser Website beschädigt aussieht, deaktivieren Sie ihn.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Verbindung ist nicht sicher</string>
     <string name="quick_settings_sheet_secure_connection_2">Verbindung ist sicher</string>
@@ -301,8 +296,7 @@
     <string name="restart_origin">Neu starten</string>
     <string name="save_file">Datei speichern als</string>
     <string name="save_file_name">Dateiname</string>
-    <string name="scroll_up">Hochscrollen</string>
-    <string name="search">Suchen</string>
+<string name="search">Suchen</string>
     <string name="search_clip">Link aus der Zwischenablage füllen</string>
     <string name="search_for">Nach %s suchen</string>
     <string name="search_store">Im Shop suchen</string>
@@ -348,8 +342,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Ihren Standard-DNS-Resolver verwenden, wenn ein Problem mit dem sicheren DNS-Anbieter auftritt</string>
-    <string name="settings_doh_server_error_format">Geben Sie eine korrekt formatierte URL ein</string>
+<string name="settings_doh_server_error_format">Geben Sie eine korrekt formatierte URL ein</string>
     <string name="settings_doh_server_error_provider">Bitte überprüfen Sie, ob es sich um einen gültigen Anbieter handelt, oder versuchen Sie es später noch einmal</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -361,8 +354,7 @@
     <string name="settings_doh_title">DNS über HTTPS</string>
     <string name="settings_donate">Spenden</string>
     <string name="settings_donate_summary">Gib zurück, was Firedown dir wert ist</string>
-    <string name="settings_donate_title">Wert für Wert</string>
-    <string name="settings_downloads">Downloads</string>
+<string name="settings_downloads">Downloads</string>
     <string name="settings_downloads_free">Downloads &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_path">Download-Speicherort</string>
     <string name="settings_downloads_sdcard_free">SD-Karte &lt;small&gt;(%s)/small&gt;</string>
@@ -387,8 +379,7 @@
     <string name="settings_query_param_remove_title">Parameter entfernen?</string>
     <string name="settings_query_param_remove_message">%1$s aus der Liste entfernen?</string>
     <string name="settings_query_param_remove_confirm">Entfernen</string>
-    <string name="settings_exceptions">Ausnahmen</string>
-    <string name="settings_follow_device_theme">Geräte-Theme beachten</string>
+<string name="settings_follow_device_theme">Geräte-Theme beachten</string>
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">Allgemein</string>
     <string name="settings_help">Hilfe</string>
@@ -452,8 +443,7 @@
     <string name="sort_by_date_opt">Datum</string>
     <string name="sort_by_origin_opt">Domain</string>
     <string name="sort_by_size_opt">Größe</string>
-    <string name="sort_by_type_all">Alle</string>
-    <string name="sort_by_type_alpha">Name</string>
+<string name="sort_by_type_alpha">Name</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Dokumente</string>
@@ -468,14 +458,7 @@
     <string name="stream_type_muxed">Video+Audio</string>
     <string name="stream_type_video">Video</string>
     <string name="switch_to_tab_description">Zum Tab wechseln</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s kann Tabs schließen, die Sie im letzten Monat nicht angesehen haben.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Schließen</string>
-    <string name="tab_tray_inactive_auto_close_title">Nach einem Monat automatisch schließen?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">In den Einstellungen deaktivieren</string>
-    <string name="tab_tray_inactive_onboarding_message">Tabs, die Sie zwei Wochen lang nicht angesehen haben, werden hierher verschoben.</string>
-    <string name="tab_tray_inactive_recently_closed">Kürzlich geschlossen</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Automatisches Schließen aktivieren</string>
-    <string name="tabs_incognito">Privat</string>
+<string name="tabs_incognito">Privat</string>
     <string name="tabs_incognito_empty">Keine privaten Tabs</string>
     <string name="tabs_regular">Tabs</string>
     <string name="task_audio_failed">Audio konnte nicht extrahiert werden</string>
@@ -506,4 +489,7 @@
     <string name="media_seek_forward_10s_desc">10 Sekunden vorspulen</string>
 
 
+    <string name="play">Wiedergabe</string>
+    <string name="pip_play">Wiedergabe</string>
+    <string name="pip_pause">Pause</string>
 </resources>

@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Hakuna SVG zinazopatikana.</string>
     <string name="capture_empty_video_message">Hakuna video zinazopatikana.</string>
     <string name="clipboard">Imenakiliwa kwenye ubao wa kunakili</string>
-    <string name="connection_enhanced_protection">Ulinzi Ulioimarishwa wa Ufuatiliaji</string>
-    <string name="connection_secure">Muunganisho ni salama</string>
+<string name="connection_secure">Muunganisho ni salama</string>
     <string name="delete">Futa</string>
     <string name="delete_all_bookmarks">Hii itafuta data yako yote ya alamisho.</string>
     <string name="delete_all_browsing">Kufuta vidakuzi vyote na data ya tovuti kunaweza kukuondoa kwenye tovuti na kuondoa maudhui ya nje ya mtandao.</string>
@@ -64,9 +63,7 @@
     <string name="empty_media_help">Baadhi ya faili za midia zinahitaji kuchezwa kabla ya Firedown kuzitambua kama faili zinazoweza kupakuliwa.</string>
     <string name="empty_media_help_title">Cheza media kabla ya kupakua</string>
     <string name="empty_media_subtitle_help">Tafadhali cheza media kama kawaida. Kisha inapaswa kuonekana na faili zingine za media, baada ya kubonyeza Kitufe cha Moto.</string>
-    <string name="empty_password_exeception_list">Kumbukumbu na manenosiri ambayo hayajahifadhiwa yataonyeshwa hapa.</string>
-    <string name="empty_password_list">Nenosiri lako lililohifadhiwa litaonekana hapa.</string>
-    <string name="error_check_internet_connection">Hitilafu ya muunganisho wa mtandao.</string>
+<string name="error_check_internet_connection">Hitilafu ya muunganisho wa mtandao.</string>
     <string name="error_cipher">Hitilafu ya usimbaji fiche wa faili</string>
     <string name="error_external_storage">Hakuna hifadhi ya nje inayopatikana</string>
     <string name="error_file">Haikuweza kufungua faili.</string>
@@ -146,8 +143,7 @@
     <string name="restart_origin">Anzisha tena</string>
     <string name="save_file">Hifadhi faili kama</string>
     <string name="save_file_name">Jina la faili</string>
-    <string name="scroll_up">Biringiza Juu</string>
-    <string name="search">Tafuta</string>
+<string name="search">Tafuta</string>
     <string name="search_clip">Jaza kiungo kutoka kwenye ubao wa kunakili</string>
     <string name="search_for">Tafuta %s</string>
     <string name="search_store">Tafuta kwenye duka</string>
@@ -190,8 +186,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Kurasa zitapakia kawaida, lakini kuzuia vifuatiliaji vichache.</string>
     <string name="settings_enhanced_tracking_protection_strict">Mkali</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Ulinzi thabiti wa ufuatiliaji na utendakazi wa haraka, lakini baadhi ya tovuti zinaweza zisifanye kazi ipasavyo.</string>
-    <string name="settings_exceptions">Vighairi</string>
-    <string name="settings_general">Kawaida</string>
+<string name="settings_general">Kawaida</string>
     <string name="settings_license">Leseni</string>
     <string name="settings_lock_summary">Funga ufikiaji wa UI</string>
     <string name="settings_lock_title">Kufunga programu</string>
@@ -209,8 +204,7 @@
     <string name="sort">Panga kulingana na</string>
     <string name="sort_by_date_opt">Tarehe</string>
     <string name="sort_by_size_opt">Ukubwa</string>
-    <string name="sort_by_type_all">Zote</string>
-    <string name="sort_by_type_alpha">Jina</string>
+<string name="sort_by_type_alpha">Jina</string>
     <string name="sort_by_type_apk">APK</string>
     <string name="sort_by_type_audio">Sauti</string>
     <string name="sort_by_type_docs">Nyaraka</string>

@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Nie sú k dispozícii žiadne videá.</string>
     <string name="clipboard">Skopírované do schránky</string>
     <string name="close_tab">Zavrieť kartu</string>
-    <string name="close_tab_title">Zavrieť kartu %s</string>
-    <string name="close_tabs_after_one_day">Po jednom dni</string>
+<string name="close_tabs_after_one_day">Po jednom dni</string>
     <string name="close_tabs_after_one_day_summary">Zavrieť po jednom dni</string>
     <string name="close_tabs_after_one_month">Po mesiaci</string>
     <string name="close_tabs_after_one_month_summary">Zavrieť po jednom mesiaci</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Zavrieť po jednom týždni</string>
     <string name="close_tabs_manually">Manuálne</string>
     <string name="close_tabs_manually_summary">Zavrieť ručne</string>
-    <string name="connection_enhanced_protection">Vylepšená ochrana pred sledovaním</string>
-    <string name="connection_secure">Pripojenie je zabezpečené</string>
+<string name="connection_secure">Pripojenie je zabezpečené</string>
     <string name="delete">Odstrániť</string>
     <string name="delete_all_bookmarks">Týmto sa odstránia všetky údaje o vašich záložkách.</string>
     <string name="delete_all_browsing">Vymazanie všetkých súborov cookie a údajov stránok vás môže odhlásiť z webových stránok a odstrániť offline obsah.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">Niektoré mediálne súbory je potrebné prehrať, kým ich Firedown dokáže rozpoznať ako súbory na stiahnutie.</string>
     <string name="empty_media_help_title">Pred stiahnutím prehrajte médium</string>
     <string name="empty_media_subtitle_help">Prehrávajte médiá ako zvyčajne. Potom by sa mal objaviť s ostatnými mediálnymi súbormi po stlačení tlačidla Fire.</string>
-    <string name="empty_password_exeception_list">Tu sa zobrazia prihlásenia a heslá, ktoré nie sú uložené.</string>
-    <string name="empty_password_list">Tu sa zobrazí vaše uložené heslo.</string>
-    <string name="error_check_internet_connection">Chyba internetového pripojenia.</string>
+<string name="error_check_internet_connection">Chyba internetového pripojenia.</string>
     <string name="error_cipher">Chyba šifrovania súboru</string>
     <string name="error_external_storage">Nie je k dispozícii žiadne externé úložisko</string>
     <string name="error_file">Súbor sa nepodarilo otvoriť.</string>
@@ -169,8 +165,7 @@
     <string name="popup_toggle">Prepnúť zobrazenie</string>
     <string name="settings_doh_provider_custom_dialog_error_https">Webová adresa musí začínať reťazcom “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Neplatná URL adresa</string>
-    <string name="prompt_update_confirmation">Aktualizovať</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Odporúča sa zapnúť ochranu pred sledovaním.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Odporúča sa zapnúť ochranu pred sledovaním.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Ak sa niečo na tejto stránke javí ako nefunkčné, skúste ju vypnúť.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Pripojenie nie je zabezpečené</string>
     <string name="quick_settings_sheet_secure_connection_2">Pripojenie je zabezpečené</string>
@@ -186,8 +181,7 @@
     <string name="restart_origin">Reštart</string>
     <string name="save_file">Uložiť súbor ako</string>
     <string name="save_file_name">Názov súboru</string>
-    <string name="scroll_up">Posunúť nahor</string>
-    <string name="search">Vyhľadávanie</string>
+<string name="search">Vyhľadávanie</string>
     <string name="search_clip">Vyplňte odkaz zo schránky</string>
     <string name="search_for">Hľadať %s</string>
     <string name="search_store">Hľadajte v obchode</string>
@@ -217,8 +211,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Ak sa vyskytne problém so zabezpečeným DNS, použije sa predvolený nástroj na prekladanie DNS</string>
-    <string name="settings_doh_server_error_format">Zadajte adresu URL v správnom formáte</string>
+<string name="settings_doh_server_error_format">Zadajte adresu URL v správnom formáte</string>
     <string name="settings_doh_server_error_provider">Overte, že ide o platného poskytovateľa, alebo to skúste znova neskôr</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -239,8 +232,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Stránky sa načítajú normálne, ale blokujú menej sledovačov.</string>
     <string name="settings_enhanced_tracking_protection_strict">Prísne</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Silnejšia ochrana pred sledovaním a rýchlejší výkon, ale niektoré stránky nemusia fungovať správne.</string>
-    <string name="settings_exceptions">Výnimky</string>
-    <string name="settings_follow_device_theme">Podľa zariadenia</string>
+<string name="settings_follow_device_theme">Podľa zariadenia</string>
     <string name="settings_general">generál</string>
     <string name="settings_license">Licencie</string>
     <string name="settings_light_theme">Svetlá</string>
@@ -271,8 +263,7 @@
     <string name="sort">Zoradiť podľa</string>
     <string name="sort_by_date_opt">Dátum</string>
     <string name="sort_by_size_opt">Veľkosť</string>
-    <string name="sort_by_type_all">Všetky</string>
-    <string name="sort_by_type_alpha">Názov</string>
+<string name="sort_by_type_alpha">Názov</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Zvuk</string>
     <string name="sort_by_type_docs">Dokumenty</string>
@@ -282,14 +273,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">PSČ</string>
     <string name="switch_to_tab_description">Prejsť na kartu</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s môže zavrieť karty, ktoré ste za posledný mesiac nevideli.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Zavrieť</string>
-    <string name="tab_tray_inactive_auto_close_title">Automaticky zavrieť po jednom mesiaci?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Vypnúť v nastaveniach</string>
-    <string name="tab_tray_inactive_onboarding_message">Tu sa presunú karty, ktoré ste dva týždne nevideli.</string>
-    <string name="tab_tray_inactive_recently_closed">Nedávno zatvorené</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Zapnúť automatické zatváranie</string>
-    <string name="task_decryption_finished">Dešifrovanie dokončené</string>
+<string name="task_decryption_finished">Dešifrovanie dokončené</string>
     <string name="task_encryption_finished">Šifrovanie dokončené</string>
     <string name="top_sites_edit_dialog_save">Uložiť</string>
     <string name="top_sites_edit_dialog_title">Upraviť skratku</string>

@@ -37,8 +37,7 @@
     <string name="capture_empty_video_message">Nessun video disponibile.</string>
     <string name="clipboard">Copiato negli appunti</string>
     <string name="close_tab">Chiudi scheda</string>
-    <string name="close_tab_title">Chiudi scheda %s</string>
-    <string name="close_tabs_after_one_day">Dopo un giorno</string>
+<string name="close_tabs_after_one_day">Dopo un giorno</string>
     <string name="close_tabs_after_one_day_summary">Chiudi dopo un giorno</string>
     <string name="close_tabs_after_one_month">Dopo un mese</string>
     <string name="close_tabs_after_one_month_summary">Chiudi dopo un mese</string>
@@ -46,8 +45,7 @@
     <string name="close_tabs_after_one_week_summary">Chiudi dopo una settimana</string>
     <string name="close_tabs_manually">Mai</string>
     <string name="close_tabs_manually_summary">Chiudi manualmente</string>
-    <string name="connection_enhanced_protection">Protezione dal tracciamento avanzata</string>
-    <string name="connection_secure">La connessione è sicura</string>
+<string name="connection_secure">La connessione è sicura</string>
     <string name="delete">Elimina</string>
     <string name="delete_all_bookmarks">Ciò eliminerà tutti i dati dei tuoi segnalibri.</string>
     <string name="delete_all_browsing">Cancellare tutti i cookie e i dati dei siti potrebbe farti uscire dai siti web e rimuovere i contenuti offline.</string>
@@ -94,9 +92,7 @@
     <string name="empty_media_help">Alcuni file multimediali devono essere riprodotti prima che Firedown possa rilevarli come file scaricabili.</string>
     <string name="empty_media_help_title">Riproduci il contenuto multimediale prima di scaricarlo</string>
     <string name="empty_media_subtitle_help">Riprodurre il contenuto multimediale come di consueto. Dovrebbe quindi apparire con gli altri file multimediali, dopo aver premuto il pulsante Fire.</string>
-    <string name="empty_password_exeception_list">Qui verranno visualizzati gli accessi e le password non salvati.</string>
-    <string name="empty_password_list">La password salvata apparirà qui.</string>
-    <string name="error_check_internet_connection">Errore di connessione Internet.</string>
+<string name="error_check_internet_connection">Errore di connessione Internet.</string>
     <string name="error_cipher">Errore di crittografia del file</string>
     <string name="error_external_storage">Memoria esterna non disponibile</string>
     <string name="error_file">Impossibile aprire il file.</string>
@@ -184,8 +180,7 @@
     <string name="popup_toggle">Attiva/disattiva visualizzazione</string>
     <string name="settings_doh_provider_custom_dialog_error_https">L’indirizzo deve iniziare con “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Indirizzo non valido</string>
-    <string name="prompt_update_confirmation">Aggiorna</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">È consigliato attivare la protezione antitracciamento.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">È consigliato attivare la protezione antitracciamento.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se qualcosa non funziona su questo sito, prova a disattivarla.</string>
     <string name="quick_settings_sheet_insecure_connection_2">La connessione non è sicura</string>
     <string name="quick_settings_sheet_secure_connection_2">La connessione è sicura</string>
@@ -211,8 +206,7 @@
     <string name="restart_origin">Ricomincia</string>
     <string name="save_file">Salva file come</string>
     <string name="save_file_name">Nome del file</string>
-    <string name="scroll_up">Scorri verso l\'alto</string>
-    <string name="search">Ricerca</string>
+<string name="search">Ricerca</string>
     <string name="search_clip">Compila il collegamento dagli appunti</string>
     <string name="search_for">Cerca %s</string>
     <string name="search_store">Cerca nel negozio</string>
@@ -242,8 +236,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Utilizza il sistema predefinito di risoluzione dei nomi se si verifica un problema con il fornitore di DNS sicuro</string>
-    <string name="settings_doh_server_error_format">Inserisci un URL formattato correttamente</string>
+<string name="settings_doh_server_error_format">Inserisci un URL formattato correttamente</string>
     <string name="settings_doh_server_error_provider">Verificare che sia un provider valido o riprovare più tardi</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -278,8 +271,7 @@
     <string name="settings_query_param_remove_title">Rimuovere il parametro?</string>
     <string name="settings_query_param_remove_message">Rimuovere %1$s dall\'elenco?</string>
     <string name="settings_query_param_remove_confirm">Rimuovi</string>
-    <string name="settings_exceptions">Eccezioni</string>
-    <string name="settings_follow_device_theme">Usa il tema del dispositivo</string>
+<string name="settings_follow_device_theme">Usa il tema del dispositivo</string>
     <string name="settings_general">Generale</string>
     <string name="settings_license">Licenze</string>
     <string name="settings_light_theme">Chiaro</string>
@@ -310,8 +302,7 @@
     <string name="sort">Ordina per</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Dimensione</string>
-    <string name="sort_by_type_all">Tutto</string>
-    <string name="sort_by_type_alpha">Nome</string>
+<string name="sort_by_type_alpha">Nome</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Documenti</string>
@@ -321,14 +312,7 @@
     <string name="sort_by_type_video">video</string>
     <string name="sort_by_type_zip">Zip\n\n</string>
     <string name="switch_to_tab_description">Passa alla scheda</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s può chiudere le schede che non hai visualizzato nell’ultimo mese.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Chiudi</string>
-    <string name="tab_tray_inactive_auto_close_title">Chiudi automaticamente dopo un mese?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Disattiva nelle impostazioni</string>
-    <string name="tab_tray_inactive_onboarding_message">Le schede che non visualizzi da due settimane vengono spostate qui.</string>
-    <string name="tab_tray_inactive_recently_closed">Chiuse di recente</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Attiva chiusura automatica</string>
-    <string name="task_decryption_finished">Decifratura completata</string>
+<string name="task_decryption_finished">Decifratura completata</string>
     <string name="task_encryption_finished">Crittografia completata</string>
     <string name="task_gif_finished">GIF creata</string>
     <string name="top_sites_edit_dialog_save">Salva</string>

@@ -31,8 +31,7 @@
     <string name="capture_empty_video_message">Nenhum vídeo disponível.</string>
     <string name="clipboard">Copiado para a área de transferência</string>
     <string name="close_tab">Fechar separador</string>
-    <string name="close_tab_title">Fechar separador %s</string>
-    <string name="close_tabs_after_one_day">Depois de um dia</string>
+<string name="close_tabs_after_one_day">Depois de um dia</string>
     <string name="close_tabs_after_one_day_summary">Fechar depois de um dia</string>
     <string name="close_tabs_after_one_month">Depois de um mês</string>
     <string name="close_tabs_after_one_month_summary">Fechar depois um mês</string>
@@ -40,8 +39,7 @@
     <string name="close_tabs_after_one_week_summary">Fechar depois de uma semana</string>
     <string name="close_tabs_manually">Manualmente</string>
     <string name="close_tabs_manually_summary">Fechar manualmente</string>
-    <string name="connection_enhanced_protection">Proteção aprimorada contra rastreamento</string>
-    <string name="connection_secure">A conexão é segura</string>
+<string name="connection_secure">A conexão é segura</string>
     <string name="delete">Excluir</string>
     <string name="delete_all_bookmarks">Isso excluirá todos os dados dos seus favoritos.</string>
     <string name="delete_all_browsing">Limpar todos os cookies e dados do site pode desconectar você dos sites e remover conteúdo off-line.</string>
@@ -145,8 +143,7 @@
     <string name="popup_toggle">Alternar visualização</string>
     <string name="settings_doh_provider_custom_dialog_error_https">O URL deve começar com “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL inválido</string>
-    <string name="prompt_update_confirmation">Atualizar</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Recomenda-se a ativação da proteção contra a monitorização.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Recomenda-se a ativação da proteção contra a monitorização.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se parecer que algo não está a funcionar neste site, experimente desativar.</string>
     <string name="quick_settings_sheet_insecure_connection_2">A ligação não é segura</string>
     <string name="quick_settings_sheet_secure_connection_2">A ligação é segura</string>
@@ -157,8 +154,7 @@
     <string name="restart_origin">Reiniciar</string>
     <string name="save_file">Salvar o arquivo como</string>
     <string name="save_file_name">Nome do arquivo</string>
-    <string name="scroll_up">Rolar para cima</string>
-    <string name="search">Procurar</string>
+<string name="search">Procurar</string>
     <string name="search_clip">Preencher link da área de transferência</string>
     <string name="search_for">Pesquisar por %s</string>
     <string name="search_store">Pesquise na loja</string>
@@ -182,8 +178,7 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookies e dados de sites</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">A sua sessão será encerrada na maioria dos sites</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Separadores abertos</string>
-    <string name="settings_doh_server_default">Utiliza o seu tradutor de DNS predefinido se existir um problema com o fornecedor de DNS seguro</string>
-    <string name="settings_enhanced_tracking_protection">Proteção melhorada contra a monitorização</string>
+<string name="settings_enhanced_tracking_protection">Proteção melhorada contra a monitorização</string>
     <string name="settings_enhanced_tracking_protection_custom_description_2">Escolha quais os rastreadores e scripts a bloquear.</string>
     <string name="settings_enhanced_tracking_protection_standard_default_1">Padrão (predefinição)</string>
     <string name="settings_enhanced_tracking_protection_standard_description_5">As páginas serão carregadas normalmente, mas serão bloqueados menos rastreadores.</string>
@@ -215,8 +210,7 @@
     <string name="sort">Ordenar por</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Tamanho</string>
-    <string name="sort_by_type_all">Todos</string>
-    <string name="sort_by_type_alpha">Nome</string>
+<string name="sort_by_type_alpha">Nome</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Áudio</string>
     <string name="sort_by_type_docs">Documentos</string>
@@ -226,14 +220,7 @@
     <string name="sort_by_type_video">Vídeo</string>
     <string name="sort_by_type_zip">Fecho eclair</string>
     <string name="switch_to_tab_description">Mudar para o separador</string>
-    <string name="tab_tray_inactive_auto_close_body_2">O %1$s pode encerrar separadores que não acedeu no último mês.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Encerrar</string>
-    <string name="tab_tray_inactive_auto_close_title">Auto-encerrar após um mês?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Desligar nas definições</string>
-    <string name="tab_tray_inactive_onboarding_message">Os separadores que não acede há duas semanas são movidos para aqui.</string>
-    <string name="tab_tray_inactive_recently_closed">Recentemente fechados</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Ativar encerramento automático</string>
-    <string name="top_sites_edit_dialog_save">Guardar</string>
+<string name="top_sites_edit_dialog_save">Guardar</string>
     <string name="top_sites_edit_dialog_title">Editar atalho</string>
     <string name="top_sites_edit_dialog_url_title">URL</string>
     <string name="top_sites_max_limit_confirmation_button">OK, percebi</string>

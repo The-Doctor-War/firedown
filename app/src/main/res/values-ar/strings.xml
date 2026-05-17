@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">لا توجد مقاطع فيديو متاحة.</string>
     <string name="clipboard">نسخ إلى الحافظة</string>
     <string name="close_tab">أغلِق اللسان</string>
-    <string name="close_tab_title">أغلِق اللسان ”%s“</string>
-    <string name="close_tabs_after_one_day">بعد يوم واحد</string>
+<string name="close_tabs_after_one_day">بعد يوم واحد</string>
     <string name="close_tabs_after_one_day_summary">أغلِق بعد يوم واحد</string>
     <string name="close_tabs_after_one_month">بعد شهر واحد</string>
     <string name="close_tabs_after_one_month_summary">أغلِق بعد شهر واحد</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">أغلِق بعد أسبوع واحد</string>
     <string name="close_tabs_manually">يدويًا</string>
     <string name="close_tabs_manually_summary">أغلِق يدويًا</string>
-    <string name="connection_enhanced_protection">تعزيز حماية التتبع</string>
-    <string name="connection_secure">الاتصال آمن</string>
+<string name="connection_secure">الاتصال آمن</string>
     <string name="delete">يمسح</string>
     <string name="delete_all_bookmarks">سيؤدي هذا إلى حذف جميع بيانات الإشارات المرجعية الخاصة بك.</string>
     <string name="delete_all_browsing">قد يؤدي مسح جميع ملفات تعريف الارتباط وبيانات الموقع إلى تسجيل خروجك من مواقع الويب وإزالة المحتوى غير المتصل بالإنترنت.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">يجب تشغيل بعض ملفات الوسائط قبل أن يتمكن Firedown من اكتشافها كملفات قابلة للتنزيل.</string>
     <string name="empty_media_help_title">قم بتشغيل الوسائط قبل التنزيل</string>
     <string name="empty_media_subtitle_help">يرجى تشغيل الوسائط كالمعتاد. ومن المفترض أن يظهر بعد ذلك مع ملفات الوسائط الأخرى، بعد الضغط على زر التشغيل.</string>
-    <string name="empty_password_exeception_list">سيتم عرض تسجيلات الدخول وكلمات المرور التي لم يتم حفظها هنا.</string>
-    <string name="empty_password_list">ستظهر كلمة المرور المحفوظة هنا.</string>
-    <string name="error_check_internet_connection">خطأ في الاتصال بالإنترنت.</string>
+<string name="error_check_internet_connection">خطأ في الاتصال بالإنترنت.</string>
     <string name="error_cipher">خطأ تشفير الملف</string>
     <string name="error_external_storage">لا يوجد مساحة تخزين خارجية</string>
     <string name="error_file">لا يمكن فتح الملف.</string>
@@ -177,8 +173,7 @@
     <string name="popup_tabs_close">إغلاق كافة علامات التبويب</string>
     <string name="popup_tabs_new">علامة تبويب جديدة</string>
     <string name="popup_toggle">نظرة قوية</string>
-    <string name="prompt_update_confirmation">حدّث</string>
-    <string name="quick_settings_sheet_insecure_connection_2">الاتصال غير آمن</string>
+<string name="quick_settings_sheet_insecure_connection_2">الاتصال غير آمن</string>
     <string name="quick_settings_sheet_secure_connection_2">الاتصال آمن</string>
     <string name="quick_settings_sheet_tracking_site_title">الحماية من التتبع على هذا الموقع</string>
     <plurals name="blocked_trackers_summary">
@@ -202,8 +197,7 @@
     <string name="restart_origin">إعادة تشغيل</string>
     <string name="save_file">احفظ الملف تحت اسم</string>
     <string name="save_file_name">اسم الملف</string>
-    <string name="scroll_up">انتقل إلى أعلى</string>
-    <string name="search">يبحث</string>
+<string name="search">يبحث</string>
     <string name="search_clip">ملء الرابط من الحافظة</string>
     <string name="search_for">البحث عن %s</string>
     <string name="search_store">ابحث في المتجر</string>
@@ -267,8 +261,7 @@
     <string name="settings_query_param_remove_title">هل تريد إزالة المعلمة؟</string>
     <string name="settings_query_param_remove_message">هل تريد إزالة %1$s من القائمة؟</string>
     <string name="settings_query_param_remove_confirm">إزالة</string>
-    <string name="settings_exceptions">الاستثناءات</string>
-    <string name="settings_follow_device_theme">اتبع سمة الجهاز</string>
+<string name="settings_follow_device_theme">اتبع سمة الجهاز</string>
     <string name="settings_general">عام</string>
     <string name="settings_license">التراخيص</string>
     <string name="settings_light_theme">فاتحة</string>
@@ -299,8 +292,7 @@
     <string name="sort">الترتيب حسب</string>
     <string name="sort_by_date_opt">تاريخ</string>
     <string name="sort_by_size_opt">مقاس</string>
-    <string name="sort_by_type_all">الجميع</string>
-    <string name="sort_by_type_alpha">اسم</string>
+<string name="sort_by_type_alpha">اسم</string>
     <string name="sort_by_type_apk">APK</string>
     <string name="sort_by_type_audio">صوتي</string>
     <string name="sort_by_type_docs">وثائق</string>
@@ -310,14 +302,7 @@
     <string name="sort_by_type_video">فيديو</string>
     <string name="sort_by_type_zip">أَزِيز</string>
     <string name="switch_to_tab_description">انتقل إلى اللسان</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s يمكنه غلق الألسنة التي لم تعرضها منذ شهر تلقائيًا.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">أغلِق</string>
-    <string name="tab_tray_inactive_auto_close_title">أتريد إغلاقها تلقائيًا بعد شهر؟</string>
-    <string name="tab_tray_inactive_onboarding_button_text">عطّله من الإعدادات</string>
-    <string name="tab_tray_inactive_onboarding_message">ستُنقل الألسنة التي لم تعرضها منذ أسبوعين إلى هنا.</string>
-    <string name="tab_tray_inactive_recently_closed">المُغلقة حديثًا</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">شغّل الإغلاق التلقائي</string>
-    <string name="task_encryption_finished">تم الانتهاء من التشفير</string>
+<string name="task_encryption_finished">تم الانتهاء من التشفير</string>
     <string name="task_gif_finished">تم إنشاء GIF</string>
     <string name="top_sites_edit_dialog_save">احفظ</string>
     <string name="top_sites_edit_dialog_title">حرّر الاختصار</string>

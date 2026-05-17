@@ -67,8 +67,7 @@
     <string name="clipboard">クリップボードにコピーされました</string>
     <string name="clipboard_delete">クリップボードから候補を削除しますか？</string>
     <string name="close_tab">タブを閉じる</string>
-    <string name="close_tab_title">%s のタブを閉じる</string>
-    <string name="close_tabs_after_one_day">1 日後</string>
+<string name="close_tabs_after_one_day">1 日後</string>
     <string name="close_tabs_after_one_day_summary">1 日後に閉じる</string>
     <string name="close_tabs_after_one_month">1 か月後</string>
     <string name="close_tabs_after_one_month_summary">1 か月後に閉じる</string>
@@ -76,8 +75,7 @@
     <string name="close_tabs_after_one_week_summary">1 週間後に閉じる</string>
     <string name="close_tabs_manually">閉じない</string>
     <string name="close_tabs_manually_summary">手動で閉じる</string>
-    <string name="connection_enhanced_protection">強化されたトラッキング保護</string>
-    <string name="connection_secure">接続は安全です</string>
+<string name="connection_secure">接続は安全です</string>
     <string name="delete">消去</string>
     <string name="delete_all_bookmarks">これにより、ブックマーク データがすべて削除されます。</string>
     <string name="delete_all_browsing">すべての Cookie とサイト データをクリアすると、Web サイトからサインアウトされ、オフライン コンテンツが削除される場合があります。</string>
@@ -152,9 +150,7 @@
     <string name="empty_media_help">一部のメディア ファイルは、Firedown がダウンロード可能なファイルとして検出する前に再生する必要があります。</string>
     <string name="empty_media_help_title">ダウンロードする前にメディアを再生</string>
     <string name="empty_media_subtitle_help">通常どおりメディアを再生してください。Fire ボタンを押すと、他のメディア ファイルとともに表示されるはずです。</string>
-    <string name="empty_password_exeception_list">保存されていないログインとパスワードがここに表示されます。</string>
-    <string name="empty_password_list">保存したパスワードがここに表示されます。</string>
-    <string name="error_check_internet_connection">インターネット接続エラー。</string>
+<string name="error_check_internet_connection">インターネット接続エラー。</string>
     <string name="error_cipher">ファイル暗号化エラー</string>
     <string name="error_external_storage">使用可能な外部ストレージがありません</string>
     <string name="error_file">ファイルを開けませんでした。</string>
@@ -266,8 +262,7 @@
     <string name="popup_tabs_close">すべてのタブを閉じる</string>
     <string name="popup_tabs_new">新しいタブ</string>
     <string name="popup_toggle">ビューの切り替え</string>
-    <string name="prompt_update_confirmation">更新</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">追跡防止をオンにすることをお勧めします。</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">追跡防止をオンにすることをお勧めします。</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">このサイトでの動作がおかしい場合は、オフにしてみてください。</string>
     <string name="quick_settings_sheet_insecure_connection_2">接続は安全ではありません</string>
     <string name="quick_settings_sheet_secure_connection_2">接続は安全です</string>
@@ -299,8 +294,7 @@
     <string name="restart_origin">再起動</string>
     <string name="save_file">ファイルを別名で保存</string>
     <string name="save_file_name">ファイル名</string>
-    <string name="scroll_up">スクロールアップ</string>
-    <string name="search">検索</string>
+<string name="search">検索</string>
     <string name="search_clip">クリップボードからリンクを埋める</string>
     <string name="search_for">%s を検索</string>
     <string name="search_store">ストアで探す</string>
@@ -346,8 +340,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">安全な DNS プロバイダーで問題がある場合、既定の DNS リゾルバーを使用します</string>
-    <string name="settings_doh_server_error_format">正しい形式の URL を入力</string>
+<string name="settings_doh_server_error_format">正しい形式の URL を入力</string>
     <string name="settings_doh_server_error_provider">有効なプロバイダであることを確認するか、後でもう一度お試しください</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -359,8 +352,7 @@
     <string name="settings_doh_title">HTTPS 経由の DNS</string>
     <string name="settings_donate">寄付する</string>
     <string name="settings_donate_summary">Firedownの価値ぶんを還元してください</string>
-    <string name="settings_donate_title">価値には価値で</string>
-    <string name="settings_downloads">ダウンロード</string>
+<string name="settings_downloads">ダウンロード</string>
     <string name="settings_downloads_free">ダウンロード&lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_path">ダウンロード場所</string>
     <string name="settings_downloads_sdcard_free">SD カード&lt;small&gt;（%s ）/small&gt;</string>
@@ -385,8 +377,7 @@
     <string name="settings_query_param_remove_title">パラメータを削除しますか?</string>
     <string name="settings_query_param_remove_message">%1$s を一覧から削除しますか?</string>
     <string name="settings_query_param_remove_confirm">削除</string>
-    <string name="settings_exceptions">例外</string>
-    <string name="settings_follow_device_theme">端末のテーマに従う</string>
+<string name="settings_follow_device_theme">端末のテーマに従う</string>
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">一般</string>
     <string name="settings_help">ヘルプ</string>
@@ -450,8 +441,7 @@
     <string name="sort_by_date_opt">日付</string>
     <string name="sort_by_origin_opt">ドメイン</string>
     <string name="sort_by_size_opt">サイズ</string>
-    <string name="sort_by_type_all">全て</string>
-    <string name="sort_by_type_alpha">名前</string>
+<string name="sort_by_type_alpha">名前</string>
     <string name="sort_by_type_apk">APK</string>
     <string name="sort_by_type_audio">オーディオ</string>
     <string name="sort_by_type_docs">書類</string>
@@ -466,14 +456,7 @@
     <string name="stream_type_muxed">動画+音声</string>
     <string name="stream_type_video">動画</string>
     <string name="switch_to_tab_description">タブを表示</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s は 1 か月以上表示していないタブを閉じることができます。</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">閉じる</string>
-    <string name="tab_tray_inactive_auto_close_title">1 か月後に自動的に閉じますか？</string>
-    <string name="tab_tray_inactive_onboarding_button_text">設定でオフにする</string>
-    <string name="tab_tray_inactive_onboarding_message">2 週間以上表示していないタブをここに移動します。</string>
-    <string name="tab_tray_inactive_recently_closed">最近閉じたタブ</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">タブを自動的に閉じる</string>
-    <string name="tabs_incognito">プライベート</string>
+<string name="tabs_incognito">プライベート</string>
     <string name="tabs_incognito_empty">プライベートタブはありません</string>
     <string name="tabs_regular">タブ</string>
     <string name="task_audio_failed">音声を抽出できませんでした</string>
@@ -505,4 +488,7 @@
 
 
 
+    <string name="play">再生</string>
+    <string name="pip_play">再生</string>
+    <string name="pip_pause">一時停止</string>
 </resources>

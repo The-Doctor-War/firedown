@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">SVG-ներ չկան:</string>
     <string name="capture_empty_video_message">Տեսանյութեր չկան։</string>
     <string name="clipboard">Պատճենվել է սեղմատախտակում</string>
-    <string name="connection_enhanced_protection">Ընդլայնված հետագծման պաշտպանություն</string>
-    <string name="connection_secure">Միացումն ապահով է</string>
+<string name="connection_secure">Միացումն ապահով է</string>
     <string name="delete">Ջնջել</string>
     <string name="delete_all_bookmarks">Սա կջնջի ձեր բոլոր էջանիշների տվյալները:</string>
     <string name="delete_all_browsing">Բոլոր թխուկները և կայքի տվյալները մաքրելը կարող է ձեզ դուրս գալ կայքերից և հեռացնել անցանց բովանդակությունը:</string>
@@ -64,9 +63,7 @@
     <string name="empty_media_help">Որոշ մեդիա ֆայլեր պետք է նվագարկվեն, նախքան Firedown-ը դրանք հայտնաբերի որպես ներբեռնվող ֆայլեր:</string>
     <string name="empty_media_help_title">Ներբեռնելուց առաջ նվագարկեք մեդիա</string>
     <string name="empty_media_subtitle_help">Խնդրում ենք նվագարկել մեդիա ինչպես միշտ: Այնուհետև այն պետք է հայտնվի այլ մեդիա ֆայլերի հետ՝ սեղմելով Fire-Button-ը:</string>
-    <string name="empty_password_exeception_list">Այստեղ կցուցադրվեն չպահված մուտքերն ու գաղտնաբառերը:</string>
-    <string name="empty_password_list">Ձեր պահպանված գաղտնաբառը կհայտնվի այստեղ:</string>
-    <string name="error_check_internet_connection">Ինտերնետ կապի սխալ:</string>
+<string name="error_check_internet_connection">Ինտերնետ կապի սխալ:</string>
     <string name="error_cipher">Ֆայլի գաղտնագրման սխալ</string>
     <string name="error_external_storage">Արտաքին պահեստավորում հասանելի չէ</string>
     <string name="error_file">Չհաջողվեց բացել ֆայլը:</string>
@@ -139,8 +136,7 @@
     <string name="restart_origin">Վերսկսել</string>
     <string name="save_file">Պահպանել ֆայլը որպես</string>
     <string name="save_file_name">Ֆայլի անունը</string>
-    <string name="scroll_up">Ոլորել Վերև</string>
-    <string name="search">Որոնում</string>
+<string name="search">Որոնում</string>
     <string name="search_clip">Լրացրեք հղումը clipboard-ից</string>
     <string name="search_for">Որոնել %s</string>
     <string name="search_store">Որոնել խանութում</string>
@@ -176,8 +172,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Էջերը նորմալ կբեռնվեն, բայց ավելի քիչ թրեքեր կփակվեն:</string>
     <string name="settings_enhanced_tracking_protection_strict">Խիստ</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Հետագծման ավելի ուժեղ պաշտպանություն և ավելի արագ կատարում, սակայն որոշ կայքեր կարող են ճիշտ չաշխատել:</string>
-    <string name="settings_exceptions">Բացառություններ</string>
-    <string name="settings_general">Գեներալ</string>
+<string name="settings_general">Գեներալ</string>
     <string name="settings_license">Լիցենզիաներ</string>
     <string name="settings_lock_summary">Կողպեք մուտքը միջերես</string>
     <string name="settings_lock_title">Հավելվածի կողպեք</string>
@@ -195,8 +190,7 @@
     <string name="sort">Դասավորել ըստ</string>
     <string name="sort_by_date_opt">Ամսաթիվ</string>
     <string name="sort_by_size_opt">Չափը</string>
-    <string name="sort_by_type_all">Բոլորը</string>
-    <string name="sort_by_type_alpha">Անուն</string>
+<string name="sort_by_type_alpha">Անուն</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Աուդիո</string>
     <string name="sort_by_type_docs">Փաստաթղթեր</string>

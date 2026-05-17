@@ -32,8 +32,7 @@
     <string name="capture_empty_video_message">Saadaval pole ühtegi videot.</string>
     <string name="clipboard">Kopeeriti lõikelauale</string>
     <string name="close_tab">Sulge kaart</string>
-    <string name="close_tab_title">Sulge kaart %s</string>
-    <string name="close_tabs_after_one_day">Ühe päeva pärast</string>
+<string name="close_tabs_after_one_day">Ühe päeva pärast</string>
     <string name="close_tabs_after_one_day_summary">Suletakse ühe päeva pärast</string>
     <string name="close_tabs_after_one_month">Ühe kuu pärast</string>
     <string name="close_tabs_after_one_month_summary">Suletakse ühe kuu pärast</string>
@@ -41,8 +40,7 @@
     <string name="close_tabs_after_one_week_summary">Suletakse ühe nädala pärast</string>
     <string name="close_tabs_manually">Mitte kunagi</string>
     <string name="close_tabs_manually_summary">Suletakse käsitsi</string>
-    <string name="connection_enhanced_protection">Täiustatud jälgimiskaitse</string>
-    <string name="connection_secure">Ühendus on turvaline</string>
+<string name="connection_secure">Ühendus on turvaline</string>
     <string name="delete">Kustuta</string>
     <string name="delete_all_bookmarks">See kustutab kõik teie järjehoidjate andmed.</string>
     <string name="delete_all_browsing">Kõigi küpsiste ja saidiandmete kustutamine võib teid veebisaitidelt välja logida ja võrguühenduseta sisu eemaldada.</string>
@@ -87,9 +85,7 @@
     <string name="empty_media_help">Mõnda meediumifaili tuleb esitada enne, kui Firedown suudab need allalaaditavate failidena tuvastada.</string>
     <string name="empty_media_help_title">Enne allalaadimist esitage meediat</string>
     <string name="empty_media_subtitle_help">Palun esitage meediat nagu tavaliselt. Pärast tulekahju-nupu vajutamist peaks see ilmuma koos teiste meediumifailidega.</string>
-    <string name="empty_password_exeception_list">Siin kuvatakse sisselogimised ja paroolid, mida pole salvestatud.</string>
-    <string name="empty_password_list">Siin kuvatakse teie salvestatud parool.</string>
-    <string name="error_check_internet_connection">Interneti-ühenduse viga.</string>
+<string name="error_check_internet_connection">Interneti-ühenduse viga.</string>
     <string name="error_cipher">Faili krüptimise viga</string>
     <string name="error_external_storage">Välist salvestusruumi pole saadaval</string>
     <string name="error_file">Faili ei saanud avada.</string>
@@ -168,8 +164,7 @@
     <string name="settings_jit_enabled_summary">Kui see eelistus pole kasutusel, siis keerukate veebisaitide jõudlus võib väheneda. Seadistuse muutmine eeldab veebibrauseri uuesti käivitamist</string>
     <string name="settings_webgl_disabled">Lülita WebGL välja</string>
     <string name="settings_webrtc_enabled">Kasuta WebRTC-d</string>
-    <string name="prompt_update_confirmation">Uuenda</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Ühendus pole turvaline</string>
+<string name="quick_settings_sheet_insecure_connection_2">Ühendus pole turvaline</string>
     <string name="quick_settings_sheet_secure_connection_2">Turvaline ühendus</string>
     <string name="remove_top_site">Eemalda</string>
     <string name="rename">Nimeta ümber</string>
@@ -182,8 +177,7 @@
     <string name="restart_origin">Taaskäivita</string>
     <string name="save_file">Salvesta fail nimega</string>
     <string name="save_file_name">Faili nimi</string>
-    <string name="scroll_up">Keri üles</string>
-    <string name="search">Otsing</string>
+<string name="search">Otsing</string>
     <string name="search_clip">Täida lõikepuhvrist link</string>
     <string name="search_for">Otsi: %s</string>
     <string name="search_store">Otsige poest</string>
@@ -232,8 +226,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Lehed laaditakse normaalselt, kuid blokeerivad vähem jälgijaid.</string>
     <string name="settings_enhanced_tracking_protection_strict">Range</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Tugevam jälgimiskaitse ja kiirem jõudlus, kuid mõned saidid ei pruugi korralikult töötada.</string>
-    <string name="settings_exceptions">Erandid</string>
-    <string name="settings_follow_device_theme">Järgitakse seadme teemat</string>
+<string name="settings_follow_device_theme">Järgitakse seadme teemat</string>
     <string name="settings_general">Kindral</string>
     <string name="settings_license">Litsentsid</string>
     <string name="settings_light_theme">Hele</string>
@@ -263,8 +256,7 @@
     <string name="sort">Sortimisalus:</string>
     <string name="sort_by_date_opt">Kuupäev</string>
     <string name="sort_by_size_opt">Suurus</string>
-    <string name="sort_by_type_all">Kõik</string>
-    <string name="sort_by_type_alpha">Nimi</string>
+<string name="sort_by_type_alpha">Nimi</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Heli</string>
     <string name="sort_by_type_docs">Dokumendid</string>
@@ -275,14 +267,7 @@
     <string name="sort_by_type_zip">Zip</string>
     <string name="spoof_timezone_summary">Kui see valik on kasutusel, siis parandab see kaitset sinu täpsema tuvastamise vastu</string>
     <string name="switch_to_tab_description">Lülitu kaardile</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s saab sulgeda kaardid, mida sa pole viimase kuu jooksul vaadanud.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Sulge</string>
-    <string name="tab_tray_inactive_auto_close_title">Kas sulgeda automaatselt kuu aja pärast?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Lülita see sätetes välja</string>
-    <string name="tab_tray_inactive_onboarding_message">Kaardid, mida sa pole vaadanud 2 nädalat, liigutatakse siia.</string>
-    <string name="tab_tray_inactive_recently_closed">Hiljuti suletud</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Lülita automaatne sulgemine sisse</string>
-    <string name="task_decryption_finished">Dekrüpteerimine lõpetatud</string>
+<string name="task_decryption_finished">Dekrüpteerimine lõpetatud</string>
     <string name="task_encryption_finished">Krüpteerimine on lõpetatud</string>
     <string name="top_sites_edit_dialog_save">Salvesta</string>
     <string name="top_sites_max_limit_confirmation_button">Olgu, sain aru</string>

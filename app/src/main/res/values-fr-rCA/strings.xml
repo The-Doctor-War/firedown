@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Aucun SVG disponible.</string>
     <string name="capture_empty_video_message">Aucune vidéo disponible.</string>
     <string name="clipboard">Copié dans le presse-papier</string>
-    <string name="connection_enhanced_protection">Protection améliorée contre le suivi</string>
-    <string name="connection_secure">La connexion est sécurisée</string>
+<string name="connection_secure">La connexion est sécurisée</string>
     <string name="delete">Supprimer</string>
     <string name="delete_all_bookmarks">Cela supprimera toutes les données de vos favoris.</string>
     <string name="delete_all_browsing">La suppression de tous les cookies et données du site peut vous déconnecter des sites Web et supprimer le contenu hors ligne.</string>
@@ -64,9 +63,7 @@
     <string name="empty_media_help">Certains fichiers multimédias doivent être lus avant que Firedown puisse les détecter en tant que fichiers téléchargeables.</string>
     <string name="empty_media_help_title">Lire le média avant de le télécharger</string>
     <string name="empty_media_subtitle_help">Veuillez lire le média comme d\'habitude. Il devrait alors apparaître avec les autres fichiers multimédias, après avoir appuyé sur le bouton Fire.</string>
-    <string name="empty_password_exeception_list">Les identifiants et mots de passe qui ne sont pas enregistrés seront affichés ici.</string>
-    <string name="empty_password_list">Votre mot de passe enregistré apparaîtra ici.</string>
-    <string name="error_check_internet_connection">Erreur de connexion Internet.</string>
+<string name="error_check_internet_connection">Erreur de connexion Internet.</string>
     <string name="error_cipher">Erreur de cryptage du fichier</string>
     <string name="error_external_storage">Pas de stockage externe disponible</string>
     <string name="error_file">Impossible d\'ouvrir le fichier.</string>
@@ -144,8 +141,7 @@
     <string name="restart_origin">Redémarrage</string>
     <string name="save_file">Enregistrer le fichier sous</string>
     <string name="save_file_name">Nom de fichier</string>
-    <string name="scroll_up">Faire défiler vers le haut</string>
-    <string name="search">Recherche</string>
+<string name="search">Recherche</string>
     <string name="search_clip">Remplir le lien depuis le presse-papier</string>
     <string name="search_for">Rechercher %s</string>
     <string name="search_store">Rechercher sur la boutique</string>
@@ -187,8 +183,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Les pages se chargeront normalement, mais bloqueront moins de trackers.</string>
     <string name="settings_enhanced_tracking_protection_strict">Strict</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Protection de suivi renforcée et performances plus rapides, mais certains sites peuvent ne pas fonctionner correctement.</string>
-    <string name="settings_exceptions">Des exceptions</string>
-    <string name="settings_general">Général</string>
+<string name="settings_general">Général</string>
     <string name="settings_license">Licences</string>
     <string name="settings_lock_summary">Verrouiller l\'accès à l\'interface utilisateur</string>
     <string name="settings_lock_title">Verrou d\'application</string>
@@ -206,8 +201,7 @@
     <string name="sort">Trier par</string>
     <string name="sort_by_date_opt">Date</string>
     <string name="sort_by_size_opt">Taille</string>
-    <string name="sort_by_type_all">Tous</string>
-    <string name="sort_by_type_alpha">Nom</string>
+<string name="sort_by_type_alpha">Nom</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">l\'audio</string>
     <string name="sort_by_type_docs">Documents</string>

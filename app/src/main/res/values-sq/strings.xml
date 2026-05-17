@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Nuk ka video të disponueshme.</string>
     <string name="clipboard">Kopjuar në kujtesën e fragmenteve</string>
     <string name="close_tab">Mbylle skedën</string>
-    <string name="close_tab_title">Mbylle skedën %s</string>
-    <string name="close_tabs_after_one_day">Pas një dite</string>
+<string name="close_tabs_after_one_day">Pas një dite</string>
     <string name="close_tabs_after_one_day_summary">Mbylle pas një dite</string>
     <string name="close_tabs_after_one_month">Pas një muaji</string>
     <string name="close_tabs_after_one_month_summary">Mbylle pas një muaji</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Mbylle pas një jave</string>
     <string name="close_tabs_manually">Dorazi</string>
     <string name="close_tabs_manually_summary">Mbyllini dorazi</string>
-    <string name="connection_enhanced_protection">Mbrojtje e përmirësuar nga gjurmimi</string>
-    <string name="connection_secure">Lidhja është e sigurt</string>
+<string name="connection_secure">Lidhja është e sigurt</string>
     <string name="delete">Fshije</string>
     <string name="delete_all_bookmarks">Kjo do të fshijë të gjitha të dhënat e faqeshënuesve.</string>
     <string name="delete_all_browsing">Pastrimi i të gjitha kukit dhe të dhënave të sajtit mund t\'ju dalë nga faqet e internetit dhe të heqë përmbajtjen jashtë linje.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">Disa skedarë media duhet të luhen përpara se Firedown t\'i zbulojë ato si skedarë të shkarkueshëm.</string>
     <string name="empty_media_help_title">Luaj median përpara shkarkimit</string>
     <string name="empty_media_subtitle_help">Ju lutem luani median si zakonisht. Më pas duhet të shfaqet me skedarët e tjerë të medias, pasi të keni shtypur butonin e zjarrit.</string>
-    <string name="empty_password_exeception_list">Hyrjet dhe fjalëkalimet që nuk janë ruajtur do të shfaqen këtu.</string>
-    <string name="empty_password_list">Fjalëkalimi juaj i ruajtur do të shfaqet këtu.</string>
-    <string name="error_check_internet_connection">Gabim i lidhjes në internet.</string>
+<string name="error_check_internet_connection">Gabim i lidhjes në internet.</string>
     <string name="error_cipher">Gabim në enkriptimin e skedarit</string>
     <string name="error_external_storage">Nuk ka hapësirë ​​ruajtëse të jashtme</string>
     <string name="error_file">Skedari nuk mund të hapej.</string>
@@ -169,8 +165,7 @@
     <string name="popup_toggle">Ndrysho pamjen</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL-ja duhet të fillojnë me “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL e pavlefshme</string>
-    <string name="prompt_update_confirmation">Përditësoje</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Lidhja s’është e siguruar</string>
+<string name="quick_settings_sheet_insecure_connection_2">Lidhja s’është e siguruar</string>
     <string name="quick_settings_sheet_secure_connection_2">Lidhja është e siguruar</string>
     <string name="quit_application">Po mbyllet aplikacioni, që të aplikohen ndryshimet…</string>
     <string name="remove_top_site">Hiqe</string>
@@ -179,8 +174,7 @@
     <string name="restart_origin">Rifillo, fillo përsëri</string>
     <string name="save_file">Ruaje skedarin si</string>
     <string name="save_file_name">Emri i skedarit</string>
-    <string name="scroll_up">Lëviz lart</string>
-    <string name="search">Kërko</string>
+<string name="search">Kërko</string>
     <string name="search_clip">Plotësoni lidhjen nga kujtesa</string>
     <string name="search_for">Kërko për %s</string>
     <string name="search_store">Kërkoni në dyqan</string>
@@ -207,8 +201,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Do të bëhet dalja juaj nga shumica e sajteve</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Skeda të hapura</string>
     <string name="settings_doh_server">Serveri DNS</string>
-    <string name="settings_doh_server_default">Përdorni ftilluesin tuaj parazgjedhje DNS, nëse ka ndonjë problem me furnizuesin e DNS-së të siguruar</string>
-    <string name="settings_doh_server_error_format">Fut një URL të formatuar saktë</string>
+<string name="settings_doh_server_error_format">Fut një URL të formatuar saktë</string>
     <string name="settings_doh_server_error_provider">Ju lutemi verifikoni që është një ofrues i vlefshëm ose provoni përsëri më vonë</string>
     <string name="settings_doh_server_off">Përdorni zgjidhjen e sistemit DNS</string>
     <string name="settings_doh_server_title">Përdor Ofruesin</string>
@@ -226,8 +219,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Faqet do të ngarkohen normalisht, por do të bllokojnë më pak gjurmues.</string>
     <string name="settings_enhanced_tracking_protection_strict">E rreptë</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Mbrojtje më e fortë nga gjurmimi dhe performancë më e shpejtë, por disa sajte mund të mos funksionojnë siç duhet.</string>
-    <string name="settings_exceptions">Përjashtimet</string>
-    <string name="settings_follow_device_theme">Ndiq temën e pajisjes</string>
+<string name="settings_follow_device_theme">Ndiq temën e pajisjes</string>
     <string name="settings_general">Gjeneral</string>
     <string name="settings_license">Licencat</string>
     <string name="settings_light_theme">E çelët</string>
@@ -258,8 +250,7 @@
     <string name="sort">Rendit sipas</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Madhësia</string>
-    <string name="sort_by_type_all">Të gjitha</string>
-    <string name="sort_by_type_alpha">Emri</string>
+<string name="sort_by_type_alpha">Emri</string>
     <string name="sort_by_type_apk">APK</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Dokumentet</string>
@@ -269,14 +260,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Kalo te skeda</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s mund të mbyllë skeda që s’i keni parë gjatë muajit të fundit.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Mbylli</string>
-    <string name="tab_tray_inactive_auto_close_title">Të vetëmbyllen pas një muaji?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Çaktivizojeni te rregullimet</string>
-    <string name="tab_tray_inactive_onboarding_message">Skedat që s’i keni parë gjatë dy javësh, kalohen këtu.</string>
-    <string name="tab_tray_inactive_recently_closed">Mbyllur së fundi</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Aktivizo vetëmbyllje</string>
-    <string name="task_decryption_finished">Deshifrimi përfundoi</string>
+<string name="task_decryption_finished">Deshifrimi përfundoi</string>
     <string name="task_encryption_finished">Kriptimi përfundoi</string>
     <string name="top_sites_edit_dialog_save">Ruaje</string>
     <string name="top_sites_edit_dialog_title">Përpunoni shkurtore</string>

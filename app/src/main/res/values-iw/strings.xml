@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">אין סרטונים זמינים.</string>
     <string name="clipboard">הועתק ללוח</string>
     <string name="close_tab">סגירת לשונית</string>
-    <string name="close_tab_title">סגירת הלשונית %s</string>
-    <string name="close_tabs_after_one_day">אחרי יום אחד</string>
+<string name="close_tabs_after_one_day">אחרי יום אחד</string>
     <string name="close_tabs_after_one_day_summary">סגירה לאחר יום אחד</string>
     <string name="close_tabs_after_one_month">אחרי חודש אחד</string>
     <string name="close_tabs_after_one_month_summary">סגירה לאחר חודש אחד</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">סגירה לאחר שבוע אחד</string>
     <string name="close_tabs_manually">לעולם לא</string>
     <string name="close_tabs_manually_summary">סגירה באופן ידני</string>
-    <string name="connection_enhanced_protection">הגנת מעקב משופרת</string>
-    <string name="connection_secure">החיבור מאובטח</string>
+<string name="connection_secure">החיבור מאובטח</string>
     <string name="delete">לִמְחוֹק</string>
     <string name="delete_all_bookmarks">פעולה זו תמחק את כל נתוני הסימניות שלך.</string>
     <string name="delete_all_browsing">ניקוי כל קובצי ה-Cookie ונתוני האתר עשוי להוציא אותך מאתרים ולהסיר תוכן לא מקוון.</string>
@@ -91,9 +89,7 @@
     <string name="empty_media_help">יש להפעיל קובצי מדיה מסוימים לפני ש-Firedown תוכל לזהות אותם כקבצים להורדה.</string>
     <string name="empty_media_help_title">הפעל את המדיה לפני ההורדה</string>
     <string name="empty_media_subtitle_help">נא לשחק במדיה כרגיל. לאחר מכן, הוא אמור להופיע עם קובצי המדיה האחרים, לאחר לחיצה על לחצן האש.</string>
-    <string name="empty_password_exeception_list">כניסות וסיסמאות שאינן נשמרות יוצגו כאן.</string>
-    <string name="empty_password_list">הסיסמה השמורה שלך תופיע כאן.</string>
-    <string name="error_check_internet_connection">שגיאת חיבור לאינטרנט.</string>
+<string name="error_check_internet_connection">שגיאת חיבור לאינטרנט.</string>
     <string name="error_cipher">שגיאת הצפנת קובץ</string>
     <string name="error_external_storage">אין אחסון חיצוני זמין</string>
     <string name="error_file">לא ניתן היה לפתוח את הקובץ.</string>
@@ -181,8 +177,7 @@
     <string name="popup_toggle">החלף תצוגה</string>
     <string name="settings_doh_provider_custom_dialog_error_https">הכתובת חייבת להתחיל ב־״https://‎״</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">כתובת לא תקנית</string>
-    <string name="prompt_update_confirmation">עדכון</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">מומלץ להפעיל את הגנת המעקב.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">מומלץ להפעיל את הגנת המעקב.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">אם משהו נראה שבור באתר הזה, ניתן לנסות לכבות אותה.</string>
     <string name="quick_settings_sheet_insecure_connection_2">החיבור אינו מאובטח</string>
     <string name="quick_settings_sheet_secure_connection_2">החיבור מאובטח</string>
@@ -198,8 +193,7 @@
     <string name="restart_origin">איתחול</string>
     <string name="save_file">שמור קובץ בשם</string>
     <string name="save_file_name">שם קובץ</string>
-    <string name="scroll_up">לגלול מעלה</string>
-    <string name="search">לחפש</string>
+<string name="search">לחפש</string>
     <string name="search_clip">מילוי קישור מהלוח</string>
     <string name="search_for">חפש את %s</string>
     <string name="search_store">חפש בחנות</string>
@@ -229,8 +223,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">שימוש במפענח ה־DNS ברירת המחדל אם יש בעיה עם ספק ה־DNS המאובטח</string>
-    <string name="settings_doh_server_error_format">הזן כתובת אתר בפורמט נכון</string>
+<string name="settings_doh_server_error_format">הזן כתובת אתר בפורמט נכון</string>
     <string name="settings_doh_server_error_provider">אנא ודא שזהו ספק חוקי או נסה שוב מאוחר יותר</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -251,8 +244,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">הדפים ייטענו כרגיל, אך יחסמו פחות עוקבים.</string>
     <string name="settings_enhanced_tracking_protection_strict">קַפְּדָנִי</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">הגנת מעקב חזקה יותר וביצועים מהירים יותר, אך ייתכן שחלק מהאתרים לא יפעלו כראוי.</string>
-    <string name="settings_exceptions">חריגים</string>
-    <string name="settings_follow_device_theme">שימוש בערכת הנושא של המכשיר</string>
+<string name="settings_follow_device_theme">שימוש בערכת הנושא של המכשיר</string>
     <string name="settings_general">כללי</string>
     <string name="settings_license">רישיונות</string>
     <string name="settings_light_theme">בהיר</string>
@@ -283,8 +275,7 @@
     <string name="sort">מיון לפי</string>
     <string name="sort_by_date_opt">תַאֲרִיך</string>
     <string name="sort_by_size_opt">גודל</string>
-    <string name="sort_by_type_all">את כל</string>
-    <string name="sort_by_type_alpha">שֵׁם</string>
+<string name="sort_by_type_alpha">שֵׁם</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">אודיו</string>
     <string name="sort_by_type_docs">מסמכים</string>
@@ -294,14 +285,7 @@
     <string name="sort_by_type_video">וִידֵאוֹ</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">מעבר ללשונית</string>
-    <string name="tab_tray_inactive_auto_close_body_2">‏%1$s יכול לסגור לשוניות שלא צפית בהן במהלך החודש האחרון.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">סגירה</string>
-    <string name="tab_tray_inactive_auto_close_title">לסגור באופן אוטומטי לאחר חודש אחד?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">כיבוי בהגדרות</string>
-    <string name="tab_tray_inactive_onboarding_message">לשוניות בהן לא צפית במשך שבועיים מועברות לכאן.</string>
-    <string name="tab_tray_inactive_recently_closed">נסגרו לאחרונה</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">הפעלת סגירה אוטומטית</string>
-    <string name="task_decryption_finished">הפענוח הסתיים</string>
+<string name="task_decryption_finished">הפענוח הסתיים</string>
     <string name="task_encryption_finished">ההצפנה הסתיימה</string>
     <string name="task_gif_finished">GIF נוצר</string>
     <string name="top_sites_edit_dialog_save">שמירה</string>

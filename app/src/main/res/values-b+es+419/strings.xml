@@ -21,8 +21,7 @@
   <string name="capture_empty_svgs_message">No hay SVG disponibles.</string>
   <string name="capture_empty_video_message">No hay vídeos disponibles.</string>
     <string name="clipboard">Copiado al portapapeles</string>
-  <string name="connection_enhanced_protection">Protección de seguimiento mejorada</string>
-  <string name="connection_secure">La conexión es segura</string>
+<string name="connection_secure">La conexión es segura</string>
     <string name="delete">Eliminar</string>
   <string name="delete_all_bookmarks">Esto eliminará todos los datos de tus marcadores.</string>
   <string name="delete_all_browsing">Borrar todas las cookies y los datos del sitio puede cerrar tu sesión en los sitios web y eliminar el contenido sin conexión.</string>
@@ -64,9 +63,7 @@
   <string name="empty_media_help">Algunos archivos multimedia deben reproducirse antes de que Firedown pueda detectarlos como archivos descargables.</string>
   <string name="empty_media_help_title">Reproducir el contenido multimedia antes de descargarlo</string>
   <string name="empty_media_subtitle_help">Por favor, reproduce los medios como de costumbre. Luego debería aparecer con los otros archivos multimedia, después de presionar el botón de Firedown.</string>
-  <string name="empty_password_exeception_list">Los inicios de sesión y contraseñas que no se guarden se mostrarán aquí.</string>
-  <string name="empty_password_list">Tu contraseña guardada aparecerá aquí.</string>
-  <string name="error_check_internet_connection">Error de conexión a Internet.</string>
+<string name="error_check_internet_connection">Error de conexión a Internet.</string>
   <string name="error_cipher">Error de cifrado de archivo</string>
   <string name="error_external_storage">Almacenamiento externo no disponible</string>
   <string name="error_file">No se pudo abrir el archivo.</string>
@@ -144,8 +141,7 @@
   <string name="restart_origin">Reanudar</string>
   <string name="save_file">Guardar archivo como</string>
   <string name="save_file_name">Nombre del archivo</string>
-    <string name="scroll_up">Desplazar hacia arriba</string>
-  <string name="search">Buscar</string>
+<string name="search">Buscar</string>
   <string name="search_clip">Rellenar enlace desde el portapapeles</string>
     <string name="search_for">Buscar %s</string>
   <string name="search_store">Buscar en la tienda</string>
@@ -187,8 +183,7 @@
   <string name="settings_enhanced_tracking_protection_standard_description_5">Las páginas se cargarán normalmente, pero bloquearán menos rastreadores.</string>
   <string name="settings_enhanced_tracking_protection_strict">Estricto</string>
   <string name="settings_enhanced_tracking_protection_strict_description_4">Protección de seguimiento más fuerte y un rendimiento más rápido, pero algunos sitios pueden no funcionar correctamente.</string>
-  <string name="settings_exceptions">Excepciones</string>
-  <string name="settings_general">General</string>
+<string name="settings_general">General</string>
   <string name="settings_license">Licencias</string>
   <string name="settings_lock_summary">Bloquear el acceso a la interfaz de usuario</string>
   <string name="settings_lock_title">Bloqueo de aplicación</string>
@@ -206,8 +201,7 @@
   <string name="sort">Ordenar por</string>
   <string name="sort_by_date_opt">Fecha</string>
   <string name="sort_by_size_opt">Tamaño</string>
-  <string name="sort_by_type_all">Todo</string>
-  <string name="sort_by_type_alpha">Nombre</string>
+<string name="sort_by_type_alpha">Nombre</string>
   <string name="sort_by_type_apk">Apk</string>
   <string name="sort_by_type_audio">Audio</string>
   <string name="sort_by_type_docs">Documentos</string>

@@ -12,8 +12,7 @@
     <string name="browser_menu_share">Dela</string>
     <string name="browser_menu_stop">Stopp</string>
     <string name="close_tab">Stäng flik</string>
-    <string name="close_tab_title">Stäng flik %s</string>
-    <string name="close_tabs_after_one_day">Efter en dag</string>
+<string name="close_tabs_after_one_day">Efter en dag</string>
     <string name="close_tabs_after_one_day_summary">Stäng efter en dag</string>
     <string name="close_tabs_after_one_month">Efter en månad</string>
     <string name="close_tabs_after_one_month_summary">Stäng efter en månad</string>
@@ -32,8 +31,7 @@
     <string name="open_new_tab_2">Ny flik</string>
     <string name="settings_doh_provider_custom_dialog_error_https">Webbadressen måste börja med \"https://\"</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Ogiltig URL</string>
-    <string name="prompt_update_confirmation">Uppdatera</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Aktivera spårningsskydd rekommenderas.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Aktivera spårningsskydd rekommenderas.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Om något ser trasigt ut på den här webbplatsen, försök att stänga av det.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Anslutningen är inte säker</string>
     <string name="quick_settings_sheet_secure_connection_2">Anslutningen är säker</string>
@@ -47,8 +45,7 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Kakor och webbplatsdata</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">Du kommer att loggas ut från de flesta webbplatser</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Öppna flikar</string>
-    <string name="settings_doh_server_default">Använd din standard DNS-resolver om det finns ett problem med den säkra DNS-leverantören</string>
-    <string name="settings_follow_device_theme">Följ enhetens tema</string>
+<string name="settings_follow_device_theme">Följ enhetens tema</string>
     <string name="settings_light_theme">Ljust</string>
     <string name="settings_quit_fragment_summary">Tar automatiskt bort surfdata när du väljer \"Avsluta\" från huvudmenyn</string>
     <string name="settings_quit_title">Ta bort surfdata vid avslut</string>
@@ -62,14 +59,7 @@
     <string name="snackbar_deleted_undo">ÅNGRA</string>
     <string name="snackbar_tab_closed">Flik stängd</string>
     <string name="switch_to_tab_description">Växla till flik</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s kan stänga flikar som du inte har besökt under den senaste månaden.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Stäng</string>
-    <string name="tab_tray_inactive_auto_close_title">Stäng automatiskt efter en månad?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Stäng av i inställningarna</string>
-    <string name="tab_tray_inactive_onboarding_message">Flikar som du inte har besökt på två veckor flyttas hit.</string>
-    <string name="tab_tray_inactive_recently_closed">Nyligen stängda</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Aktivera automatisk stängning</string>
-    <string name="top_sites_edit_dialog_save">Spara</string>
+<string name="top_sites_edit_dialog_save">Spara</string>
     <string name="top_sites_edit_dialog_title">Redigera genväg</string>
     <string name="top_sites_edit_dialog_url_title">URL</string>
     <string name="top_sites_max_limit_confirmation_button">Ok, jag förstår</string>

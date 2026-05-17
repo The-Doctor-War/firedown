@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">Нема доступних видео снимака.</string>
     <string name="clipboard">Копирано у међуспремник</string>
     <string name="close_tab">Затвори језичак</string>
-    <string name="close_tab_title">Затвори језичак %s</string>
-    <string name="close_tabs_after_one_day">После једног дана</string>
+<string name="close_tabs_after_one_day">После једног дана</string>
     <string name="close_tabs_after_one_day_summary">Затвори након једног дана</string>
     <string name="close_tabs_after_one_month">После једног месеца</string>
     <string name="close_tabs_after_one_month_summary">Затвори након једног месеца</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">Затвори након једне седмице</string>
     <string name="close_tabs_manually">Ручно</string>
     <string name="close_tabs_manually_summary">Затвори ручно</string>
-    <string name="connection_enhanced_protection">Побољшана заштита од праћења</string>
-    <string name="connection_secure">Веза је безбедна</string>
+<string name="connection_secure">Веза је безбедна</string>
     <string name="delete">Избриши</string>
     <string name="delete_all_bookmarks">Ово ће избрисати све податке о обележивачима.</string>
     <string name="delete_all_browsing">Брисањем свих колачића и података о сајтовима можете да се одјавите са веб локација и уклоните офлајн садржај.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">Неке медијске датотеке треба да се репродукују пре него што их Firedown региструје као датотеке за преузимање.</string>
     <string name="empty_media_help_title">Пустите медије пре преузимања</string>
     <string name="empty_media_subtitle_help">Пустите медије као и обично. Затим би требало да се појави са другим медијским датотекама, након притиска на дугме Fire.</string>
-    <string name="empty_password_exeception_list">Овде ће бити приказане пријаве и лозинке које нису сачуване.</string>
-    <string name="empty_password_list">Ваша сачувана лозинка ће се појавити овде.</string>
-    <string name="error_check_internet_connection">Грешка интернет везе.</string>
+<string name="error_check_internet_connection">Грешка интернет везе.</string>
     <string name="error_cipher">Грешка код шифровања датотеке</string>
     <string name="error_external_storage">Није доступна спољна меморија</string>
     <string name="error_file">Није могуће отворити датотеку.</string>
@@ -166,8 +162,7 @@
     <string name="popup_tabs_close">Затвори све картице</string>
     <string name="popup_tabs_new">Нови прозор</string>
     <string name="popup_toggle">Промени преглед</string>
-    <string name="prompt_update_confirmation">Ажурирај</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Веза није безбедна</string>
+<string name="quick_settings_sheet_insecure_connection_2">Веза није безбедна</string>
     <string name="quick_settings_sheet_secure_connection_2">Веза је безбедна</string>
     <string name="quit_application">Затварање апликације ради примене промена…</string>
     <string name="remove_top_site">Уклони</string>
@@ -181,8 +176,7 @@
     <string name="restart_origin">Покрени поново</string>
     <string name="save_file">Сачувај датотеку као</string>
     <string name="save_file_name">Назив датотеке</string>
-    <string name="scroll_up">Померање нагоре</string>
-    <string name="search">Претрага</string>
+<string name="search">Претрага</string>
     <string name="search_clip">Попуните везу из међуспремника</string>
     <string name="search_for">Потражи %s</string>
     <string name="search_store">Потражите у продавници</string>
@@ -233,8 +227,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Странице ће се нормално учитавати, али ће блокирати мање трагача.</string>
     <string name="settings_enhanced_tracking_protection_strict">Строго</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Јача заштита од праћења и брже перформансе, али неке локације можда неће радити исправно.</string>
-    <string name="settings_exceptions">Изузеци</string>
-    <string name="settings_follow_device_theme">Прати тему уређаја</string>
+<string name="settings_follow_device_theme">Прати тему уређаја</string>
     <string name="settings_general">Опште</string>
     <string name="settings_license">Лиценце</string>
     <string name="settings_light_theme">Светла</string>
@@ -265,8 +258,7 @@
     <string name="sort">Сортирај према</string>
     <string name="sort_by_date_opt">Датум</string>
     <string name="sort_by_size_opt">Величина</string>
-    <string name="sort_by_type_all">Све</string>
-    <string name="sort_by_type_alpha">Име</string>
+<string name="sort_by_type_alpha">Име</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Аудио</string>
     <string name="sort_by_type_docs">Документи</string>
@@ -276,14 +268,7 @@
     <string name="sort_by_type_video">Видео</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Пређи на језичак</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s може да затвори језичке које нисте прегледали прошлог месеца.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Затвори</string>
-    <string name="tab_tray_inactive_auto_close_title">Аутоматски затвори након једног месеца?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Искључи у подешавањима</string>
-    <string name="tab_tray_inactive_onboarding_message">Картице које нисте погледали више од две недеље су премештене овде.</string>
-    <string name="tab_tray_inactive_recently_closed">Недавно затворено</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Укључи аутоматско затварање</string>
-    <string name="task_decryption_finished">Дешифровање је завршено</string>
+<string name="task_decryption_finished">Дешифровање је завршено</string>
     <string name="task_encryption_finished">Шифровање је завршено</string>
     <string name="top_sites_edit_dialog_save">Сачувај</string>
     <string name="top_sites_edit_dialog_title">Уреди пречицу</string>

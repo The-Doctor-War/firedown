@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">هیچ ویدیویی در دسترس نیست.</string>
     <string name="clipboard">در کلیپ بورد کپی شد</string>
     <string name="close_tab">بستن زبانه</string>
-    <string name="close_tab_title">بستن زبانه%s</string>
-    <string name="close_tabs_after_one_day">بعد از یک روز</string>
+<string name="close_tabs_after_one_day">بعد از یک روز</string>
     <string name="close_tabs_after_one_day_summary">بستن پس از یک روز</string>
     <string name="close_tabs_after_one_month">بعد از یک ماه</string>
     <string name="close_tabs_after_one_month_summary">بستن پس از یک ماه</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">بستن پس از یک هفته</string>
     <string name="close_tabs_manually">دستی</string>
     <string name="close_tabs_manually_summary">بستن دستی</string>
-    <string name="connection_enhanced_protection">حفاظت ردیابی پیشرفته</string>
-    <string name="connection_secure">اتصال امن است</string>
+<string name="connection_secure">اتصال امن است</string>
     <string name="delete">حذف</string>
     <string name="delete_all_bookmarks">با این کار تمام داده های نشانک شما حذف می شود.</string>
     <string name="delete_all_browsing">پاک کردن همه کوکی‌ها و داده‌های سایت ممکن است شما را از سیستم وب‌سایت‌ها خارج کرده و محتوای آفلاین را حذف کند.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">برخی از فایل‌های رسانه قبل از اینکه Firedown بتواند آنها را به‌عنوان فایل قابل دانلود شناسایی کند، باید پخش شوند.</string>
     <string name="empty_media_help_title">قبل از دانلود، رسانه را پخش کنید</string>
     <string name="empty_media_subtitle_help">لطفا رسانه را طبق معمول پخش کنید. پس از فشار دادن Fire-Button، باید با سایر فایل‌های رسانه‌ای ظاهر شود.</string>
-    <string name="empty_password_exeception_list">اطلاعات ورود و رمز عبوری که ذخیره نشده‌اند در اینجا نشان داده می‌شوند.</string>
-    <string name="empty_password_list">رمز عبور ذخیره شده شما در اینجا ظاهر می‌شود.</string>
-    <string name="error_check_internet_connection">خطای اتصال به اینترنت</string>
+<string name="error_check_internet_connection">خطای اتصال به اینترنت</string>
     <string name="error_cipher">خطای رمزگذاری فایل</string>
     <string name="error_external_storage">حافظه خارجی در دسترس نیست</string>
     <string name="error_file">فایل باز نشد.</string>
@@ -169,8 +165,7 @@
     <string name="popup_toggle">نمایش را تغییر دهید</string>
     <string name="settings_doh_provider_custom_dialog_error_https">نشانی بایستی با «‪https://‬» آغاز شود</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">نشانی اینترنتی معتبر نیست</string>
-    <string name="prompt_update_confirmation">به‌روزرسانی‌</string>
-    <string name="quick_settings_sheet_insecure_connection_2">اتصال امن نیست</string>
+<string name="quick_settings_sheet_insecure_connection_2">اتصال امن نیست</string>
     <string name="quick_settings_sheet_secure_connection_2">اتصال امن است</string>
     <string name="quit_application">خروج از برنامه برای اعمال تغییرات…</string>
     <string name="remove_top_site">حذف</string>
@@ -184,8 +179,7 @@
     <string name="restart_origin">راه اندازی مجدد</string>
     <string name="save_file">ذخیره فایل به عنوان</string>
     <string name="save_file_name">نام فایل</string>
-    <string name="scroll_up">به بالا کشیده شود</string>
-    <string name="search">جستجو کردن</string>
+<string name="search">جستجو کردن</string>
     <string name="search_clip">پیوند را از کلیپ بورد پر کنید</string>
     <string name="search_for">جستجو برای %s</string>
     <string name="search_store">جستجو در فروشگاه</string>
@@ -213,8 +207,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">استفاده از مبدل ساناد در صورتی که مشکلی برای کار با ارائه‌دهندهٔ ساناد وجود داشته باشد</string>
-    <string name="settings_doh_server_error_format">یک URL با فرمت صحیح وارد کنید</string>
+<string name="settings_doh_server_error_format">یک URL با فرمت صحیح وارد کنید</string>
     <string name="settings_doh_server_error_provider">لطفاً تأیید کنید که این ارائه‌دهنده معتبری است یا بعداً دوباره امتحان کنید</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -235,8 +228,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">صفحات به طور معمول بارگیری می‌شوند، اما تعداد ردیاب‌های کمتری را مسدود می‌کنند.</string>
     <string name="settings_enhanced_tracking_protection_strict">سخت‌گیرانه</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">حفاظت ردیابی قوی‌تر و عملکرد سریع‌تر، اما برخی از سایت‌ها ممکن است به درستی کار نکنند.</string>
-    <string name="settings_exceptions">استثناها</string>
-    <string name="settings_follow_device_theme">پیروی از زمینهٔ افزاره</string>
+<string name="settings_follow_device_theme">پیروی از زمینهٔ افزاره</string>
     <string name="settings_general">عمومی</string>
     <string name="settings_license">مجوزها</string>
     <string name="settings_light_theme">روشن</string>
@@ -267,8 +259,7 @@
     <string name="sort">به‌ترتیب</string>
     <string name="sort_by_date_opt">تاریخ</string>
     <string name="sort_by_size_opt">اندازه</string>
-    <string name="sort_by_type_all">همه</string>
-    <string name="sort_by_type_alpha">نام</string>
+<string name="sort_by_type_alpha">نام</string>
     <string name="sort_by_type_apk">APK</string>
     <string name="sort_by_type_audio">سمعی</string>
     <string name="sort_by_type_docs">اسناد</string>
@@ -278,14 +269,7 @@
     <string name="sort_by_type_video">ویدئو</string>
     <string name="sort_by_type_zip">زیپ</string>
     <string name="switch_to_tab_description">پرش به زبانه</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s می‌تواند زبانه‌هایی را که در ماه گذشته مشاهده نکرده‌اید؛ ببندد.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">بستن</string>
-    <string name="tab_tray_inactive_auto_close_title">بسته شدن خودکار بعد از یک ماه؟</string>
-    <string name="tab_tray_inactive_onboarding_button_text">خاموش کردن در تنظیمات</string>
-    <string name="tab_tray_inactive_onboarding_message">زبانه‌هایی که دو هفته است ندیده‌اید به اینجا منتقل می‌شوند.</string>
-    <string name="tab_tray_inactive_recently_closed">به تازگی بسته شده است</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">فعال‌سازی بستن خودکار</string>
-    <string name="task_decryption_finished">رمزگشایی به پایان رسید</string>
+<string name="task_decryption_finished">رمزگشایی به پایان رسید</string>
     <string name="task_encryption_finished">رمزگذاری به پایان رسید</string>
     <string name="top_sites_edit_dialog_save">ذخیره</string>
     <string name="top_sites_edit_dialog_title">ویرایش میانبر</string>

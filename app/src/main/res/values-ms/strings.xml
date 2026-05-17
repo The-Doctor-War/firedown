@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Tiada SVG tersedia.</string>
     <string name="capture_empty_video_message">Tiada video tersedia.</string>
     <string name="clipboard">Disalin ke papan keratan</string>
-    <string name="connection_enhanced_protection">Perlindungan Penjejakan yang Dipertingkatkan</string>
-    <string name="connection_secure">Sambungan selamat</string>
+<string name="connection_secure">Sambungan selamat</string>
     <string name="delete">Padam</string>
     <string name="delete_all_bookmarks">Ini akan memadamkan semua data penanda halaman anda.</string>
     <string name="delete_all_browsing">Mengosongkan semua kuki dan data tapak boleh melog anda keluar daripada tapak web dan mengalih keluar kandungan luar talian.</string>
@@ -64,9 +63,7 @@
     <string name="empty_media_help">Sesetengah fail media perlu dimainkan sebelum Firedown dapat mengesannya sebagai fail yang boleh dimuat turun.</string>
     <string name="empty_media_help_title">Mainkan media sebelum memuat turun</string>
     <string name="empty_media_subtitle_help">Sila mainkan media seperti biasa. Ia kemudiannya akan muncul bersama fail media lain, selepas menekan Butang Aplikasi.</string>
-    <string name="empty_password_exeception_list">Log masuk dan kata laluan yang tidak disimpan akan ditunjukkan di sini.</string>
-    <string name="empty_password_list">Kata laluan anda yang disimpan akan dipaparkan di sini.</string>
-    <string name="error_check_internet_connection">Ralat sambungan Internet.</string>
+<string name="error_check_internet_connection">Ralat sambungan Internet.</string>
     <string name="error_cipher">Ralat penyulitan fail</string>
     <string name="error_external_storage">Tiada storan luaran tersedia</string>
     <string name="error_file">Tidak dapat membuka fail.</string>
@@ -146,8 +143,7 @@
     <string name="restart_origin">Mula semula</string>
     <string name="save_file">Simpan fail sebagai</string>
     <string name="save_file_name">Nama fail</string>
-    <string name="scroll_up">Tatal Ke Atas</string>
-    <string name="search">Cari</string>
+<string name="search">Cari</string>
     <string name="search_clip">Isikan pautan dari papan keratan</string>
     <string name="search_for">Cari %s</string>
     <string name="search_store">Cari di kedai</string>
@@ -190,8 +186,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Halaman akan dimuatkan seperti biasa, tetapi menyekat lebih sedikit penjejak.</string>
     <string name="settings_enhanced_tracking_protection_strict">Tegas</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Perlindungan penjejakan yang lebih kukuh dan prestasi yang lebih pantas, tetapi sesetengah tapak mungkin tidak berfungsi dengan betul.</string>
-    <string name="settings_exceptions">Pengecualian</string>
-    <string name="settings_general">Umum</string>
+<string name="settings_general">Umum</string>
     <string name="settings_license">Lesen</string>
     <string name="settings_lock_summary">Kunci akses kepada UI</string>
     <string name="settings_lock_title">Kunci aplikasi</string>
@@ -209,8 +204,7 @@
     <string name="sort">Isih mengikut</string>
     <string name="sort_by_date_opt">Tarikh</string>
     <string name="sort_by_size_opt">Saiz</string>
-    <string name="sort_by_type_all">Semua</string>
-    <string name="sort_by_type_alpha">Nama</string>
+<string name="sort_by_type_alpha">Nama</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Dokumen</string>

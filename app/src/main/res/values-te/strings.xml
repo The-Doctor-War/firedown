@@ -29,8 +29,7 @@
     <string name="capture_empty_video_message">వీడియోలు ఏవీ అందుబాటులో లేవు.</string>
     <string name="clipboard">క్లిప్‌బోర్డ్‌కి కాపీ చేయబడింది</string>
     <string name="close_tab">ట్యాబును మూసివేయి</string>
-    <string name="close_tab_title">%s ట్యాబును మూసివేయి</string>
-    <string name="close_tabs_after_one_day">ఒక రోజు తరువాత</string>
+<string name="close_tabs_after_one_day">ఒక రోజు తరువాత</string>
     <string name="close_tabs_after_one_day_summary">ఒక రోజు తర్వాత మూసివేయి</string>
     <string name="close_tabs_after_one_month">ఒక నెల తరువాత</string>
     <string name="close_tabs_after_one_month_summary">ఒక నెల తర్వాత మూసివేయి</string>
@@ -38,8 +37,7 @@
     <string name="close_tabs_after_one_week_summary">ఒక వారం తర్వాత మూసివేయి</string>
     <string name="close_tabs_manually">మానవీయంగా</string>
     <string name="close_tabs_manually_summary">మానవీయంగా మూసివేయండి</string>
-    <string name="connection_enhanced_protection">మెరుగైన ట్రాకింగ్ రక్షణ</string>
-    <string name="connection_secure">కనెక్షన్ సురక్షితం</string>
+<string name="connection_secure">కనెక్షన్ సురక్షితం</string>
     <string name="delete">తొలగించు</string>
     <string name="delete_all_bookmarks">ఇది మీ బుక్‌మార్క్‌ల డేటా మొత్తాన్ని తొలగిస్తుంది.</string>
     <string name="delete_all_browsing">అన్ని కుక్కీలు మరియు సైట్ డేటాను క్లియర్ చేయడం వలన మీరు వెబ్‌సైట్‌ల నుండి సైన్ అవుట్ చేయవచ్చు మరియు ఆఫ్‌లైన్ కంటెంట్‌ను తీసివేయవచ్చు.</string>
@@ -84,9 +82,7 @@
     <string name="empty_media_help">ఫైర్‌డౌన్ వాటిని డౌన్‌లోడ్ చేయదగిన ఫైల్‌లుగా గుర్తించడానికి ముందు కొన్ని మీడియా ఫైల్‌లను ప్లే చేయాల్సి ఉంటుంది.</string>
     <string name="empty_media_help_title">డౌన్‌లోడ్ చేయడానికి ముందు మీడియాను ప్లే చేయండి</string>
     <string name="empty_media_subtitle_help">దయచేసి ఎప్పటిలాగే మీడియాను ప్లే చేయండి. ఫైర్-బటన్ నొక్కిన తర్వాత అది ఇతర మీడియా ఫైల్‌లతో కనిపిస్తుంది.</string>
-    <string name="empty_password_exeception_list">సేవ్ చేయని లాగిన్‌లు మరియు పాస్‌వర్డ్‌లు ఇక్కడ చూపబడతాయి.</string>
-    <string name="empty_password_list">మీరు సేవ్ చేసిన పాస్‌వర్డ్ ఇక్కడ కనిపిస్తుంది.</string>
-    <string name="error_check_internet_connection">ఇంటర్నెట్ కనెక్షన్ లోపం.</string>
+<string name="error_check_internet_connection">ఇంటర్నెట్ కనెక్షన్ లోపం.</string>
     <string name="error_cipher">ఫైల్ ఎన్‌క్రిప్షన్ లోపం</string>
     <string name="error_external_storage">ప్రత్యామ్నాయ నిల్వ సదుపాయము లేదు</string>
     <string name="error_file">ఫైల్‌ని తెరవడం సాధ్యపడలేదు.</string>
@@ -160,8 +156,7 @@
     <string name="popup_tabs_close">అన్ని ట్యాబ్‌లను మూసివేయండి</string>
     <string name="popup_tabs_new">కొత్త టాబ్</string>
     <string name="popup_toggle">వీక్షణను టోగుల్ చేయండి</string>
-    <string name="prompt_update_confirmation">తాజాకరించు</string>
-    <string name="quick_settings_sheet_insecure_connection_2">అనుసంధానం సురక్షితం కాదు</string>
+<string name="quick_settings_sheet_insecure_connection_2">అనుసంధానం సురక్షితం కాదు</string>
     <string name="quick_settings_sheet_secure_connection_2">అనుసంధానం సురక్షితం</string>
     <string name="remove_top_site">తీసివేయి</string>
     <string name="rename">పేరు మార్చండి</string>
@@ -174,8 +169,7 @@
     <string name="restart_origin">పునఃప్రారంభించండి</string>
     <string name="save_file">ఫైల్‌ని ఇలా సేవ్ చేయండి</string>
     <string name="save_file_name">ఫైల్ పేరు</string>
-    <string name="scroll_up">పైకి స్క్రోల్ చేయండి</string>
-    <string name="search">వెతకండి</string>
+<string name="search">వెతకండి</string>
     <string name="search_clip">క్లిప్‌బోర్డ్ నుండి లింక్‌ని పూరించండి</string>
     <string name="search_for">%s కోసం శోధించండి</string>
     <string name="search_store">స్టోర్‌లో శోధించండి</string>
@@ -218,8 +212,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">పేజీలు సాధారణంగా లోడ్ అవుతాయి, కానీ తక్కువ ట్రాకర్‌లను బ్లాక్ చేస్తాయి.</string>
     <string name="settings_enhanced_tracking_protection_strict">స్ట్రిక్ట్</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">బలమైన ట్రాకింగ్ రక్షణ మరియు వేగవంతమైన పనితీరు, కానీ కొన్ని సైట్‌లు సరిగ్గా పని చేయకపోవచ్చు.</string>
-    <string name="settings_exceptions">మినహాయింపులు</string>
-    <string name="settings_follow_device_theme">పరికరపు అలంకారాన్ని అనుసరించు</string>
+<string name="settings_follow_device_theme">పరికరపు అలంకారాన్ని అనుసరించు</string>
     <string name="settings_general">జనరల్</string>
     <string name="settings_license">లైసెన్స్‌లు</string>
     <string name="settings_light_theme">లేత</string>
@@ -244,8 +237,7 @@
     <string name="sort">ఇలా క్రమబద్ధీకరించండి</string>
     <string name="sort_by_date_opt">తేదీ</string>
     <string name="sort_by_size_opt">పరిమాణం</string>
-    <string name="sort_by_type_all">అన్నీ</string>
-    <string name="sort_by_type_alpha">పేరు</string>
+<string name="sort_by_type_alpha">పేరు</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">ఆడియో</string>
     <string name="sort_by_type_docs">పత్రాలు</string>
@@ -255,10 +247,7 @@
     <string name="sort_by_type_video">వీడియో</string>
     <string name="sort_by_type_zip">జిప్</string>
     <string name="switch_to_tab_description">ట్యాబుకు మారు</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">మూసివేయి</string>
-    <string name="tab_tray_inactive_onboarding_button_text">అమరికలలో ఆఫ్ చేసుకోండి</string>
-    <string name="tab_tray_inactive_recently_closed">ఇటీవల మూసినవి</string>
-    <string name="task_decryption_finished">డిక్రిప్షన్ పూర్తయింది</string>
+<string name="task_decryption_finished">డిక్రిప్షన్ పూర్తయింది</string>
     <string name="task_encryption_finished">ఎన్‌క్రిప్షన్ పూర్తయింది</string>
     <string name="top_sites_edit_dialog_save">భద్రపరుచు</string>
     <string name="top_sites_max_limit_confirmation_button">సరే, అర్థమయ్యింది</string>

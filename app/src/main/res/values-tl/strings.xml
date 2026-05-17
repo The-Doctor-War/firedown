@@ -32,8 +32,7 @@
     <string name="capture_empty_video_message">Walang available na video.</string>
     <string name="clipboard">Kinopya sa clipboard</string>
     <string name="close_tab">Isara ang tab</string>
-    <string name="close_tab_title">Isara ang tab na %s</string>
-    <string name="close_tabs_after_one_day">Pagkatapos ng isang araw</string>
+<string name="close_tabs_after_one_day">Pagkatapos ng isang araw</string>
     <string name="close_tabs_after_one_day_summary">Isara pagkatapos ng isang araw</string>
     <string name="close_tabs_after_one_month">Pagkatapos ng isang buwan</string>
     <string name="close_tabs_after_one_month_summary">Isara pagkatapos ng isang buwan</string>
@@ -41,8 +40,7 @@
     <string name="close_tabs_after_one_week_summary">Isara pagkatapos ng isang linggo</string>
     <string name="close_tabs_manually">Manu-mano</string>
     <string name="close_tabs_manually_summary">Manu-manong isara</string>
-    <string name="connection_enhanced_protection">Pinahusay na Proteksyon sa Pagsubaybay</string>
-    <string name="connection_secure">Ang koneksyon ay ligtas</string>
+<string name="connection_secure">Ang koneksyon ay ligtas</string>
     <string name="delete">Tanggalin</string>
     <string name="delete_all_bookmarks">Tatanggalin nito ang lahat ng data ng iyong mga bookmark.</string>
     <string name="delete_all_browsing">Ang pag-clear sa lahat ng cookies at data ng site ay maaaring mag-sign out sa iyo sa mga website at mag-alis ng offline na nilalaman.</string>
@@ -88,9 +86,7 @@
     <string name="empty_media_help">Kailangang i-play ang ilang media file bago matukoy ng Firedown ang mga ito bilang isang nada-download na file.</string>
     <string name="empty_media_help_title">I-play ang media bago mag-download</string>
     <string name="empty_media_subtitle_help">Paki-play ang media gaya ng dati. Dapat itong lumabas kasama ng iba pang mga media file, pagkatapos pindutin ang Fire-Button.</string>
-    <string name="empty_password_exeception_list">Ang mga login at password na hindi nai-save ay ipapakita dito.</string>
-    <string name="empty_password_list">Lalabas dito ang iyong naka-save na password.</string>
-    <string name="error_check_internet_connection">Error sa koneksyon sa internet.</string>
+<string name="error_check_internet_connection">Error sa koneksyon sa internet.</string>
     <string name="error_cipher">Error sa pag-encrypt ng file</string>
     <string name="error_external_storage">Walang available na panlabas na storage</string>
     <string name="error_file">Hindi mabuksan ang file.</string>
@@ -167,8 +163,7 @@
     <string name="popup_toggle">I-toggle ang view</string>
     <string name="settings_doh_provider_custom_dialog_error_https">Dapat magsimula sa “https://” ang URL</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Di-wastong URL</string>
-    <string name="prompt_update_confirmation">I-update</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Ang koneksyon ay hindi ligtas</string>
+<string name="quick_settings_sheet_insecure_connection_2">Ang koneksyon ay hindi ligtas</string>
     <string name="quick_settings_sheet_secure_connection_2">Ligtas na koneksyon</string>
     <string name="quit_application">Nagsasara na ang application para mailapat ang mga pagbabago…</string>
     <string name="remove_top_site">Alisin</string>
@@ -177,8 +172,7 @@
     <string name="restart_origin">I-restart</string>
     <string name="save_file">I-save ang file bilang</string>
     <string name="save_file_name">Pangalan ng file</string>
-    <string name="scroll_up">Mag-scroll pataas</string>
-    <string name="search">Maghanap</string>
+<string name="search">Maghanap</string>
     <string name="search_clip">Punan ang link mula sa clipboard</string>
     <string name="search_for">Maghanap ng %s</string>
     <string name="search_store">Maghanap sa tindahan</string>
@@ -203,8 +197,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Mala-log out ka sa karamihan ng mga site</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Mga nakabukas na tab</string>
     <string name="settings_doh_server">DNS Server</string>
-    <string name="settings_doh_server_default">Gamitin mo ang iyong default DNS resolver kung may problema sa secure DNS provider</string>
-    <string name="settings_doh_server_error_format">Maglagay ng tamang format na URL</string>
+<string name="settings_doh_server_error_format">Maglagay ng tamang format na URL</string>
     <string name="settings_doh_server_error_provider">Paki-verify na ito ay isang wastong provider o subukang muli sa ibang pagkakataon</string>
     <string name="settings_doh_server_off">Gumamit ng system DNS resolver</string>
     <string name="settings_doh_server_title">Gamitin ang Provider</string>
@@ -222,8 +215,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Normal na maglo-load ang mga page, ngunit mag-block ng mas kaunting mga tracker.</string>
     <string name="settings_enhanced_tracking_protection_strict">Mahigpit</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Mas malakas na proteksyon sa pagsubaybay at mas mabilis na pagganap, ngunit maaaring hindi gumana nang maayos ang ilang site.</string>
-    <string name="settings_exceptions">Mga pagbubukod</string>
-    <string name="settings_follow_device_theme">Sundin ang tema ng device</string>
+<string name="settings_follow_device_theme">Sundin ang tema ng device</string>
     <string name="settings_general">Heneral</string>
     <string name="settings_license">Mga lisensya</string>
     <string name="settings_light_theme">Maliwanag</string>
@@ -253,8 +245,7 @@
     <string name="sort">Pagbukud-bukurin ayon sa</string>
     <string name="sort_by_date_opt">Petsa</string>
     <string name="sort_by_size_opt">Sukat</string>
-    <string name="sort_by_type_all">Lahat</string>
-    <string name="sort_by_type_alpha">Pangalan</string>
+<string name="sort_by_type_alpha">Pangalan</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Mga dokumento</string>
@@ -264,14 +255,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Lumipat ng tab</string>
-    <string name="tab_tray_inactive_auto_close_body_2">Kayang isara ng %1$s ang mga tab na hindi mo natingnan sa nakaraang buwan.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Isara</string>
-    <string name="tab_tray_inactive_auto_close_title">Kusang isara pagkatapos ng isang buwan?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Isara sa mga setting</string>
-    <string name="tab_tray_inactive_onboarding_message">Ang mga tab na hindi mo natingnan sa loob ng dalawang linggo ay inilipat dito.</string>
-    <string name="tab_tray_inactive_recently_closed">Isinara kamakailan</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Buksan ang auto-close</string>
-    <string name="task_decryption_finished">Tapos na ang pag-decryption</string>
+<string name="task_decryption_finished">Tapos na ang pag-decryption</string>
     <string name="task_encryption_finished">Tapos na ang pag-encrypt</string>
     <string name="top_sites_edit_dialog_save">I-save</string>
     <string name="top_sites_edit_dialog_title">Baguhin ang shortcut</string>

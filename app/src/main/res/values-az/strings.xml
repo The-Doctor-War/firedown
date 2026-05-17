@@ -30,9 +30,7 @@
     <string name="capture_empty_video_message">Video yoxdur.</string>
     <string name="clipboard">Buferə kopyalandı</string>
     <string name="close_tab">Vərəqi qapat</string>
-    <string name="close_tab_title">%s vərəqini qapat</string>
-    <string name="connection_enhanced_protection">Təkmilləşdirilmiş İzləmə Mühafizəsi</string>
-    <string name="connection_secure">Bağlantı təhlükəsizdir</string>
+<string name="connection_secure">Bağlantı təhlükəsizdir</string>
     <string name="delete">Sil</string>
     <string name="delete_all_bookmarks">Bu, bütün əlfəcin məlumatlarınızı siləcək.</string>
     <string name="delete_all_browsing">Bütün kukilərin və sayt məlumatlarının təmizlənməsi sizi vebsaytlardan çıxara və oflayn məzmunu silə bilər.</string>
@@ -77,9 +75,7 @@
     <string name="empty_media_help">Firedown onları endirilə bilən fayllar kimi aşkar etməzdən əvvəl bəzi media faylları oxudulmalıdır.</string>
     <string name="empty_media_help_title">Yükləməzdən əvvəl medianı çalın</string>
     <string name="empty_media_subtitle_help">Zəhmət olmasa medianı həmişəki kimi oynayın. Yanğın düyməsini basdıqdan sonra digər media faylları ilə birlikdə görünməlidir.</string>
-    <string name="empty_password_exeception_list">Yadda saxlanmayan girişlər və parollar burada göstəriləcək.</string>
-    <string name="empty_password_list">Yadda saxlanmış parolunuz burada görünəcək.</string>
-    <string name="error_check_internet_connection">İnternet bağlantısı xətası.</string>
+<string name="error_check_internet_connection">İnternet bağlantısı xətası.</string>
     <string name="error_cipher">Fayl şifrələmə xətası</string>
     <string name="error_external_storage">Xarici yaddaş mövcud deyil</string>
     <string name="error_file">Faylı açmaq mümkün olmadı.</string>
@@ -153,8 +149,7 @@
     <string name="popup_tabs_close">Bütün tabları bağlayın</string>
     <string name="popup_tabs_new">Yeni tab</string>
     <string name="popup_toggle">Görünüşü dəyişdirin</string>
-    <string name="prompt_update_confirmation">Yenilə</string>
-    <string name="remove_top_site">Sil</string>
+<string name="remove_top_site">Sil</string>
     <string name="rename">Adını dəyişdirin</string>
     <string name="rename_file">Faylın adını dəyişdirin</string>
     <string name="request_geolocation">Cihazınızın məkanı &lt;b&gt; %s &lt;/b&gt; ilə paylaşılsın?</string>
@@ -165,8 +160,7 @@
     <string name="restart_origin">Yenidən başlamaq</string>
     <string name="save_file">Faylı qeyd edin</string>
     <string name="save_file_name">Fayl adı</string>
-    <string name="scroll_up">Yuxarı sürüşdürün</string>
-    <string name="search">Axtar</string>
+<string name="search">Axtar</string>
     <string name="search_clip">Buferdən keçidi doldurun</string>
     <string name="search_for">%s axtarın</string>
     <string name="search_store">Mağazada axtarın</string>
@@ -205,8 +199,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Səhifələr normal yüklənəcək, lakin daha az izləyicini bloklayacaq.</string>
     <string name="settings_enhanced_tracking_protection_strict">Sərt</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Daha güclü izləmə qorunması və daha sürətli performans, lakin bəzi saytlar düzgün işləməyə bilər.</string>
-    <string name="settings_exceptions">İstisnalar</string>
-    <string name="settings_follow_device_theme">Cihaz mövzusuna uyğun</string>
+<string name="settings_follow_device_theme">Cihaz mövzusuna uyğun</string>
     <string name="settings_general">General</string>
     <string name="settings_license">Lisenziyalar</string>
     <string name="settings_light_theme">Açıq</string>
@@ -229,8 +222,7 @@
     <string name="sort">Sıralayın</string>
     <string name="sort_by_date_opt">Tarix</string>
     <string name="sort_by_size_opt">Ölçü</string>
-    <string name="sort_by_type_all">Hamısı</string>
-    <string name="sort_by_type_alpha">Ad</string>
+<string name="sort_by_type_alpha">Ad</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Sənədlər</string>

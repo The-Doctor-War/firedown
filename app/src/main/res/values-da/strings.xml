@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Ingen tilgængelige videoer.</string>
     <string name="clipboard">Kopieret til udklipsholder</string>
     <string name="close_tab">Luk faneblad</string>
-    <string name="close_tab_title">Luk faneblad %s</string>
-    <string name="close_tabs_after_one_day">Efter en dag</string>
+<string name="close_tabs_after_one_day">Efter en dag</string>
     <string name="close_tabs_after_one_day_summary">Luk efter en dag</string>
     <string name="close_tabs_after_one_month">Efter en måned</string>
     <string name="close_tabs_after_one_month_summary">Luk efter en måned</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Luk efter en uge</string>
     <string name="close_tabs_manually">Aldrig</string>
     <string name="close_tabs_manually_summary">Luk manuelt</string>
-    <string name="connection_enhanced_protection">Forbedret sporingsbeskyttelse</string>
-    <string name="connection_secure">Forbindelsen er sikker</string>
+<string name="connection_secure">Forbindelsen er sikker</string>
     <string name="delete">Slet</string>
     <string name="delete_all_bookmarks">Dette vil slette alle dine bogmærkedata.</string>
     <string name="delete_all_browsing">Rydning af alle cookies og webstedsdata kan muligvis logge dig ud af websteder og fjerne offlineindhold.</string>
@@ -91,9 +89,7 @@
     <string name="empty_media_help">Nogle mediefiler skal afspilles, før Firedown kan registrere dem som filer, der kan downloades.</string>
     <string name="empty_media_help_title">Afspil mediet før download</string>
     <string name="empty_media_subtitle_help">Afspil venligst medier som normalt. Det skulle så vises sammen med de andre mediefiler, efter at du har trykket på Fire-knappen.</string>
-    <string name="empty_password_exeception_list">Login og adgangskoder, der ikke er gemt, vil blive vist her.</string>
-    <string name="empty_password_list">Din gemte adgangskode vises her.</string>
-    <string name="error_check_internet_connection">Internet forbindelsesfejl.</string>
+<string name="error_check_internet_connection">Internet forbindelsesfejl.</string>
     <string name="error_cipher">Fil krypteringsfejl</string>
     <string name="error_external_storage">Ingen ekstern lagerplads er tilgængelig</string>
     <string name="error_file">Filen kunne ikke åbnes.</string>
@@ -181,8 +177,7 @@
     <string name="popup_toggle">Skift visning</string>
     <string name="settings_doh_provider_custom_dialog_error_https">"URL'er skal starte med “https://”"</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Ugyldig URL</string>
-    <string name="prompt_update_confirmation">Opdater</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Det anbefales at aktivere beskyttelse mod sporing.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Det anbefales at aktivere beskyttelse mod sporing.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Hvis noget på webstedet ikke ser ud til at virke som det skal, så prøv at slå beskyttelse fra.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Forbindelsen er ikke sikker</string>
     <string name="quick_settings_sheet_secure_connection_2">Forbindelsen er sikker</string>
@@ -198,8 +193,7 @@
     <string name="restart_origin">Genstart</string>
     <string name="save_file">Gem fil som</string>
     <string name="save_file_name">Filnavn</string>
-    <string name="scroll_up">Rulle op</string>
-    <string name="search">Søg</string>
+<string name="search">Søg</string>
     <string name="search_clip">Udfyld link fra udklipsholder</string>
     <string name="search_for">Søg efter %s</string>
     <string name="search_store">Søg i butikken</string>
@@ -229,8 +223,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Brug din standard DNS-resolver, hvis der opstår problemer med den sikre DNS-udbyder</string>
-    <string name="settings_doh_server_error_format">Indtast en korrekt formateret URL</string>
+<string name="settings_doh_server_error_format">Indtast en korrekt formateret URL</string>
     <string name="settings_doh_server_error_provider">Bekræft venligst, at det er en gyldig udbyder, eller prøv igen senere</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -251,8 +244,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Sider indlæses normalt, men blokerer færre trackere.</string>
     <string name="settings_enhanced_tracking_protection_strict">Strikt</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Stærkere sporingsbeskyttelse og hurtigere ydeevne, men nogle websteder fungerer muligvis ikke korrekt.</string>
-    <string name="settings_exceptions">Undtagelser</string>
-    <string name="settings_follow_device_theme">Samme som enhedens tema</string>
+<string name="settings_follow_device_theme">Samme som enhedens tema</string>
     <string name="settings_general">Generel</string>
     <string name="settings_license">Licenser</string>
     <string name="settings_light_theme">Lys</string>
@@ -283,8 +275,7 @@
     <string name="sort">Sortér efter</string>
     <string name="sort_by_date_opt">Dato</string>
     <string name="sort_by_size_opt">Størrelse</string>
-    <string name="sort_by_type_all">Alle</string>
-    <string name="sort_by_type_alpha">Navn</string>
+<string name="sort_by_type_alpha">Navn</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Lyd</string>
     <string name="sort_by_type_docs">Dokumenter</string>
@@ -294,14 +285,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Skift til faneblad</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s kan lukke faneblade, du ikke har set i løbet af den seneste måned.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Luk</string>
-    <string name="tab_tray_inactive_auto_close_title">Luk automatisk efter en måned?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Slå fra i indstillinger</string>
-    <string name="tab_tray_inactive_onboarding_message">Faneblade, du ikke har set i to uger, flyttes hertil.</string>
-    <string name="tab_tray_inactive_recently_closed">Nyligt lukkede</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Slå automatisk lukning til</string>
-    <string name="task_decryption_finished">Dekryptering er afsluttet</string>
+<string name="task_decryption_finished">Dekryptering er afsluttet</string>
     <string name="task_encryption_finished">Kryptering er afsluttet</string>
     <string name="task_gif_finished">GIF oprettet</string>
     <string name="top_sites_edit_dialog_save">Gem</string>

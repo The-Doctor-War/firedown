@@ -12,8 +12,7 @@
     <string name="browser_menu_share">Compartir</string>
     <string name="browser_menu_stop">Detener</string>
     <string name="close_tab">Cerrar pestaña</string>
-    <string name="close_tab_title">Cerrar pestaña %s</string>
-    <string name="close_tabs_after_one_day">Después de un día</string>
+<string name="close_tabs_after_one_day">Después de un día</string>
     <string name="close_tabs_after_one_day_summary">Cerrar después de un día</string>
     <string name="close_tabs_after_one_month">Después de un mes</string>
     <string name="close_tabs_after_one_month_summary">Cerrar después de un mes</string>
@@ -32,8 +31,7 @@
     <string name="open_new_tab_2">Nueva pestaña</string>
     <string name="settings_doh_provider_custom_dialog_error_https">La URL debe comenzar con “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL inválida</string>
-    <string name="prompt_update_confirmation">Actualizar</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Se recomienda activar la protección contra rastreo.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Se recomienda activar la protección contra rastreo.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Si algo parece roto en este sitio, probá desactivarla.</string>
     <string name="quick_settings_sheet_insecure_connection_2">La conexión no es segura</string>
     <string name="quick_settings_sheet_secure_connection_2">La conexión es segura</string>
@@ -47,8 +45,7 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Cookies y datos del sitio</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">Se cerrará la sesión en la mayor parte de los sitios</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Pestañas abiertas</string>
-    <string name="settings_doh_server_default">Usá la resolución de DNS predeterminada si hay un problema con el proveedor de DNS seguro</string>
-    <string name="settings_follow_device_theme">Usar el tema del dispositivo</string>
+<string name="settings_follow_device_theme">Usar el tema del dispositivo</string>
     <string name="settings_light_theme">Claro</string>
     <string name="settings_quit_fragment_summary">Elimina automáticamente los datos de navegación cuando seleccionás "Salir" en el menú principal</string>
     <string name="settings_quit_title">Eliminar datos de navegación al salir</string>
@@ -62,14 +59,7 @@
     <string name="snackbar_deleted_undo">DESHACER</string>
     <string name="snackbar_tab_closed">Pestaña cerrada</string>
     <string name="switch_to_tab_description">Cambiar a pestaña</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s puede cerrar pestañas que no abriste durante el último mes.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Cerrar</string>
-    <string name="tab_tray_inactive_auto_close_title">¿Cerrar automáticamente después de un mes?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Desactivar en configuración</string>
-    <string name="tab_tray_inactive_onboarding_message">Las pestañas que no se vieron por dos semanas se mueven acá.</string>
-    <string name="tab_tray_inactive_recently_closed">Recientemente cerrados</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Habilitar cierre automático</string>
-    <string name="top_sites_edit_dialog_save">Guardar</string>
+<string name="top_sites_edit_dialog_save">Guardar</string>
     <string name="top_sites_edit_dialog_title">Editar acceso directo</string>
     <string name="top_sites_edit_dialog_url_title">URL</string>
     <string name="top_sites_max_limit_confirmation_button">Listo, lo entendí.</string>

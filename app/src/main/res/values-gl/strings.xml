@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">Non hai vídeos dispoñibles.</string>
     <string name="clipboard">Copiouse no portapapeis</string>
     <string name="close_tab">Pechar lapela</string>
-    <string name="close_tab_title">Pechar lapela %s</string>
-    <string name="close_tabs_after_one_day">Despois dun día</string>
+<string name="close_tabs_after_one_day">Despois dun día</string>
     <string name="close_tabs_after_one_day_summary">Pechar despois de un día</string>
     <string name="close_tabs_after_one_month">Despois dun mes</string>
     <string name="close_tabs_after_one_month_summary">Pechar despois de un mes</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">Despois de unha semana</string>
     <string name="close_tabs_manually">Manualmente</string>
     <string name="close_tabs_manually_summary">Pechar manualmente</string>
-    <string name="connection_enhanced_protection">Protección de seguimento mellorada</string>
-    <string name="connection_secure">A conexión é segura</string>
+<string name="connection_secure">A conexión é segura</string>
     <string name="delete">Eliminar</string>
     <string name="delete_all_bookmarks">Isto eliminará todos os datos dos teus marcadores.</string>
     <string name="delete_all_browsing">Ao borrar todas as cookies e os datos do sitio, é posible que pecha sesión nos sitios web e elimine o contido sen conexión.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">Hai que reproducir algúns ficheiros multimedia para que Firedown poida detectalos como ficheiros descargables.</string>
     <string name="empty_media_help_title">Reproduce os medios antes de descargar</string>
     <string name="empty_media_subtitle_help">Reproduce os medios como de costume. Despois debería aparecer cos outros ficheiros multimedia, despois de premer o botón Fire.</string>
-    <string name="empty_password_exeception_list">Aquí mostraranse os inicios de sesión e os contrasinais que non estean gardados.</string>
-    <string name="empty_password_list">O teu contrasinal gardado aparecerá aquí.</string>
-    <string name="error_check_internet_connection">Erro de conexión a Internet.</string>
+<string name="error_check_internet_connection">Erro de conexión a Internet.</string>
     <string name="error_cipher">Erro de cifrado do ficheiro</string>
     <string name="error_external_storage">Non hai almacenamento externo dispoñible</string>
     <string name="error_file">Non se puido abrir o ficheiro.</string>
@@ -168,8 +164,7 @@
     <string name="popup_toggle">Alterna a vista</string>
     <string name="settings_doh_provider_custom_dialog_error_https">O URL debe comezar por «https://»</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL non válido</string>
-    <string name="prompt_update_confirmation">Actualizar</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Recoméndase activar a protección de rastrexo.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Recoméndase activar a protección de rastrexo.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Se algo parece que non funciona neste sitio, tenta desactivalo.</string>
     <string name="quick_settings_sheet_insecure_connection_2">A conexión non é segura</string>
     <string name="quick_settings_sheet_secure_connection_2">A conexión é segura</string>
@@ -180,8 +175,7 @@
     <string name="restart_origin">Reiniciar</string>
     <string name="save_file">Gardar ficheiro como</string>
     <string name="save_file_name">Nome de arquivo</string>
-    <string name="scroll_up">Desprácese cara arriba</string>
-    <string name="search">Busca</string>
+<string name="search">Busca</string>
     <string name="search_clip">Encha a ligazón desde o portapapeis</string>
     <string name="search_for">Busca %s</string>
     <string name="search_store">Busca na tenda</string>
@@ -208,8 +202,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Pechará a sesión na maioría dos sitios</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Lapelas abertas</string>
     <string name="settings_doh_server">Servidor DNS</string>
-    <string name="settings_doh_server_default">Usa o teu resolvedor de DNS predeterminado se hai un problema co provedor de DNS seguro</string>
-    <string name="settings_doh_server_error_format">Introduza un URL con formato correcto</string>
+<string name="settings_doh_server_error_format">Introduza un URL con formato correcto</string>
     <string name="settings_doh_server_error_provider">Verifique que é un provedor válido ou ténteo de novo máis tarde</string>
     <string name="settings_doh_server_off">Use o sistema de resolución DNS</string>
     <string name="settings_doh_server_title">Usar o provedor</string>
@@ -227,8 +220,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">As páxinas cargaranse normalmente, pero bloquearán menos rastreadores.</string>
     <string name="settings_enhanced_tracking_protection_strict">Estrita</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Protección de seguimento máis forte e rendemento máis rápido, pero é posible que algúns sitios non funcionen correctamente.</string>
-    <string name="settings_exceptions">Excepcións</string>
-    <string name="settings_follow_device_theme">Segundo o tema do dispositivo</string>
+<string name="settings_follow_device_theme">Segundo o tema do dispositivo</string>
     <string name="settings_general">Xeral</string>
     <string name="settings_license">Licenzas</string>
     <string name="settings_light_theme">Claro</string>
@@ -259,8 +251,7 @@
     <string name="sort">Ordenar por</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Tamaño</string>
-    <string name="sort_by_type_all">Todos</string>
-    <string name="sort_by_type_alpha">Nome</string>
+<string name="sort_by_type_alpha">Nome</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Documentos</string>
@@ -270,14 +261,7 @@
     <string name="sort_by_type_video">Vídeo</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Cambiar á lapela</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s pode pechar os separadores que non se visen durante o último mes.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Pechar</string>
-    <string name="tab_tray_inactive_auto_close_title">Pechar automaticamente despois dun mes?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Desactivar na configuración</string>
-    <string name="tab_tray_inactive_onboarding_message">Os separadores que non vise en dúas semanas móvense aquí.</string>
-    <string name="tab_tray_inactive_recently_closed">Pechados recentemente</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Activar o peche automático</string>
-    <string name="task_decryption_finished">Rematou o descifrado</string>
+<string name="task_decryption_finished">Rematou o descifrado</string>
     <string name="task_encryption_finished">Rematou o cifrado</string>
     <string name="top_sites_edit_dialog_save">Gardar</string>
     <string name="top_sites_edit_dialog_title">Editar atallo</string>

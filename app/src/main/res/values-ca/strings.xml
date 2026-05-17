@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">No hi ha vídeos disponibles.</string>
     <string name="clipboard">S\'ha copiat al porta-retalls</string>
     <string name="close_tab">Tanca la pestanya</string>
-    <string name="close_tab_title">Tanca la pestanya %s</string>
-    <string name="close_tabs_after_one_day">Al cap d’un dia</string>
+<string name="close_tabs_after_one_day">Al cap d’un dia</string>
     <string name="close_tabs_after_one_day_summary">Tanca-les al cap d’un dia</string>
     <string name="close_tabs_after_one_month">Al cap d’un mes</string>
     <string name="close_tabs_after_one_month_summary">Tanca-les al cap d’un mes</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Tanca-les al cap d’una setmana</string>
     <string name="close_tabs_manually">Manualment</string>
     <string name="close_tabs_manually_summary">Tanca-les manualment</string>
-    <string name="connection_enhanced_protection">Protecció de seguiment millorada</string>
-    <string name="connection_secure">La connexió és segura</string>
+<string name="connection_secure">La connexió és segura</string>
     <string name="delete">Suprimeix</string>
     <string name="delete_all_bookmarks">Això suprimirà totes les dades de les adreces d\'interès.</string>
     <string name="delete_all_browsing">Esborrant totes les galetes i les dades del lloc pot ser que tanqueu la sessió dels llocs web i que elimineu el contingut fora de línia.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">Alguns fitxers multimèdia s\'han de reproduir abans que Firedown pugui detectar-los com a fitxers descarregables.</string>
     <string name="empty_media_help_title">Reprodueix els mitjans abans de descarregar-los</string>
     <string name="empty_media_subtitle_help">Si us plau, reprodueix els mitjans com de costum. Aleshores hauria d\'aparèixer amb els altres fitxers multimèdia, després de prémer el botó de foc.</string>
-    <string name="empty_password_exeception_list">Aquí es mostraran els inicis de sessió i les contrasenyes que no estiguin desades.</string>
-    <string name="empty_password_list">La contrasenya desada apareixerà aquí.</string>
-    <string name="error_check_internet_connection">Error de connexió a Internet.</string>
+<string name="error_check_internet_connection">Error de connexió a Internet.</string>
     <string name="error_cipher">Error de xifratge del fitxer</string>
     <string name="error_external_storage">No hi ha emmagatzematge extern disponible</string>
     <string name="error_file">No s\'ha pogut obrir el fitxer.</string>
@@ -169,8 +165,7 @@
     <string name="popup_toggle">Canvia la vista</string>
     <string name="settings_doh_provider_custom_dialog_error_https">L’URL ha de començar per «https://»</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">L’URL no és vàlid</string>
-    <string name="prompt_update_confirmation">Actualitza</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">És recomanable activar la protecció contra el seguiment.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">És recomanable activar la protecció contra el seguiment.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Si us sembla que aquest lloc no funciona bé, proveu de desactivar-la.</string>
     <string name="quick_settings_sheet_insecure_connection_2">La connexió no és segura</string>
     <string name="quick_settings_sheet_secure_connection_2">La connexió és segura</string>
@@ -186,8 +181,7 @@
     <string name="restart_origin">Reinicia</string>
     <string name="save_file">Desa el fitxer com a</string>
     <string name="save_file_name">Nom de l\'arxiu</string>
-    <string name="scroll_up">Desplaçar-se cap amunt</string>
-    <string name="search">Cerca</string>
+<string name="search">Cerca</string>
     <string name="search_clip">Omple l\'enllaç des del porta-retalls</string>
     <string name="search_for">Cerca %s</string>
     <string name="search_store">Cerca a la botiga</string>
@@ -217,8 +211,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Utilitza el vostre sistema de resolució de DNS per defecte si hi ha algun problema amb el proveïdor de DNS segur</string>
-    <string name="settings_doh_server_error_format">Introdueix un URL amb el format correcte</string>
+<string name="settings_doh_server_error_format">Introdueix un URL amb el format correcte</string>
     <string name="settings_doh_server_error_provider">Verifica que sigui un proveïdor vàlid o torna-ho a provar més tard</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -239,8 +232,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Les pàgines es carregaran normalment, però bloquejaran menys seguidors.</string>
     <string name="settings_enhanced_tracking_protection_strict">Estricte</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Protecció de seguiment més forta i rendiment més ràpid, però és possible que alguns llocs no funcionin correctament.</string>
-    <string name="settings_exceptions">Excepcions</string>
-    <string name="settings_follow_device_theme">Segons el tema del dispositiu</string>
+<string name="settings_follow_device_theme">Segons el tema del dispositiu</string>
     <string name="settings_general">General</string>
     <string name="settings_license">Llicències</string>
     <string name="settings_light_theme">Clar</string>
@@ -271,8 +263,7 @@
     <string name="sort">Ordena per</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Mida</string>
-    <string name="sort_by_type_all">Tots</string>
-    <string name="sort_by_type_alpha">Nom</string>
+<string name="sort_by_type_alpha">Nom</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Àudio</string>
     <string name="sort_by_type_docs">Documents</string>
@@ -282,14 +273,7 @@
     <string name="sort_by_type_video">Vídeo</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Canvia a la pestanya</string>
-    <string name="tab_tray_inactive_auto_close_body_2">El %1$s pot tancar les pestanyes que no hàgiu vist durant el darrer mes.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Tanca</string>
-    <string name="tab_tray_inactive_auto_close_title">Voleu tancar-les automàticament al cap d’un mes?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Desactiva-ho als paràmetres</string>
-    <string name="tab_tray_inactive_onboarding_message">Aquí s’hi mouen les pestanyes que no heu vist des de fa dues setmanes.</string>
-    <string name="tab_tray_inactive_recently_closed">Tancades recentment</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Activa el tancament automàtic</string>
-    <string name="task_decryption_finished">S\'ha acabat el desxifratge</string>
+<string name="task_decryption_finished">S\'ha acabat el desxifratge</string>
     <string name="task_encryption_finished">S\'ha acabat el xifratge</string>
     <string name="top_sites_edit_dialog_save">Desa</string>
     <string name="top_sites_edit_dialog_title">Edita la drecera</string>

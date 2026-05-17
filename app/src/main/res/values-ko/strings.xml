@@ -37,8 +37,7 @@
     <string name="capture_empty_video_message">사용 가능한 동영상이 없습니다.</string>
     <string name="clipboard">클립보드에 복사됨</string>
     <string name="close_tab">탭 닫기</string>
-    <string name="close_tab_title">%s 탭 닫기</string>
-    <string name="close_tabs_after_one_day">하루 후</string>
+<string name="close_tabs_after_one_day">하루 후</string>
     <string name="close_tabs_after_one_day_summary">하루 후 닫기</string>
     <string name="close_tabs_after_one_month">한 달 후</string>
     <string name="close_tabs_after_one_month_summary">한 달 후 닫기</string>
@@ -46,8 +45,7 @@
     <string name="close_tabs_after_one_week_summary">일주일 후 닫기</string>
     <string name="close_tabs_manually">수동</string>
     <string name="close_tabs_manually_summary">수동으로 닫기</string>
-    <string name="connection_enhanced_protection">향상된 추적 보호</string>
-    <string name="connection_secure">연결이 안전합니다</string>
+<string name="connection_secure">연결이 안전합니다</string>
     <string name="delete">삭제</string>
     <string name="delete_all_bookmarks">모든 북마크 데이터가 삭제됩니다.</string>
     <string name="delete_all_browsing">모든 쿠키와 사이트 데이터를 지우면 웹사이트에서 로그아웃되고 오프라인 콘텐츠가 제거될 수 있습니다.</string>
@@ -94,9 +92,7 @@
     <string name="empty_media_help">Firedown이 해당 미디어 파일을 다운로드 가능한 파일로 감지하려면 먼저 일부 미디어 파일을 재생해야 합니다.</string>
     <string name="empty_media_help_title">다운로드하기 전에 미디어를 재생하세요</string>
     <string name="empty_media_subtitle_help">평소처럼 미디어를 재생해 주세요. 그러면 Fire 버튼을 누른 후 다른 미디어 파일과 함께 나타날 것입니다.</string>
-    <string name="empty_password_exeception_list">저장되지 않은 로그인 정와 비밀번호는 여기에 표시됩니다.</string>
-    <string name="empty_password_list">저장된 비밀번호가 여기에 표시됩니다.</string>
-    <string name="error_check_internet_connection">인터넷 연결 오류입니다.</string>
+<string name="error_check_internet_connection">인터넷 연결 오류입니다.</string>
     <string name="error_cipher">파일 암호화 오류</string>
     <string name="error_external_storage">외부 저장 장치 사용 불가</string>
     <string name="error_file">파일을 열 수 없습니다.</string>
@@ -184,8 +180,7 @@
     <string name="popup_toggle">보기 설정/해제</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL은 “https://”로 시작해야 함</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">잘못된 URL</string>
-    <string name="prompt_update_confirmation">업데이트</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">추적 방지 기능을 켜는 것을 권장합니다.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">추적 방지 기능을 켜는 것을 권장합니다.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">이 사이트에서 뭔가 손상된 것처럼 보이면 해당 기능을 꺼보세요.</string>
     <string name="quick_settings_sheet_insecure_connection_2">연결이 안전하지 않음</string>
     <string name="quick_settings_sheet_secure_connection_2">연결이 안전함</string>
@@ -210,8 +205,7 @@
     <string name="restart_origin">다시 시작</string>
     <string name="save_file">다른 이름으로 파일 저장</string>
     <string name="save_file_name">파일 이름</string>
-    <string name="scroll_up">위로 스크롤</string>
-    <string name="search">검색</string>
+<string name="search">검색</string>
     <string name="search_clip">클립보드에서 링크 채우기</string>
     <string name="search_for">%s 검색</string>
     <string name="search_store">매장에서 검색해보세요</string>
@@ -241,8 +235,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">보안 DNS 공급자에 문제가 있는 경우 기본 DNS 확인자 사용</string>
-    <string name="settings_doh_server_error_format">올바른 형식의 URL을 입력하세요</string>
+<string name="settings_doh_server_error_format">올바른 형식의 URL을 입력하세요</string>
     <string name="settings_doh_server_error_provider">유효한 공급자인지 확인하거나 나중에 다시 시도하세요.</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -277,8 +270,7 @@
     <string name="settings_query_param_remove_title">매개변수를 삭제하시겠습니까?</string>
     <string name="settings_query_param_remove_message">목록에서 %1$s 을(를) 삭제하시겠습니까?</string>
     <string name="settings_query_param_remove_confirm">삭제</string>
-    <string name="settings_exceptions">예외</string>
-    <string name="settings_follow_device_theme">기기 테마 따르기</string>
+<string name="settings_follow_device_theme">기기 테마 따르기</string>
     <string name="settings_general">일반</string>
     <string name="settings_license">라이선스</string>
     <string name="settings_light_theme">밝게</string>
@@ -309,8 +301,7 @@
     <string name="sort">정렬 기준</string>
     <string name="sort_by_date_opt">날짜</string>
     <string name="sort_by_size_opt">크기</string>
-    <string name="sort_by_type_all">모두</string>
-    <string name="sort_by_type_alpha">이름</string>
+<string name="sort_by_type_alpha">이름</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">오디오</string>
     <string name="sort_by_type_docs">문서</string>
@@ -320,14 +311,7 @@
     <string name="sort_by_type_video">동영상</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">탭 전환</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s는 지난 한 달 동안 보지 않은 탭을 닫을 수 있습니다.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">닫기</string>
-    <string name="tab_tray_inactive_auto_close_title">한 달 후 자동 닫기를 하시겠습니까?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">설정에서 끄기</string>
-    <string name="tab_tray_inactive_onboarding_message">2주 동안 보지 않은 탭은 여기로 이동됩니다.</string>
-    <string name="tab_tray_inactive_recently_closed">최근에 닫음</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">자동 닫기 켜기</string>
-    <string name="task_decryption_finished">복호화 완료</string>
+<string name="task_decryption_finished">복호화 완료</string>
     <string name="task_encryption_finished">암호화 완료</string>
     <string name="task_gif_finished">GIF 생성됨</string>
     <string name="top_sites_edit_dialog_save">저장</string>

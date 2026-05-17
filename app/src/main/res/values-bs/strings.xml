@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Nema dostupnih videozapisa.</string>
     <string name="clipboard">Kopirano u međuspremnik</string>
     <string name="close_tab">Zatvori tab</string>
-    <string name="close_tab_title">Zatvori tab %s</string>
-    <string name="close_tabs_after_one_day">Nakon jednog dana</string>
+<string name="close_tabs_after_one_day">Nakon jednog dana</string>
     <string name="close_tabs_after_one_day_summary">Zatvori nakon jednog dana</string>
     <string name="close_tabs_after_one_month">Nakon mjesec dana</string>
     <string name="close_tabs_after_one_month_summary">Zatvori nakon mjesec dana</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Zatvori nakon jedne sedmice</string>
     <string name="close_tabs_manually">Ručno</string>
     <string name="close_tabs_manually_summary">Zatvori ručno</string>
-    <string name="connection_enhanced_protection">Poboljšana zaštita od praćenja</string>
-    <string name="connection_secure">Veza je sigurna</string>
+<string name="connection_secure">Veza je sigurna</string>
     <string name="delete">Izbriši</string>
     <string name="delete_all_bookmarks">Ovo će izbrisati sve vaše podatke o oznakama.</string>
     <string name="delete_all_browsing">Brisanje svih kolačića i podataka o web-mjestu može vas odjaviti s web stranica i ukloniti vanmrežni sadržaj.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">Neke medijske datoteke moraju se reproducirati prije nego što ih Firedown otkrije kao datoteke za preuzimanje.</string>
     <string name="empty_media_help_title">Pustite medije prije preuzimanja</string>
     <string name="empty_media_subtitle_help">Pustite medije kao i obično. Zatim bi se trebao pojaviti s drugim medijskim datotekama, nakon pritiska na tipku Fire.</string>
-    <string name="empty_password_exeception_list">Ovdje će biti prikazane prijave i lozinke koje nisu sačuvane.</string>
-    <string name="empty_password_list">Vaša sačuvana lozinka će se pojaviti ovdje.</string>
-    <string name="error_check_internet_connection">Greška internetske veze.</string>
+<string name="error_check_internet_connection">Greška internetske veze.</string>
     <string name="error_cipher">Greška kod šifriranja datoteke</string>
     <string name="error_external_storage">Nije dostupna eksterna pohrana</string>
     <string name="error_file">Nije moguće otvoriti fajl.</string>
@@ -168,8 +164,7 @@
     <string name="popup_toggle">Prebaci prikaz</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL mora početi sa “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Neispravan URL</string>
-    <string name="prompt_update_confirmation">Ažuriraj</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Preporučuje se uključivanje zaštite od praćenja.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Preporučuje se uključivanje zaštite od praćenja.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Ako nešto izgleda pokvareno na ovoj stranici, pokušajte to isključiti.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Veza nije sigurna</string>
     <string name="quick_settings_sheet_secure_connection_2">Veza je sigurna</string>
@@ -180,8 +175,7 @@
     <string name="restart_origin">Ponovo pokreni</string>
     <string name="save_file">Sačuvaj fajl kao</string>
     <string name="save_file_name">Ime dokumenta</string>
-    <string name="scroll_up">Pomaknite se prema gore</string>
-    <string name="search">Traži</string>
+<string name="search">Traži</string>
     <string name="search_clip">Popunite link iz međuspremnika</string>
     <string name="search_for">Potražite %s</string>
     <string name="search_store">Potražite u prodavnici</string>
@@ -208,8 +202,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Bit ćete odjavljeni na većini stranica</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Otvorene tabove</string>
     <string name="settings_doh_server">DNS server</string>
-    <string name="settings_doh_server_default">Koristi standarni DNS server ako postoji problem sa sigurnim pružaocem DNS-a</string>
-    <string name="settings_doh_server_error_format">Unesite ispravno formatiran URL</string>
+<string name="settings_doh_server_error_format">Unesite ispravno formatiran URL</string>
     <string name="settings_doh_server_error_provider">Molimo potvrdite da je ispravan provajder ili pokušajte ponovo kasnije</string>
     <string name="settings_doh_server_off">Koristite sistemski DNS razrješavač</string>
     <string name="settings_doh_server_title">Koristite provajdera</string>
@@ -227,8 +220,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Stranice će se normalno učitavati, ali će blokirati manje tragača.</string>
     <string name="settings_enhanced_tracking_protection_strict">Strogo</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Jača zaštita od praćenja i brže performanse, ali neke web lokacije možda neće raditi ispravno.</string>
-    <string name="settings_exceptions">Izuzeci</string>
-    <string name="settings_follow_device_theme">Slijedi temu uređaja</string>
+<string name="settings_follow_device_theme">Slijedi temu uređaja</string>
     <string name="settings_general">Generale</string>
     <string name="settings_license">Licence</string>
     <string name="settings_light_theme">Svijetla</string>
@@ -259,8 +251,7 @@
     <string name="sort">Poredajte po</string>
     <string name="sort_by_date_opt">Datum</string>
     <string name="sort_by_size_opt">Veličina</string>
-    <string name="sort_by_type_all">Sve</string>
-    <string name="sort_by_type_alpha">Ime</string>
+<string name="sort_by_type_alpha">Ime</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Dokumenti</string>
@@ -270,14 +261,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Prebaci se na tab</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s može zatvoriti tabove koje niste pogledali u proteklom mjesecu.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Zatvori</string>
-    <string name="tab_tray_inactive_auto_close_title">Automatsko zatvaranje nakon mjesec dana?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Isključite u postavkama</string>
-    <string name="tab_tray_inactive_onboarding_message">Tabovi koje niste pogledali dvije sedmice se premještaju ovdje.</string>
-    <string name="tab_tray_inactive_recently_closed">Nedavno zatvoreni tabovi</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Uključite automatsko zatvaranje</string>
-    <string name="task_decryption_finished">Dešifrovanje je završeno</string>
+<string name="task_decryption_finished">Dešifrovanje je završeno</string>
     <string name="task_encryption_finished">Šifriranje je završeno</string>
     <string name="top_sites_edit_dialog_save">Sačuvaj</string>
     <string name="top_sites_edit_dialog_title">Uredi prečicu</string>

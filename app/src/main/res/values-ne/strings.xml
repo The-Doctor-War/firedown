@@ -20,8 +20,7 @@
     <string name="capture_empty_svgs_message">कुनै SVG उपलब्ध छैन।</string>
     <string name="capture_empty_video_message">कुनै भिडियो उपलब्ध छैन।</string>
     <string name="clipboard">क्लिपबोर्डमा प्रतिलिपि गरियो</string>
-    <string name="connection_enhanced_protection">परिष्कृत ट्र्याकिङ संरक्षण</string>
-    <string name="connection_secure">जडान सुरक्षित छ</string>
+<string name="connection_secure">जडान सुरक्षित छ</string>
     <string name="delete">मेटाउन</string>
     <string name="delete_all_bookmarks">यसले तपाइँको सबै बुकमार्क डाटा मेटाउनेछ।</string>
     <string name="delete_all_browsing">सबै कुकीहरू र साइट डेटा खाली गर्नाले तपाईंलाई वेबसाइटहरूबाट साइन आउट गर्न र अफलाइन सामग्री हटाउन सक्छ।</string>
@@ -63,9 +62,7 @@
     <string name="empty_media_help">फायरडाउनले डाउनलोड गर्न मिल्ने फाइलहरूको रूपमा पत्ता लगाउन सक्नु अघि केही मिडिया फाइलहरू प्ले गर्न आवश्यक छ।</string>
     <string name="empty_media_help_title">डाउनलोड गर्नु अघि मिडिया प्ले गर्नुहोस्</string>
     <string name="empty_media_subtitle_help">कृपया मिडियालाई सामान्य रूपमा प्ले गर्नुहोस्। फायर-बटन थिचेपछि यो अन्य मिडिया फाइलहरूसँग देखा पर्दछ।</string>
-    <string name="empty_password_exeception_list">सुरक्षित नगरिएका लगइनहरू र पासवर्डहरू यहाँ देखाइनेछन्।</string>
-    <string name="empty_password_list">तपाईंको सुरक्षित पासवर्ड यहाँ देखिनेछ।</string>
-    <string name="error_check_internet_connection">इन्टरनेट जडान त्रुटि।</string>
+<string name="error_check_internet_connection">इन्टरनेट जडान त्रुटि।</string>
     <string name="error_cipher">फाइल इन्क्रिप्सन त्रुटि</string>
     <string name="error_external_storage">कुनै बाह्य भण्डारण उपलब्ध छैन</string>
     <string name="error_file">फाइल खोल्न सकिएन।</string>
@@ -138,8 +135,7 @@
     <string name="restart_origin">फेरि शुरु गर्नु</string>
     <string name="save_file">यस रूपमा फाइल बचत गर्नुहोस्</string>
     <string name="save_file_name">फाइल नाम</string>
-    <string name="scroll_up">माथि स्क्रोल गर्नुहोस्</string>
-    <string name="search">खोज्नुहोस्</string>
+<string name="search">खोज्नुहोस्</string>
     <string name="search_clip">क्लिपबोर्डबाट लिङ्क भर्नुहोस्</string>
     <string name="search_for">%s खोज्नुहोस्</string>
     <string name="search_store">पसलमा खोज्नुहोस्</string>
@@ -175,8 +171,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">पृष्ठहरू सामान्य रूपमा लोड हुनेछन्, तर कम ट्र्याकरहरूलाई रोक लगाउँछन्।</string>
     <string name="settings_enhanced_tracking_protection_strict">कडा</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">बलियो ट्र्याकिङ सुरक्षा र छिटो कार्यसम्पादन, तर केही साइटहरूले राम्ररी काम नगर्न सक्छन्।</string>
-    <string name="settings_exceptions">अपवादहरू</string>
-    <string name="settings_general">सामान्य</string>
+<string name="settings_general">सामान्य</string>
     <string name="settings_license">इजाजतपत्रहरू</string>
     <string name="settings_lock_summary">UI मा पहुँच लक गर्नुहोस्</string>
     <string name="settings_lock_title">एप लक</string>
@@ -194,8 +189,7 @@
     <string name="sort">यसअनुसार क्रमबद्ध गर्नुहोस्</string>
     <string name="sort_by_date_opt">मिति</string>
     <string name="sort_by_size_opt">साइज</string>
-    <string name="sort_by_type_all">सबै</string>
-    <string name="sort_by_type_alpha">नाम</string>
+<string name="sort_by_type_alpha">नाम</string>
     <string name="sort_by_type_apk">एपीके</string>
     <string name="sort_by_type_audio">अडियो</string>
     <string name="sort_by_type_docs">कागजातहरू</string>

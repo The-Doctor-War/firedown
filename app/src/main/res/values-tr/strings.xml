@@ -37,8 +37,7 @@
     <string name="capture_empty_video_message">Hiçbir video mevcut değil.</string>
     <string name="clipboard">Panoya kopyalandı</string>
     <string name="close_tab">Sekmeyi kapat</string>
-    <string name="close_tab_title">%s sekmesini kapat</string>
-    <string name="close_tabs_after_one_day">Bir gün sonra</string>
+<string name="close_tabs_after_one_day">Bir gün sonra</string>
     <string name="close_tabs_after_one_day_summary">Bir gün sonra kapat</string>
     <string name="close_tabs_after_one_month">Bir ay sonra</string>
     <string name="close_tabs_after_one_month_summary">Bir ay sonra kapat</string>
@@ -46,8 +45,7 @@
     <string name="close_tabs_after_one_week_summary">Bir hafta sonra kapat</string>
     <string name="close_tabs_manually">Asla</string>
     <string name="close_tabs_manually_summary">Elle kapat</string>
-    <string name="connection_enhanced_protection">Gelişmiş Takip Koruması</string>
-    <string name="connection_secure">Bağlantı güvenli</string>
+<string name="connection_secure">Bağlantı güvenli</string>
     <string name="delete">Silmek</string>
     <string name="delete_all_bookmarks">Bu, tüm yer işareti verilerinizi silecektir.</string>
     <string name="delete_all_browsing">Tüm çerezlerin ve site verilerinin temizlenmesi, web sitelerindeki oturumunuzun kapatılmasına ve çevrimdışı içeriğin kaldırılmasına neden olabilir.</string>
@@ -94,9 +92,7 @@
     <string name="empty_media_help">Firedown\'ın bunları indirilebilir dosyalar olarak algılayabilmesi için bazı medya dosyalarının oynatılması gerekir.</string>
     <string name="empty_media_help_title">İndirmeden önce medyayı oynatın</string>
     <string name="empty_media_subtitle_help">Lütfen medyayı her zamanki gibi oynatın. Ateş Düğmesine bastıktan sonra diğer medya dosyalarıyla birlikte görünmelidir.</string>
-    <string name="empty_password_exeception_list">Kaydedilmemiş kullanıcı adları ve şifreler burada gösterilecektir.</string>
-    <string name="empty_password_list">Kaydettiğiniz şifre burada görünecektir.</string>
-    <string name="error_check_internet_connection">İnternet bağlantısı hatası.</string>
+<string name="error_check_internet_connection">İnternet bağlantısı hatası.</string>
     <string name="error_cipher">Dosya şifreleme hatası</string>
     <string name="error_external_storage">Harici depolama mevcut değil</string>
     <string name="error_file">Dosya açılamadı.</string>
@@ -193,8 +189,7 @@
     <string name="settings_webrtc_enabled">"WebRTC'yi etkinleştir"</string>
     <string name="settings_webassembly_enabled">"WebAssembly'yi etkinleştir"</string>
     <string name="settings_webassembly_enabled_summary">Sitelerin derlenmiş WASM modüllerini çalıştırmasına izin verir. Devre dışı bırakmak saldırı yüzeyini azaltır ancak bazı modern web uygulamalarını bozabilir</string>
-    <string name="prompt_update_confirmation">Güncelle</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">İzlenme korumasını açmanız önerilir.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">İzlenme korumasını açmanız önerilir.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Site bozuk görünüyorsa kapatmayı deneyin.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Bağlantı güvenli değil</string>
     <string name="quick_settings_sheet_secure_connection_2">Bağlantı güvenli</string>
@@ -223,8 +218,7 @@
     <string name="restart_origin">Tekrar başlat</string>
     <string name="save_file">Farklı kaydet</string>
     <string name="save_file_name">Dosya adı</string>
-    <string name="scroll_up">Yukarı kaydır</string>
-    <string name="search">Aramak</string>
+<string name="search">Aramak</string>
     <string name="search_clip">Bağlantıyı panodan doldur</string>
     <string name="search_for">%s arayın</string>
     <string name="search_store">Mağazada ara</string>
@@ -254,8 +248,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Güvenli DNS sağlayıcınızda sorun yaşanırsa varsayılan DNS çözümleyiciniz kullanılır</string>
-    <string name="settings_doh_server_error_format">Doğru biçimlendirilmiş bir URL girin</string>
+<string name="settings_doh_server_error_format">Doğru biçimlendirilmiş bir URL girin</string>
     <string name="settings_doh_server_error_provider">Lütfen geçerli bir sağlayıcı olduğunu doğrulayın veya daha sonra tekrar deneyin</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -290,8 +283,7 @@
     <string name="settings_query_param_remove_title">Parametre kaldırılsın mı?</string>
     <string name="settings_query_param_remove_message">%1$s listeden kaldırılsın mı?</string>
     <string name="settings_query_param_remove_confirm">Kaldır</string>
-    <string name="settings_exceptions">İstisnalar</string>
-    <string name="settings_follow_device_theme">Cihaz temasına uy</string>
+<string name="settings_follow_device_theme">Cihaz temasına uy</string>
     <string name="settings_general">Genel</string>
     <string name="settings_license">Lisanslar</string>
     <string name="settings_light_theme">Açık</string>
@@ -322,8 +314,7 @@
     <string name="sort">Sıralama ölçütü</string>
     <string name="sort_by_date_opt">Tarih</string>
     <string name="sort_by_size_opt">Boyut</string>
-    <string name="sort_by_type_all">Tüm</string>
-    <string name="sort_by_type_alpha">İsim</string>
+<string name="sort_by_type_alpha">İsim</string>
     <string name="sort_by_type_apk">apk</string>
     <string name="sort_by_type_audio">Ses</string>
     <string name="sort_by_type_docs">Belgeler</string>
@@ -334,14 +325,7 @@
     <string name="sort_by_type_zip">Posta Kodu</string>
     <string name="spoof_timezone_summary">Etkinleştirildiğinde parmak izi korumasını güçlendirir</string>
     <string name="switch_to_tab_description">Sekmeye geç</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s bir aydır bakmadığınız sekmeleri kapatabilir.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Kapat</string>
-    <string name="tab_tray_inactive_auto_close_title">Bir ay sonra kendiliğinden kapatılsın mı?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Ayarlardan kapat</string>
-    <string name="tab_tray_inactive_onboarding_message">İki haftadır bakmadığınız sekmeler buraya taşınır.</string>
-    <string name="tab_tray_inactive_recently_closed">Son kapatılanlar</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Otomatik kapatmayı aç</string>
-    <string name="task_decryption_finished">Şifre çözme tamamlandı</string>
+<string name="task_decryption_finished">Şifre çözme tamamlandı</string>
     <string name="task_encryption_finished">Şifreleme tamamlandı</string>
     <string name="task_gif_finished">GIF oluşturuldu</string>
     <string name="top_sites_edit_dialog_save">Kaydet</string>

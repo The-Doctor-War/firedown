@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">Бейнелер жоқ.</string>
     <string name="clipboard">Буферге көшірілді</string>
     <string name="close_tab">Бетті жабу</string>
-    <string name="close_tab_title">%s бетін жабу</string>
-    <string name="close_tabs_after_one_day">Бір күннен кейін</string>
+<string name="close_tabs_after_one_day">Бір күннен кейін</string>
     <string name="close_tabs_after_one_day_summary">Бір күннен кейін жабу</string>
     <string name="close_tabs_after_one_month">Бір айдан кейін</string>
     <string name="close_tabs_after_one_month_summary">Бір айдан кейін жабу</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">Бір аптадан кейін жабу</string>
     <string name="close_tabs_manually">Ешқашан</string>
     <string name="close_tabs_manually_summary">Қолмен жабу</string>
-    <string name="connection_enhanced_protection">Жетілдірілген бақылау қорғауы</string>
-    <string name="connection_secure">Қосылым қауіпсіз</string>
+<string name="connection_secure">Қосылым қауіпсіз</string>
     <string name="delete">Жою</string>
     <string name="delete_all_bookmarks">Бұл барлық бетбелгі деректерін жояды.</string>
     <string name="delete_all_browsing">Барлық cookie файлдары мен сайт деректерін өшіру сізді веб-сайттардан шығуы және офлайн мазмұнды жоюы мүмкін.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">Кейбір медиа файлдарды Firedown оларды жүктеп алынатын файлдар ретінде анықтау үшін ойнату қажет.</string>
     <string name="empty_media_help_title">Жүктеп алмас бұрын медианы ойнатыңыз</string>
     <string name="empty_media_subtitle_help">Мультимедианы әдеттегідей ойнатыңыз. Ол Өрт түймешігін басқаннан кейін басқа медиа файлдармен бірге пайда болуы керек.</string>
-    <string name="empty_password_exeception_list">Сақталмаған логиндер мен құпия сөздер осы жерде көрсетіледі.</string>
-    <string name="empty_password_list">Сақталған құпия сөзіңіз осы жерде пайда болады.</string>
-    <string name="error_check_internet_connection">Интернетке қосылу қатесі.</string>
+<string name="error_check_internet_connection">Интернетке қосылу қатесі.</string>
     <string name="error_cipher">Файлды шифрлау қатесі</string>
     <string name="error_external_storage">Сыртқы жад қолжетімді емес</string>
     <string name="error_file">Файлды ашу мүмкін болмады.</string>
@@ -168,8 +164,7 @@
     <string name="popup_toggle">Көріністі ауыстыру</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL адресі \"https://\" деп басталуы керек</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Жарамсыз URL</string>
-    <string name="prompt_update_confirmation">Жаңарту</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Бақылаудан қорғанысты іске қосу ұсынылады.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Бақылаудан қорғанысты іске қосу ұсынылады.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Бұл сайтта бірдеңе бұзылған болып көрінсе, оны сөндіріп көріңіз.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Байланыс қауіпсіз емес</string>
     <string name="quick_settings_sheet_secure_connection_2">Байланыс қауіпсіз</string>
@@ -180,8 +175,7 @@
     <string name="restart_origin">Қайтадан қосу</string>
     <string name="save_file">Файлды басқаша сақтау</string>
     <string name="save_file_name">Файл атауы</string>
-    <string name="scroll_up">Жоғары айналдыру</string>
-    <string name="search">Іздеу</string>
+<string name="search">Іздеу</string>
     <string name="search_clip">Сілтемені алмасу буферінен толтырыңыз</string>
     <string name="search_for">%s іздеңіз</string>
     <string name="search_store">Дүкенде іздеу</string>
@@ -208,8 +202,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Сіз сайттардың көбінен шығасыз</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Ашық беттер</string>
     <string name="settings_doh_server">DNS сервері</string>
-    <string name="settings_doh_server_default">Қауіпсіз DNS провайдеріне қатысты мәселе болса, үнсіз келісім DNS провайдерін пайдалану</string>
-    <string name="settings_doh_server_error_format">Дұрыс пішімделген URL мекенжайын енгізіңіз</string>
+<string name="settings_doh_server_error_format">Дұрыс пішімделген URL мекенжайын енгізіңіз</string>
     <string name="settings_doh_server_error_provider">Бұл жарамды провайдер екенін растаңыз немесе кейінірек қайталап көріңіз</string>
     <string name="settings_doh_server_off">Жүйелік DNS шешу құралын пайдаланыңыз</string>
     <string name="settings_doh_server_title">Провайдерді пайдаланыңыз</string>
@@ -227,8 +220,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Беттер қалыпты түрде жүктеледі, бірақ азырақ трекерлерді блоктайды.</string>
     <string name="settings_enhanced_tracking_protection_strict">Қатаң</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Күшті бақылау қорғанысы және жылдамырақ өнімділік, бірақ кейбір сайттар дұрыс жұмыс істемеуі мүмкін.</string>
-    <string name="settings_exceptions">Ерекшеліктер</string>
-    <string name="settings_follow_device_theme">Құрылғы темасына сүйену</string>
+<string name="settings_follow_device_theme">Құрылғы темасына сүйену</string>
     <string name="settings_general">Жалпы</string>
     <string name="settings_license">Лицензиялар</string>
     <string name="settings_light_theme">Ашық түсті</string>
@@ -259,8 +251,7 @@
     <string name="sort">Сұрыптау реті</string>
     <string name="sort_by_date_opt">Күн</string>
     <string name="sort_by_size_opt">Өлшем</string>
-    <string name="sort_by_type_all">Барлық</string>
-    <string name="sort_by_type_alpha">Аты</string>
+<string name="sort_by_type_alpha">Аты</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Аудио</string>
     <string name="sort_by_type_docs">Құжаттар</string>
@@ -270,14 +261,7 @@
     <string name="sort_by_type_video">Бейне</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Бетке ауысу</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s сіз соңғы айда қарамаған беттерді жаба алады.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Жабу</string>
-    <string name="tab_tray_inactive_auto_close_title">Бір айдан кейін автожабу керек пе?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Баптауларда сөндіру</string>
-    <string name="tab_tray_inactive_onboarding_message">Сіз екі апта бойы қарамаған беттер осында жылжытылады.</string>
-    <string name="tab_tray_inactive_recently_closed">Жақында жабылған</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Автожабуды іске қосу</string>
-    <string name="task_decryption_finished">Шифрды шешу аяқталды</string>
+<string name="task_decryption_finished">Шифрды шешу аяқталды</string>
     <string name="task_encryption_finished">Шифрлау аяқталды</string>
     <string name="top_sites_edit_dialog_save">Сақтау</string>
     <string name="top_sites_edit_dialog_title">Жарлықты түзету</string>

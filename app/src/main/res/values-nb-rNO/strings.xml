@@ -12,8 +12,7 @@
     <string name="browser_menu_share">Del</string>
     <string name="browser_menu_stop">Stopp</string>
     <string name="close_tab">Lukk fane</string>
-    <string name="close_tab_title">Lukk fane %s</string>
-    <string name="close_tabs_after_one_day">Etter en dag</string>
+<string name="close_tabs_after_one_day">Etter en dag</string>
     <string name="close_tabs_after_one_day_summary">Lukk etter en dag</string>
     <string name="close_tabs_after_one_month">Etter en måned</string>
     <string name="close_tabs_after_one_month_summary">Lukk etter en måned</string>
@@ -32,8 +31,7 @@
     <string name="open_new_tab_2">Ny fane</string>
     <string name="settings_doh_provider_custom_dialog_error_https">Nettadressen må begynne med «https://».</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Ugyldig nettadresse</string>
-    <string name="prompt_update_confirmation">Oppdater</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Det anbefales å aktivere sporingsbeskyttelse.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Det anbefales å aktivere sporingsbeskyttelse.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Hvis noe ser ødelagt ut på dette nettstedet, prøv å slå det av.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Tilkoblingen er ikke sikker</string>
     <string name="quick_settings_sheet_secure_connection_2">Tilkoblingen er sikker</string>
@@ -47,8 +45,7 @@
     <string name="settings_delete_browsing_data_cookies_and_site_data">Infokapsler og nettstedsdata</string>
     <string name="settings_delete_browsing_data_cookies_subtitle">Du blir logget ut fra de fleste nettsteder</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Åpne faner</string>
-    <string name="settings_doh_server_default">Bruk din standard DNS-resolver hvis det er et problem med den sikre DNS-leverandøren</string>
-    <string name="settings_follow_device_theme">Følg enhetens tema</string>
+<string name="settings_follow_device_theme">Følg enhetens tema</string>
     <string name="settings_light_theme">Lyst</string>
     <string name="settings_quit_fragment_summary">Sletter nettleserdata automatisk når du velger «Avslutt» fra hovedmenyen</string>
     <string name="settings_quit_title">Slett nettleserdata når du avslutter</string>
@@ -62,14 +59,7 @@
     <string name="snackbar_deleted_undo">ANGRE</string>
     <string name="snackbar_tab_closed">Fane lukket</string>
     <string name="switch_to_tab_description">Bytt til fane</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s kan lukke faner du ikke har sett den siste måneden.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Lukk</string>
-    <string name="tab_tray_inactive_auto_close_title">Lukk automatisk etter en måned?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Slå av i innstillinger</string>
-    <string name="tab_tray_inactive_onboarding_message">Faner du ikke har vist på to uker, blir flyttet hit.</string>
-    <string name="tab_tray_inactive_recently_closed">Nylig lukket</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Slå på autolukking</string>
-    <string name="top_sites_edit_dialog_save">Lagre</string>
+<string name="top_sites_edit_dialog_save">Lagre</string>
     <string name="top_sites_edit_dialog_title">Rediger snarvei</string>
     <string name="top_sites_edit_dialog_url_title">URL</string>
     <string name="top_sites_max_limit_confirmation_button">OK, jeg skjønner</string>

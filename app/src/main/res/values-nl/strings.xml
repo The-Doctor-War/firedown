@@ -37,8 +37,7 @@
     <string name="capture_empty_video_message">Geen video\'s beschikbaar.</string>
     <string name="clipboard">Gekopieerd naar het klembord</string>
     <string name="close_tab">Tabblad sluiten</string>
-    <string name="close_tab_title">Tabblad %s sluiten</string>
-    <string name="close_tabs_after_one_day">Na een dag</string>
+<string name="close_tabs_after_one_day">Na een dag</string>
     <string name="close_tabs_after_one_day_summary">Na een dag sluiten</string>
     <string name="close_tabs_after_one_month">Na een maand</string>
     <string name="close_tabs_after_one_month_summary">Na een maand sluiten</string>
@@ -46,8 +45,7 @@
     <string name="close_tabs_after_one_week_summary">Na een week sluiten</string>
     <string name="close_tabs_manually">Handmatig</string>
     <string name="close_tabs_manually_summary">Handmatig sluiten</string>
-    <string name="connection_enhanced_protection">Verbeterde trackingbescherming</string>
-    <string name="connection_secure">De verbinding is veilig</string>
+<string name="connection_secure">De verbinding is veilig</string>
     <string name="delete">Verwijderen</string>
     <string name="delete_all_bookmarks">Hiermee worden al uw bladwijzergegevens verwijderd.</string>
     <string name="delete_all_browsing">Als u alle cookies en sitegegevens wist, wordt u mogelijk afgemeld bij websites en wordt offline inhoud verwijderd.</string>
@@ -94,9 +92,7 @@
     <string name="empty_media_help">Sommige mediabestanden moeten worden afgespeeld voordat Firedown ze kan detecteren als downloadbare bestanden.</string>
     <string name="empty_media_help_title">Speel de media af voordat u gaat downloaden</string>
     <string name="empty_media_subtitle_help">Speel de media af zoals gewoonlijk. Het zou dan moeten verschijnen bij de andere mediabestanden, nadat u op de vuurknop hebt gedrukt.</string>
-    <string name="empty_password_exeception_list">Inloggegevens en wachtwoorden die niet zijn opgeslagen, worden hier weergegeven.</string>
-    <string name="empty_password_list">Uw opgeslagen wachtwoord verschijnt hier.</string>
-    <string name="error_check_internet_connection">Fout met internetverbinding.</string>
+<string name="error_check_internet_connection">Fout met internetverbinding.</string>
     <string name="error_cipher">Fout bij bestandsversleuteling</string>
     <string name="error_external_storage">Geen externe opslag beschikbaar</string>
     <string name="error_file">Kan bestand niet openen.</string>
@@ -193,8 +189,7 @@
     <string name="settings_webrtc_enabled">WebRTC inschakelen</string>
     <string name="settings_webassembly_enabled">WebAssembly inschakelen</string>
     <string name="settings_webassembly_enabled_summary">Staat sites toe om gecompileerde WASM-modules uit te voeren. Uitschakelen verkleint het aanvalsoppervlak, maar kan sommige moderne webapps onbruikbaar maken</string>
-    <string name="prompt_update_confirmation">Bijwerken</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Inschakelen van Bescherming tegen volgen wordt aanbevolen.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Inschakelen van Bescherming tegen volgen wordt aanbevolen.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Als iets op deze website niet werkt, probeer het dan uit te schakelen.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Verbinding is niet beveiligd</string>
     <string name="quick_settings_sheet_secure_connection_2">Verbinding is beveiligd</string>
@@ -223,8 +218,7 @@
     <string name="restart_origin">Herstarten</string>
     <string name="save_file">Bestand opslaan als</string>
     <string name="save_file_name">Bestandsnaam</string>
-    <string name="scroll_up">Omhoog scrollen</string>
-    <string name="search">Zoekopdracht</string>
+<string name="search">Zoekopdracht</string>
     <string name="search_clip">Link vanaf klembord vullen</string>
     <string name="search_for">Zoeken naar %s</string>
     <string name="search_store">Zoek in de winkel</string>
@@ -254,8 +248,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Uw standaard DNS-resolver gebruiken als er een probleem is met de beveiligde-DNS-provider</string>
-    <string name="settings_doh_server_error_format">Voer een correct geformatteerde URL in</string>
+<string name="settings_doh_server_error_format">Voer een correct geformatteerde URL in</string>
     <string name="settings_doh_server_error_provider">Controleer of het een geldige provider is of probeer het later opnieuw</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -290,8 +283,7 @@
     <string name="settings_query_param_remove_title">Parameter verwijderen?</string>
     <string name="settings_query_param_remove_message">%1$s uit de lijst verwijderen?</string>
     <string name="settings_query_param_remove_confirm">Verwijderen</string>
-    <string name="settings_exceptions">Uitzonderingen</string>
-    <string name="settings_follow_device_theme">Apparaatthema volgen</string>
+<string name="settings_follow_device_theme">Apparaatthema volgen</string>
     <string name="settings_general">Algemeen</string>
     <string name="settings_license">Licenties</string>
     <string name="settings_light_theme">Licht</string>
@@ -322,8 +314,7 @@
     <string name="sort">Sorteren op</string>
     <string name="sort_by_date_opt">Datum</string>
     <string name="sort_by_size_opt">Maat</string>
-    <string name="sort_by_type_all">Alle</string>
-    <string name="sort_by_type_alpha">Naam</string>
+<string name="sort_by_type_alpha">Naam</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Documenten</string>
@@ -334,14 +325,7 @@
     <string name="sort_by_type_zip">Ritssluiting</string>
     <string name="spoof_timezone_summary">Dit verbetert de fingerprintingbescherming</string>
     <string name="switch_to_tab_description">Wisselen naar tabblad</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s kan tabbladen die u de afgelopen maand niet hebt bekeken sluiten.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Sluiten</string>
-    <string name="tab_tray_inactive_auto_close_title">Automatisch sluiten na een maand?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Uitschakelen in instellingen</string>
-    <string name="tab_tray_inactive_onboarding_message">Tabbladen die u twee weken niet hebt bekeken, worden hierheen verplaatst.</string>
-    <string name="tab_tray_inactive_recently_closed">Onlangs gesloten</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Automatisch sluiten inschakelen</string>
-    <string name="task_decryption_finished">Decodering voltooid</string>
+<string name="task_decryption_finished">Decodering voltooid</string>
     <string name="task_encryption_finished">Encryptie voltooid</string>
     <string name="task_gif_finished">GIF gemaakt</string>
     <string name="top_sites_edit_dialog_save">Opslaan</string>

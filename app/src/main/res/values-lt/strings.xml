@@ -30,8 +30,7 @@
     <string name="capture_empty_video_message">Vaizdo įrašų nėra.</string>
     <string name="clipboard">Nukopijuota į mainų sritį</string>
     <string name="close_tab">Užverti kortelę</string>
-    <string name="close_tab_title">Užverti kortelę „%s“</string>
-    <string name="close_tabs_after_one_day">Po vienos dienos</string>
+<string name="close_tabs_after_one_day">Po vienos dienos</string>
     <string name="close_tabs_after_one_day_summary">Užverti po dienos</string>
     <string name="close_tabs_after_one_month">Po vieno mėnesio</string>
     <string name="close_tabs_after_one_month_summary">Užverti po mėnesio</string>
@@ -39,8 +38,7 @@
     <string name="close_tabs_after_one_week_summary">Užverti po savaitės</string>
     <string name="close_tabs_manually">Pasirinktinai</string>
     <string name="close_tabs_manually_summary">Užverti rankiniu būdu</string>
-    <string name="connection_enhanced_protection">Patobulinta sekimo apsauga</string>
-    <string name="connection_secure">Ryšys saugus</string>
+<string name="connection_secure">Ryšys saugus</string>
     <string name="delete">Ištrinti</string>
     <string name="delete_all_bookmarks">Bus ištrinti visi jūsų žymių duomenys.</string>
     <string name="delete_all_browsing">Išvalius visus slapukus ir svetainės duomenis galite būti atjungti nuo svetainių ir bus pašalintas turinys, kuris būna pasiekiamas neprisijungus.</string>
@@ -85,9 +83,7 @@
     <string name="empty_media_help">Kai kuriuos medijos failus reikia paleisti, kad „Firedown“ galėtų juos aptikti kaip atsisiunčiamus failus.</string>
     <string name="empty_media_help_title">Leisti mediją prieš atsisiunčiant</string>
     <string name="empty_media_subtitle_help">Leisti mediją kaip įprasta. Tada ji turėtų pasirodyti kartu su kitais medijos failais, paspaudus „Ugnies“ mygtuką.</string>
-    <string name="empty_password_exeception_list">Čia bus rodomi neišsaugoti prisijungimai ir slaptažodžiai.</string>
-    <string name="empty_password_list">Čia bus rodomas jūsų išsaugotas slaptažodis.</string>
-    <string name="error_check_internet_connection">Interneto ryšio klaida.</string>
+<string name="error_check_internet_connection">Interneto ryšio klaida.</string>
     <string name="error_cipher">Failo šifravimo klaida</string>
     <string name="error_external_storage">Nėra išorinės saugyklos</string>
     <string name="error_file">Nepavyko atidaryti failo.</string>
@@ -161,8 +157,7 @@
     <string name="popup_tabs_close">Uždaryti visus skirtukus</string>
     <string name="popup_tabs_new">Naujas skirtukas</string>
     <string name="popup_toggle">Perjungti rodinį</string>
-    <string name="prompt_update_confirmation">Atnaujinti</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Ryšys nėra saugus</string>
+<string name="quick_settings_sheet_insecure_connection_2">Ryšys nėra saugus</string>
     <string name="quick_settings_sheet_secure_connection_2">Ryšys yra saugus</string>
     <string name="remove_top_site">Pašalinti</string>
     <string name="rename">Pervardyti</string>
@@ -175,8 +170,7 @@
     <string name="restart_origin">Perkrauti</string>
     <string name="save_file">Išsaugoti failą kaip</string>
     <string name="save_file_name">Failo pavadinimas</string>
-    <string name="scroll_up">Slinkti aukštyn</string>
-    <string name="search">Paieška</string>
+<string name="search">Paieška</string>
     <string name="search_clip">Užpildyti nuorodą iš mainų srities</string>
     <string name="search_for">Ieškoti %s</string>
     <string name="search_store">Ieškoti parduotuvėje</string>
@@ -225,8 +219,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Puslapiai bus įkeliami įprastai, tačiau blokuos mažiau stebėjimo priemonių.</string>
     <string name="settings_enhanced_tracking_protection_strict">Griežtas</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Stipresnė stebėjimo apsauga ir greitesnis veikimas, tačiau kai kurios svetainės gali netinkamai veikti.</string>
-    <string name="settings_exceptions">Išimtys</string>
-    <string name="settings_follow_device_theme">Naudoti įrenginio grafinį apvalkalą</string>
+<string name="settings_follow_device_theme">Naudoti įrenginio grafinį apvalkalą</string>
     <string name="settings_general">Bendri</string>
     <string name="settings_license">Licencijos</string>
     <string name="settings_light_theme">Šviesus</string>
@@ -251,8 +244,7 @@
     <string name="sort">Rūšiuoti pagal</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Dydis</string>
-    <string name="sort_by_type_all">Visi</string>
-    <string name="sort_by_type_alpha">Pavadinimas</string>
+<string name="sort_by_type_alpha">Pavadinimas</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Garsas</string>
     <string name="sort_by_type_docs">Dokumentai</string>
@@ -262,14 +254,7 @@
     <string name="sort_by_type_video">Vaizdo įrašas</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Pereiti į kortelę</string>
-    <string name="tab_tray_inactive_auto_close_body_2">„%1$s“ gali užverti korteles, kuriomis paskutinį mėnesį nesinaudojote.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Užverti</string>
-    <string name="tab_tray_inactive_auto_close_title">Užverti automatiškai po mėnesio?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Išjunkite nustatymuose</string>
-    <string name="tab_tray_inactive_onboarding_message">Čia perkeliamos paskutines dvi savaites nenaudotos kortelės.</string>
-    <string name="tab_tray_inactive_recently_closed">Paskiausiai užverta</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Įjungti automatinį užvėrimą</string>
-    <string name="task_decryption_finished">Iššifravimas baigtas</string>
+<string name="task_decryption_finished">Iššifravimas baigtas</string>
     <string name="task_encryption_finished">Šifravimas baigtas</string>
     <string name="top_sites_max_limit_confirmation_button">Gerai, supratau</string>
     <string name="top_sites_rename_dialog_title">Pavadinimas</string>

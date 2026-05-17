@@ -31,8 +31,7 @@
     <string name="capture_empty_video_message">Hech qanday video mavjud emas.</string>
     <string name="clipboard">Buferga nusxalandi</string>
     <string name="close_tab">Varaqni yopish</string>
-    <string name="close_tab_title">%s varagʻini yopish</string>
-    <string name="close_tabs_after_one_day">Bir kundan keyin</string>
+<string name="close_tabs_after_one_day">Bir kundan keyin</string>
     <string name="close_tabs_after_one_day_summary">Bir kundan keyin yopish</string>
     <string name="close_tabs_after_one_month">Bir oydan keyin</string>
     <string name="close_tabs_after_one_month_summary">Bir oydan keyin yopish</string>
@@ -40,8 +39,7 @@
     <string name="close_tabs_after_one_week_summary">Bir haftadan keyin yopish</string>
     <string name="close_tabs_manually">Hech qachon</string>
     <string name="close_tabs_manually_summary">Qoʻlda yopish</string>
-    <string name="connection_enhanced_protection">Kengaytirilgan kuzatuv himoyasi</string>
-    <string name="connection_secure">Ulanish xavfsiz</string>
+<string name="connection_secure">Ulanish xavfsiz</string>
     <string name="delete">Oʻchirish</string>
     <string name="delete_all_bookmarks">Bu barcha xatcho\'plar ma\'lumotlarini o\'chirib tashlaydi.</string>
     <string name="delete_all_browsing">Barcha cookie fayllari va sayt maʼlumotlarini oʻchirish sizni veb-saytlardan chiqishingiz va oflayn kontentni oʻchirib tashlashi mumkin.</string>
@@ -87,9 +85,7 @@
     <string name="empty_media_help">Firedown ularni yuklab olinadigan fayllar sifatida aniqlashidan oldin ba\'zi media fayllarni o\'ynatish kerak.</string>
     <string name="empty_media_help_title">Yuklab olishdan oldin mediani o\'ynang</string>
     <string name="empty_media_subtitle_help">Iltimos, mediani odatdagidek o\'ynang. Keyin u Fire-tugmasini bosgandan so\'ng boshqa media fayllar bilan birga paydo bo\'lishi kerak.</string>
-    <string name="empty_password_exeception_list">Saqlanmagan login va parollar bu yerda ko\'rsatiladi.</string>
-    <string name="empty_password_list">Saqlangan parolingiz shu yerda paydo bo\'ladi.</string>
-    <string name="error_check_internet_connection">Internetga ulanish xatosi.</string>
+<string name="error_check_internet_connection">Internetga ulanish xatosi.</string>
     <string name="error_cipher">Fayl shifrlash xatosi</string>
     <string name="error_external_storage">Tashqi xotira mavjud emas</string>
     <string name="error_file">Faylni ochib bo‘lmadi.</string>
@@ -161,8 +157,7 @@
     <string name="popup_tabs_close">Barcha yorliqlarni yoping</string>
     <string name="popup_tabs_new">Yangi varaq</string>
     <string name="popup_toggle">Ko‘rishni o‘chirish</string>
-    <string name="prompt_update_confirmation">Yangilash</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Ulanish xavfsiz emas</string>
+<string name="quick_settings_sheet_insecure_connection_2">Ulanish xavfsiz emas</string>
     <string name="quick_settings_sheet_secure_connection_2">Ulanish xavfsiz</string>
     <string name="remove_top_site">Olib tashlash</string>
     <string name="rename">Nomini o\'zgartirish</string>
@@ -170,8 +165,7 @@
     <string name="restart_origin">Qayta ishga tushirish</string>
     <string name="save_file">Faylni shunday saqlang</string>
     <string name="save_file_name">Fayl nomi</string>
-    <string name="scroll_up">Yuqoriga aylantiring</string>
-    <string name="search">Qidirmoq</string>
+<string name="search">Qidirmoq</string>
     <string name="search_clip">Buferdan havolani to\'ldiring</string>
     <string name="search_for">%s ni qidiring</string>
     <string name="search_store">Do\'konda qidiring</string>
@@ -213,8 +207,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Sahifalar normal yuklanadi, lekin kamroq kuzatuvchini bloklaydi.</string>
     <string name="settings_enhanced_tracking_protection_strict">Qattiq</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Kuzatuvni yanada kuchli himoyalash va tezroq ishlash, lekin baʼzi saytlar toʻgʻri ishlamasligi mumkin.</string>
-    <string name="settings_exceptions">Istisnolar</string>
-    <string name="settings_follow_device_theme">Qurilma mavzusidan foydalanish</string>
+<string name="settings_follow_device_theme">Qurilma mavzusidan foydalanish</string>
     <string name="settings_general">General</string>
     <string name="settings_license">Litsenziyalar</string>
     <string name="settings_light_theme">Yorqin</string>
@@ -244,8 +237,7 @@
     <string name="sort">Saralash</string>
     <string name="sort_by_date_opt">Sana</string>
     <string name="sort_by_size_opt">Hajmi</string>
-    <string name="sort_by_type_all">Hammasi</string>
-    <string name="sort_by_type_alpha">Ism</string>
+<string name="sort_by_type_alpha">Ism</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Hujjatlar</string>
@@ -255,14 +247,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Varaqqa oʻtish</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s oxirgi oy davomida koʻrmagan varaqlarni yopishi mumkin.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Yopish</string>
-    <string name="tab_tray_inactive_auto_close_title">Bir oydan keyin avtomatik yopilsinmi?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Sozlamalar orqali oʻchiring</string>
-    <string name="tab_tray_inactive_onboarding_message">Ikki hafta mobaynida koʻrilmagan varaqlar shu yerga koʻchirilgan.</string>
-    <string name="tab_tray_inactive_recently_closed">Yaqinda yopilgan</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Avtomatik yopishni yoqish</string>
-    <string name="task_decryption_finished">Shifrni ochish tugallandi</string>
+<string name="task_decryption_finished">Shifrni ochish tugallandi</string>
     <string name="task_encryption_finished">Shifrlash tugallandi</string>
     <string name="top_sites_max_limit_confirmation_button">OK, tushundim</string>
     <string name="top_sites_rename_dialog_title">Nomi</string>

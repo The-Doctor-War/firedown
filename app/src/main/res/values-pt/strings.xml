@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Nenhum SVG disponível.</string>
     <string name="capture_empty_video_message">Nenhum vídeo disponível.</string>
     <string name="clipboard">Copiado para a área de transferência</string>
-    <string name="connection_enhanced_protection">Proteção aprimorada contra rastreamento</string>
-    <string name="quick_settings_sheet_tracking_site_title">Proteção de rastreamento neste site</string>
+<string name="quick_settings_sheet_tracking_site_title">Proteção de rastreamento neste site</string>
     <plurals name="blocked_trackers_summary">
         <item quantity="one">%d bloqueado nesta página</item>
         <item quantity="other">%d bloqueados nesta página</item>
@@ -78,9 +77,7 @@
     <string name="empty_media_help">Alguns arquivos de mídia precisam ser reproduzidos antes que o Firedown possa detectá-los como arquivos para download.</string>
     <string name="empty_media_help_title">Reproduza a mídia antes de baixar</string>
     <string name="empty_media_subtitle_help">Reproduza a mídia normalmente. Ele deverá então aparecer com os outros arquivos de mídia, após pressionar o botão Fire.</string>
-    <string name="empty_password_exeception_list">Logins e senhas que não forem salvos serão exibidos aqui.</string>
-    <string name="empty_password_list">Sua senha salva aparecerá aqui.</string>
-    <string name="error_check_internet_connection">Erro de conexão com a Internet.</string>
+<string name="error_check_internet_connection">Erro de conexão com a Internet.</string>
     <string name="error_cipher">Erro de criptografia de arquivo</string>
     <string name="error_external_storage">Armazenamento externo indisponível</string>
     <string name="error_file">Não foi possível abrir o arquivo.</string>
@@ -179,8 +176,7 @@
     <string name="restart_origin">Reiniciar</string>
     <string name="save_file">Salvar arquivo como</string>
     <string name="save_file_name">Nome do arquivo</string>
-    <string name="scroll_up">Rolar para cima</string>
-    <string name="search">Procurar</string>
+<string name="search">Procurar</string>
     <string name="search_clip">Preencher link da área de transferência</string>
     <string name="search_for">Pesquisar por %s</string>
     <string name="search_store">Pesquise na loja</string>
@@ -237,8 +233,7 @@
     <string name="settings_query_param_remove_title">Remover parâmetro?</string>
     <string name="settings_query_param_remove_message">Remover %1$s da lista?</string>
     <string name="settings_query_param_remove_confirm">Remover</string>
-    <string name="settings_exceptions">Exceções</string>
-    <string name="settings_general">Em geral</string>
+<string name="settings_general">Em geral</string>
     <string name="settings_license">Licenças</string>
     <string name="settings_lock_summary">Bloquear acesso à IU</string>
     <string name="settings_lock_title">Bloqueio do aplicativo</string>
@@ -256,8 +251,7 @@
     <string name="sort">Organizar</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Tamanho</string>
-    <string name="sort_by_type_all">Todos</string>
-    <string name="sort_by_type_alpha">Nome</string>
+<string name="sort_by_type_alpha">Nome</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Áudio</string>
     <string name="sort_by_type_docs">Documentos</string>

@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">ບໍ່ມີວິດີໂອ.</string>
     <string name="clipboard">ສຳເນົາໃສ່ຄລິບບອດແລ້ວ</string>
     <string name="close_tab">ປິດແທັບ</string>
-    <string name="close_tab_title">ປິດແທັບ %s</string>
-    <string name="close_tabs_after_one_day">ຫຼັງຈາກມື້ໜຶ່ງ</string>
+<string name="close_tabs_after_one_day">ຫຼັງຈາກມື້ໜຶ່ງ</string>
     <string name="close_tabs_after_one_day_summary">ປິດຫຼັງຈາກມື້ໜຶ່ງ</string>
     <string name="close_tabs_after_one_month">ຫຼັງຈາກໜຶ່ງເດືອນ</string>
     <string name="close_tabs_after_one_month_summary">ປິດຫຼັງຈາກໜຶ່ງເດືອນ</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">ປິດຫຼັງຈາກໜຶ່ງອາທິດ</string>
     <string name="close_tabs_manually">ດ້ວຍ​ຕົນ​ເອງ</string>
     <string name="close_tabs_manually_summary">ປິດດ້ວຍຕົນເອງ</string>
-    <string name="connection_enhanced_protection">ປັບປຸງການປ້ອງກັນການຕິດຕາມ</string>
-    <string name="connection_secure">ການເຊື່ອມຕໍ່ແມ່ນປອດໄພ</string>
+<string name="connection_secure">ການເຊື່ອມຕໍ່ແມ່ນປອດໄພ</string>
     <string name="delete">ລຶບ</string>
     <string name="delete_all_bookmarks">ນີ້ຈະເປັນການລຶບຂໍ້ມູນບຸກມາກທັງໝົດຂອງທ່ານ.</string>
     <string name="delete_all_browsing">ການລຶບລ້າງຄຸກກີ້ ແລະຂໍ້ມູນເວັບໄຊທັງໝົດອາດເຮັດໃຫ້ເຈົ້າອອກຈາກລະບົບເວັບໄຊ ແລະລຶບເນື້ອຫາອອບລາຍອອກ.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">ບາງໄຟລ໌ມີເດຍຈະຕ້ອງຖືກຫຼິ້ນກ່ອນທີ່ Firedown ສາມາດກວດພົບວ່າເປັນໄຟລ໌ທີ່ສາມາດດາວໂຫຼດໄດ້.</string>
     <string name="empty_media_help_title">ຫຼິ້ນສື່ກ່ອນດາວໂຫຼດ</string>
     <string name="empty_media_subtitle_help">ກະລຸນາເປີດສື່ຕາມປົກກະຕິ. ຫຼັງຈາກນັ້ນ, ມັນຄວນຈະປາກົດກັບໄຟລ໌ສື່ມວນຊົນອື່ນໆ, ຫຼັງຈາກກົດປຸ່ມໄຟ.</string>
-    <string name="empty_password_exeception_list">ການເຂົ້າສູ່ລະບົບ ແລະລະຫັດຜ່ານທີ່ບໍ່ໄດ້ບັນທຶກໄວ້ຈະປາກົດຢູ່ບ່ອນນີ້.</string>
-    <string name="empty_password_list">ລະຫັດຜ່ານທີ່ບັນທຶກໄວ້ຂອງທ່ານຈະປາກົດຢູ່ບ່ອນນີ້.</string>
-    <string name="error_check_internet_connection">ການເຊື່ອມຕໍ່ອິນເຕີເນັດຜິດພາດ.</string>
+<string name="error_check_internet_connection">ການເຊື່ອມຕໍ່ອິນເຕີເນັດຜິດພາດ.</string>
     <string name="error_cipher">ການເຂົ້າລະຫັດໄຟລ໌ຜິດພາດ</string>
     <string name="error_external_storage">ບໍ່ມີບ່ອນເກັບຂໍ້ມູນພາຍນອກ</string>
     <string name="error_file">ບໍ່ສາມາດເປີດໄຟລ໌ໄດ້.</string>
@@ -165,8 +161,7 @@
     <string name="popup_toggle">ສະຫຼັບມຸມມອງ</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL ຕ້ອງເລີ່ມຕົ້ນດ້ວຍ “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL ບໍ່ຖືກຕ້ອງ</string>
-    <string name="prompt_update_confirmation">ອັບເດດ</string>
-    <string name="quick_settings_sheet_insecure_connection_2">ການເຊື່ອມຕໍ່ບໍ່ປອດໄພ</string>
+<string name="quick_settings_sheet_insecure_connection_2">ການເຊື່ອມຕໍ່ບໍ່ປອດໄພ</string>
     <string name="quick_settings_sheet_secure_connection_2">ການເຊື່ອມຕໍ່ແມ່ນປອດໄພ</string>
     <string name="quit_application">ກຳລັງອອກຈາກແອັບພລິເຄຊັນເພື່ອນຳໃຊ້ການປ່ຽນແປງ…</string>
     <string name="remove_top_site">ລຶບ</string>
@@ -175,8 +170,7 @@
     <string name="restart_origin">ເລີ່ມ​ຕົ້ນ​ໃຫມ່</string>
     <string name="save_file">ບັນທຶກໄຟລ໌ເປັນ</string>
     <string name="save_file_name">ຊື່​ເອ​ກະ​ສານ</string>
-    <string name="scroll_up">ເລື່ອນ​ຂຶ້ນ</string>
-    <string name="search">ຊອກຫາ</string>
+<string name="search">ຊອກຫາ</string>
     <string name="search_clip">ຕື່ມຂໍ້ມູນໃສ່ການເຊື່ອມຕໍ່ຈາກ clipboard</string>
     <string name="search_for">ຊອກຫາ %s</string>
     <string name="search_store">ຊອກຫາຢູ່ໃນຮ້ານ</string>
@@ -201,8 +195,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ທ່ານຈະໄດ້ອອກຈາກລະບົບທັງຫມົດ</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ເປີດແທັບ</string>
     <string name="settings_doh_server">ເຊີບເວີ DNS</string>
-    <string name="settings_doh_server_default">ໃຊ້ຕົວແກ້ໄຂ DNS ເລີ່ມຕົ້ນຂອງທ່ານຖ້າມີບັນຫາກັບຜູ້ໃຫ້ບໍລິການ DNS ທີ່ປອດໄພ</string>
-    <string name="settings_doh_server_error_format">ໃສ່ URL ທີ່ມີຮູບແບບທີ່ຖືກຕ້ອງ</string>
+<string name="settings_doh_server_error_format">ໃສ່ URL ທີ່ມີຮູບແບບທີ່ຖືກຕ້ອງ</string>
     <string name="settings_doh_server_error_provider">ກະລຸນາຢືນຢັນວ່າເປັນຜູ້ໃຫ້ບໍລິການທີ່ຖືກຕ້ອງ ຫຼືລອງໃໝ່ໃນພາຍຫຼັງ</string>
     <string name="settings_doh_server_off">ໃຊ້ຕົວແກ້ໄຂ DNS ຂອງລະບົບ</string>
     <string name="settings_doh_server_title">ໃຊ້ຜູ້ໃຫ້ບໍລິການ</string>
@@ -219,8 +212,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">ຫນ້າຕ່າງໆຈະໂຫລດຕາມປົກກະຕິ, ແຕ່ບລັອກຕົວຕິດຕາມຫນ້ອຍລົງ.</string>
     <string name="settings_enhanced_tracking_protection_strict">ເຂັ້ມງວດ</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">ການປ້ອງກັນການຕິດຕາມທີ່ເຂັ້ມແຂງແລະປະສິດທິພາບໄວຂຶ້ນ, ແຕ່ບາງສະຖານທີ່ອາດຈະເຮັດວຽກບໍ່ຖືກຕ້ອງ.</string>
-    <string name="settings_exceptions">ຂໍ້ຍົກເວັ້ນ</string>
-    <string name="settings_follow_device_theme">ຕາມຊຸດຕົກແຕ່ງອຸປະກອນ</string>
+<string name="settings_follow_device_theme">ຕາມຊຸດຕົກແຕ່ງອຸປະກອນ</string>
     <string name="settings_general">ທົ່ວໄປ</string>
     <string name="settings_license">ໃບອະນຸຍາດ</string>
     <string name="settings_light_theme">ແສງ</string>
@@ -250,8 +242,7 @@
     <string name="sort">ຈັດຮຽງຕາມ</string>
     <string name="sort_by_date_opt">ວັນທີ</string>
     <string name="sort_by_size_opt">ຂະໜາດ</string>
-    <string name="sort_by_type_all">ທັງໝົດ</string>
-    <string name="sort_by_type_alpha">ຊື່</string>
+<string name="sort_by_type_alpha">ຊື່</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">ສຽງ</string>
     <string name="sort_by_type_docs">ເອກະສານ</string>
@@ -261,14 +252,7 @@
     <string name="sort_by_type_video">ວິດີໂອ</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">ປ່ຽນໄປຫາແທັບ</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s ສາມາດປິດແທັບທີ່ທ່ານບໍ່ໄດ້ເຂົ້າໄປເບິງໃນຊ່ວງເດືອນທີ່ຜ່ານມາ.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">ປິດ</string>
-    <string name="tab_tray_inactive_auto_close_title">ປິດອັດຕະໂນມັດຫລັງຈາກຫນຶ່ງເດືອນ?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">ປິດໃນການຕັ້ງຄ່າ</string>
-    <string name="tab_tray_inactive_onboarding_message">ແທັບທີ່ທ່ານບໍ່ໄດ້ເຂົ້າໄປເບິງໃນ 2 ອາທິດຈະຖືກຍ້າຍມາໄວ້ໃນນີ້.</string>
-    <string name="tab_tray_inactive_recently_closed">ຫາກໍ່ປິດໄປມື້ກີ້ນີ້</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">ເປີດການປິດອັດຕະໂນມັດ</string>
-    <string name="task_decryption_finished">ການຖອດລະຫັດສຳເລັດແລ້ວ</string>
+<string name="task_decryption_finished">ການຖອດລະຫັດສຳເລັດແລ້ວ</string>
     <string name="task_encryption_finished">ການເຂົ້າລະຫັດສຳເລັດແລ້ວ</string>
     <string name="top_sites_edit_dialog_save">ບັນທຶກ</string>
     <string name="top_sites_edit_dialog_title">ແກ້ໄຂທາງລັດ</string>

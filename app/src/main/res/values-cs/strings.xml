@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Nejsou k dispozici žádná videa.</string>
     <string name="clipboard">Zkopírováno do schránky</string>
     <string name="close_tab">Zavřít panel</string>
-    <string name="close_tab_title">Zavřít panel %s</string>
-    <string name="close_tabs_after_one_day">Po jednom dni</string>
+<string name="close_tabs_after_one_day">Po jednom dni</string>
     <string name="close_tabs_after_one_day_summary">Zavírat po jednom dni</string>
     <string name="close_tabs_after_one_month">Po měsíci</string>
     <string name="close_tabs_after_one_month_summary">Zavírat po měsíci</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Zavírat po týdnu</string>
     <string name="close_tabs_manually">Nikdy</string>
     <string name="close_tabs_manually_summary">Zavírat ručně</string>
-    <string name="connection_enhanced_protection">Vylepšená ochrana před sledováním</string>
-    <string name="connection_secure">Připojení je zabezpečené</string>
+<string name="connection_secure">Připojení je zabezpečené</string>
     <string name="delete">Vymazat</string>
     <string name="delete_all_bookmarks">Tímto smažete všechna data vašich záložek.</string>
     <string name="delete_all_browsing">Vymazáním všech souborů cookie a dat webu se můžete odhlásit z webových stránek a odstranit offline obsah.</string>
@@ -91,9 +89,7 @@
     <string name="empty_media_help">Některé mediální soubory je třeba přehrát, než je Firedown rozpozná jako soubory ke stažení.</string>
     <string name="empty_media_help_title">Před stažením média přehrajte</string>
     <string name="empty_media_subtitle_help">Přehrávejte média jako obvykle. Poté by se měl objevit s ostatními mediálními soubory po stisknutí tlačítka Fire.</string>
-    <string name="empty_password_exeception_list">Zde se zobrazí přihlašovací jména a hesla, která nejsou uložena.</string>
-    <string name="empty_password_list">Zde se zobrazí vaše uložené heslo.</string>
-    <string name="error_check_internet_connection">Chyba připojení k internetu.</string>
+<string name="error_check_internet_connection">Chyba připojení k internetu.</string>
     <string name="error_cipher">Chyba šifrování souboru</string>
     <string name="error_external_storage">Není k dispozici žádné externí úložiště</string>
     <string name="error_file">Soubor nelze otevřít.</string>
@@ -186,8 +182,7 @@
     <string name="settings_jit_enabled_summary">Pokud je zakázáno, může být u složitých webových stránek snížen výkon. Změna tohoto nastavení restartuje váš prohlížeč</string>
     <string name="settings_webgl_disabled">Zakázat WebGL</string>
     <string name="settings_webrtc_enabled">Povolit WebRTC</string>
-    <string name="prompt_update_confirmation">Aktualizovat</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Je doporučeno zapnout ochranu proti sledování.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Je doporučeno zapnout ochranu proti sledování.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Pokud se vám zdá, že je něco na této stránce nefunkční, zkuste to vypnout.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Spojení není zabezpečené</string>
     <string name="quick_settings_sheet_secure_connection_2">Zabezpečené spojení</string>
@@ -203,8 +198,7 @@
     <string name="restart_origin">Restartujte</string>
     <string name="save_file">Uložit soubor jako</string>
     <string name="save_file_name">Název souboru</string>
-    <string name="scroll_up">Posunout nahoru</string>
-    <string name="search">Vyhledávání</string>
+<string name="search">Vyhledávání</string>
     <string name="search_clip">Vyplnit odkaz ze schránky</string>
     <string name="search_for">Hledat %s</string>
     <string name="search_store">Hledejte v obchodě</string>
@@ -234,8 +228,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">Pokud se zabezpečeným DNS nastane problém, použije se výchozí překladač DNS</string>
-    <string name="settings_doh_server_error_format">Zadejte správně formátovanou adresu URL</string>
+<string name="settings_doh_server_error_format">Zadejte správně formátovanou adresu URL</string>
     <string name="settings_doh_server_error_provider">Ověřte, zda se jedná o platného poskytovatele, nebo to zkuste znovu později</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -256,8 +249,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Stránky se načtou normálně, ale zablokují méně sledovačů.</string>
     <string name="settings_enhanced_tracking_protection_strict">Přísný</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Silnější ochrana před sledováním a rychlejší výkon, ale některé weby nemusí fungovat správně.</string>
-    <string name="settings_exceptions">Výjimky</string>
-    <string name="settings_follow_device_theme">Podle nastavení zařízení</string>
+<string name="settings_follow_device_theme">Podle nastavení zařízení</string>
     <string name="settings_general">Všeobecné</string>
     <string name="settings_license">Licence</string>
     <string name="settings_light_theme">Světlý</string>
@@ -288,8 +280,7 @@
     <string name="sort">Řadit podle</string>
     <string name="sort_by_date_opt">Datum</string>
     <string name="sort_by_size_opt">Velikost</string>
-    <string name="sort_by_type_all">Všechno</string>
-    <string name="sort_by_type_alpha">Název</string>
+<string name="sort_by_type_alpha">Název</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Zvuk</string>
     <string name="sort_by_type_docs">Dokumenty</string>
@@ -300,14 +291,7 @@
     <string name="sort_by_type_zip">zip</string>
     <string name="spoof_timezone_summary">Pokud je povoleno, zvýší ochranu proti vytváření otisku prohlížeče</string>
     <string name="switch_to_tab_description">Přepnout na panel</string>
-    <string name="tab_tray_inactive_auto_close_body_2">Aplikace %1$s může zavřít panely, které jste během posledního měsíce nepoužili.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Nechci</string>
-    <string name="tab_tray_inactive_auto_close_title">Chcete automaticky zavírat měsíc staré neaktivní panely?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Vypnout v nastavení</string>
-    <string name="tab_tray_inactive_onboarding_message">Sem se přesunou panely, které jste déle než dva týdny nepoužili.</string>
-    <string name="tab_tray_inactive_recently_closed">Nedávno zavřené</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Zapnout automatické zavírání</string>
-    <string name="task_decryption_finished">Dešifrování dokončeno</string>
+<string name="task_decryption_finished">Dešifrování dokončeno</string>
     <string name="task_encryption_finished">Šifrování dokončeno</string>
     <string name="task_gif_finished">GIF vytvořen</string>
     <string name="top_sites_edit_dialog_save">Uložit</string>

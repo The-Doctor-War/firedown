@@ -37,8 +37,7 @@
     <string name="capture_empty_video_message">沒有可用的影片。</string>
     <string name="clipboard">已複製到剪貼簿</string>
     <string name="close_tab">關閉分頁</string>
-    <string name="close_tab_title">關閉分頁 %s</string>
-    <string name="close_tabs_after_one_day">1 天後</string>
+<string name="close_tabs_after_one_day">1 天後</string>
     <string name="close_tabs_after_one_day_summary">1 天後關閉</string>
     <string name="close_tabs_after_one_month">1 個月後</string>
     <string name="close_tabs_after_one_month_summary">1 個月後關閉</string>
@@ -46,8 +45,7 @@
     <string name="close_tabs_after_one_week_summary">1 週後關閉</string>
     <string name="close_tabs_manually">永不</string>
     <string name="close_tabs_manually_summary">手動關閉</string>
-    <string name="connection_enhanced_protection">增強的追蹤保護</string>
-    <string name="connection_secure">連線安全</string>
+<string name="connection_secure">連線安全</string>
     <string name="delete">刪除</string>
     <string name="delete_all_bookmarks">這將刪除您的所有書籤資料。</string>
     <string name="delete_all_browsing">清除所有 Cookie 和網站資料可能會使您退出網站並刪除離線內容。</string>
@@ -93,9 +91,7 @@
     <string name="empty_media_help">有些媒體檔案需要先播放，Firedown 才能偵測為可下載檔案。</string>
     <string name="empty_media_help_title">下載前播放媒體</string>
     <string name="empty_media_subtitle_help">請照常播放媒體。按下 Fire 按鈕後，它應該會與其他媒體檔案一起出現。</string>
-    <string name="empty_password_exeception_list">未儲存的登入名稱和密碼將顯示在此。</string>
-    <string name="empty_password_list">您保存的密碼將出現在這裡。</string>
-    <string name="error_check_internet_connection">網路連線錯誤。</string>
+<string name="error_check_internet_connection">網路連線錯誤。</string>
     <string name="error_cipher">文件加密錯誤</string>
     <string name="error_external_storage">沒有可用的外部存儲</string>
     <string name="error_file">無法開啟文件。</string>
@@ -172,8 +168,7 @@
     <string name="popup_toggle">切換視圖</string>
     <string name="settings_doh_provider_custom_dialog_error_https">網址必須以「https://」開頭</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">網址無效</string>
-    <string name="prompt_update_confirmation">更新</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">建議開啟追蹤保護功能。</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">建議開啟追蹤保護功能。</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">若此網站功能異常，可嘗試關閉此功能。</string>
     <string name="quick_settings_sheet_insecure_connection_2">連線不安全</string>
     <string name="quick_settings_sheet_secure_connection_2">安全連線</string>
@@ -189,8 +184,7 @@
     <string name="restart_origin">重新開始</string>
     <string name="save_file">將文件另存為</string>
     <string name="save_file_name">檔案名稱</string>
-    <string name="scroll_up">向上滑動</string>
-    <string name="search">搜尋</string>
+<string name="search">搜尋</string>
     <string name="search_clip">從剪貼簿填充鏈接</string>
     <string name="search_for">搜尋%s</string>
     <string name="search_store">在商店搜尋</string>
@@ -220,8 +214,7 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_default">若無法使用安全的 DNS 提供者，就使用您的預設 DNS 解析器。</string>
-    <string name="settings_doh_server_error_format">輸入格式正確的 URL</string>
+<string name="settings_doh_server_error_format">輸入格式正確的 URL</string>
     <string name="settings_doh_server_error_provider">請驗證該提供者是否有效或稍後重試</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -242,8 +235,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">頁面將正常加載，但阻止的追蹤器較少。</string>
     <string name="settings_enhanced_tracking_protection_strict">嚴格的</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">更強的追蹤保護和更快的效能，但某些網站可能無法正常運作。</string>
-    <string name="settings_exceptions">例外情況</string>
-    <string name="settings_follow_device_theme">依照裝置佈景主題顯示</string>
+<string name="settings_follow_device_theme">依照裝置佈景主題顯示</string>
     <string name="settings_general">一般的</string>
     <string name="settings_license">許可證</string>
     <string name="settings_light_theme">亮色</string>
@@ -274,8 +266,7 @@
     <string name="sort">排序依據</string>
     <string name="sort_by_date_opt">日期</string>
     <string name="sort_by_size_opt">尺寸</string>
-    <string name="sort_by_type_all">全部</string>
-    <string name="sort_by_type_alpha">名稱</string>
+<string name="sort_by_type_alpha">名稱</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">聲音</string>
     <string name="sort_by_type_docs">文件</string>
@@ -285,14 +276,7 @@
     <string name="sort_by_type_video">影片</string>
     <string name="sort_by_type_zip">壓縮</string>
     <string name="switch_to_tab_description">切換至該分頁</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s 可自動關閉您超過一個月未檢視的分頁。</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">關閉</string>
-    <string name="tab_tray_inactive_auto_close_title">等一個月後再自動關閉？</string>
-    <string name="tab_tray_inactive_onboarding_button_text">到設定中關閉</string>
-    <string name="tab_tray_inactive_onboarding_message">超過兩週沒有檢視過的分頁，將移動至此處。</string>
-    <string name="tab_tray_inactive_recently_closed">最近關閉的分頁</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">開啟「分頁自動關閉」功能</string>
-    <string name="task_decryption_finished">解密完成</string>
+<string name="task_decryption_finished">解密完成</string>
     <string name="task_encryption_finished">加密完成</string>
     <string name="top_sites_edit_dialog_save">儲存</string>
     <string name="top_sites_edit_dialog_title">編輯捷徑</string>

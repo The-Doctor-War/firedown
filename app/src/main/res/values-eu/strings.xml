@@ -34,8 +34,7 @@
     <string name="capture_empty_video_message">Ez dago bideorik eskuragarri.</string>
     <string name="clipboard">Arbelean kopiatu da</string>
     <string name="close_tab">Itxi fitxa</string>
-    <string name="close_tab_title">Itxi %s fitxa</string>
-    <string name="close_tabs_after_one_day">Egun bat ondoren</string>
+<string name="close_tabs_after_one_day">Egun bat ondoren</string>
     <string name="close_tabs_after_one_day_summary">Itxi egun baten ondoren</string>
     <string name="close_tabs_after_one_month">Hilabete ondoren</string>
     <string name="close_tabs_after_one_month_summary">Itxi hilabete ondoren</string>
@@ -43,8 +42,7 @@
     <string name="close_tabs_after_one_week_summary">Itxi astebete ondoren</string>
     <string name="close_tabs_manually">Eskuz</string>
     <string name="close_tabs_manually_summary">Itxi eskuz</string>
-    <string name="connection_enhanced_protection">Jarraipenaren babesa hobetua</string>
-    <string name="connection_secure">Konexioa segurua da</string>
+<string name="connection_secure">Konexioa segurua da</string>
     <string name="delete">Ezabatu</string>
     <string name="delete_all_bookmarks">Honek zure laster-marken datu guztiak ezabatuko ditu.</string>
     <string name="delete_all_browsing">Cookie eta guneko datu guztiak garbitzen badituzu, baliteke webguneetatik saioa amaitzea eta lineaz kanpoko edukia kentzea.</string>
@@ -90,9 +88,7 @@
     <string name="empty_media_help">Multimedia-fitxategi batzuk erreproduzitu behar dira Firedown-ek deskarga daitezkeen fitxategi gisa hauteman ahal izateko.</string>
     <string name="empty_media_help_title">Erreproduzitu multimedia deskargatu aurretik</string>
     <string name="empty_media_subtitle_help">Mesedez, erreproduzitu komunikabideak ohi bezala. Ondoren, beste multimedia fitxategiekin agertu beharko litzateke, Fire-Botoia sakatu ondoren.</string>
-    <string name="empty_password_exeception_list">Hemen gordeta ez dauden saio-hasiera eta pasahitzak erakutsiko dira.</string>
-    <string name="empty_password_list">Hemen agertuko da gordetako pasahitza.</string>
-    <string name="error_check_internet_connection">Interneteko konexioaren errorea.</string>
+<string name="error_check_internet_connection">Interneteko konexioaren errorea.</string>
     <string name="error_cipher">Fitxategiaren enkriptatzea errorea</string>
     <string name="error_external_storage">Ez dago kanpoko biltegiratzerik</string>
     <string name="error_file">Ezin izan da fitxategia ireki.</string>
@@ -169,8 +165,7 @@
     <string name="popup_toggle">Aldatu ikuspegia</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URLak \"https://\" karaktereekin hasi behar du</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL baliogabea</string>
-    <string name="prompt_update_confirmation">Eguneratu</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Jarraipenaren babes aktibatzea gomendatzen dugu.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Jarraipenaren babes aktibatzea gomendatzen dugu.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Zerbaitek apurtuta badirudi gune honetan, saiatu desaktibatzen.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Konexioa ez da segurua</string>
     <string name="quick_settings_sheet_secure_connection_2">Konexioa segurua da</string>
@@ -181,8 +176,7 @@
     <string name="restart_origin">Berriro hasi</string>
     <string name="save_file">Gorde fitxategia honela</string>
     <string name="save_file_name">Fitxategi izena</string>
-    <string name="scroll_up">Gora joan</string>
-    <string name="search">Bilatu</string>
+<string name="search">Bilatu</string>
     <string name="search_clip">Bete esteka arbeletik</string>
     <string name="search_for">Bilatu %s</string>
     <string name="search_store">Bilatu dendan</string>
@@ -209,8 +203,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Webgune gehienetan saioa amaituko duzu</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Irekitako fitxak</string>
     <string name="settings_doh_server">DNS zerbitzaria</string>
-    <string name="settings_doh_server_default">Erabili zure DNS ebazle lehenetsia DNS seguruaren hornitzailearekin arazorik balego</string>
-    <string name="settings_doh_server_error_format">Sartu behar bezala formateatutako URL bat</string>
+<string name="settings_doh_server_error_format">Sartu behar bezala formateatutako URL bat</string>
     <string name="settings_doh_server_error_provider">Egiaztatu baliozko hornitzaile bat dela edo saiatu berriro geroago</string>
     <string name="settings_doh_server_off">Erabili sistema DNS konpontzailea</string>
     <string name="settings_doh_server_title">Erabili hornitzailea</string>
@@ -228,8 +221,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Orriak normalean kargatuko dira, baina jarraitzaile gutxiago blokeatuko dira.</string>
     <string name="settings_enhanced_tracking_protection_strict">Zorrotza</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Jarraipenaren babes sendoagoa eta errendimendu azkarragoa, baina baliteke gune batzuk behar bezala ez funtzionatzea.</string>
-    <string name="settings_exceptions">Salbuespenak</string>
-    <string name="settings_follow_device_theme">Erabili gailuaren itxura</string>
+<string name="settings_follow_device_theme">Erabili gailuaren itxura</string>
     <string name="settings_general">Orokorra</string>
     <string name="settings_license">Lizentziak</string>
     <string name="settings_light_theme">Argia</string>
@@ -260,8 +252,7 @@
     <string name="sort">Ordenatzeko irizpidea</string>
     <string name="sort_by_date_opt">Data</string>
     <string name="sort_by_size_opt">Tamaina</string>
-    <string name="sort_by_type_all">Denak</string>
-    <string name="sort_by_type_alpha">Izena</string>
+<string name="sort_by_type_alpha">Izena</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audioa</string>
     <string name="sort_by_type_docs">Dokumentuak</string>
@@ -271,14 +262,7 @@
     <string name="sort_by_type_video">Bideoa</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Aldatu fitxara</string>
-    <string name="tab_tray_inactive_auto_close_body_2">Azken hilabetean ikusi ez dituzun fitxak itxi ditzake %1$s(e)k.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Itxi</string>
-    <string name="tab_tray_inactive_auto_close_title">Automatikoki itxi hilabete ondoren?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Desaktibatu ezarpenetan</string>
-    <string name="tab_tray_inactive_onboarding_message">Azken bi asteetan ikusi ez dituzun fitxak hona eramaten dira.</string>
-    <string name="tab_tray_inactive_recently_closed">Itxitako azkenak</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Aktibatu automatikoki ixtea</string>
-    <string name="task_decryption_finished">Deszifratzea amaitu da</string>
+<string name="task_decryption_finished">Deszifratzea amaitu da</string>
     <string name="task_encryption_finished">Enkriptatzea amaitu da</string>
     <string name="top_sites_edit_dialog_save">Gorde</string>
     <string name="top_sites_edit_dialog_title">Editatu lasterbidea</string>

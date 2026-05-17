@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">Tidak ada video yang tersedia.</string>
     <string name="clipboard">Disalin ke papan klip</string>
     <string name="close_tab">Tutup tab</string>
-    <string name="close_tab_title">Tutup tab %s</string>
-    <string name="close_tabs_after_one_day">Setelah satu hari</string>
+<string name="close_tabs_after_one_day">Setelah satu hari</string>
     <string name="close_tabs_after_one_day_summary">Tutup setelah satu hari</string>
     <string name="close_tabs_after_one_month">Setelah satu bulan</string>
     <string name="close_tabs_after_one_month_summary">Tutup setelah satu bulan</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">Tutup setelah satu pekan</string>
     <string name="close_tabs_manually">Secara manual</string>
     <string name="close_tabs_manually_summary">Tutup secara manual</string>
-    <string name="connection_enhanced_protection">Perlindungan Pelacakan yang Ditingkatkan</string>
-    <string name="connection_secure">Koneksi aman</string>
+<string name="connection_secure">Koneksi aman</string>
     <string name="delete">Menghapus</string>
     <string name="delete_all_bookmarks">Ini akan menghapus semua data bookmark Anda.</string>
     <string name="delete_all_browsing">Menghapus semua cookie dan data situs dapat mengeluarkan Anda dari situs web dan menghapus konten offline.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">Beberapa file media perlu diputar sebelum Firedown dapat mendeteksinya sebagai file yang dapat diunduh.</string>
     <string name="empty_media_help_title">Putar media sebelum mengunduh</string>
     <string name="empty_media_subtitle_help">Silakan putar media seperti biasa. Ini kemudian akan muncul dengan file media lainnya, setelah menekan Tombol Api.</string>
-    <string name="empty_password_exeception_list">Login dan kata sandi yang tidak disimpan akan ditampilkan di sini.</string>
-    <string name="empty_password_list">Kata sandi Anda yang tersimpan akan muncul di sini.</string>
-    <string name="error_check_internet_connection">Kesalahan koneksi internet.</string>
+<string name="error_check_internet_connection">Kesalahan koneksi internet.</string>
     <string name="error_cipher">Kesalahan enkripsi file</string>
     <string name="error_external_storage">Tidak ada penyimpanan eksternal yang tersedia</string>
     <string name="error_file">Tidak dapat membuka file.</string>
@@ -168,8 +164,7 @@
     <string name="popup_toggle">Alihkan tampilan</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL harus diawali dengan “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL tidak valid</string>
-    <string name="prompt_update_confirmation">Perbarui</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">Disarankan untuk mengaktifkan perlindungan pelacakan.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">Disarankan untuk mengaktifkan perlindungan pelacakan.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">Jika ada yang tampak rusak pada situs ini, coba matikan.</string>
     <string name="quick_settings_sheet_insecure_connection_2">Sambungan tidak aman</string>
     <string name="quick_settings_sheet_secure_connection_2">Sambungan aman</string>
@@ -180,8 +175,7 @@
     <string name="restart_origin">Mengulang kembali</string>
     <string name="save_file">Simpan file sebagai</string>
     <string name="save_file_name">Nama file</string>
-    <string name="scroll_up">Gulir ke atas</string>
-    <string name="search">Mencari</string>
+<string name="search">Mencari</string>
     <string name="search_clip">Isi tautan dari clipboard</string>
     <string name="search_for">Telusuri %s</string>
     <string name="search_store">Cari di toko</string>
@@ -208,8 +202,7 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Anda\ akan keluar dari sebagian besar situs</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Tab terbuka</string>
     <string name="settings_doh_server">Server DNS</string>
-    <string name="settings_doh_server_default">Gunakan resolver DNS bawaan Anda jika ada masalah dengan penyedia DNS aman</string>
-    <string name="settings_doh_server_error_format">Masukkan URL yang diformat dengan benar</string>
+<string name="settings_doh_server_error_format">Masukkan URL yang diformat dengan benar</string>
     <string name="settings_doh_server_error_provider">Harap verifikasi bahwa itu adalah penyedia yang valid atau coba lagi nanti</string>
     <string name="settings_doh_server_off">Gunakan pemecah DNS sistem</string>
     <string name="settings_doh_server_title">Gunakan Penyedia</string>
@@ -227,8 +220,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Halaman akan dimuat secara normal, tetapi memblokir lebih sedikit pelacak.</string>
     <string name="settings_enhanced_tracking_protection_strict">Ketat</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Perlindungan pelacakan yang lebih kuat dan kinerja yang lebih cepat, namun beberapa situs mungkin tidak berfungsi dengan baik.</string>
-    <string name="settings_exceptions">Pengecualian</string>
-    <string name="settings_follow_device_theme">Ikuti tema peranti</string>
+<string name="settings_follow_device_theme">Ikuti tema peranti</string>
     <string name="settings_general">Umum</string>
     <string name="settings_license">Lisensi</string>
     <string name="settings_light_theme">Terang</string>
@@ -259,8 +251,7 @@
     <string name="sort">Urutkan menurut</string>
     <string name="sort_by_date_opt">Tanggal</string>
     <string name="sort_by_size_opt">Ukuran</string>
-    <string name="sort_by_type_all">Semua</string>
-    <string name="sort_by_type_alpha">Nama</string>
+<string name="sort_by_type_alpha">Nama</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Dokumen</string>
@@ -270,14 +261,7 @@
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Ritsleting</string>
     <string name="switch_to_tab_description">Pindah ke tab</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s dapat menutup tab yang belum Anda lihat selama sebulan terakhir.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Tutup</string>
-    <string name="tab_tray_inactive_auto_close_title">Tutup otomatis setelah satu bulan?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Matikan di pengaturan</string>
-    <string name="tab_tray_inactive_onboarding_message">Tab yang belum Anda lihat selama dua minggu dipindahkan ke sini.</string>
-    <string name="tab_tray_inactive_recently_closed">Baru saja ditutup</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Nyalakan tutup-otomatis</string>
-    <string name="task_decryption_finished">Dekripsi selesai</string>
+<string name="task_decryption_finished">Dekripsi selesai</string>
     <string name="task_encryption_finished">Enkripsi selesai</string>
     <string name="top_sites_edit_dialog_save">Simpan</string>
     <string name="top_sites_edit_dialog_title">Edit pintasan</string>

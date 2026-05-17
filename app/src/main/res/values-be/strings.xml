@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">Няма даступных відэа.</string>
     <string name="clipboard">Скапіравана ў буфер абмену</string>
     <string name="close_tab">Закрыць картку</string>
-    <string name="close_tab_title">Закрыць картку %s</string>
-    <string name="close_tabs_after_one_day">Праз дзень</string>
+<string name="close_tabs_after_one_day">Праз дзень</string>
     <string name="close_tabs_after_one_day_summary">Закрываць праз дзень</string>
     <string name="close_tabs_after_one_month">Праз месяц</string>
     <string name="close_tabs_after_one_month_summary">Закрываць праз месяц</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">Закрываць праз тыдзень</string>
     <string name="close_tabs_manually">Ніколі</string>
     <string name="close_tabs_manually_summary">Закрываць уручную</string>
-    <string name="connection_enhanced_protection">Палепшаная абарона ад адсочвання</string>
-    <string name="connection_secure">Злучэнне бяспечнае</string>
+<string name="connection_secure">Злучэнне бяспечнае</string>
     <string name="delete">Выдаліць</string>
     <string name="delete_all_bookmarks">Гэта выдаліць усе вашы даныя закладак.</string>
     <string name="delete_all_browsing">Ачыстка ўсіх файлаў cookie і даных сайтаў можа прывесці да выхаду з вэб-сайтаў і выдалення пазасеткавага змесціва.</string>
@@ -89,9 +87,7 @@
     <string name="empty_media_help">Некаторыя мультымедыйныя файлы неабходна прайграць, перш чым Firedown зможа выявіць іх як файлы для спампоўкі.</string>
     <string name="empty_media_help_title">Прайграйце мультымедыя перад загрузкай</string>
     <string name="empty_media_subtitle_help">Прайграйце мультымедыя як звычайна. Затым ён павінен з\'явіцца разам з іншымі медыя-файламі пасля націску кнопкі Fire.</string>
-    <string name="empty_password_exeception_list">Тут будуць паказаны лагіны і паролі, якія не былі захаваны.</string>
-    <string name="empty_password_list">Ваш захаваны пароль з\'явіцца тут.</string>
-    <string name="error_check_internet_connection">Памылка інтэрнэт-злучэння.</string>
+<string name="error_check_internet_connection">Памылка інтэрнэт-злучэння.</string>
     <string name="error_cipher">Памылка шыфравання файла</string>
     <string name="error_external_storage">Знешняга назапашвальніка няма</string>
     <string name="error_file">Немагчыма адкрыць файл.</string>
@@ -163,8 +159,7 @@
     <string name="popup_tabs_close">Закрыць усе ўкладкі</string>
     <string name="popup_tabs_new">Новая ўкладка</string>
     <string name="popup_toggle">Пераключыць прагляд</string>
-    <string name="prompt_update_confirmation">Абнавіць</string>
-    <string name="quick_settings_sheet_insecure_connection_2">Злучэнне не абаронена</string>
+<string name="quick_settings_sheet_insecure_connection_2">Злучэнне не абаронена</string>
     <string name="quick_settings_sheet_secure_connection_2">Злучэнне абаронена</string>
     <string name="quit_application">Выхад з праграмы, каб прымяніць змены…</string>
     <string name="remove_top_site">Выдаліць</string>
@@ -178,8 +173,7 @@
     <string name="restart_origin">Перазапуск</string>
     <string name="save_file">Захаваць файл як</string>
     <string name="save_file_name">Імя файла</string>
-    <string name="scroll_up">Пракруткі уверх</string>
-    <string name="search">Пошук</string>
+<string name="search">Пошук</string>
     <string name="search_clip">Запоўніць спасылку з буфера абмену</string>
     <string name="search_for">Пошук %s</string>
     <string name="search_store">Пошук у краме</string>
@@ -224,8 +218,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Старонкі будуць загружацца нармальна, але блакіраваць менш трэкераў.</string>
     <string name="settings_enhanced_tracking_protection_strict">Строгі</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Мацнейшая абарона ад адсочвання і больш высокая прадукцыйнасць, але некаторыя сайты могуць не працаваць належным чынам.</string>
-    <string name="settings_exceptions">Выключэнні</string>
-    <string name="settings_follow_device_theme">Тэма прылады</string>
+<string name="settings_follow_device_theme">Тэма прылады</string>
     <string name="settings_general">Генерал</string>
     <string name="settings_license">Ліцэнзіі</string>
     <string name="settings_light_theme">Светлая</string>
@@ -255,8 +248,7 @@
     <string name="sort">Сартаваць па</string>
     <string name="sort_by_date_opt">Дата</string>
     <string name="sort_by_size_opt">Памер</string>
-    <string name="sort_by_type_all">Усе</string>
-    <string name="sort_by_type_alpha">Імя</string>
+<string name="sort_by_type_alpha">Імя</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Аўдыё</string>
     <string name="sort_by_type_docs">Дакументы</string>
@@ -266,14 +258,7 @@
     <string name="sort_by_type_video">Відэа</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Перайсці ў картку</string>
-    <string name="tab_tray_inactive_auto_close_body_2">%1$s можа закрываць карткі, якія вы не праглядалі за апошні месяц.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">Закрыць</string>
-    <string name="tab_tray_inactive_auto_close_title">Аўтаматычна закрываць праз месяц?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">Адключыць у наладах</string>
-    <string name="tab_tray_inactive_onboarding_message">Карткі, якія вы не праглядалі на працягу двух тыдняў, будуць перанесеныя сюды.</string>
-    <string name="tab_tray_inactive_recently_closed">Нядаўна закрытыя</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">Уключыць аўтазакрыццё</string>
-    <string name="task_decryption_finished">Расшыфроўка завершана</string>
+<string name="task_decryption_finished">Расшыфроўка завершана</string>
     <string name="task_encryption_finished">Шыфраванне завершана</string>
     <string name="top_sites_edit_dialog_save">Захаваць</string>
     <string name="top_sites_max_limit_confirmation_button">OK, зразумела</string>

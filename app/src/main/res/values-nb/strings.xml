@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Ingen SVG-er tilgjengelig.</string>
     <string name="capture_empty_video_message">Ingen videoer tilgjengelig.</string>
     <string name="clipboard">Kopiert til utklippstavlen</string>
-    <string name="connection_enhanced_protection">Forbedret sporingsbeskyttelse</string>
-    <string name="connection_secure">Tilkoblingen er sikker</string>
+<string name="connection_secure">Tilkoblingen er sikker</string>
     <string name="delete">Slett</string>
     <string name="delete_all_bookmarks">Dette vil slette alle bokmerkedataene dine.</string>
     <string name="delete_all_browsing">Sletting av alle informasjonskapsler og nettstedsdata kan logge deg av nettsteder og fjerne offline innhold.</string>
@@ -65,9 +64,7 @@
     <string name="empty_media_help">Noen mediefiler må spilles av før Firedown kan oppdage dem som nedlastbare filer.</string>
     <string name="empty_media_help_title">Spill av mediefilen før du laster ned</string>
     <string name="empty_media_subtitle_help">Vennligst spill mediefilen som vanlig. Den skal da vises sammen med de andre mediefilene etter at du har trykket på Fire Button.</string>
-    <string name="empty_password_exeception_list">Pålogginger og passord som ikke er lagret vil vises her.</string>
-    <string name="empty_password_list">Ditt lagrede passord vises her.</string>
-    <string name="error_check_internet_connection">Internett-tilkoblingsfeil.</string>
+<string name="error_check_internet_connection">Internett-tilkoblingsfeil.</string>
     <string name="error_cipher">Filkrypteringsfeil</string>
     <string name="error_external_storage">Ingen ekstern lagring tilgjengelig</string>
     <string name="error_file">Kunne ikke åpne filen.</string>
@@ -158,8 +155,7 @@
     <string name="restart_origin">Omstart</string>
     <string name="save_file">Lagre fil som</string>
     <string name="save_file_name">Filnavn</string>
-    <string name="scroll_up">Scroll opp</string>
-    <string name="search">Søk</string>
+<string name="search">Søk</string>
     <string name="search_clip">Fyll lenken fra utklippstavlen</string>
     <string name="search_for">Søk etter %s</string>
     <string name="search_store">Søk i butikken</string>
@@ -202,8 +198,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Sider lastes normalt, men blokkerer færre sporere.</string>
     <string name="settings_enhanced_tracking_protection_strict">Streng</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Strengere sporingsbeskyttelse og raskere ytelse, men enkelte nettsteder fungerer kanskje ikke som de skal.</string>
-    <string name="settings_exceptions">Unntak</string>
-    <string name="settings_general">Generelt</string>
+<string name="settings_general">Generelt</string>
     <string name="settings_license">Lisenser</string>
     <string name="settings_lock_summary">Lås tilgang til brukergrensesnittet</string>
     <string name="settings_lock_title">Applås</string>
@@ -221,8 +216,7 @@
     <string name="sort">Sorter etter</string>
     <string name="sort_by_date_opt">Dato</string>
     <string name="sort_by_size_opt">Størrelse</string>
-    <string name="sort_by_type_all">Alle</string>
-    <string name="sort_by_type_alpha">Navn</string>
+<string name="sort_by_type_alpha">Navn</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Lyd</string>
     <string name="sort_by_type_docs">Dokumenter</string>

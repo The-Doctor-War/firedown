@@ -21,8 +21,7 @@
     <string name="capture_empty_svgs_message">Inga SVG:er tillgängliga.</string>
     <string name="capture_empty_video_message">Inga videor tillgängliga.</string>
     <string name="clipboard">Kopierade till urklipp</string>
-    <string name="connection_enhanced_protection">Förbättrat spårningsskydd</string>
-    <string name="connection_secure">Anslutningen är säker</string>
+<string name="connection_secure">Anslutningen är säker</string>
     <string name="delete">Radera</string>
     <string name="delete_all_bookmarks">Detta kommer att radera alla dina bokmärkesdata.</string>
     <string name="delete_all_browsing">Rensa alla cookies och webbplatsdata kan logga ut dig från webbplatser och ta bort offlineinnehåll.</string>
@@ -65,9 +64,7 @@
     <string name="empty_media_help">Vissa mediefiler måste spelas upp innan Firedown kan upptäcka dem som nedladdningsbara filer.</string>
     <string name="empty_media_help_title">Spela upp media innan du laddar ner</string>
     <string name="empty_media_subtitle_help">Vänligen spela media som vanligt. Den ska då visas tillsammans med de andra mediefilerna efter att ha tryckt på Fire-knappen.</string>
-    <string name="empty_password_exeception_list">Inloggningar och lösenord som inte är sparade kommer att visas här.</string>
-    <string name="empty_password_list">Ditt sparade lösenord visas här.</string>
-    <string name="error_check_internet_connection">Internetanslutningsfel.</string>
+<string name="error_check_internet_connection">Internetanslutningsfel.</string>
     <string name="error_cipher">Filkrypteringsfel</string>
     <string name="error_external_storage">Ingen extern lagring tillgänglig</string>
     <string name="error_file">Det gick inte att öppna filen.</string>
@@ -158,8 +155,7 @@
     <string name="restart_origin">Omstart</string>
     <string name="save_file">Spara fil som</string>
     <string name="save_file_name">Filnamn</string>
-    <string name="scroll_up">Skrolla upp</string>
-    <string name="search">Sök</string>
+<string name="search">Sök</string>
     <string name="search_clip">Fyll i länk från urklipp</string>
     <string name="search_for">Sök efter %s</string>
     <string name="search_store">Sök i butiken</string>
@@ -202,8 +198,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">Sidorna laddas normalt, men blockerar färre spårare.</string>
     <string name="settings_enhanced_tracking_protection_strict">Sträng</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">Starkare spårningsskydd och snabbare prestanda, men vissa webbplatser kanske inte fungerar korrekt.</string>
-    <string name="settings_exceptions">Undantag</string>
-    <string name="settings_general">Allmän</string>
+<string name="settings_general">Allmän</string>
     <string name="settings_license">Licenser</string>
     <string name="settings_lock_summary">Lås åtkomst till användargränssnittet</string>
     <string name="settings_lock_title">Applås</string>
@@ -221,8 +216,7 @@
     <string name="sort">Sortera efter</string>
     <string name="sort_by_date_opt">Datum</string>
     <string name="sort_by_size_opt">Storlek</string>
-    <string name="sort_by_type_all">Allt</string>
-    <string name="sort_by_type_alpha">Namn</string>
+<string name="sort_by_type_alpha">Namn</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Dokument</string>

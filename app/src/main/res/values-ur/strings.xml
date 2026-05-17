@@ -29,8 +29,7 @@
     <string name="capture_empty_video_message">کوئی ویڈیوز دستیاب نہیں ہیں۔</string>
     <string name="clipboard">کلپ بورڈ پر کاپی ہو گیا۔</string>
     <string name="close_tab">ٹیب بند کریں</string>
-    <string name="close_tab_title">%s ٹیب بند کریں</string>
-    <string name="close_tabs_after_one_day">ایک دن کے بعد</string>
+<string name="close_tabs_after_one_day">ایک دن کے بعد</string>
     <string name="close_tabs_after_one_day_summary">ایک دن کے بعد بند کریں</string>
     <string name="close_tabs_after_one_month">ایک مہینے کے بعد</string>
     <string name="close_tabs_after_one_month_summary">ایک ماہ کے بعد بند کریں</string>
@@ -38,8 +37,7 @@
     <string name="close_tabs_after_one_week_summary">ایک ہفتے کے بعد بند کریں</string>
     <string name="close_tabs_manually">دستی</string>
     <string name="close_tabs_manually_summary">دستی طور پر بند کریں</string>
-    <string name="connection_enhanced_protection">بہتر ٹریکنگ تحفظ</string>
-    <string name="connection_secure">کنکشن محفوظ ہے۔</string>
+<string name="connection_secure">کنکشن محفوظ ہے۔</string>
     <string name="delete">حذف کریں۔</string>
     <string name="delete_all_bookmarks">یہ آپ کے تمام بک مارکس ڈیٹا کو حذف کر دے گا۔</string>
     <string name="delete_all_browsing">تمام کوکیز اور سائٹ کے ڈیٹا کو صاف کرنے سے آپ ویب سائٹس سے سائن آؤٹ ہو سکتے ہیں اور آف لائن مواد کو ہٹا سکتے ہیں۔</string>
@@ -84,9 +82,7 @@
     <string name="empty_media_help">کچھ میڈیا فائلوں کو چلانے کی ضرورت ہے اس سے پہلے کہ فائر ڈاؤن ڈاؤن لوڈ کے قابل فائلوں کے طور پر ان کا پتہ لگا سکے۔</string>
     <string name="empty_media_help_title">ڈاؤن لوڈ کرنے سے پہلے میڈیا چلائیں۔</string>
     <string name="empty_media_subtitle_help">براہ کرم میڈیا کو معمول کے مطابق چلائیں۔ فائر بٹن کو دبانے کے بعد اسے دیگر میڈیا فائلوں کے ساتھ ظاہر ہونا چاہیے۔</string>
-    <string name="empty_password_exeception_list">لاگ ان اور پاس ورڈز جو محفوظ نہیں ہوئے ہیں وہ یہاں دکھائے جائیں گے۔</string>
-    <string name="empty_password_list">آپ کا محفوظ کردہ پاس ورڈ یہاں ظاہر ہوگا۔</string>
-    <string name="error_check_internet_connection">انٹرنیٹ کنکشن کی خرابی۔</string>
+<string name="error_check_internet_connection">انٹرنیٹ کنکشن کی خرابی۔</string>
     <string name="error_cipher">فائل کی خفیہ کاری کی خرابی۔</string>
     <string name="error_external_storage">بیرونی ذزخیرہ میسر نہیں</string>
     <string name="error_file">فائل نہیں کھل سکی۔</string>
@@ -160,8 +156,7 @@
     <string name="popup_tabs_close">تمام ٹیبز بند کریں۔</string>
     <string name="popup_tabs_new">نیا ٹیب</string>
     <string name="popup_toggle">منظر کو ٹوگل کریں۔</string>
-    <string name="prompt_update_confirmation">تازہ کاری کریں</string>
-    <string name="quick_settings_sheet_insecure_connection_2">کنکشن محفوظ نہیں ہے</string>
+<string name="quick_settings_sheet_insecure_connection_2">کنکشن محفوظ نہیں ہے</string>
     <string name="quick_settings_sheet_secure_connection_2">کنکشن محفوظ ہے۔</string>
     <string name="remove_top_site">ہٹائیں</string>
     <string name="rename">نام تبدیل کریں۔</string>
@@ -174,8 +169,7 @@
     <string name="restart_origin">دوبارہ شروع کریں</string>
     <string name="save_file">فائل کو بطور محفوظ کریں۔</string>
     <string name="save_file_name">فائل کا نام</string>
-    <string name="scroll_up">اوپر کرو</string>
-    <string name="search">تلاش کریں۔</string>
+<string name="search">تلاش کریں۔</string>
     <string name="search_clip">کلپ بورڈ سے لنک پُر کریں۔</string>
     <string name="search_for">%s تلاش کریں۔</string>
     <string name="search_store">اسٹور پر تلاش کریں۔</string>
@@ -218,8 +212,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">صفحات عام طور پر لوڈ ہوں گے، لیکن کم ٹریکرز کو مسدود کریں گے۔</string>
     <string name="settings_enhanced_tracking_protection_strict">سخت</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">مضبوط ٹریکنگ تحفظ اور تیز کارکردگی، لیکن ہو سکتا ہے کچھ سائٹس ٹھیک سے کام نہ کریں۔</string>
-    <string name="settings_exceptions">مستثنیات</string>
-    <string name="settings_follow_device_theme">آلہ کے تھیم پر عمل کریں</string>
+<string name="settings_follow_device_theme">آلہ کے تھیم پر عمل کریں</string>
     <string name="settings_general">جنرل</string>
     <string name="settings_license">لائسنس</string>
     <string name="settings_light_theme">ہلکا</string>
@@ -244,8 +237,7 @@
     <string name="sort">ترتیب دیں بلحاظ</string>
     <string name="sort_by_date_opt">تاریخ</string>
     <string name="sort_by_size_opt">سائز</string>
-    <string name="sort_by_type_all">تمام</string>
-    <string name="sort_by_type_alpha">نام</string>
+<string name="sort_by_type_alpha">نام</string>
     <string name="sort_by_type_apk">اے پی کے</string>
     <string name="sort_by_type_audio">آڈیو</string>
     <string name="sort_by_type_docs">دستاویزات</string>
@@ -255,12 +247,7 @@
     <string name="sort_by_type_video">ویڈیو</string>
     <string name="sort_by_type_zip">زپ</string>
     <string name="switch_to_tab_description">ٹیب پر جائیں</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">بند کریں</string>
-    <string name="tab_tray_inactive_auto_close_title">ایک ماہ کے بعد خودکار بند کریں ؟</string>
-    <string name="tab_tray_inactive_onboarding_button_text">سیٹنگز میں بند کر دیں۔</string>
-    <string name="tab_tray_inactive_recently_closed">حالیہ بند کی گئی</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">خودکار بند چالو کریں۔</string>
-    <string name="task_decryption_finished">ڈکرپشن ختم</string>
+<string name="task_decryption_finished">ڈکرپشن ختم</string>
     <string name="task_encryption_finished">خفیہ کاری مکمل ہو گئی۔</string>
     <string name="top_sites_max_limit_confirmation_button">ٹھیک ہے سمجھ گیا</string>
     <string name="top_sites_rename_dialog_title">نام</string>

@@ -33,8 +33,7 @@
     <string name="capture_empty_video_message">വീഡിയോകളൊന്നും ലഭ്യമല്ല.</string>
     <string name="clipboard">ക്ലിപ്പ്ബോർഡിലേക്ക് പകർത്തി</string>
     <string name="close_tab">ടാബ് അടയ്ക്കുക</string>
-    <string name="close_tab_title">%s ടാബ് അടയ്ക്കുക</string>
-    <string name="close_tabs_after_one_day">ഒരു ദിവസത്തിന് ശേഷം</string>
+<string name="close_tabs_after_one_day">ഒരു ദിവസത്തിന് ശേഷം</string>
     <string name="close_tabs_after_one_day_summary">ഒരു ദിവസം കഴിഞ്ഞു് അടയ്ക്കുക</string>
     <string name="close_tabs_after_one_month">ഒരു മാസത്തിനുശേഷം</string>
     <string name="close_tabs_after_one_month_summary">ഒരു മാസത്തിനുശേഷം അടയ്ക്കുക</string>
@@ -42,8 +41,7 @@
     <string name="close_tabs_after_one_week_summary">ഒരാഴ്ച കഴിഞ്ഞു് അടയ്ക്കുക</string>
     <string name="close_tabs_manually">ഒരിക്കലുമില്ല</string>
     <string name="close_tabs_manually_summary">ഞാൻ തന്നെ അടച്ചുകൊള്ളാം</string>
-    <string name="connection_enhanced_protection">മെച്ചപ്പെടുത്തിയ ട്രാക്കിംഗ് പരിരക്ഷ</string>
-    <string name="connection_secure">കണക്ഷൻ സുരക്ഷിതമാണ്</string>
+<string name="connection_secure">കണക്ഷൻ സുരക്ഷിതമാണ്</string>
     <string name="delete">ഇല്ലാതാക്കുക</string>
     <string name="delete_all_bookmarks">ഇത് നിങ്ങളുടെ എല്ലാ ബുക്ക്‌മാർക്കുകളുടെയും ഡാറ്റ ഇല്ലാതാക്കും.</string>
     <string name="delete_all_browsing">എല്ലാ കുക്കികളും സൈറ്റ് ഡാറ്റയും മായ്‌ക്കുന്നത് നിങ്ങളെ വെബ്‌സൈറ്റുകളിൽ നിന്ന് സൈൻ ഔട്ട് ചെയ്യുകയും ഓഫ്‌ലൈൻ ഉള്ളടക്കം നീക്കം ചെയ്യുകയും ചെയ്തേക്കാം.</string>
@@ -88,9 +86,7 @@
     <string name="empty_media_help">ചില മീഡിയ ഫയലുകൾ ഡൗൺലോഡ് ചെയ്യാവുന്ന ഫയലുകളായി ഫയർഡൗണിന് കണ്ടെത്തുന്നതിന് മുമ്പ് പ്ലേ ചെയ്യേണ്ടതുണ്ട്.</string>
     <string name="empty_media_help_title">ഡൗൺലോഡ് ചെയ്യുന്നതിന് മുമ്പ് മീഡിയ പ്ലേ ചെയ്യുക</string>
     <string name="empty_media_subtitle_help">പതിവുപോലെ മീഡിയ പ്ലേ ചെയ്യുക. ഫയർ-ബട്ടൺ അമർത്തിയാൽ അത് മറ്റ് മീഡിയ ഫയലുകൾക്കൊപ്പം ദൃശ്യമാകും.</string>
-    <string name="empty_password_exeception_list">സേവ് ചെയ്യാത്ത ലോഗിനുകളും പാസ്‌വേഡുകളും ഇവിടെ കാണിക്കും.</string>
-    <string name="empty_password_list">നിങ്ങളുടെ സംരക്ഷിച്ച പാസ്‌വേഡ് ഇവിടെ ദൃശ്യമാകും.</string>
-    <string name="error_check_internet_connection">ഇൻ്റർനെറ്റ് കണക്ഷൻ പിശക്.</string>
+<string name="error_check_internet_connection">ഇൻ്റർനെറ്റ് കണക്ഷൻ പിശക്.</string>
     <string name="error_cipher">ഫയൽ എൻക്രിപ്ഷൻ പിശക്</string>
     <string name="error_external_storage">ബാഹ്യ സംഭരണം ലഭ്യമല്ല</string>
     <string name="error_file">ഫയൽ തുറക്കാനായില്ല.</string>
@@ -165,8 +161,7 @@
     <string name="popup_toggle">കാഴ്ച ടോഗിൾ ചെയ്യുക</string>
     <string name="settings_doh_provider_custom_dialog_error_https">യൂ.ആർ.എൽ എല്ലാം “https://”- കൂടെ തുടങ്ങണം</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">തെറ്റായ URL</string>
-    <string name="prompt_update_confirmation">പുതുക്കുക</string>
-    <string name="protection_panel_etp_toggle_disabled_description_2">പിന്തുടൎച്ച പരിരക്ഷണം തുടങ്ങിവയ്ക്കുന്നതു ശുപാൎശചെയ്യപ്പെട്ടതാണു്.</string>
+<string name="protection_panel_etp_toggle_disabled_description_2">പിന്തുടൎച്ച പരിരക്ഷണം തുടങ്ങിവയ്ക്കുന്നതു ശുപാൎശചെയ്യപ്പെട്ടതാണു്.</string>
     <string name="protection_panel_etp_toggle_enabled_description_2">ഈ വെബ്ബിടത്തിൽ എന്തെങ്കിലും തകരാറുണ്ടെന്നു തോന്നുന്നുണ്ടെങ്കിൽ പരിരക്ഷകളെ അണച്ചു നോക്കൂ.</string>
     <string name="quick_settings_sheet_insecure_connection_2">അസുരക്ഷിതമായ സമ്പർക്കം</string>
     <string name="quick_settings_sheet_secure_connection_2">സുരക്ഷിതമായ സമ്പർക്കം</string>
@@ -177,8 +172,7 @@
     <string name="restart_origin">പുനരാരംഭിക്കുക</string>
     <string name="save_file">ഫയൽ ഇതായി സംരക്ഷിക്കുക</string>
     <string name="save_file_name">ഫയലിന്റെ പേര്</string>
-    <string name="scroll_up">മുകളിലേക്ക് സ്ക്രോൾ ചെയ്യുക</string>
-    <string name="search">തിരയുക</string>
+<string name="search">തിരയുക</string>
     <string name="search_clip">ക്ലിപ്പ്ബോർഡിൽ നിന്ന് ലിങ്ക് പൂരിപ്പിക്കുക</string>
     <string name="search_for">%s എന്നതിനായി തിരയുക</string>
     <string name="search_store">സ്റ്റോറിൽ തിരയുക</string>
@@ -222,8 +216,7 @@
     <string name="settings_enhanced_tracking_protection_standard_description_5">പേജുകൾ സാധാരണയായി ലോഡ് ചെയ്യും, എന്നാൽ കുറച്ച് ട്രാക്കറുകളെ തടയുക.</string>
     <string name="settings_enhanced_tracking_protection_strict">കണിശമായ</string>
     <string name="settings_enhanced_tracking_protection_strict_description_4">ശക്തമായ ട്രാക്കിംഗ് പരിരക്ഷയും വേഗത്തിലുള്ള പ്രകടനവും, എന്നാൽ ചില സൈറ്റുകൾ ശരിയായി പ്രവർത്തിച്ചേക്കില്ല.</string>
-    <string name="settings_exceptions">ഒഴിവാക്കലുകൾ</string>
-    <string name="settings_follow_device_theme">ഉപകരണ തീം പിന്തുടരുക</string>
+<string name="settings_follow_device_theme">ഉപകരണ തീം പിന്തുടരുക</string>
     <string name="settings_general">ജനറൽ</string>
     <string name="settings_license">ലൈസൻസുകൾ</string>
     <string name="settings_light_theme">ഇളം</string>
@@ -253,8 +246,7 @@
     <string name="sort">ഇപ്രകാരം അടുക്കുക</string>
     <string name="sort_by_date_opt">തീയതി</string>
     <string name="sort_by_size_opt">വലിപ്പം</string>
-    <string name="sort_by_type_all">എല്ലാം</string>
-    <string name="sort_by_type_alpha">പേര്</string>
+<string name="sort_by_type_alpha">പേര്</string>
     <string name="sort_by_type_apk">Apk</string>
     <string name="sort_by_type_audio">ഓഡിയോ</string>
     <string name="sort_by_type_docs">പ്രമാണങ്ങൾ</string>
@@ -264,14 +256,7 @@
     <string name="sort_by_type_video">വീഡിയോ</string>
     <string name="sort_by_type_zip">സിപ്പ്</string>
     <string name="switch_to_tab_description">ടാബിലേക്ക് മാറുക</string>
-    <string name="tab_tray_inactive_auto_close_body_2">കഴിഞ്ഞ ഒരു മാസമായി താങ്ങൾ കാണാത്ത ടാബുകൾ %1$s-ന് അടയ്ക്കാനാവും.</string>
-    <string name="tab_tray_inactive_auto_close_button_content_description">അടയ്ക്കുക</string>
-    <string name="tab_tray_inactive_auto_close_title">ഒരു മാസത്തിന് ശേഷം തനതാനെ അടയ്ക്കണോ?</string>
-    <string name="tab_tray_inactive_onboarding_button_text">ക്രമീകരണങ്ങളിൽ ഓഫ് ആക്കുക</string>
-    <string name="tab_tray_inactive_onboarding_message">രണ്ടാഴ്ചയായി നിങ്ങൾ കാണാത്ത ടാബുകൾ ഇങ്ങോട്ട് നീക്കും.</string>
-    <string name="tab_tray_inactive_recently_closed">അടുത്തിടെ അടച്ചതു്</string>
-    <string name="tab_tray_inactive_turn_on_auto_close_button_2">താനേ-അണക്കൽ തുടങ്ങുക</string>
-    <string name="task_decryption_finished">ഡീക്രിപ്ഷൻ പൂർത്തിയായി</string>
+<string name="task_decryption_finished">ഡീക്രിപ്ഷൻ പൂർത്തിയായി</string>
     <string name="task_encryption_finished">എൻക്രിപ്ഷൻ പൂർത്തിയായി</string>
     <string name="top_sites_edit_dialog_save">കരുതിവയ്ക്കുക</string>
     <string name="top_sites_edit_dialog_title">കുറുക്കുവഴി തിരുത്തുക</string>

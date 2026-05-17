@@ -275,6 +275,10 @@
     <plurals name="blocked_trackers_summary">
         <item quantity="other">本页面已拦截 %d 项</item>
     </plurals>
+    <plurals name="incognito_downloads_in_progress_title">
+        <item quantity="other">%d 个无痕下载正在进行</item>
+    </plurals>
+    <string name="incognito_downloads_in_progress_subtitle">点按以在保险箱中查看</string>
     <string name="blocked_trackers_cross_site_cookies">跨站点跟踪 Cookie</string>
     <string name="blocked_trackers_social_media">社交媒体跟踪器</string>
     <string name="blocked_trackers_fingerprinters">指纹识别器</string>

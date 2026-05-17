@@ -276,6 +276,11 @@
         <item quantity="one">%d auf dieser Seite blockiert</item>
         <item quantity="other">%d auf dieser Seite blockiert</item>
     </plurals>
+    <plurals name="incognito_downloads_in_progress_title">
+        <item quantity="one">%d Inkognito-Download läuft</item>
+        <item quantity="other">%d Inkognito-Downloads laufen</item>
+    </plurals>
+    <string name="incognito_downloads_in_progress_subtitle">Tippen, um im Tresor anzuzeigen</string>
     <string name="blocked_trackers_cross_site_cookies">Site-übergreifende Tracking-Cookies</string>
     <string name="blocked_trackers_social_media">Social-Media-Tracker</string>
     <string name="blocked_trackers_fingerprinters">Fingerprinter</string>

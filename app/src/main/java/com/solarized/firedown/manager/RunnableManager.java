@@ -339,13 +339,22 @@ public class RunnableManager extends Service {
 		Class<?> target = (safeCount > 0 && regularCount == 0)
 				? VaultActivity.class
 				: DownloadsActivity.class;
+		// Plain PendingIntent.getActivity instead of TaskStackBuilder.
+		// VaultActivity declares no parentActivityName in the manifest,
+		// and addNextIntentWithParentStack against a parent-less
+		// Activity can produce a PendingIntent that some Android
+		// versions reject as having no resolvable target — leaving the
+		// foreground notification with a null content intent that
+		// suppresses rendering. A direct getActivity sidesteps the
+		// resolver, and the FLAG_ACTIVITY_NEW_TASK | CLEAR_TOP combo
+		// gets us the same "open the activity, clear above it" behavior
+		// the back-stack builder used to provide.
 		Intent intent = new Intent(this, target);
 		intent.setAction(IntentActions.DOWNLOAD_FINISH);
-		// Create the TaskStackBuilder and add the intent, which inflates the back
-		// stack.
-		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-		stackBuilder.addNextIntentWithParentStack(intent);
-		PendingIntent contentIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		PendingIntent contentIntent = PendingIntent.getActivity(
+				this, 0, intent,
+				PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 		// Set the info for the views that show in the notification panel.
 		NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, App.DOWNLOADS_NOTIFICATION_ID);
 		mBuilder.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher_round));

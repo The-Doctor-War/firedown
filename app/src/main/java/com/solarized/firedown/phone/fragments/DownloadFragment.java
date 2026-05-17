@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.LoadState;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.color.MaterialColors;
 import com.solarized.firedown.Preferences;
@@ -35,6 +34,7 @@ import com.solarized.firedown.data.models.TaskViewModel;
 import com.solarized.firedown.manager.ServiceActions;
 import com.solarized.firedown.phone.VaultActivity;
 import com.solarized.firedown.ui.adapters.DownloadItemAdapter;
+import com.solarized.firedown.ui.adapters.IncognitoInProgressHeaderAdapter;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.diffs.DownloadDiffCallback;
 import com.solarized.firedown.IntentActions;
@@ -51,12 +51,12 @@ public class DownloadFragment extends BaseDownloadFragment implements
     private static final String TAG = DownloadFragment.class.getSimpleName();
     private ChipGroup mChipGroup;
 
-    /** Bottom-anchored card surfaced when the user has vault
-     *  (incognito-tab) downloads in flight while looking at the regular
-     *  Downloads page. Tap → open VaultActivity. Visibility driven by
-     *  TaskViewModel#getSafeCount LiveData. */
-    private MaterialCardView mIncognitoInProgressCard;
-    private TextView mIncognitoInProgressTitle;
+    /** Single-item header surfaced via {@link androidx.recyclerview.widget.ConcatAdapter}
+     *  when the user has vault (incognito-tab) downloads in flight while
+     *  looking at the regular Downloads page. Tap → open VaultActivity.
+     *  Scrolls with the list (no AppBar pin); driven by
+     *  {@code TaskViewModel#getSafeCount} LiveData. */
+    private IncognitoInProgressHeaderAdapter mIncognitoHeaderAdapter;
 
     /** Set when a new query has been dispatched; consumed on the next successful refresh. */
     private boolean mPendingScrollToTop = false;
@@ -93,8 +93,19 @@ public class DownloadFragment extends BaseDownloadFragment implements
     }
 
     @Override
+    protected int getLeadingHeaderCount() {
+        // ConcatAdapter prepends the incognito-in-progress header at
+        // adapter position 0 when there are vault downloads in flight.
+        // Report it to the base's SpanSizeLookup so the row spans the
+        // full grid width and the date-divider lookup against the
+        // paged adapter is shifted by 1.
+        return mIncognitoHeaderAdapter != null ? mIncognitoHeaderAdapter.getItemCount() : 0;
+    }
+
+    @Override
     public void onDestroyView() {
         mAdapter = null;
+        mIncognitoHeaderAdapter = null;
         mGridLayoutManager = null;
         mBottomProgressView = null;
         mChipGroup = null;
@@ -109,11 +120,6 @@ public class DownloadFragment extends BaseDownloadFragment implements
         mLCEERecyclerView = view.findViewById(R.id.list_recycler_lcee);
         mChipGroup = view.findViewById(R.id.chip_group);
         mToolbar = view.findViewById(R.id.toolbar);
-        mIncognitoInProgressCard = view.findViewById(R.id.incognito_in_progress_card);
-        mIncognitoInProgressTitle = view.findViewById(R.id.incognito_in_progress_title);
-
-        mIncognitoInProgressCard.setOnClickListener(v ->
-                startActivity(new Intent(requireContext(), VaultActivity.class)));
 
         mChipGroup.setOnCheckedStateChangeListener(this);
     }
@@ -123,7 +129,15 @@ public class DownloadFragment extends BaseDownloadFragment implements
 
         mLCEERecyclerView.setEmptyImageView(R.drawable.ill_baloons);
         mAdapter = new DownloadItemAdapter(getContext(), new DownloadDiffCallback(), this, mEnableGrid);
-        mRecyclerView.setAdapter(mAdapter);
+        mIncognitoHeaderAdapter = new IncognitoInProgressHeaderAdapter(() ->
+                startActivity(new Intent(requireContext(), VaultActivity.class)));
+        // ConcatAdapter puts the incognito-in-progress hint at adapter
+        // position 0 so it scrolls with the list. The header adapter
+        // hides itself (getItemCount == 0) when there are no vault
+        // downloads, so positions don't shift for the paginated list
+        // when the count goes back to zero.
+        mRecyclerView.setAdapter(new androidx.recyclerview.widget.ConcatAdapter(
+                mIncognitoHeaderAdapter, mAdapter));
         mRecyclerView.setVerticalScrollBarEnabled(true);
 
         configureRecyclerView(mAdapter, mEnableGrid);
@@ -188,14 +202,8 @@ public class DownloadFragment extends BaseDownloadFragment implements
         // RunnableManager#startNotification); this card covers the
         // mixed case where they end up here looking for a vault file.
         mTaskViewModel.getSafeCount().observe(getViewLifecycleOwner(), count -> {
-            int n = count != null ? count : 0;
-            if (n > 0) {
-                mIncognitoInProgressTitle.setText(getResources().getQuantityString(
-                        R.plurals.incognito_downloads_in_progress_title, n, n));
-                mIncognitoInProgressCard.setVisibility(View.VISIBLE);
-            } else {
-                mIncognitoInProgressCard.setVisibility(View.GONE);
-            }
+            if (mIncognitoHeaderAdapter == null) return;
+            mIncognitoHeaderAdapter.setCount(count != null ? count : 0);
         });
 
         mTaskViewModel.getObservableEvent().observe(getViewLifecycleOwner(), event -> {

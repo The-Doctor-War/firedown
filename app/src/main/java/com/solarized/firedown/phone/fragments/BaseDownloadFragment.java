@@ -399,6 +399,19 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         }
     }
 
+    /**
+     * Number of single-span rows the subclass prepends via
+     * {@link androidx.recyclerview.widget.ConcatAdapter} before the
+     * paged DownloadItemAdapter. Used by the SpanSizeLookup so those
+     * leading rows take the full grid width and the date-divider
+     * lookup against the inner adapter is shifted accordingly.
+     * Default 0 — overridden by {@code DownloadFragment} when its
+     * incognito-in-progress header is visible.
+     */
+    protected int getLeadingHeaderCount() {
+        return 0;
+    }
+
     protected void configureRecyclerView(DownloadItemAdapter adapter, boolean isGrid) {
         if (mRecyclerView == null) return;
 
@@ -424,14 +437,23 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             mGridLayoutManager.setSpanCount(spans);
         }
 
-        // Headers must span the full width so they don't sit in a single grid cell
+        // Headers must span the full width so they don't sit in a single grid cell.
+        // Subclasses may prepend rows via ConcatAdapter (e.g. DownloadFragment's
+        // incognito-in-progress hint) — getLeadingHeaderCount() reports how many
+        // such rows exist so the lookup spans them full-width and shifts the
+        // adapter position when querying for date-divider headers.
         mGridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
-                if (position < 0 || position >= adapter.getItemCount()) {
+                int leading = getLeadingHeaderCount();
+                if (position < leading) {
+                    return mGridLayoutManager.getSpanCount();
+                }
+                int innerPos = position - leading;
+                if (innerPos < 0 || innerPos >= adapter.getItemCount()) {
                     return 1;
                 }
-                if (adapter.getItemViewType(position) == Download.HEADER) {
+                if (adapter.getItemViewType(innerPos) == Download.HEADER) {
                     return mGridLayoutManager.getSpanCount();
                 }
                 return 1;

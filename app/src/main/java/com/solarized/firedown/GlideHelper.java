@@ -341,7 +341,18 @@ public class GlideHelper {
                 builder.into(image);
             }
 
-        } else if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isImage(mimeType)) {
+        } else if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isImage(mimeType)
+                || FileUriHelper.isAudio(mimeType)) {
+            // Audio joins the video/image branch: when the parser
+            // didn't supply an explicit thumbnail URL we point Glide
+            // at the audio URL itself and let FFmpegUriDecoder pull
+            // the embedded cover art (AV_DISPOSITION_ATTACHED_PIC).
+            // FFmpeg's HTTP demuxer only fetches as much as
+            // avformat_find_stream_info needs to populate
+            // stream->attached_pic — typically just the ID3v2 header
+            // at the start of the file. Files with no embedded art
+            // fail decode and the fallbackListener renders the
+            // mime-tinted audio icon.
             String thumbnail = entity.getFileThumbnail();
             String source = TextUtils.isEmpty(thumbnail) ? entity.getFileUrl() : thumbnail;
             Glide.with(image).load(Uri.parse(source))
@@ -385,7 +396,10 @@ public class GlideHelper {
             return builder;
         }
 
-        if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isImage(mimeType)) {
+        if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isImage(mimeType)
+                || FileUriHelper.isAudio(mimeType)) {
+            // Mirror the load() branch — audio URLs route through
+            // FFmpegUriDecoder for embedded-art extraction.
             String thumbnail = entity.getFileThumbnail();
             String source = TextUtils.isEmpty(thumbnail) ? entity.getFileUrl() : thumbnail;
             return glide.load(Uri.parse(source))

@@ -228,7 +228,15 @@ public class GlideHelper {
                     .apply(options)
                     .into(image);
 
-        } else if (FileUriHelper.isVideo(mimeType)) {
+        } else if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isAudio(mimeType)) {
+            // Audio joins the video branch: FFmpegThumbnailer (via
+            // FFmpegUriDecoder) extracts the first decodable frame of
+            // any container. For audio that means the embedded cover
+            // art stream (AV_DISPOSITION_ATTACHED_PIC — ID3 APIC,
+            // M4A covr, FLAC PICTURE, Ogg METADATA_BLOCK_PICTURE)
+            // since FFmpeg exposes attached pictures as video streams.
+            // Files with no embedded art fail decode and the
+            // fallbackListener renders the generic mime icon.
             Glide.with(image).load(entity)
                     .signature(new ObjectKey(interval + entity.getFileUrl().hashCode()))
                     .listener(fallbackListener(mimeType, image))
@@ -287,7 +295,10 @@ public class GlideHelper {
             return glide.load(entity).apply(options);
         }
 
-        if (FileUriHelper.isVideo(mimeType)) {
+        if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isAudio(mimeType)) {
+            // Mirror the load() audio+video branch — FFmpeg extracts
+            // the embedded cover art stream for audio files that have
+            // one, falls back to the generic icon otherwise.
             return glide.load(entity)
                     .signature(new ObjectKey(interval + entity.getFileUrl().hashCode()))
                     .apply(options);

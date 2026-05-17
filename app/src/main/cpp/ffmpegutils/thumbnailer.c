@@ -1021,6 +1021,52 @@ int jni_extract_bitmap (JNIEnv * env, jobject thiz, jlong stream_pos){
 
         LOGI(1, "jni_extract_bitmap seek_target: %"PRId64" duration: %"PRId64, stream_pos, stream->duration);
 
+        /* Attached-picture streams (ID3 APIC inside MP3, M4A covr, FLAC
+         * PICTURE, Ogg METADATA_BLOCK_PICTURE) are exposed by FFmpeg as
+         * video streams whose AV_DISPOSITION_ATTACHED_PIC bit is set.
+         * The picture data lives in stream->attached_pic (a pre-built
+         * AVPacket the demuxer fills during avformat_open_input).
+         *
+         * For these streams av_read_frame returns AVERROR_EOF
+         * immediately because there are no frame packets in the file —
+         * the picture isn't part of the timed video track, it's
+         * out-of-band metadata. So we decode stream->attached_pic
+         * directly instead of falling into the read-frame loop, which
+         * is what gets us actual cover art for audio files.
+         */
+        if (stream->disposition & AV_DISPOSITION_ATTACHED_PIC) {
+            LOGI(1, "jni_extract_bitmap decoding AV_DISPOSITION_ATTACHED_PIC");
+            if ((ret = utils_decode_frame(codec_ctx, frame, &got_frame, &stream->attached_pic)) < 0) {
+                LOGE(1, "jni_extract_bitmap attached_pic decode failed: %d", ret);
+                ret = -ERROR_FAILED_TO_DECODE_FRAME;
+                goto end;
+            }
+            if (got_frame) {
+                if (create_thumbnail(env, thiz, thumbnail, frame, codec_ctx) < 0) {
+                    LOGE(1, "jni_extract_bitmap attached_pic create_thumbnail failed");
+                    ret = -ERROR_FAILED_TO_DECODE_FRAME;
+                    goto end;
+                }
+            } else {
+                /* Flush — some decoders only produce output after a
+                 * trailing NULL packet (utils_decode_frame's existing
+                 * drain contract). */
+                if ((ret = utils_decode_frame(codec_ctx, frame, &got_frame, NULL)) >= 0 && got_frame) {
+                    if (create_thumbnail(env, thiz, thumbnail, frame, codec_ctx) < 0) {
+                        LOGE(1, "jni_extract_bitmap attached_pic drain create_thumbnail failed");
+                        ret = -ERROR_FAILED_TO_DECODE_FRAME;
+                        goto end;
+                    }
+                } else {
+                    LOGE(1, "jni_extract_bitmap attached_pic drain produced no frame");
+                    ret = -ERROR_FAILED_TO_DECODE_FRAME;
+                    goto end;
+                }
+            }
+            ret = ERROR_NO_ERROR;
+            goto end;
+        }
+
         if(stream_pos > 0){
 
             seek_target = av_rescale_q(stream_pos, AV_TIME_BASE_Q,stream->time_base);

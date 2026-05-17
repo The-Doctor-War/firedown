@@ -263,7 +263,8 @@ public class DownloadFragment extends BaseDownloadFragment implements
         if (resId == R.id.item) {
             int status = entity.getFileStatus();
             if (status == Download.ERROR) openSourceUrl(entity);
-            else openItem(entity, mRecyclerView.findViewHolderForAdapterPosition(position));
+            else openItem(entity, mRecyclerView.findViewHolderForAdapterPosition(
+                    position + getLeadingHeaderCount()));
         } else if (resId == R.id.item_download_action) {
             if (entity.getFileStatus() == Download.QUEUED) {
                 handleItemAction(IntentActions.DOWNLOAD_DELETE, entity);

@@ -559,13 +559,15 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
 
         @Override
         public void onClick(View v) {
-            int pos = getAbsoluteAdapterPosition();
+            // Use binding (local) position so peek() into this PagingDataAdapter
+            // stays correct when wrapped in a ConcatAdapter that prepends rows.
+            int pos = getBindingAdapterPosition();
             if (listener != null) listener.onItemClick(pos, v.getId());
         }
 
         @Override
         public boolean onLongClick(View v) {
-            int pos = getAbsoluteAdapterPosition();
+            int pos = getBindingAdapterPosition();
             if (listener != null) {
                 listener.onLongClick(pos, v.getId());
                 return true;

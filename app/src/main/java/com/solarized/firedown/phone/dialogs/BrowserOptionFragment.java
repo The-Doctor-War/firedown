@@ -113,7 +113,16 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         // Set the initial checked chip BEFORE attaching the listener so
         // the synthetic onCheckedChange callback that ChipGroup fires on
         // .check() doesn't run our sort/filter pipeline once on launch.
-        mChipGroup.check(mBrowserDownloadViewModel.getCurrentSortBrowserId());
+        // chip_all is no longer a physical chip in the group — when the
+        // persisted state is "all", we leave the group with no
+        // selection (Material filter-chip convention: nothing
+        // selected = unfiltered). Trying to .check(chip_all) would be
+        // a silent no-op now anyway, but the explicit guard makes the
+        // intent obvious.
+        int persistedId = mBrowserDownloadViewModel.getCurrentSortBrowserId();
+        if (persistedId != R.id.chip_all) {
+            mChipGroup.check(persistedId);
+        }
         mChipGroup.setOnCheckedStateChangeListener(this);
 
         mToolbar.setContentInsetsAbsolute(getResources().getDimensionPixelSize(R.dimen.list_spacing), 0);
@@ -483,10 +492,13 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
     @Override
     public void onCheckedChanged(@NonNull ChipGroup group, @NonNull List<Integer> checkedIds) {
-        if (!checkedIds.isEmpty()) {
-            String type = mBrowserDownloadViewModel.getCurrentSortForIds(checkedIds.get(0));
-            mBrowserDownloadViewModel.sortBrowserDownloads(type);
-        }
+        // Empty selection now means "show all" — Material filter-chip
+        // convention, matches DownloadFragment's effective behavior.
+        // getCurrentSortForIds returns SORT_TYPE_ALL on an unknown id,
+        // so View.NO_ID routes to the same predicate fall-through.
+        int selectedId = checkedIds.isEmpty() ? android.view.View.NO_ID : checkedIds.get(0);
+        String type = mBrowserDownloadViewModel.getCurrentSortForIds(selectedId);
+        mBrowserDownloadViewModel.sortBrowserDownloads(type);
     }
 
 

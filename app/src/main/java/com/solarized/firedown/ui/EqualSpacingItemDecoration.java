@@ -85,6 +85,15 @@ public class EqualSpacingItemDecoration extends RecyclerView.ItemDecoration {
         if (isBottomEdge(parent, childCount, childIndex, itemSpanSize, spanIndex)) {
             outRect.bottom = spacing;
         }
+
+        // Full-span rows (headers, banners) carry their own horizontal margins
+        // in their layouts so they line up with list-mode (LinearLayoutManager,
+        // no horizontal decoration). Skip decoration gutters here to avoid
+        // doubling them up in grid mode.
+        if (itemSpanSize == spanCount) {
+            outRect.left = 0;
+            outRect.right = 0;
+        }
     }
 
     @SuppressWarnings("all")

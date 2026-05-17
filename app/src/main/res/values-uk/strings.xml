@@ -130,13 +130,13 @@
     <string name="lock_biometric">Розблокуйте за допомогою біометричних даних</string>
     <string name="lock_cipher">Перемістити в захищену папку</string>
     <string name="lock_decipher">Перемістити із захищеної папки</string>
-    <string name="lock_empty">Усі файли в безпечній папці захищені криптографією.\n\nВикористовуйте свої біометричні облікові дані або облікові дані для блокування екрана, щоб розблокувати безпечну папку.</string>
+    <string name="lock_empty">Усі файли в захищеній папці зашифровані.\n\nВикористовуйте свої біометричні облікові дані або облікові дані для блокування екрана, щоб розблокувати захищену папку.</string>
     <string name="lock_enroll_accept">Налаштувати зараз</string>
     <string name="lock_enroll_cancel">Пізніше</string>
     <string name="lock_enroll_message">Налаштуйте шаблон блокування пристрою, PIN-код або пароль, щоб захистити ваші файли від доступу, якщо хтось інший має ваш пристрій.</string>
     <string name="lock_enroll_title">Захистіть свої файли</string>
     <string name="lock_unlock">Розблокувати</string>
-    <string name="lock_vault_lock">Безпечна папка заблокована</string>
+    <string name="lock_vault_lock">Захищена папка заблокована</string>
     <string name="login_host">Адреса вебсайту</string>
     <string name="navigation_captured">Скрін контенту</string>
     <string name="navigation_downloads">Завантаження</string>
@@ -288,7 +288,7 @@
     <string name="top_sites_rename_dialog_title">Назва</string>
     <string name="vault_decrypting">Дешифрування файлу, зачекайте…</string>
     <string name="vault_encrypting">Шифрування файлу, зачекайте…</string>
-    <string name="vault_unsupported">Не вдається відкрити цей файл. Щоб відкрити, перемістіть його з безпечної папки та повторіть спробу.</string>
+    <string name="vault_unsupported">Не вдається відкрити цей файл. Щоб відкрити, перемістіть його із захищеної папки та повторіть спробу.</string>
     <string name="bookmark_name">Назва</string>
     <string name="play">Відтворити</string>
     <string name="pip_play">Відтворити</string>

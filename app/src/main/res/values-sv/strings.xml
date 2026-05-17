@@ -112,7 +112,7 @@
     <string name="lock_biometric">Lås upp med dina biometriska referenser</string>
     <string name="lock_cipher">Flytta till Säker mapp</string>
     <string name="lock_decipher">Flytta från Säker mapp</string>
-    <string name="lock_empty">Safe Folder är biometriskt låst lagring för känsliga filer, dold för galleriet och andra appar.\n\nAnvänd dina biometriska uppgifter eller låsskärmsuppgifter för att låsa upp.</string>
+    <string name="lock_empty">Säker mapp är biometriskt låst lagring för känsliga filer, dold för galleriet och andra appar.\n\nAnvänd dina biometriska uppgifter eller låsskärmsuppgifter för att låsa upp.</string>
     <string name="lock_enroll_accept">Ställ in nu</string>
     <string name="lock_enroll_cancel">Senare</string>
     <string name="lock_enroll_message">Konfigurera ett enhetslåsmönster, PIN-kod eller lösenord för att skydda dina filers åtkomst om någon annan har din enhet.</string>
@@ -230,7 +230,7 @@
     <string name="task_gif_finished">GIF skapad</string>
     <string name="vault_decrypting">Dekrypterar fil, vänta…</string>
     <string name="vault_encrypting">Krypterar fil, vänta…</string>
-    <string name="vault_unsupported">Det går inte att öppna den här filen. För att öppna, flytta den från Safe Folder och försök igen.</string>
+    <string name="vault_unsupported">Det går inte att öppna den här filen. För att öppna, flytta den från Säker mapp och försök igen.</string>
     <string name="play">Spela upp</string>
     <string name="pip_play">Spela upp</string>
     <string name="pip_pause">Paus</string>

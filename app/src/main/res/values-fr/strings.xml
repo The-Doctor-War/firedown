@@ -135,7 +135,7 @@
     <string name="download_quality">Qualité de téléchargement</string>
     <string name="download_queued">En attente…</string>
     <string name="download_rename_error">Le nom du fichier est déjà utilisé.</string>
-    <string name="download_saved_to_vault">Enregistré dans le coffre-fort</string>
+    <string name="download_saved_to_vault">Enregistré dans le Dossier sécurisé</string>
     <string name="download_saving_audio">Extraction de l\'audio, veuillez patienter…</string>
     <string name="download_saving_gif">Création du GIF, veuillez patienter…</string>
     <string name="downloading">Téléchargement…</string>
@@ -275,7 +275,7 @@
         <item quantity="one">%d téléchargement privé en cours</item>
         <item quantity="other">%d téléchargements privés en cours</item>
     </plurals>
-    <string name="incognito_downloads_in_progress_subtitle">Appuyez pour voir dans le coffre-fort</string>
+    <string name="incognito_downloads_in_progress_subtitle">Appuyez pour voir dans le Dossier sécurisé</string>
     <string name="blocked_trackers_cross_site_cookies">Cookies de suivi intersites</string>
     <string name="blocked_trackers_social_media">Traqueurs des réseaux sociaux</string>
     <string name="blocked_trackers_fingerprinters">Détecteurs d\'empreintes</string>
@@ -445,7 +445,7 @@
     <string name="sort_by_size_opt">Taille</string>
 <string name="sort_by_type_alpha">Nom</string>
     <string name="sort_by_type_apk">Apk</string>
-    <string name="sort_by_type_audio">L\'audio</string>
+    <string name="sort_by_type_audio">Audio</string>
     <string name="sort_by_type_docs">Documents</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Images</string>

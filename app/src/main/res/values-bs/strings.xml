@@ -129,13 +129,13 @@
     <string name="lock_biometric">Otključajte koristeći svoje biometrijske akreditive</string>
     <string name="lock_cipher">Premjesti u sigurni folder</string>
     <string name="lock_decipher">Premjesti iz sigurnog foldera</string>
-    <string name="lock_empty">Sve datoteke u sigurnoj mapi su kriptografski zaštićene. \n \n Koristite svoje biometrijske akreditive ili akreditive za zaključani ekran da otključate Safe Folder.</string>
+    <string name="lock_empty">Sve datoteke u sigurnom folderu su kriptografski zaštićene. \n \n Koristite svoje biometrijske akreditive ili akreditive za zaključani ekran da otključate sigurni folder.</string>
     <string name="lock_enroll_accept">Postavite sada</string>
     <string name="lock_enroll_cancel">Kasnije</string>
     <string name="lock_enroll_message">Postavite obrazac za zaključavanje uređaja, PIN ili lozinku da zaštitite svoje datoteke od pristupa ako neko drugi ima vaš uređaj.</string>
     <string name="lock_enroll_title">Osigurajte svoje fajlove</string>
     <string name="lock_unlock">Otključaj</string>
-    <string name="lock_vault_lock">Safe Folder zaključan</string>
+    <string name="lock_vault_lock">Sigurni folder zaključan</string>
     <string name="login_host">URL web stranice</string>
     <string name="navigation_captured">Captured Content</string>
     <string name="navigation_downloads">Preuzimanja</string>

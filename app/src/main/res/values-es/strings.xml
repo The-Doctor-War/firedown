@@ -135,7 +135,7 @@
     <string name="download_quality">Calidad de descarga</string>
     <string name="download_queued">Pendiente…</string>
     <string name="download_rename_error">El nombre del archivo ya está en uso.</string>
-    <string name="download_saved_to_vault">Guardado en la caja fuerte</string>
+    <string name="download_saved_to_vault">Guardado en la Carpeta segura</string>
     <string name="download_saving_audio">Extrayendo audio, espera…</string>
     <string name="download_saving_gif">Creando GIF, por favor espera…</string>
     <string name="downloading">Descargando…</string>
@@ -214,9 +214,9 @@
     <string name="library_bookmarks">Marcadores</string>
     <string name="library_history">Historial</string>
     <string name="lock_biometric">Desbloquear usando tus credenciales biométricas</string>
-    <string name="lock_cipher">Mover a la carpeta segura</string>
-    <string name="lock_decipher">Sacar de la carpeta segura</string>
-    <string name="lock_empty">La Carpeta Segura es almacenamiento bloqueado por biometría para archivos sensibles, oculto de la galería y de otras apps.\n\nUsa tus credenciales biométricas o de pantalla de bloqueo para desbloquearla.</string>
+    <string name="lock_cipher">Mover a la Carpeta segura</string>
+    <string name="lock_decipher">Sacar de la Carpeta segura</string>
+    <string name="lock_empty">La Carpeta segura es almacenamiento bloqueado por biometría para archivos sensibles, oculto de la galería y de otras apps.\n\nUsa tus credenciales biométricas o de pantalla de bloqueo para desbloquearla.</string>
     <string name="lock_enroll_accept">Configurar ahora</string>
     <string name="lock_enroll_cancel">Más tarde</string>
     <string name="lock_enroll_message">Configura un patrón de bloqueo, PIN o contraseña del dispositivo para proteger el acceso a tus archivos si alguien más tiene su dispositivo.</string>
@@ -275,7 +275,7 @@
         <item quantity="one">%d descarga de incógnito en curso</item>
         <item quantity="other">%d descargas de incógnito en curso</item>
     </plurals>
-    <string name="incognito_downloads_in_progress_subtitle">Toca para ver en la caja fuerte</string>
+    <string name="incognito_downloads_in_progress_subtitle">Toca para ver en la Carpeta segura</string>
     <string name="blocked_trackers_cross_site_cookies">Cookies de seguimiento entre sitios</string>
     <string name="blocked_trackers_social_media">Rastreadores de redes sociales</string>
     <string name="blocked_trackers_fingerprinters">Identificadores digitales</string>
@@ -355,9 +355,9 @@
     <string name="settings_donate">Donar</string>
     <string name="settings_donate_summary">Devuelve lo que Firedown valga para ti</string>
 <string name="settings_downloads">Descargas</string>
-    <string name="settings_downloads_free">Descargas &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Descargas &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Ubicación de Descargas</string>
-    <string name="settings_downloads_sdcard_free">Tarjeta SD &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_sdcard_free">Tarjeta SD &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Tarjeta SD &lt;small&gt;(No detectada)&lt;/small&gt;</string>
     <string name="settings_enhanced_tracking_protection">Protección de seguimiento mejorada</string>
     <string name="settings_enhanced_tracking_protection_custom_description_2">Elige qué rastreadores y scripts deseas bloquear.</string>
@@ -482,9 +482,9 @@
     <string name="update_failed_general_title">Firedown no pudo actualizarse</string>
     <string name="update_prompt_install_body">Hay una nueva versión de Firedown disponible. Toca para actualizar.</string>
     <string name="update_prompt_install_title">Actualización de Firedown</string>
-    <string name="vault_decrypting">Descifrando archivo, espere…</string>
+    <string name="vault_decrypting">Descifrando archivo, espera…</string>
     <string name="vault_encrypting">Cifrando archivo, espera…</string>
-    <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sáCalo de la Carpeta segura y vuelve a intentarlo.</string>
+    <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sácalo de la Carpeta segura y vuelve a intentarlo.</string>
     <string name="bookmark_name">Nombre</string>    <string name="pip_enter">Imagen sobre imagen</string>    <string name="media_seek_back_10s_desc">Retroceder 10 segundos</string>
     <string name="media_seek_forward_10s_desc">Avanzar 10 segundos</string>
 

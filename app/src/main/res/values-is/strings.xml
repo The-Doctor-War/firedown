@@ -126,7 +126,7 @@
     <string name="lock_biometric">Opnaðu með líffræðilegum tölfræðiskilríkjum þínum</string>
     <string name="lock_cipher">Færa í örugga möppu</string>
     <string name="lock_decipher">Færa úr öruggri möppu</string>
-    <string name="lock_empty">Allar skrár í Safe Folder eru dulmálsverndaðar. \n \n Notaðu líffræðileg tölfræðiskilríki eða skilríki á lásskjá til að opna Safe Folder.</string>
+    <string name="lock_empty">Allar skrár í öruggri möppu eru dulmálsverndaðar. \n \n Notaðu líffræðileg tölfræðiskilríki eða skilríki á lásskjá til að opna örugga möppu.</string>
     <string name="lock_enroll_accept">Settu upp núna</string>
     <string name="lock_enroll_cancel">Seinna</string>
     <string name="lock_enroll_message">Settu upp tækislásmynstur, PIN-númer eða lykilorð til að vernda skrárnar þínar gegn aðgangi ef einhver annar er með tækið þitt.</string>
@@ -267,6 +267,6 @@
     <string name="top_sites_rename_dialog_title">Heiti</string>
     <string name="vault_decrypting">Afkóðar skrá, vinsamlegast bíddu…</string>
     <string name="vault_encrypting">Dulkóðar skrá, vinsamlegast bíddu…</string>
-    <string name="vault_unsupported">Ekki er hægt að opna þessa skrá. Til að opna skaltu færa það úr Safe Folder og reyna aftur.</string>
+    <string name="vault_unsupported">Ekki er hægt að opna þessa skrá. Til að opna skaltu færa það úr öruggri möppu og reyna aftur.</string>
     <string name="bookmark_name">Heiti</string>
 </resources>

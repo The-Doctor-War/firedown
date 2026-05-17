@@ -129,13 +129,13 @@
     <string name="lock_biometric">با استفاده از اعتبار بیومتریک خود قفل را باز کنید</string>
     <string name="lock_cipher">انتقال به «پوشه ایمن»</string>
     <string name="lock_decipher">خارج کردن از «پوشه ایمن»</string>
-    <string name="lock_empty">تمام فایل‌های موجود در پوشه امن از نظر رمزنگاری محافظت می‌شوند.\n\nبرای باز کردن قفل Safe Folder از اطلاعات کاربری بیومتریک یا اعتبار صفحه قفل خود استفاده کنید.</string>
+    <string name="lock_empty">تمام فایل‌های موجود در پوشه ایمن از نظر رمزنگاری محافظت می‌شوند.\n\nبرای باز کردن قفل پوشه ایمن از اطلاعات کاربری بیومتریک یا اعتبار صفحه قفل خود استفاده کنید.</string>
     <string name="lock_enroll_accept">اکنون تنظیم کنید</string>
     <string name="lock_enroll_cancel">بعد</string>
     <string name="lock_enroll_message">یک الگوی قفل دستگاه، پین یا رمز عبور تنظیم کنید تا از دسترسی به فایل‌هایتان در صورت داشتن دستگاه شما توسط شخص دیگری محافظت کنید.</string>
     <string name="lock_enroll_title">فایل های خود را ایمن کنید</string>
     <string name="lock_unlock">باز کردن قفل</string>
-    <string name="lock_vault_lock">پوشه امن قفل شد</string>
+    <string name="lock_vault_lock">پوشه ایمن قفل شد</string>
     <string name="login_host">آدرس وب‌سایت</string>
     <string name="navigation_captured">محتوای ضبط شده</string>
     <string name="navigation_downloads">دانلودها</string>

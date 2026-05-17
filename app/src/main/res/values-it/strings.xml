@@ -68,7 +68,7 @@
     <string name="details_modified">Ultima modifica</string>
     <string name="details_name">Nome</string>
     <string name="details_origin">Origine</string>
-    <string name="details_path">Sentiero</string>
+    <string name="details_path">Percorso</string>
     <string name="details_size">Dimensione</string>
     <string name="details_url">URL</string>
     <string name="download">Download</string>
@@ -131,7 +131,7 @@
     <string name="gif_maker_speed_very_slow">Molto lento</string>
     <string name="gif_maker_title">Crea GIF</string>
     <string name="info_welcome">Firedown ti aiuta a scaricare qualsiasi cosa dal Web. &lt;b&gt;Scopri come&lt;/b&gt;</string>
-    <string name="interval_minutes_ago">%1$dmin</string>
+    <string name="interval_minutes_ago">%1$d min</string>
     <string name="interval_month">Ultimi 30 giorni</string>
     <string name="interval_now">Ora</string>
     <string name="interval_older">Più vecchio</string>
@@ -143,7 +143,7 @@
     <string name="lock_biometric">Sblocca utilizzando le tue credenziali biometriche</string>
     <string name="lock_cipher">Sposta nella Cartella di sicurezza</string>
     <string name="lock_decipher">Sposta fuori dalla Cartella di sicurezza</string>
-    <string name="lock_empty">La Cartella sicura è uno spazio di archiviazione bloccato con biometria per file sensibili, nascosto alla galleria e alle altre app.\n\nUsa le tue credenziali biometriche o quelle della schermata di blocco per sbloccarla.</string>
+    <string name="lock_empty">La Cartella di sicurezza è uno spazio di archiviazione bloccato con biometria per file sensibili, nascosto alla galleria e alle altre app.\n\nUsa le tue credenziali biometriche o quelle della schermata di blocco per sbloccarla.</string>
     <string name="lock_enroll_accept">Configura ora</string>
     <string name="lock_enroll_cancel">Dopo</string>
     <string name="lock_enroll_message">Configura una sequenza di blocco del dispositivo, un PIN o una password per proteggere i tuoi file dall\'accesso se qualcun altro ha il tuo dispositivo.</string>
@@ -309,8 +309,8 @@
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Immagini</string>
     <string name="sort_by_type_svg">SVG</string>
-    <string name="sort_by_type_video">video</string>
-    <string name="sort_by_type_zip">Zip\n\n</string>
+    <string name="sort_by_type_video">Video</string>
+    <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Passa alla scheda</string>
 <string name="task_decryption_finished">Decifratura completata</string>
     <string name="task_encryption_finished">Crittografia completata</string>

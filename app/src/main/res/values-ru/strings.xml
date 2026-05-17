@@ -142,8 +142,8 @@
     <string name="library_bookmarks">Закладки</string>
     <string name="library_history">История</string>
     <string name="lock_biometric">Разблокируйте, используя свои биометрические учетные данные</string>
-    <string name="lock_cipher">Убрать в секретную папку</string>
-    <string name="lock_decipher">Убрать из секретной папки</string>
+    <string name="lock_cipher">Переместить в безопасную папку</string>
+    <string name="lock_decipher">Убрать из безопасной папки</string>
     <string name="lock_empty">Безопасная папка — хранилище для конфиденциальных файлов с биометрической блокировкой, скрытое от галереи и других приложений.\n\nИспользуйте биометрические данные или учётные данные экрана блокировки для разблокировки.</string>
     <string name="lock_enroll_accept">Настроить сейчас</string>
     <string name="lock_enroll_cancel">Позже</string>
@@ -158,7 +158,7 @@
     <string name="navigation_settings">Настройки</string>
     <string name="navigation_tabs">Вкладки</string>
     <string name="navigation_tabs_archive">Недавно закрытые вкладки</string>
-    <string name="navigation_vault">Секретная папка</string>
+    <string name="navigation_vault">Безопасная папка</string>
     <string name="navigation_web_bookmarks">Закладки</string>
     <string name="navigation_web_history">История</string>
     <string name="notifications_downloads_channel">Загрузки</string>

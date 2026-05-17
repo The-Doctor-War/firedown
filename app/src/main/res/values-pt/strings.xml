@@ -124,9 +124,9 @@
     <string name="interval_week">Últimos 7 dias</string>
     <string name="interval_yesterday">Ontem</string>
     <string name="lock_biometric">Desbloqueie usando suas credenciais biométricas</string>
-    <string name="lock_cipher">Mover para pasta segura</string>
-    <string name="lock_decipher">Sair da pasta segura</string>
-    <string name="lock_empty">A Pasta Segura é um armazenamento bloqueado por biometria para ficheiros sensíveis, oculto da galeria e de outras apps.\n\nUsa as tuas credenciais biométricas ou do ecrã de bloqueio para a desbloquear.</string>
+    <string name="lock_cipher">Mover para a Pasta segura</string>
+    <string name="lock_decipher">Retirar da Pasta segura</string>
+    <string name="lock_empty">A Pasta segura é um armazenamento bloqueado por biometria para ficheiros sensíveis, oculto da galeria e de outras apps.\n\nUsa as tuas credenciais biométricas ou do ecrã de bloqueio para a desbloquear.</string>
     <string name="lock_enroll_accept">Configurar agora</string>
     <string name="lock_enroll_cancel">Mais tarde</string>
     <string name="lock_enroll_message">Configure um padrão de bloqueio do dispositivo, PIN ou senha para proteger seus arquivos contra acesso se outra pessoa estiver com seu dispositivo.</string>
@@ -140,7 +140,7 @@
     <string name="navigation_settings">Configurações</string>
     <string name="navigation_tabs">Guias</string>
     <string name="navigation_tabs_archive">Guias fechadas recentemente</string>
-    <string name="navigation_vault">Pasta Segura</string>
+    <string name="navigation_vault">Pasta segura</string>
     <string name="navigation_web_bookmarks">Favoritos</string>
     <string name="navigation_web_history">Histórico</string>
     <string name="notifications_downloads_channel">Transferências</string>
@@ -265,7 +265,7 @@
     <string name="task_gif_finished">GIF criado</string>
     <string name="vault_decrypting">Descriptografando arquivo, aguarde…</string>
     <string name="vault_encrypting">Criptografando arquivo, aguarde…</string>
-    <string name="vault_unsupported">Não é possível abrir este arquivo. Para abrir, retire-o da Pasta Segura e tente novamente.</string>
+    <string name="vault_unsupported">Não é possível abrir este arquivo. Para abrir, retire-o da Pasta segura e tente novamente.</string>
     <string name="settings_https_only_title">Modo apenas HTTPS</string>
     <string name="settings_https_only_summary">Bloqueia cargas HTTP em texto simples, mostra uma página de aviso com substituição por site</string>
     <string name="settings_disk_cache_disabled">Desativar cache em disco</string>
@@ -282,5 +282,5 @@
         <item quantity="one">%d transferência anónima em curso</item>
         <item quantity="other">%d transferências anónimas em curso</item>
     </plurals>
-    <string name="incognito_downloads_in_progress_subtitle">Toque para ver na Pasta Segura</string>
+    <string name="incognito_downloads_in_progress_subtitle">Toque para ver na Pasta segura</string>
 </resources>

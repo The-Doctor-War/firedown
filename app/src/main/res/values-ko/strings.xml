@@ -143,13 +143,13 @@
     <string name="lock_biometric">생체 인식 자격 증명을 사용하여 잠금 해제</string>
     <string name="lock_cipher">보안 폴더로 이동</string>
     <string name="lock_decipher">보안 폴더에서 꺼내기</string>
-    <string name="lock_empty">안전 폴더는 민감한 파일을 위한 생체 인식 잠금 저장소이며, 갤러리와 다른 앱에서는 보이지 않습니다.\n\n생체 인증 또는 잠금 화면 자격 증명으로 잠금을 해제하세요.</string>
+    <string name="lock_empty">보안 폴더는 민감한 파일을 위한 생체 인식 잠금 저장소이며, 갤러리와 다른 앱에서는 보이지 않습니다.\n\n생체 인증 또는 잠금 화면 자격 증명으로 잠금을 해제하세요.</string>
     <string name="lock_enroll_accept">지금 설정</string>
     <string name="lock_enroll_cancel">나중에</string>
     <string name="lock_enroll_message">다른 사람이 귀하의 장치를 가지고 있는 경우 귀하의 파일에 액세스하지 못하도록 장치 잠금 패턴, PIN 또는 비밀번호를 설정하십시오.</string>
     <string name="lock_enroll_title">파일을 안전하게 보호하세요</string>
     <string name="lock_unlock">잠금 해제</string>
-    <string name="lock_vault_lock">안전 폴더가 잠겼습니다</string>
+    <string name="lock_vault_lock">보안 폴더가 잠겼습니다</string>
     <string name="login_host">웹 사이트 URL</string>
     <string name="make_gif">GIF 만들기</string>
     <string name="navigation_captured">캡처된 콘텐츠</string>
@@ -321,7 +321,7 @@
     <string name="top_sites_rename_dialog_title">이름</string>
     <string name="vault_decrypting">파일을 해독하는 중입니다. 잠시 기다려 주십시오…</string>
     <string name="vault_encrypting">파일을 암호화하는 중입니다. 잠시 기다려 주세요…</string>
-    <string name="vault_unsupported">이 파일을 열 수 없습니다. 열려면 안전 폴더 밖으로 이동한 후 다시 시도하세요.</string>
+    <string name="vault_unsupported">이 파일을 열 수 없습니다. 열려면 보안 폴더 밖으로 이동한 후 다시 시도하세요.</string>
     <string name="bookmark_name">이름</string>    <string name="media_seek_back_10s_desc">10초 뒤로</string>
     <string name="media_seek_forward_10s_desc">10초 앞으로</string>
 

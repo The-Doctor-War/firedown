@@ -144,13 +144,13 @@
     <string name="lock_biometric">Ontgrendel met uw biometrische gegevens</string>
     <string name="lock_cipher">Naar beveiligde map verplaatsen</string>
     <string name="lock_decipher">Uit beveiligde map halen</string>
-    <string name="lock_empty">De Veilige map is biometrisch vergrendelde opslag voor gevoelige bestanden, verborgen voor de galerij en andere apps.\n\nGebruik je biometrische gegevens of vergrendelschermgegevens om hem te ontgrendelen.</string>
+    <string name="lock_empty">De Beveiligde map is biometrisch vergrendelde opslag voor gevoelige bestanden, verborgen voor de galerij en andere apps.\n\nGebruik je biometrische gegevens of vergrendelschermgegevens om hem te ontgrendelen.</string>
     <string name="lock_enroll_accept">Nu instellen</string>
     <string name="lock_enroll_cancel">Later</string>
     <string name="lock_enroll_message">Stel een apparaatvergrendelingspatroon, pincode of wachtwoord in om te voorkomen dat uw bestanden worden geopend als iemand anders uw apparaat heeft.</string>
     <string name="lock_enroll_title">Beveilig uw bestanden</string>
     <string name="lock_unlock">Ontgrendelen</string>
-    <string name="lock_vault_lock">Veilige map vergrendeld</string>
+    <string name="lock_vault_lock">Beveiligde map vergrendeld</string>
     <string name="login_host">Website URL</string>
     <string name="make_gif">GIF maken</string>
     <string name="navigation_captured">Gevangen inhoud</string>
@@ -335,7 +335,7 @@
     <string name="top_sites_rename_dialog_title">Naam</string>
     <string name="vault_decrypting">Het bestand wordt gedecodeerd. Even geduld a.u.b....</string>
     <string name="vault_encrypting">Bestand versleutelen, even geduld a.u.b....</string>
-    <string name="vault_unsupported">Kan dit bestand niet openen. Om het te openen, verplaatst u het uit de Veilige map en probeert u het opnieuw.</string>
+    <string name="vault_unsupported">Kan dit bestand niet openen. Om het te openen, verplaatst u het uit de Beveiligde map en probeert u het opnieuw.</string>
     <string name="bookmark_name">Naam</string>
     <string name="settings_https_only_title">Alleen-HTTPS-modus</string>
     <string name="settings_https_only_summary">Blokkeert HTTP-laden in platte tekst, toont een waarschuwingspagina met overschrijving per site</string>

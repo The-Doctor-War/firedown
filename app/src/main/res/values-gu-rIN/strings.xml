@@ -15,7 +15,6 @@
     <string name="library_history">ઇતિહાસ</string>
     <string name="open_new_private_tab_2">નવી ખાનગી ટેબ</string>
     <string name="open_new_tab_2">નવી ટૅબ</string>
-<string name="remove_top_site">દૂર કરો</string>
     <string name="settings_dark_theme">ડાર્ક</string>
     <string name="settings_delete_browsing">બ્રાઉઝિંગ માહિતી કાઢી નાખો</string>
     <string name="settings_delete_browsing_data_browsing_history_title">ઇતિહાસ</string>
@@ -31,4 +30,8 @@
     <string name="snackbar_deleted_undo">પૂર્વવત્ કરો</string>
     <string name="snackbar_tab_closed">ટેબ બંધ કર્યું</string>
     <string name="switch_to_tab_description">ટૅબ બદલો</string>
+    <string name="downloads_quick_access_title">તાજેતરના ડાઉનલોડ્સ</string>
+    <string name="home_onboarding_sites_label">Firedown અજમાવો</string>
+    <string name="home_media_playing">ચલાવી રહ્યું છે</string>
+    <string name="home_media_paused">થોભાવ્યું</string>
 </resources>

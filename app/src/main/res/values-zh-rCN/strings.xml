@@ -12,7 +12,6 @@
     <string name="browser_enter_url">搜索或输入网址。</string>
     <string name="browser_error_image_title">火已经灭了</string>
     <string name="browser_find_in_page">在页面中查找</string>
-    <string name="browser_menu_add_to_shortcuts">添加快捷方式</string>
     <string name="browser_menu_back">后退</string>
     <string name="browser_menu_bookmark_this_page_2">为页面添加书签</string>
     <string name="browser_menu_desktop_site">桌面版网站</string>
@@ -20,7 +19,6 @@
     <string name="browser_menu_find_in_page">在页面中查找</string>
     <string name="browser_menu_forward">前进</string>
     <string name="browser_menu_refresh">刷新</string>
-    <string name="browser_menu_remove_from_shortcuts">移除快捷方式</string>
     <string name="browser_menu_settings">设置</string>
     <string name="browser_menu_share">分享</string>
     <string name="browser_menu_stop">停止</string>
@@ -196,9 +194,9 @@
     <string name="incognito_bullet_searches">搜索记录</string>
     <string name="incognito_bullet_temp_files">临时文件</string>
     <string name="incognito_bullet_visited">访问过的页面</string>
-    <string name="incognito_home_description">在隐私窗口浏览时，Firedown </string>
+    <string name="incognito_home_description">在隐私窗口浏览时，Firedown 不会保存：</string>
     <string name="incognito_home_title">隐私浏览</string>
-    <string name="incognito_home_warning">隐私浏览</string>
+    <string name="incognito_home_warning">隐私浏览不会向你的网络、雇主或访问的网站隐藏你的活动。</string>
     <string name="incognito_notification_channel">隐私浏览</string>
     <string name="incognito_notification_channel_desc">已打开隐私标签页的通知</string>
     <string name="incognito_notification_close_action">全部关闭</string>
@@ -283,7 +281,6 @@
     <string name="blocked_trackers_detail_empty">此页面尚未拦截任何跟踪器。</string>
     <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">退出应用程序以应用更改…</string>
-    <string name="remove_top_site">移除</string>
     <string name="rename">重命名</string>
     <string name="rename_file">重命名文件</string>
     <string name="request_geolocation">与以下人员共享您的设备位置&lt;b&gt;%s&lt;/b&gt;？</string>
@@ -418,7 +415,7 @@
     <string name="settings_drm_enabled">启用 DRM 播放</string>
     <string name="settings_drm_enabled_summary">允许在需要 DRM 的网站（Netflix、Spotify 等）上使用 Widevine 播放。Firedown 仍然无法下载受 DRM 保护的内容。</string>
     <string name="settings_webrtc_enabled">启用 WebRTC</string>
-    <string name="settings_webrtc_enabled_summary">P2P通话所需，可能泄露你的真实IP</string>
+    <string name="settings_webrtc_enabled_summary">允许实时视频和语音通话。禁用可减少网络探测攻击面。</string>
     <string name="settings_webassembly_enabled">启用 WebAssembly</string>
     <string name="settings_webassembly_enabled_summary">允许站点运行已编译的 WASM 模块。禁用可减少攻击面，但可能导致部分现代网页应用无法正常工作</string>
     <string name="settings_https_only_title">仅 HTTPS 模式</string>
@@ -430,11 +427,6 @@
     <string name="share">分享</string>
     <string name="share_image">分享图像</string>
     <string name="share_url">分享网址</string>
-    <string name="shortcut_max_limit_content">请先移除现有的快捷方式才能再添加。长按网站，然后选择移除。</string>
-    <string name="shortcut_max_limit_title">超出快捷方式限制</string>
-    <string name="shortcut_name_hint">快捷方式名称</string>
-    <string name="shortcut_url_hint">快捷方式网址</string>
-    <string name="snackbar_added_to_shortcuts">快捷方式已添加！</string>
     <string name="snackbar_deleted_undo">撤销</string>
     <string name="snackbar_tab_closed">标签页已关闭</string>
     <string name="sort">排序依据</string>
@@ -468,11 +460,6 @@
     <string name="task_gif_failed">无法创建GIF</string>
     <string name="task_gif_finished">已创建GIF</string>
     <string name="task_stop">停止</string>
-    <string name="top_sites_edit_dialog_save">保存</string>
-    <string name="top_sites_edit_dialog_title">编辑快捷方式</string>
-    <string name="top_sites_edit_dialog_url_title">网址</string>
-    <string name="top_sites_max_limit_confirmation_button">我知道了</string>
-    <string name="top_sites_rename_dialog_title">名称</string>
     <string name="update_auto_update_success_body">已自动更新到版本 %1$s。</string>
     <string name="update_auto_update_success_default_body">已自动更新到最新版本。</string>
     <string name="update_auto_update_success_title">Firedown 更新成功</string>
@@ -491,4 +478,11 @@
     <string name="play">播放</string>
     <string name="pip_play">播放</string>
     <string name="pip_pause">暂停</string>
+    <string name="downloads_quick_access_title">最近下载</string>
+    <string name="home_onboarding_sites_label">在以下网站试用 Firedown</string>
+    <string name="home_vault_button">安全文件夹</string>
+    <string name="home_media_playing">正在播放</string>
+    <string name="home_media_paused">已暂停</string>
+    <string name="downloads_quick_access_view_all">查看全部下载</string>
+    <string name="downloads_quick_access_empty">最近的下载将显示在这里</string>
 </resources>

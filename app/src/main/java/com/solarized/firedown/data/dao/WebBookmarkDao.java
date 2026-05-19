@@ -24,7 +24,6 @@ public interface WebBookmarkDao {
     @Query("SELECT * FROM webbookmark WHERE uid LIKE :id")
     WebBookmarkEntity getId(int id);
 
-
     @Query("SELECT * FROM webbookmark ORDER BY file_date DESC")
     PagingSource<Integer, WebBookmarkEntity> getBookmarks();
 

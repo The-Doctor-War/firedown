@@ -15,4 +15,12 @@
         <item quantity="one">%1$dh</item>
         <item quantity="other">%1$dh</item>
     </plurals>
+    <plurals name="home_vault_item_count">
+        <item quantity="one">%d element desat</item>
+        <item quantity="other">%d elements desats</item>
+    </plurals>
+    <plurals name="home_downloads_file_count">
+        <item quantity="one">%d fitxer desat</item>
+        <item quantity="other">%d fitxers desats</item>
+    </plurals>
 </resources>

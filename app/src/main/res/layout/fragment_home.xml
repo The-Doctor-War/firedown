@@ -24,31 +24,149 @@
     </com.google.android.material.appbar.AppBarLayout>
 
 
-    <LinearLayout
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/home_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:animateLayoutChanges="true"
-        android:orientation="vertical"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
-        tools:visibility="visible">
+        android:layout_marginBottom="@dimen/app_bar_size"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:overScrollMode="never"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
-
-        <com.solarized.firedown.ui.OnBoardingCard
-            android:id="@+id/onboarding"
+        <!--
+            Stack spacing model: a single 4dp paddingTop on the column
+            provides the gap from the toolbar to whichever card lands
+            first. Each card carries its own marginBottom for the gap
+            below it — so when a card is GONE neither its top nor its
+            bottom margin contributes, and the next visible card sits
+            4dp under the toolbar regardless of which one it is.
+            Using marginTop instead would 'inherit' a 12dp top gap
+            onto the new first card and push it down too far.
+        -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginTop="4dp" />
+            android:orientation="vertical"
+            android:paddingTop="4dp"
+            tools:visibility="visible">
 
 
-        <com.solarized.firedown.ui.HomeViewpager
-            android:id="@+id/view_pager_holder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp" />
+            <com.solarized.firedown.ui.OnBoardingCard
+                android:id="@+id/onboarding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginBottom="12dp" />
 
 
-    </LinearLayout>
+            <include
+                android:id="@+id/active_download_strip"
+                layout="@layout/view_home_active_download"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_spacing"
+                android:layout_marginEnd="@dimen/list_spacing"
+                android:layout_marginBottom="12dp" />
+
+
+            <include
+                android:id="@+id/home_media_strip"
+                layout="@layout/view_home_media_strip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_spacing"
+                android:layout_marginEnd="@dimen/list_spacing"
+                android:layout_marginBottom="12dp" />
+
+
+            <include
+                android:id="@+id/recent_downloads_card"
+                layout="@layout/card_home_recent_downloads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_spacing"
+                android:layout_marginEnd="@dimen/list_spacing"
+                android:layout_marginBottom="12dp" />
+
+
+            <!--
+                Safe Folder entry card. Mirrors the Downloads card shape
+                (surface-container background, icon + title + subtitle)
+                so the two read as a pair. Subtitle reads 'N items saved'
+                only when count > 0; otherwise title-only so a
+                vault-curious user sees the entry name without a
+                misleading '0 items'. Tap → VaultActivity (app-lock
+                gate handles PIN / biometric).
+            -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/home_vault_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_spacing"
+                android:layout_marginEnd="@dimen/list_spacing"
+                android:layout_marginBottom="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardBackgroundColor="?attr/colorSurfaceContainerHigh"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="14dp">
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_lock_24"
+                        app:tint="?attr/colorOnSurface" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/home_vault_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:text="@string/home_vault_button"
+                            android:textAppearance="?attr/textAppearanceTitleSmall"
+                            android:textColor="?attr/colorOnSurface" />
+
+                        <TextView
+                            android:id="@+id/home_vault_subtitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:maxLines="1"
+                            android:textAppearance="?attr/textAppearanceBodySmall"
+                            android:textColor="?attr/colorOnSurfaceVariant"
+                            android:visibility="gone"
+                            tools:text="12 items saved"
+                            tools:visibility="visible" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 
     <com.solarized.firedown.autocomplete.AutoCompleteView
@@ -77,6 +195,12 @@
         android:layout_gravity="bottom"
         app:enableCradle="false" />
 
+    <View
+        android:id="@+id/navigation_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:background="?android:attr/colorBackground" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
-

@@ -25,4 +25,12 @@
     </plurals>
 
     
-    </resources>
+    <plurals name="home_vault_item_count">
+        <item quantity="one">%d uložená položka</item>
+        <item quantity="other">%d uložených položiek</item>
+    </plurals>
+    <plurals name="home_downloads_file_count">
+        <item quantity="one">%d uložený súbor</item>
+        <item quantity="other">%d uložených súborov</item>
+    </plurals>
+</resources>

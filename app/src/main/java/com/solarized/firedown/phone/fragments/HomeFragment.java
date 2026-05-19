@@ -1,8 +1,7 @@
 package com.solarized.firedown.phone.fragments;
 
-import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -12,7 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
-import android.view.inputmethod.InputMethodManager;
+import android.widget.TextView;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -23,9 +22,12 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.card.MaterialCardView;
+
+import com.google.android.material.color.MaterialColors;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
@@ -34,14 +36,11 @@ import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.entity.AutoCompleteEntity;
 import com.solarized.firedown.autocomplete.AutoCompleteViewModel;
-import com.solarized.firedown.data.entity.ShortCutsEntity;
 import com.solarized.firedown.data.models.BrowserDialogViewModel;
 import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
 import com.solarized.firedown.data.models.IncognitoStateViewModel;
 import com.solarized.firedown.data.models.RecentDownloadsViewModel;
-import com.solarized.firedown.data.models.TaskViewModel;
-import com.solarized.firedown.data.models.ShortCutsViewModel;
 import com.solarized.firedown.geckoview.GeckoResources;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.geckoview.GeckoToolbar;
@@ -54,70 +53,61 @@ import com.solarized.firedown.phone.SettingsActivity;
 import com.solarized.firedown.phone.VaultActivity;
 import com.solarized.firedown.autocomplete.AutoCompleteEditText;
 import com.solarized.firedown.autocomplete.AutoCompleteView;
-import com.solarized.firedown.phone.dialogs.DownloadsQuickAccessSheet;
-import com.solarized.firedown.ui.HomeViewpager;
 import com.solarized.firedown.ui.OnBoardingCard;
-import com.solarized.firedown.ui.adapters.ShortCutsAdapter;
-import com.solarized.firedown.ui.diffs.ShortCutsDiffCallback;
 import com.solarized.firedown.geckoview.toolbar.BottomNavigationBar;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.adapters.SearchAutocompleteAdapter;
 import com.solarized.firedown.ui.diffs.SearchDiffCallback;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.utils.NavigationUtils;
-import com.solarized.firedown.utils.WebUtils;
+import com.solarized.firedown.utils.Utils;
 
 import dagger.hilt.android.AndroidEntryPoint;
-
 
 
 @AndroidEntryPoint
 public class HomeFragment extends BaseBrowserFragment implements BottomNavigationBar.OnBottomBarListener,
         AutoCompleteEditText.OnCommitListener, AutoCompleteEditText.OnFilterListener, AutoCompleteEditText.OnFocusChangedListener,
         AutoCompleteEditText.OnTextChangedListener, AutoCompleteEditText.OnSearchStateChangeListener,
-        GeckoToolbar.OnToolbarListener , OnBoardingCard.OnBoardingCardListener, OnItemClickListener,
-        DownloadsQuickAccessSheet.Host {
+        GeckoToolbar.OnToolbarListener , OnBoardingCard.OnBoardingCardListener, OnItemClickListener {
 
 
     private static final String TAG = HomeFragment.class.getName();
     private BrowserURIViewModel mBrowserURIViewModel;
     private BrowserDialogViewModel mBrowserDialogViewModel;
-    private ShortCutsViewModel mShortCutsViewModel;
     private GeckoStateViewModel mGeckoStateViewModel;
     private IncognitoStateViewModel mIncognitoStateViewModel;
-    private TaskViewModel mTaskViewModel;
     private RecentDownloadsViewModel mRecentDownloadsViewModel;
     private AutoCompleteEditText mAutoCompleteEditText;
     private AutoCompleteView mAutoCompleteView;
-    private ShortCutsAdapter mShortCutsAdapter;
     private View mNewTabView;
     private OnBoardingCard mOnBoardingCard;
     private GeckoToolbar mGeckoToolbar;
-    private HomeViewpager mHomeViewPager;
     private BottomNavigationBar mBottomNavigationBar;
+    private MaterialCardView mRecentDownloadsCard;
+    private View mHomeScroll;
+    private MaterialCardView mActiveStrip;
+    private android.view.ViewGroup mActiveStripRows;
+    private View mActiveStripIcon;
+    @Nullable private android.animation.ObjectAnimator mActiveStripPulse;
+    private TextView mHomeVaultSubtitle;
+    private TextView mRecentDownloadsSubtitle;
+    private View mHomeMediaStrip;
+    private androidx.appcompat.widget.AppCompatImageView mHomeMediaIcon;
+    private TextView mHomeMediaLabel;
+    private TextView mHomeMediaTitle;
+    private TextView mHomeMediaSubtitle;
+    private androidx.appcompat.widget.AppCompatImageButton mHomeMediaToggle;
+    @Nullable private java.util.List<DownloadEntity> mLastActiveList;
+    @Nullable private Integer mLastFinishedCount;
+    private long mLastFinishedSize = 0L;
 
-
-    @Override
-    public void onConfigurationChanged(@NonNull Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-
-        RecyclerView recyclerView = mHomeViewPager.getRecyclerView();
-
-        GridLayoutManager gridLayoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
-
-        if(gridLayoutManager != null){
-            gridLayoutManager.setSpanCount(getResources().getInteger(R.integer.shortcuts_span));
-        }
-
-    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mAutoCompleteViewModel = new ViewModelProvider(this).get(AutoCompleteViewModel.class);
-        mShortCutsViewModel = new ViewModelProvider(this).get(ShortCutsViewModel.class);
-        mTaskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         mRecentDownloadsViewModel = new ViewModelProvider(this).get(RecentDownloadsViewModel.class);
         mGeckoStateViewModel = new ViewModelProvider(mActivity).get(GeckoStateViewModel.class);
         mIncognitoStateViewModel = new ViewModelProvider(mActivity).get(IncognitoStateViewModel.class);
@@ -153,13 +143,60 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
-        mHomeViewPager = v.findViewById(R.id.view_pager_holder);
         mNewTabView = v.findViewById(R.id.bottom_new_tab);
         mAutoCompleteView = v.findViewById(R.id.auto_complete_view);
         mOnBoardingCard = v.findViewById(R.id.onboarding);
         mOnBoardingCard.setCallback(this);
 
+        mRecentDownloadsCard = v.findViewById(R.id.recent_downloads_card);
+
+        mActiveStrip = v.findViewById(R.id.active_download_strip);
+        mActiveStripIcon = v.findViewById(R.id.active_download_icon);
+        mActiveStripRows = v.findViewById(R.id.active_download_rows);
+        mActiveStrip.setOnClickListener(view ->
+                mStartForResult.launch(new Intent(mActivity, DownloadsActivity.class)));
+
+        mHomeMediaStrip = v.findViewById(R.id.home_media_strip);
+        mHomeMediaIcon = v.findViewById(R.id.home_media_icon);
+        mHomeMediaLabel = v.findViewById(R.id.home_media_label);
+        mHomeMediaTitle = v.findViewById(R.id.home_media_title);
+        mHomeMediaSubtitle = v.findViewById(R.id.home_media_subtitle);
+        mHomeMediaToggle = v.findViewById(R.id.home_media_toggle);
+        // Tap → switch to the playing tab. Same flow IntentHandler.handleMainMedia
+        // uses for the foreground media notification: look up the session,
+        // promote it, fire OPEN_SESSION, navigate to browser.
+        mHomeMediaStrip.setOnClickListener(view -> {
+            int sessionId = mGeckoMediaController.getCurrentSessionId();
+            if (sessionId != 0) openSessionId(sessionId);
+        });
+        // Trailing toggle button: play / pause the current session in
+        // place without navigating away. Borderless ripple on the
+        // button + tap on the rest of the card → openSessionId; tap
+        // here → toggle playback only.
+        mHomeMediaToggle.setOnClickListener(view -> {
+            Boolean playing = mGeckoMediaController.getIsPlayingLiveData().getValue();
+            if (playing != null && playing) {
+                mGeckoMediaController.pause();
+            } else {
+                mGeckoMediaController.play();
+            }
+        });
+
+
+        mHomeScroll = v.findViewById(R.id.home_scroll);
         mBottomNavigationBar = v.findViewById(R.id.bottom_app_bar);
+
+
+        mRecentDownloadsSubtitle = v.findViewById(R.id.recent_downloads_subtitle);
+        mRecentDownloadsCard.setOnClickListener(view ->
+                mStartForResult.launch(new Intent(mActivity, DownloadsActivity.class)));
+
+        View vaultCard = v.findViewById(R.id.home_vault_card);
+        mHomeVaultSubtitle = v.findViewById(R.id.home_vault_subtitle);
+        vaultCard.setOnClickListener(view ->
+                mStartForResult.launch(new Intent(mActivity, VaultActivity.class)));
+
+
         mBottomNavigationBar.setListener(this);
 
         mGeckoToolbar = v.findViewById(R.id.toolbar_layout);
@@ -190,9 +227,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             }
         });
 
-        mShortCutsAdapter = new ShortCutsAdapter(mActivity, new ShortCutsDiffCallback(), this);
-        mHomeViewPager.getRecyclerView().setAdapter(mShortCutsAdapter);
-
         return v;
     }
 
@@ -202,11 +236,12 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
         Log.d(TAG, "onViewCreated");
 
-        // Regular home shows only the regular (non-vault) download
-        // count — incognito-tab downloads stay off this badge so the
-        // public chrome doesn't advertise private activity.
-        mTaskViewModel.getRegularCount().observe(getViewLifecycleOwner(),
-                count -> mBottomNavigationBar.onBadgeCount(count));
+        // No download-count badge on the bottom bar in normal home —
+        // the active strip card above already shows what's downloading
+        // (with filenames + progress + a 3-row cap), so the red dot
+        // would signal a strict subset of what the card surfaces.
+        // BrowserFragment keeps the badge since the strip isn't
+        // visible there.
 
         mGeckoStateViewModel.getTabsCount().observe(getViewLifecycleOwner(), mObservableEntities
                 -> mBottomNavigationBar.onTabsCount(mObservableEntities));
@@ -231,16 +266,58 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
         });
 
-        mShortCutsViewModel.getShortCuts().observe(getViewLifecycleOwner(), mObservableShortCuts ->
-                mShortCutsAdapter.submitList(mObservableShortCuts));
+        // Three streams power the home Downloads surfaces:
+        //  * getActive — drives the active-download strip (visible
+        //    only when in-flight non-vault items exist).
+        //  * getFinishedCount / getFinishedSize — drive the
+        //    Downloads card subtitle ('N files saved · X.Y GB').
+        //    Card itself is visible whenever the toggle is on, even
+        //    with zero saved files, so the entry is discoverable.
+        //  * keeps getRecent hot via the long-press handler — see
+        //    onBottomBarButtonLongClick — by reading getValue() at
+        //    tap time; the sheet itself owns its own observer.
+        mRecentDownloadsViewModel.getActive().observe(getViewLifecycleOwner(), list -> {
+            mLastActiveList = list;
+            applyActiveStripVisibility();
+        });
+        mRecentDownloadsViewModel.getFinishedCount().observe(getViewLifecycleOwner(), count -> {
+            mLastFinishedCount = count;
+            bindDownloadsSubtitle();
+        });
+        mRecentDownloadsViewModel.getFinishedSize().observe(getViewLifecycleOwner(), size -> {
+            mLastFinishedSize = size == null ? 0L : size;
+            bindDownloadsSubtitle();
+        });
 
-        // Keep the recent-downloads LiveData hot so the long-press
-        // quick-access popup has a value to read synchronously on
-        // first invocation. Room's LiveData stays cold until it has
-        // an active observer, so without this the popup's
-        // getValue() returns null on first long-press and we fall
-        // back to DownloadsActivity instead of showing the popup.
-        mRecentDownloadsViewModel.getRecent().observe(getViewLifecycleOwner(), list -> { /* warm only */ });
+        // Vault count drives the empty-hero vault button's count badge.
+        // Button itself is always visible while the empty hero is
+        // showing — discoverability for users who haven't yet used
+        // vault — but the badge only appears when count > 0.
+        mRecentDownloadsViewModel.getVaultCount().observe(getViewLifecycleOwner(), count -> {
+            if (mHomeVaultSubtitle == null) return;
+            int n = count == null ? 0 : count;
+            if (n > 0) {
+                mHomeVaultSubtitle.setVisibility(View.VISIBLE);
+                mHomeVaultSubtitle.setText(getResources().getQuantityString(
+                        R.plurals.home_vault_item_count, n, n));
+            } else {
+                mHomeVaultSubtitle.setVisibility(View.GONE);
+            }
+        });
+
+        // Background-media strip — visible iff GeckoMediaController has a
+        // current session (something is playing or recently paused).
+        // currentSessionId == 0 means no media surface; hide the strip.
+        // isPlaying drives the PLAYING / PAUSED label so the user can
+        // tell at a glance whether tapping the card resumes or just
+        // switches.
+        mGeckoMediaController.getCurrentSessionIdLiveData().observe(getViewLifecycleOwner(),
+                sessionId -> bindMediaStrip());
+        mGeckoMediaController.getIsPlayingLiveData().observe(getViewLifecycleOwner(),
+                playing -> bindMediaStrip());
+
+        mRecentDownloadsCard.setVisibility(View.VISIBLE);
+        applyActiveStripVisibility();
 
         // NOTE: HomeFragment intentionally does NOT observe
         // BrowserURIViewModel.getEvents().  IntentHandler owns all tab
@@ -297,6 +374,19 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             }
         });
 
+
+        ViewCompat.setOnApplyWindowInsetsListener(mHomeScroll, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            // Apply the insets as padding to the view. Here, set all the dimensions
+            // as appropriate to your layout. You can also update the view's margin if
+            // more appropriate.
+            v.setPadding(insets.left, 0, insets.right, insets.bottom);
+
+            // Return CONSUMED if you don't want the window insets to keep passing down
+            // to descendant views.
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         ViewCompat.setOnApplyWindowInsetsListener(mGeckoToolbar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
             // Apply the insets as padding to the view. Here, set all the dimensions
@@ -335,8 +425,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             } else if (Lifecycle.Event.ON_RESUME.equals(event)) {
                 Log.d(TAG, "onResume");
                 mStop = false;
-                // Badge count is updated reactively via TaskRepository.getRegularCount()
-                // which is already observed in onViewCreated — no need to poll the service.
             }
         });
 
@@ -359,12 +447,225 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mHomeViewPager = null;
+        mHomeScroll = null;
         mAutoCompleteView = null;
         mGeckoToolbar = null;
         mNewTabView = null;
         mBottomNavigationBar = null;
         mOnBoardingCard = null;
+        mRecentDownloadsCard = null;
+        mActiveStrip = null;
+        mActiveStripRows = null;
+        stopActiveStripPulse();
+        mActiveStripIcon = null;
+        mHomeVaultSubtitle = null;
+        mRecentDownloadsSubtitle = null;
+        mHomeMediaStrip = null;
+        mHomeMediaIcon = null;
+        mHomeMediaLabel = null;
+        mHomeMediaTitle = null;
+        mHomeMediaSubtitle = null;
+        mHomeMediaToggle = null;
+    }
+
+    /**
+     * Active-strip visibility tracks whether any non-vault download is
+     * in PROGRESS / QUEUED. When at least one is live, bind the rows
+     * and start the flame pulse; otherwise hide the card and stop the
+     * animator so it doesn't burn cycles off-screen.
+     */
+    private void applyActiveStripVisibility() {
+        if (mActiveStrip == null) return;
+        boolean hasActive = mLastActiveList != null && !mLastActiveList.isEmpty();
+        mActiveStrip.setVisibility(hasActive ? View.VISIBLE : View.GONE);
+        if (hasActive) {
+            bindActiveStrip(mLastActiveList);
+            startActiveStripPulse();
+        } else {
+            stopActiveStripPulse();
+        }
+    }
+
+    /** Subtle alpha pulse on the active-strip's Firedown flame icon
+     *  to communicate 'live, this is happening now'. Lazily
+     *  instantiated; cancelled when the strip is hidden or the
+     *  view is destroyed. */
+    private void startActiveStripPulse() {
+        if (mActiveStripIcon == null) return;
+        if (mActiveStripPulse != null && mActiveStripPulse.isStarted()) return;
+        mActiveStripPulse = android.animation.ObjectAnimator.ofFloat(
+                mActiveStripIcon, "alpha", 1.0f, 0.45f);
+        mActiveStripPulse.setDuration(1100L);
+        mActiveStripPulse.setRepeatCount(android.animation.ValueAnimator.INFINITE);
+        mActiveStripPulse.setRepeatMode(android.animation.ValueAnimator.REVERSE);
+        mActiveStripPulse.start();
+    }
+
+    private void stopActiveStripPulse() {
+        if (mActiveStripPulse != null) {
+            mActiveStripPulse.cancel();
+            mActiveStripPulse = null;
+        }
+        if (mActiveStripIcon != null) {
+            mActiveStripIcon.setAlpha(1.0f);
+        }
+    }
+
+    /** Binds the 'N files saved · X.Y GB' subtitle on the Downloads
+     *  card. Hidden when no finished files exist so a curious user
+     *  with nothing downloaded yet sees the bare entry label. */
+    private void bindDownloadsSubtitle() {
+        if (mRecentDownloadsSubtitle == null) return;
+        int n = mLastFinishedCount == null ? 0 : mLastFinishedCount;
+        if (n <= 0) {
+            mRecentDownloadsSubtitle.setVisibility(View.GONE);
+            return;
+        }
+        String files = getResources().getQuantityString(
+                R.plurals.home_downloads_file_count, n, n);
+        String text = mLastFinishedSize > 0
+                ? getString(R.string.home_downloads_subtitle_with_size,
+                        files, Utils.readableFileSize(mLastFinishedSize))
+                : files;
+        mRecentDownloadsSubtitle.setVisibility(View.VISIBLE);
+        mRecentDownloadsSubtitle.setText(text);
+    }
+
+    /**
+     * Inflates one compact row per in-flight regular download (DAO
+     * caps the list at 3, so the strip height is bounded). Each row
+     * carries its own filename + percent label + LinearProgressIndicator;
+     * indeterminate while the file is QUEUED or 'live' (size not yet
+     * known), determinate once the percentage is real.
+     *
+     * <p>Re-inflates from scratch on every observer tick rather than
+     * trying to diff in place — N is tiny, the rows are cheap, and
+     * the visible churn is bounded.</p>
+     */
+    private void bindActiveStrip(@NonNull java.util.List<DownloadEntity> active) {
+        if (mActiveStripRows == null) return;
+        mActiveStripRows.removeAllViews();
+        LayoutInflater inflater = LayoutInflater.from(mActiveStripRows.getContext());
+        int onContainer = MaterialColors.getColor(
+                mActiveStripRows, com.google.android.material.R.attr.colorOnPrimaryContainer);
+        int trackAlpha = androidx.core.graphics.ColorUtils.setAlphaComponent(onContainer, 0x3D);
+        for (DownloadEntity item : active) {
+            View row = inflater.inflate(R.layout.view_home_active_download_row, mActiveStripRows, false);
+            bindActiveStripRow(row, item, trackAlpha);
+            mActiveStripRows.addView(row);
+        }
+    }
+
+    private void bindActiveStripRow(@NonNull View row, @NonNull DownloadEntity item, int trackAlpha) {
+        TextView title = row.findViewById(R.id.active_download_title);
+        TextView percent = row.findViewById(R.id.active_download_percent);
+        LinearProgressIndicator bar = row.findViewById(R.id.active_download_bar);
+        // Track colour: theme attr + alpha can't be combined in XML,
+        // and the M3 default (colorSecondary, yellow in Firedown's
+        // palette) fights the orange surface. Pin the track to
+        // colorOnPrimaryContainer at ~24% alpha so it reads as a
+        // subtle ghost of the indicator rather than a competing colour.
+        bar.setTrackColor(trackAlpha);
+
+        title.setText(item.getFileName());
+        boolean live = item.getFileIsLive();
+        boolean queued = item.getFileStatus() == Download.QUEUED;
+        boolean indeterminate = live || queued;
+        bar.setIndeterminate(indeterminate);
+        if (queued) {
+            percent.setText(R.string.download_queued);
+        } else if (live) {
+            percent.setText(Utils.readableFileSize(item.getFileSize()));
+        } else {
+            int pct = item.getFileProgress();
+            bar.setProgress(pct);
+            percent.setText(String.format(java.util.Locale.US, "%d%%", pct));
+        }
+    }
+
+    /**
+     * Binds the home media strip from the {@link GeckoMediaController}'s
+     * current session. Re-runs on every emission from either
+     * currentSessionId or isPlaying — both observers route here so the
+     * label flips reactively between PLAYING and PAUSED as the user
+     * pauses / resumes from the notification.
+     *
+     * <p>Strip visibility: shown iff there's a current session AND we
+     * have metadata for it. Hidden otherwise (no media on screen → no
+     * card on home).</p>
+     *
+     * <p>Image source priority: iconBitmap (favicon bitmap) → Glide
+     * load of favicon URL — the card represents the playing tab, so
+     * the tab favicon is the right identity (album art goes on the
+     * media notification, not here). Title priority: metadata title
+     * → metadata album → metadata URL (domain). Subtitle is artist
+     * when present, otherwise the domain — never both, to avoid
+     * 'YouTube · youtube.com' duplication.</p>
+     */
+    private void bindMediaStrip() {
+        if (mHomeMediaStrip == null) return;
+        int sessionId = mGeckoMediaController.getCurrentSessionId();
+        if (sessionId == 0) {
+            mHomeMediaStrip.setVisibility(View.GONE);
+            return;
+        }
+        com.solarized.firedown.geckoview.media.GeckoMetaData meta =
+                mGeckoMediaController.getGeckoMetaData();
+        if (meta == null) {
+            mHomeMediaStrip.setVisibility(View.GONE);
+            return;
+        }
+        mHomeMediaStrip.setVisibility(View.VISIBLE);
+
+        Boolean playingValue = mGeckoMediaController.getIsPlayingLiveData().getValue();
+        boolean playing = playingValue != null && playingValue;
+        mHomeMediaLabel.setText(playing ? R.string.home_media_playing : R.string.home_media_paused);
+        // Toggle button mirrors the playing state — pause icon when
+        // playing (tap → pause), play icon when paused (tap → resume).
+        // contentDescription announces the *current* state for a
+        // screen reader (the action to take is the inverse).
+        if (mHomeMediaToggle != null) {
+            mHomeMediaToggle.setImageResource(playing
+                    ? R.drawable.ic_pause_24
+                    : R.drawable.ic_play_arrow_24);
+            mHomeMediaToggle.setContentDescription(getString(playing
+                    ? R.string.home_media_playing
+                    : R.string.home_media_paused));
+        }
+
+        String title = meta.getTitle();
+        if (title == null || title.isEmpty()) title = meta.getAlbum();
+        if (title == null || title.isEmpty()) title = meta.getUrl();
+        mHomeMediaTitle.setText(title);
+
+        String subtitle = meta.getArtist();
+        if (subtitle == null || subtitle.isEmpty()) {
+            // Skip the URL if it's identical to the title (already shown).
+            String urlPart = meta.getUrl();
+            subtitle = (urlPart != null && !urlPart.equals(title)) ? urlPart : null;
+        }
+        if (subtitle != null && !subtitle.isEmpty()) {
+            mHomeMediaSubtitle.setVisibility(View.VISIBLE);
+            mHomeMediaSubtitle.setText(subtitle);
+        } else {
+            mHomeMediaSubtitle.setVisibility(View.GONE);
+        }
+
+        // Use the tab's favicon, not the page's MediaSession artwork —
+        // the card reads as 'tab playing in the background' and the
+        // tab's identity is its favicon. Album art looks great on the
+        // notification but here it competes with the playing tab's
+        // identity (and pages without artwork would fall through to
+        // the favicon anyway, so we'd ship two visual styles).
+        android.graphics.Bitmap favicon = meta.getIconBitmap();
+        if (favicon != null) {
+            mHomeMediaIcon.setImageBitmap(favicon);
+        } else if (meta.getIcon() != null && !meta.getIcon().isEmpty()) {
+            com.solarized.firedown.GlideHelper.load(meta.getIcon(), meta.getUrl(),
+                    mHomeMediaIcon, new com.bumptech.glide.request.RequestOptions());
+        } else {
+            mHomeMediaIcon.setImageDrawable(null);
+        }
     }
 
     @Override
@@ -382,11 +683,11 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             flashNewTab(mNewTabView);
             addNewTab();
         } else if(id == R.id.search_button){
-            mAutoCompleteViewModel.resetEngines();
-            mAutoCompleteView.showEmpty();
-            mAutoCompleteEditText.requestFocus();
-            InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(mAutoCompleteEditText, InputMethodManager.SHOW_FORCED);
+            // Cradle slot on normal home is Bookmarks — the URL bar at
+            // the top already covers the search path, so the centre
+            // tap-target gives the bookmarks list a one-tap entry.
+            Intent bookmarksIntent = new Intent(mActivity, BookmarkActivity.class);
+            mStartForResult.launch(bookmarksIntent);
         }
     }
 
@@ -395,38 +696,16 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         if (id == R.id.new_tab_button) {
             NavigationUtils.navigateSafe(mNavController, R.id.dialog_new_tabs, R.id.home);
             return true;
-        } else if (id == R.id.downloads_button) {
-            // If we already know there's nothing recent (LiveData has
-            // been warmed by the observer below), skip the sheet and
-            // jump straight to DownloadsActivity so the long-press
-            // still feels responsive on a fresh install. Otherwise
-            // open the bottom sheet; the sheet self-dismisses if the
-            // list goes empty after it's already on screen.
-            java.util.List<DownloadEntity> cached =
-                    mRecentDownloadsViewModel.getRecent().getValue();
-            if (cached == null || cached.isEmpty()) {
-                mStartForResult.launch(new Intent(mActivity, DownloadsActivity.class));
-            } else {
-                new DownloadsQuickAccessSheet().show(getChildFragmentManager(),
-                        DownloadsQuickAccessSheet.TAG);
-            }
-            return true;
         }
+        // Home intentionally has no other long-press affordances —
+        // every bottom-bar slot already has a visible-on-home
+        // entry (Downloads card, Safe Folder card, cradle Bookmarks
+        // button). Hidden long-press gestures were the right call
+        // when the slot had no on-screen surface (BrowserFragment
+        // keeps the Downloads long-press sheet for that reason),
+        // not here.
         return false;
     }
-
-    @Override
-    public void onQuickAccessFileTap(@NonNull DownloadEntity entity) {
-        // Match DownloadFragment's row tap: errored downloads jump to
-        // the source URL, everything else hits openItem (which is a
-        // no-op for not-yet-completed files but at least consistent).
-        if (entity.getFileStatus() == Download.ERROR) {
-            openSourceUrl(entity);
-        } else {
-            openItem(entity, null);
-        }
-    }
-
 
     @Override
     public void onCommit() {
@@ -511,14 +790,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mGeckoStateViewModel.setGeckoState(geckoState, true);
     }
 
-    private void addIncognitoTab() {
-        GeckoState geckoState = new GeckoState(new GeckoStateEntity(true));
-        geckoState.setEntityIncognito(true);
-        Log.d(TAG, "addIncognitoTab: created home tab id=" + geckoState.getEntityId());
-
-        //mGeckoStateViewModel.setGeckoState(geckoState, true);
-    }
-
 
     @Override
     public void onToolbarButtonClick(View v, int id) {
@@ -550,10 +821,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 String text = mSearchRepository.parseUri(searchEntity.getSubText());
                 openUri(text);
             }
-        }else if(resId == R.id.item_web_visited || resId == R.id.item_web_visited_holder){
-            ShortCutsEntity shortcutsEntity = mShortCutsAdapter.getCurrentList().get(position);
-            String url = WebUtils.getSchemeDomainName(shortcutsEntity.getUrl());
-            openUri(url);
         }
     }
 
@@ -568,11 +835,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             geckoState.setEntityUri(uri);
             openUri(uri);
             mAutoCompleteViewModel.clearClipboard();
-        }else if(resId == R.id.item_web_visited || resId == R.id.item_web_visited_holder){
-            ShortCutsEntity shortcutsEntity =  mShortCutsAdapter.getCurrentList().get(position);
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(Keys.ITEM_ID, shortcutsEntity);
-            NavigationUtils.navigateSafe(mNavController, R.id.dialog_shortcuts_options, bundle);
         }
     }
 
@@ -591,6 +853,5 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             mOnBoardingCard.setVisibility(View.GONE);
         }
     }
-
 
 }

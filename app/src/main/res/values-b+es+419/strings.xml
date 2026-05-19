@@ -215,4 +215,9 @@
     <string name="vault_decrypting">Descifrando archivo, espere…</string>
     <string name="vault_encrypting">Cifrando archivo, espere…</string>
     <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sácalo de la Carpeta segura y vuelve a intentarlo.</string>
- </resources>
+     <string name="downloads_quick_access_title">Descargas recientes</string>
+    <string name="home_onboarding_sites_label">Probá Firedown en</string>
+    <string name="home_vault_button">Carpeta segura</string>
+    <string name="home_media_playing">Reproduciendo</string>
+    <string name="home_media_paused">En pausa</string>
+</resources>

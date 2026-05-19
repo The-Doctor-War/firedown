@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="home_vault_item_count">
+        <item quantity="one">%d sparat objekt</item>
+        <item quantity="other">%d sparade objekt</item>
+    </plurals>
+    <plurals name="home_downloads_file_count">
+        <item quantity="one">%d sparad fil</item>
+        <item quantity="other">%d sparade filer</item>
+    </plurals>
+</resources>

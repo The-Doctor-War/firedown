@@ -218,4 +218,9 @@
     <string name="vault_decrypting">Notiek faila atšifrēšana, uzgaidiet…</string>
     <string name="vault_encrypting">Notiek faila šifrēšana, uzgaidiet…</string>
     <string name="vault_unsupported">Nevar atvērt šo failu. Lai atvērtu, izņemiet to no drošās mapes un mēģiniet vēlreiz.</string>
+    <string name="downloads_quick_access_title">Nesenās lejupielādes</string>
+    <string name="home_onboarding_sites_label">Izmēģiniet Firedown</string>
+    <string name="home_vault_button">Drošā mape</string>
+    <string name="home_media_playing">Atskaņo</string>
+    <string name="home_media_paused">Pauzēts</string>
 </resources>

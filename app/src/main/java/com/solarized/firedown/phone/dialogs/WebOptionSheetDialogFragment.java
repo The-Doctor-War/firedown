@@ -126,7 +126,4 @@ public class WebOptionSheetDialogFragment extends BaseBottomSheetDialogFragment 
             NavigationUtils.navigateSafe(mNavController, R.id.web_bookmark_edit, bundle);
         }
     }
-
-
-
 }

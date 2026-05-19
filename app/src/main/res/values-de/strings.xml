@@ -12,7 +12,6 @@
     <string name="browser_enter_url">Suchen oder geben Sie die URL ein.</string>
     <string name="browser_error_image_title">Das Feuer ist weg</string>
     <string name="browser_find_in_page">Seite durchsuchen</string>
-    <string name="browser_menu_add_to_shortcuts">Zu Verknüpfungen hinzufügen</string>
     <string name="browser_menu_back">Zurück</string>
     <string name="browser_menu_bookmark_this_page_2">Lesezeichen für diese Seite hinzufügen</string>
     <string name="browser_menu_desktop_site">Desktop-Website</string>
@@ -20,7 +19,6 @@
     <string name="browser_menu_find_in_page">Seite durchsuchen</string>
     <string name="browser_menu_forward">Vor</string>
     <string name="browser_menu_refresh">Aktualisieren</string>
-    <string name="browser_menu_remove_from_shortcuts">Aus Verknüpfungen entfernen</string>
     <string name="browser_menu_settings">Einstellungen</string>
     <string name="browser_menu_share">Teilen</string>
     <string name="browser_menu_stop">Anhalten</string>
@@ -196,9 +194,9 @@
     <string name="incognito_bullet_searches">Suchanfragen</string>
     <string name="incognito_bullet_temp_files">Temporäre Dateien</string>
     <string name="incognito_bullet_visited">Besuchte Seiten</string>
-    <string name="incognito_home_description">Wenn du in einem privaten Fenster surfst, wird Firedown </string>
+    <string name="incognito_home_description">Wenn du in einem privaten Fenster surfst, speichert Firedown nicht:</string>
     <string name="incognito_home_title">Privater Modus</string>
-    <string name="incognito_home_warning">Privates Surfen </string>
+    <string name="incognito_home_warning">Privates Surfen verbirgt deine Aktivität nicht vor deinem Netzwerk, deinem Arbeitgeber oder den besuchten Webseiten.</string>
     <string name="incognito_notification_channel">Privater Modus</string>
     <string name="incognito_notification_channel_desc">Benachrichtigung für offene private Tabs</string>
     <string name="incognito_notification_close_action">Alle schließen</string>
@@ -285,7 +283,6 @@
     <string name="blocked_trackers_detail_empty">Auf dieser Seite wurden noch keine Tracker blockiert.</string>
     <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">Beenden der Anwendung, um Änderungen zu übernehmen…</string>
-    <string name="remove_top_site">Entfernen</string>
     <string name="rename">Umbenennen</string>
     <string name="rename_file">Datei umbenennen</string>
     <string name="request_geolocation">Ihren Gerätestandort mit &lt;b&gt;%s&lt;/b&gt; teilen?</string>
@@ -420,7 +417,7 @@
     <string name="settings_drm_enabled">DRM-Wiedergabe aktivieren</string>
     <string name="settings_drm_enabled_summary">Erlaubt Widevine auf Seiten, die DRM benötigen (Netflix, Spotify, …). Firedown kann DRM-geschützte Inhalte trotzdem nicht herunterladen.</string>
     <string name="settings_webrtc_enabled">WebRTC aktivieren</string>
-    <string name="settings_webrtc_enabled_summary">Nötig für P2P-Anrufe, kann deine echte IP preisgeben</string>
+    <string name="settings_webrtc_enabled_summary">Ermöglicht Echtzeit-Video- und Sprachanrufe. Deaktivieren verringert die Netzwerk-Probing-Angriffsfläche.</string>
     <string name="settings_webassembly_enabled">WebAssembly aktivieren</string>
     <string name="settings_webassembly_enabled_summary">Erlaubt Webseiten das Ausführen kompilierter WASM-Module. Deaktivieren verringert die Angriffsfläche, kann aber moderne Web-Apps beeinträchtigen</string>
     <string name="settings_https_only_title">Nur-HTTPS-Modus</string>
@@ -432,11 +429,6 @@
     <string name="share">Teilen</string>
     <string name="share_image">BILD teilen</string>
     <string name="share_url">URL teilen</string>
-    <string name="shortcut_max_limit_content">Entfernen Sie eine der Verknüpfungen, um eine neue hinzuzufügen. Tippen und halten Sie die Seite und wählen Sie „Entfernen“.</string>
-    <string name="shortcut_max_limit_title">Obergrenze für Verknüpfungen erreicht</string>
-    <string name="shortcut_name_hint">Name der Verknüpfung</string>
-    <string name="shortcut_url_hint">Verknüpfungs-URL</string>
-    <string name="snackbar_added_to_shortcuts">Zu Verknüpfungen hinzugefügt!</string>
     <string name="snackbar_deleted_undo">RÜCKGÄNGIG</string>
     <string name="snackbar_tab_closed">Tab geschlossen</string>
     <string name="sort">Sortieren nach</string>
@@ -470,11 +462,6 @@
     <string name="task_gif_failed">GIF konnte nicht erstellt werden</string>
     <string name="task_gif_finished">GIF erstellt</string>
     <string name="task_stop">Stoppen</string>
-    <string name="top_sites_edit_dialog_save">Speichern</string>
-    <string name="top_sites_edit_dialog_title">Verknüpfung bearbeiten</string>
-    <string name="top_sites_edit_dialog_url_title">URL</string>
-    <string name="top_sites_max_limit_confirmation_button">Ok, verstanden</string>
-    <string name="top_sites_rename_dialog_title">Name</string>
     <string name="update_auto_update_success_body">Du wurdest automatisch auf Version %1$s aktualisiert.</string>
     <string name="update_auto_update_success_default_body">Du wurdest automatisch auf die neueste Version aktualisiert.</string>
     <string name="update_auto_update_success_title">Firedown erfolgreich aktualisiert</string>
@@ -492,4 +479,11 @@
     <string name="play">Wiedergabe</string>
     <string name="pip_play">Wiedergabe</string>
     <string name="pip_pause">Pause</string>
+    <string name="downloads_quick_access_title">Letzte Downloads</string>
+    <string name="home_onboarding_sites_label">Firedown ausprobieren auf</string>
+    <string name="home_vault_button">Sicherer Ordner</string>
+    <string name="home_media_playing">Wiedergabe</string>
+    <string name="home_media_paused">Pausiert</string>
+    <string name="downloads_quick_access_view_all">Alle Downloads anzeigen</string>
+    <string name="downloads_quick_access_empty">Aktuelle Downloads erscheinen hier</string>
 </resources>

@@ -110,4 +110,30 @@ public interface DownloadDao {
 
     @Query("SELECT COUNT(*) FROM download")
     Integer getRowCount();
+
+    /**
+     * Live count of vault-stored downloads (file_safe = 1). Surfaced
+     * on the home empty hero so the vault entry can carry an item
+     * count badge that updates as the user saves / deletes private
+     * files. LiveData (not a one-shot Integer) so the badge stays in
+     * sync without manual refresh hooks.
+     */
+    @Query("SELECT COUNT(*) FROM download WHERE file_safe = 1")
+    LiveData<Integer> getSafeCountLive();
+
+    /** Live count of finished regular (non-vault) downloads. Drives
+     *  the home 'Downloads' card subtitle (N files saved). */
+    @Query("SELECT COUNT(*) FROM download WHERE file_safe = 0 AND file_status = 1")
+    LiveData<Integer> getRegularFinishedCountLive();
+
+    /** Live sum of bytes for finished regular (non-vault) downloads.
+     *  Drives the home 'Downloads' card subtitle's size suffix. */
+    @Query("SELECT IFNULL(SUM(file_size), 0) FROM download WHERE file_safe = 0 AND file_status = 1")
+    LiveData<Long> getRegularFinishedSizeLive();
+
+    /** Live list of in-flight regular downloads (PROGRESS=0, QUEUED=2,
+     *  non-vault). Drives the home active-download strip. Capped at
+     *  the number of rows the strip ever renders. */
+    @Query("SELECT * FROM download WHERE file_safe = 0 AND file_status IN (0, 2) ORDER BY file_date DESC LIMIT 3")
+    LiveData<List<DownloadEntity>> getActiveRegularLive();
 }

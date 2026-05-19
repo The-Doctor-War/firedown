@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Active-download strip on the home page. Two-column layout: the
+  pulsing Firedown flame on the left, vertically centred against
+  the whole card; the content column on the right stacks the
+  'DOWNLOADING' header and one row per in-flight regular download
+  (capped at 3 by the DAO query).
+
+  Tinted with colorPrimaryContainer to read as 'live' — distinct
+  from the surface-container colour the static Downloads / Safe
+  Folder cards use. Whole card is tappable; tap → DownloadsActivity.
+-->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/active_download_strip"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:visibility="gone"
+    app:cardBackgroundColor="?attr/colorPrimaryContainer"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="14dp">
+
+        <!--
+            Firedown flame instead of the canonical download arrow —
+            the static Downloads card below already owns that glyph,
+            and the alpha-pulse animator (wired in HomeFragment)
+            communicates 'live, happening now' in a way a duplicated
+            download icon couldn't. layout_gravity=center_vertical
+            anchors the icon to the centre of whatever the content
+            column's height resolves to (header + 1–3 rows) — stays
+            balanced regardless of row count.
+        -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/active_download_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="center_vertical"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_firedown"
+            app:tint="?attr/colorOnPrimaryContainer" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:letterSpacing="0.08"
+                android:text="@string/downloading"
+                android:textAllCaps="true"
+                android:textAppearance="?attr/textAppearanceLabelSmall"
+                android:textColor="?attr/colorOnPrimaryContainer" />
+
+            <!--
+                Rows container — HomeFragment inflates one
+                view_home_active_download_row per active item
+                (cap = 3) and removeAllViews + re-inflates on every
+                observer tick. Each row carries its own top padding
+                so spacing scales naturally with N.
+            -->
+            <LinearLayout
+                android:id="@+id/active_download_rows"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

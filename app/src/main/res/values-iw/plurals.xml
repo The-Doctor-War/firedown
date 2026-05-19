@@ -22,4 +22,12 @@
     </plurals>
 
     
-    </resources>
+    <plurals name="home_vault_item_count">
+        <item quantity="one">פריט %d נשמר</item>
+        <item quantity="other">%d פריטים נשמרו</item>
+    </plurals>
+    <plurals name="home_downloads_file_count">
+        <item quantity="one">נשמר קובץ %d</item>
+        <item quantity="other">נשמרו %d קבצים</item>
+    </plurals>
+</resources>

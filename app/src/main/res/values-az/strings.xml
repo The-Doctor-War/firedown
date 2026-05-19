@@ -149,7 +149,6 @@
     <string name="popup_tabs_close">Bütün tabları bağlayın</string>
     <string name="popup_tabs_new">Yeni tab</string>
     <string name="popup_toggle">Görünüşü dəyişdirin</string>
-<string name="remove_top_site">Sil</string>
     <string name="rename">Adını dəyişdirin</string>
     <string name="rename_file">Faylın adını dəyişdirin</string>
     <string name="request_geolocation">Cihazınızın məkanı &lt;b&gt; %s &lt;/b&gt; ilə paylaşılsın?</string>
@@ -236,4 +235,9 @@
     <string name="vault_decrypting">Faylın şifrəsi açılır, gözləyin...</string>
     <string name="vault_encrypting">Fayl şifrələnir, gözləyin…</string>
     <string name="vault_unsupported">Bu faylı açmaq mümkün deyil. Açmaq üçün onu Təhlükəsiz Qovluqdan çıxarın və yenidən cəhd edin.</string>
+    <string name="downloads_quick_access_title">Son endirilənlər</string>
+    <string name="home_onboarding_sites_label">Firedown-u sınayın</string>
+    <string name="home_vault_button">Təhlükəsiz Qovluq</string>
+    <string name="home_media_playing">Oxudulur</string>
+    <string name="home_media_paused">Dayandırıldı</string>
 </resources>

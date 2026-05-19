@@ -10,7 +10,6 @@
     <string name="browser_enter_url">Search or Type URL</string>
     <string name="browser_error_image_title">The Fire is Gone</string>
     <string name="browser_find_in_page">Find in page</string>
-    <string name="browser_menu_add_to_shortcuts">Add to shortcuts</string>
     <string name="browser_menu_back">Back</string>
     <string name="browser_menu_bookmark_this_page_2">Bookmark page</string>
     <string name="browser_menu_desktop_site">Desktop site</string>
@@ -18,7 +17,6 @@
     <string name="browser_menu_find_in_page">Find in page</string>
     <string name="browser_menu_forward">Forward</string>
     <string name="browser_menu_refresh">Refresh</string>
-    <string name="browser_menu_remove_from_shortcuts">Remove from shortcuts</string>
     <string name="browser_menu_settings">Settings</string>
     <string name="browser_menu_share">Share</string>
     <string name="browser_menu_stop">Stop</string>
@@ -129,6 +127,25 @@
     <string name="download_finished_meta">%1$s - %2$s</string>
     <string name="downloads_quick_access_title">Recent downloads</string>
     <string name="downloads_quick_access_view_all">View all downloads</string>
+    <!-- Trailing-action label on the home recent-downloads card. Kept
+         short so it fits next to the section title on narrow phones
+         even in longer Romance / Slavic locales. -->
+    <string name="downloads_quick_access_empty">Recent downloads will appear here</string>
+    <!-- Section header on the home media strip — shown while a tab
+         is actively producing audio / video. Pairs with
+         home_media_paused for the paused-but-spotlit state so the
+         user can resume from the card. -->
+    <string name="home_media_playing">Playing</string>
+    <string name="home_media_paused">Paused</string>
+    <!-- Subtitle on the home Downloads card. Combines the file-count
+         plural with a readable byte size — '150 files saved · 2.4 GB'.
+         %1$s is the plural (home_downloads_file_count), %2$s is the
+         size string (Utils.readableFileSize). -->
+    <string name="home_downloads_subtitle_with_size">%1$s · %2$s</string>
+    <!-- Header label for the supported-sites chip strip inside the
+         onboarding card. Frames the brand chips as 'we test against
+         these'. Tap a chip → visits the site. -->
+    <string name="home_onboarding_sites_label">Try Firedown on</string>
     <string name="download_adaptative">Adaptive</string>
     <string name="download_file">A file is ready to be downloaded:</string>
     <string name="download_finished">Download finished</string>
@@ -197,9 +214,9 @@
     <string name="incognito_bullet_searches">Searches</string>
     <string name="incognito_bullet_temp_files">Temporary files</string>
     <string name="incognito_bullet_visited">Visited pages</string>
-    <string name="incognito_home_description">When you browse in a Private Window, Firedown </string>
+    <string name="incognito_home_description">When you browse in a Private Window, Firedown won't keep:</string>
     <string name="incognito_home_title">Private Browsing</string>
-    <string name="incognito_home_warning">Private Browsing </string>
+    <string name="incognito_home_warning">Private Browsing doesn't hide your activity from your network, employer, or the sites you visit.</string>
     <string name="incognito_notification_channel">Private Browsing</string>
     <string name="incognito_notification_channel_desc">Notification for open private tabs</string>
     <string name="incognito_notification_close_action">Close all</string>
@@ -286,7 +303,6 @@
     <string name="blocked_trackers_detail_empty">No trackers blocked yet on this page.</string>
     <string name="blocked_trackers_host_count_multiplier">×%1$d</string>
     <string name="quit_application">Quitting the application to apply changes…</string>
-    <string name="remove_top_site">Remove</string>
     <string name="rename">Rename</string>
     <string name="rename_file">Rename file</string>
     <string name="request_geolocation">Share your device location with &lt;b&gt;&lt;font color=#ffffff&gt;%s&lt;/font&gt;&lt;/b&gt;?</string>
@@ -424,7 +440,7 @@
     <string name="settings_drm_enabled">Enable DRM playback</string>
     <string name="settings_drm_enabled_summary">Allows Widevine on sites that require DRM (Netflix, Spotify, …). Firedown still cannot download DRM-protected content.</string>
     <string name="settings_webrtc_enabled">Enable WebRTC</string>
-    <string name="settings_webrtc_enabled_summary">Required for P2P calls, can leak your real IP</string>
+    <string name="settings_webrtc_enabled_summary">Allows real-time video / voice calls. Disabling reduces network-probing surface.</string>
     <string name="settings_webassembly_enabled">Enable WebAssembly</string>
     <string name="settings_webassembly_enabled_summary">Allows sites to run compiled WASM modules. Disabling reduces attack surface but may break some modern web apps</string>
     <string name="settings_https_only_title">HTTPS-only mode</string>
@@ -436,11 +452,6 @@
     <string name="share">Share</string>
     <string name="share_image">Share IMAGE</string>
     <string name="share_url">Share URL</string>
-    <string name="shortcut_max_limit_content">To add a new shortcut, remove one. Touch and hold the site and select remove.</string>
-    <string name="shortcut_max_limit_title">Shortcut limit reached</string>
-    <string name="shortcut_name_hint">Shortcut name</string>
-    <string name="shortcut_url_hint">Shortcut URL</string>
-    <string name="snackbar_added_to_shortcuts">Added to shortcuts!</string>
     <string name="snackbar_deleted_undo">UNDO</string>
     <string name="snackbar_tab_closed">Tab closed</string>
     <string name="sort">Sort by</string>
@@ -474,11 +485,6 @@
     <string name="task_gif_failed">Could not create GIF</string>
     <string name="task_gif_finished">GIF created</string>
     <string name="task_stop">Stop</string>
-    <string name="top_sites_edit_dialog_save">Save</string>
-    <string name="top_sites_edit_dialog_title">Edit shortcut</string>
-    <string name="top_sites_edit_dialog_url_title">URL</string>
-    <string name="top_sites_max_limit_confirmation_button">OK, Got It</string>
-    <string name="top_sites_rename_dialog_title">Name</string>
     <string name="update_auto_update_success_body">You were automatically updated to version %1$s.</string>
     <string name="update_auto_update_success_default_body">You were automatically updated to latest version.</string>
     <string name="update_auto_update_success_title">Firedown successfully updated</string>
@@ -498,4 +504,12 @@
     <string name="media_seek_back_10s_desc">Skip back 10 seconds</string>
     <string name="media_seek_forward_10s_desc">Skip forward 10 seconds</string>
 <string name="play">Play</string>
+    <!-- Title of the subtle entry card below the paste CTA on the
+         empty home hero. Opens VaultActivity. Term matches
+         navigation_vault so the home entry and the destination read
+         the same way; per-locale translations are derived from each
+         locale's navigation_vault entry (script-driven) so 'Safe
+         Folder' becomes 'Carpeta segura' in es, 'Sicherer Ordner' in
+         de, etc. -->
+    <string name="home_vault_button">Safe Folder</string>
 </resources>

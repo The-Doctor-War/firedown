@@ -81,6 +81,31 @@ public class DownloadDataRepository {
         return mDatabase.downloadDao().getDownloadsLimit(limit);
     }
 
+    /** Live count of vault-saved downloads. Drives the home empty-hero
+     *  vault tile's visibility (any count > 0 → tile reads as occupied)
+     *  and its badge label. */
+    public LiveData<Integer> getSafeCount() {
+        return mDatabase.downloadDao().getSafeCountLive();
+    }
+
+    /** Live count of finished regular downloads — drives the home
+     *  Downloads card subtitle. */
+    public LiveData<Integer> getRegularFinishedCount() {
+        return mDatabase.downloadDao().getRegularFinishedCountLive();
+    }
+
+    /** Live total bytes for finished regular downloads — drives the
+     *  home Downloads card subtitle's size suffix. */
+    public LiveData<Long> getRegularFinishedSize() {
+        return mDatabase.downloadDao().getRegularFinishedSizeLive();
+    }
+
+    /** Live list of in-flight regular downloads. Drives the home
+     *  active-download strip. */
+    public LiveData<List<DownloadEntity>> getActiveRegular() {
+        return mDatabase.downloadDao().getActiveRegularLive();
+    }
+
     public List<DownloadEntity> getAllRawList() {
         return mDatabase.downloadDao().getAllRawList();
     }

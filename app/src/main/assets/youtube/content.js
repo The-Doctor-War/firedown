@@ -32,10 +32,26 @@ if (location.pathname === '/robots.txt') {
     try { window.wrappedJSObject.eval(BGUTILS_CODE); }
     catch(e) { console.error('[BG-robots] bgutils inject failed:', e.message); }
 
-    // Expose callback for results
+    // Expose callback for results. Two delivery paths:
+    //   - runtime.sendMessage to background.js for the legacy JS-orchestrated
+    //     flow (background.js holds the requestId and resolves its own promise).
+    //   - window CustomEvent for the native PoTokenGenerator flow. That flow's
+    //     listener lives in THIS content script, and runtime.sendMessage from a
+    //     content script does NOT loop back to itself, so we need a DOM-level
+    //     side channel. Content scripts share the page's DOM, so the event
+    //     dispatched on window.wrappedJSObject is observable from below via a
+    //     window.addEventListener with the same name.
     exportFunction(function(resultJson) {
         try {
             browser.runtime.sendMessage({ type: 'poTokenResult', data: JSON.parse(resultJson) });
+        } catch (e) {}
+        // Use a string payload to dodge Xray-wrapper restrictions on
+        // page-defined object properties read from the content script side.
+        try {
+            const ev = new window.wrappedJSObject.CustomEvent(
+                    'fdPoTokenResult',
+                    cloneInto({ detail: resultJson }, window.wrappedJSObject));
+            window.wrappedJSObject.dispatchEvent(ev);
         } catch (e) {}
     }, window.wrappedJSObject, { defineAs: '__fdPoTokenCB' });
 
@@ -150,19 +166,23 @@ if (location.pathname === '/robots.txt') {
                 if (!window.wrappedJSObject || typeof window.wrappedJSObject.__fdGenPoToken !== 'function') {
                     throw new Error('__fdGenPoToken not exposed yet');
                 }
-                // __fdGenPoToken calls __fdPoTokenCB → that callback posts a
-                // runtime.sendMessage of type 'poTokenResult'. We need the
-                // result here on the port, not relayed through background.js.
-                // Wrap with a one-shot listener keyed by requestId.
+                // __fdGenPoToken calls __fdPoTokenCB → that callback also
+                // dispatches a window 'fdPoTokenResult' CustomEvent (in
+                // addition to its legacy runtime.sendMessage broadcast).
+                // We listen for the event here because runtime.sendMessage
+                // from a content script does NOT loop back to the same
+                // content script — the legacy path relies on background.js
+                // to relay, which we're explicitly bypassing.
                 const token = await new Promise((resolve, reject) => {
-                    const handler = (resultMsg) => {
-                        if (resultMsg?.type !== 'poTokenResult') return;
-                        if (resultMsg.data?.requestId !== requestId) return;
-                        browser.runtime.onMessage.removeListener(handler);
-                        if (resultMsg.data.error) reject(new Error(resultMsg.data.error));
-                        else resolve(resultMsg.data.token);
+                    const handler = (ev) => {
+                        let data;
+                        try { data = JSON.parse(ev.detail); } catch (e) { return; }
+                        if (!data || data.requestId !== requestId) return;
+                        window.removeEventListener('fdPoTokenResult', handler);
+                        if (data.error) reject(new Error(data.error));
+                        else resolve(data.token);
                     };
-                    browser.runtime.onMessage.addListener(handler);
+                    window.addEventListener('fdPoTokenResult', handler);
                     window.wrappedJSObject.__fdGenPoToken(msg.videoId || '', msg.visitorData || '', requestId);
                 });
                 natPort.postMessage({ type: 'mintResult', requestId, token });

@@ -43,6 +43,16 @@
         <action
             android:id="@+id/action_browser_to_history"
             app:destination="@id/nav_graph_history" />
+        <!--
+            Direct entry to the bookmark editor, used by the
+            'Edit bookmark' popup item on the browser. Old flow opened
+            BookmarkActivity with BOOKMARK_EDIT + ITEM_ID extras; new
+            flow passes ITEM_ID as a nav argument and lands directly
+            on the edit destination.
+        -->
+        <action
+            android:id="@+id/action_browser_to_bookmark_edit"
+            app:destination="@id/web_bookmark_edit" />
     </fragment>
     <fragment
         android:id="@+id/tabs"
@@ -169,13 +179,12 @@
         android:name="com.solarized.firedown.phone.dialogs.ClipboardDialogFragment" />
 
     <!--
-        Bookmark + History child graphs nested into root so the main
-        NavController can route into them. The standalone
-        BookmarkActivity / HistoryActivity still host their own copies
-        of these graphs for the current Intent-launched paths; PR 2
-        will switch the call sites over to navigate() against root
-        and drop the Activities. Until then both hosts coexist —
-        this PR is purely additive infrastructure.
+        Bookmark + History destinations live inside their own child
+        graphs (kept separate to scope their inner dialogs). Nested
+        into root via include so home / home_incognito / browser can
+        reach them via nav actions. Replaces the previous
+        BookmarkActivity / HistoryActivity wrappers that hosted these
+        graphs in their own NavHostFragment.
     -->
     <include app:graph="@navigation/nav_graph_bookmark" />
     <include app:graph="@navigation/nav_graph_history" />

@@ -13,9 +13,11 @@ import androidx.lifecycle.*;
 import androidx.paging.LoadState;
 import androidx.recyclerview.widget.*;
 
+import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.entity.WebHistoryEntity;
+import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.WebHistoryViewModel;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.adapters.WebHistoryAdapter;
@@ -28,6 +30,7 @@ public class WebHistoryFragment extends BaseFocusFragment implements SearchView.
 
     private static final String TAG = WebHistoryFragment.class.getSimpleName();
     private WebHistoryViewModel mWebHistoryViewModel;
+    private BrowserURIViewModel mBrowserURIViewModel;
     private WebHistoryAdapter mAdapter;
 
     /** Set when a new query has been dispatched; consumed on the next successful refresh. */
@@ -37,6 +40,8 @@ public class WebHistoryFragment extends BaseFocusFragment implements SearchView.
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWebHistoryViewModel = new ViewModelProvider(this).get(WebHistoryViewModel.class);
+        // Activity-scoped so BrowserFragment observes the same event.
+        mBrowserURIViewModel = new ViewModelProvider(mActivity).get(BrowserURIViewModel.class);
         setupBackPress();
     }
 
@@ -153,7 +158,7 @@ public class WebHistoryFragment extends BaseFocusFragment implements SearchView.
             if (mActionModeEnabled) {
                 stopActionMode();
             } else {
-                mActivity.finish();
+                mNavController.popBackStack();
             }
         });
     }
@@ -216,7 +221,10 @@ public class WebHistoryFragment extends BaseFocusFragment implements SearchView.
             } else if (resId == R.id.item_web_history) {
                 GeckoStateEntity geckoState = new GeckoStateEntity(false);
                 geckoState.setUri(entity.getUrl());
-                setSessionResult(geckoState);
+                // Mirrors WebBookmarkFragment: publish OPEN_URI, then
+                // pop back to home + push browser.
+                mBrowserURIViewModel.onEventSelected(geckoState, IntentActions.OPEN_URI);
+                NavigationUtils.navigateSafe(mNavController, R.id.action_web_history_to_browser);
             }
         }
     }

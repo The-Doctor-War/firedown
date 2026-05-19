@@ -55,8 +55,6 @@ public class IntentActions {
 
     public static final String OPEN_EXTERNAL_URI = "com.solarized.firedown.OPEN_URI_EXTERNAL";
 
-    public static final String BOOKMARK_EDIT = "com.solarized.firedown.BOOKMARK_EDIT";
-
     public static final String ACTIVITY_FINISH = "com.solarized.firedown.ACTIVITY_FINISH";
 
     public static final String MAIN_MEDIA = "com.solarized.firedown.MAIN_MEDIA";

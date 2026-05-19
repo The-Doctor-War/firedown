@@ -17,7 +17,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.MenuProvider;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.NavBackStackEntry;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -134,12 +133,10 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
     }
 
     private void handleBack() {
-        NavBackStackEntry prev = mNavController.getPreviousBackStackEntry();
-        if (prev != null && prev.getDestination().getId() == R.id.web_bookmark) {
-            mNavController.popBackStack();
-        } else {
-            mActivity.finish();
-        }
+        // Pop back to whichever destination launched us — could be the
+        // bookmark list (entered from a bookmark item's more menu) or
+        // the browser (entered from the popup 'Edit bookmark' action).
+        mNavController.popBackStack();
     }
 
     @Override
@@ -151,13 +148,13 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
                     mWebBookmarkViewModel.delete(mPreviousId);
                 }
                 mWebBookmarkViewModel.add(mWebBookmarkEntity);
-                mActivity.finish();
+                mNavController.popBackStack();
             } else {
                 enableEditing();
             }
         } else if (viewId == R.id.delete_button) {
             mWebBookmarkViewModel.delete(mWebBookmarkEntity);
-            mActivity.finish();
+            mNavController.popBackStack();
         }
     }
 

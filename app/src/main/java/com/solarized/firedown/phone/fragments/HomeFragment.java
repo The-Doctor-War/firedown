@@ -46,9 +46,7 @@ import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.geckoview.GeckoToolbar;
 import com.solarized.firedown.manager.DownloadRequest;
 
-import com.solarized.firedown.phone.BookmarkActivity;
 import com.solarized.firedown.phone.DownloadsActivity;
-import com.solarized.firedown.phone.HistoryActivity;
 import com.solarized.firedown.phone.SettingsActivity;
 import com.solarized.firedown.phone.VaultActivity;
 import com.solarized.firedown.autocomplete.AutoCompleteEditText;
@@ -349,11 +347,9 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 Intent vaultIntent = new Intent(mActivity, VaultActivity.class);
                 mStartForResult.launch(vaultIntent);
             } else if (id == R.drawable.ic_bookmarks_24) {
-                Intent bookmarksIntent = new Intent(mActivity, BookmarkActivity.class);
-                mStartForResult.launch(bookmarksIntent);
+                NavigationUtils.navigateSafe(mNavController, R.id.action_home_to_bookmarks);
             } else if (id == R.drawable.ic_history_24) {
-                Intent historyIntent = new Intent(mActivity, HistoryActivity.class);
-                mStartForResult.launch(historyIntent);
+                NavigationUtils.navigateSafe(mNavController, R.id.action_home_to_history);
             } else if(id == R.drawable.ic_baseline_settings_24 || id == R.drawable.ic_settings_24){
                 Intent settingsIntent = new Intent(mActivity, SettingsActivity.class);
                 mStartForResult.launch(settingsIntent);
@@ -686,8 +682,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             // Cradle slot on normal home is Bookmarks — the URL bar at
             // the top already covers the search path, so the centre
             // tap-target gives the bookmarks list a one-tap entry.
-            Intent bookmarksIntent = new Intent(mActivity, BookmarkActivity.class);
-            mStartForResult.launch(bookmarksIntent);
+            NavigationUtils.navigateSafe(mNavController, R.id.action_home_to_bookmarks);
         }
     }
 

@@ -11,6 +11,17 @@
             app:destination="@id/web_bookmark_edit"
             app:popUpTo="@id/web_bookmark"
             app:popUpToInclusive="true" />
+        <!--
+            Tapping an entry pops back to home and pushes browser, so
+            the user lands on home → browser. Back from browser → home,
+            matching the old Activity-based flow where BookmarkActivity
+            finished and IntentHandler pushed browser on top of home.
+        -->
+        <action
+            android:id="@+id/action_web_bookmark_to_browser"
+            app:destination="@id/browser"
+            app:popUpTo="@id/home"
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/web_bookmark_edit"

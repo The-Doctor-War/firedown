@@ -20,9 +20,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.paging.LoadState;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.entity.WebBookmarkEntity;
+import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.WebBookmarkViewModel;
 import com.solarized.firedown.ui.CardViewListItemDecoration;
 import com.solarized.firedown.ui.OnItemClickListener;
@@ -39,12 +41,16 @@ public class WebBookmarkFragment extends BaseFocusFragment implements OnItemClic
     private static final String TAG = WebBookmarkFragment.class.getName();
     private WebBookmarkAdapter mAdapter;
     private WebBookmarkViewModel mWebBookmarkViewModel;
+    private BrowserURIViewModel mBrowserURIViewModel;
     private boolean mPendingScrollToTop = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mWebBookmarkViewModel = new ViewModelProvider(this).get(WebBookmarkViewModel.class);
+        // Activity-scoped so BrowserFragment (the OPEN_URI observer)
+        // picks up the same event instance we publish here.
+        mBrowserURIViewModel = new ViewModelProvider(mActivity).get(BrowserURIViewModel.class);
         mWebBookmarkViewModel.search(null);
         setupBackPress();
     }
@@ -127,7 +133,7 @@ public class WebBookmarkFragment extends BaseFocusFragment implements OnItemClic
             if(mActionModeEnabled){
                 stopActionMode();
             }else{
-                mActivity.finish();
+                mNavController.popBackStack();
             }
         });
         mToolbar.addMenuProvider(new MenuProvider() {
@@ -160,7 +166,7 @@ public class WebBookmarkFragment extends BaseFocusFragment implements OnItemClic
                     }
                     return true;
                 } else if (id == android.R.id.home) {
-                    mActivity.finish();
+                    mNavController.popBackStack();
                     return true;
                 }
                 return false;
@@ -222,7 +228,12 @@ public class WebBookmarkFragment extends BaseFocusFragment implements OnItemClic
                 if(webBookmarkEntity != null){
                     GeckoStateEntity geckoStateEntity = new GeckoStateEntity(false);
                     geckoStateEntity.setUri(webBookmarkEntity.getUrl());
-                    setSessionResult(geckoStateEntity);
+                    // Same shape HomeFragment uses to open a URL — publish the
+                    // OPEN_URI event on the shared ViewModel, then navigate to
+                    // browser via the action that pops back to home (so the
+                    // bookmark surface isn't left on the back stack).
+                    mBrowserURIViewModel.onEventSelected(geckoStateEntity, IntentActions.OPEN_URI);
+                    NavigationUtils.navigateSafe(mNavController, R.id.action_web_bookmark_to_browser);
                 }
             }
         }

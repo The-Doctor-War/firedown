@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rounded-square tonal background for the Safe Folder leading icon
+    on Home. Pairs with bg_icon_container_primary (Downloads) so the
+    two shelf cards read as distinct destinations rather than a
+    generic pair. Secondary container = peach; primary = coral.
+    Corner radius (12dp) echoes the parent card corner so the chip
+    nests cleanly.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorSecondaryContainer" />
+    <corners android:radius="12dp" />
+</shape>

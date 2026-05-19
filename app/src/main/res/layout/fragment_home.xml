@@ -124,7 +124,7 @@
                     <FrameLayout
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/bg_icon_container_tonal">
+                        android:background="@drawable/bg_icon_container_secondary">
 
                         <androidx.appcompat.widget.AppCompatImageView
                             android:layout_width="24dp"

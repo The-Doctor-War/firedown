@@ -1836,6 +1836,7 @@ async function processVideo(details, videoId) {
                     serverAbrStreamingUrl: sabrUrl,
                     videoPlaybackUstreamerConfig: sabrConfig,
                     formats: sabrFormats,
+                    videoId: videoId,
                     visitorData: cachedVisitorData || null,
                     clientVersion: null
                 };

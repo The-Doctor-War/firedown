@@ -54,6 +54,14 @@ public class JsonHelper {
                 if (clientVersion != null && !clientVersion.isEmpty() && !"null".equals(clientVersion)) {
                     entity.setSabrClientVersion(clientVersion);
                 }
+                String videoId = sabr.optString("videoId", null);
+                if (videoId != null && !videoId.isEmpty() && !"null".equals(videoId)) {
+                    entity.setSabrVideoId(videoId);
+                }
+                String visitorData = sabr.optString("visitorData", null);
+                if (visitorData != null && !visitorData.isEmpty() && !"null".equals(visitorData)) {
+                    entity.setSabrVisitorData(visitorData);
+                }
             }
 
             // Duration from innertube (lengthSeconds * 1000 in background.js)

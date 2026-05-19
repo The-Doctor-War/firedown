@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.solarized.firedown.data.Download;
+import com.solarized.firedown.geckoview.PoTokenGenerator;
 import com.solarized.firedown.ffmpegutils.FFmpegDownloader;
 import com.solarized.firedown.ffmpegutils.FFmpegErrors;
 import com.solarized.firedown.ffmpegutils.FFmpegListener;
@@ -353,17 +354,27 @@ public class SabrStrategy implements DownloadStrategy {
      */
     @Nullable
     private String mintPoToken(@NonNull DownloadRequest request) {
-        // Native mint path is wired and ready, but it needs videoId +
-        // visitorData on the DownloadRequest to build the BotGuard
-        // contentBinding. Those fields haven't been threaded through the
-        // request yet (BrowserDownloadEntity → JsonHelper → DownloadRequest
-        // would need parallel additions). Until that's done, the native
-        // PoTokenGenerator stays dormant and we fall through to the JS
-        // token from the request. The PoTokenGenerator session + port
-        // infrastructure still proves out in the meantime because the
-        // content script connects the port as soon as Java's
-        // PoTokenGenerator.generate is invoked — which is the next step
-        // once videoId/visitorData are wired.
+        PoTokenGenerator gen = context.getPoTokenGenerator();
+        String videoId = request.getSabrVideoId();
+        String visitorData = request.getSabrVisitorData();
+
+        if (gen != null && !TextUtils.isEmpty(videoId) && !TextUtils.isEmpty(visitorData)) {
+            try {
+                String native_ = gen.generate(videoId, visitorData);
+                if (!TextUtils.isEmpty(native_)) {
+                    Log.d(TAG, "Native PO token: " + native_.length() + " chars");
+                    return native_;
+                }
+                Log.w(TAG, "Native mint returned empty, falling back to JS token");
+            } catch (Exception e) {
+                Log.w(TAG, "Native mint failed, falling back to JS token: " + e.getMessage());
+            }
+        } else if (gen == null) {
+            Log.w(TAG, "PoTokenGenerator unavailable, using JS token");
+        } else {
+            Log.w(TAG, "Missing videoId/visitorData on request, using JS token");
+        }
+
         return request.getSabrPoToken();
     }
 

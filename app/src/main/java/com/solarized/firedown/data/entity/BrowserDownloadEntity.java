@@ -75,6 +75,8 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
     String sabrConfig;
     String sabrPoToken;
     String sabrClientVersion;
+    String sabrVideoId;
+    String sabrVisitorData;
 
     ArrayList<FFmpegEntity> mStreams;
 
@@ -155,6 +157,8 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         sabrConfig = in.readString();
         sabrPoToken = in.readString();
         sabrClientVersion = in.readString();
+        sabrVideoId = in.readString();
+        sabrVisitorData = in.readString();
         incognito = in.readByte() != 0;
     }
 
@@ -445,6 +449,22 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         this.sabrClientVersion = v;
     }
 
+    public String getSabrVideoId() {
+        return sabrVideoId;
+    }
+
+    public void setSabrVideoId(String v) {
+        this.sabrVideoId = v;
+    }
+
+    public String getSabrVisitorData() {
+        return sabrVisitorData;
+    }
+
+    public void setSabrVisitorData(String v) {
+        this.sabrVisitorData = v;
+    }
+
     public boolean isIncognito() { return incognito; }
 
     public void setIncognito(boolean incognito) { this.incognito = incognito; }
@@ -481,6 +501,8 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         this.sabrConfig = entity.getSabrConfig();
         this.sabrPoToken = entity.getSabrPoToken();
         this.sabrClientVersion = entity.getSabrClientVersion();
+        this.sabrVideoId = entity.getSabrVideoId();
+        this.sabrVisitorData = entity.getSabrVisitorData();
         this.incognito = entity.isIncognito();
     }
 
@@ -527,6 +549,8 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         dest.writeString(sabrConfig);
         dest.writeString(sabrPoToken);
         dest.writeString(sabrClientVersion);
+        dest.writeString(sabrVideoId);
+        dest.writeString(sabrVisitorData);
         dest.writeByte((byte) (incognito ? 1 : 0));
     }
 

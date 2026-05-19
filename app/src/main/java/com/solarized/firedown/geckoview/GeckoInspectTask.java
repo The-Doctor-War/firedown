@@ -64,6 +64,8 @@ public class GeckoInspectTask implements Runnable {
     private final String mSabrConfig;
     private final String mSabrClientVersion;
     private final String mSabrPoToken;
+    private final String mSabrVideoId;
+    private final String mSabrVisitorData;
     private final long mDuration;
     private final boolean mIncognito;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
@@ -88,6 +90,8 @@ public class GeckoInspectTask implements Runnable {
         mSabrConfig = geckoInspectEntity.getSabrConfig();
         mSabrClientVersion = geckoInspectEntity.getSabrClientVersion();
         mSabrPoToken = geckoInspectEntity.getSabrPoToken();
+        mSabrVideoId = geckoInspectEntity.getSabrVideoId();
+        mSabrVisitorData = geckoInspectEntity.getSabrVisitorData();
         mDuration = geckoInspectEntity.getDuration();
         mIncognito = geckoInspectEntity.isIncognito();
 
@@ -153,6 +157,12 @@ public class GeckoInspectTask implements Runnable {
             }
             if (!TextUtils.isEmpty(mSabrPoToken)) {
                 entity.setSabrPoToken(mSabrPoToken);
+            }
+            if (!TextUtils.isEmpty(mSabrVideoId)) {
+                entity.setSabrVideoId(mSabrVideoId);
+            }
+            if (!TextUtils.isEmpty(mSabrVisitorData)) {
+                entity.setSabrVisitorData(mSabrVisitorData);
             }
         }
 

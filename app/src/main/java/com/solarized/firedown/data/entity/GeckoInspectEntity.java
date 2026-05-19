@@ -20,6 +20,8 @@ public class GeckoInspectEntity {
     private String sabrConfig;
     private String sabrPoToken;
     private String sabrClientVersion;
+    private String sabrVideoId;
+    private String sabrVisitorData;
     // Duration in milliseconds from innertube (lengthSeconds * 1000)
     private long duration;
     private boolean incognito;
@@ -112,6 +114,18 @@ public class GeckoInspectEntity {
     }
     public void setSabrClientVersion(String v) {
         this.sabrClientVersion = v;
+    }
+    public String getSabrVideoId() {
+        return sabrVideoId;
+    }
+    public void setSabrVideoId(String v) {
+        this.sabrVideoId = v;
+    }
+    public String getSabrVisitorData() {
+        return sabrVisitorData;
+    }
+    public void setSabrVisitorData(String v) {
+        this.sabrVisitorData = v;
     }
     public long getDuration() {
         return duration;

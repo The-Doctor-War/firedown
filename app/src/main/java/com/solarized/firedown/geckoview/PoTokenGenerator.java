@@ -124,7 +124,22 @@ public class PoTokenGenerator {
     private final Consumer<GeckoSession> sessionRegistrar;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
-    /** Serializes session-create/close + lifecycle field access. */
+    /**
+     * Serializes session-create/close + lifecycle field access.
+     *
+     * <p><b>Lock ordering invariant:</b> when both {@code lock} and {@code pending}
+     * are held, {@code lock} is acquired first. No method takes {@code pending}
+     * first and then {@code lock}. Mint registration in {@link #mint} acquires
+     * both in this order to make the port-snapshot + pending-registration
+     * atomic vs. the disconnect sweep in {@link #failAllPending}.</p>
+     *
+     * <p><b>Lock-vs-future-wait invariant:</b> callers MUST NOT hold {@code lock}
+     * while blocking on {@link CompletableFuture#get}. The port-handshake
+     * delegate (driven by the Gecko main thread) takes {@code lock} to mutate
+     * state, so any thread sleeping under the lock would deadlock the
+     * handshake. {@link #ensureReady} captures the future under the lock and
+     * then releases before awaiting.</p>
+     */
     private final Object lock = new Object();
 
     @GuardedBy("lock") private GeckoSession session;
@@ -218,7 +233,7 @@ public class PoTokenGenerator {
             // reconnected after a session restart), drop the old one first.
             if (port != null && port != newPort) {
                 Log.w(TAG, "replacing existing port — failing any in-flight mints");
-                failAllPendingLocked("port replaced");
+                failAllPending("port replaced");
             }
             port = newPort;
         }
@@ -240,7 +255,7 @@ public class PoTokenGenerator {
                     if (port == src) {
                         port = null;
                     }
-                    failAllPendingLocked("port disconnected");
+                    failAllPending("port disconnected");
                     // Session is likely dead too; clear it so the next
                     // generate() rebuilds from scratch.
                     closeSessionLocked();
@@ -367,19 +382,26 @@ public class PoTokenGenerator {
     /** Send a mint request over {@link #port} and block on the reply. */
     @Nullable
     private String mint(@NonNull String videoId, @Nullable String visitorData) {
-        WebExtension.Port p;
+        // Capture port AND register pending atomically under the same lock
+        // that onDisconnect / closeSession take. Otherwise there's a small
+        // window where the disconnect sweep clears `pending` between our
+        // port read and our pending.put, leaving the future orphaned and
+        // forcing the full 15s timeout. Holding `lock` here means the
+        // sweep either runs entirely before our registration (port is null,
+        // fast fail) or entirely after (our future is in the snapshot and
+        // gets failed exceptionally).
+        final String requestId = "pot-" + System.nanoTime();
+        final CompletableFuture<String> future = new CompletableFuture<>();
+        final WebExtension.Port p;
         synchronized (lock) {
+            if (port == null) {
+                Log.w(TAG, "mint: no port");
+                return null;
+            }
             p = port;
-        }
-        if (p == null) {
-            Log.w(TAG, "mint: no port");
-            return null;
-        }
-
-        String requestId = "pot-" + System.nanoTime();
-        CompletableFuture<String> future = new CompletableFuture<>();
-        synchronized (pending) {
-            pending.put(requestId, future);
+            synchronized (pending) {
+                pending.put(requestId, future);
+            }
         }
 
         try {
@@ -487,11 +509,23 @@ public class PoTokenGenerator {
             readyFuture.completeExceptionally(new IllegalStateException("session closing"));
         }
         readyFuture = null;
-        failAllPendingLocked("session closing");
+        failAllPending("session closing");
     }
 
-    /** Caller MUST hold {@link #lock}. */
-    private void failAllPendingLocked(@NonNull String reason) {
+    /**
+     * Fails any pending mints with the given reason. Manages its own
+     * {@code pending} synchronization internally so callers can invoke it
+     * with or without holding {@link #lock}.
+     *
+     * <p>Note: in current call sites we DO hold {@code lock} when calling
+     * this (from {@link #onPortConnected} / port {@code onDisconnect} /
+     * {@link #closeSessionLocked}). Future-waiters in {@code mint()} are
+     * blocked on {@code future.get()} which doesn't require {@code lock},
+     * so completing-while-locked is safe today. If anyone ever attaches a
+     * {@code whenComplete} callback to these futures that re-takes
+     * {@code lock}, this would deadlock — keep this in mind.</p>
+     */
+    private void failAllPending(@NonNull String reason) {
         List<CompletableFuture<String>> snapshot;
         synchronized (pending) {
             snapshot = new ArrayList<>(pending.values());

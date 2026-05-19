@@ -173,15 +173,30 @@ if (location.pathname === '/robots.txt') {
                 // from a content script does NOT loop back to the same
                 // content script — the legacy path relies on background.js
                 // to relay, which we're explicitly bypassing.
+                // 17s ceiling — slightly above Java's 15s mint timeout so the
+                // Java side fails first on hangs, but we still clean up the
+                // listener if __fdGenPoToken never calls __fdPoTokenCB (page
+                // crash, runtime fault, etc.). Without this, listeners would
+                // accumulate on the long-lived robots.txt session — 5h of
+                // mints with occasional hangs adds up.
                 const token = await new Promise((resolve, reject) => {
+                    let timerId;
+                    const cleanup = () => {
+                        window.removeEventListener('fdPoTokenResult', handler);
+                        if (timerId !== undefined) clearTimeout(timerId);
+                    };
                     const handler = (ev) => {
                         let data;
                         try { data = JSON.parse(ev.detail); } catch (e) { return; }
                         if (!data || data.requestId !== requestId) return;
-                        window.removeEventListener('fdPoTokenResult', handler);
+                        cleanup();
                         if (data.error) reject(new Error(data.error));
                         else resolve(data.token);
                     };
+                    timerId = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('mint timeout (no __fdPoTokenCB after 17s)'));
+                    }, 17000);
                     window.addEventListener('fdPoTokenResult', handler);
                     window.wrappedJSObject.__fdGenPoToken(msg.videoId || '', msg.visitorData || '', requestId);
                 });

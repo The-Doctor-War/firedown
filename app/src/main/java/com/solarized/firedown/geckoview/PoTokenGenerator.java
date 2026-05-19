@@ -101,8 +101,11 @@ public class PoTokenGenerator {
     /** Matches the {@code cm}-cache TTL inside {@code content.js}; after this we recycle the session. */
     private static final long SESSION_TTL_MS = 5L * 60 * 60 * 1000;
 
-    /** Max wait for the page to load + content script to send {@code ready} over the port. */
-    private static final long INIT_TIMEOUT_MS = 10_000;
+    /** Max wait for the page to load + content script to send {@code ready} over the port.
+     *  Kept short so a broken native path doesn't add multi-second overhead per
+     *  download before falling back to the JS-shipped token — fast fail is
+     *  more important than chasing the last few % of slow networks. */
+    private static final long INIT_TIMEOUT_MS = 3_000;
 
     /** Max wait for a single mint reply. Per-video mints are normally <100ms (cached VM)
      *  or ~3s (first mint after fresh session). 15s leaves headroom but caps a stuck mint. */
@@ -268,7 +271,12 @@ public class PoTokenGenerator {
     private boolean createSessionLocked() {
         Log.i(TAG, "createSession: building hidden session for " + ROBOTS_URL);
         readyFuture = new CompletableFuture<>();
-        // Create + open + load all on the Gecko main thread.
+        // Create + register + open + load all on the Gecko main thread.
+        // Order matters: registerSession must run BEFORE session.open() so
+        // the WebExtension MessageDelegate is attached when GeckoView's
+        // WebExtension subsystem binds content scripts to the session.
+        // That's how TabDelegate.onNewTab works — it returns an unopened
+        // session and GeckoView opens it later, after delegates are wired.
         AtomicReference<GeckoSession> ref = new AtomicReference<>();
         mainHandler.post(() -> {
             try {
@@ -278,13 +286,15 @@ public class PoTokenGenerator {
                         .allowJavascript(true)
                         .build();
                 GeckoSession s = new GeckoSession(settings);
-                s.open(runtime);
-                // Attach our WebExtensions so the YouTube content script
-                // gets injected when robots.txt loads. The registrar wires
-                // up MessageDelegate / ActionDelegate via GeckoRuntimeHelper;
-                // we only care about the youtube-potoken Port that gets
-                // opened from the injected content script.
+                // 1) Attach delegates first — so content scripts get bound
+                //    when GeckoView opens the session.
                 sessionRegistrar.accept(s);
+                // 2) Open the session — content scripts attach here.
+                s.open(runtime);
+                // 3) Mark active so the WebExtension API treats this as a
+                //    live tab for content-script injection purposes.
+                s.setActive(true);
+                // 4) Finally, navigate.
                 s.loadUri(ROBOTS_URL);
                 ref.set(s);
                 Log.i(TAG, "createSession: session opened, awaiting content script ready");

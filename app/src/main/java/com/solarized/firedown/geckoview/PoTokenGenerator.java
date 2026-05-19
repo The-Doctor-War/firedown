@@ -166,11 +166,15 @@ public class PoTokenGenerator {
         Log.i(TAG, "generate: videoId=" + videoId + " visitorData="
                 + (visitorData != null ? visitorData.length() + " chars" : "null"));
         // Step 1: make sure we have a live session + content script ready.
-        // Synchronized so two concurrent callers don't both try to create.
-        boolean ready;
-        synchronized (lock) {
-            ready = ensureReadyLocked();
-        }
+        // Critical: we MUST NOT hold `lock` while awaiting the ready signal.
+        // The signal arrives via onPortConnected → handlePortMessage on the
+        // GeckoView main thread, both of which take `lock` to mutate state.
+        // If we held `lock` during readyFuture.get(), the port handshake
+        // would deadlock waiting for the lock we're sleeping on — exactly
+        // the failure mode the diagnostic logs surfaced ("Long monitor
+        // contention ... in onPortConnected for 2.591s" then "ready" arrives
+        // ~14ms after our timeout fired).
+        boolean ready = ensureReady();
         if (!ready) {
             Log.w(TAG, "generate: session not ready, aborting");
             return null;
@@ -249,35 +253,83 @@ public class PoTokenGenerator {
     // Internal
     // ────────────────────────────────────────────────────────────────────────
 
-    /** Caller MUST hold {@link #lock}. */
-    private boolean ensureReadyLocked() {
-        // Session is fresh and the port is connected — reuse.
-        long age = System.currentTimeMillis() - sessionCreatedAt;
-        Log.i(TAG, "ensureReady: session=" + (session != null)
-                + " port=" + (port != null) + " age=" + age + "ms");
-        if (session != null && port != null && age < SESSION_TTL_MS) {
-            return true;
+    /**
+     * Returns true once we have a live session + connected port + content
+     * script that signalled ready. The caller MUST NOT hold {@link #lock}
+     * — see the comment in {@link #generate} for why.
+     *
+     * <p>Splits into two phases on purpose: a short critical section under
+     * {@code lock} that either confirms the cached session is still good or
+     * kicks off creation + captures the {@link #readyFuture}, followed by
+     * the long {@code future.get()} wait done WITHOUT the lock so the port
+     * handshake delegate can take the lock and resolve the future.</p>
+     */
+    private boolean ensureReady() {
+        CompletableFuture<Void> waitOn;
+        synchronized (lock) {
+            long age = System.currentTimeMillis() - sessionCreatedAt;
+            Log.i(TAG, "ensureReady: session=" + (session != null)
+                    + " port=" + (port != null) + " age=" + age + "ms");
+            if (session != null && port != null && age < SESSION_TTL_MS) {
+                return true;
+            }
+            // A creation kicked off by a concurrent caller may already be
+            // in flight — piggy-back on its future instead of starting a
+            // second creation that would race with the first. Two cases:
+            //   (a) session==null but readyFuture in flight: the main-thread
+            //       runnable hasn't created the session yet.
+            //   (b) session!=null but port==null and readyFuture in flight:
+            //       session is created, awaiting content.js to connect.
+            // Either way, our future.get() will resolve when the port
+            // handshake fires.
+            if (readyFuture != null && !readyFuture.isDone()) {
+                Log.i(TAG, "ensureReady: piggy-backing on in-flight creation");
+                waitOn = readyFuture;
+            } else {
+                // Session is stale or never created — tear down and rebuild.
+                if (session != null) {
+                    Log.i(TAG, "session stale (age=" + age + "ms) — recycling");
+                    closeSessionLocked();
+                }
+                waitOn = startSessionLocked();
+                if (waitOn == null) {
+                    return false;
+                }
+            }
         }
-        // Session is stale or never created — tear down and rebuild.
-        if (session != null) {
-            Log.i(TAG, "session stale (age=" + age + "ms) — recycling");
-            closeSessionLocked();
+
+        long t0 = System.currentTimeMillis();
+        try {
+            waitOn.get(INIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            Log.w(TAG, "ready signal timed out after " + INIT_TIMEOUT_MS + "ms — content script never connected");
+            synchronized (lock) { closeSessionLocked(); }
+            return false;
+        } catch (ExecutionException | InterruptedException e) {
+            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+            Log.w(TAG, "ready signal failed: " + e.getMessage());
+            synchronized (lock) { closeSessionLocked(); }
+            return false;
         }
-        return createSessionLocked();
+        Log.i(TAG, "session ready after " + (System.currentTimeMillis() - t0) + "ms");
+        return true;
     }
 
-    /** Caller MUST hold {@link #lock}. Creates session, loads robots.txt,
-     *  waits for content script to connect its port + send {@code ready}. */
-    private boolean createSessionLocked() {
+    /** Caller MUST hold {@link #lock}. Kicks off session creation on the main
+     *  thread and returns the future that resolves when content.js signals
+     *  ready. Returns {@code null} only on the rare path where we couldn't
+     *  even post the creation runnable. */
+    @Nullable
+    private CompletableFuture<Void> startSessionLocked() {
         Log.i(TAG, "createSession: building hidden session for " + ROBOTS_URL);
-        readyFuture = new CompletableFuture<>();
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        readyFuture = future;
         // Create + register + open + load all on the Gecko main thread.
         // Order matters: registerSession must run BEFORE session.open() so
         // the WebExtension MessageDelegate is attached when GeckoView's
         // WebExtension subsystem binds content scripts to the session.
         // That's how TabDelegate.onNewTab works — it returns an unopened
         // session and GeckoView opens it later, after delegates are wired.
-        AtomicReference<GeckoSession> ref = new AtomicReference<>();
         mainHandler.post(() -> {
             try {
                 GeckoSessionSettings settings = new GeckoSessionSettings.Builder()
@@ -294,43 +346,22 @@ public class PoTokenGenerator {
                 // 3) Mark active so the WebExtension API treats this as a
                 //    live tab for content-script injection purposes.
                 s.setActive(true);
-                // 4) Finally, navigate.
+                // 4) Stash session + timestamp so concurrent callers see the
+                //    live session before content.js fires ready. Take the
+                //    lock briefly — we're not blocking on anything here.
+                synchronized (lock) {
+                    session = s;
+                    sessionCreatedAt = System.currentTimeMillis();
+                }
+                // 5) Finally, navigate.
                 s.loadUri(ROBOTS_URL);
-                ref.set(s);
                 Log.i(TAG, "createSession: session opened, awaiting content script ready");
             } catch (Exception e) {
                 Log.e(TAG, "session create failed", e);
-                readyFuture.completeExceptionally(e);
+                future.completeExceptionally(e);
             }
         });
-
-        // Wait for ready signal. CompletableFuture.get is independent of any
-        // Gecko / WebExtension scheduler — it blocks on a JVM monitor.
-        long t0 = System.currentTimeMillis();
-        try {
-            readyFuture.get(INIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            Log.w(TAG, "ready signal timed out after " + INIT_TIMEOUT_MS + "ms — content script never connected");
-            closeSessionLocked();
-            return false;
-        } catch (ExecutionException | InterruptedException e) {
-            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
-            Log.w(TAG, "ready signal failed: " + e.getMessage());
-            closeSessionLocked();
-            return false;
-        }
-
-        GeckoSession s = ref.get();
-        if (s == null) {
-            // Session creation post failed before completing the future.
-            // readyFuture already completed exceptionally above, but
-            // defensive-check anyway.
-            return false;
-        }
-        session = s;
-        sessionCreatedAt = System.currentTimeMillis();
-        Log.i(TAG, "session ready after " + (System.currentTimeMillis() - t0) + "ms");
-        return true;
+        return future;
     }
 
     /** Send a mint request over {@link #port} and block on the reply. */

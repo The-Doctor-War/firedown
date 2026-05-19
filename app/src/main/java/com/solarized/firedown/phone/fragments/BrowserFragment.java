@@ -902,14 +902,26 @@ public class BrowserFragment extends BaseBrowserFragment
      */
     private void showEnableWasmSnackbar(String reportedUrl, boolean incognito) {
         GeckoState current = peekCurrentGeckoState();
-        if (current == null || current.getEntityUri() == null) return;
+        if (current == null || current.getEntityUri() == null) {
+            Log.d(TAG, "showEnableWasmSnackbar skip: no current tab. reportedUrl=" + reportedUrl);
+            return;
+        }
 
         String currentHost = WebUtils.getDomainName(current.getEntityUri());
         String reportedHost = WebUtils.getDomainName(reportedUrl);
-        if (!reportedHost.equals(currentHost)) return;
+        if (!reportedHost.equals(currentHost)) {
+            Log.d(TAG, "showEnableWasmSnackbar skip: host mismatch. current=" + currentHost
+                    + " reported=" + reportedHost);
+            return;
+        }
 
         View anchor = getSnackAnchorView();
-        if (anchor == null) return;
+        if (anchor == null) {
+            Log.d(TAG, "showEnableWasmSnackbar skip: no anchor view");
+            return;
+        }
+        Log.d(TAG, "showEnableWasmSnackbar showing for " + reportedHost
+                + " incognito=" + incognito);
 
         Snackbar snackbar = makeSnackbar(
                 anchor,

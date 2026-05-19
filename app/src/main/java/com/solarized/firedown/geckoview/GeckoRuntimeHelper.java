@@ -309,7 +309,7 @@ public class GeckoRuntimeHelper {
             Log.d(TAG, "onMessage: " + jsonObject);
             try {
                 switch (nativeApp) {
-                    case "browser" -> handleBrowserMessage(jsonObject);
+                    case "browser" -> handleBrowserMessage(jsonObject, sender.session);
                     case "icons" -> handleIconsMessage(jsonObject);
                     case "ublock" -> handleUblockMessage(jsonObject, sender.session);
                     case "youtube", "parser" -> handleExtractionMessage(jsonObject);
@@ -321,7 +321,7 @@ public class GeckoRuntimeHelper {
         }
 
 
-        private void handleBrowserMessage(JSONObject json) throws JSONException {
+        private void handleBrowserMessage(JSONObject json, GeckoSession senderSession) throws JSONException {
             Log.d(TAG, "handleBrowserMessage: " + json);
             String listener = json.getString("listener");
             switch (listener) {
@@ -341,14 +341,20 @@ public class GeckoRuntimeHelper {
                     // The content-script bridge spotted a WASM error on the
                     // page. Route to the active repo (incognito vs regular)
                     // so the BrowserFragment for that tab type observes it
-                    // and shows the "Enable for {host}?" snackbar. We look
-                    // up incognito-ness by tabId rather than trusting the
-                    // JS bridge — the content script has no reliable way
-                    // to introspect its own session's private-mode state.
+                    // and shows the "Enable for {host}?" snackbar.
+                    //
+                    // Prefer senderSession lookup over the JS-sent tabId —
+                    // content scripts going through sendNativeMessage don't
+                    // populate sender.tab, so the JS payload's tabId may
+                    // be -1. The GeckoSession the message arrived on is
+                    // always authoritative.
                     String url = json.optString("url", null);
+                    String detail = json.optString("detail", "");
+                    Log.d(TAG, "wasmUnavailable received: url=" + url
+                            + " session=" + senderSession + " detail=" + detail);
                     if (TextUtils.isEmpty(url)) break;
-                    int tabId = json.optInt("tabId", GeckoState.NULL_SESSION_ID);
-                    boolean isIncognito = mIncognitoStateRepository.getGeckoState(tabId) != null;
+                    boolean isIncognito = senderSession != null
+                            && mIncognitoStateRepository.getGeckoState(senderSession) != null;
                     if (isIncognito) {
                         mIncognitoStateRepository.getWasmAllowlistRepository().postNeedsWasm(url);
                     } else {

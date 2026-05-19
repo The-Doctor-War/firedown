@@ -25,19 +25,53 @@ console.log('[cs] loaded', location.href);
   function report(detail) {
     if (reported) return;
     reported = true;
+    const payload = {
+      // 'kind' is what the background runtime.onMessage listener
+      // filters on (fallback path). 'listener' is what the Java-side
+      // MessageDelegate.handleBrowserMessage switches on (direct path).
+      kind: 'wasm-unavailable',
+      listener: 'wasmUnavailable',
+      url: location.href,
+      detail: String(detail || '').slice(0, 200),
+    };
+    console.log('[cs] wasm-unavailable reporting', location.href, detail);
+    // Direct content→native first (manifest grants
+    // nativeMessagingFromContent). Skipping the background hop avoids
+    // a race where the page throws before requests.js has registered
+    // its runtime.onMessage listener. Fall back to the background path
+    // if the direct call rejects.
     try {
-      browser.runtime.sendMessage({
-        kind: 'wasm-unavailable',
-        url: location.href,
-        detail: String(detail || '').slice(0, 200),
-      });
-    } catch (_) { /* extension context torn down — ignore */ }
+      const r = browser.runtime.sendNativeMessage('browser', payload);
+      if (r && r.catch) r.catch(() => fallback(payload));
+      return;
+    } catch (_) { fallback(payload); }
   }
 
+  function fallback(payload) {
+    try { browser.runtime.sendMessage(payload); } catch (_) {}
+  }
+
+  // window.error fires for synchronous uncaught throws in the page.
+  // useCapture=true puts us ahead of any page-installed handler.
   window.addEventListener('error', (e) => {
     const msg = (e && (e.message || (e.error && e.error.message))) || '';
     if (WASM_PATTERN.test(msg)) report(msg);
   }, true);
+
+  // Older surface — some sites (or polyfills) only set window.onerror
+  // and bypass addEventListener entirely. Chain onto any existing
+  // handler so we don't clobber the page.
+  const origOnError = window.onerror;
+  window.onerror = function (msg, src, line, col, err) {
+    try {
+      const text = (err && err.message) || (typeof msg === 'string' ? msg : '');
+      if (WASM_PATTERN.test(text)) report(text);
+    } catch (_) {}
+    if (typeof origOnError === 'function') {
+      return origOnError.apply(this, arguments);
+    }
+    return false;
+  };
 
   window.addEventListener('unhandledrejection', (e) => {
     const reason = e && e.reason;
@@ -45,6 +79,8 @@ console.log('[cs] loaded', location.href);
     if (msg && WASM_PATTERN.test(msg)) report(msg);
   });
 
+  // console.error wrap. Sites often catch the throw and only log via
+  // console.error, so window.error never sees it.
   const origError = console.error;
   console.error = function (...args) {
     try {
@@ -53,9 +89,10 @@ console.log('[cs] loaded', location.href);
         try { return String(a); } catch (_) { return ''; }
       }).join(' ');
       if (WASM_PATTERN.test(joined)) report(joined);
-    } catch (_) { /* never let our wrapper break the page */ }
+    } catch (_) {}
     return origError.apply(console, args);
   };
+
 })();
 
 // Top-frame metadata responder. We only answer in the top frame so the

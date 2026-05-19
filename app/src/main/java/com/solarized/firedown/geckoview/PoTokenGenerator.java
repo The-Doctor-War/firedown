@@ -1,161 +1,538 @@
 package com.solarized.firedown.geckoview;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mozilla.geckoview.GeckoRuntime;
 import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoSessionSettings;
+import org.mozilla.geckoview.WebExtension;
 
-import java.util.concurrent.CountDownLatch;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 /**
- * Generates PO tokens by running BotGuard in a hidden GeckoSession.
+ * Mints PO tokens for SABR downloads from Java instead of the WebExtension's
+ * JS orchestration in {@code background.js}.
  *
- * Mirrors FreeTube's approach: creates a lightweight page at youtube.com origin
- * (robots.txt — plain text, no CSP), where the content script auto-injects
- * bgutils + BotGuard runner. The entire BotGuard flow runs in youtube.com
- * context with proper origin, cookies, and DOM.
+ * <h3>Why this exists</h3>
+ * The pre-existing JS path ({@code background.js generatePoToken} →
+ * {@code browser.tabs.create('robots.txt')} → content script BotGuard runner)
+ * is fragile because (a) it goes through GeckoView's WebExtension Tabs API,
+ * whose state-conversion code throws {@code webProgress is undefined} /
+ * {@code WindowEventDispatcher win is null} cascades that destroy the tab
+ * mid-mint, and (b) it relies on JS {@code setTimeout} for timeout/retry,
+ * which dies after those same GeckoView faults corrupt the WebExtension
+ * event dispatcher. We worked around both with pre-warm, coalescing,
+ * microtask-yield retry loops, and a 3-attempt outer loop, but each
+ * workaround layers fragility on fragility.
  *
- * Flow:
- * 1. Java creates hidden GeckoSession, loads youtube.com/robots.txt
- * 2. Content script (matches *.youtube.com/*) auto-injects
- * 3. background.js sends generatePoToken message to content script
- * 4. Content script runs BotGuard via wrappedJSObject.eval() (no CSP on robots.txt)
- * 5. PO token flows: page → content script → background.js → native message → Java
- * 6. Java closes hidden session
+ * <h3>What this class does differently</h3>
+ * <ul>
+ *   <li>Creates a {@link GeckoSession} <i>directly</i> via {@code new GeckoSession()}
+ *       instead of going through {@code browser.tabs.create}. The session
+ *       isn't enrolled in the WebExtension tab list, so {@code ext-tabs.js}
+ *       never iterates over it and its buggy state-conversion code never
+ *       fires for our session.</li>
+ *   <li>Owns the timeout / retry / lifecycle on a JVM thread with
+ *       {@link CompletableFuture#get(long, TimeUnit)} and Java's executor
+ *       primitives. These don't share a fate with GeckoView's JS event
+ *       dispatcher — they survive WebExtension scheduler faults.</li>
+ *   <li>Keeps the BotGuard session alive across {@link #generate} calls so
+ *       per-video mints reuse the cached BotGuard VM inside {@code content.js}
+ *       (~5h validity window) and complete in ~100ms instead of ~3s.</li>
+ *   <li>Mints fresh per-video each call (never caches the token itself) so
+ *       the {@code contentBinding} always matches the video YouTube checks
+ *       against — fixing the latent bug in the JS cache that returned a
+ *       videoA-bound token to a videoB download.</li>
+ * </ul>
+ *
+ * <h3>Communication with the page</h3>
+ * The BotGuard JS still has to run inside the page (it needs {@code youtube.com}
+ * origin for the {@code jnn-pa.googleapis.com} fetch + a DOM for the
+ * {@code bgutils-js} VM). What we change is who orchestrates around it: a
+ * native port named {@code youtube-potoken} opened by the existing
+ * {@code content.js} when it loads on {@code /robots.txt}. Java holds the
+ * port, sends {@code mint} requests over it, and receives the per-video
+ * token over the same port. No {@code browser.tabs.create}, no
+ * {@code runtime.sendMessage} via {@code background.js}, no {@code setTimeout}
+ * in the critical path.
+ *
+ * <h3>Lifecycle</h3>
+ * Singleton. Session is created on first {@link #generate} call, reused
+ * across calls until {@value #SESSION_TTL_MS} (matches the BotGuard minter's
+ * own ~5h cache TTL inside {@code content.js} — re-using the session past
+ * that point would just trigger a fresh BotGuard challenge inside the page,
+ * so we recycle the whole thing instead). Closes the session and fails any
+ * in-flight mints on {@link #shutdown}, on session age expiry, or on an
+ * unrecoverable port disconnect.
+ *
+ * <h3>Concurrency</h3>
+ * All session state mutations go through {@link #lock}. Multiple
+ * {@link #generate} callers serialize on the lock for the session-creation
+ * step but run mints concurrently against the live port (each mint carries
+ * its own request id, replies dispatched via the {@link #pending} map).
  */
 public class PoTokenGenerator {
 
     private static final String TAG = "PoTokenGenerator";
-    private static final String ROBOTS_URL = "https://www.youtube.com/robots.txt";
-    private static final long TIMEOUT_MS = 20_000; // 20 seconds
+
+    /** Plain-text page on youtube.com — no CSP, so the page can {@code eval} bgutils.
+     *  The {@code #fd-native} hash tells {@code content.js} to open the native
+     *  port (otherwise it would try to in every JS-orchestrated robots.txt tab
+     *  too, churning our port whenever that tab loads or dies). */
+    private static final String ROBOTS_URL = "https://www.youtube.com/robots.txt#fd-native";
+
+    /** Matches the {@code cm}-cache TTL inside {@code content.js}; after this we recycle the session. */
+    private static final long SESSION_TTL_MS = 5L * 60 * 60 * 1000;
+
+    /** Max wait for the page to load + content script to send {@code ready} over the port.
+     *  Kept short so a broken native path doesn't add multi-second overhead per
+     *  download before falling back to the JS-shipped token — fast fail is
+     *  more important than chasing the last few % of slow networks. */
+    private static final long INIT_TIMEOUT_MS = 3_000;
+
+    /** Max wait for a single mint reply. Per-video mints are normally <100ms (cached VM)
+     *  or ~3s (first mint after fresh session). 15s leaves headroom but caps a stuck mint. */
+    private static final long MINT_TIMEOUT_MS = 15_000;
+
+    /** Port name the content script connects to. Must match the literal in
+     *  {@code content.js}. Note: {@code connectNative} validates against
+     *  {@code /^\w+(\.\w+)*$/} — hyphens are rejected, so use underscore. */
+    public static final String PORT_NAME = "youtube_potoken";
 
     private final GeckoRuntime runtime;
-    private GeckoSession hiddenSession;
-    private volatile String pendingToken;
-    private volatile String pendingError;
-    private CountDownLatch latch;
-
-    public PoTokenGenerator(GeckoRuntime runtime) {
-        this.runtime = runtime;
-    }
+    /** Hooks the session into the WebExtension wiring so the youtube extension
+     *  content scripts get injected when robots.txt loads. Provided by
+     *  {@code GeckoRuntimeHelper} (which owns the loaded extensions map) to
+     *  avoid a circular dependency. */
+    private final Consumer<GeckoSession> sessionRegistrar;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     /**
-     * Generate a PO token for the given video ID.
-     * This is a BLOCKING call — run on a background thread.
+     * Serializes session-create/close + lifecycle field access.
      *
-     * @param videoId    YouTube video ID
-     * @param visitorData Base64 visitor data
-     * @return PO token string, or null on failure
+     * <p><b>Lock ordering invariant:</b> when both {@code lock} and {@code pending}
+     * are held, {@code lock} is acquired first. No method takes {@code pending}
+     * first and then {@code lock}. Mint registration in {@link #mint} acquires
+     * both in this order to make the port-snapshot + pending-registration
+     * atomic vs. the disconnect sweep in {@link #failAllPending}.</p>
+     *
+     * <p><b>Lock-vs-future-wait invariant:</b> callers MUST NOT hold {@code lock}
+     * while blocking on {@link CompletableFuture#get}. The port-handshake
+     * delegate (driven by the Gecko main thread) takes {@code lock} to mutate
+     * state, so any thread sleeping under the lock would deadlock the
+     * handshake. {@link #ensureReady} captures the future under the lock and
+     * then releases before awaiting.</p>
      */
-    public String generate(String videoId, String visitorData) {
-        Log.d(TAG, "Generating PO token for " + videoId);
+    private final Object lock = new Object();
 
-        latch = new CountDownLatch(1);
-        pendingToken = null;
-        pendingError = null;
+    @GuardedBy("lock") private GeckoSession session;
+    @GuardedBy("lock") private long sessionCreatedAt;
+    /** Set when the content script's {@code ready} message arrives over the port. */
+    @GuardedBy("lock") private CompletableFuture<Void> readyFuture;
+    /** The Port handed to us by {@link #onPortConnected}; set after content script connects. */
+    @GuardedBy("lock") private WebExtension.Port port;
 
-        // Create hidden session on UI thread (GeckoSession requires it)
-        final AtomicReference<GeckoSession> sessionRef = new AtomicReference<>();
+    /** Per-mint reply tracker — requestId → future. Concurrent because completions arrive
+     *  from the port delegate on the GeckoView main thread, but {@code generate()} waits
+     *  on the future from arbitrary caller threads. */
+    private final Map<String, CompletableFuture<String>> pending = new HashMap<>();
 
-        try {
-            // Post to main thread to create session
-            android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-            CountDownLatch sessionLatch = new CountDownLatch(1);
+    public PoTokenGenerator(@NonNull GeckoRuntime runtime,
+                            @NonNull Consumer<GeckoSession> sessionRegistrar) {
+        this.runtime = runtime;
+        this.sessionRegistrar = sessionRegistrar;
+    }
 
-            mainHandler.post(() -> {
-                try {
-                    GeckoSessionSettings settings = new GeckoSessionSettings.Builder()
-                            .usePrivateMode(false)
-                            .suspendMediaWhenInactive(true)
-                            .allowJavascript(true)
-                            .build();
+    // ────────────────────────────────────────────────────────────────────────
+    // Public API
+    // ────────────────────────────────────────────────────────────────────────
 
-                    hiddenSession = new GeckoSession(settings);
-                    hiddenSession.open(runtime);
-
-                    // Set navigation delegate to know when page loads
-                    hiddenSession.setNavigationDelegate(new GeckoSession.NavigationDelegate() {});
-                    hiddenSession.setContentDelegate(new GeckoSession.ContentDelegate() {});
-
-                    hiddenSession.loadUri(ROBOTS_URL);
-                    sessionRef.set(hiddenSession);
-                    Log.d(TAG, "Hidden session created, loading " + ROBOTS_URL);
-                } catch (Exception e) {
-                    Log.e(TAG, "Failed to create session", e);
-                    pendingError = e.getMessage();
-                    latch.countDown();
-                }
-                sessionLatch.countDown();
-            });
-
-            sessionLatch.await(5, TimeUnit.SECONDS);
-
-            if (sessionRef.get() == null) {
-                Log.e(TAG, "Session creation failed");
-                return null;
-            }
-
-            // Wait for the PO token result (comes via native messaging from background.js)
-            boolean completed = latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
-
-            if (!completed) {
-                Log.w(TAG, "PO token generation timed out (" + TIMEOUT_MS + "ms)");
-                cleanup();
-                return null;
-            }
-
-            if (pendingError != null) {
-                Log.w(TAG, "PO token generation failed: " + pendingError);
-                cleanup();
-                return null;
-            }
-
-            Log.d(TAG, "PO token generated: " + (pendingToken != null ? pendingToken.length() + " chars" : "null"));
-            cleanup();
-            return pendingToken;
-
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Interrupted", e);
-            cleanup();
+    /**
+     * Mint a PO token bound to the given video. Blocking call — run from a
+     * background thread (NOT the main thread, NOT a Gecko thread).
+     *
+     * @param videoId YouTube video ID, used as the BotGuard {@code contentBinding}.
+     *                Falls back to {@code visitorData} only if videoId is empty.
+     * @param visitorData Base64-encoded visitor data from YouTube. Passed
+     *                    through to the in-page BotGuard runner.
+     * @return token, or {@code null} on any failure (timeout, port dropped,
+     *         session create failed, content script error). Caller decides
+     *         whether to retry or fall back.
+     */
+    @Nullable
+    public String generate(@NonNull String videoId, @Nullable String visitorData) {
+        Log.i(TAG, "generate: videoId=" + videoId + " visitorData="
+                + (visitorData != null ? visitorData.length() + " chars" : "null"));
+        // Step 1: make sure we have a live session + content script ready.
+        // Critical: we MUST NOT hold `lock` while awaiting the ready signal.
+        // The signal arrives via onPortConnected → handlePortMessage on the
+        // GeckoView main thread, both of which take `lock` to mutate state.
+        // If we held `lock` during readyFuture.get(), the port handshake
+        // would deadlock waiting for the lock we're sleeping on — exactly
+        // the failure mode the diagnostic logs surfaced ("Long monitor
+        // contention ... in onPortConnected for 2.591s" then "ready" arrives
+        // ~14ms after our timeout fired).
+        boolean ready = ensureReady();
+        if (!ready) {
+            Log.w(TAG, "generate: session not ready, aborting");
             return null;
         }
+
+        // Step 2: send mint request, wait for reply. Both can happen
+        // concurrently across callers because the port can multiplex via
+        // per-request ids.
+        String token = mint(videoId, visitorData);
+        Log.i(TAG, "generate: result=" + (token != null ? token.length() + " chars" : "null"));
+        return token;
     }
 
     /**
-     * Called by GeckoRuntimeHelper when the PO token result arrives
-     * via native messaging from background.js.
+     * Tear down the session and fail any in-flight mints. Idempotent.
+     * Call from app shutdown (and from anywhere else state recovery is needed).
      */
-    public void onTokenResult(String token, String error) {
-        if (error != null) {
-            pendingError = error;
-        } else {
-            pendingToken = token;
-        }
-        if (latch != null) {
-            latch.countDown();
+    public void shutdown() {
+        Log.d(TAG, "shutdown");
+        synchronized (lock) {
+            closeSessionLocked();
         }
     }
 
-    private void cleanup() {
-        if (hiddenSession != null) {
-            try {
-                android.os.Handler mainHandler = new android.os.Handler(android.os.Looper.getMainLooper());
-                final GeckoSession session = hiddenSession;
-                hiddenSession = null;
-                mainHandler.post(() -> {
-                    try {
-                        session.close();
-                        Log.d(TAG, "Hidden session closed");
-                    } catch (Exception e) {
-                        Log.w(TAG, "Error closing session", e);
-                    }
-                });
-            } catch (Exception e) {
-                Log.w(TAG, "Error in cleanup", e);
+    // ────────────────────────────────────────────────────────────────────────
+    // Wired by GeckoRuntimeHelper when the content script's native port connects
+    // ────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Called by {@code GeckoRuntimeHelper.MessageDelegate.onConnect} when
+     * the content script on robots.txt opens its native port.
+     *
+     * <p>Wires up the port's delegate to dispatch replies into {@link #pending}.
+     * Also resolves the {@link #readyFuture} so {@link #ensureReadyLocked} can
+     * proceed.</p>
+     */
+    public void onPortConnected(@NonNull WebExtension.Port newPort) {
+        Log.i(TAG, "port connected (sender=" + newPort.sender + ")");
+        synchronized (lock) {
+            // If we're somehow already holding a port (e.g. content script
+            // reconnected after a session restart), drop the old one first.
+            if (port != null && port != newPort) {
+                Log.w(TAG, "replacing existing port — failing any in-flight mints");
+                failAllPending("port replaced");
             }
+            port = newPort;
+        }
+        newPort.setDelegate(new WebExtension.PortDelegate() {
+            @Override
+            public void onPortMessage(@NonNull Object message, @NonNull WebExtension.Port src) {
+                if (!(message instanceof JSONObject)) {
+                    Log.w(TAG, "onPortMessage: not a JSONObject");
+                    return;
+                }
+                JSONObject json = (JSONObject) message;
+                handlePortMessage(json);
+            }
+
+            @Override
+            public void onDisconnect(@NonNull WebExtension.Port src) {
+                Log.w(TAG, "port disconnected");
+                synchronized (lock) {
+                    if (port == src) {
+                        port = null;
+                    }
+                    failAllPending("port disconnected");
+                    // Session is likely dead too; clear it so the next
+                    // generate() rebuilds from scratch.
+                    closeSessionLocked();
+                }
+            }
+        });
+    }
+
+    // ────────────────────────────────────────────────────────────────────────
+    // Internal
+    // ────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Returns true once we have a live session + connected port + content
+     * script that signalled ready. The caller MUST NOT hold {@link #lock}
+     * — see the comment in {@link #generate} for why.
+     *
+     * <p>Splits into two phases on purpose: a short critical section under
+     * {@code lock} that either confirms the cached session is still good or
+     * kicks off creation + captures the {@link #readyFuture}, followed by
+     * the long {@code future.get()} wait done WITHOUT the lock so the port
+     * handshake delegate can take the lock and resolve the future.</p>
+     */
+    private boolean ensureReady() {
+        CompletableFuture<Void> waitOn;
+        synchronized (lock) {
+            long age = System.currentTimeMillis() - sessionCreatedAt;
+            Log.i(TAG, "ensureReady: session=" + (session != null)
+                    + " port=" + (port != null) + " age=" + age + "ms");
+            if (session != null && port != null && age < SESSION_TTL_MS) {
+                return true;
+            }
+            // A creation kicked off by a concurrent caller may already be
+            // in flight — piggy-back on its future instead of starting a
+            // second creation that would race with the first. Two cases:
+            //   (a) session==null but readyFuture in flight: the main-thread
+            //       runnable hasn't created the session yet.
+            //   (b) session!=null but port==null and readyFuture in flight:
+            //       session is created, awaiting content.js to connect.
+            // Either way, our future.get() will resolve when the port
+            // handshake fires.
+            if (readyFuture != null && !readyFuture.isDone()) {
+                Log.i(TAG, "ensureReady: piggy-backing on in-flight creation");
+                waitOn = readyFuture;
+            } else {
+                // Session is stale or never created — tear down and rebuild.
+                if (session != null) {
+                    Log.i(TAG, "session stale (age=" + age + "ms) — recycling");
+                    closeSessionLocked();
+                }
+                waitOn = startSessionLocked();
+                if (waitOn == null) {
+                    return false;
+                }
+            }
+        }
+
+        long t0 = System.currentTimeMillis();
+        try {
+            waitOn.get(INIT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            Log.w(TAG, "ready signal timed out after " + INIT_TIMEOUT_MS + "ms — content script never connected");
+            synchronized (lock) { closeSessionLocked(); }
+            return false;
+        } catch (ExecutionException | InterruptedException e) {
+            if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+            Log.w(TAG, "ready signal failed: " + e.getMessage());
+            synchronized (lock) { closeSessionLocked(); }
+            return false;
+        }
+        Log.i(TAG, "session ready after " + (System.currentTimeMillis() - t0) + "ms");
+        return true;
+    }
+
+    /** Caller MUST hold {@link #lock}. Kicks off session creation on the main
+     *  thread and returns the future that resolves when content.js signals
+     *  ready. Returns {@code null} only on the rare path where we couldn't
+     *  even post the creation runnable. */
+    @Nullable
+    private CompletableFuture<Void> startSessionLocked() {
+        Log.i(TAG, "createSession: building hidden session for " + ROBOTS_URL);
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        readyFuture = future;
+        // Create + register + open + load all on the Gecko main thread.
+        // Order matters: registerSession must run BEFORE session.open() so
+        // the WebExtension MessageDelegate is attached when GeckoView's
+        // WebExtension subsystem binds content scripts to the session.
+        // That's how TabDelegate.onNewTab works — it returns an unopened
+        // session and GeckoView opens it later, after delegates are wired.
+        mainHandler.post(() -> {
+            try {
+                GeckoSessionSettings settings = new GeckoSessionSettings.Builder()
+                        .usePrivateMode(false)
+                        .suspendMediaWhenInactive(true)
+                        .allowJavascript(true)
+                        .build();
+                GeckoSession s = new GeckoSession(settings);
+                // 1) Attach delegates first — so content scripts get bound
+                //    when GeckoView opens the session.
+                sessionRegistrar.accept(s);
+                // 2) Open the session — content scripts attach here.
+                s.open(runtime);
+                // 3) Mark active so the WebExtension API treats this as a
+                //    live tab for content-script injection purposes.
+                s.setActive(true);
+                // 4) Stash session + timestamp so concurrent callers see the
+                //    live session before content.js fires ready. Take the
+                //    lock briefly — we're not blocking on anything here.
+                synchronized (lock) {
+                    session = s;
+                    sessionCreatedAt = System.currentTimeMillis();
+                }
+                // 5) Finally, navigate.
+                s.loadUri(ROBOTS_URL);
+                Log.i(TAG, "createSession: session opened, awaiting content script ready");
+            } catch (Exception e) {
+                Log.e(TAG, "session create failed", e);
+                future.completeExceptionally(e);
+            }
+        });
+        return future;
+    }
+
+    /** Send a mint request over {@link #port} and block on the reply. */
+    @Nullable
+    private String mint(@NonNull String videoId, @Nullable String visitorData) {
+        // Capture port AND register pending atomically under the same lock
+        // that onDisconnect / closeSession take. Otherwise there's a small
+        // window where the disconnect sweep clears `pending` between our
+        // port read and our pending.put, leaving the future orphaned and
+        // forcing the full 15s timeout. Holding `lock` here means the
+        // sweep either runs entirely before our registration (port is null,
+        // fast fail) or entirely after (our future is in the snapshot and
+        // gets failed exceptionally).
+        final String requestId = "pot-" + System.nanoTime();
+        final CompletableFuture<String> future = new CompletableFuture<>();
+        final WebExtension.Port p;
+        synchronized (lock) {
+            if (port == null) {
+                Log.w(TAG, "mint: no port");
+                return null;
+            }
+            p = port;
+            synchronized (pending) {
+                pending.put(requestId, future);
+            }
+        }
+
+        try {
+            JSONObject msg = new JSONObject();
+            msg.put("type", "mint");
+            msg.put("requestId", requestId);
+            msg.put("videoId", videoId);
+            msg.put("visitorData", visitorData != null ? visitorData : "");
+            // postMessage can be called from any thread — internally posts
+            // to the Gecko main thread.
+            p.postMessage(msg);
+        } catch (JSONException e) {
+            // Won't happen — all keys are static strings — but handle for
+            // completeness so generate() always exits cleanly.
+            Log.e(TAG, "mint: JSON build failed", e);
+            synchronized (pending) {
+                pending.remove(requestId);
+            }
+            return null;
+        }
+
+        try {
+            return future.get(MINT_TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            Log.w(TAG, "mint: timeout id=" + requestId + " after " + MINT_TIMEOUT_MS + "ms");
+            return null;
+        } catch (ExecutionException e) {
+            Log.w(TAG, "mint: failed id=" + requestId + " err=" + e.getCause());
+            return null;
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            Log.w(TAG, "mint: interrupted id=" + requestId);
+            return null;
+        } finally {
+            synchronized (pending) {
+                pending.remove(requestId);
+            }
+        }
+    }
+
+    /** Route an inbound port message to the right handler. */
+    private void handlePortMessage(@NonNull JSONObject json) {
+        String type = json.optString("type", "");
+        switch (type) {
+            case "ready":
+                // Content script finished injecting bgutils + the BotGuard
+                // runner and is ready to mint. Resolve the ready future so
+                // createSessionLocked() can return.
+                Log.i(TAG, "port: ready");
+                synchronized (lock) {
+                    if (readyFuture != null && !readyFuture.isDone()) {
+                        readyFuture.complete(null);
+                    }
+                }
+                break;
+            case "mintResult": {
+                String requestId = json.optString("requestId", "");
+                Log.i(TAG, "port: mintResult id=" + requestId
+                        + " token=" + json.optString("token", "").length() + " chars"
+                        + " error=" + json.optString("error", ""));
+                if (requestId.isEmpty()) {
+                    Log.w(TAG, "mintResult missing requestId");
+                    return;
+                }
+                CompletableFuture<String> f;
+                synchronized (pending) {
+                    f = pending.remove(requestId);
+                }
+                if (f == null) {
+                    // Late reply — caller's get() already timed out and removed
+                    // the entry. Nothing to do.
+                    Log.d(TAG, "mintResult late or unknown id=" + requestId);
+                    return;
+                }
+                String error = json.optString("error", "");
+                if (!error.isEmpty()) {
+                    f.completeExceptionally(new RuntimeException(error));
+                } else {
+                    String token = json.optString("token", "");
+                    f.complete(token);
+                }
+                break;
+            }
+            default:
+                Log.d(TAG, "unhandled port message type=" + type);
+        }
+    }
+
+    /** Caller MUST hold {@link #lock}. */
+    private void closeSessionLocked() {
+        if (session != null) {
+            final GeckoSession s = session;
+            session = null;
+            mainHandler.post(() -> {
+                try {
+                    s.close();
+                } catch (Exception e) {
+                    Log.w(TAG, "session.close failed", e);
+                }
+            });
+        }
+        sessionCreatedAt = 0L;
+        port = null;
+        if (readyFuture != null && !readyFuture.isDone()) {
+            readyFuture.completeExceptionally(new IllegalStateException("session closing"));
+        }
+        readyFuture = null;
+        failAllPending("session closing");
+    }
+
+    /**
+     * Fails any pending mints with the given reason. Manages its own
+     * {@code pending} synchronization internally so callers can invoke it
+     * with or without holding {@link #lock}.
+     *
+     * <p>Note: in current call sites we DO hold {@code lock} when calling
+     * this (from {@link #onPortConnected} / port {@code onDisconnect} /
+     * {@link #closeSessionLocked}). Future-waiters in {@code mint()} are
+     * blocked on {@code future.get()} which doesn't require {@code lock},
+     * so completing-while-locked is safe today. If anyone ever attaches a
+     * {@code whenComplete} callback to these futures that re-takes
+     * {@code lock}, this would deadlock — keep this in mind.</p>
+     */
+    private void failAllPending(@NonNull String reason) {
+        List<CompletableFuture<String>> snapshot;
+        synchronized (pending) {
+            snapshot = new ArrayList<>(pending.values());
+            pending.clear();
+        }
+        for (CompletableFuture<String> f : snapshot) {
+            f.completeExceptionally(new IllegalStateException(reason));
         }
     }
 }

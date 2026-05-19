@@ -121,6 +121,9 @@ public class RunnableManager extends Service {
 	@Inject
 	OkHttpClient mOkHttpClient;
 
+	@Inject
+	com.solarized.firedown.geckoview.GeckoRuntimeHelper mGeckoRuntimeHelper;
+
 	// A managed pool of background decoder threads
 	private final ThreadPoolExecutor mDownloadThreadPool = new ThreadPoolExecutor(
 			NUMBER_OF_CORES, NUMBER_OF_CORES, KEEP_ALIVE_TIME,
@@ -571,7 +574,7 @@ public class RunnableManager extends Service {
 		Log.d(TAG, "resumeDownloadTaskToExecutor mUrl: " + mUrl + " filePath: " + filePath);
 		DownloadTask task = mDownloadTaskWorkQueue.poll();
 		if (task == null) {
-			task = new DownloadTask(RunnableManager.this, mDownloadRepository, mOkHttpClient);
+			task = new DownloadTask(RunnableManager.this, mDownloadRepository, mOkHttpClient, mGeckoRuntimeHelper.getPoTokenGenerator());
 		}
 
 		Log.d(TAG, "resumeDownloadTaskToExecutor id: " + id);
@@ -619,7 +622,7 @@ public class RunnableManager extends Service {
 
 		DownloadTask task = mDownloadTaskWorkQueue.poll();
 		if (task == null) {
-			task = new DownloadTask(RunnableManager.this, mDownloadRepository, mOkHttpClient);
+			task = new DownloadTask(RunnableManager.this, mDownloadRepository, mOkHttpClient, mGeckoRuntimeHelper.getPoTokenGenerator());
 		}
 
 		int id = DownloadTask.generateId();

@@ -3,7 +3,11 @@ package com.solarized.firedown.manager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.solarized.firedown.data.Download;
+import com.solarized.firedown.geckoview.PoTokenGenerator;
 import com.solarized.firedown.ffmpegutils.FFmpegDownloader;
 import com.solarized.firedown.ffmpegutils.FFmpegErrors;
 import com.solarized.firedown.ffmpegutils.FFmpegListener;
@@ -111,11 +115,31 @@ public class SabrStrategy implements DownloadStrategy {
         sabrDownloader.setStreamingUrl(request.getSabrUrl());
         sabrDownloader.setUstreamerConfig(request.getSabrConfig());
 
-        // PO token from BotGuard — enables full download without attestation wall
-        String poToken = request.getSabrPoToken();
+        // PO token resolution — two paths in order of preference:
+        //
+        //   1. NATIVE — PoTokenGenerator owns a long-lived hidden GeckoSession
+        //      and mints a fresh per-video token over a native port. This
+        //      bypasses the WebExtension Tabs API fragility (the
+        //      `webProgress is undefined` / `WindowEventDispatcher win is
+        //      null` cascade that's been killing tabs mid-mint) and uses
+        //      Java CountDownLatch / CompletableFuture timeouts that don't
+        //      die alongside the JS macrotask scheduler.
+        //
+        //   2. JS-EMBEDDED — token attached to the DownloadRequest from the
+        //      youtube WebExtension's background.js path. Kept as a fallback
+        //      until the native path is proven across all repro cases.
+        //
+        // Per-video binding matters: each PO token is bound to a specific
+        // videoId (the BotGuard `contentBinding`), so we always want a fresh
+        // mint for the video being downloaded. The native path mints fresh;
+        // the JS path may return a cached token bound to a different video
+        // (a latent bug in the JS cache).
+        String poToken = mintPoToken(request);
         if (!TextUtils.isEmpty(poToken)) {
             sabrDownloader.setPoToken(poToken);
             Log.d(TAG, "PO token applied: " + poToken.length() + " chars");
+        } else {
+            Log.w(TAG, "No PO token available — SABR will hit the attestation wall");
         }
 
         // Dynamic MWEB client version from HTML — CDN validates cver= matches
@@ -319,6 +343,50 @@ public class SabrStrategy implements DownloadStrategy {
     // ========================================================================
     // Helpers
     // ========================================================================
+
+    /**
+     * Resolve a PO token for this download. Prefers the native path (PoTokenGenerator
+     * via DownloadContext) because it's resilient to the GeckoView WebExtension
+     * scheduler/tabs faults that have been killing the JS path. Falls back to the
+     * JS-embedded token on the request if the native generator is unavailable or
+     * its mint fails. We're already on a background thread here (the
+     * DownloadRunnable), so blocking on the native mint is safe.
+     */
+    @Nullable
+    private String mintPoToken(@NonNull DownloadRequest request) {
+        PoTokenGenerator gen = context.getPoTokenGenerator();
+        String videoId = request.getSabrVideoId();
+        String visitorData = request.getSabrVisitorData();
+        String jsToken = request.getSabrPoToken();
+        int jsLen = jsToken != null ? jsToken.length() : 0;
+
+        Log.d(TAG, "mintPoToken: gen=" + (gen != null) + " videoId="
+                + (videoId != null ? videoId : "null") + " visitorData="
+                + (visitorData != null ? visitorData.length() + " chars" : "null")
+                + " jsFallback=" + jsLen + " chars");
+
+        if (gen != null && !TextUtils.isEmpty(videoId) && !TextUtils.isEmpty(visitorData)) {
+            long t0 = System.currentTimeMillis();
+            try {
+                String native_ = gen.generate(videoId, visitorData);
+                long dt = System.currentTimeMillis() - t0;
+                if (!TextUtils.isEmpty(native_)) {
+                    Log.d(TAG, "Native PO token: " + native_.length() + " chars (" + dt + "ms)");
+                    return native_;
+                }
+                Log.w(TAG, "Native mint returned empty after " + dt + "ms, falling back to JS token");
+            } catch (Exception e) {
+                long dt = System.currentTimeMillis() - t0;
+                Log.w(TAG, "Native mint failed after " + dt + "ms, falling back to JS token: " + e.getMessage());
+            }
+        } else if (gen == null) {
+            Log.w(TAG, "PoTokenGenerator unavailable, using JS token");
+        } else {
+            Log.w(TAG, "Missing videoId/visitorData on request, using JS token");
+        }
+
+        return jsToken;
+    }
 
     private void reportProgress(int percent, long downloaded, long total) {
         if (callback == null) return;

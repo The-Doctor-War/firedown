@@ -49,12 +49,16 @@ public class DownloadTask implements DownloadCallback {
 
     public DownloadTask(RunnableManager runnableManager,
                         DownloadDataRepository repository,
-                        OkHttpClient okHttpClient) {
+                        OkHttpClient okHttpClient,
+                        com.solarized.firedown.geckoview.PoTokenGenerator poTokenGenerator) {
         this.runnableManager = runnableManager;
         this.repository = repository;
         this.okHttpClient = okHttpClient;
+        this.poTokenGenerator = poTokenGenerator;
         this.entity = new DownloadEntity();
     }
+
+    private final com.solarized.firedown.geckoview.PoTokenGenerator poTokenGenerator;
 
     // ========================================================================
     // Initialization
@@ -143,7 +147,7 @@ public class DownloadTask implements DownloadCallback {
 
     /** Central DownloadContext factory — keeps the OkHttpClient wiring in one place. */
     private DownloadContext buildContext(String path, String headers, String cookie) {
-        return new DownloadContext(okHttpClient, runnableManager, path, headers, cookie);
+        return new DownloadContext(okHttpClient, runnableManager, path, headers, cookie, poTokenGenerator);
     }
 
     /** Called from DownloadRunnable.finally — runs on the download thread. */

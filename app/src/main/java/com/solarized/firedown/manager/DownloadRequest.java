@@ -42,6 +42,8 @@ public class DownloadRequest implements Parcelable {
     @Nullable private final String sabrConfig;
     @Nullable private final String sabrPoToken;
     @Nullable private final String sabrClientVersion;
+    @Nullable private final String sabrVideoId;
+    @Nullable private final String sabrVisitorData;
 
     // SABR fields — per-variant (from selected FFmpegEntity)
     private final int sabrVideoItag;
@@ -75,6 +77,8 @@ public class DownloadRequest implements Parcelable {
         this.sabrConfig = builder.sabrConfig;
         this.sabrPoToken = builder.sabrPoToken;
         this.sabrClientVersion = builder.sabrClientVersion;
+        this.sabrVideoId = builder.sabrVideoId;
+        this.sabrVisitorData = builder.sabrVisitorData;
         this.sabrVideoItag = builder.sabrVideoItag;
         this.sabrVideoLastModified = builder.sabrVideoLastModified;
         this.sabrVideoXtags = builder.sabrVideoXtags;
@@ -112,7 +116,9 @@ public class DownloadRequest implements Parcelable {
                 .sabrUrl(entity.getSabrUrl())
                 .sabrConfig(entity.getSabrConfig())
                 .sabrPoToken(entity.getSabrPoToken())
-                .sabrClientVersion(entity.getSabrClientVersion());
+                .sabrClientVersion(entity.getSabrClientVersion())
+                .sabrVideoId(entity.getSabrVideoId())
+                .sabrVisitorData(entity.getSabrVisitorData());
 
         // Apply best stream — sort by quality descending, pick first
         ArrayList<FFmpegEntity> streams = entity.getStreams();
@@ -161,7 +167,9 @@ public class DownloadRequest implements Parcelable {
                 .sabrUrl(entity.getSabrUrl())
                 .sabrConfig(entity.getSabrConfig())
                 .sabrPoToken(entity.getSabrPoToken())
-                .sabrClientVersion(entity.getSabrClientVersion());
+                .sabrClientVersion(entity.getSabrClientVersion())
+                .sabrVideoId(entity.getSabrVideoId())
+                .sabrVisitorData(entity.getSabrVisitorData());
 
         if (selectedStream != null) {
             applySabrFields(builder, selectedStream);
@@ -218,6 +226,8 @@ public class DownloadRequest implements Parcelable {
     @Nullable public String getSabrConfig()             { return sabrConfig; }
     @Nullable public String getSabrPoToken()            { return sabrPoToken; }
     @Nullable public String getSabrClientVersion()      { return sabrClientVersion; }
+    @Nullable public String getSabrVideoId()            { return sabrVideoId; }
+    @Nullable public String getSabrVisitorData()        { return sabrVisitorData; }
     public int getSabrVideoItag()                       { return sabrVideoItag; }
     @Nullable public String getSabrVideoLastModified()  { return sabrVideoLastModified; }
     @Nullable public String getSabrVideoXtags()         { return sabrVideoXtags; }
@@ -266,6 +276,8 @@ public class DownloadRequest implements Parcelable {
         private String sabrConfig;
         private String sabrPoToken;
         private String sabrClientVersion;
+        private String sabrVideoId;
+        private String sabrVisitorData;
         private int sabrVideoItag;
         private String sabrVideoLastModified;
         private String sabrVideoXtags;
@@ -300,6 +312,8 @@ public class DownloadRequest implements Parcelable {
         public Builder sabrConfig(String config)            { this.sabrConfig = config; return this; }
         public Builder sabrPoToken(String token)            { this.sabrPoToken = token; return this; }
         public Builder sabrClientVersion(String v)         { this.sabrClientVersion = v; return this; }
+        public Builder sabrVideoId(String v)                { this.sabrVideoId = v; return this; }
+        public Builder sabrVisitorData(String v)            { this.sabrVisitorData = v; return this; }
         public Builder sabrVideoItag(int itag)              { this.sabrVideoItag = itag; return this; }
         public Builder sabrVideoLastModified(String lmt)    { this.sabrVideoLastModified = lmt; return this; }
         public Builder sabrVideoXtags(String xtags)         { this.sabrVideoXtags = xtags; return this; }
@@ -341,6 +355,8 @@ public class DownloadRequest implements Parcelable {
         sabrConfig = in.readString();
         sabrPoToken = in.readString();
         sabrClientVersion = in.readString();
+        sabrVideoId = in.readString();
+        sabrVisitorData = in.readString();
         sabrVideoItag = in.readInt();
         sabrVideoLastModified = in.readString();
         sabrVideoXtags = in.readString();
@@ -374,6 +390,8 @@ public class DownloadRequest implements Parcelable {
         dest.writeString(sabrConfig);
         dest.writeString(sabrPoToken);
         dest.writeString(sabrClientVersion);
+        dest.writeString(sabrVideoId);
+        dest.writeString(sabrVisitorData);
         dest.writeInt(sabrVideoItag);
         dest.writeString(sabrVideoLastModified);
         dest.writeString(sabrVideoXtags);

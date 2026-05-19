@@ -32,10 +32,26 @@ if (location.pathname === '/robots.txt') {
     try { window.wrappedJSObject.eval(BGUTILS_CODE); }
     catch(e) { console.error('[BG-robots] bgutils inject failed:', e.message); }
 
-    // Expose callback for results
+    // Expose callback for results. Two delivery paths:
+    //   - runtime.sendMessage to background.js for the legacy JS-orchestrated
+    //     flow (background.js holds the requestId and resolves its own promise).
+    //   - window CustomEvent for the native PoTokenGenerator flow. That flow's
+    //     listener lives in THIS content script, and runtime.sendMessage from a
+    //     content script does NOT loop back to itself, so we need a DOM-level
+    //     side channel. Content scripts share the page's DOM, so the event
+    //     dispatched on window.wrappedJSObject is observable from below via a
+    //     window.addEventListener with the same name.
     exportFunction(function(resultJson) {
         try {
             browser.runtime.sendMessage({ type: 'poTokenResult', data: JSON.parse(resultJson) });
+        } catch (e) {}
+        // Use a string payload to dodge Xray-wrapper restrictions on
+        // page-defined object properties read from the content script side.
+        try {
+            const ev = new window.wrappedJSObject.CustomEvent(
+                    'fdPoTokenResult',
+                    cloneInto({ detail: resultJson }, window.wrappedJSObject));
+            window.wrappedJSObject.dispatchEvent(ev);
         } catch (e) {}
     }, window.wrappedJSObject, { defineAs: '__fdPoTokenCB' });
 
@@ -131,6 +147,76 @@ if (location.pathname === '/robots.txt') {
     // background.js waits for this instead of a blind 2500ms sleep — avoids the
     // race where GeckoView tears down the tab before the sleep finishes.
     browser.runtime.sendMessage({ type: 'poTokenTabReady' }).catch(() => {});
+
+    // Native PO-token bridge — only opened when Java's PoTokenGenerator
+    // created this session. Java signals ownership via the URL fragment
+    // #fd-native; without it (i.e. background.js's browser.tabs.create
+    // path) we skip the native port so it doesn't get captured + later
+    // torn down when the JS tab dies, which would break the native path
+    // mid-mint if it ran concurrently.
+    if (location.hash === '#fd-native') try {
+        // Port name must match PoTokenGenerator.PORT_NAME exactly, and the
+        // WebExtension connectNative regex /^\w+(\.\w+)*$/ rejects hyphens,
+        // so use underscore.
+        const natPort = browser.runtime.connectNative('youtube_potoken');
+        natPort.onMessage.addListener(async (msg) => {
+            if (msg?.type !== 'mint') return;
+            const requestId = msg.requestId;
+            try {
+                if (!window.wrappedJSObject || typeof window.wrappedJSObject.__fdGenPoToken !== 'function') {
+                    throw new Error('__fdGenPoToken not exposed yet');
+                }
+                // __fdGenPoToken calls __fdPoTokenCB → that callback also
+                // dispatches a window 'fdPoTokenResult' CustomEvent (in
+                // addition to its legacy runtime.sendMessage broadcast).
+                // We listen for the event here because runtime.sendMessage
+                // from a content script does NOT loop back to the same
+                // content script — the legacy path relies on background.js
+                // to relay, which we're explicitly bypassing.
+                // 17s ceiling — slightly above Java's 15s mint timeout so the
+                // Java side fails first on hangs, but we still clean up the
+                // listener if __fdGenPoToken never calls __fdPoTokenCB (page
+                // crash, runtime fault, etc.). Without this, listeners would
+                // accumulate on the long-lived robots.txt session — 5h of
+                // mints with occasional hangs adds up.
+                const token = await new Promise((resolve, reject) => {
+                    let timerId;
+                    const cleanup = () => {
+                        window.removeEventListener('fdPoTokenResult', handler);
+                        if (timerId !== undefined) clearTimeout(timerId);
+                    };
+                    const handler = (ev) => {
+                        let data;
+                        try { data = JSON.parse(ev.detail); } catch (e) { return; }
+                        if (!data || data.requestId !== requestId) return;
+                        cleanup();
+                        if (data.error) reject(new Error(data.error));
+                        else resolve(data.token);
+                    };
+                    timerId = setTimeout(() => {
+                        cleanup();
+                        reject(new Error('mint timeout (no __fdPoTokenCB after 17s)'));
+                    }, 17000);
+                    window.addEventListener('fdPoTokenResult', handler);
+                    window.wrappedJSObject.__fdGenPoToken(msg.videoId || '', msg.visitorData || '', requestId);
+                });
+                natPort.postMessage({ type: 'mintResult', requestId, token });
+            } catch (e) {
+                natPort.postMessage({ type: 'mintResult', requestId, error: e.message });
+            }
+        });
+        natPort.onDisconnect.addListener(() => {
+            console.log('[BG-robots] native PO-token port disconnected');
+        });
+        // Tell Java the runner is up and ready to receive mint requests.
+        natPort.postMessage({ type: 'ready' });
+        console.log('[BG-robots] native PO-token port connected');
+    } catch (e) {
+        // connectNative throws if no matching native app is registered for
+        // this session. That's fine in the legacy JS path — fall back to the
+        // browser.runtime.sendMessage flow above.
+        console.log('[BG-robots] native PO-token port unavailable: ' + e.message);
+    }
 
     console.log('[BG-robots] PO token content script ready on robots.txt');
 }

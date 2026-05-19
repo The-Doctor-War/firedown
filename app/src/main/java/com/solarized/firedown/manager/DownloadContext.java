@@ -3,8 +3,10 @@ package com.solarized.firedown.manager;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.solarized.firedown.StoragePaths;
+import com.solarized.firedown.geckoview.PoTokenGenerator;
 import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.Utils;
 
@@ -29,6 +31,7 @@ public class DownloadContext {
     private final Map<String, String> headers;
     private final String userAgent;
     private final Context context;
+    @Nullable private final PoTokenGenerator poTokenGenerator;
     private volatile boolean stopped;
     private volatile boolean deleted;
     private Thread currentThread;
@@ -37,11 +40,13 @@ public class DownloadContext {
                            @NonNull Context context,
                            String filePath,
                            String rawHeaders,
-                           String cookieHeader) {
+                           String cookieHeader,
+                           @Nullable PoTokenGenerator poTokenGenerator) {
         this.context = context;
         this.okHttpClient = okHttpClient;
         this.filePath = filePath;
         this.userAgent = BrowserHeaders.getDefaultUserAgentString();
+        this.poTokenGenerator = poTokenGenerator;
 
         // Parse headers
         this.headers = new HashMap<>();
@@ -56,6 +61,15 @@ public class DownloadContext {
     @NonNull
     public OkHttpClient getOkHttpClient() {
         return okHttpClient;
+    }
+
+    /** Singleton minter for SABR PO tokens. {@code null} only if the runtime
+     *  helper wasn't ready yet at context-build time (e.g. very early
+     *  shutdown); strategies should null-check and fall back to whatever
+     *  token shipped on the {@code DownloadRequest}. */
+    @Nullable
+    public PoTokenGenerator getPoTokenGenerator() {
+        return poTokenGenerator;
     }
 
     public File getOutputFile() {

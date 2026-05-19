@@ -11,6 +11,12 @@
             app:destination="@id/home_incognito"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_home_to_bookmarks"
+            app:destination="@id/nav_graph_bookmark" />
+        <action
+            android:id="@+id/action_home_to_history"
+            app:destination="@id/nav_graph_history" />
     </fragment>
 
     <fragment
@@ -21,10 +27,23 @@
             app:destination="@id/home"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_home_incognito_to_bookmarks"
+            app:destination="@id/nav_graph_bookmark" />
+        <action
+            android:id="@+id/action_home_incognito_to_history"
+            app:destination="@id/nav_graph_history" />
     </fragment>
     <fragment
         android:id="@+id/browser"
-        android:name="com.solarized.firedown.phone.fragments.BrowserFragment" />
+        android:name="com.solarized.firedown.phone.fragments.BrowserFragment">
+        <action
+            android:id="@+id/action_browser_to_bookmarks"
+            app:destination="@id/nav_graph_bookmark" />
+        <action
+            android:id="@+id/action_browser_to_history"
+            app:destination="@id/nav_graph_history" />
+    </fragment>
     <fragment
         android:id="@+id/tabs"
         android:name="com.solarized.firedown.phone.fragments.TabsHolderFragment">
@@ -148,5 +167,17 @@
     <dialog
         android:id="@+id/dialog_delete_clipboard"
         android:name="com.solarized.firedown.phone.dialogs.ClipboardDialogFragment" />
+
+    <!--
+        Bookmark + History child graphs nested into root so the main
+        NavController can route into them. The standalone
+        BookmarkActivity / HistoryActivity still host their own copies
+        of these graphs for the current Intent-launched paths; PR 2
+        will switch the call sites over to navigate() against root
+        and drop the Activities. Until then both hosts coexist —
+        this PR is purely additive infrastructure.
+    -->
+    <include app:graph="@navigation/nav_graph_bookmark" />
+    <include app:graph="@navigation/nav_graph_history" />
 
 </navigation>

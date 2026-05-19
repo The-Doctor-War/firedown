@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rounded-square tonal background for leading icons on home shelf
+    cards (Downloads, Safe Folder). Material 3 list-item style: the
+    card surface stays neutral, while a 40dp tonal chip behind the
+    icon carries a hint of brand color so the pair reads as Firedown
+    rather than a generic system shelf. Corner radius (12dp) echoes
+    the parent card corner so the chip nests cleanly.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorSecondaryContainer" />
+    <corners android:radius="12dp" />
+</shape>

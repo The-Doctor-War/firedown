@@ -1583,11 +1583,7 @@ async function processVideo(details, videoId) {
         // Intercept-wait removed. In practice, every observed processVideo flow
         // uses streamSource="html" — the player API XHR interceptor never fires
         // for MWEB because YouTube embeds playerResponse in the page HTML, not
-        // in a separate XHR. The 800ms setTimeout wait was dead time that also
-        // depended on setTimeout's macrotask scheduler — which is the FIRST
-        // thing to break when GeckoView's eventDispatcher faults after a
-        // PoToken-tab-destruction race. By skipping the wait entirely, we go
-        // straight to HTML fetch and avoid the setTimeout dependency.
+        // in a separate XHR. The 800ms setTimeout wait was dead time.
         //
         // The intercept fast-path is still checked SYNCHRONOUSLY above for the
         // case where the XHR did arrive before processVideo ran. We just don't
@@ -1913,28 +1909,12 @@ async function processVideo(details, videoId) {
                 }
             }
 
-            // Send variants + SABR data
+            // Send variants + SABR data. The PO token used to be minted here
+            // via a hidden robots.txt tab + BotGuard runner; that orchestration
+            // moved to Java's PoTokenGenerator (per-download, blocked off the
+            // download worker thread). background.js no longer ships a token —
+            // SabrStrategy mints fresh per video before each SABR request.
             if (variants && variants.length > 0) {
-                // Generate PO token for SABR downloads — attestation wall can hit
-                // mid-stream (StreamProtectionStatus status=3) and kill the download
-                // after ~3 segments if no poToken is present in the protobuf.
-                if (sabrData) {
-                    const vd = cachedVisitorData || sabrData.visitorData;
-                    if (vd) {
-                        try {
-                            const t0 = Date.now();
-                            console.log(`[Process] Generating PO token for ${videoId}...`);
-                            const poTokenStr = await generatePoToken(vd, videoId);
-                            if (poTokenStr) {
-                                sabrData.poToken = poTokenStr;
-                                console.log(`[Process] PO token: ${poTokenStr.length} chars (${Date.now() - t0}ms)`);
-                            }
-                        } catch (e) {
-                            console.warn(`[Process] PO token failed: ${e.message} (SABR may hit attestation wall)`);
-                        }
-                    }
-                }
-
                 const streamHeaders = getBrowserHeaders();
                 const duration = parseInt(playerResponse.videoDetails?.lengthSeconds || "0", 10) * 1000;
                 const message = {
@@ -1946,7 +1926,7 @@ async function processVideo(details, videoId) {
                     variants, sabr: sabrData
                 };
                 await sendYouTubeNative(message);
-                console.log(`[Process] Sent ${variants.length} variant(s) to native: ${videoId} [${streamSource}]${sabrData ? ' (SABR' + (sabrData.poToken ? '+POT' : '') + ')' : ''}`);
+                console.log(`[Process] Sent ${variants.length} variant(s) to native: ${videoId} [${streamSource}]${sabrData ? ' (SABR)' : ''}`);
                 _exitMode = 'sent-variants';
                 return;
             }
@@ -1976,22 +1956,9 @@ async function processVideo(details, videoId) {
                     }
                 }
 
-                // Generate PO token
-                const vd = cachedVisitorData || sabrData.visitorData;
-                if (vd) {
-                    try {
-                        const t0 = Date.now();
-                        console.log(`[Process] Generating PO token for ${videoId}...`);
-                        const poTokenStr = await generatePoToken(vd, videoId);
-                        if (poTokenStr) {
-                            sabrData.poToken = poTokenStr;
-                            console.log(`[Process] PO token: ${poTokenStr.length} chars (${Date.now() - t0}ms)`);
-                        }
-                    } catch (e) {
-                        console.warn(`[Process] PO token failed: ${e.message}`);
-                    }
-                }
-
+                // PO token is minted by Java's PoTokenGenerator inside
+                // SabrStrategy.mintPoToken — see the comment in the variants
+                // branch above.
                 const sabrVariants = buildSabrOnlyVariants(sabrData);
                 if (sabrVariants.length > 0) {
                     const streamHeaders = getBrowserHeaders();
@@ -2005,14 +1972,11 @@ async function processVideo(details, videoId) {
                         variants: sabrVariants, sabr: sabrData
                     };
                     await sendYouTubeNative(message);
-                    console.log(`[Process] Sent ${sabrVariants.length} SABR variant(s) to native: ${videoId} [${streamSource}] (SABR-only${sabrData.poToken ? '+POT' : ''})`);
+                    console.log(`[Process] Sent ${sabrVariants.length} SABR variant(s) to native: ${videoId} [${streamSource}] (SABR-only)`);
                     _exitMode = 'sent-sabr-only';
                     return;
                 }
 
-                if (!sabrData.poToken) {
-                    console.log(`[Process] No PO token and no variants for ${videoId} — giving up`);
-                }
             }
 
             // itag 18 fallback from current response
@@ -2236,24 +2200,6 @@ browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 browser.tabs.onRemoved.addListener((tabId) => {
     clearTabFromCache(tabId);
     for (const [url, entry] of urlToTabCache) { if (entry.tabId === tabId) urlToTabCache.delete(url); }
-    // Clean up PO token tab reference if closed externally or by GeckoView
-    if (tabId === poTokenTabId) {
-        poTokenTabId = null;
-        // If we were waiting for this tab's content script to signal ready,
-        // resolve immediately so ensurePoTokenTab detects the tab is gone
-        // instead of waiting for the full init timeout.
-        if (poTokenReadyResolve) poTokenReadyResolve();
-        // Reject any pending PO token requests — the page context is dead,
-        // so the result callback will never fire. Without this, requests
-        // hang for the full 20s timeout. This happens when GeckoView tears
-        // down the tab window after sendMessage succeeded but before the
-        // BotGuard VM finished minting.
-        for (const [rid, entry] of pendingPoTokenRequests) {
-            clearTimeout(entry.timer);
-            entry.reject(new Error('PO token tab died during mint'));
-        }
-        pendingPoTokenRequests.clear();
-    }
 });
 
 setInterval(() => {
@@ -2395,311 +2341,6 @@ browser.runtime.onMessage.addListener((msg, sender) => {
         }
     }
 });
-
-// =============================================================================
-// PO TOKEN GENERATION
-// BotGuard runs in a hidden youtube.com/robots.txt tab (no CSP).
-// Content script injects bgutils + BotGuard runner at document_start,
-// then sends a 'poTokenTabReady' message back to signal readiness.
-// We send generatePoToken messages to that tab and receive results back.
-// Minter is cached ~5h in the page context — subsequent mints are instant.
-//
-// Tab lifecycle: created lazily on first generatePoToken() call and KEPT
-// ALIVE for the duration of the extension session. Destroying the tab
-// after each mint races with GeckoView's session-store update logic and
-// leaves the eventDispatcher in a faulted state, which silently breaks
-// setTimeout in this WebExtension. See the long comment in generatePoToken
-// for the full root-cause explanation.
-//
-// The tab is only re-created if:
-//   - ensurePoTokenTab's ping fails (content script unresponsive)
-//   - GeckoView destroys the tab on its own (onRemoved fires)
-//   - The extension reloads
-//
-// GeckoView on Android can tear down background tab windows aggressively.
-// To handle this, ensurePoTokenTab waits for a ready signal from content.js
-// rather than a blind sleep — if the tab dies before content.js signals,
-// we detect it immediately via the timeout or onRemoved listener.
-// =============================================================================
-
-let poTokenTabId = null;
-const PO_TOKEN_TAB_INIT_TIMEOUT = 8000;   // max wait for content script ready signal
-const pendingPoTokenRequests = new Map(); // requestId → { resolve, reject, timer }
-
-// Resolves when content.js on robots.txt sends 'poTokenTabReady'.
-// Set by ensurePoTokenTab, resolved by onMessage listener.
-let poTokenReadyResolve = null;
-
-// ---- PO Token Cache ----
-// A successfully minted PO token is reused across videos for the same visitor
-// session. The BotGuard minter in content.js caches for 5 hours; the minted
-// token itself is valid for about 6 hours. We cache the token in background.js
-// so subsequent videos get it instantly (0ms) without needing the robots.txt tab.
-//
-// On cache miss or expiry, we try to mint via tab. If that fails (GeckoView
-// killed the tab), we generate a cold-start placeholder token that satisfies
-// YouTube's attestation check for initial segments while a real token is
-// minted asynchronously in the background.
-const PO_TOKEN_CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours
-let poTokenCache = null; // { token, visitorData, timestamp }
-
-/**
- * Generate a cold-start PO token entirely in background.js (no tab needed).
- * This is a placeholder token that YouTube accepts for initial SABR segments.
- * It buys time while a real BotGuard-minted token is generated asynchronously.
- *
- * Port of bgutils-js generateColdStartToken — pure math, no BotGuard VM.
- */
-function generateColdStartPoToken(identifier) {
-    const encoded = new TextEncoder().encode(identifier);
-    if (encoded.length > 118) return null; // too long for cold-start format
-    const timestamp = Math.floor(Date.now() / 1000);
-    const keys = [Math.floor(Math.random() * 256), Math.floor(Math.random() * 256)];
-    const header = new Uint8Array([keys[0], keys[1], 0, 1,
-        (timestamp >> 24) & 0xff, (timestamp >> 16) & 0xff,
-        (timestamp >> 8) & 0xff, timestamp & 0xff]);
-    const packet = new Uint8Array(2 + header.length + encoded.length);
-    packet[0] = 34;
-    packet[1] = header.length + encoded.length;
-    packet.set(header, 2);
-    packet.set(encoded, 2 + header.length);
-    // XOR scramble payload with 2-byte key
-    const payload = packet.subarray(2);
-    for (let i = 2; i < payload.length; i++) payload[i] ^= payload[i % 2];
-    // Base64url encode
-    const b64 = btoa(String.fromCharCode(...packet));
-    return b64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-/**
- * Remove a PO token tab immediately, cleaning up all state.
- * Used after successful mint and on init failure to avoid leaking a GeckoSession.
- * Handles GeckoView builds where tabs.remove may not be supported.
- */
-function removePoTokenTab(tabId) {
-    if (poTokenTabId === tabId) poTokenTabId = null;
-    if (tabId) {
-        try {
-            // tabs.remove returns a Promise — catch its rejection to avoid
-            // uncaught errors in GeckoView builds that don't support it.
-            const p = browser.tabs.remove(tabId);
-            if (p && typeof p.catch === 'function') p.catch(() => {});
-        } catch (e) {}
-    }
-}
-
-async function ensurePoTokenTab() {
-    // Fast path: tab already alive — verify content script is still responsive.
-    // tabs.get succeeds even when GeckoView has torn down the window (tab exists
-    // but page context is dead), so we probe with a ping message instead.
-    if (poTokenTabId) {
-        try {
-            await browser.tabs.sendMessage(poTokenTabId, { type: 'ping' });
-            return poTokenTabId;
-        } catch (e) {
-            // Content script is dead — clean up and create a fresh tab
-            console.log(`[PoToken] Tab ${poTokenTabId} unresponsive, removing`);
-            removePoTokenTab(poTokenTabId);
-        }
-    }
-
-    // Clean up any orphaned robots.txt tabs (dead windows from previous runs)
-    const existing = await browser.tabs.query({ url: '*://*.youtube.com/robots.txt' });
-    for (const t of existing) {
-        try { await browser.tabs.remove(t.id); } catch (e) {}
-    }
-
-    // Create new tab and wait for content.js ready signal (not a blind sleep).
-    // content.js sends { type: 'poTokenTabReady' } after injecting bgutils + runner.
-    let createdTabId = null;
-    try {
-        const tab = await browser.tabs.create({ url: 'https://www.youtube.com/robots.txt', active: false });
-        createdTabId = tab.id;
-        poTokenTabId = createdTabId;
-        console.log(`[PoToken] Created robots.txt tab: ${createdTabId}`);
-
-        // Wait for content script ready signal or timeout
-        const ready = await new Promise((resolve) => {
-            const timeout = setTimeout(() => {
-                poTokenReadyResolve = null;
-                resolve(false);
-            }, PO_TOKEN_TAB_INIT_TIMEOUT);
-
-            poTokenReadyResolve = () => {
-                clearTimeout(timeout);
-                poTokenReadyResolve = null;
-                resolve(true);
-            };
-        });
-
-        if (!ready) {
-            // Content script never signaled — tab was likely killed by GeckoView.
-            // Clean up to avoid leaking a dead GeckoSession.
-            console.warn('[PoToken] Tab init timed out (content script never ready), removing tab');
-            removePoTokenTab(createdTabId);
-            return null;
-        }
-
-        // Verify the tab is still alive after the ready signal
-        // (it could have been removed between signal and here)
-        if (poTokenTabId !== createdTabId) {
-            // onRemoved fired during init — tab is gone
-            console.warn('[PoToken] Tab removed during init');
-            return null;
-        }
-
-        console.log(`[PoToken] Tab ${createdTabId} ready`);
-        return createdTabId;
-    } catch (e) {
-        console.warn(`[PoToken] tabs.create failed: ${e.message}`);
-        removePoTokenTab(createdTabId);
-        return null;
-    }
-}
-
-// Handle messages from content script on robots.txt
-browser.runtime.onMessage.addListener((msg) => {
-    // Ready signal: content.js has injected bgutils + BotGuard runner
-    if (msg?.type === 'poTokenTabReady') {
-        if (poTokenReadyResolve) poTokenReadyResolve();
-        return;
-    }
-
-    // Token result: content.js forwarding BotGuard mint result
-    if (msg?.type === 'poTokenResult' && msg.data) {
-        const rid = msg.data.requestId;
-        const pending = rid ? pendingPoTokenRequests.get(rid) : null;
-
-        // If no matching requestId, resolve any pending request (backward compat)
-        const entry = pending || pendingPoTokenRequests.values().next().value;
-        if (!entry) return;
-
-        const key = pending ? rid : pendingPoTokenRequests.keys().next().value;
-        clearTimeout(entry.timer);
-        pendingPoTokenRequests.delete(key);
-
-        if (msg.data.error) {
-            entry.reject(new Error(msg.data.error));
-        } else if (msg.data.token) {
-            entry.resolve(msg.data.token);
-        } else {
-            entry.reject(new Error('Empty PO token result'));
-        }
-    }
-});
-
-/**
- * Generate a content-bound PO token for a video.
- *
- * Uses a three-tier strategy:
- * 1. Cache hit: return immediately (0ms) if a valid token exists for this visitor
- * 2. Tab mint: create robots.txt tab, run BotGuard VM, mint fresh token (~400ms)
- * 3. Cold-start fallback: generate a placeholder token in background.js (~0ms)
- *    that YouTube accepts for initial SABR segments
- *
- * Successfully minted tokens are cached for 6 hours and reused across videos.
- * This eliminates the per-video tab creation that GeckoView kept killing.
- *
- * @param {string} visitorData - Base64 visitor data
- * @param {string} videoId - YouTube video ID (used as content binding)
- * @returns {Promise<string>} PO token string
- */
-async function generatePoToken(visitorData, videoId) {
-    // Tier 1: return cached token if still valid for this visitor session
-    if (poTokenCache &&
-        poTokenCache.visitorData === visitorData &&
-        (Date.now() - poTokenCache.timestamp) < PO_TOKEN_CACHE_TTL) {
-        console.log(`[PoToken] Cache hit (age ${Math.round((Date.now() - poTokenCache.timestamp) / 1000)}s)`);
-        return poTokenCache.token;
-    }
-
-    // Tier 2: try to mint via BotGuard tab
-    try {
-        const token = await mintPoTokenViaTab(visitorData, videoId);
-        // Cache the successfully minted token
-        poTokenCache = { token, visitorData, timestamp: Date.now() };
-        console.log(`[PoToken] Minted and cached (${token.length} chars)`);
-        // Keep the tab alive. Destroying it after each mint races with
-        // GeckoView's session-store update, leaving a stale tab reference
-        // whose `win` is null. That fault propagates through GeckoView's
-        // eventDispatcher, which the WebExtension's macrotask scheduler
-        // depends on — meaning setTimeout silently stops firing in
-        // background.js. Symptoms: second click after a download silently
-        // hangs because await new Promise(setTimeout 800) never resolves.
-        //
-        // The tab is hidden (active: false), uses no CPU when idle, and
-        // costs ~10MB. Across the session that's a lot less expensive than
-        // the bugs caused by destroy/recreate cycles. The minter inside
-        // content.js already caches the BotGuard VM for ~5 hours, so
-        // subsequent mints on the same tab are instant anyway.
-        //
-        // The tab is only torn down if (a) GeckoView kills it on its own
-        // (handled via onRemoved → poTokenTabId = null), (b) ensurePoTokenTab
-        // pings it and finds the content script unresponsive, or (c) the
-        // extension is reloaded. In all three cases ensurePoTokenTab will
-        // create a fresh one on the next call.
-        return token;
-    } catch (e) {
-        console.warn(`[PoToken] Tab mint failed: ${e.message}`);
-    }
-
-    // Tier 3: cold-start placeholder token (no tab needed, instant)
-    const identifier = videoId || visitorData;
-    const coldToken = generateColdStartPoToken(identifier);
-    if (coldToken) {
-        // Cache it too — better than nothing, and avoids repeated tab failures
-        poTokenCache = { token: coldToken, visitorData, timestamp: Date.now() };
-        console.log(`[PoToken] Using cold-start token (${coldToken.length} chars)`);
-        return coldToken;
-    }
-
-    throw new Error('PO token generation failed (all tiers)');
-}
-
-/**
- * Internal: mint a PO token via the BotGuard robots.txt tab.
- * Separated from generatePoToken so the cache/fallback logic stays clean.
- * Tab cleanup is handled by the caller — this function only mints.
- */
-async function mintPoTokenViaTab(visitorData, videoId) {
-    const tabId = await ensurePoTokenTab();
-    if (!tabId) throw new Error('No robots.txt tab available');
-
-    const requestId = `pot-${Date.now()}-${(Math.random() * 1e6 | 0).toString(36)}`;
-
-    const token = await new Promise((resolve, reject) => {
-        const timer = setTimeout(() => {
-            pendingPoTokenRequests.delete(requestId);
-            reject(new Error('PO token timeout (20s)'));
-        }, 20000);
-
-        pendingPoTokenRequests.set(requestId, { resolve, reject, timer });
-
-        browser.tabs.sendMessage(tabId, {
-            type: 'generatePoToken',
-            data: { videoId, visitorData: visitorData || '', requestId }
-        }).catch(async (e) => {
-            // Tab might have died — try recreating once
-            console.warn(`[PoToken] Send failed, recreating tab: ${e.message}`);
-            removePoTokenTab(tabId);
-            try {
-                const newTabId = await ensurePoTokenTab();
-                if (newTabId) {
-                    await browser.tabs.sendMessage(newTabId, {
-                        type: 'generatePoToken',
-                        data: { videoId, visitorData: visitorData || '', requestId }
-                    });
-                    return;
-                }
-            } catch (e2) { /* fall through */ }
-            clearTimeout(timer);
-            pendingPoTokenRequests.delete(requestId);
-            reject(new Error('PO token tab unavailable'));
-        });
-    });
-
-    return token;
-}
 
 
 // =============================================================================

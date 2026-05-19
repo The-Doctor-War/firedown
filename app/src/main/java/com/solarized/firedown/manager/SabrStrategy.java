@@ -345,47 +345,41 @@ public class SabrStrategy implements DownloadStrategy {
     // ========================================================================
 
     /**
-     * Resolve a PO token for this download. Prefers the native path (PoTokenGenerator
-     * via DownloadContext) because it's resilient to the GeckoView WebExtension
-     * scheduler/tabs faults that have been killing the JS path. Falls back to the
-     * JS-embedded token on the request if the native generator is unavailable or
-     * its mint fails. We're already on a background thread here (the
-     * DownloadRunnable), so blocking on the native mint is safe.
+     * Mint a PO token for this download via {@link PoTokenGenerator}. Returns
+     * {@code null} on failure — the SABR download will start without one and
+     * YouTube will cut it at ~60s with status=3 (attestation required), which
+     * is the correct fail-mode: better to fail fast than to ship a cold-start
+     * placeholder that fakes a head start and dies the same way.
      */
     @Nullable
     private String mintPoToken(@NonNull DownloadRequest request) {
         PoTokenGenerator gen = context.getPoTokenGenerator();
         String videoId = request.getSabrVideoId();
         String visitorData = request.getSabrVisitorData();
-        String jsToken = request.getSabrPoToken();
-        int jsLen = jsToken != null ? jsToken.length() : 0;
 
-        Log.d(TAG, "mintPoToken: gen=" + (gen != null) + " videoId="
-                + (videoId != null ? videoId : "null") + " visitorData="
-                + (visitorData != null ? visitorData.length() + " chars" : "null")
-                + " jsFallback=" + jsLen + " chars");
-
-        if (gen != null && !TextUtils.isEmpty(videoId) && !TextUtils.isEmpty(visitorData)) {
-            long t0 = System.currentTimeMillis();
-            try {
-                String native_ = gen.generate(videoId, visitorData);
-                long dt = System.currentTimeMillis() - t0;
-                if (!TextUtils.isEmpty(native_)) {
-                    Log.d(TAG, "Native PO token: " + native_.length() + " chars (" + dt + "ms)");
-                    return native_;
-                }
-                Log.w(TAG, "Native mint returned empty after " + dt + "ms, falling back to JS token");
-            } catch (Exception e) {
-                long dt = System.currentTimeMillis() - t0;
-                Log.w(TAG, "Native mint failed after " + dt + "ms, falling back to JS token: " + e.getMessage());
-            }
-        } else if (gen == null) {
-            Log.w(TAG, "PoTokenGenerator unavailable, using JS token");
-        } else {
-            Log.w(TAG, "Missing videoId/visitorData on request, using JS token");
+        if (gen == null) {
+            Log.w(TAG, "mintPoToken: PoTokenGenerator unavailable");
+            return null;
+        }
+        if (TextUtils.isEmpty(videoId) || TextUtils.isEmpty(visitorData)) {
+            Log.w(TAG, "mintPoToken: missing videoId/visitorData on request");
+            return null;
         }
 
-        return jsToken;
+        long t0 = System.currentTimeMillis();
+        try {
+            String token = gen.generate(videoId, visitorData);
+            long dt = System.currentTimeMillis() - t0;
+            if (!TextUtils.isEmpty(token)) {
+                Log.d(TAG, "Native PO token: " + token.length() + " chars (" + dt + "ms)");
+                return token;
+            }
+            Log.w(TAG, "Native mint returned empty after " + dt + "ms");
+        } catch (Exception e) {
+            long dt = System.currentTimeMillis() - t0;
+            Log.w(TAG, "Native mint failed after " + dt + "ms: " + e.getMessage());
+        }
+        return null;
     }
 
     private void reportProgress(int percent, long downloaded, long total) {

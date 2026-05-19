@@ -208,6 +208,18 @@ public class GeckoRuntimeHelper {
                     // Set global delegate
                     if (webExtension != null && delegateId != null) {
                         webExtension.setMessageDelegate(mMessageDelegate, delegateId);
+                        // The youtube extension's content.js opens a second
+                        // native port for PoTokenGenerator. setMessageDelegate
+                        // is keyed by nativeAppName — the call above only
+                        // registers for the extension's main name ("youtube"),
+                        // so connectNative('youtube_potoken') from content.js
+                        // would never reach Java's MessageDelegate.onConnect.
+                        // Register the same delegate for the potoken port too;
+                        // the router in onConnect dispatches by port.name.
+                        if ("youtube".equals(delegateId)) {
+                            webExtension.setMessageDelegate(
+                                    mMessageDelegate, PoTokenGenerator.PORT_NAME);
+                        }
                     }
 
                     // Set TabDelegate so extensions can use browser.tabs.create
@@ -258,6 +270,13 @@ public class GeckoRuntimeHelper {
             for (Map.Entry<String, WebExtension> entry : mLoadedExtensions.entrySet()) {
                 geckoSession.getWebExtensionController().setMessageDelegate(entry.getValue(), mMessageDelegate, entry.getKey());
                 geckoSession.getWebExtensionController().setActionDelegate(entry.getValue(), mBrowserSessionActionDelegate);
+                // Mirror the global setMessageDelegate hookup for the
+                // PoTokenGenerator port name so connectNative('youtube_potoken')
+                // from content.js reaches Java on per-session controllers too.
+                if ("youtube".equals(entry.getKey())) {
+                    geckoSession.getWebExtensionController().setMessageDelegate(
+                            entry.getValue(), mMessageDelegate, PoTokenGenerator.PORT_NAME);
+                }
             }
         });
     }

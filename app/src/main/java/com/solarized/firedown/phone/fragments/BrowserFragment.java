@@ -976,7 +976,22 @@ public class BrowserFragment extends BaseBrowserFragment
     @Override
     public void onQuickAccessFileTap(@NonNull DownloadEntity entity) {
         if (entity.getFileStatus() == Download.ERROR) {
-            openSourceUrl(entity);
+            // Inlined replacement for BaseFocusFragment.openSourceUrl, which
+            // does setResult + finish — that flow assumes the fragment is
+            // hosted in a child Activity (DownloadsActivity / VaultActivity)
+            // whose result is consumed by BrowserActivity. BrowserFragment
+            // *is* in BrowserActivity, so finish() there would close the app.
+            // Same in-process pattern as WebOptionSheetDialogFragment's
+            // 'Open in New Tab': publish OPEN_URI with the source URL on
+            // the shared ViewModel and let the existing observer below
+            // (handles OPEN_URI by setActiveSession + openSession + openUri)
+            // do the work.
+            String url = !TextUtils.isEmpty(entity.getOriginUrl())
+                    ? entity.getOriginUrl()
+                    : entity.getFileUrl();
+            if (TextUtils.isEmpty(url)) return;
+            GeckoStateEntity geckoStateEntity = new GeckoStateEntity(true, url);
+            mBrowserURIViewModel.onEventSelected(geckoStateEntity, IntentActions.OPEN_URI);
         } else {
             openItem(entity, null);
         }

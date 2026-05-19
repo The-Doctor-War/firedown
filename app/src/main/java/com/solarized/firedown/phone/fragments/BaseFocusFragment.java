@@ -53,7 +53,6 @@ import com.solarized.firedown.phone.DownloadsActivity;
 import com.solarized.firedown.phone.PlayerActivity;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.DownloadEntity;
-import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.manager.DownloadRequest;
 import com.solarized.firedown.manager.RunnableManager;
 import com.solarized.firedown.phone.VaultActivity;
@@ -262,16 +261,6 @@ public class BaseFocusFragment extends Fragment {
 
     public ActivityResultLauncher<Intent> getActivityResultLauncher(){
         return mStartForResult;
-    }
-
-    protected void setSessionResult(GeckoStateEntity entity) {
-        Intent intent = new Intent();
-        intent.setAction(IntentActions.OPEN_URI);
-        intent.putExtra(Keys.ITEM_ID, entity.getId());
-        intent.putExtra(Keys.ITEM_IS_HOME, entity.isHome());
-        intent.putExtra(Keys.ITEM_URL, entity.getUri());
-        mActivity.setResult(Activity.RESULT_OK, intent);
-        mActivity.finish();
     }
 
 

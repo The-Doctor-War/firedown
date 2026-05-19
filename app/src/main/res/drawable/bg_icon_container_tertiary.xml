@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rounded-square raspberry background for the Safe Folder leading
+    icon on Home. Pairs with bg_icon_container_primary (Downloads).
+    Tertiary is used here, not secondary, because secondaryContainer
+    is the playing-tab media strip's full-surface tint — placing a
+    peach Vault chip directly under a peach media strip falsely reads
+    as 'these belong together'. Raspberry separates Vault into its
+    own identity ('your private corner') and the lock + raspberry
+    pairing carries an intuitive 'personal' connotation.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorTertiaryContainer" />
+    <corners android:radius="12dp" />
+</shape>

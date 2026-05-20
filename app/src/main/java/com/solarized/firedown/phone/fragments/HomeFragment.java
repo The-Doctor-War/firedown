@@ -200,6 +200,8 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         vaultCard.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, VaultActivity.class)));
 
+        applyHomeCardPalettes(v);
+
 
         mBottomNavigationBar.setListener(this);
 
@@ -427,6 +429,12 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             } else if (Lifecycle.Event.ON_RESUME.equals(event)) {
                 Log.d(TAG, "onResume");
                 mStop = false;
+                // Pick up any palette change made in Settings → Home
+                // cards. The settings sub-screen is hosted by another
+                // activity, so the home view survives the round-trip
+                // and only its chip backgrounds need to flip.
+                View root = getView();
+                if (root != null) applyHomeCardPalettes(root);
             }
         });
 
@@ -513,6 +521,44 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         }
         if (mActiveStripIcon != null) {
             mActiveStripIcon.setAlpha(1.0f);
+        }
+    }
+
+    /**
+     * Re-tints the Downloads + Safe Folder chips using the user's
+     * picked palettes from settings. Reads each preference once and
+     * defers to {@link com.solarized.firedown.ui.HomeCardPalette#apply}
+     * which mutates the chip drawable in place — no view re-inflation
+     * needed. Called from {@code onCreateView} so re-entering the home
+     * page after changing the setting in Settings → Home cards picks
+     * up the new colour on the next layout pass.
+     */
+    private void applyHomeCardPalettes(@NonNull View root) {
+        SharedPreferences prefs = androidx.preference.PreferenceManager
+                .getDefaultSharedPreferences(requireContext());
+
+        View downloadsChip = root.findViewById(R.id.recent_downloads_chip);
+        androidx.appcompat.widget.AppCompatImageView downloadsIcon =
+                root.findViewById(R.id.recent_downloads_icon);
+        if (downloadsChip != null && downloadsIcon != null) {
+            String key = prefs.getString(
+                    Preferences.SETTINGS_HOME_DOWNLOADS_PALETTE,
+                    Preferences.DEFAULT_HOME_DOWNLOADS_PALETTE);
+            com.solarized.firedown.ui.HomeCardPalette
+                    .fromKey(key, com.solarized.firedown.ui.HomeCardPalette.CORAL)
+                    .apply(downloadsChip, downloadsIcon);
+        }
+
+        View vaultChip = root.findViewById(R.id.home_vault_chip);
+        androidx.appcompat.widget.AppCompatImageView vaultIcon =
+                root.findViewById(R.id.home_vault_icon);
+        if (vaultChip != null && vaultIcon != null) {
+            String key = prefs.getString(
+                    Preferences.SETTINGS_HOME_VAULT_PALETTE,
+                    Preferences.DEFAULT_HOME_VAULT_PALETTE);
+            com.solarized.firedown.ui.HomeCardPalette
+                    .fromKey(key, com.solarized.firedown.ui.HomeCardPalette.RASPBERRY)
+                    .apply(vaultChip, vaultIcon);
         }
     }
 

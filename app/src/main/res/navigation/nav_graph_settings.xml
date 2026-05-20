@@ -83,7 +83,17 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
+        <action
+            android:id="@+id/action_settings_to_home_cards"
+            app:destination="@id/settings_home_cards"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+    <fragment
+        android:id="@+id/settings_home_cards"
+        android:name="com.solarized.firedown.settings.HomeCardsFragment" />
     <fragment
         android:id="@+id/settings_wasm"
         android:name="com.solarized.firedown.settings.WasmFragment" />

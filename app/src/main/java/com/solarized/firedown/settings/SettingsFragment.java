@@ -436,6 +436,8 @@ public class SettingsFragment extends BasePreferenceFragment
                     NavigationUtils.navigateSafe(mNavController, R.id.action_settings_to_donate);
             case Preferences.SETTINGS_WASM ->
                     NavigationUtils.navigateSafe(mNavController, R.id.action_settings_to_wasm);
+            case Preferences.SETTINGS_HOME_CARDS ->
+                    NavigationUtils.navigateSafe(mNavController, R.id.action_settings_to_home_cards);
             case Preferences.SETTINGS_AUTOFILL ->
                 openAutofillSettings();
             case Preferences.SETTINGS_SUPPORT -> {

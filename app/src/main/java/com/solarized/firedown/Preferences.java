@@ -69,6 +69,17 @@ public class Preferences {
 
     public static final String SETTINGS_THEME_OLED = "com.solarized.firedown.preferences.theme.oled";
 
+    /** Per-card chip palette overrides on the home page. String values
+     *  map to {@link com.solarized.firedown.ui.HomeCardPalette#key}.
+     *  Defaults preserve the previously hard-coded shelf colours
+     *  (coral for Downloads, raspberry for Safe Folder) so an upgrade
+     *  with no user interaction looks identical to before. */
+    public static final String SETTINGS_HOME_CARDS = "com.solarized.firedown.preferences.home.cards";
+    public static final String SETTINGS_HOME_DOWNLOADS_PALETTE = "com.solarized.firedown.preferences.home.downloads.palette";
+    public static final String SETTINGS_HOME_VAULT_PALETTE = "com.solarized.firedown.preferences.home.vault.palette";
+    public static final String DEFAULT_HOME_DOWNLOADS_PALETTE = "coral";
+    public static final String DEFAULT_HOME_VAULT_PALETTE = "raspberry";
+
     /**
      * Sentinel value stored in {@link #SETTINGS_THEME} when the user picks
      * AMOLED mode. Distinct from {@link androidx.appcompat.app.AppCompatDelegate}

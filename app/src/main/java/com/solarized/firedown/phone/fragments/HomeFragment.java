@@ -549,14 +549,20 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         boolean night = com.solarized.firedown.ui.HomeCardStyle.isNightMode(getResources());
 
         if (mActiveStrip != null) {
+            com.solarized.firedown.ui.HomeCardStyle.CardLook activeLook = style.active(night);
             com.solarized.firedown.ui.HomeCardStyle.applyToCard(
                     mActiveStrip,
                     null,
                     (android.widget.ImageView) mActiveStripIcon,
+                    mActiveStripTitle,
                     null,
-                    null,
-                    root.findViewById(R.id.active_download_label),
-                    style.active(night));
+                    mActiveStripLabel,
+                    activeLook);
+            // Percent reads as a number, not a soft subtitle — keep it
+            // at full fg opacity instead of running it through the
+            // applyToCard subtitle (alpha B3) path.
+            if (mActiveStripPercent != null) mActiveStripPercent.setTextColor(activeLook.fg);
+            if (mActiveStripBar != null) mActiveStripBar.setIndicatorColor(activeLook.fg);
         }
 
         if (mHomeMediaStrip instanceof MaterialCardView) {

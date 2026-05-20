@@ -70,26 +70,6 @@ public class HomeCardStylesFragment extends BasePreferenceFragment {
         RadioButton radio = row.findViewById(R.id.style_option_radio);
         name.setText(style.nameRes);
 
-        MaterialCardView activeCard = row.findViewById(R.id.style_option_active_card);
-        HomeCardStyle.applyToCard(
-                activeCard,
-                null,
-                (AppCompatImageView) row.findViewById(R.id.style_option_active_icon),
-                row.findViewById(R.id.style_option_active_title),
-                null,
-                row.findViewById(R.id.style_option_active_label),
-                style.active(night));
-
-        MaterialCardView mediaCard = row.findViewById(R.id.style_option_media_card);
-        HomeCardStyle.applyToCard(
-                mediaCard,
-                null,
-                (AppCompatImageView) row.findViewById(R.id.style_option_media_toggle),
-                row.findViewById(R.id.style_option_media_title),
-                row.findViewById(R.id.style_option_media_subtitle),
-                row.findViewById(R.id.style_option_media_label),
-                style.media(night));
-
         MaterialCardView downloadsCard = row.findViewById(R.id.style_option_downloads_card);
         HomeCardStyle.applyToCard(
                 downloadsCard,

@@ -456,23 +456,19 @@
     <string name="settings_tabs_archive_summary">Automatically close tabs you haven\'t used in a while</string>
     <string name="settings_tabs_archive_title">Auto-close tabs</string>
     <string name="settings_theme">Theme</string>
-    <!-- Settings → General → Home cards. Sub-screen that picks a
-         packaged style for the Downloads + Safe Folder shelf cards
-         (both flip together). Spike: experimental, may go away. -->
+    <!-- Settings → Theme → Home cards. Sub-screen that picks a
+         packaged style for the home page. -->
     <string name="settings_home_cards">Home cards</string>
-    <string name="settings_home_cards_summary">Pick a style for the Downloads and Safe Folder cards</string>
-    <string name="settings_home_cards_header">All four home cards flip together as a single theme — active download, playing media, Downloads, Safe Folder.</string>
+    <string name="settings_home_cards_summary">Pick the style for home cards</string>
+    <string name="settings_home_cards_header">A single home theme flips all the home cards together — pick the look you like.</string>
     <string name="home_card_style_neutral">Neutral</string>
-    <string name="home_card_style_coral_wash">Coral wash</string>
-    <string name="home_card_style_coral_wash_chip">Coral wash + chip</string>
+    <string name="home_card_style_blush">Blush</string>
+    <string name="home_card_style_bloom">Bloom</string>
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_ember">Ember</string>
     <!-- Sample-data subtitles shown inside the style-picker previews.
          Not surfaced anywhere else — purely illustrative so the
          preview cards don't look anaemic. -->
-    <string name="home_card_style_preview_active_title">my_video_file_name.mp4</string>
-    <string name="home_card_style_preview_media_title">Bossa Lofi Radio</string>
-    <string name="home_card_style_preview_media_subtitle">youtube.com</string>
     <string name="home_card_style_preview_downloads_subtitle">150 files saved · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 items saved</string>
     <string name="settings_version">Version</string>

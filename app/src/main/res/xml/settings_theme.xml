@@ -33,5 +33,10 @@
         app:enabled="true"
         app:icon="@drawable/ic_oled_24" />
 
+    <Preference
+        android:key="com.solarized.firedown.preferences.home.cards"
+        android:title="@string/settings_home_cards"
+        android:summary="@string/settings_home_cards_summary"
+        app:icon="@drawable/ic_card_24" />
 
 </PreferenceScreen>

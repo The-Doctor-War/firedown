@@ -1,42 +1,54 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <com.solarized.firedown.settings.ui.RadioButtonPreference
-        android:defaultValue="false"
-        android:key="com.solarized.firedown.preferences.theme.default"
-        android:title="@string/settings_follow_device_theme"
-        app:enabled="true"
-        app:icon="@drawable/ic_settings_24" />
+    <PreferenceCategory
+        android:title="@string/settings_theme_app_category"
+        app:iconSpaceReserved="false">
+
+        <com.solarized.firedown.settings.ui.RadioButtonPreference
+            android:defaultValue="false"
+            android:key="com.solarized.firedown.preferences.theme.default"
+            android:title="@string/settings_follow_device_theme"
+            app:enabled="true"
+            app:icon="@drawable/ic_settings_24" />
 
 
-    <com.solarized.firedown.settings.ui.RadioButtonPreference
-        android:defaultValue="true"
-        android:key="com.solarized.firedown.preferences.theme.dark"
-        android:title="@string/settings_dark_theme"
-        app:enabled="true"
-        app:icon="@drawable/dark_mode_24" />
+        <com.solarized.firedown.settings.ui.RadioButtonPreference
+            android:defaultValue="true"
+            android:key="com.solarized.firedown.preferences.theme.dark"
+            android:title="@string/settings_dark_theme"
+            app:enabled="true"
+            app:icon="@drawable/dark_mode_24" />
 
 
-    <com.solarized.firedown.settings.ui.RadioButtonPreference
-        android:defaultValue="false"
-        android:key="com.solarized.firedown.preferences.theme.light"
-        android:title="@string/settings_light_theme"
-        app:enabled="true"
-        app:icon="@drawable/light_mode_24" />
+        <com.solarized.firedown.settings.ui.RadioButtonPreference
+            android:defaultValue="false"
+            android:key="com.solarized.firedown.preferences.theme.light"
+            android:title="@string/settings_light_theme"
+            app:enabled="true"
+            app:icon="@drawable/light_mode_24" />
 
 
-    <com.solarized.firedown.settings.ui.RadioButtonPreference
-        android:defaultValue="false"
-        android:key="com.solarized.firedown.preferences.theme.oled"
-        android:title="@string/settings_oled_theme"
-        android:summary="@string/settings_oled_theme_summary"
-        app:enabled="true"
-        app:icon="@drawable/ic_oled_24" />
+        <com.solarized.firedown.settings.ui.RadioButtonPreference
+            android:defaultValue="false"
+            android:key="com.solarized.firedown.preferences.theme.oled"
+            android:title="@string/settings_oled_theme"
+            android:summary="@string/settings_oled_theme_summary"
+            app:enabled="true"
+            app:icon="@drawable/ic_oled_24" />
 
-    <Preference
-        android:key="com.solarized.firedown.preferences.home.cards"
-        android:title="@string/settings_home_cards"
-        android:summary="@string/settings_home_cards_summary"
-        app:icon="@drawable/ic_card_24" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_theme_home_category"
+        app:iconSpaceReserved="false">
+
+        <Preference
+            android:key="com.solarized.firedown.preferences.home.cards"
+            android:title="@string/settings_home_cards"
+            android:summary="@string/settings_home_cards_summary"
+            app:icon="@drawable/ic_colors_24" />
+
+    </PreferenceCategory>
 
 </PreferenceScreen>

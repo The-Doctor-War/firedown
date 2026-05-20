@@ -223,4 +223,16 @@
     <string name="home_vault_button">Folder selamat</string>
     <string name="home_media_playing">Memainkan</string>
     <string name="home_media_paused">Dijeda</string>
+<string name="settings_theme_app_category">App theme</string>
+    <string name="settings_theme_home_category">Home page</string>
+    <string name="settings_home_cards">Home cards</string>
+    <string name="settings_home_cards_summary">Pick the style for home cards</string>
+    <string name="settings_home_cards_header">A single home theme flips all the home cards together — pick the look you like.</string>
+    <string name="home_card_style_neutral">Neutral</string>
+    <string name="home_card_style_blush">Blush</string>
+    <string name="home_card_style_bloom">Bloom</string>
+    <string name="home_card_style_coral">Coral</string>
+    <string name="home_card_style_preview_downloads_subtitle">150 files saved · 2.4 GB</string>
+    <string name="home_card_style_preview_vault_subtitle">12 items saved</string>
+
 </resources>

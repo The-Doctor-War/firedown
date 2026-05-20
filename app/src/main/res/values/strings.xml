@@ -456,6 +456,12 @@
     <string name="settings_tabs_archive_summary">Automatically close tabs you haven\'t used in a while</string>
     <string name="settings_tabs_archive_title">Auto-close tabs</string>
     <string name="settings_theme">Theme</string>
+    <!-- Section headers inside the Theme settings screen. The app
+         radios (Default/Dark/Light/OLED) live under the first; the
+         home-cards picker lives under the second so the two kinds of
+         choices don't read as one continuous list. -->
+    <string name="settings_theme_app_category">App theme</string>
+    <string name="settings_theme_home_category">Home page</string>
     <!-- Settings → Theme → Home cards. Sub-screen that picks a
          packaged style for the home page. -->
     <string name="settings_home_cards">Home cards</string>
@@ -465,7 +471,6 @@
     <string name="home_card_style_blush">Blush</string>
     <string name="home_card_style_bloom">Bloom</string>
     <string name="home_card_style_coral">Coral</string>
-    <string name="home_card_style_ember">Ember</string>
     <!-- Sample-data subtitles shown inside the style-picker previews.
          Not surfaced anywhere else — purely illustrative so the
          preview cards don't look anaemic. -->

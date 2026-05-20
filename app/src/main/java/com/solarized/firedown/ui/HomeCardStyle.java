@@ -35,12 +35,10 @@ import java.util.List;
  * end up with these constants, so we keep them inline.</p>
  *
  * <p>Live cards (active download, playing media) keep their branded
- * coral / peach treatment across variants 0–3 — they're the home
- * page's two 'live' anchors. Variant 4 (Ember) is the only one that
- * also darkens the live cards, intentionally trading the live signal
- * for a uniform dark home. The picker UI only previews the two shelf
- * cards because variants 0–3 share identical live-card looks and
- * showing them five times would be noise — see
+ * coral / peach treatment across all variants — they're the home
+ * page's two 'live' anchors. The picker UI only previews the two
+ * shelf cards because the live cards look identical across variants
+ * and showing them four times would be noise — see
  * HomeCardStylesFragment.</p>
  */
 public final class HomeCardStyle {
@@ -144,23 +142,8 @@ public final class HomeCardStyle {
             ACTIVE_BRAND_LIGHT, ACTIVE_BRAND_DARK,
             MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
 
-    /** 4 — Ember. Dark warm surface in both light and dark modes,
-     *  across all four cards. Live cards drop their branded surface
-     *  for the same dark wash but keep a branded accent icon so the
-     *  'live' signal isn't lost. */
-    public static final HomeCardStyle EMBER = new HomeCardStyle("ember",
-            R.string.home_card_style_ember,
-            new CardLook(0xFF3A1F1C, 0xFFF4DDDB, null, 0xFFFF857F),
-            new CardLook(0xFF3A1F1C, 0xFFF4DDDB, null, 0xFFF66A66),
-            new CardLook(0xFF3A1A28, 0xFFF4DDDB, null, 0xFFFFB0C9),
-            new CardLook(0xFF3A1A28, 0xFFF4DDDB, null, 0xFFFFB0C9),
-            new CardLook(0xFF3A1F1C, 0xFFF4DDDB, null, 0xFFFF857F),
-            new CardLook(0xFF3A1F1C, 0xFFF4DDDB, null, 0xFFF66A66),
-            new CardLook(0xFF3A1A28, 0xFFF4DDDB, null, 0xFFFAB186),
-            new CardLook(0xFF3A1A28, 0xFFF4DDDB, null, 0xFFFAB186));
-
     public static final List<HomeCardStyle> ALL =
-            Arrays.asList(NEUTRAL, BLUSH, BLOOM, CORAL, EMBER);
+            Arrays.asList(NEUTRAL, BLUSH, BLOOM, CORAL);
 
     @NonNull
     public static HomeCardStyle fromKey(@Nullable String key, @NonNull HomeCardStyle fallback) {

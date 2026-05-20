@@ -27,6 +27,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.solarized.firedown.crash.CrashReportSheet;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
@@ -211,7 +212,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
             // isFinishing()/isDestroyed() activity we'd hit
             // IllegalStateException from FragmentManager.
             if (mPaused || isFinishing() || isDestroyed()) return;
-            com.solarized.firedown.crash.CrashReportSheet.showIfPending(
+            CrashReportSheet.showIfPending(
                     this, getSupportFragmentManager());
         });
     }

@@ -8,6 +8,132 @@
 
 console.log('[cs] loaded', location.href);
 
+// ---------------------------------------------------------------------------
+// WebAssembly unavailability detector
+// WASM is disabled by default in Firedown for privacy (javascript.options.wasm
+// = false). Some sites (kick.com, codepen, figma) hard-require it and break.
+//
+// WebExtension content scripts run in an *isolated* JS world: wrapping
+// `console.error` or `window.WebAssembly` here does NOT intercept the page's
+// own console / globals — those live in the page world. Only window-level DOM
+// events are shared. The first version of this detector ran the wrappers in
+// the isolated world and missed every error from kick.com's player, even
+// though `[cs] loaded` proved the script was injected.
+//
+// Fix: inject a <script> tag whose textContent runs in the page world. That
+// script wraps the page's console.error, hooks window.error /
+// unhandledrejection, and dispatches a CustomEvent on document when it spots
+// a WASM-related message. The isolated-world listener below picks up the
+// event and forwards it through the native messaging port to Java.
+// ---------------------------------------------------------------------------
+(() => {
+  const SIGNAL_EVENT = '__firedown_wasm_unavailable__';
+
+  // --- Isolated-world receiver: page → content script → native ----------
+  let reported = false;
+  document.addEventListener(SIGNAL_EVENT, (e) => {
+    if (reported) return;
+    reported = true;
+    // CustomEvent.detail crosses the Xray boundary as a wrapped object; pull
+    // the string fields defensively. location.href works because the content
+    // script's window IS the page's window (just an isolated wrapper).
+    const detail = (e && e.detail && (e.detail.detail || e.detail.wrappedJSObject?.detail)) || '';
+    const payload = {
+      kind: 'wasm-unavailable',
+      listener: 'wasmUnavailable',
+      url: location.href,
+      detail: String(detail).slice(0, 200),
+    };
+    console.log('[cs] wasm-unavailable reporting', location.href, detail);
+    try {
+      const r = browser.runtime.sendNativeMessage('browser', payload);
+      if (r && r.catch) r.catch(() => fallback(payload));
+    } catch (_) { fallback(payload); }
+  }, true);
+
+  function fallback(payload) {
+    try { browser.runtime.sendMessage(payload); } catch (_) {}
+  }
+
+  // --- Page-world probe: injected as a <script> so it runs with the same
+  //     globals the site uses. Hooks every surface a WASM error might
+  //     show up on. Dispatches the signal event on document so our
+  //     isolated-world listener above can pick it up.
+  const PROBE = `(() => {
+    const PATTERN = /WebAssembly|wasm\\b/i;
+    const NAME = ${JSON.stringify(SIGNAL_EVENT)};
+    let fired = false;
+    function fire(detail) {
+      if (fired) return;
+      fired = true;
+      try {
+        document.dispatchEvent(new CustomEvent(NAME, {
+          detail: { detail: String(detail || '').slice(0, 200) }
+        }));
+      } catch (_) {}
+    }
+    function textOf(thing) {
+      if (!thing) return '';
+      if (typeof thing === 'string') return thing;
+      try {
+        if (thing.message) return String(thing.message);
+        if (thing.toString) return thing.toString();
+        return String(thing);
+      } catch (_) { return ''; }
+    }
+    window.addEventListener('error', function (e) {
+      const m = textOf(e && (e.message || e.error));
+      if (PATTERN.test(m)) fire(m);
+    }, true);
+    // Older surface — sites that assign window.onerror skip addEventListener.
+    const origOnError = window.onerror;
+    window.onerror = function (msg, src, line, col, err) {
+      try {
+        const text = textOf(err) || textOf(msg);
+        if (PATTERN.test(text)) fire(text);
+      } catch (_) {}
+      if (typeof origOnError === 'function') {
+        return origOnError.apply(this, arguments);
+      }
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function (e) {
+      const m = textOf(e && e.reason);
+      if (m && PATTERN.test(m)) fire(m);
+    });
+    // console.error wrap. Re-wrap if the page replaces console.error later
+    // (some analytics SDKs do this on init) so we keep intercepting.
+    function wrapConsoleError() {
+      const orig = console.error;
+      if (orig && orig.__firedown_wrapped) return;
+      const wrapped = function () {
+        try {
+          const j = Array.prototype.map.call(arguments, textOf).join(' ');
+          if (PATTERN.test(j)) fire(j);
+        } catch (_) {}
+        return orig.apply(console, arguments);
+      };
+      wrapped.__firedown_wrapped = true;
+      try { console.error = wrapped; } catch (_) {}
+    }
+    wrapConsoleError();
+    // Re-wrap if console.error gets reassigned later. Cheap: only runs once
+    // after a microtask + once on DOMContentLoaded; that catches the common
+    // "analytics replaces console" pattern.
+    Promise.resolve().then(wrapConsoleError);
+    document.addEventListener('DOMContentLoaded', wrapConsoleError, { once: true });
+  })();`;
+
+  try {
+    const s = document.createElement('script');
+    s.textContent = PROBE;
+    (document.documentElement || document.head || document.body).appendChild(s);
+    s.remove();
+  } catch (e) {
+    console.log('[cs] wasm probe injection failed:', e && e.message);
+  }
+})();
+
 // Top-frame metadata responder. We only answer in the top frame so the
 // background's tabs.sendMessage (which broadcasts to all frames in a tab
 // by default) doesn't return an iframe's title instead of the page's.

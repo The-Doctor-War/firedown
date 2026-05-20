@@ -313,4 +313,15 @@
     <string name="incognito_home_warning">التصفح الخاص لا يخفي نشاطك عن شبكتك أو صاحب العمل أو المواقع التي تزورها.</string>
     <string name="downloads_quick_access_view_all">عرض جميع التنزيلات</string>
     <string name="downloads_quick_access_empty">ستظهر التنزيلات الأخيرة هنا</string>
+    <string name="wasm_snackbar_message">يحتاج %s إلى WebAssembly</string>
+    <string name="wasm_snackbar_action_enable">تفعيل</string>
+    <string name="settings_wasm_allowlist_title">المواقع المسموح بها</string>
+    <string name="settings_wasm_allowlist_empty">لا توجد مواقع بعد. اضغط \"تفعيل\" عندما يطلب موقع WebAssembly.</string>
+    <string name="settings_wasm_allowlist_clear">مسح الكل</string>
+    <string name="settings_wasm_allowlist_clear_summary">إزالة جميع المواقع المسموح بها</string>
+    <string name="settings_wasm_allowlist_clear_message">إزالة جميع المواقع من قائمة WebAssembly المسموح بها؟</string>
+    <string name="settings_wasm_allowlist_clear_confirm">مسح</string>
+    <string name="settings_wasm_allowlist_remove_title">إزالة الموقع</string>
+    <string name="settings_wasm_allowlist_remove_message">إزالة %s من قائمة WebAssembly المسموح بها؟</string>
+    <string name="settings_wasm_allowlist_remove_confirm">إزالة</string>
 </resources>

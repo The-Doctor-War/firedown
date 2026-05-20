@@ -332,4 +332,15 @@
     <string name="incognito_home_warning">La navigazione privata non nasconde la tua attività alla rete, al datore di lavoro o ai siti che visiti.</string>
     <string name="downloads_quick_access_view_all">Vedi tutti i download</string>
     <string name="downloads_quick_access_empty">I download recenti appariranno qui</string>
+    <string name="wasm_snackbar_message">%s richiede WebAssembly per funzionare</string>
+    <string name="wasm_snackbar_action_enable">Attiva</string>
+    <string name="settings_wasm_allowlist_title">Siti consentiti</string>
+    <string name="settings_wasm_allowlist_empty">Nessun sito. Tocca \"Attiva\" nella barra quando un sito richiede WebAssembly.</string>
+    <string name="settings_wasm_allowlist_clear">Cancella tutto</string>
+    <string name="settings_wasm_allowlist_clear_summary">Rimuovi tutti i siti consentiti</string>
+    <string name="settings_wasm_allowlist_clear_message">Rimuovere tutti i siti dalla lista consentiti di WebAssembly?</string>
+    <string name="settings_wasm_allowlist_clear_confirm">Cancella</string>
+    <string name="settings_wasm_allowlist_remove_title">Rimuovi sito</string>
+    <string name="settings_wasm_allowlist_remove_message">Rimuovere %s dalla lista consentiti di WebAssembly?</string>
+    <string name="settings_wasm_allowlist_remove_confirm">Rimuovi</string>
 </resources>

@@ -637,6 +637,23 @@ nativePort.onMessage.addListener(async (msg) => {
 // ---------------------------------------------------------------------------
 
 browser.runtime.onMessage.addListener(async (msg, sender) => {
+  // Content script told us a page tried to use WebAssembly while it's
+  // disabled. Forward to native so BrowserFragment can surface the
+  // "Enable for {host}?" snackbar scoped to the right tab.
+  if (msg?.kind === 'wasm-unavailable') {
+    try {
+      browser.runtime.sendNativeMessage('browser', {
+        listener: 'wasmUnavailable',
+        url: msg.url,
+        tabId: sender?.tab?.id ?? -1,
+        detail: msg.detail || '',
+      });
+    } catch (e) {
+      console.warn('[req] wasm-unavailable forward failed:', e?.message);
+    }
+    return;
+  }
+
   if (msg?.kind !== 'images-detected') return;
   if (!Array.isArray(msg.urls)) return;
 

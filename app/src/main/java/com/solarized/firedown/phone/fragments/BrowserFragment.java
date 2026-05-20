@@ -85,6 +85,7 @@ import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.utils.NavigationUtils;
 import com.solarized.firedown.utils.UrlStringUtils;
+import com.solarized.firedown.utils.WebUtils;
 
 import org.apache.commons.io.FilenameUtils;
 import org.mozilla.geckoview.GeckoResult;
@@ -419,6 +420,21 @@ public class BrowserFragment extends BaseBrowserFragment
                     popToCorrectHome(false);
                 }
             }
+        });
+
+        // WebAssembly per-site allowlist. The content-script bridge in
+        // the webrequests extension reports when a page tried to use WASM
+        // while it's disabled. We surface a one-tap "Enable for {host}?"
+        // snackbar. Filter by mIsIncognitoThemed so the regular and
+        // incognito fragments don't both fire for the same event — each
+        // VM is wired to its own repo (persistent vs in-memory).
+        mGeckoStateViewModel.getNeedsWasmLive().observe(getViewLifecycleOwner(), url -> {
+            if (mIsIncognitoThemed || url == null) return;
+            showEnableWasmSnackbar(url, false);
+        });
+        mIncognitoStateViewModel.getNeedsWasmLive().observe(getViewLifecycleOwner(), url -> {
+            if (!mIsIncognitoThemed || url == null) return;
+            showEnableWasmSnackbar(url, true);
         });
 
         mBrowserURIViewModel.getEvents().observe(getViewLifecycleOwner(), mPair -> {
@@ -869,6 +885,60 @@ public class BrowserFragment extends BaseBrowserFragment
         mDownloadButton.setVisibility(View.VISIBLE);
 
         enterBrowsing();
+    }
+
+    /**
+     * Shows the "Enable WebAssembly for {host}?" snackbar in response to a
+     * wasm-unavailable event from the content-script bridge.
+     *
+     * <p>The snackbar is scoped to the host of {@code reportedUrl}; only
+     * fires if that host matches the currently active tab — sites in
+     * background tabs shouldn't be able to grab the user's attention on
+     * a foreground tab they're not looking at. Tapping "Enable" adds the
+     * host to the appropriate allowlist (persistent or incognito-only)
+     * and asks {@link GeckoRuntimeHelper#enableWasmAndReload} to flip
+     * the global pref and reload — the pref change is async, the reload
+     * waits for it.</p>
+     */
+    private void showEnableWasmSnackbar(String reportedUrl, boolean incognito) {
+        GeckoState current = peekCurrentGeckoState();
+        if (current == null || current.getEntityUri() == null) {
+            Log.d(TAG, "showEnableWasmSnackbar skip: no current tab. reportedUrl=" + reportedUrl);
+            return;
+        }
+
+        String currentHost = WebUtils.getDomainName(current.getEntityUri());
+        String reportedHost = WebUtils.getDomainName(reportedUrl);
+        if (!reportedHost.equals(currentHost)) {
+            Log.d(TAG, "showEnableWasmSnackbar skip: host mismatch. current=" + currentHost
+                    + " reported=" + reportedHost);
+            return;
+        }
+
+        View anchor = getSnackAnchorView();
+        if (anchor == null) {
+            Log.d(TAG, "showEnableWasmSnackbar skip: no anchor view");
+            return;
+        }
+        Log.d(TAG, "showEnableWasmSnackbar showing for " + reportedHost
+                + " incognito=" + incognito);
+
+        Snackbar snackbar = makeSnackbar(
+                anchor,
+                getString(R.string.wasm_snackbar_message, reportedHost),
+                mIsIncognitoThemed);
+        snackbar.setAction(R.string.wasm_snackbar_action_enable, v -> {
+            if (incognito) {
+                mIncognitoStateViewModel.allowWasmFor(reportedUrl);
+            } else {
+                mGeckoStateViewModel.allowWasmFor(reportedUrl);
+            }
+            GeckoState state = peekCurrentGeckoState();
+            if (state != null) {
+                mGeckoRuntimeHelper.enableWasmAndReload(state.getGeckoSession());
+            }
+        });
+        snackbar.show();
     }
 
     /**

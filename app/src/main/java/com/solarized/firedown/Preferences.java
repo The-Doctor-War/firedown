@@ -98,6 +98,9 @@ public class Preferences {
 
     public static final boolean DEFAULT_ENABLE_WEBASSEMBLY = false;
 
+    /** Click key for the WASM settings sub-screen entry. */
+    public static final String SETTINGS_WASM = "com.solarized.firedown.preferences.browser.wasm";
+
     public static final String SETTINGS_ENABLE_DRM = "com.solarized.firedown.preferences.browser.enable.drm";
 
     /**

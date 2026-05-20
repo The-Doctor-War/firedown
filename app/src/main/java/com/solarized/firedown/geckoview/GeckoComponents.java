@@ -1321,8 +1321,17 @@ public class GeckoComponents {
 
             geckoState.setInitialLoad(false);
 
-            if(isCurrentGeckoState(geckoState))
+            if(isCurrentGeckoState(geckoState)) {
+                // WASM pref is global to the Gecko runtime — there's no
+                // per-session API. Re-evaluate on each navigation of the
+                // active tab so the pref tracks "is the host I'm currently
+                // looking at allowlisted?" Background tabs share the
+                // runtime, which is the trade-off the user accepted by
+                // picking the dynamic-global mode.
+                mGeckoRuntimeHelper.setWebAssembly(
+                        mGeckoRuntimeHelper.shouldEnableWasmFor(url));
                 mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOCATION, geckoState);
+            }
 
 
         }

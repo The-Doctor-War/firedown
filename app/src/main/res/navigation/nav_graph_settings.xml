@@ -93,7 +93,7 @@
     </fragment>
     <fragment
         android:id="@+id/settings_home_cards"
-        android:name="com.solarized.firedown.settings.HomeCardsFragment" />
+        android:name="com.solarized.firedown.settings.HomeCardStylesFragment" />
     <fragment
         android:id="@+id/settings_wasm"
         android:name="com.solarized.firedown.settings.WasmFragment" />

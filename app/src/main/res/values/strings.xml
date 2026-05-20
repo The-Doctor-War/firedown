@@ -451,19 +451,22 @@
     <string name="settings_tabs_archive_summary">Automatically close tabs you haven\'t used in a while</string>
     <string name="settings_tabs_archive_title">Auto-close tabs</string>
     <string name="settings_theme">Theme</string>
-    <!-- Settings → General → Home cards. Sub-screen that lets the user
-         tint the Downloads + Safe Folder shelf-card chips. Spike:
-         experimental, may go away. Strings deliberately match the
-         tonal-container vocabulary in the M3 palette so a translator
-         doesn't have to learn a separate naming scheme. -->
+    <!-- Settings → General → Home cards. Sub-screen that picks a
+         packaged style for the Downloads + Safe Folder shelf cards
+         (both flip together). Spike: experimental, may go away. -->
     <string name="settings_home_cards">Home cards</string>
-    <string name="settings_home_cards_summary">Tint the Downloads and Safe Folder chips</string>
-    <string name="settings_home_downloads_palette">Downloads card colour</string>
-    <string name="settings_home_vault_palette">Safe Folder card colour</string>
-    <string name="palette_coral">Coral</string>
-    <string name="palette_peach">Peach</string>
-    <string name="palette_raspberry">Raspberry</string>
-    <string name="palette_neutral">Neutral</string>
+    <string name="settings_home_cards_summary">Pick a style for the Downloads and Safe Folder cards</string>
+    <string name="settings_home_cards_header">Both cards flip together. Live cards (active download, playing media) keep their own brand colours regardless of the choice below.</string>
+    <string name="home_card_style_current">Current (reference)</string>
+    <string name="home_card_style_tinted_no_chip">Tinted surface, no chip</string>
+    <string name="home_card_style_tinted_with_chip">Tinted surface with chip</string>
+    <string name="home_card_style_filled_brand">Filled brand surface</string>
+    <string name="home_card_style_always_dark">Always-dark surface</string>
+    <!-- Sample-data subtitles shown inside the style-picker previews.
+         Not surfaced anywhere else — purely illustrative so the
+         preview cards don't look anaemic. -->
+    <string name="home_card_style_preview_downloads_subtitle">150 files saved · 2.4 GB</string>
+    <string name="home_card_style_preview_vault_subtitle">12 items saved</string>
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">Disable WebGL</string>
     <string name="settings_webgl_disabled_summary">Blocks GPU fingerprinting, may break 3D content</string>

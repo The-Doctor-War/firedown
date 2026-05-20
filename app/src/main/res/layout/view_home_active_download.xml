@@ -120,7 +120,7 @@
             android:layout_marginStart="8dp"
             android:gravity="center"
             android:minWidth="44dp"
-            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textAppearance="?attr/textAppearanceBodySmallEmphasized"
             android:textColor="?attr/colorOnPrimaryContainer"
             tools:text="45%" />
 

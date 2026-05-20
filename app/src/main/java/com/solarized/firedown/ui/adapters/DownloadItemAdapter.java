@@ -53,20 +53,23 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     private final Drawable mChecked;
     private final Drawable mUnChecked;
     private final RequestOptions mRequestOptions;
-    /** Active-row colours pulled from the user's HomeCardStyle pick so
-     *  the in-flight download here matches the active strip on Home. */
+    /** Soft 'wash' surface for in-flight rows. Pale coral on light,
+     *  deep warm on dark. Hardcoded rather than pulled from the
+     *  HomeCardStyle pick — the home active strip is loud
+     *  (primaryContainer) because nothing else competes with it
+     *  there; here we sit next to procedurally-generated coral mime
+     *  icons that disappear into a full brand surface, so the wash
+     *  has to stay tonally distinct from those icons. */
     private final int mActiveCardBg;
-    private final int mActiveFg;
-    private final int mActiveFgVariant;
     /** Defaults for non-active rows. List items want plain surface
      *  (transparent against the page); grid items keep the
      *  surfaceContainerHigh placeholder the layout originally set. */
     private final int mDefaultListBg;
     private final int mDefaultGridBg;
-    private final int mDefaultFg;
-    private final int mDefaultFgVariant;
-    /** Brand accent for the list-mode mime label on a flat surface. */
+    /** Brand accent for the list-mode mime label, also used as the
+     *  progress bar indicator colour. */
     private final int mDefaultPrimary;
+    private final int mDefaultPrimaryAlpha;
     private boolean mActionMode;
     private boolean mEnabled;
     private boolean mEnableGrid;
@@ -91,35 +94,22 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                         com.google.android.material.R.attr.colorPrimaryContainer, Color.TRANSPARENT));
         mRequestOptions = new RequestOptions();
 
-        // Active-row tint: pulled from whichever Home cards style the
-        // user picked, so the in-flight download here uses the same
-        // surface as the active-download strip on Home. Resolved once
-        // — the adapter is recreated when DownloadsActivity reopens,
-        // so a style change in Settings shows up next visit.
-        android.content.SharedPreferences prefs = androidx.preference.PreferenceManager
-                .getDefaultSharedPreferences(context);
-        com.solarized.firedown.ui.HomeCardStyle style =
-                com.solarized.firedown.ui.HomeCardStyle.fromKey(
-                        prefs.getString(
-                                com.solarized.firedown.Preferences.SETTINGS_HOME_CARD_STYLE,
-                                com.solarized.firedown.Preferences.DEFAULT_HOME_CARD_STYLE),
-                        com.solarized.firedown.ui.HomeCardStyle.NEUTRAL);
-        boolean night = com.solarized.firedown.ui.HomeCardStyle.isNightMode(context.getResources());
-        com.solarized.firedown.ui.HomeCardStyle.CardLook active = style.active(night);
-        mActiveCardBg = active.bg;
-        mActiveFg = active.fg;
-        mActiveFgVariant = androidx.core.graphics.ColorUtils.setAlphaComponent(active.fg, 0xB3);
+        boolean night = (context.getResources().getConfiguration().uiMode
+                & android.content.res.Configuration.UI_MODE_NIGHT_MASK)
+                == android.content.res.Configuration.UI_MODE_NIGHT_YES;
+        // Wash colours match the Home cards 'Blush' palette so the
+        // downloads-list active row reads as a soft live signal
+        // rather than the loud primaryContainer brand wall.
+        mActiveCardBg = night ? 0xFF3A1F1C : 0xFFFFE6E0;
 
         mDefaultListBg = MaterialColors.getColor(context,
                 com.google.android.material.R.attr.colorSurface, Color.TRANSPARENT);
         mDefaultGridBg = MaterialColors.getColor(context,
                 com.google.android.material.R.attr.colorSurfaceContainerHigh, Color.TRANSPARENT);
-        mDefaultFg = MaterialColors.getColor(context,
-                com.google.android.material.R.attr.colorOnSurface, Color.BLACK);
-        mDefaultFgVariant = MaterialColors.getColor(context,
-                com.google.android.material.R.attr.colorOnSurfaceVariant, Color.GRAY);
         mDefaultPrimary = MaterialColors.getColor(context,
                 com.google.android.material.R.attr.colorPrimary, Color.BLACK);
+        mDefaultPrimaryAlpha = androidx.core.graphics.ColorUtils
+                .setAlphaComponent(mDefaultPrimary, 0x33);
     }
 
 
@@ -390,30 +380,18 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         }
 
         // ── Active-state surface ────────────────────────────────────
-        // In-flight items (PROGRESS / QUEUED) take the picked Home
-        // theme's active surface so the 'live' signal here matches
-        // the active-download strip on Home. Completed / error rows
-        // reset to the per-view-type default — list goes back to
-        // plain surface (flat against the page), grid keeps the
-        // surfaceContainerHigh placeholder the layout originally set
-        // so an unloaded thumbnail still has a backdrop.
+        // In-flight items (PROGRESS / QUEUED) take the wash surface
+        // so the 'live' signal is visible without the heavy brand
+        // wall fighting the procedurally-coloured mime placeholders.
+        // Completed / error rows reset to the per-view-type default —
+        // list goes back to plain surface (flat against the page),
+        // grid keeps the surfaceContainerHigh placeholder so an
+        // unloaded thumbnail still has a backdrop. Text colours stay
+        // at theme defaults; the wash is tonally close enough to the
+        // page surface that onSurface / onSurfaceVariant read fine.
         boolean isActive = status == Download.PROGRESS || status == Download.QUEUED;
         holder.item.setCardBackgroundColor(
                 isActive ? mActiveCardBg : (isGrid ? mDefaultGridBg : mDefaultListBg));
-        int fg = isActive ? mActiveFg : mDefaultFg;
-        int fgVariant = isActive ? mActiveFgVariant : mDefaultFgVariant;
-        if (holder.fileName != null) holder.fileName.setTextColor(fg);
-        if (holder.fileUrl != null) holder.fileUrl.setTextColor(fgVariant);
-        if (holder.progressText != null) holder.progressText.setTextColor(fgVariant);
-        if (holder.finishedText != null) holder.finishedText.setTextColor(fgVariant);
-        if (holder.queuedText != null) holder.queuedText.setTextColor(fgVariant);
-        // List mime label uses colorPrimary on a flat surface but
-        // would disappear on the coral active row — recolour to the
-        // active fg so it stays visible. Grid mime keeps its filled
-        // chip style so it doesn't need this swap.
-        if (!isGrid) {
-            holder.mimeText.setTextColor(isActive ? mActiveFg : mDefaultPrimary);
-        }
 
         if (holder.fileName != null) holder.fileName.setText(entity.getFileName());
         if (holder.fileUrl != null) holder.fileUrl.setText(domain);
@@ -464,14 +442,12 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             holder.image.setTag(null);
         }else {
             setVisible(holder.progressRow, true);
-            // Tint the bar against the active surface — track gets the
-            // active fg at low alpha so it reads as a subtle channel
-            // rather than a saturated orange wash, indicator/text take
-            // the active fg at full opacity for legibility on coral.
+            // Bar tints: indicator in brand coral (the 'live' signal)
+            // and track in the same coral at ~20 % alpha so it reads
+            // as a subtle channel beneath, not a saturated wash.
             if (holder.progressBar != null) {
-                ColorStateList barFg = ColorStateList.valueOf(mActiveFg);
-                ColorStateList barBg = ColorStateList.valueOf(
-                        androidx.core.graphics.ColorUtils.setAlphaComponent(mActiveFg, 0x33));
+                ColorStateList barFg = ColorStateList.valueOf(mDefaultPrimary);
+                ColorStateList barBg = ColorStateList.valueOf(mDefaultPrimaryAlpha);
                 holder.progressBar.setProgressTintList(barFg);
                 holder.progressBar.setProgressBackgroundTintList(barBg);
                 holder.progressBar.setIndeterminateTintList(barFg);

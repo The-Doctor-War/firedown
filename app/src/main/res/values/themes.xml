@@ -148,7 +148,12 @@
         <item name="backgroundTint">@color/segmented_button_background</item>
         <item name="android:textColor">@color/segmented_button_text_color</item>
         <item name="iconTint">@color/segmented_button_icon_color</item>
-        <item name="cornerRadius">12dp</item>
+        <!-- Pill shape, same trick the filter chips use: large radius
+             is capped to half the button height by the framework, so
+             the value just guarantees a full pill regardless of
+             Material's default button height. Matches the chips on
+             Downloads / BrowserOptions for visual consistency. -->
+        <item name="cornerRadius">100dp</item>
     </style>
 
 

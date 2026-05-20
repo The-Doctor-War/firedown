@@ -25,8 +25,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
-
-import com.google.android.material.color.MaterialColors;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.Preferences;
@@ -93,7 +91,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     @Nullable private android.animation.ObjectAnimator mActiveStripPulse;
     private TextView mHomeVaultSubtitle;
     private TextView mRecentDownloadsSubtitle;
-    private View mHomeMediaStrip;
+    private MaterialCardView mHomeMediaStrip;
     private androidx.appcompat.widget.AppCompatImageView mHomeMediaIcon;
     private TextView mHomeMediaLabel;
     private TextView mHomeMediaTitle;
@@ -565,9 +563,9 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             if (mActiveStripBar != null) mActiveStripBar.setIndicatorColor(activeLook.fg);
         }
 
-        if (mHomeMediaStrip instanceof MaterialCardView) {
+        if (mHomeMediaStrip != null) {
             com.solarized.firedown.ui.HomeCardStyle.applyToCard(
-                    (MaterialCardView) mHomeMediaStrip,
+                    mHomeMediaStrip,
                     null,
                     mHomeMediaToggle,
                     mHomeMediaTitle,
@@ -640,15 +638,25 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             mActiveStripLabel.setText(R.string.downloading);
         }
 
-        // Track colour: theme attr + alpha can't be combined in XML,
-        // and the M3 default (colorSecondary, yellow in Firedown's
-        // palette) fights the orange surface. Pin the track to
-        // colorOnPrimaryContainer at ~24% alpha so it reads as a
-        // subtle ghost of the indicator rather than a competing colour.
-        int onContainer = MaterialColors.getColor(
-                mActiveStripBar, com.google.android.material.R.attr.colorOnPrimaryContainer);
-        int trackAlpha = androidx.core.graphics.ColorUtils.setAlphaComponent(onContainer, 0x3D);
-        mActiveStripBar.setTrackColor(trackAlpha);
+        // Track + indicator both source from the picked HomeCardStyle's
+        // active(night).fg so they stay coordinated if a future style
+        // diverges from the default ACTIVE_BRAND tone. Indicator at
+        // full opacity, track at ~24% alpha to read as a subtle ghost
+        // rather than a competing colour.
+        SharedPreferences prefs = androidx.preference.PreferenceManager
+                .getDefaultSharedPreferences(requireContext());
+        com.solarized.firedown.ui.HomeCardStyle style =
+                com.solarized.firedown.ui.HomeCardStyle.fromKey(
+                        prefs.getString(
+                                Preferences.SETTINGS_HOME_CARD_STYLE,
+                                Preferences.DEFAULT_HOME_CARD_STYLE),
+                        com.solarized.firedown.ui.HomeCardStyle.NEUTRAL);
+        boolean night = com.solarized.firedown.ui.HomeCardStyle
+                .isNightMode(getResources());
+        int activeFg = style.active(night).fg;
+        mActiveStripBar.setIndicatorColor(activeFg);
+        mActiveStripBar.setTrackColor(
+                androidx.core.graphics.ColorUtils.setAlphaComponent(activeFg, 0x3D));
 
         mActiveStripTitle.setText(item.getFileName());
         boolean live = item.getFileIsLive();

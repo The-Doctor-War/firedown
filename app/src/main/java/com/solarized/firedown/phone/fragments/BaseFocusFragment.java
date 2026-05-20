@@ -110,11 +110,20 @@ public class BaseFocusFragment extends Fragment {
             new ActivityResultCallback<>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
+                    // Defensive: under process recreation the result
+                    // dispatch can race with onDetach (which nulls
+                    // mActivity). mTaskViewModel can be null in the
+                    // same window. Skip if either field has been torn
+                    // down — the caller will retry on the next user
+                    // interaction.
+                    if (mActivity == null) return;
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Optional<Intent> optionalIntent = Optional.ofNullable(result.getData());
                         optionalIntent.ifPresent(intent -> mActivity.handleIntent(intent));
-                    }else if(result.getResultCode() == Activity.RESULT_CANCELED){
-                        mTaskViewModel.sendEvent(new TaskEvent.Cancelled());
+                    } else if (result.getResultCode() == Activity.RESULT_CANCELED) {
+                        if (mTaskViewModel != null) {
+                            mTaskViewModel.sendEvent(new TaskEvent.Cancelled());
+                        }
                     }
                 }
             });

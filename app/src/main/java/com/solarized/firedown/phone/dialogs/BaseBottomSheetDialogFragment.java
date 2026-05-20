@@ -56,6 +56,9 @@ public class BaseBottomSheetDialogFragment extends BottomSheetDialogFragment {
             new ActivityResultCallback<>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
+                    // Defensive: process-recreation race can dispatch
+                    // the result after onDetach nulled mActivity.
+                    if (mActivity == null) return;
                     if (result.getResultCode() == Activity.RESULT_OK) {
                         Optional<Intent> optionalIntent = Optional.ofNullable(result.getData());
                         optionalIntent.ifPresent(intent -> mActivity.handleIntent(intent));

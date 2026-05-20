@@ -273,6 +273,37 @@ public abstract class NavigationUtils {
         }
     }
 
+    /**
+     * Variant that forwards a {@link NavOptions} bundle (typically with
+     * a {@code setPopUpTo} target). Same destination-existence guard
+     * as the other overloads so a double-tap can't race the navigation
+     * into a destination the current node no longer recognises.
+     */
+    public static void navigateSafe(NavController navController, @IdRes int resId,
+                                    Bundle args, NavOptions navOptions) {
+
+        if (navController == null)
+            return;
+
+        NavDestination currentDestination = navController.getCurrentDestination();
+        if (currentDestination == null)
+            return;
+
+        NavAction navAction = currentDestination.getAction(resId);
+        NavGraph currentNode = currentDestination instanceof NavGraph
+                ? (NavGraph) currentDestination
+                : currentDestination.getParent();
+
+        if (navAction != null) {
+            int destinationId = navAction.getDestinationId();
+            if (destinationId != 0 && currentNode != null && currentNode.findNode(destinationId) != null) {
+                navController.navigate(resId, args, navOptions);
+            }
+        } else if (currentNode != null && currentNode.findNode(resId) != null) {
+            navController.navigate(resId, args, navOptions);
+        }
+    }
+
     public static void popBackStackSafe(NavController navController, int id){
 
         if(navController == null)

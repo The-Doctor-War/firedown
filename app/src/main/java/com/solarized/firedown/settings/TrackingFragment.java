@@ -7,6 +7,7 @@ import androidx.preference.Preference;
 import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
 import com.solarized.firedown.settings.ui.RadioButtonPreference;
+import com.solarized.firedown.utils.NavigationUtils;
 import dagger.hilt.android.AndroidEntryPoint;
 import org.mozilla.geckoview.ContentBlocking;
 
@@ -61,7 +62,7 @@ public class TrackingFragment extends BasePreferenceFragment implements Preferen
 
         if(mStripListNavPreference != null) {
             mStripListNavPreference.setOnPreferenceClickListener(p -> {
-                mNavController.navigate(R.id.action_tracking_to_query_params);
+                NavigationUtils.navigateSafe(mNavController, R.id.action_tracking_to_query_params);
                 return true;
             });
         }

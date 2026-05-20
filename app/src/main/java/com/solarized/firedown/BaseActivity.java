@@ -205,7 +205,12 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
         // commits over the top, hiding the sheet until the user
         // navigates to a Browser tab.
         getWindow().getDecorView().post(() -> {
-            if (mPaused) return;     // gone background again before the post ran
+            // mPaused covers the common case (user navigated away
+            // before the post ran). The other two catch the rarer
+            // 'activity dying' cases — if we showed a sheet on an
+            // isFinishing()/isDestroyed() activity we'd hit
+            // IllegalStateException from FragmentManager.
+            if (mPaused || isFinishing() || isDestroyed()) return;
             com.solarized.firedown.crash.CrashReportSheet.showIfPending(
                     this, getSupportFragmentManager());
         });

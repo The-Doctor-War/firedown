@@ -60,55 +60,56 @@
                 app:layout_constraintStart_toStartOf="@id/image"
                 app:layout_constraintTop_toTopOf="@id/image" />
 
-            <!-- Top row: mime badge + file name -->
-            <LinearLayout
-                android:id="@+id/row_top"
+            <!-- Top row: file name only. The mime badge that used to
+                 live here has moved down to the metadata line as
+                 plain text — the filename is the primary identifier
+                 and shouldn't share that row with a heavy filled
+                 chip that grows with translations. -->
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/file_name"
+                style="@style/TextAppearance.Material3.TitleSmall"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toTopOf="@id/file_url"
+                android:layout_marginStart="@dimen/list_margin"
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textColor="?attr/colorOnSurface"
+                app:layout_constraintBottom_toTopOf="@id/mime_text"
                 app:layout_constraintEnd_toStartOf="@id/item_download_action"
-                app:layout_constraintStart_toEndOf="@id/image">
+                app:layout_constraintStart_toEndOf="@id/image" />
 
-                <TextView
-                    android:id="@+id/mime_text"
-                    style="@style/MimePrimary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/list_margin"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="4dp"
-                    tools:text="mp3" />
+            <!-- Middle row: mime label · globe · domain. mime_text
+                 keeps its id (adapter binds it the same way) but
+                 now uses the text-only MimePrimaryLabel style. The
+                 adapter appends ' · ' so the label reads as a
+                 prefix to the domain; if mime resolves to empty
+                 the view is hidden and the row degrades to plain
+                 'globe · domain'. -->
+            <TextView
+                android:id="@+id/mime_text"
+                style="@style/MimePrimaryLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_margin"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/image"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:text="VÍDEO · " />
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/file_name"
-                    style="@style/TextAppearance.Material3.TitleSmall"
-                    android:textColor="?attr/colorOnSurface"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:ellipsize="marquee"
-                    android:singleLine="true" />
-
-            </LinearLayout>
-
-            <!-- Middle row: domain -->
             <ImageView
                 android:id="@+id/file_url_icon"
                 android:layout_width="@dimen/list_item_domain"
                 android:layout_height="@dimen/list_item_domain"
-                android:layout_marginStart="8dp"
                 android:contentDescription="@null"
-                app:tint="?attr/colorOnSurfaceVariant"
                 android:src="@drawable/ic_baseline_language_24"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/image"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintStart_toEndOf="@id/mime_text"
+                app:layout_constraintTop_toTopOf="parent"
+                app:tint="?attr/colorOnSurfaceVariant" />
 
             <TextView
                 android:id="@+id/file_url"
                 style="@style/TextAppearance.Material3.LabelSmall"
-                android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="4dp"
@@ -117,9 +118,10 @@
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"
                 android:singleLine="true"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/item_download_action"
-                app:layout_constraintStart_toEndOf="@+id/file_url_icon"
+                app:layout_constraintStart_toEndOf="@id/file_url_icon"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <!-- Bottom row: status area (only one visible at a time) -->

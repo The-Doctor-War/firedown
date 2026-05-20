@@ -65,6 +65,8 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     private final int mDefaultGridBg;
     private final int mDefaultFg;
     private final int mDefaultFgVariant;
+    /** Brand accent for the list-mode mime label on a flat surface. */
+    private final int mDefaultPrimary;
     private boolean mActionMode;
     private boolean mEnabled;
     private boolean mEnableGrid;
@@ -116,6 +118,8 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 com.google.android.material.R.attr.colorOnSurface, Color.BLACK);
         mDefaultFgVariant = MaterialColors.getColor(context,
                 com.google.android.material.R.attr.colorOnSurfaceVariant, Color.GRAY);
+        mDefaultPrimary = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorPrimary, Color.BLACK);
     }
 
 
@@ -374,7 +378,16 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         holder.item.setStrokeColor(mActionMode && contains ? mColorSelected : mColorNormal);
         holder.selected.setVisibility(mActionMode ? View.VISIBLE : View.GONE);
         holder.selected.setImageDrawable(mActionMode ? (contains ? mChecked : mUnChecked) : null);
-        holder.mimeText.setText(FileUriHelper.getLongMimeText(mContext, mimeType));
+        // List mode renders mime as a text label that prefixes the
+        // domain ('VÍDEO · youtube.com'), so append the separator
+        // here; grid keeps the chip styling, no separator.
+        String mimeLabel = FileUriHelper.getLongMimeText(mContext, mimeType);
+        if (TextUtils.isEmpty(mimeLabel)) {
+            holder.mimeText.setVisibility(View.GONE);
+        } else {
+            holder.mimeText.setVisibility(View.VISIBLE);
+            holder.mimeText.setText(isGrid ? mimeLabel : mimeLabel + " · ");
+        }
 
         // ── Active-state surface ────────────────────────────────────
         // In-flight items (PROGRESS / QUEUED) take the picked Home
@@ -394,6 +407,13 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         if (holder.progressText != null) holder.progressText.setTextColor(fgVariant);
         if (holder.finishedText != null) holder.finishedText.setTextColor(fgVariant);
         if (holder.queuedText != null) holder.queuedText.setTextColor(fgVariant);
+        // List mime label uses colorPrimary on a flat surface but
+        // would disappear on the coral active row — recolour to the
+        // active fg so it stays visible. Grid mime keeps its filled
+        // chip style so it doesn't need this swap.
+        if (!isGrid) {
+            holder.mimeText.setTextColor(isActive ? mActiveFg : mDefaultPrimary);
+        }
 
         if (holder.fileName != null) holder.fileName.setText(entity.getFileName());
         if (holder.fileUrl != null) holder.fileUrl.setText(domain);

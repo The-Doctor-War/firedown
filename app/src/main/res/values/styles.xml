@@ -187,6 +187,24 @@
         <item name="singleLine">true</item>
     </style>
 
+    <!-- Text-only mime label used in the Downloads list. No chip
+         background — sits inline with the domain on the metadata
+         line so it scales naturally with long translations
+         (Russian ИЗОБРАЖЕНИЕ, Italian SOTTOTITOLI) instead of
+         pushing the filename off-screen. Coloured with colorPrimary
+         so it reads as a brand-accented label on the surface; the
+         adapter overrides it to the active CardLook's fg when the
+         row sits on the coral active surface, where colorPrimary
+         would disappear into the background. -->
+    <style name="MimePrimaryLabel">
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.04</item>
+        <item name="singleLine">true</item>
+    </style>
+
     <style name="MimeTertiary">
         <item name="android:background">@drawable/rounded_secondary</item>
         <item name="android:textColor">?attr/colorOnSecondaryContainer</item>

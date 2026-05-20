@@ -461,8 +461,8 @@
          (both flip together). Spike: experimental, may go away. -->
     <string name="settings_home_cards">Home cards</string>
     <string name="settings_home_cards_summary">Pick a style for the Downloads and Safe Folder cards</string>
-    <string name="settings_home_cards_header">Both cards flip together. Live cards (active download, playing media) keep their own brand colours regardless of the choice below.</string>
-    <string name="home_card_style_current">Current (reference)</string>
+    <string name="settings_home_cards_header">All four home cards flip together as a single theme — active download, playing media, Downloads, Safe Folder.</string>
+    <string name="home_card_style_default">Default</string>
     <string name="home_card_style_tinted_no_chip">Tinted surface, no chip</string>
     <string name="home_card_style_tinted_with_chip">Tinted surface with chip</string>
     <string name="home_card_style_filled_brand">Filled brand surface</string>
@@ -470,6 +470,9 @@
     <!-- Sample-data subtitles shown inside the style-picker previews.
          Not surfaced anywhere else — purely illustrative so the
          preview cards don't look anaemic. -->
+    <string name="home_card_style_preview_active_title">my_video_file_name.mp4</string>
+    <string name="home_card_style_preview_media_title">Bossa Lofi Radio</string>
+    <string name="home_card_style_preview_media_subtitle">youtube.com</string>
     <string name="home_card_style_preview_downloads_subtitle">150 files saved · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 items saved</string>
     <string name="settings_version">Version</string>

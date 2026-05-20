@@ -75,7 +75,7 @@ public class Preferences {
      *  are a packaged styling, not per-card colour tweaks. */
     public static final String SETTINGS_HOME_CARDS = "com.solarized.firedown.preferences.home.cards";
     public static final String SETTINGS_HOME_CARD_STYLE = "com.solarized.firedown.preferences.home.card.style";
-    public static final String DEFAULT_HOME_CARD_STYLE = "current";
+    public static final String DEFAULT_HOME_CARD_STYLE = "default";
 
     /**
      * Sentinel value stored in {@link #SETTINGS_THEME} when the user picks

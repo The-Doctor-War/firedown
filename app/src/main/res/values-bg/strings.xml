@@ -224,7 +224,7 @@
     <string name="settings_doh_title">DNS през HTTPS</string>
     <string name="settings_donate">Дарете</string>
     <string name="settings_downloads">Изтегляния</string>
-    <string name="settings_downloads_free">Изтегляния &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Изтегляния &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Местоположение за изтегляния</string>
     <string name="settings_downloads_sdcard_free">SD карта &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD карта &lt;small&gt;(не е открита)&lt;/small&gt;</string>

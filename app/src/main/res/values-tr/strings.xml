@@ -256,7 +256,7 @@
     <string name="settings_doh_title">HTTPS üzerinden DNS</string>
     <string name="settings_donate">Bağış yap</string>
     <string name="settings_downloads">İndirilenler</string>
-    <string name="settings_downloads_free">İndirilenler</string>
+    <string name="settings_downloads_free">İndirilenler &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">İndirmeler Konum</string>
     <string name="settings_downloads_sdcard_free">SD Kart &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD Kart &lt;small&gt;(Algılanamadı)&lt;/small&gt;</string>

@@ -198,7 +198,7 @@
     <string name="settings_doh_summary">DNS දත්තවලට අනවසරයෙන් සවන්දීම සහ හැසිරවීම වැළැක්වීම මගින් පෞද්ගලිකත්වය වැඩි කරන්න.</string>
     <string name="settings_doh_title">HTTPS හරහා DNS</string>
     <string name="settings_downloads">බාගත කිරීම්</string>
-    <string name="settings_downloads_free">බාගැනීම් &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">බාගැනීම් &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">බාගැනීම් ස්ථානය</string>
     <string name="settings_downloads_sdcard_free">SD කාඩ්පත &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD කාඩ්පත &lt;small&gt;(හඳුනා නොගත්)&lt;/small&gt;</string>

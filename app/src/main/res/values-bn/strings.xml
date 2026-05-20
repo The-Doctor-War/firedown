@@ -195,7 +195,7 @@
     <string name="settings_doh_title">HTTPS এর উপর DNS</string>
     <string name="settings_donate">ডোনেট করুন</string>
     <string name="settings_downloads">ডাউনলোড</string>
-    <string name="settings_downloads_free">ডাউনলোড &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">ডাউনলোড &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ডাউনলোডের অবস্থান</string>
     <string name="settings_downloads_sdcard_free">SD কার্ড &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD কার্ড &lt;small&gt;(শনাক্ত করা হয়নি)&lt;/small&gt;</string>

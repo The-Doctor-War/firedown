@@ -188,7 +188,7 @@
     <string name="settings_doh_title">HTTPS üzərindən DNS</string>
     <string name="settings_donate">İanə ver</string>
     <string name="settings_downloads">Yükləmələr</string>
-    <string name="settings_downloads_free">Endirmələr &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Endirmələr &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Yükləmə yeri</string>
     <string name="settings_downloads_sdcard_free">SD Kart &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD Kart &lt;small&gt;(Alınmadı)&lt;/small&gt;</string>

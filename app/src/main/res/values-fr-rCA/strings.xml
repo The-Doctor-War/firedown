@@ -173,7 +173,7 @@
     <string name="settings_doh_summary">Améliorez la confidentialité en empêchant l’écoute clandestine et la manipulation des données DNS.</string>
     <string name="settings_doh_title">DNS sur HTTPS</string>
     <string name="settings_downloads">Téléchargements</string>
-    <string name="settings_downloads_free">Téléchargements &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Téléchargements &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Téléchargements Emplacement</string>
     <string name="settings_downloads_sdcard_free">Carte SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Carte SD &lt;small&gt;(non détectée)&lt;/small&gt;</string>

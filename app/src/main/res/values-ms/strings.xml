@@ -176,7 +176,7 @@
     <string name="settings_doh_title">DNS melalui HTTPS</string>
     <string name="settings_donate">Derma</string>
     <string name="settings_downloads">Muat turun</string>
-    <string name="settings_downloads_free">Muat turun &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Muat turun &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Lokasi Muat turun</string>
     <string name="settings_downloads_sdcard_free">Kad SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Kad SD &lt;small&gt;(Tidak dikesan)&lt;/small&gt;</string>

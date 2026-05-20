@@ -192,7 +192,7 @@
     <string name="settings_doh_title">DNS ओवर HTTPS</string>
     <string name="settings_donate">दान करें</string>
     <string name="settings_downloads">डाउनलोड</string>
-    <string name="settings_downloads_free">डाउनलोड &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">डाउनलोड &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">डाउनलोड स्थान</string>
     <string name="settings_downloads_sdcard_free">एसडी कार्ड &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">एसडी कार्ड &lt;small&gt;(पता नहीं चला)&lt;/small&gt;</string>

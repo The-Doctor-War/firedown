@@ -236,7 +236,7 @@
     <string name="settings_doh_title">DNS přes HTTPS</string>
     <string name="settings_donate">Přispějte</string>
     <string name="settings_downloads">Stahování</string>
-    <string name="settings_downloads_free">Stahování &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Stahování &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Umístění ke stažení</string>
     <string name="settings_downloads_sdcard_free">SD karta &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD karta &lt;small&gt;(nezjištěno)&lt;/small&gt;</string>

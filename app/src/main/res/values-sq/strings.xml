@@ -206,7 +206,7 @@
     <string name="settings_doh_title">DNS mbi HTTPS</string>
     <string name="settings_donate">Dhuro</string>
     <string name="settings_downloads">Shkarkimet</string>
-    <string name="settings_downloads_free">Shkarkimet &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Shkarkimet &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Vendndodhja e shkarkimeve</string>
     <string name="settings_downloads_sdcard_free">Karta SD &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Karta SD &lt;small&gt;(Nuk u zbulua)&lt;/small&gt;</string>

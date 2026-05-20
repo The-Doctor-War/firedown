@@ -244,7 +244,7 @@
     <string name="settings_doh_title">DNS over HTTPS</string>
     <string name="settings_donate">Dona</string>
     <string name="settings_downloads">Download</string>
-    <string name="settings_downloads_free">Download &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Download &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Posizione dei download</string>
     <string name="settings_downloads_sdcard_free">Scheda SD&lt;small&gt;(%s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Scheda SD &lt;small&gt;(Non rilevata)&lt;/small&gt;</string>

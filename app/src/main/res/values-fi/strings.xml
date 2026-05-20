@@ -235,7 +235,7 @@
     <string name="settings_doh_title">DNS HTTPS:n kautta</string>
     <string name="settings_donate">Lahjoita</string>
     <string name="settings_downloads">Lataukset</string>
-    <string name="settings_downloads_free">Lataukset &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Lataukset &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Lataukset Sijainti</string>
     <string name="settings_downloads_sdcard_free">SD-kortti &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD-kortti &lt;small&gt;(ei havaittu)&lt;/small&gt;</string>

@@ -201,7 +201,7 @@
     <string name="settings_doh_title">HTTPS پر DNS</string>
     <string name="settings_donate">عطیہ کریں</string>
     <string name="settings_downloads">ڈاؤن لوڈ</string>
-    <string name="settings_downloads_free">ڈاؤن لوڈز &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">ڈاؤن لوڈز &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ڈاؤن لوڈز کا مقام</string>
     <string name="settings_downloads_sdcard_free">SD کارڈ &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD کارڈ &lt;small&gt;(پتہ نہیں چلا)&lt;/small&gt;</string>

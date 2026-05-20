@@ -231,7 +231,7 @@
     <string name="settings_doh_title">DNS over HTTPS</string>
     <string name="settings_donate">Donér</string>
     <string name="settings_downloads">Downloads</string>
-    <string name="settings_downloads_free">Downloads &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Downloads &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Downloads placering</string>
     <string name="settings_downloads_sdcard_free">SD-kort &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD-kort &lt;small&gt;(ikke fundet)&lt;/small&gt;</string>

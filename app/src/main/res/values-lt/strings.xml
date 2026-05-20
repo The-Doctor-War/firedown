@@ -208,7 +208,7 @@
     <string name="settings_doh_title">DNS per HTTPS</string>
     <string name="settings_donate">Paremti</string>
     <string name="settings_downloads">Atsisiuntimai</string>
-    <string name="settings_downloads_free">Atsisiuntimai &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Atsisiuntimai &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Atsisiuntimų vieta</string>
     <string name="settings_downloads_sdcard_free">SD kortelė &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD kortelė &lt;small&gt;(neaptikta)&lt;/small&gt;</string>

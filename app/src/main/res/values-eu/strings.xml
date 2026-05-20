@@ -208,7 +208,7 @@
     <string name="settings_doh_title">DNS HTTPS bidez</string>
     <string name="settings_donate">Egin dohaintza</string>
     <string name="settings_downloads">Deskargak</string>
-    <string name="settings_downloads_free">Deskargak &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Deskargak &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Deskargak kokapena</string>
     <string name="settings_downloads_sdcard_free">SD txartela &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD txartela &lt;small&gt;(Ez da detektatu)&lt;/small&gt;</string>

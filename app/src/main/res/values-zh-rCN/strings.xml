@@ -350,7 +350,7 @@
     <string name="settings_donate">捐款</string>
     <string name="settings_donate_summary">回馈 Firedown 对你的价值</string>
 <string name="settings_downloads">下载</string>
-    <string name="settings_downloads_free">下载</string>
+    <string name="settings_downloads_free">下载 &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">下载位置</string>
     <string name="settings_downloads_sdcard_free">SD 卡&lt;small&gt;（%s ）/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD 卡&lt;small&gt;（未检测到）&lt;/small&gt;</string>

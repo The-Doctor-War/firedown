@@ -219,7 +219,7 @@
     <string name="settings_doh_title">DNS μέσω HTTPS</string>
     <string name="settings_donate">Δωρεά</string>
     <string name="settings_downloads">Λήψεις</string>
-    <string name="settings_downloads_free">Λήψεις &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Λήψεις &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Τοποθεσία λήψεων</string>
     <string name="settings_downloads_sdcard_free">Κάρτα SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Κάρτα SD &lt;small&gt;(Δεν εντοπίστηκε)&lt;/small&gt;</string>

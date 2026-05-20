@@ -169,7 +169,7 @@
     <string name="settings_doh_title">HTTPS ਉੱਤੇ DNS</string>
     <string name="settings_donate">ਦਾਨ ਦਿਓ</string>
     <string name="settings_downloads">ਡਾਊਨਲੋਡ</string>
-    <string name="settings_downloads_free">ਡਾਊਨਲੋਡ &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">ਡਾਊਨਲੋਡ &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ਡਾਊਨਲੋਡ ਟਿਕਾਣਾ</string>
     <string name="settings_downloads_sdcard_free">SD ਕਾਰਡ &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD ਕਾਰਡ &lt;small&gt;(ਪਤਾ ਨਹੀਂ ਲੱਗਾ)&lt;/small&gt;</string>

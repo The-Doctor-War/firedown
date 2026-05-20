@@ -257,7 +257,7 @@
     <string name="settings_doh_title">DNS przez HTTPS</string>
     <string name="settings_donate">Wpłać darowiznę</string>
     <string name="settings_downloads">Pliki do pobrania</string>
-    <string name="settings_downloads_free">Pliki do pobrania  &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Pliki do pobrania &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Lokalizacja pobierania</string>
     <string name="settings_downloads_sdcard_free">Karta SD&lt;small&gt;(%s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Karta SD &lt;small&gt;(Nie wykryto)&lt;/small&gt;</string>

@@ -350,7 +350,7 @@
     <string name="settings_donate">寄付する</string>
     <string name="settings_donate_summary">Firedownの価値ぶんを還元してください</string>
 <string name="settings_downloads">ダウンロード</string>
-    <string name="settings_downloads_free">ダウンロード&lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">ダウンロード &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ダウンロード場所</string>
     <string name="settings_downloads_sdcard_free">SD カード&lt;small&gt;（%s ）/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD カード（検出されませんでした）&lt;small&gt;&lt;/small&gt;</string>

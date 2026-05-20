@@ -207,7 +207,7 @@
     <string name="settings_doh_title">DNS HTTPS-ზე</string>
     <string name="settings_donate">გააკეთე დონაცია</string>
     <string name="settings_downloads">Ჩამოტვირთვები</string>
-    <string name="settings_downloads_free">Ჩამოტვირთვები &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Ჩამოტვირთვები &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Ჩამოტვირთვების მდებარეობა</string>
     <string name="settings_downloads_sdcard_free">SD ბარათი &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD ბარათი &lt;small&gt;(არ არის აღმოჩენილი)&lt;/small&gt;</string>

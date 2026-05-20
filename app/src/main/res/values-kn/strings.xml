@@ -187,7 +187,7 @@
     <string name="settings_doh_title">HTTPS ಮೂಲಕ DNS</string>
     <string name="settings_donate">ದೇಣಿಗೆ ನೀಡಿ</string>
     <string name="settings_downloads">ಡೌನ್‌ಲೋಡ್‌ಗಳು</string>
-    <string name="settings_downloads_free">ಡೌನ್‌ಲೋಡ್‌ಗಳು &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">ಡೌನ್‌ಲೋಡ್‌ಗಳು &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ಡೌನ್‌ಲೋಡ್‌ಗಳ ಸ್ಥಳ</string>
     <string name="settings_downloads_sdcard_free">SD ಕಾರ್ಡ್ &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD ಕಾರ್ಡ್ &lt;ಸಣ್ಣ&gt;(ಪತ್ತೆಯಾಗಿಲ್ಲ)&lt;/small&gt;</string>

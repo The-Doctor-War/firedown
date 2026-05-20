@@ -215,7 +215,7 @@
     <string name="settings_doh_title">DNS از طریق HTTPS</string>
     <string name="settings_donate">اهدای کمک مالی</string>
     <string name="settings_downloads">دانلودها</string>
-    <string name="settings_downloads_free">دانلودها &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">دانلودها &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">مکان دانلودها</string>
     <string name="settings_downloads_sdcard_free">کارت SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">کارت SD &lt;small&gt;(شناسایی نشد)&lt;/small&gt;</string>

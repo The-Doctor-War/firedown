@@ -231,7 +231,7 @@
     <string name="settings_doh_title">DNS דרך HTTPS</string>
     <string name="settings_donate">ביצוע תרומה</string>
     <string name="settings_downloads">הורדות</string>
-    <string name="settings_downloads_free">הורדות &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">הורדות &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">מיקום הורדות</string>
     <string name="settings_downloads_sdcard_free">כרטיס SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">כרטיס SD &lt;small&gt;(לא זוהה)&lt;/small&gt;</string>

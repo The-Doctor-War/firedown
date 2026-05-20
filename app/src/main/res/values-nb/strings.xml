@@ -188,7 +188,7 @@
     <string name="settings_doh_title">DNS over HTTPS</string>
     <string name="settings_donate">Gi penger</string>
     <string name="settings_downloads">Nedlastinger</string>
-    <string name="settings_downloads_free">Nedlastinger</string>
+    <string name="settings_downloads_free">Nedlastinger &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Nedlastingsplassering</string>
     <string name="settings_downloads_sdcard_free">SD-kort &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD-kort &lt;small&gt;(ikke oppdaget)&lt;/small&gt;</string>

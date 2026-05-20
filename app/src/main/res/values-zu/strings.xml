@@ -173,7 +173,7 @@
     <string name="settings_doh_summary">Khulisa ubumfihlo ngokuvimbela ukulalela nokukhohlisa idatha ye-DNS.</string>
     <string name="settings_doh_title">I-DNS ngaphezulu kwe-HTTPS</string>
     <string name="settings_downloads">Okulandwayo</string>
-    <string name="settings_downloads_free">Okulandwayo</string>
+    <string name="settings_downloads_free">Okulandwayo &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Indawo yokulanda</string>
     <string name="settings_downloads_sdcard_free">Ikhadi le-SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Ikhadi le-SD &lt;small&gt;(Alitholakali)&lt;/small&gt;</string>

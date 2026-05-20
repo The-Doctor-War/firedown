@@ -214,7 +214,7 @@
     <string name="settings_doh_title">DNS преко HTTPS-а</string>
     <string name="settings_donate">Донирајте</string>
     <string name="settings_downloads">Преузимања</string>
-    <string name="settings_downloads_free">Преузимања &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">Преузимања &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Локација преузимања</string>
     <string name="settings_downloads_sdcard_free">SD картица &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD картица &lt;small&gt;(није откривена)&lt;/small&gt;</string>

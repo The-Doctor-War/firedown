@@ -169,7 +169,7 @@
     <string name="settings_doh_summary">DNS ତଥ୍ୟର ଶୁଣିବା ଏବଂ ମନିପୁଲେସନ୍ ରୋକିବା ଦ୍ୱାରା ଗୋପନୀୟତା ବୃଦ୍ଧି କରନ୍ତୁ |</string>
     <string name="settings_doh_title">HTTPS ଉପରେ DNS |</string>
     <string name="settings_downloads">ଡାଉନଲୋଡ୍ |</string>
-    <string name="settings_downloads_free">&lt;small&gt; &lt;font color = # a8aebf&gt; ( %s ) &lt;/font&gt; &lt;/small&gt; ଡାଉନଲୋଡ୍ କରନ୍ତୁ |</string>
+    <string name="settings_downloads_free"> &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ଅବସ୍ଥାନ ଡାଉନଲୋଡ୍ କରନ୍ତୁ |</string>
     <string name="settings_downloads_sdcard_free">SD କାର୍ଡ &lt;small&gt; &lt;font color = # a8aebf&gt; ( %s ) &lt;/font&gt; &lt;/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD କାର୍ଡ &lt;small&gt; (ଚିହ୍ନଟ ହୋଇନାହିଁ) &lt;/small&gt; |</string>

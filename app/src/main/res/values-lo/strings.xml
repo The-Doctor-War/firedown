@@ -199,7 +199,7 @@
     <string name="settings_doh_summary">ເພີ່ມຄວາມເປັນສ່ວນຕົວໂດຍການປ້ອງກັນການລັກຟັງ ແລະການຈັດການຂໍ້ມູນ DNS.</string>
     <string name="settings_doh_title">DNS ຜ່ານ HTTPS</string>
     <string name="settings_downloads">ດາວໂຫຼດ</string>
-    <string name="settings_downloads_free">ດາວໂຫຼດ &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">ດາວໂຫຼດ &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">ສະຖານທີ່ດາວໂຫຼດ</string>
     <string name="settings_downloads_sdcard_free">SD Card &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD ກາດ &lt;small&gt;(ບໍ່ກວດພົບ)&lt;/small&gt;</string>

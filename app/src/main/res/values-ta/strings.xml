@@ -190,7 +190,7 @@
     <string name="settings_doh_title">HTTPS வழியாக DNS</string>
     <string name="settings_donate">நன்கொடையளிக்கவும்</string>
     <string name="settings_downloads">பதிவிறக்கங்கள்</string>
-    <string name="settings_downloads_free">பதிவிறக்கங்கள் &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">பதிவிறக்கங்கள் &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">பதிவிறக்கங்கள் இடம்</string>
     <string name="settings_downloads_sdcard_free">SD கார்டு &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD கார்டு &lt;சிறிய&gt;(கண்டறியப்படவில்லை)&lt;/small&gt;</string>

@@ -204,7 +204,7 @@
     <string name="settings_doh_summary">Auktu friðhelgi einkalífsins með því að koma í veg fyrir hlerun og meðferð á DNS gögnum.</string>
     <string name="settings_doh_title">DNS yfir HTTPS</string>
     <string name="settings_downloads">Niðurhal</string>
-    <string name="settings_downloads_free">Niðurhal &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Niðurhal &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Staðsetning niðurhals</string>
     <string name="settings_downloads_sdcard_free">SD kort &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD kort &lt;small&gt;(finnst ekki)&lt;/small&gt;</string>

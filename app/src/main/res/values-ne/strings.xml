@@ -161,7 +161,7 @@
     <string name="settings_doh_summary">DNS डाटा को छन र हेरफेर रोकेर गोपनीयता बढाउनुहोस्।</string>
     <string name="settings_doh_title">HTTPS मा DNS</string>
     <string name="settings_downloads">डाउनलोडहरू</string>
-    <string name="settings_downloads_free">डाउनलोडहरू &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">डाउनलोडहरू &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">डाउनलोड स्थान</string>
     <string name="settings_downloads_sdcard_free">SD कार्ड &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD कार्ड &lt;small&gt;(पत्ता लागेन)&lt;/small&gt;</string>

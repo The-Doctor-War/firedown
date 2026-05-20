@@ -219,7 +219,7 @@
     <string name="settings_doh_title">DNS cez HTTPS</string>
     <string name="settings_donate">Prispieť</string>
     <string name="settings_downloads">K stiahnutiu</string>
-    <string name="settings_downloads_free">K stiahnutiu &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">K stiahnutiu &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Miesto sťahovania</string>
     <string name="settings_downloads_sdcard_free">SD karta &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD karta &lt;small&gt;(nerozpoznaná)&lt;/small&gt;</string>

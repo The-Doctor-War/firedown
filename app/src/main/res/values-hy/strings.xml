@@ -162,7 +162,7 @@
     <string name="settings_doh_summary">Բարձրացրեք գաղտնիությունը՝ կանխելով DNS տվյալների գաղտնալսումը և շահարկումը:</string>
     <string name="settings_doh_title">DNS՝ HTTPS-ի միջոցով</string>
     <string name="settings_downloads">Ներբեռնումներ</string>
-    <string name="settings_downloads_free">Ներբեռնումներ &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Ներբեռնումներ &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Ներբեռնումների գտնվելու վայրը</string>
     <string name="settings_downloads_sdcard_free">SD քարտ &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD քարտ &lt;small&gt;(Չի հայտնաբերվել)&lt;/small&gt;</string>

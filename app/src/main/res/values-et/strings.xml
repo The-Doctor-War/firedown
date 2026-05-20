@@ -213,7 +213,7 @@
     <string name="settings_doh_title">DNS HTTPS-i kaudu</string>
     <string name="settings_donate">Anneta</string>
     <string name="settings_downloads">Allalaadimised</string>
-    <string name="settings_downloads_free">Allalaadimised</string>
+    <string name="settings_downloads_free">Allalaadimised &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Allalaadimiste asukoht</string>
     <string name="settings_downloads_sdcard_free">SD-kaart &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD-kaart &lt;small&gt;(ei tuvastatud)&lt;/small&gt;</string>

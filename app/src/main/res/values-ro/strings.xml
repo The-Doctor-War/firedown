@@ -216,7 +216,7 @@
     <string name="settings_doh_title">DNS prin HTTPS</string>
     <string name="settings_donate">Donează</string>
     <string name="settings_downloads">Descărcări</string>
-    <string name="settings_downloads_free">Descărcări</string>
+    <string name="settings_downloads_free">Descărcări &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Locație de descărcări</string>
     <string name="settings_downloads_sdcard_free">Card SD &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Card SD &lt;small&gt;(Nedetectat)&lt;/small&gt;</string>

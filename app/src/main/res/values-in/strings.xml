@@ -207,7 +207,7 @@
     <string name="settings_doh_title">DNS melalui HTTPS</string>
     <string name="settings_donate">Donasi</string>
     <string name="settings_downloads">Unduhan</string>
-    <string name="settings_downloads_free">Unduh &lt;small&gt;( %s )/small&gt;</string>
+    <string name="settings_downloads_free">Unduh &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">Lokasi Unduhan</string>
     <string name="settings_downloads_sdcard_free">Kartu SD &lt;small&gt;( %s )/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">Kartu SD &lt;kecil&gt;(Tidak terdeteksi)&lt;/kecil&gt;</string>

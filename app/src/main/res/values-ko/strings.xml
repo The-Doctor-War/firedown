@@ -243,7 +243,7 @@
     <string name="settings_doh_title">HTTPS를 통한 DNS</string>
     <string name="settings_donate">후원하기</string>
     <string name="settings_downloads">다운로드</string>
-    <string name="settings_downloads_free">다운로드&lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">다운로드 &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">다운로드 위치</string>
     <string name="settings_downloads_sdcard_free">SD 카드&lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD 카드&lt;small&gt;(감지되지 않음)&lt;/small&gt;</string>

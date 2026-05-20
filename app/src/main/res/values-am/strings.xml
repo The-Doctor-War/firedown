@@ -214,7 +214,7 @@
     <string name="settings_doh_summary">የDNS መረጃን ማዳመጥ እና መጠቀሚያ በመከላከል ግላዊነትን ይጨምሩ።</string>
     <string name="settings_doh_title">DNS በ HTTPS ላይ</string>
     <string name="settings_downloads">ውርዶች</string>
-    <string name="settings_downloads_free">ውርዶች &lt;small&gt;(%s)/small&gt;</string>
+    <string name="settings_downloads_free">ውርዶች &lt;small&gt;(%s)&lt;/small&gt;</string>
     <string name="settings_downloads_path">የውርዶች መገኛ ቦታ</string>
     <string name="settings_downloads_sdcard_free">SD ካርድ &lt;small&gt;(%s)/small&gt;</string>
     <string name="settings_downloads_sdcard_not_detected">SD ካርድ &lt;small&gt;(አልተገኘም)&lt;/small&gt;</string>

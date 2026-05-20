@@ -69,16 +69,13 @@ public class Preferences {
 
     public static final String SETTINGS_THEME_OLED = "com.solarized.firedown.preferences.theme.oled";
 
-    /** Per-card chip palette overrides on the home page. String values
-     *  map to {@link com.solarized.firedown.ui.HomeCardPalette#key}.
-     *  Defaults preserve the previously hard-coded shelf colours
-     *  (coral for Downloads, raspberry for Safe Folder) so an upgrade
-     *  with no user interaction looks identical to before. */
+    /** Home shelf-card style picker. Single preference (one of the
+     *  {@link com.solarized.firedown.ui.HomeCardStyle#key} values) flips
+     *  both the Downloads and Safe Folder cards together — the choices
+     *  are a packaged styling, not per-card colour tweaks. */
     public static final String SETTINGS_HOME_CARDS = "com.solarized.firedown.preferences.home.cards";
-    public static final String SETTINGS_HOME_DOWNLOADS_PALETTE = "com.solarized.firedown.preferences.home.downloads.palette";
-    public static final String SETTINGS_HOME_VAULT_PALETTE = "com.solarized.firedown.preferences.home.vault.palette";
-    public static final String DEFAULT_HOME_DOWNLOADS_PALETTE = "coral";
-    public static final String DEFAULT_HOME_VAULT_PALETTE = "raspberry";
+    public static final String SETTINGS_HOME_CARD_STYLE = "com.solarized.firedown.preferences.home.card.style";
+    public static final String DEFAULT_HOME_CARD_STYLE = "current";
 
     /**
      * Sentinel value stored in {@link #SETTINGS_THEME} when the user picks

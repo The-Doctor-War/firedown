@@ -2,23 +2,6 @@
 <resources>
 
 
-    <!-- Home shelf-card chip palette options. Values must stay in
-         sync with HomeCardPalette.key — string literals are used as
-         the persisted preference, the labels are the localised
-         dialog entries. -->
-    <string-array name="home_card_palette_entries">
-        <item>@string/palette_coral</item>
-        <item>@string/palette_peach</item>
-        <item>@string/palette_raspberry</item>
-        <item>@string/palette_neutral</item>
-    </string-array>
-    <string-array name="home_card_palette_values">
-        <item>coral</item>
-        <item>peach</item>
-        <item>raspberry</item>
-        <item>neutral</item>
-    </string-array>
-
     <string-array name="delete_history">
         <item>Last 15 minutes</item>
         <item>Last hour</item>

@@ -200,7 +200,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         vaultCard.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, VaultActivity.class)));
 
-        applyHomeCardPalettes(v);
+        applyHomeCardStyle(v);
 
 
         mBottomNavigationBar.setListener(this);
@@ -434,7 +434,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 // activity, so the home view survives the round-trip
                 // and only its chip backgrounds need to flip.
                 View root = getView();
-                if (root != null) applyHomeCardPalettes(root);
+                if (root != null) applyHomeCardStyle(root);
             }
         });
 
@@ -525,46 +525,44 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     }
 
     /**
-     * Re-tints the Downloads + Safe Folder chips using the user's
-     * picked palettes from settings. Reads each preference once and
-     * defers to {@link com.solarized.firedown.ui.HomeCardPalette#apply}
-     * which mutates the chip drawable in place — no view re-inflation
-     * needed. Called from {@code onCreateView} so re-entering the home
-     * page after changing the setting in Settings → Home cards picks
-     * up the new colour on the next layout pass.
+     * Paints the Downloads + Safe Folder shelf cards with the user's
+     * picked {@link com.solarized.firedown.ui.HomeCardStyle}. One pref,
+     * both cards flip together — the variants are coherent looks, not
+     * per-card tweaks. Called from {@code onCreateView} and again on
+     * {@code ON_RESUME} so a style change made in Settings shows up
+     * when the user navigates back, without forcing a fragment rebuild.
      */
-    private void applyHomeCardPalettes(@NonNull View root) {
+    private void applyHomeCardStyle(@NonNull View root) {
         SharedPreferences prefs = androidx.preference.PreferenceManager
                 .getDefaultSharedPreferences(requireContext());
+        String key = prefs.getString(
+                Preferences.SETTINGS_HOME_CARD_STYLE,
+                Preferences.DEFAULT_HOME_CARD_STYLE);
+        com.solarized.firedown.ui.HomeCardStyle style =
+                com.solarized.firedown.ui.HomeCardStyle.fromKey(
+                        key, com.solarized.firedown.ui.HomeCardStyle.CURRENT);
+        boolean night = com.solarized.firedown.ui.HomeCardStyle.isNightMode(getResources());
 
         MaterialCardView downloadsCard = root.findViewById(R.id.recent_downloads_card);
-        View downloadsChip = root.findViewById(R.id.recent_downloads_chip);
-        androidx.appcompat.widget.AppCompatImageView downloadsIcon =
-                root.findViewById(R.id.recent_downloads_icon);
-        TextView downloadsTitle = root.findViewById(R.id.recent_downloads_title);
-        if (downloadsCard != null && downloadsChip != null && downloadsIcon != null) {
-            String key = prefs.getString(
-                    Preferences.SETTINGS_HOME_DOWNLOADS_PALETTE,
-                    Preferences.DEFAULT_HOME_DOWNLOADS_PALETTE);
-            com.solarized.firedown.ui.HomeCardPalette
-                    .fromKey(key, com.solarized.firedown.ui.HomeCardPalette.CORAL)
-                    .apply(downloadsCard, downloadsChip, downloadsIcon,
-                            downloadsTitle, mRecentDownloadsSubtitle);
+        if (downloadsCard != null) {
+            com.solarized.firedown.ui.HomeCardStyle.applyToCard(
+                    downloadsCard,
+                    root.findViewById(R.id.recent_downloads_chip),
+                    root.findViewById(R.id.recent_downloads_icon),
+                    root.findViewById(R.id.recent_downloads_title),
+                    mRecentDownloadsSubtitle,
+                    style.downloads(night));
         }
 
         MaterialCardView vaultCard = root.findViewById(R.id.home_vault_card);
-        View vaultChip = root.findViewById(R.id.home_vault_chip);
-        androidx.appcompat.widget.AppCompatImageView vaultIcon =
-                root.findViewById(R.id.home_vault_icon);
-        TextView vaultTitle = root.findViewById(R.id.home_vault_title);
-        if (vaultCard != null && vaultChip != null && vaultIcon != null) {
-            String key = prefs.getString(
-                    Preferences.SETTINGS_HOME_VAULT_PALETTE,
-                    Preferences.DEFAULT_HOME_VAULT_PALETTE);
-            com.solarized.firedown.ui.HomeCardPalette
-                    .fromKey(key, com.solarized.firedown.ui.HomeCardPalette.RASPBERRY)
-                    .apply(vaultCard, vaultChip, vaultIcon,
-                            vaultTitle, mHomeVaultSubtitle);
+        if (vaultCard != null) {
+            com.solarized.firedown.ui.HomeCardStyle.applyToCard(
+                    vaultCard,
+                    root.findViewById(R.id.home_vault_chip),
+                    root.findViewById(R.id.home_vault_icon),
+                    root.findViewById(R.id.home_vault_title),
+                    mHomeVaultSubtitle,
+                    style.vault(night));
         }
     }
 

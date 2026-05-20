@@ -134,6 +134,7 @@
         <item name="chipSurfaceColor">@color/transparent</item>
         <item name="chipBackgroundColor">@color/chip_download</item>
         <item name="chipCornerRadius">100dp</item>
+        <item name="chipMinHeight">36dp</item>
     </style>
 
     <style name="Firedown.AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">

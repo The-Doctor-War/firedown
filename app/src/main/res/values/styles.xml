@@ -284,6 +284,10 @@
              exact height — bumping it once here keeps the pill look
              even if Material updates the default chip height later. -->
         <item name="chipCornerRadius">100dp</item>
+        <!-- 36dp instead of the M3 default 32 — the extra 4dp gives the
+             pill curve a bit more room to show and makes the rail feel
+             comfortable to tap without crossing into 'button' territory. -->
+        <item name="chipMinHeight">36dp</item>
     </style>
 
     <style name="Firedown.AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">

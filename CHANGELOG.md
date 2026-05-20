@@ -1,3 +1,13 @@
+## [1.1.72] - 2026-05-20
+
+- Added Home cards style picker (Settings → Theme → Home cards)
+- Added crash reporter with one-tap GitHub issue prefill
+- Refreshed Downloads and captured-content layouts
+- Pill-shaped filter chips and Tabs / Incognito selector
+- Translations across 83 locales for the new strings
+- Bump Gecko to version 151.0.20260513195118
+- Minor bugfixes
+
 ## [1.1.71] - 2026-05-15
 
 - Added double tap on video playing

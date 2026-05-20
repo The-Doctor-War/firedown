@@ -528,28 +528,34 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         SharedPreferences prefs = androidx.preference.PreferenceManager
                 .getDefaultSharedPreferences(requireContext());
 
+        MaterialCardView downloadsCard = root.findViewById(R.id.recent_downloads_card);
         View downloadsChip = root.findViewById(R.id.recent_downloads_chip);
         androidx.appcompat.widget.AppCompatImageView downloadsIcon =
                 root.findViewById(R.id.recent_downloads_icon);
-        if (downloadsChip != null && downloadsIcon != null) {
+        TextView downloadsTitle = root.findViewById(R.id.recent_downloads_title);
+        if (downloadsCard != null && downloadsChip != null && downloadsIcon != null) {
             String key = prefs.getString(
                     Preferences.SETTINGS_HOME_DOWNLOADS_PALETTE,
                     Preferences.DEFAULT_HOME_DOWNLOADS_PALETTE);
             com.solarized.firedown.ui.HomeCardPalette
                     .fromKey(key, com.solarized.firedown.ui.HomeCardPalette.CORAL)
-                    .apply(downloadsChip, downloadsIcon);
+                    .apply(downloadsCard, downloadsChip, downloadsIcon,
+                            downloadsTitle, mRecentDownloadsSubtitle);
         }
 
+        MaterialCardView vaultCard = root.findViewById(R.id.home_vault_card);
         View vaultChip = root.findViewById(R.id.home_vault_chip);
         androidx.appcompat.widget.AppCompatImageView vaultIcon =
                 root.findViewById(R.id.home_vault_icon);
-        if (vaultChip != null && vaultIcon != null) {
+        TextView vaultTitle = root.findViewById(R.id.home_vault_title);
+        if (vaultCard != null && vaultChip != null && vaultIcon != null) {
             String key = prefs.getString(
                     Preferences.SETTINGS_HOME_VAULT_PALETTE,
                     Preferences.DEFAULT_HOME_VAULT_PALETTE);
             com.solarized.firedown.ui.HomeCardPalette
                     .fromKey(key, com.solarized.firedown.ui.HomeCardPalette.RASPBERRY)
-                    .apply(vaultChip, vaultIcon);
+                    .apply(vaultCard, vaultChip, vaultIcon,
+                            vaultTitle, mHomeVaultSubtitle);
         }
     }
 

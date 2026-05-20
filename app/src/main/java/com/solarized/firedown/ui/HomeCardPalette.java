@@ -1,16 +1,20 @@
 package com.solarized.firedown.ui;
 
 import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.AttrRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.graphics.ColorUtils;
 import androidx.core.widget.ImageViewCompat;
 
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.color.MaterialColors;
 
 /**
@@ -71,26 +75,45 @@ public enum HomeCardPalette {
     }
 
     /**
-     * Re-tints the chip background and icon to this palette. The chip
-     * is expected to carry one of the {@code bg_icon_container_*}
-     * drawables — a shape with a solid fill — so a {@code mutate() +
-     * setColor()} on the {@link GradientDrawable} swaps the colour
-     * without leaking the change to other views sharing the resource.
+     * Flips the whole card to this palette's tone — card surface,
+     * icon, and text — so the shelf cards read like the
+     * active-download / media strips above them (full tinted
+     * container, no inner chip). The chip's own background is
+     * cleared because a chip-on-tinted-card looks muddy when both
+     * share a hue; the icon sits directly on the card surface like
+     * the media strip's favicon. Title takes onContainer at full
+     * opacity, subtitle the same colour at ~70 % alpha to read as
+     * a softer secondary line.
+     *
+     * <p>{@code mutate()} on the chip drawable guarantees the change
+     * is per-view; without it, both cards sharing a drawable resource
+     * would smear across each other.</p>
      */
-    public void apply(@NonNull View chip, @NonNull ImageView icon) {
-        int container = MaterialColors.getColor(chip, containerAttr);
-        int onContainer = MaterialColors.getColor(chip, onContainerAttr);
+    public void apply(@NonNull MaterialCardView card,
+                      @NonNull View chip,
+                      @NonNull ImageView icon,
+                      @Nullable TextView title,
+                      @Nullable TextView subtitle) {
+        int container = MaterialColors.getColor(card, containerAttr);
+        int onContainer = MaterialColors.getColor(card, onContainerAttr);
+
+        card.setCardBackgroundColor(container);
 
         Drawable bg = chip.getBackground();
         if (bg != null) {
             bg = bg.mutate();
             if (bg instanceof GradientDrawable) {
-                ((GradientDrawable) bg).setColor(container);
+                ((GradientDrawable) bg).setColor(Color.TRANSPARENT);
             } else {
-                bg.setTint(container);
+                bg.setTint(Color.TRANSPARENT);
             }
             chip.setBackground(bg);
         }
         ImageViewCompat.setImageTintList(icon, ColorStateList.valueOf(onContainer));
+
+        if (title != null) title.setTextColor(onContainer);
+        if (subtitle != null) {
+            subtitle.setTextColor(ColorUtils.setAlphaComponent(onContainer, 0xB3));
+        }
     }
 }

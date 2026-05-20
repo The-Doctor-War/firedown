@@ -55,6 +55,8 @@
 
     <style name="Firedown.Widget.App.Chip.Filter" parent="Widget.Material3.Chip.Filter">
         <item name="materialThemeOverlay">@style/ThemeOverlay.App.Chip</item>
+        <item name="chipCornerRadius">100dp</item>
+        <item name="chipMinHeight">36dp</item>
     </style>
 
     <style name="ThemeOverlay.App.Chip" parent="">

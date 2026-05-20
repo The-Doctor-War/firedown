@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  Captured-content list row. Mirrors fragment_download_item.xml's
+  structure for cross-screen consistency: thumbnail on the left,
+  vertical text column in the middle (filename / mime · domain /
+  tags), action button on the right edge.
+
+  Card background uses surfaceContainerLow with zero elevation —
+  enough tonal contrast against the bottom-sheet surface for the
+  rows to read as discrete items (the sheet's appbar doesn't lift,
+  so we need *some* per-row containment) without the heavy
+  elevated-card shadow.
+-->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -14,12 +26,11 @@
         android:layout_gravity="center_vertical"
         android:layout_marginStart="@dimen/list_spacing"
         android:visibility="gone"
-        app:tint="?attr/colorPrimaryContainer"
-        app:srcCompat="@drawable/ic_baseline_check_circle_24" />
+        app:srcCompat="@drawable/ic_baseline_check_circle_24"
+        app:tint="?attr/colorPrimaryContainer" />
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/item"
-        style="@style/Widget.Material3.CardView.Elevated"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/list_spacing"
@@ -27,16 +38,17 @@
         android:layout_marginEnd="@dimen/list_spacing"
         android:layout_marginBottom="4dp"
         android:layout_weight="1"
+        app:cardBackgroundColor="?attr/colorSurfaceContainerLow"
         app:cardCornerRadius="8dp"
-        app:strokeWidth="2dp"
-        app:strokeColor="@color/transparent">
+        app:cardElevation="0dp"
+        app:strokeColor="@color/transparent"
+        app:strokeWidth="2dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/list_download_image_height"
             android:layout_margin="@dimen/list_margin">
 
-            <!-- Thumbnail -->
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image"
                 android:layout_width="@dimen/list_download_image_width"
@@ -52,121 +64,128 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Top row: mime badge + file name (sits above domain) -->
+            <!-- Text column: filename / mime · domain / tags. Vertical
+                 LinearLayout with center-vertical gravity so the
+                 three lines distribute evenly inside the 64dp row
+                 regardless of which tag combo is visible. -->
             <LinearLayout
-                android:id="@+id/row_top"
+                android:id="@+id/text_column"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toTopOf="@id/file_url"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="vertical"
+                android:paddingStart="@dimen/list_margin"
+                android:paddingEnd="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/item_download_more"
-                app:layout_constraintStart_toEndOf="@id/image">
-
-                <TextView
-                    android:id="@+id/mime_text"
-                    style="@style/MimePrimary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/list_margin"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="4dp"
-                    tools:text="mp4" />
+                app:layout_constraintStart_toEndOf="@id/image"
+                app:layout_constraintTop_toTopOf="parent">
 
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/file_name"
-                    android:textColor="?attr/colorOnSurface"
                     style="@style/TextAppearance.Material3.TitleSmall"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
                     android:ellipsize="marquee"
                     android:singleLine="true"
+                    android:textColor="?attr/colorOnSurface"
                     tools:text="video_file.mp4" />
+
+                <!-- Meta line: mime label · globe · domain. -->
+                <LinearLayout
+                    android:id="@+id/row_meta"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/mime_text"
+                        style="@style/MimePrimaryLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="VÍDEO · " />
+
+                    <ImageView
+                        android:id="@+id/file_url_icon"
+                        android:layout_width="@dimen/list_item_domain"
+                        android:layout_height="@dimen/list_item_domain"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_baseline_language_24"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                    <TextView
+                        android:id="@+id/file_url"
+                        style="@style/TextAppearance.Material3.LabelSmall"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_weight="1"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        tools:text="m.youtube.com" />
+
+                </LinearLayout>
+
+                <!-- Tag row: quality · duration. Single horizontal
+                     line; either or both can be GONE at bind time. -->
+                <LinearLayout
+                    android:id="@+id/tag_row"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tag_quality"
+                        style="@style/TextAppearance.Material3.BodySmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:visibility="gone"
+                        tools:text="1080p"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tag_separator"
+                        style="@style/TextAppearance.Material3.BodySmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:text="@string/separator"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tag_duration"
+                        style="@style/TextAppearance.Material3.BodySmall"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:singleLine="true"
+                        android:textColor="?attr/colorOnSurfaceVariant"
+                        android:visibility="gone"
+                        tools:text="03:45"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Middle row: domain (vertically centered to parent) -->
-            <ImageView
-                android:id="@+id/file_url_icon"
-                app:tint="?attr/colorOnSurfaceVariant"
-                android:layout_width="@dimen/list_item_domain"
-                android:layout_height="@dimen/list_item_domain"
-                android:layout_marginStart="8dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_baseline_language_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/image"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/file_url"
-                style="@style/TextAppearance.Material3.LabelSmall"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginEnd="12dp"
-                android:ellipsize="marquee"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:singleLine="true"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/item_download_more"
-                app:layout_constraintStart_toEndOf="@id/file_url_icon"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="example.com" />
-
-            <!-- Bottom row: tags (below domain, same position as status texts in guide) -->
-            <TextView
-                android:id="@+id/tag_quality"
-                style="@style/TextAppearance.Material3.BodySmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="@dimen/list_margin"
-                android:layout_marginBottom="2dp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/image"
-                app:layout_constraintTop_toBottomOf="@id/file_url"
-                tools:text="1080p" />
-
-            <TextView
-                android:id="@+id/tag_separator"
-                style="@style/TextAppearance.Material3.BodySmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="@string/separator"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:visibility="gone"
-                app:layout_constraintStart_toEndOf="@id/tag_quality"
-                app:layout_constraintTop_toTopOf="@id/tag_quality"
-                app:layout_constraintBottom_toBottomOf="@id/tag_quality" />
-
-            <TextView
-                android:id="@+id/tag_duration"
-                style="@style/TextAppearance.Material3.BodySmall"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:layout_marginBottom="2dp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@id/tag_separator"
-                app:layout_constraintTop_toBottomOf="@id/file_url"
-                tools:text="03:45" />
-
-            <!-- Action button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/item_download_more"
                 style="@style/Theme.FireDown.More.Button"
+                app:icon="@drawable/ic_baseline_more_vert_24"
                 app:iconTint="?attr/colorOnSurfaceVariant"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:icon="@drawable/ic_baseline_more_vert_24" />
+                app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

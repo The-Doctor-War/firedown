@@ -106,7 +106,7 @@ public class WasmFragment extends BasePreferenceFragment {
             Preference p = new Preference(requireContext());
             p.setKey(KEY_HOST_PREFIX + host);
             p.setTitle(host);
-            p.setIcon(R.drawable.memory_alt_24);
+            p.setIcon(R.drawable.ic_globe_24);
             p.setOrder(order++);
             p.setOnPreferenceClickListener(pref -> {
                 confirmRemove(host);

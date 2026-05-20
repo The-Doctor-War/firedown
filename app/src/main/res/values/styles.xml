@@ -168,6 +168,11 @@
 
     <style name="Firedown.Widget.App.Chip.Filter" parent="Widget.Material3.Chip.Filter">
         <item name="materialThemeOverlay">@style/ThemeOverlay.App.Chip</item>
+        <!-- Matches Theme.FireDown.Download.Chip: full pill + 36dp
+             min height so the rail reads consistently across the
+             Downloads list and the BrowserOptions sheet. -->
+        <item name="chipCornerRadius">100dp</item>
+        <item name="chipMinHeight">36dp</item>
     </style>
 
     <style name="ThemeOverlay.App.Chip" parent="">

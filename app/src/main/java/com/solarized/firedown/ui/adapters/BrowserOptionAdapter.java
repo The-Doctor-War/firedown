@@ -109,7 +109,17 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         }
 
         // ── Common bindings ──────────────────────────────────────────────
-        holder.mimeText.setText(FileUriHelper.getLongMimeText(context, entity.getMimeType()));
+        // List mode renders mime as a text label that prefixes the
+        // domain ('VÍDEO · m.youtube.com'); grid keeps the filled chip
+        // pinned to the thumbnail corner. Hide the view entirely if the
+        // mime resolves to empty so the row doesn't render a stray ' · '.
+        String mimeLabel = FileUriHelper.getLongMimeText(context, entity.getMimeType());
+        if (TextUtils.isEmpty(mimeLabel)) {
+            holder.mimeText.setVisibility(View.GONE);
+        } else {
+            holder.mimeText.setVisibility(View.VISIBLE);
+            holder.mimeText.setText(holder.isList ? mimeLabel + " · " : mimeLabel);
+        }
 
         RequestOptions options = mRequestOptions
                 .set(GlideRequestOptions.MIMETYPE, mimeType)

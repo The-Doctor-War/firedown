@@ -47,15 +47,15 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/list_download_image_height"
-            android:layout_margin="@dimen/list_margin">
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/list_margin"
+            android:minHeight="@dimen/list_download_image_height">
 
             <!-- Thumbnail -->
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image"
                 android:layout_width="@dimen/list_download_image_width"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
+                android:layout_height="@dimen/list_download_image_height"
                 android:adjustViewBounds="true"
                 android:background="@drawable/mask_image_rounded"
                 android:contentDescription="@null"
@@ -77,14 +77,17 @@
                 app:layout_constraintStart_toStartOf="@id/image"
                 app:layout_constraintTop_toTopOf="@id/image" />
 
-            <!-- Text column: filename / meta line / status. Vertical
-                 LinearLayout with center-vertical gravity gives even
-                 spacing regardless of how tall the status row is. -->
+            <!-- Text column: filename / meta line / status. wrap_content
+                 with top+bottom parent constraints — centred when the
+                 column is shorter than the thumbnail, but the row
+                 expands when it's taller (large font scales). Letting
+                 the row grow instead of capping at 64dp keeps the
+                 meta / status lines from clipping at accessibility
+                 font scales. -->
             <LinearLayout
                 android:id="@+id/text_column"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingStart="@dimen/list_margin"
                 android:paddingEnd="0dp"

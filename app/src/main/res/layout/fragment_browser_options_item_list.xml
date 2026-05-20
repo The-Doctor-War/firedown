@@ -46,14 +46,14 @@
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/list_download_image_height"
-            android:layout_margin="@dimen/list_margin">
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/list_margin"
+            android:minHeight="@dimen/list_download_image_height">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image"
                 android:layout_width="@dimen/list_download_image_width"
-                android:layout_height="match_parent"
-                android:layout_gravity="center"
+                android:layout_height="@dimen/list_download_image_height"
                 android:adjustViewBounds="true"
                 android:background="@drawable/mask_image_rounded"
                 android:contentDescription="@null"
@@ -64,15 +64,16 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Text column: filename / mime · domain / tags. Vertical
-                 LinearLayout with center-vertical gravity so the
-                 three lines distribute evenly inside the 64dp row
-                 regardless of which tag combo is visible. -->
+            <!-- Text column: filename / mime · domain / tags.
+                 wrap_content height with top+bottom parent constraints
+                 — centred when shorter than the thumbnail, but the
+                 row grows when content needs more vertical space
+                 (large font scales). Keeps the tag line from
+                 clipping at accessibility scales. -->
             <LinearLayout
                 android:id="@+id/text_column"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingStart="@dimen/list_margin"
                 android:paddingEnd="0dp"

@@ -11,7 +11,6 @@ import androidx.annotation.Nullable;
 
 public class ProgressOverlayView extends android.view.View {
 
-    private final Paint bgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint trackPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint arcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -34,7 +33,11 @@ public class ProgressOverlayView extends android.view.View {
     }
 
     private void init() {
-        bgPaint.setColor(0x1Eff716c);
+        // No background fill — the host card now carries the active
+        // 'wash' surface that signals 'live'. Painting an extra coral
+        // wash on top double-tinted the grid tile and overpowered the
+        // wash. The ring + arc + percent label do all the live-signal
+        // work; the surface beneath is whatever the adapter set.
 
         trackPaint.setStyle(Paint.Style.STROKE);
         trackPaint.setColor(0x40ff716c);
@@ -86,8 +89,6 @@ public class ProgressOverlayView extends android.view.View {
         int w = getWidth();
         int h = getHeight();
         if (w == 0 || h == 0) return;
-
-        canvas.drawRect(0, 0, w, h, bgPaint);
 
         float cx = w / 2f;
         float cy = h / 2f;

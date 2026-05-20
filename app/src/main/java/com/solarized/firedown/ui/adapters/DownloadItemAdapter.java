@@ -107,7 +107,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         mDefaultGridBg = MaterialColors.getColor(context,
                 com.google.android.material.R.attr.colorSurfaceContainerHigh, Color.TRANSPARENT);
         mDefaultPrimary = MaterialColors.getColor(context,
-                com.google.android.material.R.attr.colorPrimary, Color.BLACK);
+                android.R.attr.colorPrimary, Color.BLACK);
         mDefaultPrimaryAlpha = androidx.core.graphics.ColorUtils
                 .setAlphaComponent(mDefaultPrimary, 0x33);
     }

@@ -27,6 +27,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.solarized.firedown.crash.CrashReportSheet;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
@@ -206,7 +207,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
         // navigates to a Browser tab.
         getWindow().getDecorView().post(() -> {
             if (mPaused) return;     // gone background again before the post ran
-            com.solarized.firedown.crash.CrashReportSheet.showIfPending(
+            CrashReportSheet.showIfPending(
                     this, getSupportFragmentManager());
         });
     }

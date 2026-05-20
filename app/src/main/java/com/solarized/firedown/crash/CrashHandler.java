@@ -12,9 +12,12 @@ import androidx.annotation.NonNull;
  * crash dialog). Installed once from {@link com.solarized.firedown.App}
  * at startup.
  *
- * <p>Gecko native crashes are handled separately by
- * {@link GeckoCrashHandlerService} — both write to the same crashes
- * directory so the next-launch UI is a single unified surface.</p>
+ * <p>Native Gecko crashes are not tracked — without
+ * {@code libcrashhelper.so} in the build there's no minidump to
+ * surface, and a "Gecko died" report with no diagnostic data isn't
+ * useful to a maintainer. Tab-level Gecko process deaths are
+ * handled separately by {@code ContentDelegate.onKill} which
+ * reloads the killed tab.</p>
  */
 public final class CrashHandler implements Thread.UncaughtExceptionHandler {
 

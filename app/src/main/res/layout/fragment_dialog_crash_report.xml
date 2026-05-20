@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Crash-report sheet. Shown on next launch after either a Java
-  uncaught exception (CrashHandler) or a Gecko child-process crash
-  (GeckoCrashHandlerService) wrote a report to CrashStorage.
+  Crash-report sheet. Shown on next launch after CrashHandler wrote
+  a Java uncaught exception to CrashStorage. The action buttons open
+  a pre-filled GitHub new-issue URL or stash the report on the
+  clipboard.
 
-  Single UI for both crash sources — fields are bound from the
-  CrashReport regardless of which handler captured it. The action
-  buttons open a pre-filled GitHub new-issue URL or stash the report
-  on the clipboard.
+  Native Gecko crashes are intentionally not surfaced here — without
+  libcrashhelper.so in the build the minidump never gets written, so
+  there's nothing diagnostic to report. ContentDelegate.onKill
+  handles tab-level Gecko deaths by reloading the affected tab.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

@@ -3,7 +3,6 @@ package com.solarized.firedown.crash;
 import android.os.Build;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import com.solarized.firedown.App;
 import com.solarized.firedown.BuildConfig;
@@ -13,25 +12,26 @@ import org.json.JSONObject;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Map;
 
 /**
- * Structured crash report. Built from either a Java {@link Throwable}
- * (main process, caught by {@link CrashHandler}) or from the extras
- * bundle GeckoView passes to {@link GeckoCrashHandlerService} when a
- * Gecko child process dies.
+ * Structured crash report. Built from a Java {@link Throwable}
+ * captured by {@link CrashHandler} in the main process.
  *
- * <p>Serialized as JSON to {@code filesDir/crashes/} so both processes
- * can write to a shared location. {@link CrashStorage} owns the I/O;
- * this class is just the shape.</p>
+ * <p>Gecko native crashes are deliberately not tracked: without
+ * {@code libcrashhelper.so} in the build, GeckoView's crash intent
+ * arrives with no minidump / no extras, so there's nothing
+ * diagnostic to report. Tab-level Gecko deaths are handled by
+ * {@code ContentDelegate.onKill} which reloads the killed tab.</p>
+ *
+ * <p>Serialized as JSON to {@code filesDir/crashes/}. {@link CrashStorage}
+ * owns the I/O; this class is just the shape.</p>
  */
 public final class CrashReport {
 
     public static final String TYPE_JAVA = "java";
-    public static final String TYPE_GECKO = "gecko";
 
     public final long timestamp;
-    public final String type;          // TYPE_JAVA or TYPE_GECKO
+    public final String type;          // TYPE_JAVA
     public final String versionName;
     public final int versionCode;
     public final String device;
@@ -39,19 +39,15 @@ public final class CrashReport {
     public final int sdk;
     public final String installSource;
 
-    /** Java thread name (TYPE_JAVA) or Gecko process type (TYPE_GECKO). */
+    /** Thread name where the throwable originated. */
     public final String origin;
 
-    /** Stack trace text for Java, or formatted extras for Gecko. */
+    /** Stack trace text. */
     public final String trace;
-
-    /** Optional path to the Breakpad minidump (Gecko only). */
-    @Nullable
-    public final String minidumpPath;
 
     private CrashReport(long timestamp, String type, String versionName, int versionCode,
                         String device, String abi, int sdk, String installSource,
-                        String origin, String trace, @Nullable String minidumpPath) {
+                        String origin, String trace) {
         this.timestamp = timestamp;
         this.type = type;
         this.versionName = versionName;
@@ -62,7 +58,6 @@ public final class CrashReport {
         this.installSource = installSource;
         this.origin = origin;
         this.trace = trace;
-        this.minidumpPath = minidumpPath;
     }
 
     public static CrashReport fromThrowable(@NonNull Thread thread, @NonNull Throwable t) {
@@ -78,32 +73,7 @@ public final class CrashReport {
                 Build.VERSION.SDK_INT,
                 safeInstallSource(),
                 thread.getName(),
-                sw.toString(),
-                null);
-    }
-
-    public static CrashReport fromGecko(@NonNull String processType,
-                                        @NonNull Map<String, String> extras,
-                                        @Nullable String minidumpPath) {
-        StringBuilder sb = new StringBuilder();
-        // Sort keys for stable ordering — easier to diff between reports.
-        java.util.List<String> keys = new java.util.ArrayList<>(extras.keySet());
-        java.util.Collections.sort(keys);
-        for (String k : keys) {
-            sb.append(k).append('=').append(extras.get(k)).append('\n');
-        }
-        return new CrashReport(
-                System.currentTimeMillis(),
-                TYPE_GECKO,
-                safeVersionName(),
-                safeVersionCode(),
-                Build.MANUFACTURER + " " + Build.MODEL,
-                primaryAbi(),
-                Build.VERSION.SDK_INT,
-                safeInstallSource(),
-                processType,
-                sb.toString(),
-                minidumpPath);
+                sw.toString());
     }
 
     public JSONObject toJson() throws JSONException {
@@ -118,14 +88,13 @@ public final class CrashReport {
         o.put("installSource", installSource);
         o.put("origin", origin);
         o.put("trace", trace);
-        if (minidumpPath != null) o.put("minidumpPath", minidumpPath);
         return o;
     }
 
     public static CrashReport fromJson(JSONObject o) throws JSONException {
         return new CrashReport(
                 o.getLong("timestamp"),
-                o.getString("type"),
+                o.optString("type", TYPE_JAVA),
                 o.optString("versionName", ""),
                 o.optInt("versionCode", 0),
                 o.optString("device", ""),
@@ -133,8 +102,7 @@ public final class CrashReport {
                 o.optInt("sdk", 0),
                 o.optString("installSource", ""),
                 o.optString("origin", ""),
-                o.optString("trace", ""),
-                o.has("minidumpPath") ? o.optString("minidumpPath") : null);
+                o.optString("trace", ""));
     }
 
     /**
@@ -151,7 +119,8 @@ public final class CrashReport {
     }
 
     // ── Static helpers that fall back gracefully when called from the
-    //    crash handler process where the Application may not be ready.
+    //    crash handler at process-death time where the Application may
+    //    not be fully initialised.
 
     private static String safeVersionName() {
         try { return App.getVersionName(); } catch (Throwable ignored) {}

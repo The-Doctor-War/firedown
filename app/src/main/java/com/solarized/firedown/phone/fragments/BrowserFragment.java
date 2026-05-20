@@ -710,11 +710,11 @@ public class BrowserFragment extends BaseBrowserFragment
             } else if (Lifecycle.Event.ON_START.equals(event)) {
                 Log.d(TAG, "onStart");
                 mSwipeRefreshLayout.setEnabled(true);
-                // Crash-report sheet — both CrashHandler and the
-                // GeckoCrashHandlerService write to CrashStorage; this
-                // is the single surface that shows whichever ran last.
-                // sShownThisLaunch guards against re-pop on subsequent
-                // ON_START events in the same process.
+                // Crash-report sheet — CrashHandler writes Java
+                // crashes from any process to CrashStorage. Idempotent
+                // via findFragmentByTag and file delete-on-action; a
+                // crash that lands after the user dismisses an earlier
+                // one still surfaces on the next ON_START.
                 com.solarized.firedown.crash.CrashReportSheet.showIfPending(
                         requireContext(), getParentFragmentManager());
 

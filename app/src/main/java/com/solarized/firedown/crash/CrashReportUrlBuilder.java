@@ -49,9 +49,6 @@ public final class CrashReportUrlBuilder {
         if (report.installSource != null && !report.installSource.isEmpty()) {
             sb.append("**Source:** ").append(report.installSource).append('\n');
         }
-        if (report.minidumpPath != null) {
-            sb.append("**Minidump:** ").append(report.minidumpPath).append('\n');
-        }
         sb.append('\n').append("```\n");
 
         // Reserve ~120 chars for the closing fence + truncation footer.
@@ -92,9 +89,6 @@ public final class CrashReportUrlBuilder {
                 .append(" · ").append(report.abi).append('\n');
         if (report.installSource != null && !report.installSource.isEmpty()) {
             sb.append("Source: ").append(report.installSource).append('\n');
-        }
-        if (report.minidumpPath != null) {
-            sb.append("Minidump: ").append(report.minidumpPath).append('\n');
         }
         sb.append('\n').append(report.trace == null ? "" : report.trace).append('\n');
         return sb.toString();

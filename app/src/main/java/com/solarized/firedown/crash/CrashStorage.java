@@ -20,15 +20,13 @@ import java.util.UUID;
 
 /**
  * Disk I/O for {@link CrashReport}s. Reports live under
- * {@code filesDir/crashes/<timestamp>-<uuid>.json}. {@code filesDir} is
- * shared across all processes of the app (main process, Gecko children,
- * the crash-handler service process), so both {@link CrashHandler} and
- * {@link GeckoCrashHandlerService} write to the same location without
- * needing IPC.
+ * {@code filesDir/crashes/<timestamp>-<uuid>.json}, written by
+ * {@link CrashHandler} from whichever process the throwable bubbled
+ * up in. {@code filesDir} is shared across every process of the app
+ * so the bottom-sheet UI in the main process picks up reports written
+ * by any of them on the next launch.
  *
- * <p>No locking — filenames are unique per crash (timestamp + UUID).
- * The Settings/snackbar UI in the main process reads them on the next
- * launch.</p>
+ * <p>No locking — filenames are unique per crash (timestamp + UUID).</p>
  */
 public final class CrashStorage {
 

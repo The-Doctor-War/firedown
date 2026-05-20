@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Crash-report sheet. Shown on next launch after CrashHandler wrote
+  a Java uncaught exception to CrashStorage. The action buttons open
+  a pre-filled GitHub new-issue URL or stash the report on the
+  clipboard.
+
+  Native Gecko crashes are intentionally not surfaced here — without
+  libcrashhelper.so in the build the minidump never gets written, so
+  there's nothing diagnostic to report. ContentDelegate.onKill
+  handles tab-level Gecko deaths by reloading the affected tab.
+
+  Layout: outer LinearLayout is match_parent in height so the trace
+  block can use layout_weight=1 to absorb whatever space is left
+  after the fixed header + button row. The sheet's overall height
+  is constrained by behavior.maxHeight (R.dimen.bottom_sheet_max_height)
+  set in CrashReportSheet.onStart — 640dp in portrait, uncapped in
+  landscape where it just fills the available window height. Either
+  way the trace gets the leftover space and the button row stays
+  visible, fixing the landscape case where a fixed 280dp trace
+  pushed buttons off-screen.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/crash_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    <include layout="@layout/dialog_drag_handle" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            app:srcCompat="@drawable/ic_baseline_cancel_filled_24"
+            app:tint="?attr/colorError" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/crash_sheet_title"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/crash_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="Last session · v3.0.4 · java/main" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <!-- Trace block — weight=1 absorbs the remaining sheet height
+         after header + button row. minHeight gives a usable readable
+         area on very short sheets (e.g. landscape on a small phone);
+         the inner NestedScrollView takes over once a long trace
+         overflows the available space. -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp"
+        android:background="?attr/colorSurfaceContainerHigh"
+        android:minHeight="120dp"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/crash_trace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurface"
+            android:textIsSelectable="true"
+            android:textSize="11sp"
+            tools:text="java.lang.NullPointerException&#10;\tat com.solarized.firedown.…" />
+
+    </androidx.core.widget.NestedScrollView>
+
+
+    <!-- Action row. "Report" alone (not "Report on GitHub") so the
+         three buttons fit on a 360dp-wide phone without wrapping
+         the row and sending buttons off-screen. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crash_dismiss"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/crash_sheet_dismiss" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crash_copy"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/crash_sheet_copy" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crash_report"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/crash_sheet_report" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

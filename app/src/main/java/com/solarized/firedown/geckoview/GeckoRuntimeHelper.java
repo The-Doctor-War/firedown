@@ -112,7 +112,14 @@ public class GeckoRuntimeHelper {
         }
 
         runtimeSettingsBuilder
-                .crashHandler(null)              // no custom handler
+                // Gecko native crashes need libcrashhelper.so to produce
+                // a Breakpad minidump — without it the intent reaches us
+                // with no diagnostic data, so there's nothing actionable
+                // to report. Tab-level death is already handled by
+                // ContentDelegate.onKill (reload the killed tab). Java
+                // crashes in the main process are still caught by
+                // CrashHandler installed in App.onCreate.
+                .crashHandler(null)
                 .remoteDebuggingEnabled(BuildConfig.DEBUG)
                 .consoleOutput(BuildConfig.DEBUG)
                 .debugLogging(BuildConfig.DEBUG)

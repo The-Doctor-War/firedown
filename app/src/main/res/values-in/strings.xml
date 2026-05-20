@@ -280,5 +280,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 file disimpan · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 item disimpan</string>
+    <string name="crash_sheet_title">Crash terdeteksi</string>
+    <string name="crash_sheet_report">Laporkan</string>
+    <string name="crash_sheet_copy">Salin</string>
+    <string name="crash_sheet_dismiss">Tutup</string>
+    <string name="crash_sheet_copied">Laporan crash disalin ke papan klip</string>
+    <string name="crash_sheet_open_failed">Tidak dapat membuka browser. Laporan ada di papan klip — tempel ke issue GitHub baru.</string>
+
 
 </resources>

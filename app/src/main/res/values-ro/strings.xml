@@ -288,5 +288,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fișiere salvate · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elemente salvate</string>
+    <string name="crash_sheet_title">Eroare detectată</string>
+    <string name="crash_sheet_report">Raportează</string>
+    <string name="crash_sheet_copy">Copiază</string>
+    <string name="crash_sheet_dismiss">Închide</string>
+    <string name="crash_sheet_copied">Raportul de eroare copiat în clipboard</string>
+    <string name="crash_sheet_open_failed">Nu s-a putut deschide browserul. Raportul este în clipboard — lipește-l într-un nou issue GitHub.</string>
+
 
 </resources>

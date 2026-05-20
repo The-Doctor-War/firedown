@@ -274,5 +274,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 skedarë të ruajtur · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 artikuj të ruajtur</string>
+    <string name="crash_sheet_title">Zbulua një rrëzim</string>
+    <string name="crash_sheet_report">Raporto</string>
+    <string name="crash_sheet_copy">Kopjo</string>
+    <string name="crash_sheet_dismiss">Hidh poshtë</string>
+    <string name="crash_sheet_copied">Raporti i rrëzimit u kopjua në kujtesë</string>
+    <string name="crash_sheet_open_failed">Nuk u hap dot shfletuesi. Raporti është në kujtesë — ngjite në një issue të ri në GitHub.</string>
+
 
 </resources>

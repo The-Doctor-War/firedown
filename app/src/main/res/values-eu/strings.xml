@@ -276,5 +276,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fitxategi gordeta · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementu gordeta</string>
+    <string name="crash_sheet_title">Hutsegitea atzemana</string>
+    <string name="crash_sheet_report">Eman berri</string>
+    <string name="crash_sheet_copy">Kopiatu</string>
+    <string name="crash_sheet_dismiss">Baztertu</string>
+    <string name="crash_sheet_copied">Hutsegite txostena arbelean kopiatu da</string>
+    <string name="crash_sheet_open_failed">Ezin izan da arakatzailea ireki. Txostena arbelean dago — itsatsi GitHub-eko gai berri batean.</string>
+
 
 </resources>

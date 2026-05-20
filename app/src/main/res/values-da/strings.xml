@@ -308,5 +308,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 filer gemt · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementer gemt</string>
+    <string name="crash_sheet_title">Nedbrud registreret</string>
+    <string name="crash_sheet_report">Rapporter</string>
+    <string name="crash_sheet_copy">Kopier</string>
+    <string name="crash_sheet_dismiss">Afvis</string>
+    <string name="crash_sheet_copied">Nedbrudsrapport kopieret til udklipsholderen</string>
+    <string name="crash_sheet_open_failed">Kunne ikke åbne en browser. Nedbrudsrapporten er i din udklipsholder — indsæt den i et nyt GitHub-issue.</string>
+
 
 </resources>

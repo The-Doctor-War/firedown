@@ -251,5 +251,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fayl yadda saxlanıldı · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 element yadda saxlanıldı</string>
+    <string name="crash_sheet_title">Çökmə aşkarlandı</string>
+    <string name="crash_sheet_report">Bildir</string>
+    <string name="crash_sheet_copy">Kopyala</string>
+    <string name="crash_sheet_dismiss">Bağla</string>
+    <string name="crash_sheet_copied">Çökmə hesabatı mübadilə yaddaşına kopyalandı</string>
+    <string name="crash_sheet_open_failed">Brauzer açıla bilmədi. Hesabat mübadilə yaddaşındadır — yeni GitHub məsələsinə yapışdırın.</string>
+
 
 </resources>

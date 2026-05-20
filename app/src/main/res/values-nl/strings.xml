@@ -373,5 +373,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 bestanden opgeslagen · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 items opgeslagen</string>
+    <string name="crash_sheet_title">Crash gedetecteerd</string>
+    <string name="crash_sheet_report">Rapporteren</string>
+    <string name="crash_sheet_copy">Kopiëren</string>
+    <string name="crash_sheet_dismiss">Sluiten</string>
+    <string name="crash_sheet_copied">Crashrapport gekopieerd naar klembord</string>
+    <string name="crash_sheet_open_failed">Kan de browser niet openen. Het crashrapport staat op je klembord — plak het in een nieuw GitHub-issue.</string>
+
 
 </resources>

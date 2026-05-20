@@ -507,5 +507,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 件のファイルを保存 · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 件のアイテムを保存</string>
+    <string name="crash_sheet_title">クラッシュを検出しました</string>
+    <string name="crash_sheet_report">報告</string>
+    <string name="crash_sheet_copy">コピー</string>
+    <string name="crash_sheet_dismiss">閉じる</string>
+    <string name="crash_sheet_copied">クラッシュレポートをクリップボードにコピーしました</string>
+    <string name="crash_sheet_open_failed">ブラウザを開けませんでした。レポートはクリップボードにあります — 新しい GitHub の issue に貼り付けてください。</string>
+
 
 </resources>

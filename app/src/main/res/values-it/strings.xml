@@ -354,5 +354,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 file salvati · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementi salvati</string>
+    <string name="crash_sheet_title">Arresto rilevato</string>
+    <string name="crash_sheet_report">Segnala</string>
+    <string name="crash_sheet_copy">Copia</string>
+    <string name="crash_sheet_dismiss">Ignora</string>
+    <string name="crash_sheet_copied">Rapporto di arresto copiato negli appunti</string>
+    <string name="crash_sheet_open_failed">Impossibile aprire il browser. Il rapporto è negli appunti — incollalo in un nuovo issue su GitHub.</string>
+
 
 </resources>

@@ -508,5 +508,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 Dateien gespeichert · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 Elemente gespeichert</string>
+    <string name="crash_sheet_title">Absturz erkannt</string>
+    <string name="crash_sheet_report">Melden</string>
+    <string name="crash_sheet_copy">Kopieren</string>
+    <string name="crash_sheet_dismiss">Verwerfen</string>
+    <string name="crash_sheet_copied">Absturzbericht in die Zwischenablage kopiert</string>
+    <string name="crash_sheet_open_failed">Browser konnte nicht geöffnet werden. Der Absturzbericht ist in deiner Zwischenablage — füge ihn in einem neuen GitHub-Issue ein.</string>
+
 
 </resources>

@@ -292,5 +292,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">บันทึก 150 ไฟล์ · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">บันทึก 12 รายการ</string>
+    <string name="crash_sheet_title">ตรวจพบการขัดข้อง</string>
+    <string name="crash_sheet_report">รายงาน</string>
+    <string name="crash_sheet_copy">คัดลอก</string>
+    <string name="crash_sheet_dismiss">ปิด</string>
+    <string name="crash_sheet_copied">คัดลอกรายงานการขัดข้องไปยังคลิปบอร์ดแล้ว</string>
+    <string name="crash_sheet_open_failed">ไม่สามารถเปิดเบราว์เซอร์ได้ รายงานอยู่ในคลิปบอร์ด — วางลงใน GitHub issue ใหม่</string>
+
 
 </resources>

@@ -325,5 +325,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 souborů uloženo · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 položek uloženo</string>
+    <string name="crash_sheet_title">Zjištěno selhání</string>
+    <string name="crash_sheet_report">Nahlásit</string>
+    <string name="crash_sheet_copy">Kopírovat</string>
+    <string name="crash_sheet_dismiss">Zavřít</string>
+    <string name="crash_sheet_copied">Hlášení o pádu zkopírováno do schránky</string>
+    <string name="crash_sheet_open_failed">Nepodařilo se otevřít prohlížeč. Hlášení je ve schránce — vložte jej do nového GitHub issue.</string>
+
 
 </resources>

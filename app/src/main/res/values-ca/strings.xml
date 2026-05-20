@@ -306,5 +306,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fitxers desats · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elements desats</string>
+    <string name="crash_sheet_title">Fallada detectada</string>
+    <string name="crash_sheet_report">Informa</string>
+    <string name="crash_sheet_copy">Copia</string>
+    <string name="crash_sheet_dismiss">Descarta</string>
+    <string name="crash_sheet_copied">Informe de fallada copiat al porta-retalls</string>
+    <string name="crash_sheet_open_failed">No s\'ha pogut obrir el navegador. L\'informe és al porta-retalls — enganxa\'l a una nova incidència de GitHub.</string>
+
 
 </resources>

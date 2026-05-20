@@ -239,5 +239,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">已儲存 150 個檔案 · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">已儲存 12 個項目</string>
+    <string name="crash_sheet_title">偵測到當機</string>
+    <string name="crash_sheet_report">回報</string>
+    <string name="crash_sheet_copy">複製</string>
+    <string name="crash_sheet_dismiss">關閉</string>
+    <string name="crash_sheet_copied">當機報告已複製到剪貼簿</string>
+    <string name="crash_sheet_open_failed">無法開啟瀏覽器。當機報告已在剪貼簿中 — 請貼到新的 GitHub issue 中。</string>
+
 
 </resources>

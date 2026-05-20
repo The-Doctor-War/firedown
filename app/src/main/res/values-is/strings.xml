@@ -272,5 +272,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 skrár vistaðar · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 atriði vistuð</string>
+    <string name="crash_sheet_title">Hrun greint</string>
+    <string name="crash_sheet_report">Tilkynna</string>
+    <string name="crash_sheet_copy">Afrita</string>
+    <string name="crash_sheet_dismiss">Hafna</string>
+    <string name="crash_sheet_copied">Hrunskýrsla afrituð á klemmuspjald</string>
+    <string name="crash_sheet_open_failed">Tókst ekki að opna vafra. Skýrslan er á klemmuspjaldinu — límdu hana inn í nýja GitHub-vandamálatilkynningu.</string>
+
 
 </resources>

@@ -372,5 +372,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 dosya kaydedildi · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 öğe kaydedildi</string>
+    <string name="crash_sheet_title">Çökme algılandı</string>
+    <string name="crash_sheet_report">Bildir</string>
+    <string name="crash_sheet_copy">Kopyala</string>
+    <string name="crash_sheet_dismiss">Kapat</string>
+    <string name="crash_sheet_copied">Çökme raporu panoya kopyalandı</string>
+    <string name="crash_sheet_open_failed">Tarayıcı açılamadı. Çökme raporu panonuzda — yeni bir GitHub konusuna yapıştırın.</string>
+
 
 </resources>

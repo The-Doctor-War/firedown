@@ -261,5 +261,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fayl saqlandi · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 element saqlandi</string>
+    <string name="crash_sheet_title">Ishlamay qolish aniqlandi</string>
+    <string name="crash_sheet_report">Xabar berish</string>
+    <string name="crash_sheet_copy">Nusxa olish</string>
+    <string name="crash_sheet_dismiss">Yopish</string>
+    <string name="crash_sheet_copied">Ishlamay qolish hisoboti vaqtinchalik xotiraga nusxalandi</string>
+    <string name="crash_sheet_open_failed">Brauzer ochilmadi. Hisobot vaqtinchalik xotirada — yangi GitHub muammosiga joylashtiring.</string>
+
 
 </resources>

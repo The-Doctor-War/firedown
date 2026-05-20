@@ -295,5 +295,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fájl mentve · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elem mentve</string>
+    <string name="crash_sheet_title">Összeomlás észlelve</string>
+    <string name="crash_sheet_report">Jelentés</string>
+    <string name="crash_sheet_copy">Másolás</string>
+    <string name="crash_sheet_dismiss">Elvetés</string>
+    <string name="crash_sheet_copied">Összeomlási jelentés a vágólapra másolva</string>
+    <string name="crash_sheet_open_failed">Nem sikerült megnyitni a böngészőt. A jelentés a vágólapon van — illessze be egy új GitHub bejegyzésbe.</string>
+
 
 </resources>

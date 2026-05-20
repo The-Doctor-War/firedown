@@ -368,5 +368,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">Zapisano 150 plików · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">Zapisano 12 elementów</string>
+    <string name="crash_sheet_title">Wykryto awarię</string>
+    <string name="crash_sheet_report">Zgłoś</string>
+    <string name="crash_sheet_copy">Kopiuj</string>
+    <string name="crash_sheet_dismiss">Odrzuć</string>
+    <string name="crash_sheet_copied">Raport awarii skopiowany do schowka</string>
+    <string name="crash_sheet_open_failed">Nie można otworzyć przeglądarki. Raport awarii jest w schowku — wklej go do nowego zgłoszenia w GitHub.</string>
+
 
 </resources>

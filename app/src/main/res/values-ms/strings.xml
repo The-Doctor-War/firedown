@@ -234,5 +234,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fail disimpan · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 item disimpan</string>
+    <string name="crash_sheet_title">Ranap dikesan</string>
+    <string name="crash_sheet_report">Lapor</string>
+    <string name="crash_sheet_copy">Salin</string>
+    <string name="crash_sheet_dismiss">Tutup</string>
+    <string name="crash_sheet_copied">Laporan ranap disalin ke papan keratan</string>
+    <string name="crash_sheet_open_failed">Tidak dapat membuka pelayar. Laporan ada di papan keratan — tampal ke issue GitHub baharu.</string>
+
 
 </resources>

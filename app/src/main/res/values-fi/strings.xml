@@ -312,5 +312,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 tiedostoa tallennettu · 2,4 Gt</string>
     <string name="home_card_style_preview_vault_subtitle">12 kohdetta tallennettu</string>
+    <string name="crash_sheet_title">Kaatuminen havaittu</string>
+    <string name="crash_sheet_report">Raportoi</string>
+    <string name="crash_sheet_copy">Kopioi</string>
+    <string name="crash_sheet_dismiss">Hylkää</string>
+    <string name="crash_sheet_copied">Kaatumisraportti kopioitu leikepöydälle</string>
+    <string name="crash_sheet_open_failed">Selainta ei voitu avata. Raportti on leikepöydällä — liitä se uuteen GitHub-asiaan.</string>
+
 
 </resources>

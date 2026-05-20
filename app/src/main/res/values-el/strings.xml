@@ -295,5 +295,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 αρχεία αποθηκεύτηκαν · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 στοιχεία αποθηκεύτηκαν</string>
+    <string name="crash_sheet_title">Εντοπίστηκε κατάρρευση</string>
+    <string name="crash_sheet_report">Αναφορά</string>
+    <string name="crash_sheet_copy">Αντιγραφή</string>
+    <string name="crash_sheet_dismiss">Παράβλεψη</string>
+    <string name="crash_sheet_copied">Η αναφορά κατάρρευσης αντιγράφηκε στο πρόχειρο</string>
+    <string name="crash_sheet_open_failed">Δεν ήταν δυνατό το άνοιγμα του προγράμματος περιήγησης. Η αναφορά είναι στο πρόχειρό σας — επικολλήστε την σε ένα νέο GitHub issue.</string>
+
 
 </resources>

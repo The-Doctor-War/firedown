@@ -273,5 +273,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 файлаў захавана · 2,4 ГБ</string>
     <string name="home_card_style_preview_vault_subtitle">12 элементаў захавана</string>
+    <string name="crash_sheet_title">Выяўлены збой</string>
+    <string name="crash_sheet_report">Адправіць</string>
+    <string name="crash_sheet_copy">Капіяваць</string>
+    <string name="crash_sheet_dismiss">Закрыць</string>
+    <string name="crash_sheet_copied">Справаздача аб збоі скапіявана ў буфер абмену</string>
+    <string name="crash_sheet_open_failed">Не атрымалася адкрыць браўзер. Справаздача ў буферы абмену — устаўце яе ў новы запыт GitHub.</string>
+
 
 </resources>

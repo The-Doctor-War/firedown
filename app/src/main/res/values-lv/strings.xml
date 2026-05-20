@@ -234,5 +234,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 failu saglabāti · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 vienumi saglabāti</string>
+    <string name="crash_sheet_title">Konstatēta avārija</string>
+    <string name="crash_sheet_report">Ziņot</string>
+    <string name="crash_sheet_copy">Kopēt</string>
+    <string name="crash_sheet_dismiss">Aizvērt</string>
+    <string name="crash_sheet_copied">Avārijas ziņojums kopēts starpliktuvē</string>
+    <string name="crash_sheet_open_failed">Pārlūku neizdevās atvērt. Ziņojums ir starpliktuvē — ielīmējiet to jaunā GitHub problēmā.</string>
+
 
 </resources>

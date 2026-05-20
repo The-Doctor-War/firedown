@@ -275,5 +275,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 файл сақталды · 2,4 ГБ</string>
     <string name="home_card_style_preview_vault_subtitle">12 элемент сақталды</string>
+    <string name="crash_sheet_title">Іркіліс анықталды</string>
+    <string name="crash_sheet_report">Хабарлау</string>
+    <string name="crash_sheet_copy">Көшіру</string>
+    <string name="crash_sheet_dismiss">Жабу</string>
+    <string name="crash_sheet_copied">Іркіліс есебі алмасу буферіне көшірілді</string>
+    <string name="crash_sheet_open_failed">Браузерді ашу мүмкін болмады. Есеп алмасу буферінде — оны жаңа GitHub мәселесіне қойыңыз.</string>
+
 
 </resources>

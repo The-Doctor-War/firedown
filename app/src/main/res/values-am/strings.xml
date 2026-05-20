@@ -281,5 +281,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 ፋይሎች ተቀምጠዋል · 2.4 ጂቢ</string>
     <string name="home_card_style_preview_vault_subtitle">12 ዕቃዎች ተቀምጠዋል</string>
+    <string name="crash_sheet_title">ብልሽት ተገኝቷል</string>
+    <string name="crash_sheet_report">ሪፖርት</string>
+    <string name="crash_sheet_copy">ቅዳ</string>
+    <string name="crash_sheet_dismiss">ዝጋ</string>
+    <string name="crash_sheet_copied">የብልሽት ሪፖርት ወደ ቅንጥብ ሰሌዳ ተቀድቷል</string>
+    <string name="crash_sheet_open_failed">አሳሹን መክፈት አልተቻለም። ሪፖርቱ በቅንጥብ ሰሌዳ ላይ ነው — በአዲስ GitHub issue ውስጥ ይለጥፉት።</string>
+
 
 </resources>

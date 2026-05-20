@@ -267,5 +267,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 فائلیں محفوظ · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 آئٹمز محفوظ</string>
+    <string name="crash_sheet_title">کریش کا پتہ چلا</string>
+    <string name="crash_sheet_report">رپورٹ</string>
+    <string name="crash_sheet_copy">کاپی</string>
+    <string name="crash_sheet_dismiss">مسترد</string>
+    <string name="crash_sheet_copied">کریش رپورٹ کلپ بورڈ پر کاپی ہو گئی</string>
+    <string name="crash_sheet_open_failed">براؤزر نہیں کھل سکا۔ رپورٹ آپ کے کلپ بورڈ پر ہے — اسے نئے GitHub مسئلے میں چسپاں کریں۔</string>
+
 
 </resources>

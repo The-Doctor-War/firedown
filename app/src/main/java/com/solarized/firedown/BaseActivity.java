@@ -196,11 +196,19 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
         mPaused = false;
         // Crash-report sheet — surfaces here rather than in any single
         // fragment so it fires regardless of which activity Android
-        // restarts to after a crash. The previous foregrounded activity
-        // may have been Settings or Downloads, not Browser, so a
-        // BrowserFragment-only trigger misses those paths.
-        com.solarized.firedown.crash.CrashReportSheet.showIfPending(
-                this, getSupportFragmentManager());
+        // restarts to after a crash.
+        //
+        // Defer to the next main-thread tick so any pending fragment
+        // transactions (e.g. NavHostFragment committing HomeFragment
+        // on a fresh launch) finish before we add the dialog — without
+        // this, BrowserActivity.onResume fires the dialog and Home
+        // commits over the top, hiding the sheet until the user
+        // navigates to a Browser tab.
+        getWindow().getDecorView().post(() -> {
+            if (mPaused) return;     // gone background again before the post ran
+            com.solarized.firedown.crash.CrashReportSheet.showIfPending(
+                    this, getSupportFragmentManager());
+        });
     }
 
     @Override

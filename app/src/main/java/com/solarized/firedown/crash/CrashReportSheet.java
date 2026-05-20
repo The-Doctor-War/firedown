@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.FragmentManager;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.solarized.firedown.R;
@@ -159,6 +160,25 @@ public class CrashReportSheet extends BottomSheetDialogFragment {
     private void sweepAndDismiss() {
         for (File f : mPending) CrashStorage.delete(f);
         dismissAllowingStateLoss();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Match BaseBottomSheetDialogFragment's sizing pattern:
+        // skip the half-collapsed peek state (this sheet's content is
+        // small enough that the peek would clip the action row), and
+        // cap height at R.dimen.bottom_sheet_max_height so a long
+        // stack trace doesn't push the sheet edge-to-edge with the
+        // status bar.
+        View parent = getView() != null ? (View) getView().getParent() : null;
+        if (parent == null) return;
+        BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(parent);
+        behavior.setSkipCollapsed(true);
+        behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        int maxHeightPx = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_max_height);
+        behavior.setMaxHeight(maxHeightPx > 0 ? maxHeightPx : -1);
+        parent.requestLayout();
     }
 
     private void copyToClipboard(@NonNull String text) {

@@ -13,7 +13,7 @@
     <color name="md_theme_onTertiary">#640034</color>
     <color name="md_theme_tertiaryContainer">#C8417B</color>
     <color name="md_theme_onTertiaryContainer">#FFFFFF</color>
-    <color name="md_theme_error">#FF9988</color>
+    <color name="md_theme_error">#FFB4AB</color>
     <color name="md_theme_onError">#690005</color>
     <color name="md_theme_errorContainer">#93000A</color>
     <color name="md_theme_onErrorContainer">#FFDAD6</color>

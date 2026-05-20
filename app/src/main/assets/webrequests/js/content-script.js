@@ -60,35 +60,68 @@ console.log('[cs] loaded', location.href);
   //     show up on. Dispatches the signal event on document so our
   //     isolated-world listener above can pick it up.
   const PROBE = `(() => {
-    const PATTERN = /WebAssembly/i;
+    const PATTERN = /WebAssembly|wasm\\b/i;
     const NAME = ${JSON.stringify(SIGNAL_EVENT)};
     let fired = false;
     function fire(detail) {
       if (fired) return;
       fired = true;
-      document.dispatchEvent(new CustomEvent(NAME, {
-        detail: { detail: String(detail || '').slice(0, 200) }
-      }));
+      try {
+        document.dispatchEvent(new CustomEvent(NAME, {
+          detail: { detail: String(detail || '').slice(0, 200) }
+        }));
+      } catch (_) {}
     }
-    window.addEventListener('error', (e) => {
-      const m = (e && (e.message || (e.error && e.error.message))) || '';
+    function textOf(thing) {
+      if (!thing) return '';
+      if (typeof thing === 'string') return thing;
+      try {
+        if (thing.message) return String(thing.message);
+        if (thing.toString) return thing.toString();
+        return String(thing);
+      } catch (_) { return ''; }
+    }
+    window.addEventListener('error', function (e) {
+      const m = textOf(e && (e.message || e.error));
       if (PATTERN.test(m)) fire(m);
     }, true);
-    window.addEventListener('unhandledrejection', (e) => {
-      const r = e && e.reason;
-      const m = r && (r.message || String(r));
+    // Older surface — sites that assign window.onerror skip addEventListener.
+    const origOnError = window.onerror;
+    window.onerror = function (msg, src, line, col, err) {
+      try {
+        const text = textOf(err) || textOf(msg);
+        if (PATTERN.test(text)) fire(text);
+      } catch (_) {}
+      if (typeof origOnError === 'function') {
+        return origOnError.apply(this, arguments);
+      }
+      return false;
+    };
+    window.addEventListener('unhandledrejection', function (e) {
+      const m = textOf(e && e.reason);
       if (m && PATTERN.test(m)) fire(m);
     });
-    const orig = console.error;
-    console.error = function () {
-      try {
-        const j = Array.prototype.map.call(arguments, function (a) {
-          return (a && a.message) || (function () { try { return String(a); } catch (_) { return ''; } })();
-        }).join(' ');
-        if (PATTERN.test(j)) fire(j);
-      } catch (_) {}
-      return orig.apply(console, arguments);
-    };
+    // console.error wrap. Re-wrap if the page replaces console.error later
+    // (some analytics SDKs do this on init) so we keep intercepting.
+    function wrapConsoleError() {
+      const orig = console.error;
+      if (orig && orig.__firedown_wrapped) return;
+      const wrapped = function () {
+        try {
+          const j = Array.prototype.map.call(arguments, textOf).join(' ');
+          if (PATTERN.test(j)) fire(j);
+        } catch (_) {}
+        return orig.apply(console, arguments);
+      };
+      wrapped.__firedown_wrapped = true;
+      try { console.error = wrapped; } catch (_) {}
+    }
+    wrapConsoleError();
+    // Re-wrap if console.error gets reassigned later. Cheap: only runs once
+    // after a microtask + once on DOMContentLoaded; that catches the common
+    // "analytics replaces console" pattern.
+    Promise.resolve().then(wrapConsoleError);
+    document.addEventListener('DOMContentLoaded', wrapConsoleError, { once: true });
   })();`;
 
   try {

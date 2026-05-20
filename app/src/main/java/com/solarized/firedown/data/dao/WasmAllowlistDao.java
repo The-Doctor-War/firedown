@@ -15,6 +15,9 @@ public interface WasmAllowlistDao {
     @Query("SELECT uid FROM wasm_allowlist")
     List<Integer> getAllIds();
 
+    @Query("SELECT * FROM wasm_allowlist ORDER BY date DESC")
+    List<WasmAllowlistEntity> getAll();
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Long insert(WasmAllowlistEntity entity);
 

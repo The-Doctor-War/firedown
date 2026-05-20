@@ -340,6 +340,15 @@
     <string name="settings_clear_browsing_success">Data cleared for %s</string>
     <string name="wasm_snackbar_message">%s needs WebAssembly to work</string>
     <string name="wasm_snackbar_action_enable">Enable</string>
+    <string name="settings_wasm_allowlist_title">Allowed sites</string>
+    <string name="settings_wasm_allowlist_empty">No sites yet. Tap \"Enable\" on the snackbar when a site asks for WebAssembly.</string>
+    <string name="settings_wasm_allowlist_clear">Clear all</string>
+    <string name="settings_wasm_allowlist_clear_summary">Remove every allowed site</string>
+    <string name="settings_wasm_allowlist_clear_message">Remove every site from the WebAssembly allowlist?</string>
+    <string name="settings_wasm_allowlist_clear_confirm">Clear</string>
+    <string name="settings_wasm_allowlist_remove_title">Remove site</string>
+    <string name="settings_wasm_allowlist_remove_message">Remove %s from the WebAssembly allowlist?</string>
+    <string name="settings_wasm_allowlist_remove_confirm">Remove</string>
     <string name="settings_clear_browsing_summary">Clear all saved cookies and site data</string>
     <string name="settings_cookies">Cookies and Site Data</string>
     <string name="settings_cookies_accept_first_party">Block 3rd-party cookies only</string>

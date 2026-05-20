@@ -350,4 +350,15 @@
     <string name="incognito_home_warning">Gizli gezinti, etkinliğinizi ağınızdan, işvereninizden veya ziyaret ettiğiniz sitelerden gizlemez.</string>
     <string name="downloads_quick_access_view_all">Tüm indirmeleri görüntüle</string>
     <string name="downloads_quick_access_empty">Son indirmeler burada görüntülenecek</string>
+    <string name="wasm_snackbar_message">%s WebAssembly gerektiriyor</string>
+    <string name="wasm_snackbar_action_enable">Etkinleştir</string>
+    <string name="settings_wasm_allowlist_title">İzin verilen siteler</string>
+    <string name="settings_wasm_allowlist_empty">Henüz site yok. Bir site WebAssembly istediğinde \"Etkinleştir\"e dokunun.</string>
+    <string name="settings_wasm_allowlist_clear">Tümünü temizle</string>
+    <string name="settings_wasm_allowlist_clear_summary">Tüm izin verilen siteleri kaldır</string>
+    <string name="settings_wasm_allowlist_clear_message">WebAssembly izin listesinden tüm siteleri kaldır?</string>
+    <string name="settings_wasm_allowlist_clear_confirm">Temizle</string>
+    <string name="settings_wasm_allowlist_remove_title">Siteyi kaldır</string>
+    <string name="settings_wasm_allowlist_remove_message">%s sitesini WebAssembly izin listesinden kaldır?</string>
+    <string name="settings_wasm_allowlist_remove_confirm">Kaldır</string>
 </resources>

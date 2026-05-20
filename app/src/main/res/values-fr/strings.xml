@@ -486,4 +486,15 @@
     <string name="home_media_paused">En pause</string>
     <string name="downloads_quick_access_view_all">Voir tous les téléchargements</string>
     <string name="downloads_quick_access_empty">Les téléchargements récents apparaîtront ici</string>
+    <string name="wasm_snackbar_message">%s a besoin de WebAssembly pour fonctionner</string>
+    <string name="wasm_snackbar_action_enable">Activer</string>
+    <string name="settings_wasm_allowlist_title">Sites autorisés</string>
+    <string name="settings_wasm_allowlist_empty">Aucun site pour l\'instant. Appuyez sur « Activer » lorsqu\'un site demande WebAssembly.</string>
+    <string name="settings_wasm_allowlist_clear">Tout effacer</string>
+    <string name="settings_wasm_allowlist_clear_summary">Retirer tous les sites autorisés</string>
+    <string name="settings_wasm_allowlist_clear_message">Retirer tous les sites de la liste autorisée WebAssembly ?</string>
+    <string name="settings_wasm_allowlist_clear_confirm">Effacer</string>
+    <string name="settings_wasm_allowlist_remove_title">Retirer le site</string>
+    <string name="settings_wasm_allowlist_remove_message">Retirer %s de la liste autorisée WebAssembly ?</string>
+    <string name="settings_wasm_allowlist_remove_confirm">Retirer</string>
 </resources>

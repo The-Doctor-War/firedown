@@ -290,4 +290,15 @@
     <string name="incognito_home_warning">Приватний перегляд не приховує вашу активність від мережі, роботодавця чи відвідуваних сайтів.</string>
     <string name="downloads_quick_access_view_all">Переглянути всі завантаження</string>
     <string name="downloads_quick_access_empty">Тут з\'являться нещодавні завантаження</string>
+    <string name="wasm_snackbar_message">Для %s потрібен WebAssembly</string>
+    <string name="wasm_snackbar_action_enable">Увімкнути</string>
+    <string name="settings_wasm_allowlist_title">Дозволені сайти</string>
+    <string name="settings_wasm_allowlist_empty">Ще немає сайтів. Натисніть «Увімкнути», коли сайт запросить WebAssembly.</string>
+    <string name="settings_wasm_allowlist_clear">Очистити все</string>
+    <string name="settings_wasm_allowlist_clear_summary">Видалити всі дозволені сайти</string>
+    <string name="settings_wasm_allowlist_clear_message">Видалити всі сайти зі списку дозволених для WebAssembly?</string>
+    <string name="settings_wasm_allowlist_clear_confirm">Очистити</string>
+    <string name="settings_wasm_allowlist_remove_title">Видалити сайт</string>
+    <string name="settings_wasm_allowlist_remove_message">Видалити %s зі списку дозволених для WebAssembly?</string>
+    <string name="settings_wasm_allowlist_remove_confirm">Видалити</string>
 </resources>

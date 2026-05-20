@@ -53,6 +53,18 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     private final Drawable mChecked;
     private final Drawable mUnChecked;
     private final RequestOptions mRequestOptions;
+    /** Active-row colours pulled from the user's HomeCardStyle pick so
+     *  the in-flight download here matches the active strip on Home. */
+    private final int mActiveCardBg;
+    private final int mActiveFg;
+    private final int mActiveFgVariant;
+    /** Defaults for non-active rows. List items want plain surface
+     *  (transparent against the page); grid items keep the
+     *  surfaceContainerHigh placeholder the layout originally set. */
+    private final int mDefaultListBg;
+    private final int mDefaultGridBg;
+    private final int mDefaultFg;
+    private final int mDefaultFgVariant;
     private boolean mActionMode;
     private boolean mEnabled;
     private boolean mEnableGrid;
@@ -76,6 +88,34 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 MaterialColors.getColor(context,
                         com.google.android.material.R.attr.colorPrimaryContainer, Color.TRANSPARENT));
         mRequestOptions = new RequestOptions();
+
+        // Active-row tint: pulled from whichever Home cards style the
+        // user picked, so the in-flight download here uses the same
+        // surface as the active-download strip on Home. Resolved once
+        // — the adapter is recreated when DownloadsActivity reopens,
+        // so a style change in Settings shows up next visit.
+        android.content.SharedPreferences prefs = androidx.preference.PreferenceManager
+                .getDefaultSharedPreferences(context);
+        com.solarized.firedown.ui.HomeCardStyle style =
+                com.solarized.firedown.ui.HomeCardStyle.fromKey(
+                        prefs.getString(
+                                com.solarized.firedown.Preferences.SETTINGS_HOME_CARD_STYLE,
+                                com.solarized.firedown.Preferences.DEFAULT_HOME_CARD_STYLE),
+                        com.solarized.firedown.ui.HomeCardStyle.NEUTRAL);
+        boolean night = com.solarized.firedown.ui.HomeCardStyle.isNightMode(context.getResources());
+        com.solarized.firedown.ui.HomeCardStyle.CardLook active = style.active(night);
+        mActiveCardBg = active.bg;
+        mActiveFg = active.fg;
+        mActiveFgVariant = androidx.core.graphics.ColorUtils.setAlphaComponent(active.fg, 0xB3);
+
+        mDefaultListBg = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorSurface, Color.TRANSPARENT);
+        mDefaultGridBg = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorSurfaceContainerHigh, Color.TRANSPARENT);
+        mDefaultFg = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorOnSurface, Color.BLACK);
+        mDefaultFgVariant = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorOnSurfaceVariant, Color.GRAY);
     }
 
 
@@ -335,6 +375,25 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         holder.selected.setVisibility(mActionMode ? View.VISIBLE : View.GONE);
         holder.selected.setImageDrawable(mActionMode ? (contains ? mChecked : mUnChecked) : null);
         holder.mimeText.setText(FileUriHelper.getLongMimeText(mContext, mimeType));
+
+        // ── Active-state surface ────────────────────────────────────
+        // In-flight items (PROGRESS / QUEUED) take the picked Home
+        // theme's active surface so the 'live' signal here matches
+        // the active-download strip on Home. Completed / error rows
+        // reset to the per-view-type default — list goes back to
+        // plain surface (flat against the page), grid keeps the
+        // surfaceContainerHigh placeholder the layout originally set
+        // so an unloaded thumbnail still has a backdrop.
+        boolean isActive = status == Download.PROGRESS || status == Download.QUEUED;
+        holder.item.setCardBackgroundColor(
+                isActive ? mActiveCardBg : (isGrid ? mDefaultGridBg : mDefaultListBg));
+        int fg = isActive ? mActiveFg : mDefaultFg;
+        int fgVariant = isActive ? mActiveFgVariant : mDefaultFgVariant;
+        if (holder.fileName != null) holder.fileName.setTextColor(fg);
+        if (holder.fileUrl != null) holder.fileUrl.setTextColor(fgVariant);
+        if (holder.progressText != null) holder.progressText.setTextColor(fgVariant);
+        if (holder.finishedText != null) holder.finishedText.setTextColor(fgVariant);
+        if (holder.queuedText != null) holder.queuedText.setTextColor(fgVariant);
 
         if (holder.fileName != null) holder.fileName.setText(entity.getFileName());
         if (holder.fileUrl != null) holder.fileUrl.setText(domain);

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — Home cards style variants</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: #18181a;
+    color: #e8e8ea;
+    line-height: 1.45;
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+  .subtitle { color: #9aa0a6; font-size: 13px; margin: 0 0 24px; }
+  h2 { font-size: 15px; margin: 28px 0 4px; color: #e8e8ea; font-weight: 600; }
+  .rationale { color: #9aa0a6; font-size: 12px; margin: 0 0 12px; max-width: 720px; }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 10px; }
+  @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }
+
+  .mode { border-radius: 14px; padding: 14px; }
+  .mode-light { background: #FBF9FB; color: #1B1B1E; }
+  .mode-dark  { background: #131315; color: #E4E2E5; }
+
+  .mode-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.55;
+    margin-bottom: 10px;
+  }
+
+  /* Cards */
+  .card {
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .icon-slot {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-slot svg { width: 24px; height: 24px; }
+  .stack { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+  .title { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .subtitle-row { font-size: 11px; opacity: 0.75; margin-top: 1px; }
+  .label-eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .progress-bar {
+    height: 3px; border-radius: 2px; margin-top: 6px; overflow: hidden;
+  }
+  .progress-fill { height: 100%; }
+  .pct {
+    font-size: 13px; font-weight: 600;
+    margin-left: 10px; flex-shrink: 0;
+  }
+
+  /* Pause / play button on media card */
+  .control-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .control-btn svg { width: 18px; height: 18px; }
+
+  .palette { background: #232326; padding: 12px; border-radius: 8px; margin-bottom: 20px; }
+  .palette-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+  .chip {
+    width: 64px; height: 56px; border-radius: 6px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 9px; padding: 4px; line-height: 1.1; text-align: center;
+  }
+  .chip .hex { opacity: 0.65; font-size: 8px; margin-top: 2px; }
+  .palette-label { font-size: 11px; opacity: 0.7; margin-bottom: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Home cards: style variants</h1>
+<p class="subtitle">Full Home stack — active download, playing media, Downloads, Safe Folder — rendered for each shelf-card variant. The two live cards (download / media) are constant across variants so you can see how each shelf treatment plays with what's already on screen.</p>
+
+<div class="palette">
+  <div class="palette-label">Brand — Light</div>
+  <div class="palette-row">
+    <div class="chip" style="background:#f0716c;color:#fff;">primary<span class="hex">#f0716c</span></div>
+    <div class="chip" style="background:#FF857F;color:#460005;">primCont<span class="hex">#FF857F</span></div>
+    <div class="chip" style="background:#FFBF9B;color:#5D2E0D;">secCont<span class="hex">#FFBF9B</span></div>
+    <div class="chip" style="background:#C8417B;color:#fff;">terCont<span class="hex">#C8417B</span></div>
+    <div class="chip" style="background:#EFEDF0;color:#1B1B1E;border:1px solid #ddd;">surfHi<span class="hex">#EFEDF0</span></div>
+  </div>
+  <div class="palette-label" style="margin-top:10px;">Brand — Dark</div>
+  <div class="palette-row">
+    <div class="chip" style="background:#F66A66;color:#0F0000;">primCont<span class="hex">#F66A66</span></div>
+    <div class="chip" style="background:#FAB186;color:#532606;">secCont<span class="hex">#FAB186</span></div>
+    <div class="chip" style="background:#FFB0C9;color:#640034;">tertiary<span class="hex">#FFB0C9</span></div>
+    <div class="chip" style="background:#C8417B;color:#fff;">terCont<span class="hex">#C8417B</span></div>
+    <div class="chip" style="background:#1F1F22;color:#E4E2E5;border:1px solid #333;">surfCont<span class="hex">#1F1F22</span></div>
+  </div>
+</div>
+
+
+<script>
+  // ─── SVG paths ────────────────────────────────────────────────
+  const DOWNLOAD_SVG = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 16l-5-5h3V4h4v7h3l-5 5zm-7 4v-2h14v2H5z"/></svg>`;
+  const LOCK_SVG     = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 17a2 2 0 002-2 2 2 0 00-2-2 2 2 0 00-2 2 2 2 0 002 2m6-9a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V10a2 2 0 012-2h1V6a5 5 0 015-5 5 5 0 015 5v2h1m-6-5.5A3.5 3.5 0 008.5 6V8h7V6A3.5 3.5 0 0012 2.5z"/></svg>`;
+  const FLAME_SVG    = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32-2.59 2.08-3.61 5.75-2.39 8.9.04.1.08.2.08.33 0 .22-.15.42-.35.5-.23.1-.47.04-.66-.12a.583.583 0 01-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 10 4.87 12.3 5 14.47c.06.5.12 1 .29 1.5.14.6.41 1.2.71 1.73 1.08 1.73 2.95 2.97 4.96 3.22 2.14.27 4.43-.12 6.07-1.6 1.83-1.66 2.47-4.32 1.53-6.6l-.13-.26c-.21-.46-.77-1.26-.77-1.26m-3.16 6.3c-.28.24-.74.5-1.1.6-1.12.4-2.24-.16-2.9-.82 1.19-.28 1.9-1.16 2.11-2.05.17-.8-.15-1.46-.28-2.23-.12-.74-.1-1.37.17-2.06.19.38.39.76.63 1.06.77 1 1.98 1.44 2.24 2.8.04.14.06.28.06.43.03.82-.33 1.72-.93 2.27z"/></svg>`;
+  const PAUSE_SVG    = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 19h4V5h-4M6 19h4V5H6v14z"/></svg>`;
+  const YT_SVG       = `<svg viewBox="0 0 24 24"><path fill="#FF0000" d="M21.582 6.186a2.506 2.506 0 00-1.768-1.768C18.254 4 12 4 12 4s-6.254 0-7.814.418A2.506 2.506 0 002.418 6.186C2 7.746 2 12 2 12s0 4.254.418 5.814a2.506 2.506 0 001.768 1.768C5.746 20 12 20 12 20s6.254 0 7.814-.418a2.506 2.506 0 001.768-1.768C22 16.254 22 12 22 12s0-4.254-.418-5.814zM10 15.464V8.536L16 12l-6 3.464z"/></svg>`;
+
+  // ─── Card factories ───────────────────────────────────────────
+
+  // Active-download card (constant across variants).
+  function activeDownloadCard(mode) {
+    const isLight = mode === "light";
+    return `
+      <div class="card" style="background:${isLight ? "#FF857F" : "#F66A66"}; color:${isLight ? "#460005" : "#0F0000"};">
+        <div class="icon-slot" style="background:transparent; color:${isLight ? "#460005" : "#0F0000"};">
+          ${FLAME_SVG}
+        </div>
+        <div class="stack">
+          <div class="label-eyebrow">DOWNLOADING…</div>
+          <div class="title">Fantasy Music for Study Relax…</div>
+          <div class="progress-bar" style="background:${isLight ? "rgba(70,0,5,0.15)" : "rgba(15,0,0,0.2)"};">
+            <div class="progress-fill" style="width:48%; background:${isLight ? "#460005" : "#0F0000"};"></div>
+          </div>
+        </div>
+        <div class="pct">48%</div>
+      </div>
+    `;
+  }
+
+  // Playing-media card (constant across variants).
+  function playingMediaCard(mode) {
+    const isLight = mode === "light";
+    return `
+      <div class="card" style="background:${isLight ? "#FFBF9B" : "#FAB186"}; color:${isLight ? "#5D2E0D" : "#532606"};">
+        <div class="icon-slot" style="background:transparent;">
+          ${YT_SVG}
+        </div>
+        <div class="stack">
+          <div class="label-eyebrow">PLAYING</div>
+          <div class="title">Fantasy Music for Study &amp; Rel…</div>
+          <div class="subtitle-row">Enchanted Melodies</div>
+        </div>
+        <div class="control-btn" style="color:${isLight ? "#5D2E0D" : "#532606"};">${PAUSE_SVG}</div>
+      </div>
+    `;
+  }
+
+  // Shelf-card factory — different per variant.
+  function shelfCards(mode, variant) {
+    const dl = variant.downloads[mode];
+    const vt = variant.vault[mode];
+    return `
+      <div class="card" style="background:${dl.bg}; color:${dl.fg};">
+        <div class="icon-slot" style="background:${dl.chipBg || "transparent"}; color:${dl.chipFg || dl.iconColor};">
+          ${DOWNLOAD_SVG}
+        </div>
+        <div class="stack">
+          <div class="title">Downloads</div>
+          <div class="subtitle-row">7 files · 2.3 GB</div>
+        </div>
+      </div>
+      <div class="card" style="background:${vt.bg}; color:${vt.fg};">
+        <div class="icon-slot" style="background:${vt.chipBg || "transparent"}; color:${vt.chipFg || vt.iconColor};">
+          ${LOCK_SVG}
+        </div>
+        <div class="stack">
+          <div class="title">Safe Folder</div>
+          <div class="subtitle-row">2 files saved</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFullStack(mode, variant) {
+    return `
+      ${activeDownloadCard(mode)}
+      ${playingMediaCard(mode)}
+      ${shelfCards(mode, variant)}
+    `;
+  }
+
+  // ─── Variants ─────────────────────────────────────────────────
+  const variants = [
+    {
+      name: "0. Current (reference)",
+      rationale: "What's in main right now. Neutral surface + coloured 40dp icon chip. Two cards feel like equal-weight destinations with distinct identities. Sits comfortably under the bright live cards.",
+      downloads: {
+        light: { bg: "#EFEDF0", fg: "#1B1B1E", chipBg: "#FF857F", chipFg: "#460005" },
+        dark:  { bg: "#1F1F22", fg: "#E4E2E5", chipBg: "#F66A66", chipFg: "#0F0000" },
+      },
+      vault: {
+        light: { bg: "#EFEDF0", fg: "#1B1B1E", chipBg: "#C8417B", chipFg: "#FFFFFF" },
+        dark:  { bg: "#1F1F22", fg: "#E4E2E5", chipBg: "#C8417B", chipFg: "#FFFFFF" },
+      },
+    },
+    {
+      name: "1. Inverted surface, theme-adapted, no chip",
+      rationale: "Surface itself carries the brand colour, no chip. Light = soft pale-tinted wash, dark = deep warm surface (the screenshot vibe). Live cards still pop as the brightest things on Home.",
+      downloads: {
+        light: { bg: "#FFE6E0", fg: "#5C1313", iconColor: "#B11030" },
+        dark:  { bg: "#3A1F1C", fg: "#F4DDDB", iconColor: "#F66A66" },
+      },
+      vault: {
+        light: { bg: "#FBE2EC", fg: "#5C1B3F", iconColor: "#8C1F49" },
+        dark:  { bg: "#3A1A28", fg: "#F4DDDB", iconColor: "#FFB0C9" },
+      },
+    },
+    {
+      name: "2. Inverted surface, chip kept",
+      rationale: "Tinted surface AND a chip — the screenshot pattern literally (its pause button is a chip on a tinted surface). Two layers of brand colour per card.",
+      downloads: {
+        light: { bg: "#FFE6E0", fg: "#5C1313", chipBg: "#FF857F", chipFg: "#460005" },
+        dark:  { bg: "#3A1F1C", fg: "#F4DDDB", chipBg: "#F66A66", chipFg: "#0F0000" },
+      },
+      vault: {
+        light: { bg: "#FBE2EC", fg: "#5C1B3F", chipBg: "#C8417B", chipFg: "#FFFFFF" },
+        dark:  { bg: "#3A1A28", fg: "#F4DDDB", chipBg: "#C8417B", chipFg: "#FFFFFF" },
+      },
+    },
+    {
+      name: "3. Filled brand surface (matches live cards)",
+      rationale: "Shelf cards adopt the same full-saturation surface treatment as the live cards. Home becomes a uniform brand wall — easy to dismiss as 'now everything looks live.'",
+      downloads: {
+        light: { bg: "#FF857F", fg: "#460005", iconColor: "#460005" },
+        dark:  { bg: "#F66A66", fg: "#0F0000", iconColor: "#0F0000" },
+      },
+      vault: {
+        light: { bg: "#C8417B", fg: "#FFFFFF", iconColor: "#FFFFFF" },
+        dark:  { bg: "#C8417B", fg: "#FFFFFF", iconColor: "#FFFFFF" },
+      },
+    },
+    {
+      name: "4. Always-dark surface (screenshot literal)",
+      rationale: "Dark warm surface in BOTH modes — strongest brand statement but the cards become a dark island in light theme.",
+      downloads: {
+        light: { bg: "#3A1F1C", fg: "#F4DDDB", iconColor: "#FF857F" },
+        dark:  { bg: "#3A1F1C", fg: "#F4DDDB", iconColor: "#F66A66" },
+      },
+      vault: {
+        light: { bg: "#3A1A28", fg: "#F4DDDB", iconColor: "#FFB0C9" },
+        dark:  { bg: "#3A1A28", fg: "#F4DDDB", iconColor: "#FFB0C9" },
+      },
+    },
+  ];
+
+  const root = document.body;
+
+  for (const v of variants) {
+    const section = document.createElement("div");
+    section.innerHTML = `
+      <h2>${v.name}</h2>
+      <p class="rationale">${v.rationale}</p>
+      <div class="row">
+        <div class="mode mode-light">
+          <div class="mode-label">Light</div>
+          ${renderFullStack("light", v)}
+        </div>
+        <div class="mode mode-dark">
+          <div class="mode-label">Dark</div>
+          ${renderFullStack("dark", v)}
+        </div>
+      </div>
+    `;
+    root.appendChild(section);
+  }
+</script>
+
+
+<h2 style="margin-top:36px;">Reading the comparison</h2>
+<ul style="font-size:13px;color:#c9c9cf;max-width:720px;">
+  <li><b>Live cards are constant.</b> Every variant shows the same coral active-download and peach playing-media cards. Pay attention to how each shelf-card variant <i>relates</i> to the cards above.</li>
+  <li><b>Variant 3</b> demonstrates the homogenisation risk: when all four cards have a full coloured surface, the live ones stop being the loud ones.</li>
+  <li><b>Variant 1 vs 2</b>: in 1 the icon floats on a tinted surface; in 2 there's a chip on a tinted surface. The 2-layer version is the literal screenshot pattern but doubles up on brand colour per card.</li>
+  <li><b>Variant 4</b>: see how the dark shelf cards land in <i>light</i> mode — that's the cost of always-dark.</li>
+</ul>
+
+</body>
+</html>

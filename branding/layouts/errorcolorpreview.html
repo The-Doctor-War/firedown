@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — colorError candidates</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, system-ui, sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: #1a1a1c;
+    color: #e8e8ea;
+    line-height: 1.45;
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+  .subtitle { color: #9aa0a6; font-size: 13px; margin: 0 0 28px; }
+  h2 { font-size: 15px; margin: 32px 0 12px; color: #c9c9cf; font-weight: 600; }
+  .palette { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .chip {
+    width: 70px; height: 70px; border-radius: 8px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 500;
+    padding: 4px;
+  }
+  .chip .hex { opacity: 0.7; font-size: 8px; margin-top: 2px; }
+
+  .candidate { margin-bottom: 36px; }
+  .candidate-header {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 12px;
+  }
+  .candidate-name { font-size: 16px; font-weight: 600; }
+  .candidate-rationale { font-size: 12px; color: #9aa0a6; }
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px) { .modes { grid-template-columns: 1fr; } }
+
+  /* Mode-specific card — uses the actual surface tokens. */
+  .card {
+    border-radius: 16px;
+    padding: 16px;
+  }
+  .card-light {
+    background: #FBF9FB;
+    color: #1B1B1E;
+  }
+  .card-dark {
+    background: #131315;
+    color: #E4E2E5;
+  }
+  .card-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    opacity: 0.6;
+    margin-bottom: 12px;
+  }
+
+  /* A mini bottom-sheet preview. */
+  .sheet {
+    border-radius: 12px;
+    padding: 14px 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .sheet-light { background: #EFEDF0; }
+  .sheet-dark { background: #1F1F22; }
+
+  .sheet-header { display: flex; align-items: center; gap: 12px; }
+  .icon {
+    width: 22px; height: 22px;
+    flex-shrink: 0;
+  }
+  .icon svg { width: 100%; height: 100%; }
+  .sheet-title { font-size: 14px; font-weight: 600; }
+  .sheet-subtitle { font-size: 11px; opacity: 0.7; margin-top: 1px; }
+
+  .trace {
+    background: rgba(127,127,127,0.12);
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    opacity: 0.8;
+  }
+  .actions { display: flex; justify-content: flex-end; gap: 6px; }
+  .btn {
+    font-size: 11px; padding: 5px 10px;
+    border-radius: 16px;
+    border: 1px solid currentColor;
+    background: transparent;
+    cursor: pointer;
+  }
+  .btn-filled { border: 0; }
+
+  /* Brand reference palette. */
+  .ref { background: #232326; padding: 12px; border-radius: 8px; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<h1>colorError candidates</h1>
+<p class="subtitle">Firedown brand is red-leaning (coral + peach + raspberry). Error needs to read as <b>not the brand</b> while still feeling deliberate. Each candidate shown in light + dark, with the brand palette beside it for context.</p>
+
+<h2>Reference: brand palette</h2>
+<div class="ref">
+  <div style="font-size:11px;opacity:0.7;margin-bottom:6px;">Light</div>
+  <div class="palette">
+    <div class="chip" style="background:#f0716c;color:#fff;">primary<span class="hex">#f0716c</span></div>
+    <div class="chip" style="background:#FF857F;color:#460005;">primCont<span class="hex">#FF857F</span></div>
+    <div class="chip" style="background:#FFBF9B;color:#5D2E0D;">secCont<span class="hex">#FFBF9B</span></div>
+    <div class="chip" style="background:#C8417B;color:#fff;">terCont<span class="hex">#C8417B</span></div>
+    <div class="chip" style="background:#FBF9FB;color:#1B1B1E;border:1px solid #ddd;">surface<span class="hex">#FBF9FB</span></div>
+  </div>
+  <div style="font-size:11px;opacity:0.7;margin:10px 0 6px;">Dark</div>
+  <div class="palette">
+    <div class="chip" style="background:#f0716c;color:#68000C;">primary<span class="hex">#f0716c</span></div>
+    <div class="chip" style="background:#F66A66;color:#0F0000;">primCont<span class="hex">#F66A66</span></div>
+    <div class="chip" style="background:#FAB186;color:#532606;">secCont<span class="hex">#FAB186</span></div>
+    <div class="chip" style="background:#C8417B;color:#fff;">terCont<span class="hex">#C8417B</span></div>
+    <div class="chip" style="background:#131315;color:#E4E2E5;border:1px solid #333;">surface<span class="hex">#131315</span></div>
+  </div>
+</div>
+
+<script>
+  // candidates: name, rationale, lightHex, darkHex
+  const candidates = [
+    {
+      name: "1. Stock M3 (current)",
+      rationale: "Generator output. Cool red, clearly NOT brand. Maximum semantic clarity, off-brand feel.",
+      light: "#BA1A1A", dark: "#FFB4AB",
+    },
+    {
+      name: "2. Deep wine",
+      rationale: "Same hue family as primary but much darker — distinguished by lightness, not hue. Feels intentional, still red.",
+      light: "#7A1414", dark: "#FFA08A",
+    },
+    {
+      name: "3. Firebrick",
+      rationale: "Slightly browner than primary, with a deeper saturation. Sits between brand-red and warning-amber.",
+      light: "#A02418", dark: "#FF8C7A",
+    },
+    {
+      name: "4. Cool crimson",
+      rationale: "Pushes hue cooler than primary (toward magenta) so it's clearly different, but stays a saturated red.",
+      light: "#B11030", dark: "#FF8B9C",
+    },
+    {
+      name: "5. Burnt orange",
+      rationale: "Shifts to orange/amber. Breaks 'red = error' convention but reads as 'warning' and pairs with peach secondaryContainer.",
+      light: "#B45309", dark: "#FBB070",
+    },
+  ];
+
+  const traceText = `java.lang.NullPointerException
+\tat com.solarized.firedown.phone.fragments.SettingsFragment
+\t.onPreferenceClick(SettingsFragment.java:413)
+\tat androidx.preference.Preference.performClick(...)`;
+
+  const cancelIconSvg = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>`;
+
+  const root = document.body;
+
+  function makeSheet({ mode, errorHex }) {
+    const isLight = mode === "light";
+    return `
+      <div class="card card-${mode}">
+        <div class="card-label">${isLight ? "Light" : "Dark"}</div>
+        <div class="sheet sheet-${mode}">
+          <div class="sheet-header">
+            <div class="icon" style="color:${errorHex};">${cancelIconSvg}</div>
+            <div>
+              <div class="sheet-title">Crash detected</div>
+              <div class="sheet-subtitle">2 min ago · v3.0.4 · java/main</div>
+            </div>
+          </div>
+          <div class="trace">${traceText}</div>
+          <div class="actions">
+            <button class="btn" style="color:${isLight ? "#1B1B1E" : "#E4E2E5"}; opacity:0.7;">Dismiss</button>
+            <button class="btn" style="color:${isLight ? "#1B1B1E" : "#E4E2E5"}; opacity:0.7;">Copy</button>
+            <button class="btn btn-filled" style="background:${isLight ? "#f0716c" : "#f0716c"}; color:${isLight ? "#fff" : "#68000C"};">Report</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  for (const c of candidates) {
+    const section = document.createElement("div");
+    section.className = "candidate";
+    section.innerHTML = `
+      <div class="candidate-header">
+        <div class="candidate-name">${c.name}</div>
+        <div class="candidate-rationale">${c.rationale}</div>
+      </div>
+      <div class="palette">
+        <div class="chip" style="background:${c.light};color:#fff;">light<span class="hex">${c.light}</span></div>
+        <div class="chip" style="background:${c.dark};color:#222;">dark<span class="hex">${c.dark}</span></div>
+      </div>
+      <div class="modes">
+        ${makeSheet({ mode: "light", errorHex: c.light })}
+        ${makeSheet({ mode: "dark", errorHex: c.dark })}
+      </div>
+    `;
+    root.appendChild(section);
+  }
+</script>
+
+</body>
+</html>

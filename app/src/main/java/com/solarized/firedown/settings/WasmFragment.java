@@ -23,8 +23,8 @@ import dagger.hilt.android.AndroidEntryPoint;
  *   <li>The global {@code javascript.options.wasm} toggle (the same one
  *       that used to live directly on the main Settings list).</li>
  *   <li>The per-site allowlist — every host the user has approved via
- *       the "Enable for X?" snackbar. Long-press to remove a single
- *       host; the "Clear all" entry wipes the list.</li>
+ *       the "Enable for X?" snackbar. Tap a host to open a remove
+ *       confirmation; the "Clear all" entry wipes the entire list.</li>
  * </ul>
  *
  * <p>SettingsFragment routes here via the

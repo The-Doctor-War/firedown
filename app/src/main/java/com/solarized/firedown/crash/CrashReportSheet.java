@@ -3,6 +3,7 @@ package com.solarized.firedown.crash;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -175,7 +176,8 @@ public class CrashReportSheet extends BottomSheetDialogFragment {
     }
 
     private void sweepAndDismiss() {
-        for (File f : mPending) CrashStorage.delete(f);
+        // File cleanup lives in onDismiss so swipe-down / back also
+        // sweep — see the override above.
         dismissAllowingStateLoss();
     }
 
@@ -184,18 +186,37 @@ public class CrashReportSheet extends BottomSheetDialogFragment {
         super.onStart();
         // Match BaseBottomSheetDialogFragment's sizing pattern:
         // skip the half-collapsed peek state (this sheet's content is
-        // small enough that the peek would clip the action row), and
-        // cap height at R.dimen.bottom_sheet_max_height so a long
-        // stack trace doesn't push the sheet edge-to-edge with the
-        // status bar.
+        // small enough that the peek would clip the action row), cap
+        // width at R.dimen.bottom_sheet_max_width (sentinel 0 in
+        // values/dimens.xml clears the cap for portrait phones; the
+        // landscape / tablet override puts a real cap), and cap
+        // height at R.dimen.bottom_sheet_max_height.
         View parent = getView() != null ? (View) getView().getParent() : null;
         if (parent == null) return;
         BottomSheetBehavior<View> behavior = BottomSheetBehavior.from(parent);
         behavior.setSkipCollapsed(true);
         behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        int maxWidthPx = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_max_width);
+        behavior.setMaxWidth(maxWidthPx > 0 ? maxWidthPx : -1);
         int maxHeightPx = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_max_height);
         behavior.setMaxHeight(maxHeightPx > 0 ? maxHeightPx : -1);
         parent.requestLayout();
+    }
+
+    /**
+     * Any dismissal — Report/Copy/Dismiss button, swipe-down, back
+     * press, tap outside — sweeps the pending files. The "show me
+     * again next time" model would require an explicit "Later"
+     * button, which we don't have; treating every exit as final
+     * matches what users mean when they dismiss a crash dialog
+     * (either they reported or they don't want to). Without this
+     * override, swipe-down/back left the files on disk and the
+     * sheet popped on every subsequent activity start.
+     */
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        for (File f : mPending) CrashStorage.delete(f);
+        super.onDismiss(dialog);
     }
 
     private void copyToClipboard(@NonNull String text) {

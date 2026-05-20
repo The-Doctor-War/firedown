@@ -428,7 +428,18 @@
       `,
     };
     const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'>${svgs[kind]}</svg>`;
-    return "data:image/svg+xml;utf8," + svg.replace(/#/g, "%23").replace(/\n\s+/g, " ");
+    // Encode characters that would otherwise close the surrounding
+    // HTML attribute or the CSS url() string. # is URL syntax; "
+    // closes a double-quoted HTML attribute; ' closes the
+    // single-quoted CSS url; < / > are fine inside attribute values
+    // but trip CSS parsers on some browsers — encode them too.
+    return "data:image/svg+xml;utf8," + svg
+      .replace(/\n\s+/g, " ")
+      .replace(/#/g, "%23")
+      .replace(/"/g, "%22")
+      .replace(/'/g, "%27")
+      .replace(/</g, "%3C")
+      .replace(/>/g, "%3E");
   }
 
   // ─── List row builder ─────────────────────────────────────────
@@ -438,7 +449,7 @@
     if (selected) cls.push("selected");
 
     const thumbHtml = item.thumb
-      ? `<div class="thumb-l" style="background-image:url(\"${item.thumb}\")"></div>`
+      ? `<div class="thumb-l" style="background-image:url('${item.thumb}')"></div>`
       : `<div class="thumb-l placeholder">${I.movie}</div>`;
 
     const badges = [`<span class="mime-badge">${item.mime || "VÍDEO"}</span>`];
@@ -465,7 +476,7 @@
   function gridTile({ mode, variant, item, isActive }) {
     const cls = ["tile", `v${variant.id}`, mode];
     if (isActive) cls.push("active");
-    const bg = item.thumb && !isActive ? `style="background-image:url(\"${item.thumb}\")"` : "";
+    const bg = item.thumb && !isActive ? `style="background-image:url('${item.thumb}')"` : "";
     if (isActive || !item.thumb) cls.push("placeholder");
 
     const inner = isActive

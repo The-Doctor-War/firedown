@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   One row in the home-cards style picker. Radio + name on top,
-  miniature previews of all four home cards (active download, playing
-  media, Downloads, Safe Folder) below, divider at the bottom.
-  HomeCardStylesFragment inflates one of these per HomeCardStyle.ALL
-  and rebinds the preview colours through HomeCardStyle.applyToCard
-  so what the user sees in the picker matches what HomeFragment
-  renders after selection.
+  miniature previews of the two shelf cards (Downloads, Safe Folder)
+  below, divider at the bottom. The active-download + playing-media
+  cards are intentionally not previewed here — they keep their
+  branded surface across variants 0–3 (only Ember darkens them),
+  and rendering them five times in the picker would just be
+  repetition. HomeCardStylesFragment inflates one of these per
+  HomeCardStyle.ALL and rebinds the preview colours through
+  HomeCardStyle.applyToCard so what the user sees in the picker
+  matches what HomeFragment renders after selection.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -43,138 +46,6 @@
             android:textColor="?attr/colorOnSurface" />
 
     </LinearLayout>
-
-    <!-- ── Active-download preview ────────────────────────────── -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/style_option_active_card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="0dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="14dp">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/style_option_active_icon"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_firedown" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/style_option_active_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.08"
-                    android:text="@string/downloading"
-                    android:textAllCaps="true"
-                    android:textAppearance="?attr/textAppearanceLabelSmall" />
-
-                <TextView
-                    android:id="@+id/style_option_active_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/home_card_style_preview_active_title"
-                    android:textAppearance="?attr/textAppearanceTitleSmall" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- ── Playing-media preview ──────────────────────────────── -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/style_option_media_card"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="10dp"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="0dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="14dp">
-
-            <!-- Static favicon stand-in — not themed; mirrors how the
-                 real card shows a Glide-loaded site icon. -->
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_play_arrow_24" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="14dp"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/style_option_media_label"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:letterSpacing="0.08"
-                    android:text="@string/home_media_playing"
-                    android:textAllCaps="true"
-                    android:textAppearance="?attr/textAppearanceLabelSmall" />
-
-                <TextView
-                    android:id="@+id/style_option_media_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/home_card_style_preview_media_title"
-                    android:textAppearance="?attr/textAppearanceTitleSmall" />
-
-                <TextView
-                    android:id="@+id/style_option_media_subtitle"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/home_card_style_preview_media_subtitle"
-                    android:textAppearance="?attr/textAppearanceBodySmall" />
-
-            </LinearLayout>
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/style_option_media_toggle"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="8dp"
-                android:contentDescription="@null"
-                android:src="@drawable/ic_pause_24" />
-
-        </LinearLayout>
-
-    </com.google.android.material.card.MaterialCardView>
 
     <!-- ── Downloads card preview ─────────────────────────────── -->
     <com.google.android.material.card.MaterialCardView

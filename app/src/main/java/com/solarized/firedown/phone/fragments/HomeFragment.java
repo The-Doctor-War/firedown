@@ -85,7 +85,10 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private MaterialCardView mRecentDownloadsCard;
     private View mHomeScroll;
     private MaterialCardView mActiveStrip;
-    private android.view.ViewGroup mActiveStripRows;
+    private TextView mActiveStripLabel;
+    private TextView mActiveStripTitle;
+    private TextView mActiveStripPercent;
+    private LinearProgressIndicator mActiveStripBar;
     private View mActiveStripIcon;
     @Nullable private android.animation.ObjectAnimator mActiveStripPulse;
     private TextView mHomeVaultSubtitle;
@@ -150,7 +153,10 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
         mActiveStrip = v.findViewById(R.id.active_download_strip);
         mActiveStripIcon = v.findViewById(R.id.active_download_icon);
-        mActiveStripRows = v.findViewById(R.id.active_download_rows);
+        mActiveStripLabel = v.findViewById(R.id.active_download_label);
+        mActiveStripTitle = v.findViewById(R.id.active_download_title);
+        mActiveStripPercent = v.findViewById(R.id.active_download_percent);
+        mActiveStripBar = v.findViewById(R.id.active_download_bar);
         mActiveStrip.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, DownloadsActivity.class)));
 
@@ -459,7 +465,10 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mOnBoardingCard = null;
         mRecentDownloadsCard = null;
         mActiveStrip = null;
-        mActiveStripRows = null;
+        mActiveStripLabel = null;
+        mActiveStripTitle = null;
+        mActiveStripPercent = null;
+        mActiveStripBar = null;
         stopActiveStripPulse();
         mActiveStripIcon = null;
         mHomeVaultSubtitle = null;
@@ -540,14 +549,20 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         boolean night = com.solarized.firedown.ui.HomeCardStyle.isNightMode(getResources());
 
         if (mActiveStrip != null) {
+            com.solarized.firedown.ui.HomeCardStyle.CardLook activeLook = style.active(night);
             com.solarized.firedown.ui.HomeCardStyle.applyToCard(
                     mActiveStrip,
                     null,
                     (android.widget.ImageView) mActiveStripIcon,
+                    mActiveStripTitle,
                     null,
-                    null,
-                    root.findViewById(R.id.active_download_label),
-                    style.active(night));
+                    mActiveStripLabel,
+                    activeLook);
+            // Percent reads as a number, not a soft subtitle — keep it
+            // at full fg opacity instead of running it through the
+            // applyToCard subtitle (alpha B3) path.
+            if (mActiveStripPercent != null) mActiveStripPercent.setTextColor(activeLook.fg);
+            if (mActiveStripBar != null) mActiveStripBar.setIndicatorColor(activeLook.fg);
         }
 
         if (mHomeMediaStrip instanceof MaterialCardView) {
@@ -605,54 +620,49 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     }
 
     /**
-     * Inflates one compact row per in-flight regular download (DAO
-     * caps the list at 3, so the strip height is bounded). Each row
-     * carries its own filename + percent label + LinearProgressIndicator;
-     * indeterminate while the file is QUEUED or 'live' (size not yet
-     * known), determinate once the percentage is real.
+     * Binds the active-download strip to the newest in-flight regular
+     * download. The DAO returns the list sorted newest-first; we show
+     * only the head and surface any extras as a '+N more' suffix on
+     * the header label — keeps the card a fixed height regardless of
+     * how many parallel downloads are in flight.
      *
-     * <p>Re-inflates from scratch on every observer tick rather than
-     * trying to diff in place — N is tiny, the rows are cheap, and
-     * the visible churn is bounded.</p>
+     * <p>Progress bar is indeterminate while QUEUED or 'live' (size
+     * not yet known), determinate once the percentage is real.</p>
      */
     private void bindActiveStrip(@NonNull java.util.List<DownloadEntity> active) {
-        if (mActiveStripRows == null) return;
-        mActiveStripRows.removeAllViews();
-        LayoutInflater inflater = LayoutInflater.from(mActiveStripRows.getContext());
-        int onContainer = MaterialColors.getColor(
-                mActiveStripRows, com.google.android.material.R.attr.colorOnPrimaryContainer);
-        int trackAlpha = androidx.core.graphics.ColorUtils.setAlphaComponent(onContainer, 0x3D);
-        for (DownloadEntity item : active) {
-            View row = inflater.inflate(R.layout.view_home_active_download_row, mActiveStripRows, false);
-            bindActiveStripRow(row, item, trackAlpha);
-            mActiveStripRows.addView(row);
-        }
-    }
+        if (mActiveStripBar == null || active.isEmpty()) return;
+        DownloadEntity item = active.get(0);
+        int extras = active.size() - 1;
 
-    private void bindActiveStripRow(@NonNull View row, @NonNull DownloadEntity item, int trackAlpha) {
-        TextView title = row.findViewById(R.id.active_download_title);
-        TextView percent = row.findViewById(R.id.active_download_percent);
-        LinearProgressIndicator bar = row.findViewById(R.id.active_download_bar);
+        if (extras > 0) {
+            mActiveStripLabel.setText(getString(R.string.home_active_downloads_more, extras));
+        } else {
+            mActiveStripLabel.setText(R.string.downloading);
+        }
+
         // Track colour: theme attr + alpha can't be combined in XML,
         // and the M3 default (colorSecondary, yellow in Firedown's
         // palette) fights the orange surface. Pin the track to
         // colorOnPrimaryContainer at ~24% alpha so it reads as a
         // subtle ghost of the indicator rather than a competing colour.
-        bar.setTrackColor(trackAlpha);
+        int onContainer = MaterialColors.getColor(
+                mActiveStripBar, com.google.android.material.R.attr.colorOnPrimaryContainer);
+        int trackAlpha = androidx.core.graphics.ColorUtils.setAlphaComponent(onContainer, 0x3D);
+        mActiveStripBar.setTrackColor(trackAlpha);
 
-        title.setText(item.getFileName());
+        mActiveStripTitle.setText(item.getFileName());
         boolean live = item.getFileIsLive();
         boolean queued = item.getFileStatus() == Download.QUEUED;
         boolean indeterminate = live || queued;
-        bar.setIndeterminate(indeterminate);
+        mActiveStripBar.setIndeterminate(indeterminate);
         if (queued) {
-            percent.setText(R.string.download_queued);
+            mActiveStripPercent.setText(R.string.download_queued);
         } else if (live) {
-            percent.setText(Utils.readableFileSize(item.getFileSize()));
+            mActiveStripPercent.setText(Utils.readableFileSize(item.getFileSize()));
         } else {
             int pct = item.getFileProgress();
-            bar.setProgress(pct);
-            percent.setText(String.format(java.util.Locale.US, "%d%%", pct));
+            mActiveStripBar.setProgress(pct);
+            mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%%", pct));
         }
     }
 

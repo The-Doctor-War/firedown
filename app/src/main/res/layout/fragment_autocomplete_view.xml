@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/address_bar_margin"
         android:layout_marginEnd="@dimen/address_bar_margin"
+        android:layout_marginTop="@dimen/address_bar_margin"
         android:visibility="gone" />
 
 
@@ -23,6 +24,7 @@
         android:layout_weight="1"
         android:layout_marginStart="@dimen/address_bar_margin"
         android:layout_marginEnd="@dimen/address_bar_margin"
+        android:layout_marginTop="@dimen/address_bar_margin"
         android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 

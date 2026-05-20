@@ -34,19 +34,29 @@
             the static Downloads card below already owns that glyph,
             and the alpha-pulse animator (wired in HomeFragment)
             communicates 'live, happening now' in a way a duplicated
-            download icon couldn't. layout_gravity=center_vertical
-            anchors the icon to the centre of whatever the content
-            column's height resolves to (header + 1–3 rows) — stays
-            balanced regardless of row count.
+            download icon couldn't.
+            Wrapped in a 40dp transparent slot to match the leading
+            slot the Downloads / Safe Folder shelf cards use for
+            their tonal chip — keeps icon centres and text columns
+            aligned across the four home cards. layout_gravity on
+            the wrapper anchors it to the centre of whatever the
+            content column's height resolves to (header + 1–3 rows).
         -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/active_download_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="center_vertical"
-            android:contentDescription="@null"
-            android:src="@drawable/ic_firedown"
-            app:tint="?attr/colorOnPrimaryContainer" />
+        <FrameLayout
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/active_download_icon"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_firedown"
+                app:tint="?attr/colorOnPrimaryContainer" />
+
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="0dp"

@@ -279,6 +279,11 @@
     <style name="Theme.FireDown.Download.Chip" parent="Widget.Material3.Chip.Filter">
         <item name="chipSurfaceColor">@color/transparent</item>
         <item name="chipBackgroundColor">@color/chip_download</item>
+        <!-- Pill shape. Large radius is capped to half the chip height
+             by the framework, so the value doesn't have to match the
+             exact height — bumping it once here keeps the pill look
+             even if Material updates the default chip height later. -->
+        <item name="chipCornerRadius">100dp</item>
     </style>
 
     <style name="Firedown.AlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">

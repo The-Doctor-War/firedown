@@ -5,129 +5,217 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Firedown — Downloads fragment variants</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
-    margin: 0;
-    padding: 24px;
-    background: #1a1a1c;
-    color: #e8e8ea;
-    line-height: 1.45;
+  :root {
+    /* ── Firedown M3 tokens (raw hex from values/colors.xml) ── */
+    --bg-light:   #FBF9FB;
+    --bg-dark:    #131315;
+    --on-bg-light:#1B1B1E;
+    --on-bg-dark: #E4E2E5;
+    --on-var-light: #44474C;
+    --on-var-dark:  #C5C6CD;
+    --outline-light: #75777D;
+    --outline-dark:  #8F9097;
+    --outline-variant-light: #C5C6CD;
+    --outline-variant-dark:  #44474C;
+    --surface-container-light: #EFEDF0;
+    --surface-container-dark:  #1F1F22;
+    --surface-container-high-light: #E9E7EA;
+    --surface-container-high-dark:  #292A2C;
+    --surface-container-low-light:  #F5F3F6;
+    --surface-container-low-dark:   #1B1B1E;
+
+    /* Brand */
+    --primary:               #f0716c;
+    --primary-container-l:   #FF857F;
+    --primary-container-d:   #F66A66;
+    --on-primary-container-l:#460005;
+    --on-primary-container-d:#0F0000;
+    --secondary-container-l: #FFBF9B;
+    --secondary-container-d: #FAB186;
+    --on-secondary-container-l:#5D2E0D;
+    --on-secondary-container-d:#532606;
+
+    /* Soft "wash" tints used by the Blush/Coral wash family. */
+    --wash-coral-light: #FFE6E0;
+    --wash-coral-dark:  #3A1F1C;
+    --wash-coral-on-light:#5C1313;
+    --wash-coral-on-dark: #F4DDDB;
   }
-  h1 { font-size: 20px; margin: 0 0 4px; font-weight: 600; }
-  .subtitle { color: #9aa0a6; font-size: 13px; margin: 0 0 28px; max-width: 880px; }
-  h2 { font-size: 16px; margin: 36px 0 10px; color: #c9c9cf; font-weight: 600; }
 
-  .variant { margin-bottom: 56px; padding-top: 20px; border-top: 1px solid #2a2a2d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    font-family: -apple-system, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+    padding: 32px;
+    background: #131316;
+    color: #e8e8ea;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1 { font-size: 22px; margin: 0 0 4px; font-weight: 600; letter-spacing: -0.01em; }
+  .subtitle { color: #9aa0a6; font-size: 14px; margin: 0 0 28px; max-width: 880px; }
+  h2 { font-size: 16px; margin: 32px 0 14px; color: #c9c9cf; font-weight: 600; }
+
+  /* ── Brand reference strip ─────────────────────────────────── */
+  .ref { background: #1c1c1f; padding: 16px; border-radius: 10px; margin-bottom: 28px; }
+  .ref .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .ref .mode-label { font-size: 11px; opacity: 0.65; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.08em; }
+  .palette { display: flex; gap: 6px; flex-wrap: wrap; }
+  .swatch {
+    width: 64px; height: 56px; border-radius: 7px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 600;
+    padding: 4px 2px; text-align: center;
+  }
+  .swatch .hex { opacity: 0.7; font-size: 8px; margin-top: 1px; font-weight: 400; }
+
+  /* ── Variant blocks ────────────────────────────────────────── */
+  .variant { margin-bottom: 64px; padding-top: 28px; border-top: 1px solid #28282c; }
   .variant:first-of-type { border-top: 0; padding-top: 0; }
-  .variant-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
-  .variant-name { font-size: 18px; font-weight: 600; }
-  .variant-rationale { color: #9aa0a6; font-size: 13px; max-width: 760px; }
+  .variant-head {
+    display: flex; flex-direction: column; gap: 6px;
+    margin-bottom: 18px;
+  }
+  .variant-head .row { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .variant-name { font-size: 19px; font-weight: 600; }
+  .variant-rationale { color: #9aa0a6; font-size: 13.5px; max-width: 880px; }
+  .variant-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 999px;
+    background: #2a2a2e; color: #c8c8ce; text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .variant-tag.keep   { background: #1f3a2b; color: #8ad9ad; }
+  .variant-tag.change { background: #3a1f2a; color: #f0a7c5; }
 
-  /* 2×2 grid of phone frames per variant: list/grid × light/dark. */
   .matrix {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(4, minmax(0, 290px));
+    gap: 16px;
   }
-  @media (max-width: 1100px) { .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 600px)  { .matrix { grid-template-columns: 1fr; } }
+  @media (max-width: 1240px) { .matrix { grid-template-columns: repeat(2, minmax(0, 320px)); } }
+  @media (max-width: 700px)  { .matrix { grid-template-columns: 1fr; } }
 
+  .cell {
+    display: flex; flex-direction: column; gap: 8px;
+    align-items: stretch;
+  }
   .cell-label {
     font-size: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     color: #80848a;
-    margin-bottom: 6px;
     text-align: center;
+    font-weight: 600;
   }
 
+  /* ── Phone frame ───────────────────────────────────────────── */
   .phone {
-    border-radius: 18px;
+    border-radius: 22px;
     overflow: hidden;
-    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35);
-    border: 1px solid #2a2a2d;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35), 0 0 0 1px #2a2a2d;
+    height: 620px;
+    display: flex; flex-direction: column;
+    font-size: 13px;
   }
-  .phone.light { background: #FBF9FB; color: #1B1B1E; }
-  .phone.dark  { background: #131315; color: #E4E2E5; }
+  .phone.light { background: var(--bg-light); color: var(--on-bg-light); }
+  .phone.dark  { background: var(--bg-dark);  color: var(--on-bg-dark);  }
+  .phone-scroll { flex: 1; overflow: hidden; }
 
-  /* Pretend status bar / app bar. */
+  /* App bar */
   .appbar {
-    display: flex; align-items: center;
-    padding: 10px 14px 6px;
-    font-size: 14px; font-weight: 600;
-    border-bottom: 0;
+    display: flex; align-items: center; gap: 4px;
+    padding: 14px 12px 8px;
+    font-size: 15px; font-weight: 600;
   }
-  .appbar .title { flex: 1; margin-left: 4px; }
-  .appbar .icon  { width: 18px; height: 18px; opacity: 0.85; }
-  .appbar svg    { width: 18px; height: 18px; }
+  .appbar .title { flex: 1; padding-left: 6px; letter-spacing: -0.01em; }
+  .appbar .icon-btn {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 999px;
+  }
+  .appbar svg { width: 20px; height: 20px; }
 
-  .chips { display: flex; gap: 6px; padding: 6px 12px 10px; overflow: hidden; }
+  /* Filter chip row */
+  .chips { display: flex; gap: 6px; padding: 6px 12px 12px; overflow: hidden; }
   .chip {
     border-radius: 999px;
     padding: 5px 12px;
-    font-size: 11px;
-    border: 1px solid currentColor;
-    color: currentColor;
-    opacity: 0.7;
-    background: transparent;
+    font-size: 11.5px;
+    border: 1px solid;
     white-space: nowrap;
   }
+  .light .chip { border-color: var(--outline-light); color: var(--on-bg-light); }
+  .dark  .chip { border-color: var(--outline-dark);  color: var(--on-bg-dark);  }
 
   .section-header {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 8px 14px 4px;
-  }
-  .light .section-header { color: #1B1B1E; }
-  .dark  .section-header { color: #E4E2E5; }
-
-  .list, .grid {
-    padding: 4px 8px 12px;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 10px 16px 6px;
+    letter-spacing: -0.01em;
   }
 
-  /* ── List rows ───────────────────────────────────────── */
+  /* ── List view ─────────────────────────────────────────────── */
+  .list { padding: 4px 8px 14px; display: flex; flex-direction: column; gap: 2px; }
   .row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px;
-    border-radius: 8px;
-    margin-bottom: 2px;
+    display: flex; align-items: stretch; gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    min-height: 76px;
   }
-  .thumb {
-    width: 62px; height: 50px;
+  .thumb-l {
+    width: 78px; height: 64px;
     border-radius: 6px;
-    background-size: cover; background-position: center;
     flex-shrink: 0;
-    background-color: #d6d6dc;
+    background-size: cover; background-position: center;
+    position: relative;
+    overflow: hidden;
   }
-  .dark .thumb { background-color: #2a2a2e; }
-  .thumb.placeholder { display: flex; align-items: center; justify-content: center; }
-  .thumb.placeholder svg { width: 24px; height: 24px; opacity: 0.55; }
-  .row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-  .row-top { display: flex; align-items: center; gap: 6px; }
-  .badge {
-    font-size: 9px; font-weight: 700;
-    padding: 1px 5px;
-    border-radius: 4px;
-    background: #FF857F; color: #460005;
-    letter-spacing: 0.04em;
+  .thumb-l.placeholder {
+    display: flex; align-items: center; justify-content: center;
   }
-  .dark .badge { background: #F66A66; color: #0F0000; }
-  .badge.duration { background: #FFBF9B; color: #5D2E0D; }
-  .dark .badge.duration { background: #FAB186; color: #532606; }
-  .file-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .domain { font-size: 10px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
-  .domain svg { width: 10px; height: 10px; opacity: 0.7; }
-  .meta { font-size: 10px; opacity: 0.6; }
-  .row-trail { width: 22px; height: 22px; opacity: 0.45; }
+  .light .thumb-l.placeholder { background: var(--surface-container-high-light); }
+  .dark  .thumb-l.placeholder { background: var(--surface-container-high-dark); }
+  .thumb-l.placeholder svg { width: 28px; height: 28px; opacity: 0.55; }
+
+  .row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+  .row-top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .mime-badge {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 6px; border-radius: 4px;
+    background: var(--primary-container-l); color: var(--on-primary-container-l);
+    flex-shrink: 0;
+  }
+  .dark .mime-badge { background: var(--primary-container-d); color: var(--on-primary-container-d); }
+  .dur-badge {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 6px; border-radius: 4px;
+    background: var(--secondary-container-l); color: var(--on-secondary-container-l);
+  }
+  .dark .dur-badge { background: var(--secondary-container-d); color: var(--on-secondary-container-d); }
+
+  .file-name {
+    font-size: 13.5px; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .domain {
+    font-size: 11.5px; display: flex; align-items: center; gap: 4px;
+  }
+  .light .domain { color: var(--on-var-light); }
+  .dark  .domain { color: var(--on-var-dark); }
+  .domain svg { width: 12px; height: 12px; opacity: 0.7; }
+  .meta { font-size: 11.5px; }
+  .light .meta { color: var(--on-var-light); }
+  .dark  .meta { color: var(--on-var-dark); }
+
+  .row-trail {
+    width: 24px; opacity: 0.55;
+    display: flex; align-items: flex-start; justify-content: center; padding-top: 4px;
+  }
   .row-trail svg { width: 22px; height: 22px; }
-  .progress-row { display: flex; align-items: center; gap: 6px; padding-top: 2px; }
-  .progress-pct { font-size: 10px; opacity: 0.75; min-width: 26px; }
+
+  .progress-row { display: flex; align-items: center; gap: 8px; padding-top: 2px; }
+  .progress-pct { font-size: 11px; min-width: 28px; font-weight: 500; }
   .progress-bar {
     flex: 1; height: 4px; border-radius: 2px;
     background: rgba(240,113,108,0.18);
@@ -135,195 +223,287 @@
   }
   .progress-bar > span {
     display: block; height: 100%;
-    background: #f0716c;
+    background: var(--primary);
   }
 
-  /* ── Grid tiles ──────────────────────────────────────── */
+  /* ── Grid view ─────────────────────────────────────────────── */
+  .grid { padding: 0 8px 10px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .tile {
     position: relative;
     border-radius: 8px;
     overflow: hidden;
     aspect-ratio: 16 / 10;
     background-size: cover; background-position: center;
-    background-color: #d6d6dc;
   }
-  .dark .tile { background-color: #2a2a2e; }
   .tile.placeholder { display: flex; align-items: center; justify-content: center; }
-  .tile.placeholder svg { width: 28px; height: 28px; opacity: 0.55; }
+  .light .tile.placeholder { background: var(--surface-container-high-light); }
+  .dark  .tile.placeholder { background: var(--surface-container-high-dark); }
+  .tile-more {
+    position: absolute; top: 6px; right: 6px;
+    width: 26px; height: 26px;
+    background: rgba(0,0,0,0.35);
+    color: white;
+    border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile-more svg { width: 16px; height: 16px; }
   .tile-badges {
     position: absolute; bottom: 6px; right: 6px;
     display: flex; gap: 4px;
   }
-  .tile-more {
-    position: absolute; top: 4px; right: 4px;
-    color: white;
-    width: 20px; height: 20px;
-    background: rgba(0,0,0,0.35);
-    border-radius: 999px;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .tile-more svg { width: 14px; height: 14px; }
   .tile-progress {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    color: currentColor;
+    color: var(--primary);
   }
-  .tile-progress .ring { width: 56px; height: 56px; }
+  .dark .tile-progress { color: var(--primary-container-d); }
+  .tile-progress .ring { width: 64px; height: 64px; }
   .tile-progress text {
-    font-size: 16px; font-weight: 600;
+    font-size: 8px; font-weight: 700;
     text-anchor: middle; dominant-baseline: middle;
     fill: currentColor;
   }
 
-  /* ── State backgrounds reused per variant ────────────── */
-  .row.active.v0-light { background: transparent; }
-  .row.active.v0-dark  { background: transparent; }
+  /* ── Per-variant overlays ──────────────────────────────────── */
+  /* Variant 0: only the active row needs the placeholder; no row background. */
 
-  .row.v1-light { background: #F5F3F6; }
-  .row.v1-dark  { background: #1F1F22; }
-  .row.active.v1-light { background: #FFE6E0; }
-  .row.active.v1-dark  { background: #3A1F1C; }
+  /* Variant 1: every row sits on surfaceContainerLow. */
+  .row.v1.light { background: var(--surface-container-low-light); }
+  .row.v1.dark  { background: var(--surface-container-low-dark); }
+  .row.v1.active.light { background: var(--wash-coral-light); color: var(--wash-coral-on-light); }
+  .row.v1.active.dark  { background: var(--wash-coral-dark);  color: var(--wash-coral-on-dark); }
 
-  .row.active.v2-light { background: #FFE6E0; }
-  .row.active.v2-dark  { background: #3A1F1C; }
-  .row.v2-light { background: transparent; }
-  .row.v2-dark  { background: transparent; }
+  /* Variant 2: active = coral wash; completed = transparent. */
+  .row.v2.active.light { background: var(--wash-coral-light); color: var(--wash-coral-on-light); }
+  .row.v2.active.dark  { background: var(--wash-coral-dark);  color: var(--wash-coral-on-dark); }
 
-  .group-card-light { background: #F5F3F6; border-radius: 12px; margin: 4px 8px 12px; padding: 4px; }
-  .group-card-dark  { background: #1F1F22; border-radius: 12px; margin: 4px 8px 12px; padding: 4px; }
-  .group-card-light .section-header,
-  .group-card-dark  .section-header { padding: 10px 10px 4px; }
-  .group-card-light .row,
-  .group-card-dark  .row { margin-bottom: 0; }
-  .group-card-light .row + .row,
-  .group-card-dark  .row + .row { border-top: 1px solid rgba(127,127,127,0.12); border-radius: 0; }
+  /* Variant 3: day group container wrapping rows. */
+  .group-card { margin: 4px 12px 14px; border-radius: 14px; padding: 4px 6px 6px; }
+  .group-card.light { background: var(--surface-container-low-light); }
+  .group-card.dark  { background: var(--surface-container-low-dark); }
+  .group-card .section-header { padding: 12px 10px 4px; }
+  .group-card .row { border-radius: 8px; margin-bottom: 0; }
+  .group-card .row + .row { border-top: 1px solid rgba(127,127,127,0.13); }
+  .group-card .row.active.light { background: var(--wash-coral-light); color: var(--wash-coral-on-light); border-radius: 8px; }
+  .group-card .row.active.dark  { background: var(--wash-coral-dark);  color: var(--wash-coral-on-dark); border-radius: 8px; }
 
-  .row.v4-light, .row.v4-dark { background: transparent; padding: 6px 8px; }
-  .row.v4-light .progress-bar, .row.v4-dark .progress-bar { background: rgba(127,127,127,0.18); }
+  /* Variant 4: active uses the full primaryContainer brand surface. */
+  .row.v4.active.light {
+    background: var(--primary-container-l); color: var(--on-primary-container-l);
+  }
+  .row.v4.active.dark {
+    background: var(--primary-container-d); color: var(--on-primary-container-d);
+  }
+  .row.v4.active .progress-bar { background: rgba(0,0,0,0.18); }
+  .row.v4.active .progress-bar > span { background: var(--on-primary-container-l); }
+  .row.v4.active.dark .progress-bar > span { background: var(--on-primary-container-d); }
+  .tile.v4.active.light {
+    background: var(--primary-container-l); color: var(--on-primary-container-l);
+  }
+  .tile.v4.active.dark {
+    background: var(--primary-container-d); color: var(--on-primary-container-d);
+  }
+  .tile.v4.active .tile-progress { color: currentColor; }
 
-  .tile.active-tinted-light { background-color: #FFE6E0; color: #B11030; }
-  .tile.active-tinted-dark  { background-color: #3A1F1C; color: #FF857F; }
-  .tile.active-coral-light  { background-color: #FF857F; color: #460005; }
-  .tile.active-coral-dark   { background-color: #F66A66; color: #0F0000; }
-
-  .tile.outlined-light { box-shadow: inset 0 0 0 1px #e1dfe2; }
-  .tile.outlined-dark  { box-shadow: inset 0 0 0 1px #2a2a2e; }
-
-  /* Selection state demo helper (v5). */
-  .row.selected.v5-light { background: #FFDAD7; box-shadow: inset 0 0 0 1px #f0716c; }
-  .row.selected.v5-dark  { background: #4a1f1f; box-shadow: inset 0 0 0 1px #f0716c; }
-  .row.selected .row-trail svg path { fill: #f0716c; }
+  /* Variant 5: outlined cards. */
+  .row.v5 { background: transparent; }
+  .row.v5.light { box-shadow: inset 0 0 0 1px var(--outline-variant-light); }
+  .row.v5.dark  { box-shadow: inset 0 0 0 1px var(--outline-variant-dark); }
+  .row.v5.active.light { background: var(--wash-coral-light); box-shadow: none; color: var(--wash-coral-on-light); }
+  .row.v5.active.dark  { background: var(--wash-coral-dark);  box-shadow: none; color: var(--wash-coral-on-dark);  }
 </style>
 </head>
 <body>
 
 <h1>Downloads fragment — UI variants</h1>
 <p class="subtitle">
-  Each variant shown in four cells: <b>list / grid × light / dark</b>. The data is the same across
-  every cell — one in-flight download, one finished video with thumbnail, one image — under the
-  'Hoy' (today) header. Goal is to evaluate <i>card treatment</i>: do list rows want a surface
-  background? Should actives get a stronger 'live' tint? Are day-headers loud enough or should they
-  be wrapped in grouped containers?
+  Same data in every cell — one in-flight download, three finished items split across <b>Hoy</b> /
+  <b>Ayer</b>. Each variant shown as <b>list × grid × light × dark</b> so the only thing changing
+  is the card treatment. Token values are the actual hex from <code>values/colors.xml</code> and
+  <code>values-night/colors.xml</code>; the soft &quot;wash&quot; tints come from the Blush /
+  Bloom Home-cards palettes for cross-screen consistency.
 </p>
 
+<h2>Reference: tokens in use</h2>
+<div class="ref">
+  <div class="pair">
+    <div>
+      <div class="mode-label">Light</div>
+      <div class="palette">
+        <div class="swatch" style="background:var(--bg-light);color:#1B1B1E;border:1px solid #ddd">background<span class="hex">#FBF9FB</span></div>
+        <div class="swatch" style="background:var(--surface-container-low-light);color:#1B1B1E;border:1px solid #e0dee2">surfL<span class="hex">#F5F3F6</span></div>
+        <div class="swatch" style="background:var(--surface-container-light);color:#1B1B1E">surfC<span class="hex">#EFEDF0</span></div>
+        <div class="swatch" style="background:var(--surface-container-high-light);color:#1B1B1E">surfH<span class="hex">#E9E7EA</span></div>
+        <div class="swatch" style="background:var(--wash-coral-light);color:var(--wash-coral-on-light)">wash<span class="hex">#FFE6E0</span></div>
+        <div class="swatch" style="background:var(--primary-container-l);color:var(--on-primary-container-l)">primCt<span class="hex">#FF857F</span></div>
+        <div class="swatch" style="background:var(--secondary-container-l);color:var(--on-secondary-container-l)">secCt<span class="hex">#FFBF9B</span></div>
+      </div>
+    </div>
+    <div>
+      <div class="mode-label">Dark</div>
+      <div class="palette">
+        <div class="swatch" style="background:var(--bg-dark);color:#E4E2E5;border:1px solid #2a2a2e">background<span class="hex">#131315</span></div>
+        <div class="swatch" style="background:var(--surface-container-low-dark);color:#E4E2E5">surfL<span class="hex">#1B1B1E</span></div>
+        <div class="swatch" style="background:var(--surface-container-dark);color:#E4E2E5">surfC<span class="hex">#1F1F22</span></div>
+        <div class="swatch" style="background:var(--surface-container-high-dark);color:#E4E2E5">surfH<span class="hex">#292A2C</span></div>
+        <div class="swatch" style="background:var(--wash-coral-dark);color:var(--wash-coral-on-dark)">wash<span class="hex">#3A1F1C</span></div>
+        <div class="swatch" style="background:var(--primary-container-d);color:var(--on-primary-container-d)">primCt<span class="hex">#F66A66</span></div>
+        <div class="swatch" style="background:var(--secondary-container-d);color:var(--on-secondary-container-d)">secCt<span class="hex">#FAB186</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-  // ─── SVG icons reused everywhere ──────────────────────────────
-  const ICON_SEARCH = `<svg viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35M18 11a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
-  const ICON_MORE = `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>`;
-  const ICON_GRID = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3,3h8v8H3V3 M3,13h8v8H3V13 M13,3h8v8h-8V3 M13,13h8v8h-8V13"/></svg>`;
-  const ICON_LIST = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3,4h18v2H3V4 M3,11h18v2H3v-2 M3,18h18v2H3v-2"/></svg>`;
-  const ICON_BACK = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20,11H7.83l5.59-5.59L12,4l-8,8 8,8 1.42-1.41L7.83,13H20Z"/></svg>`;
-  const ICON_GLOBE = `<svg viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" fill="none" d="M12,2a10,10 0 100,20 10,10 0 000,-20M2,12h20M12,2a14,14 0 010,20M12,2a14,14 0 000,20"/></svg>`;
-  const ICON_FILE = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>`;
-  const ICON_MOVIE = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h2l1 2h3L9 4h2l1 2h3l-1-2h2l1 2h3v14H4V4m0 6v8h16v-8H4z"/></svg>`;
+  // ─── Icons (Material Symbols paths, currentColor) ─────────────
+  const I = {
+    back:   `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H20z"/></svg>`,
+    search: `<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M21 21l-4.35-4.35M18 11a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>`,
+    more:   `<svg viewBox="0 0 24 24"><circle cx="12" cy="5"  r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>`,
+    grid:   `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3V3m0 10h8v8H3v-8M13 3h8v8h-8V3m0 10h8v8h-8v-8"/></svg>`,
+    list:   `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3 4h18v2H3V4m0 7h18v2H3v-2m0 7h18v2H3v-2"/></svg>`,
+    globe:  `<svg viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.4" d="M12 2a10 10 0 100 20 10 10 0 000-20M2 12h20M12 2a14 14 0 010 20M12 2a14 14 0 000 20"/></svg>`,
+    movie:  `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h2l1 2h3L9 4h2l1 2h3l-1-2h2l1 2h3v14H4V4m0 6v8h16v-8H4z"/></svg>`,
+  };
 
-  // ─── Fake thumbnail data URIs (procedural svg) ───────────────
-  function thumbDataUri(label, c1, c2) {
-    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64'>
-      <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
-        <stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/>
-      </linearGradient></defs>
-      <rect width='100' height='64' fill='url(%23g)'/>
-      <text x='50' y='38' font-family='sans-serif' font-size='9' fill='white' text-anchor='middle' opacity='0.85'>${label}</text>
-    </svg>`;
-    return "data:image/svg+xml;utf8," + svg.replace(/#/g, "%23");
+  // ─── Procedural-but-photographic thumbnail factory ────────────
+  // Produces a stack of gradients + shapes that read as landscape /
+  // forest / portrait at thumbnail scale, vs the previous flat
+  // gradient blocks.
+  function thumb(kind) {
+    const svgs = {
+      knight: `
+        <defs>
+          <linearGradient id="k-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7c8a8c"/><stop offset="1" stop-color="#3a4a4c"/></linearGradient>
+          <linearGradient id="k-fore" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#3b3530"/><stop offset="1" stop-color="#1b1612"/></linearGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(%23k-sky)"/>
+        <polygon points="0,60 25,40 45,55 70,35 100,55 100,100 0,100" fill="#26342f" opacity="0.7"/>
+        <polygon points="0,72 35,55 60,68 100,60 100,100 0,100" fill="url(%23k-fore)"/>
+        <circle cx="78" cy="22" r="10" fill="#d5b78a" opacity="0.55"/>
+        <path d="M40 70 L48 50 L54 70 Z" fill="#0d0a08"/>
+      `,
+      hobbit: `
+        <defs>
+          <linearGradient id="h-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#a9c8d8"/><stop offset="1" stop-color="#cfe4d1"/></linearGradient>
+          <linearGradient id="h-grass" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7fa856"/><stop offset="1" stop-color="#4a6d33"/></linearGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(%23h-sky)"/>
+        <ellipse cx="35" cy="78" rx="40" ry="22" fill="url(%23h-grass)"/>
+        <ellipse cx="70" cy="86" rx="36" ry="20" fill="#3d5d2a"/>
+        <ellipse cx="32" cy="62" rx="14" ry="10" fill="#5c4530"/>
+        <ellipse cx="32" cy="62" rx="6"  ry="5"  fill="#1a120a"/>
+        <circle cx="86" cy="20" r="9" fill="#fff4d6"/>
+        <ellipse cx="20" cy="42" rx="14" ry="5" fill="#fff" opacity="0.45"/>
+      `,
+      wizard: `
+        <defs>
+          <linearGradient id="w-sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7aa5c8"/><stop offset="1" stop-color="#c9d4cb"/></linearGradient>
+          <linearGradient id="w-sea" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#5f8bb2"/><stop offset="1" stop-color="#2b4663"/></linearGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(%23w-sky)"/>
+        <polygon points="0,55 30,30 55,45 80,25 100,40 100,70 0,70" fill="#9ab2c2" opacity="0.85"/>
+        <rect y="62" width="100" height="38" fill="url(%23w-sea)"/>
+        <ellipse cx="50" cy="62" rx="60" ry="3" fill="#22466b" opacity="0.6"/>
+        <ellipse cx="22" cy="80" rx="6" ry="3" fill="#5b3922"/>
+        <path d="M22 78 L24 70 L28 80 Z" fill="#1a0f08"/>
+      `,
+      portrait: `
+        <defs>
+          <linearGradient id="p-bg" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#48323b"/><stop offset="1" stop-color="#211418"/></linearGradient>
+        </defs>
+        <rect width="100" height="100" fill="url(%23p-bg)"/>
+        <ellipse cx="50" cy="44" rx="18" ry="22" fill="#d6a890"/>
+        <path d="M28 100 Q50 60 72 100 Z" fill="#603438"/>
+        <path d="M22 32 Q34 8 50 16 Q66 8 78 32 Q72 24 50 22 Q28 24 22 32 Z" fill="#a85844"/>
+        <circle cx="44" cy="46" r="2" fill="#1a1010"/>
+        <circle cx="56" cy="46" r="2" fill="#1a1010"/>
+      `,
+    };
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='xMidYMid slice'>${svgs[kind]}</svg>`;
+    return "data:image/svg+xml;utf8," + svg.replace(/#/g, "%23").replace(/\n\s+/g, " ");
   }
-  const T_KNIGHT  = thumbDataUri("knight",   "#2c4a3a", "#1a2f24");
-  const T_HOBBIT  = thumbDataUri("hobbit",   "#7d9b5e", "#3f5a36");
-  const T_WIZARD  = thumbDataUri("wizard",   "#48739a", "#1f3b58");
-  const T_IMAGE   = thumbDataUri("witcher",  "#5a3b3b", "#2a1818");
 
-  // ─── Cell builders ───────────────────────────────────────────
-  function listRow({ mode, state, variantClass, thumb, name, domain, meta, badges, percent, selected }) {
-    const cls = ["row"];
-    if (state === "active") cls.push("active");
+  // ─── List row builder ─────────────────────────────────────────
+  function listRow({ mode, variant, item, isActive, selected }) {
+    const cls = ["row", `v${variant.id}`, mode];
+    if (isActive) cls.push("active");
     if (selected) cls.push("selected");
-    if (variantClass) cls.push(`${variantClass}-${mode}`);
 
-    const trail = `<div class="row-trail">${ICON_MORE}</div>`;
+    const thumbHtml = item.thumb
+      ? `<div class="thumb-l" style="background-image:url(\"${item.thumb}\")"></div>`
+      : `<div class="thumb-l placeholder">${I.movie}</div>`;
 
-    const thumbHtml = thumb
-      ? `<div class="thumb" style="background-image:url('${thumb}')"></div>`
-      : `<div class="thumb placeholder">${ICON_MOVIE}</div>`;
-
-    const badgeHtml = (badges || []).map(b =>
-      `<span class="badge ${b.kind || ''}">${b.label}</span>`).join("");
-
-    const bottom = state === "active"
+    const badges = [`<span class="mime-badge">${item.mime || "VÍDEO"}</span>`];
+    const bottom = isActive
       ? `<div class="progress-row">
-           <span class="progress-pct">${percent || 0}%</span>
-           <div class="progress-bar"><span style="width:${percent || 0}%"></span></div>
+           <span class="progress-pct">${item.percent}%</span>
+           <div class="progress-bar"><span style="width:${item.percent}%"></span></div>
          </div>`
-      : `<div class="meta">${meta || ""}</div>`;
+      : `<div class="meta">${item.meta}</div>`;
 
     return `
       <div class="${cls.join(' ')}">
         ${thumbHtml}
         <div class="row-body">
-          <div class="row-top">${badgeHtml}<span class="file-name">${name}</span></div>
-          <div class="domain">${ICON_GLOBE}<span>${domain}</span></div>
+          <div class="row-top">${badges.join('')}<span class="file-name">${item.name}</span></div>
+          <div class="domain">${I.globe}<span>${item.domain}</span></div>
           ${bottom}
         </div>
-        ${trail}
+        <div class="row-trail">${I.more}</div>
       </div>`;
   }
 
-  function gridTile({ mode, state, percent, thumb, badges, tileClass }) {
-    const cls = ["tile"];
-    if (state === "active" && !thumb) cls.push(tileClass || `active-tinted-${mode}`);
-    if (state !== "active" && !thumb) cls.push(`outlined-${mode}`);
+  // ─── Grid tile builder ────────────────────────────────────────
+  function gridTile({ mode, variant, item, isActive }) {
+    const cls = ["tile", `v${variant.id}`, mode];
+    if (isActive) cls.push("active");
+    const bg = item.thumb && !isActive ? `style="background-image:url(\"${item.thumb}\")"` : "";
+    if (isActive || !item.thumb) cls.push("placeholder");
 
-    const bg = thumb ? `style="background-image:url('${thumb}')"` : "";
-    const placeholder = !thumb
-      ? (state === "active"
-          ? `<div class="tile-progress">
-               <svg class="ring" viewBox="0 0 36 36">
-                 <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
-                 <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2"
-                   stroke-dasharray="${(percent || 0) * 0.942} 100" stroke-linecap="round"
-                   transform="rotate(-90 18 18)"/>
-                 <text x="18" y="19">${percent || 0}%</text>
-               </svg>
-             </div>`
-          : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:currentColor;opacity:0.4">${ICON_FILE}</div>`)
+    const inner = isActive
+      ? `<div class="tile-progress">
+           <svg class="ring" viewBox="0 0 36 36">
+             <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2" opacity="0.22"/>
+             <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-dasharray="${(item.percent || 0) * 0.942} 100" stroke-linecap="round"
+               transform="rotate(-90 18 18)"/>
+             <text x="18" y="19">${item.percent}%</text>
+           </svg>
+         </div>`
       : "";
 
-    const more = `<div class="tile-more">${ICON_MORE}</div>`;
-    const badgeHtml = `<div class="tile-badges">${(badges || []).map(b =>
-      `<span class="badge ${b.kind || ''}">${b.label}</span>`).join("")}</div>`;
+    const badges = isActive
+      ? `<span class="mime-badge">VÍDEO</span>`
+      : (item.duration
+          ? `<span class="mime-badge">${item.mime || "VÍDEO"}</span><span class="dur-badge">${item.duration}</span>`
+          : `<span class="mime-badge">${item.mime || "VÍDEO"}</span>`);
 
-    return `<div class="${cls.join(' ')}" ${bg}>${placeholder}${more}${badgeHtml}</div>`;
+    return `
+      <div class="${cls.join(' ')}" ${bg}>
+        ${inner}
+        <div class="tile-more">${I.more}</div>
+        <div class="tile-badges">${badges}</div>
+      </div>`;
   }
 
-  function appbar(mode, view, title = "Descargas") {
-    const viewIcon = view === "grid" ? ICON_LIST : ICON_GRID;
+  // ─── App bar + chip rail ──────────────────────────────────────
+  function appbar(mode, view) {
+    const toggle = view === "grid" ? I.list : I.grid;
     return `
       <div class="appbar">
-        <div class="icon">${ICON_BACK}</div>
-        <div class="title">${title}</div>
-        <div class="icon">${ICON_SEARCH}</div>
-        <div class="icon" style="margin-left:14px">${viewIcon}</div>
-        <div class="icon" style="margin-left:14px">${ICON_MORE}</div>
+        <div class="icon-btn">${I.back}</div>
+        <div class="title">Descargas</div>
+        <div class="icon-btn">${I.search}</div>
+        <div class="icon-btn">${toggle}</div>
+        <div class="icon-btn">${I.more}</div>
       </div>
       <div class="chips">
         <span class="chip">Video</span>
@@ -333,124 +513,125 @@
       </div>`;
   }
 
-  // Wrap section body — variant 3 wraps in a grouped surface card.
-  function section(mode, header, body, grouped) {
-    if (grouped) {
-      return `<div class="group-card-${mode}">
-        <div class="section-header">${header}</div>
-        ${body}
-      </div>`;
-    }
-    return `<div class="section-header">${header}</div>${body}`;
-  }
+  // ─── Data ─────────────────────────────────────────────────────
+  const ITEMS = {
+    active:   { name: "The Knight Who Chose...", domain: "youtube.com", percent: 58, thumb: null },
+    knight:   { name: "Relaxing Celtic Forest...", domain: "youtube.com", meta: "11.6 MB · 20 may 2026", thumb: thumb("knight"),  duration: "00:04:46" },
+    hobbit:   { name: "A Quiet Morning in the...", domain: "youtube.com", meta: "373.7 MB · 20 may 2026", thumb: thumb("hobbit"),  duration: "01:04:50" },
+    wizard:   { name: "Fantasy Music for Stud...", domain: "youtube.com", meta: "637.3 MB · 20 may 2026", thumb: thumb("wizard"),  duration: "02:22:22" },
+    portrait: { name: "hqdefault.jpg",             domain: "m.youtube.com", meta: "21.1 KB · 18 may 2026", mime: "IMAGEN", thumb: thumb("portrait") },
+  };
 
-  // ─── Per-variant cell rendering ──────────────────────────────
+  // ─── Cell rendering ───────────────────────────────────────────
   function buildList(mode, variant) {
-    const rows = [];
-    rows.push(listRow({
-      mode, state: "active", variantClass: variant.listClass,
-      thumb: null, name: "The Knight Who Chose...", domain: "youtube.com",
-      badges: [{ label: "VÍDEO" }], percent: 58,
-    }));
-    rows.push(listRow({
-      mode, state: "done", variantClass: variant.listClass,
-      thumb: T_KNIGHT, name: "Relaxing Celtic Forest...", domain: "youtube.com",
-      meta: "11.6 MB · 20 may 2026", badges: [{ label: "VÍDEO" }],
-    }));
-    rows.push(listRow({
-      mode, state: "done", variantClass: variant.listClass,
-      thumb: T_HOBBIT, name: "A Quiet Morning in the...", domain: "youtube.com",
-      meta: "373.7 MB · 20 may 2026", badges: [{ label: "VÍDEO" }],
-    }));
-    const ayer = listRow({
-      mode, state: "done", variantClass: variant.listClass,
-      thumb: T_WIZARD, name: "Fantasy Music for Stud...", domain: "youtube.com",
-      meta: "637.3 MB · 20 may 2026", badges: [{ label: "VÍDEO" }],
-    });
+    const rows = (variant.grouped
+      ? (rowsHtml) => `<div class="group-card ${mode}">
+          <div class="section-header">Hoy</div>${rowsHtml}
+        </div>`
+      : (rowsHtml) => `<div class="section-header">Hoy</div><div class="list">${rowsHtml}</div>`);
+
+    const ayer = (rowHtml) => variant.grouped
+      ? `<div class="group-card ${mode}">
+          <div class="section-header">Ayer</div>${rowHtml}
+        </div>`
+      : `<div class="section-header">Ayer</div><div class="list">${rowHtml}</div>`;
+
+    const todayHtml = [
+      listRow({ mode, variant, item: ITEMS.active, isActive: true }),
+      listRow({ mode, variant, item: ITEMS.knight }),
+      listRow({ mode, variant, item: ITEMS.hobbit }),
+    ].join("");
+
+    const ayerHtml = listRow({ mode, variant, item: ITEMS.wizard });
 
     return `${appbar(mode, "list")}
-      <div class="list">
-        ${section(mode, "Hoy",  `<div>${rows.join('')}</div>`, variant.grouped)}
-        ${section(mode, "Ayer", `<div>${ayer}</div>`,           variant.grouped)}
+      <div class="phone-scroll">
+        ${rows(todayHtml)}
+        ${ayer(ayerHtml)}
       </div>`;
   }
 
   function buildGrid(mode, variant) {
-    const tileClass = variant.gridActiveClass ? `${variant.gridActiveClass}-${mode}` : null;
-    const todayTiles = [
-      gridTile({ mode, state: "active", percent: 58, thumb: null, tileClass,
-                 badges: [{ label: "VÍDEO" }] }),
-      gridTile({ mode, state: "done", thumb: T_KNIGHT,
-                 badges: [{ label: "VÍDEO" }, { label: "00:04:46", kind: "duration" }] }),
-      gridTile({ mode, state: "done", thumb: T_HOBBIT,
-                 badges: [{ label: "VÍDEO" }, { label: "01:04:50", kind: "duration" }] }),
-    ];
-    const ayerTiles = [
-      gridTile({ mode, state: "done", thumb: T_WIZARD,
-                 badges: [{ label: "VÍDEO" }, { label: "02:22:22", kind: "duration" }] }),
-    ];
+    const today = [
+      gridTile({ mode, variant, item: ITEMS.active, isActive: true }),
+      gridTile({ mode, variant, item: ITEMS.knight }),
+      gridTile({ mode, variant, item: ITEMS.hobbit }),
+    ].join("");
+    const ayer = gridTile({ mode, variant, item: ITEMS.wizard });
 
     return `${appbar(mode, "grid")}
-      <div class="grid" style="padding-top:6px;padding-bottom:4px">${todayTiles.join('')}</div>
-      <div class="section-header">Ayer</div>
-      <div class="grid" style="padding-top:0">${ayerTiles.join('')}</div>`;
+      <div class="phone-scroll">
+        <div class="section-header">Hoy</div>
+        <div class="grid">${today}</div>
+        <div class="section-header">Ayer</div>
+        <div class="grid">${ayer}</div>
+      </div>`;
   }
 
   function cell(mode, kind, variant) {
     const body = kind === "list" ? buildList(mode, variant) : buildGrid(mode, variant);
-    return `
-      <div>
-        <div class="cell-label">${kind} · ${mode}</div>
-        <div class="phone ${mode}">${body}</div>
-      </div>`;
+    return `<div class="cell">
+      <div class="cell-label">${kind} · ${mode}</div>
+      <div class="phone ${mode}">${body}</div>
+    </div>`;
   }
 
-  // ─── Variants ────────────────────────────────────────────────
+  // ─── Variants ─────────────────────────────────────────────────
   const variants = [
     {
+      id: 0,
       name: "0. Current (reference)",
-      rationale: "What's shipped today. List rows have no card background; only the in-flight download stands out because its tinted background shows through (no thumbnail loaded). Grid tiles are also background-less for completed items; actives use a placeholder tint.",
-      listClass: "v0",
-      gridActiveClass: "active-tinted",
+      tag: { label: "Shipped", cls: "keep" },
+      rationale: "What's on main today. List rows are flat — only the in-flight download shows colour because its tile placeholder leaks through (no thumbnail yet). Grid is the same idea: tiles are edge-to-edge thumbnails for completed items, active gets a tinted placeholder. The active state is read by colour-by-accident rather than design intent.",
       grouped: false,
     },
     {
+      id: 1,
       name: "1. Surface card on every row",
-      rationale: "Every list row sits on a soft surface-container card; the active row uses the coral wash tint to keep its 'live' status. Reads as a uniform list of cards rather than a list of bullets. Adds visual heft — could feel busier on dense lists.",
-      listClass: "v1",
-      gridActiveClass: "active-tinted",
+      tag: { label: "More structure", cls: "change" },
+      rationale: "Every list row sits on a surfaceContainerLow card; the active row still takes the coral wash to keep the live signal. Reads as 'list of cards' rather than 'list of bullets' — easier to track row boundaries when scrolling, especially with mixed text + thumbnail content. Cost: extra visual weight on a screen that's mostly already-saved files.",
       grouped: false,
     },
     {
-      name: "2. Active-only tint, flat completed",
-      rationale: "Same as today but explicit: in-flight rows take a strong coral wash, completed rows stay flat. Makes the 'live state' the only thing fighting for attention. Closest to what the home page already does with its active-download strip.",
-      listClass: "v2",
-      gridActiveClass: "active-tinted",
+      id: 2,
+      name: "2. Active = wash, completed = flat",
+      tag: { label: "Cleaner today", cls: "keep" },
+      rationale: "Closest to what's shipped, just intentional: in-flight rows take the same coral wash the home active-download card uses; completed rows stay flat. The colour now appears because we chose it, not because of an unloaded thumbnail. Minimum visual delta from V0, biggest payoff in clarity.",
       grouped: false,
     },
     {
+      id: 3,
       name: "3. Day-grouped containers",
-      rationale: "Each day-header (Hoy / Ayer) wraps its rows in a single rounded surface container, with hairline dividers between rows. Mirrors the iOS Files / Google Files grouping aesthetic. Stronger 'scan by day' affordance; loses the per-row card individuality.",
-      listClass: "v0",
-      gridActiveClass: "active-tinted",
+      tag: { label: "Restructure", cls: "change" },
+      rationale: "Each day-header (Hoy / Ayer / …) wraps its rows in a single rounded surface container with hairline dividers between rows. iOS Files / Google Files grouping aesthetic — the day becomes the scannable unit. Trade-off: long sections (50+ items in a day) carry one giant rounded container; row corners are uniform inside it.",
       grouped: true,
     },
     {
-      name: "4. Active uses Home theme's branded tint",
-      rationale: "Same shape as today (only actives tinted) but the active tile/row uses the same full-saturation brand colour the home active-download card uses (coral primaryContainer) instead of the soft wash. Stronger continuity between the home strip and the Downloads list.",
-      listClass: "v2",
-      gridActiveClass: "active-coral",
+      id: 4,
+      name: "4. Active uses Home theme's brand tint",
+      tag: { label: "Continuity", cls: "change" },
+      rationale: "Same shape as V2 (only actives tinted) but actives adopt the full primaryContainer brand surface the home active-download card already uses — coral fill, full opacity, dark text. Strong continuity between the home strip and the Downloads list; reading 'this is what's downloading right now' across the app reuses the same colour key.",
+      grouped: false,
+    },
+    {
+      id: 5,
+      name: "5. Outlined cards everywhere",
+      tag: { label: "Quieter than V1", cls: "change" },
+      rationale: "Every row gets a 1dp outline using the M3 outlineVariant token; no fill. Half-way between today's flat list (V0) and the filled cards (V1). Rows have visual containment without adding tonal weight to the page. Active row still uses the coral wash and drops its outline so it pops harder by contrast.",
       grouped: false,
     },
   ];
 
   const root = document.body;
   for (const v of variants) {
-    const section = document.createElement("div");
+    const section = document.createElement("section");
     section.className = "variant";
     section.innerHTML = `
-      <div class="variant-header">
-        <div class="variant-name">${v.name}</div>
+      <div class="variant-head">
+        <div class="row">
+          <div class="variant-name">${v.name}</div>
+          ${v.tag ? `<span class="variant-tag ${v.tag.cls}">${v.tag.label}</span>` : ""}
+        </div>
         <div class="variant-rationale">${v.rationale}</div>
       </div>
       <div class="matrix">

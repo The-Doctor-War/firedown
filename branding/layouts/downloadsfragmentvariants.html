@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — Downloads fragment variants</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    margin: 0;
+    padding: 24px;
+    background: #1a1a1c;
+    color: #e8e8ea;
+    line-height: 1.45;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; font-weight: 600; }
+  .subtitle { color: #9aa0a6; font-size: 13px; margin: 0 0 28px; max-width: 880px; }
+  h2 { font-size: 16px; margin: 36px 0 10px; color: #c9c9cf; font-weight: 600; }
+
+  .variant { margin-bottom: 56px; padding-top: 20px; border-top: 1px solid #2a2a2d; }
+  .variant:first-of-type { border-top: 0; padding-top: 0; }
+  .variant-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+  .variant-name { font-size: 18px; font-weight: 600; }
+  .variant-rationale { color: #9aa0a6; font-size: 13px; max-width: 760px; }
+
+  /* 2×2 grid of phone frames per variant: list/grid × light/dark. */
+  .matrix {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+  }
+  @media (max-width: 1100px) { .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 600px)  { .matrix { grid-template-columns: 1fr; } }
+
+  .cell-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #80848a;
+    margin-bottom: 6px;
+    text-align: center;
+  }
+
+  .phone {
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 1px 0 rgba(255,255,255,0.04) inset, 0 8px 24px rgba(0,0,0,0.35);
+    border: 1px solid #2a2a2d;
+  }
+  .phone.light { background: #FBF9FB; color: #1B1B1E; }
+  .phone.dark  { background: #131315; color: #E4E2E5; }
+
+  /* Pretend status bar / app bar. */
+  .appbar {
+    display: flex; align-items: center;
+    padding: 10px 14px 6px;
+    font-size: 14px; font-weight: 600;
+    border-bottom: 0;
+  }
+  .appbar .title { flex: 1; margin-left: 4px; }
+  .appbar .icon  { width: 18px; height: 18px; opacity: 0.85; }
+  .appbar svg    { width: 18px; height: 18px; }
+
+  .chips { display: flex; gap: 6px; padding: 6px 12px 10px; overflow: hidden; }
+  .chip {
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 11px;
+    border: 1px solid currentColor;
+    color: currentColor;
+    opacity: 0.7;
+    background: transparent;
+    white-space: nowrap;
+  }
+
+  .section-header {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px 4px;
+  }
+  .light .section-header { color: #1B1B1E; }
+  .dark  .section-header { color: #E4E2E5; }
+
+  .list, .grid {
+    padding: 4px 8px 12px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  /* ── List rows ───────────────────────────────────────── */
+  .row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    margin-bottom: 2px;
+  }
+  .thumb {
+    width: 62px; height: 50px;
+    border-radius: 6px;
+    background-size: cover; background-position: center;
+    flex-shrink: 0;
+    background-color: #d6d6dc;
+  }
+  .dark .thumb { background-color: #2a2a2e; }
+  .thumb.placeholder { display: flex; align-items: center; justify-content: center; }
+  .thumb.placeholder svg { width: 24px; height: 24px; opacity: 0.55; }
+  .row-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .row-top { display: flex; align-items: center; gap: 6px; }
+  .badge {
+    font-size: 9px; font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: #FF857F; color: #460005;
+    letter-spacing: 0.04em;
+  }
+  .dark .badge { background: #F66A66; color: #0F0000; }
+  .badge.duration { background: #FFBF9B; color: #5D2E0D; }
+  .dark .badge.duration { background: #FAB186; color: #532606; }
+  .file-name { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .domain { font-size: 10px; opacity: 0.6; display: flex; align-items: center; gap: 4px; }
+  .domain svg { width: 10px; height: 10px; opacity: 0.7; }
+  .meta { font-size: 10px; opacity: 0.6; }
+  .row-trail { width: 22px; height: 22px; opacity: 0.45; }
+  .row-trail svg { width: 22px; height: 22px; }
+  .progress-row { display: flex; align-items: center; gap: 6px; padding-top: 2px; }
+  .progress-pct { font-size: 10px; opacity: 0.75; min-width: 26px; }
+  .progress-bar {
+    flex: 1; height: 4px; border-radius: 2px;
+    background: rgba(240,113,108,0.18);
+    overflow: hidden;
+  }
+  .progress-bar > span {
+    display: block; height: 100%;
+    background: #f0716c;
+  }
+
+  /* ── Grid tiles ──────────────────────────────────────── */
+  .tile {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 16 / 10;
+    background-size: cover; background-position: center;
+    background-color: #d6d6dc;
+  }
+  .dark .tile { background-color: #2a2a2e; }
+  .tile.placeholder { display: flex; align-items: center; justify-content: center; }
+  .tile.placeholder svg { width: 28px; height: 28px; opacity: 0.55; }
+  .tile-badges {
+    position: absolute; bottom: 6px; right: 6px;
+    display: flex; gap: 4px;
+  }
+  .tile-more {
+    position: absolute; top: 4px; right: 4px;
+    color: white;
+    width: 20px; height: 20px;
+    background: rgba(0,0,0,0.35);
+    border-radius: 999px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .tile-more svg { width: 14px; height: 14px; }
+  .tile-progress {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: currentColor;
+  }
+  .tile-progress .ring { width: 56px; height: 56px; }
+  .tile-progress text {
+    font-size: 16px; font-weight: 600;
+    text-anchor: middle; dominant-baseline: middle;
+    fill: currentColor;
+  }
+
+  /* ── State backgrounds reused per variant ────────────── */
+  .row.active.v0-light { background: transparent; }
+  .row.active.v0-dark  { background: transparent; }
+
+  .row.v1-light { background: #F5F3F6; }
+  .row.v1-dark  { background: #1F1F22; }
+  .row.active.v1-light { background: #FFE6E0; }
+  .row.active.v1-dark  { background: #3A1F1C; }
+
+  .row.active.v2-light { background: #FFE6E0; }
+  .row.active.v2-dark  { background: #3A1F1C; }
+  .row.v2-light { background: transparent; }
+  .row.v2-dark  { background: transparent; }
+
+  .group-card-light { background: #F5F3F6; border-radius: 12px; margin: 4px 8px 12px; padding: 4px; }
+  .group-card-dark  { background: #1F1F22; border-radius: 12px; margin: 4px 8px 12px; padding: 4px; }
+  .group-card-light .section-header,
+  .group-card-dark  .section-header { padding: 10px 10px 4px; }
+  .group-card-light .row,
+  .group-card-dark  .row { margin-bottom: 0; }
+  .group-card-light .row + .row,
+  .group-card-dark  .row + .row { border-top: 1px solid rgba(127,127,127,0.12); border-radius: 0; }
+
+  .row.v4-light, .row.v4-dark { background: transparent; padding: 6px 8px; }
+  .row.v4-light .progress-bar, .row.v4-dark .progress-bar { background: rgba(127,127,127,0.18); }
+
+  .tile.active-tinted-light { background-color: #FFE6E0; color: #B11030; }
+  .tile.active-tinted-dark  { background-color: #3A1F1C; color: #FF857F; }
+  .tile.active-coral-light  { background-color: #FF857F; color: #460005; }
+  .tile.active-coral-dark   { background-color: #F66A66; color: #0F0000; }
+
+  .tile.outlined-light { box-shadow: inset 0 0 0 1px #e1dfe2; }
+  .tile.outlined-dark  { box-shadow: inset 0 0 0 1px #2a2a2e; }
+
+  /* Selection state demo helper (v5). */
+  .row.selected.v5-light { background: #FFDAD7; box-shadow: inset 0 0 0 1px #f0716c; }
+  .row.selected.v5-dark  { background: #4a1f1f; box-shadow: inset 0 0 0 1px #f0716c; }
+  .row.selected .row-trail svg path { fill: #f0716c; }
+</style>
+</head>
+<body>
+
+<h1>Downloads fragment — UI variants</h1>
+<p class="subtitle">
+  Each variant shown in four cells: <b>list / grid × light / dark</b>. The data is the same across
+  every cell — one in-flight download, one finished video with thumbnail, one image — under the
+  'Hoy' (today) header. Goal is to evaluate <i>card treatment</i>: do list rows want a surface
+  background? Should actives get a stronger 'live' tint? Are day-headers loud enough or should they
+  be wrapped in grouped containers?
+</p>
+
+<script>
+  // ─── SVG icons reused everywhere ──────────────────────────────
+  const ICON_SEARCH = `<svg viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35M18 11a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`;
+  const ICON_MORE = `<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg>`;
+  const ICON_GRID = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3,3h8v8H3V3 M3,13h8v8H3V13 M13,3h8v8h-8V3 M13,13h8v8h-8V13"/></svg>`;
+  const ICON_LIST = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M3,4h18v2H3V4 M3,11h18v2H3v-2 M3,18h18v2H3v-2"/></svg>`;
+  const ICON_BACK = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M20,11H7.83l5.59-5.59L12,4l-8,8 8,8 1.42-1.41L7.83,13H20Z"/></svg>`;
+  const ICON_GLOBE = `<svg viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" fill="none" d="M12,2a10,10 0 100,20 10,10 0 000,-20M2,12h20M12,2a14,14 0 010,20M12,2a14,14 0 000,20"/></svg>`;
+  const ICON_FILE = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>`;
+  const ICON_MOVIE = `<svg viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h2l1 2h3L9 4h2l1 2h3l-1-2h2l1 2h3v14H4V4m0 6v8h16v-8H4z"/></svg>`;
+
+  // ─── Fake thumbnail data URIs (procedural svg) ───────────────
+  function thumbDataUri(label, c1, c2) {
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 64'>
+      <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+        <stop offset='0' stop-color='${c1}'/><stop offset='1' stop-color='${c2}'/>
+      </linearGradient></defs>
+      <rect width='100' height='64' fill='url(%23g)'/>
+      <text x='50' y='38' font-family='sans-serif' font-size='9' fill='white' text-anchor='middle' opacity='0.85'>${label}</text>
+    </svg>`;
+    return "data:image/svg+xml;utf8," + svg.replace(/#/g, "%23");
+  }
+  const T_KNIGHT  = thumbDataUri("knight",   "#2c4a3a", "#1a2f24");
+  const T_HOBBIT  = thumbDataUri("hobbit",   "#7d9b5e", "#3f5a36");
+  const T_WIZARD  = thumbDataUri("wizard",   "#48739a", "#1f3b58");
+  const T_IMAGE   = thumbDataUri("witcher",  "#5a3b3b", "#2a1818");
+
+  // ─── Cell builders ───────────────────────────────────────────
+  function listRow({ mode, state, variantClass, thumb, name, domain, meta, badges, percent, selected }) {
+    const cls = ["row"];
+    if (state === "active") cls.push("active");
+    if (selected) cls.push("selected");
+    if (variantClass) cls.push(`${variantClass}-${mode}`);
+
+    const trail = `<div class="row-trail">${ICON_MORE}</div>`;
+
+    const thumbHtml = thumb
+      ? `<div class="thumb" style="background-image:url('${thumb}')"></div>`
+      : `<div class="thumb placeholder">${ICON_MOVIE}</div>`;
+
+    const badgeHtml = (badges || []).map(b =>
+      `<span class="badge ${b.kind || ''}">${b.label}</span>`).join("");
+
+    const bottom = state === "active"
+      ? `<div class="progress-row">
+           <span class="progress-pct">${percent || 0}%</span>
+           <div class="progress-bar"><span style="width:${percent || 0}%"></span></div>
+         </div>`
+      : `<div class="meta">${meta || ""}</div>`;
+
+    return `
+      <div class="${cls.join(' ')}">
+        ${thumbHtml}
+        <div class="row-body">
+          <div class="row-top">${badgeHtml}<span class="file-name">${name}</span></div>
+          <div class="domain">${ICON_GLOBE}<span>${domain}</span></div>
+          ${bottom}
+        </div>
+        ${trail}
+      </div>`;
+  }
+
+  function gridTile({ mode, state, percent, thumb, badges, tileClass }) {
+    const cls = ["tile"];
+    if (state === "active" && !thumb) cls.push(tileClass || `active-tinted-${mode}`);
+    if (state !== "active" && !thumb) cls.push(`outlined-${mode}`);
+
+    const bg = thumb ? `style="background-image:url('${thumb}')"` : "";
+    const placeholder = !thumb
+      ? (state === "active"
+          ? `<div class="tile-progress">
+               <svg class="ring" viewBox="0 0 36 36">
+                 <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2" opacity="0.25"/>
+                 <circle cx="18" cy="18" r="15" fill="none" stroke="currentColor" stroke-width="2"
+                   stroke-dasharray="${(percent || 0) * 0.942} 100" stroke-linecap="round"
+                   transform="rotate(-90 18 18)"/>
+                 <text x="18" y="19">${percent || 0}%</text>
+               </svg>
+             </div>`
+          : `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:currentColor;opacity:0.4">${ICON_FILE}</div>`)
+      : "";
+
+    const more = `<div class="tile-more">${ICON_MORE}</div>`;
+    const badgeHtml = `<div class="tile-badges">${(badges || []).map(b =>
+      `<span class="badge ${b.kind || ''}">${b.label}</span>`).join("")}</div>`;
+
+    return `<div class="${cls.join(' ')}" ${bg}>${placeholder}${more}${badgeHtml}</div>`;
+  }
+
+  function appbar(mode, view, title = "Descargas") {
+    const viewIcon = view === "grid" ? ICON_LIST : ICON_GRID;
+    return `
+      <div class="appbar">
+        <div class="icon">${ICON_BACK}</div>
+        <div class="title">${title}</div>
+        <div class="icon">${ICON_SEARCH}</div>
+        <div class="icon" style="margin-left:14px">${viewIcon}</div>
+        <div class="icon" style="margin-left:14px">${ICON_MORE}</div>
+      </div>
+      <div class="chips">
+        <span class="chip">Video</span>
+        <span class="chip">Audio</span>
+        <span class="chip">Imágenes</span>
+        <span class="chip">GIF</span>
+      </div>`;
+  }
+
+  // Wrap section body — variant 3 wraps in a grouped surface card.
+  function section(mode, header, body, grouped) {
+    if (grouped) {
+      return `<div class="group-card-${mode}">
+        <div class="section-header">${header}</div>
+        ${body}
+      </div>`;
+    }
+    return `<div class="section-header">${header}</div>${body}`;
+  }
+
+  // ─── Per-variant cell rendering ──────────────────────────────
+  function buildList(mode, variant) {
+    const rows = [];
+    rows.push(listRow({
+      mode, state: "active", variantClass: variant.listClass,
+      thumb: null, name: "The Knight Who Chose...", domain: "youtube.com",
+      badges: [{ label: "VÍDEO" }], percent: 58,
+    }));
+    rows.push(listRow({
+      mode, state: "done", variantClass: variant.listClass,
+      thumb: T_KNIGHT, name: "Relaxing Celtic Forest...", domain: "youtube.com",
+      meta: "11.6 MB · 20 may 2026", badges: [{ label: "VÍDEO" }],
+    }));
+    rows.push(listRow({
+      mode, state: "done", variantClass: variant.listClass,
+      thumb: T_HOBBIT, name: "A Quiet Morning in the...", domain: "youtube.com",
+      meta: "373.7 MB · 20 may 2026", badges: [{ label: "VÍDEO" }],
+    }));
+    const ayer = listRow({
+      mode, state: "done", variantClass: variant.listClass,
+      thumb: T_WIZARD, name: "Fantasy Music for Stud...", domain: "youtube.com",
+      meta: "637.3 MB · 20 may 2026", badges: [{ label: "VÍDEO" }],
+    });
+
+    return `${appbar(mode, "list")}
+      <div class="list">
+        ${section(mode, "Hoy",  `<div>${rows.join('')}</div>`, variant.grouped)}
+        ${section(mode, "Ayer", `<div>${ayer}</div>`,           variant.grouped)}
+      </div>`;
+  }
+
+  function buildGrid(mode, variant) {
+    const tileClass = variant.gridActiveClass ? `${variant.gridActiveClass}-${mode}` : null;
+    const todayTiles = [
+      gridTile({ mode, state: "active", percent: 58, thumb: null, tileClass,
+                 badges: [{ label: "VÍDEO" }] }),
+      gridTile({ mode, state: "done", thumb: T_KNIGHT,
+                 badges: [{ label: "VÍDEO" }, { label: "00:04:46", kind: "duration" }] }),
+      gridTile({ mode, state: "done", thumb: T_HOBBIT,
+                 badges: [{ label: "VÍDEO" }, { label: "01:04:50", kind: "duration" }] }),
+    ];
+    const ayerTiles = [
+      gridTile({ mode, state: "done", thumb: T_WIZARD,
+                 badges: [{ label: "VÍDEO" }, { label: "02:22:22", kind: "duration" }] }),
+    ];
+
+    return `${appbar(mode, "grid")}
+      <div class="grid" style="padding-top:6px;padding-bottom:4px">${todayTiles.join('')}</div>
+      <div class="section-header">Ayer</div>
+      <div class="grid" style="padding-top:0">${ayerTiles.join('')}</div>`;
+  }
+
+  function cell(mode, kind, variant) {
+    const body = kind === "list" ? buildList(mode, variant) : buildGrid(mode, variant);
+    return `
+      <div>
+        <div class="cell-label">${kind} · ${mode}</div>
+        <div class="phone ${mode}">${body}</div>
+      </div>`;
+  }
+
+  // ─── Variants ────────────────────────────────────────────────
+  const variants = [
+    {
+      name: "0. Current (reference)",
+      rationale: "What's shipped today. List rows have no card background; only the in-flight download stands out because its tinted background shows through (no thumbnail loaded). Grid tiles are also background-less for completed items; actives use a placeholder tint.",
+      listClass: "v0",
+      gridActiveClass: "active-tinted",
+      grouped: false,
+    },
+    {
+      name: "1. Surface card on every row",
+      rationale: "Every list row sits on a soft surface-container card; the active row uses the coral wash tint to keep its 'live' status. Reads as a uniform list of cards rather than a list of bullets. Adds visual heft — could feel busier on dense lists.",
+      listClass: "v1",
+      gridActiveClass: "active-tinted",
+      grouped: false,
+    },
+    {
+      name: "2. Active-only tint, flat completed",
+      rationale: "Same as today but explicit: in-flight rows take a strong coral wash, completed rows stay flat. Makes the 'live state' the only thing fighting for attention. Closest to what the home page already does with its active-download strip.",
+      listClass: "v2",
+      gridActiveClass: "active-tinted",
+      grouped: false,
+    },
+    {
+      name: "3. Day-grouped containers",
+      rationale: "Each day-header (Hoy / Ayer) wraps its rows in a single rounded surface container, with hairline dividers between rows. Mirrors the iOS Files / Google Files grouping aesthetic. Stronger 'scan by day' affordance; loses the per-row card individuality.",
+      listClass: "v0",
+      gridActiveClass: "active-tinted",
+      grouped: true,
+    },
+    {
+      name: "4. Active uses Home theme's branded tint",
+      rationale: "Same shape as today (only actives tinted) but the active tile/row uses the same full-saturation brand colour the home active-download card uses (coral primaryContainer) instead of the soft wash. Stronger continuity between the home strip and the Downloads list.",
+      listClass: "v2",
+      gridActiveClass: "active-coral",
+      grouped: false,
+    },
+  ];
+
+  const root = document.body;
+  for (const v of variants) {
+    const section = document.createElement("div");
+    section.className = "variant";
+    section.innerHTML = `
+      <div class="variant-header">
+        <div class="variant-name">${v.name}</div>
+        <div class="variant-rationale">${v.rationale}</div>
+      </div>
+      <div class="matrix">
+        ${cell("light", "list", v)}
+        ${cell("dark",  "list", v)}
+        ${cell("light", "grid", v)}
+        ${cell("dark",  "grid", v)}
+      </div>`;
+    root.appendChild(section);
+  }
+</script>
+
+</body>
+</html>

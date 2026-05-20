@@ -46,7 +46,8 @@
         -->
         <FrameLayout
             android:layout_width="40dp"
-            android:layout_height="40dp">
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_container_surface">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/home_media_icon"

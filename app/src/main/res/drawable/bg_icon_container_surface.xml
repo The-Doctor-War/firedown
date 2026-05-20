@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Neutral rounded-square background for leading icons on cards
+    whose surface is already a brand tint — active-download strip
+    (coral) and media-playing strip (peach). Pairs with
+    bg_icon_container_primary / _tertiary on the neutral shelf
+    cards: shelf cards put a colored chip on a neutral surface,
+    these put a neutral chip on a colored surface. Same 40dp slot
+    keeps icon centres and text columns aligned across all four
+    home cards.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorSurfaceContainerHigh" />
+    <corners android:radius="12dp" />
+</shape>

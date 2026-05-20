@@ -45,7 +45,8 @@
         <FrameLayout
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_gravity="center_vertical">
+            android:layout_gravity="center_vertical"
+            android:background="@drawable/bg_icon_container_surface">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/active_download_icon"
@@ -54,7 +55,7 @@
                 android:layout_gravity="center"
                 android:contentDescription="@null"
                 android:src="@drawable/ic_firedown"
-                app:tint="?attr/colorOnPrimaryContainer" />
+                app:tint="?attr/colorOnSurface" />
 
         </FrameLayout>
 

@@ -821,9 +821,16 @@ public class GeckoRuntimeHelper {
      * pref ON if the host is in the regular or incognito allowlist,
      * otherwise the user's baseline. Called from NavigationDelegate
      * on every onLocationChange so the pref tracks the active tab.
+     *
+     * <p>Short-circuits non-http(s) URLs (about:, moz-extension:, data:,
+     * file:) — WebUtils.getDomainName logs a MalformedURLException for
+     * those, and the allowlist is meaningful only for web origins anyway.</p>
      */
     public boolean shouldEnableWasmFor(String url) {
         if (TextUtils.isEmpty(url)) return getUserWebAssemblyPreference();
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            return getUserWebAssemblyPreference();
+        }
         if (mWasmAllowlistRepository.contains(url)) return true;
         if (mIncognitoStateRepository.getWasmAllowlistRepository().contains(url)) return true;
         return getUserWebAssemblyPreference();

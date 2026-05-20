@@ -22,11 +22,14 @@
             app:popupTheme="@style/Theme.FireDown.Popup"
             app:title="@string/navigation_downloads" />
 
+        <!-- Filter chip rail. No scrollFlags so it stays pinned under
+             the toolbar — the chips are the primary filter affordance
+             on this screen and forcing the user to scroll back to the
+             top to switch type is a friction tax. -->
         <include
             layout="@layout/fragment_download_list_options"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_scrollFlags="scroll" />
+            android:layout_height="wrap_content" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -5,6 +5,7 @@
 - Refreshed Downloads and captured-content layouts
 - Pill-shaped filter chips and Tabs / Incognito selector
 - Translations across 83 locales for the new strings
+- Bump Gecko to version 151.0.20260513195118
 - Minor bugfixes
 
 ## [1.1.71] - 2026-05-15

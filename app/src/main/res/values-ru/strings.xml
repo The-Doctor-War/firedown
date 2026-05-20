@@ -371,5 +371,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 файлов сохранено · 2,4 ГБ</string>
     <string name="home_card_style_preview_vault_subtitle">12 элементов сохранено</string>
+    <string name="crash_sheet_title">Сбой обнаружен</string>
+    <string name="crash_sheet_report">Отправить</string>
+    <string name="crash_sheet_copy">Копировать</string>
+    <string name="crash_sheet_dismiss">Закрыть</string>
+    <string name="crash_sheet_copied">Отчёт о сбое скопирован в буфер обмена</string>
+    <string name="crash_sheet_open_failed">Не удалось открыть браузер. Отчёт о сбое в буфере обмена — вставьте его в новую заявку на GitHub.</string>
+
 
 </resources>

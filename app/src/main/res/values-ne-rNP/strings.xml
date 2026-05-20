@@ -34,5 +34,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 फाइलहरू सुरक्षित · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 वस्तुहरू सुरक्षित</string>
+    <string name="crash_sheet_title">क्र्यास पत्ता लाग्यो</string>
+    <string name="crash_sheet_report">रिपोर्ट</string>
+    <string name="crash_sheet_copy">प्रतिलिपि</string>
+    <string name="crash_sheet_dismiss">खारेज</string>
+    <string name="crash_sheet_copied">क्र्यास रिपोर्ट क्लिपबोर्डमा प्रतिलिपि भयो</string>
+    <string name="crash_sheet_open_failed">ब्राउजर खोल्न सकिएन। रिपोर्ट क्लिपबोर्डमा छ — यसलाई नयाँ GitHub इस्युमा टाँस्नुहोस्।</string>
+
 
 </resources>

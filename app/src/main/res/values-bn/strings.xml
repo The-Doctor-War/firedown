@@ -261,5 +261,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150টি ফাইল সংরক্ষিত · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12টি আইটেম সংরক্ষিত</string>
+    <string name="crash_sheet_title">ক্র্যাশ সনাক্ত করা হয়েছে</string>
+    <string name="crash_sheet_report">রিপোর্ট</string>
+    <string name="crash_sheet_copy">কপি</string>
+    <string name="crash_sheet_dismiss">বাতিল</string>
+    <string name="crash_sheet_copied">ক্র্যাশ রিপোর্ট ক্লিপবোর্ডে কপি করা হয়েছে</string>
+    <string name="crash_sheet_open_failed">ব্রাউজার খোলা যায়নি। রিপোর্ট ক্লিপবোর্ডে আছে — এটি একটি নতুন GitHub ইস্যুতে পেস্ট করুন।</string>
+
 
 </resources>

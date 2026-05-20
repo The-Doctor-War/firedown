@@ -335,5 +335,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 ملفًا محفوظًا · 2.4 جيجابايت</string>
     <string name="home_card_style_preview_vault_subtitle">12 عنصرًا محفوظًا</string>
+    <string name="crash_sheet_title">تم رصد تعطل</string>
+    <string name="crash_sheet_report">إبلاغ</string>
+    <string name="crash_sheet_copy">نسخ</string>
+    <string name="crash_sheet_dismiss">تجاهل</string>
+    <string name="crash_sheet_copied">تم نسخ تقرير التعطل إلى الحافظة</string>
+    <string name="crash_sheet_open_failed">تعذر فتح المتصفح. التقرير في الحافظة — الصقه في مشكلة جديدة على GitHub.</string>
+
 
 </resources>

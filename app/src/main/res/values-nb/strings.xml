@@ -252,5 +252,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 filer lagret · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementer lagret</string>
+    <string name="crash_sheet_title">Krasj oppdaget</string>
+    <string name="crash_sheet_report">Rapporter</string>
+    <string name="crash_sheet_copy">Kopier</string>
+    <string name="crash_sheet_dismiss">Avvis</string>
+    <string name="crash_sheet_copied">Krasjrapport kopiert til utklippstavlen</string>
+    <string name="crash_sheet_open_failed">Kunne ikke åpne en nettleser. Krasjrapporten er på utklippstavlen — lim den inn i en ny GitHub-sak.</string>
+
 
 </resources>

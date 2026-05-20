@@ -282,5 +282,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 датотека сачувано · 2,4 ГБ</string>
     <string name="home_card_style_preview_vault_subtitle">12 ставки сачувано</string>
+    <string name="crash_sheet_title">Откривен пад</string>
+    <string name="crash_sheet_report">Пријави</string>
+    <string name="crash_sheet_copy">Копирај</string>
+    <string name="crash_sheet_dismiss">Одбаци</string>
+    <string name="crash_sheet_copied">Извештај о паду копиран у клипборд</string>
+    <string name="crash_sheet_open_failed">Прегледач није могао да се отвори. Извештај је у клипборду — налепите га у нови GitHub проблем.</string>
+
 
 </resources>

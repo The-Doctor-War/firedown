@@ -274,5 +274,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 failų išsaugota · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementų išsaugota</string>
+    <string name="crash_sheet_title">Aptiktas strigties</string>
+    <string name="crash_sheet_report">Pranešti</string>
+    <string name="crash_sheet_copy">Kopijuoti</string>
+    <string name="crash_sheet_dismiss">Atmesti</string>
+    <string name="crash_sheet_copied">Strigties pranešimas nukopijuotas į iškarpinę</string>
+    <string name="crash_sheet_open_failed">Nepavyko atidaryti naršyklės. Pranešimas yra iškarpinėje — įklijuokite jį į naują GitHub problemą.</string>
+
 
 </resources>

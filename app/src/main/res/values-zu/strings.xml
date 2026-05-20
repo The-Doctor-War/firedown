@@ -231,5 +231,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">Amafayela angu-150 alondoloziwe · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">Izinto ezingu-12 zilondoloziwe</string>
+    <string name="crash_sheet_title">Kutholakele ukubhajwa</string>
+    <string name="crash_sheet_report">Bika</string>
+    <string name="crash_sheet_copy">Kopisha</string>
+    <string name="crash_sheet_dismiss">Vala</string>
+    <string name="crash_sheet_copied">Umbiko wokubhajwa ukopishelwe ebhodini lokukopisha</string>
+    <string name="crash_sheet_open_failed">Akukwazanga ukuvulwa kwesiphequluli. Umbiko usebhodini lokukopisha — unamathisele endabeni entsha ye-GitHub.</string>
+
 
 </resources>

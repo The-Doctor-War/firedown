@@ -266,5 +266,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">ගොනු 150ක් සුරැකූ · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">අයිතම 12ක් සුරැකූ</string>
+    <string name="crash_sheet_title">බිඳවැටීමක් අනාවරණය විය</string>
+    <string name="crash_sheet_report">වාර්තා</string>
+    <string name="crash_sheet_copy">පිටපත් කරන්න</string>
+    <string name="crash_sheet_dismiss">ඉවත් කරන්න</string>
+    <string name="crash_sheet_copied">බිඳවැටීමේ වාර්තාව ක්ලිප්බෝඩයට පිටපත් කරන ලදී</string>
+    <string name="crash_sheet_open_failed">බ්‍රවුසරය විවෘත කළ නොහැකි විය. වාර්තාව ක්ලිප්බෝඩයේ ඇත — එය නව GitHub issue එකකට අලවන්න.</string>
+
 
 </resources>

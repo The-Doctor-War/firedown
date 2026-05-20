@@ -54,5 +54,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 फ़ाइलें सहेजी गईं · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 आइटम सहेजे गए</string>
+    <string name="crash_sheet_title">क्रैश का पता चला</string>
+    <string name="crash_sheet_report">रिपोर्ट</string>
+    <string name="crash_sheet_copy">कॉपी</string>
+    <string name="crash_sheet_dismiss">खारिज</string>
+    <string name="crash_sheet_copied">क्रैश रिपोर्ट क्लिपबोर्ड पर कॉपी की गई</string>
+    <string name="crash_sheet_open_failed">ब्राउज़र नहीं खोला जा सका। रिपोर्ट क्लिपबोर्ड पर है — इसे एक नए GitHub इश्यू में पेस्ट करें।</string>
+
 
 </resources>

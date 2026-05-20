@@ -261,5 +261,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">ဖိုင် ၁၅၀ သိမ်းပြီး · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">ပစ္စည်း ၁၂ ခု သိမ်းပြီး</string>
+    <string name="crash_sheet_title">ပျက်စီးမှု တွေ့ရှိ</string>
+    <string name="crash_sheet_report">တင်ပြ</string>
+    <string name="crash_sheet_copy">ကူးယူ</string>
+    <string name="crash_sheet_dismiss">ပိတ်</string>
+    <string name="crash_sheet_copied">ပျက်စီးမှု အစီရင်ခံစာ ကလစ်ဘုတ်သို့ ကူးယူပြီး</string>
+    <string name="crash_sheet_open_failed">ဘရောက်ဆာ ဖွင့်၍မရပါ။ အစီရင်ခံစာ ကလစ်ဘုတ်တွင်ရှိသည် — GitHub issue အသစ်တွင် ကူးထည့်ပါ။</string>
+
 
 </resources>

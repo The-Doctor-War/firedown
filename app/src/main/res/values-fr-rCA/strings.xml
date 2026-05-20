@@ -231,5 +231,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 fichiers enregistrés · 2,4 Go</string>
     <string name="home_card_style_preview_vault_subtitle">12 éléments enregistrés</string>
+    <string name="crash_sheet_title">Plantage détecté</string>
+    <string name="crash_sheet_report">Signaler</string>
+    <string name="crash_sheet_copy">Copier</string>
+    <string name="crash_sheet_dismiss">Ignorer</string>
+    <string name="crash_sheet_copied">Rapport de plantage copié dans le presse-papiers</string>
+    <string name="crash_sheet_open_failed">Impossible d\'ouvrir le navigateur. Le rapport est dans le presse-papiers — collez-le dans un nouveau ticket GitHub.</string>
+
 
 </resources>

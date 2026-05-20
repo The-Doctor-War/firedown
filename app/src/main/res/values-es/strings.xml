@@ -508,5 +508,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 archivos guardados · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementos guardados</string>
+    <string name="crash_sheet_title">Fallo detectado</string>
+    <string name="crash_sheet_report">Informar</string>
+    <string name="crash_sheet_copy">Copiar</string>
+    <string name="crash_sheet_dismiss">Descartar</string>
+    <string name="crash_sheet_copied">Informe de fallo copiado al portapapeles</string>
+    <string name="crash_sheet_open_failed">No se pudo abrir el navegador. El informe está en tu portapapeles — pégalo en una nueva incidencia de GitHub.</string>
+
 
 </resources>

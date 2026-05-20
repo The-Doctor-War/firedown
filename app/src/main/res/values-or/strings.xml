@@ -231,5 +231,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 ଫାଇଲ୍ ସଞ୍ଚୟ ହୋଇଛି · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 ଆଇଟମ୍ ସଞ୍ଚୟ ହୋଇଛି</string>
+    <string name="crash_sheet_title">କ୍ରାଶ୍ ଚିହ୍ନଟ ହୋଇଛି</string>
+    <string name="crash_sheet_report">ରିପୋର୍ଟ</string>
+    <string name="crash_sheet_copy">କପି</string>
+    <string name="crash_sheet_dismiss">ବାତିଲ୍</string>
+    <string name="crash_sheet_copied">କ୍ରାଶ୍ ରିପୋର୍ଟ କ୍ଲିପ୍ବୋର୍ଡକୁ କପି ହୋଇଛି</string>
+    <string name="crash_sheet_open_failed">ବ୍ରାଉଜର୍ ଖୋଲିପାରିଲା ନାହିଁ। ରିପୋର୍ଟ କ୍ଲିପ୍ବୋର୍ଡରେ ଅଛି — ଏହାକୁ ଏକ ନୂଆ GitHub ଇସ୍ୟୁରେ ପେଷ୍ଟ କରନ୍ତୁ।</string>
+
 
 </resources>

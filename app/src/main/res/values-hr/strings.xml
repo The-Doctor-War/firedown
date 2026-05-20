@@ -290,5 +290,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 datoteka spremljeno · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 stavki spremljeno</string>
+    <string name="crash_sheet_title">Otkriveno rušenje</string>
+    <string name="crash_sheet_report">Prijavi</string>
+    <string name="crash_sheet_copy">Kopiraj</string>
+    <string name="crash_sheet_dismiss">Odbaci</string>
+    <string name="crash_sheet_copied">Izvještaj o rušenju kopiran u međuspremnik</string>
+    <string name="crash_sheet_open_failed">Nije moguće otvoriti preglednik. Izvještaj je u međuspremniku — zalijepite ga u novi GitHub issue.</string>
+
 
 </resources>

@@ -308,5 +308,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 קבצים נשמרו · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 פריטים נשמרו</string>
+    <string name="crash_sheet_title">התגלתה קריסה</string>
+    <string name="crash_sheet_report">דווח</string>
+    <string name="crash_sheet_copy">העתק</string>
+    <string name="crash_sheet_dismiss">סגור</string>
+    <string name="crash_sheet_copied">דוח הקריסה הועתק ללוח</string>
+    <string name="crash_sheet_open_failed">לא ניתן לפתוח דפדפן. הדוח נמצא בלוח — הדבק אותו ב-issue חדש בגיטהאב.</string>
+
 
 </resources>

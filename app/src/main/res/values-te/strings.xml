@@ -268,5 +268,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 ఫైళ్లు సేవ్ చేయబడ్డాయి · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 అంశాలు సేవ్ చేయబడ్డాయి</string>
+    <string name="crash_sheet_title">క్రాష్ గుర్తించబడింది</string>
+    <string name="crash_sheet_report">నివేదిక</string>
+    <string name="crash_sheet_copy">కాపీ</string>
+    <string name="crash_sheet_dismiss">తీసివేయండి</string>
+    <string name="crash_sheet_copied">క్రాష్ నివేదిక క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది</string>
+    <string name="crash_sheet_open_failed">బ్రౌజర్‌ను తెరవలేకపోయింది. నివేదిక క్లిప్‌బోర్డ్‌లో ఉంది — దానిని కొత్త GitHub ఇష్యూలో పేస్ట్ చేయండి.</string>
+
 
 </resources>

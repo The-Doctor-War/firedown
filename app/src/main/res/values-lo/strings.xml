@@ -267,5 +267,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">ບັນທຶກ 150 ໄຟລ໌ · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">ບັນທຶກ 12 ລາຍການ</string>
+    <string name="crash_sheet_title">ກວດພົບການລົ້ມ</string>
+    <string name="crash_sheet_report">ລາຍງານ</string>
+    <string name="crash_sheet_copy">ສຳເນົາ</string>
+    <string name="crash_sheet_dismiss">ປິດ</string>
+    <string name="crash_sheet_copied">ສຳເນົາລາຍງານການລົ້ມໄປຍັງຄລິບບອດແລ້ວ</string>
+    <string name="crash_sheet_open_failed">ບໍ່ສາມາດເປີດເບຣົາເຊີໄດ້. ລາຍງານຢູ່ໃນຄລິບບອດ — ວາງລົງໃນ issue GitHub ໃໝ່.</string>
+
 
 </resources>

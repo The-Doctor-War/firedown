@@ -234,5 +234,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">Faili 150 zimehifadhiwa · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">Vipengee 12 vimehifadhiwa</string>
+    <string name="crash_sheet_title">Hitilafu imegunduliwa</string>
+    <string name="crash_sheet_report">Ripoti</string>
+    <string name="crash_sheet_copy">Nakili</string>
+    <string name="crash_sheet_dismiss">Funga</string>
+    <string name="crash_sheet_copied">Ripoti ya hitilafu imenakiliwa kwenye ubao wa kunakili</string>
+    <string name="crash_sheet_open_failed">Imeshindwa kufungua kivinjari. Ripoti iko kwenye ubao wa kunakili — bandika kwenye issue mpya ya GitHub.</string>
+
 
 </resources>

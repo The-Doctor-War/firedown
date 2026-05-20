@@ -269,5 +269,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 file ang nai-save · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 item ang nai-save</string>
+    <string name="crash_sheet_title">Natukoy ang pag-crash</string>
+    <string name="crash_sheet_report">Iulat</string>
+    <string name="crash_sheet_copy">Kopyahin</string>
+    <string name="crash_sheet_dismiss">Isara</string>
+    <string name="crash_sheet_copied">Nakopya ang ulat ng pag-crash sa clipboard</string>
+    <string name="crash_sheet_open_failed">Hindi mabuksan ang browser. Nasa clipboard ang ulat — i-paste ito sa bagong GitHub issue.</string>
+
 
 </resources>

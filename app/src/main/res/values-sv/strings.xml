@@ -255,5 +255,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 filer sparade · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 objekt sparade</string>
+    <string name="crash_sheet_title">Krasch upptäckt</string>
+    <string name="crash_sheet_report">Rapportera</string>
+    <string name="crash_sheet_copy">Kopiera</string>
+    <string name="crash_sheet_dismiss">Avvisa</string>
+    <string name="crash_sheet_copied">Kraschrapport kopierad till urklipp</string>
+    <string name="crash_sheet_open_failed">Det gick inte att öppna webbläsaren. Kraschrapporten finns i ditt urklipp — klistra in den i ett nytt GitHub-ärende.</string>
+
 
 </resources>

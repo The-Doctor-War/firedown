@@ -352,5 +352,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">파일 150개 저장됨 · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">항목 12개 저장됨</string>
+    <string name="crash_sheet_title">충돌이 감지됨</string>
+    <string name="crash_sheet_report">신고</string>
+    <string name="crash_sheet_copy">복사</string>
+    <string name="crash_sheet_dismiss">닫기</string>
+    <string name="crash_sheet_copied">충돌 보고서가 클립보드에 복사됨</string>
+    <string name="crash_sheet_open_failed">브라우저를 열 수 없습니다. 보고서가 클립보드에 있습니다 — 새로운 GitHub 이슈에 붙여넣어 주세요.</string>
+
 
 </resources>

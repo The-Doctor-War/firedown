@@ -282,5 +282,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 faili salvestatud · 2,4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 elementi salvestatud</string>
+    <string name="crash_sheet_title">Tuvastatud krahh</string>
+    <string name="crash_sheet_report">Teata</string>
+    <string name="crash_sheet_copy">Kopeeri</string>
+    <string name="crash_sheet_dismiss">Loobu</string>
+    <string name="crash_sheet_copied">Krahhi aruanne kopeeritud lõikelauale</string>
+    <string name="crash_sheet_open_failed">Brauserit ei õnnestunud avada. Aruanne on lõikelaual — kleebi see uude GitHub probleemi.</string>
+
 
 </resources>

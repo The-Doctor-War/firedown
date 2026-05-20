@@ -67,5 +67,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">Պահպանված է 150 ֆայլ · 2,4 ԳԲ</string>
     <string name="home_card_style_preview_vault_subtitle">Պահպանված է 12 տարր</string>
+    <string name="crash_sheet_title">Հայտնաբերվեց խափանում</string>
+    <string name="crash_sheet_report">Հաղորդել</string>
+    <string name="crash_sheet_copy">Պատճենել</string>
+    <string name="crash_sheet_dismiss">Փակել</string>
+    <string name="crash_sheet_copied">Խափանման հաշվետվությունը պատճենվեց փոխանակման բուֆեր</string>
+    <string name="crash_sheet_open_failed">Չհաջողվեց բացել զննարկիչը։ Հաշվետվությունը փոխանակման բուֆերում է — տեղադրեք այն նոր GitHub հարցում։</string>
+
 
 </resources>

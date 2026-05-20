@@ -45,5 +45,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 ફાઇલો સાચવી · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 આઇટમ સાચવ્યા</string>
+    <string name="crash_sheet_title">ક્રેશ શોધાયું</string>
+    <string name="crash_sheet_report">રિપોર્ટ</string>
+    <string name="crash_sheet_copy">કૉપિ</string>
+    <string name="crash_sheet_dismiss">બરતરફ</string>
+    <string name="crash_sheet_copied">ક્રેશ રિપોર્ટ ક્લિપબોર્ડ પર કૉપિ થયો</string>
+    <string name="crash_sheet_open_failed">બ્રાઉઝર ખોલી શકાયું નહીં. રિપોર્ટ ક્લિપબોર્ડ પર છે — તેને નવા GitHub ઈશ્યૂમાં પેસ્ટ કરો.</string>
+
 
 </resources>

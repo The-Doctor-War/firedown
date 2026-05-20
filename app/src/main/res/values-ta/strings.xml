@@ -256,5 +256,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">150 கோப்புகள் சேமிக்கப்பட்டன · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 உருப்படிகள் சேமிக்கப்பட்டன</string>
+    <string name="crash_sheet_title">செயலிழப்பு கண்டறியப்பட்டது</string>
+    <string name="crash_sheet_report">புகாரளி</string>
+    <string name="crash_sheet_copy">நகலெடு</string>
+    <string name="crash_sheet_dismiss">நிராகரி</string>
+    <string name="crash_sheet_copied">செயலிழப்பு அறிக்கை கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது</string>
+    <string name="crash_sheet_open_failed">உலாவியைத் திறக்க முடியவில்லை. அறிக்கை கிளிப்போர்டில் உள்ளது — அதை புதிய GitHub பிரச்சினையில் ஒட்டவும்.</string>
+
 
 </resources>

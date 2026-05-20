@@ -275,5 +275,12 @@
     <string name="home_card_style_coral">Coral</string>
     <string name="home_card_style_preview_downloads_subtitle">შენახულია 150 ფაილი · 2,4 გბ</string>
     <string name="home_card_style_preview_vault_subtitle">შენახულია 12 ელემენტი</string>
+    <string name="crash_sheet_title">გამოვლენილია გათიშვა</string>
+    <string name="crash_sheet_report">მოხსენება</string>
+    <string name="crash_sheet_copy">ასლი</string>
+    <string name="crash_sheet_dismiss">დახურვა</string>
+    <string name="crash_sheet_copied">გათიშვის ანგარიში დაკოპირდა გაცვლის ბუფერში</string>
+    <string name="crash_sheet_open_failed">ბრაუზერი ვერ გაიხსნა. ანგარიში გაცვლის ბუფერშია — ჩასვით ის ახალ GitHub issue-ში.</string>
+
 
 </resources>

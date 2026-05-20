@@ -284,4 +284,22 @@
     <string name="incognito_home_warning">Duyệt web riêng tư không che giấu hoạt động của bạn khỏi mạng, chủ lao động hoặc các trang bạn truy cập.</string>
     <string name="downloads_quick_access_view_all">Xem tất cả tệp tải xuống</string>
     <string name="downloads_quick_access_empty">Các tệp tải xuống gần đây sẽ xuất hiện ở đây</string>
+    <string name="settings_theme_app_category">Chủ đề ứng dụng</string>
+    <string name="settings_theme_home_category">Màn hình chính</string>
+    <string name="settings_home_cards">Thẻ trang chính</string>
+    <string name="settings_home_cards_summary">Chọn kiểu cho thẻ trang chính</string>
+    <string name="settings_home_cards_header">Một chủ đề thay đổi tất cả các thẻ cùng lúc — chọn diện mạo bạn thích.</string>
+    <string name="home_card_style_neutral">Trung tính</string>
+    <string name="home_card_style_blush">Blush</string>
+    <string name="home_card_style_bloom">Bloom</string>
+    <string name="home_card_style_coral">Coral</string>
+    <string name="home_card_style_preview_downloads_subtitle">Đã lưu 150 tệp · 2,4 GB</string>
+    <string name="home_card_style_preview_vault_subtitle">Đã lưu 12 mục</string>
+    <string name="crash_sheet_title">Phát hiện sự cố</string>
+    <string name="crash_sheet_report">Báo cáo</string>
+    <string name="crash_sheet_copy">Sao chép</string>
+    <string name="crash_sheet_dismiss">Đóng</string>
+    <string name="crash_sheet_copied">Đã sao chép báo cáo sự cố vào bộ nhớ tạm</string>
+    <string name="crash_sheet_open_failed">Không thể mở trình duyệt. Báo cáo đã ở trong bộ nhớ tạm — dán vào một issue mới trên GitHub.</string>
+
 </resources>

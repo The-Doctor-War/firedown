@@ -354,6 +354,11 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
         void setTextOrHide(@Nullable TextView tv, @Nullable String text) {
             if (tv == null) return;
+            if (TextUtils.isEmpty(text)) {
+                tv.setVisibility(View.GONE);
+                return;
+            }
+            tv.setVisibility(View.VISIBLE);
             tv.setText(text);
         }
 

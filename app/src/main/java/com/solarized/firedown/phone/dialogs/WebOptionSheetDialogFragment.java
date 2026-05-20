@@ -127,7 +127,7 @@ public class WebOptionSheetDialogFragment extends BaseBottomSheetDialogFragment 
             NavOptions navOptions = new NavOptions.Builder()
                     .setPopUpTo(R.id.home, false)
                     .build();
-            mNavController.navigate(R.id.browser, null, navOptions);
+            NavigationUtils.navigateSafe(mNavController, R.id.browser, null, navOptions);
         } else if (id == R.drawable.ic_baseline_delete_24) {
             mWebBookmarkViewModel.delete(mId);
             mWebHistoryViewModel.delete(mId);

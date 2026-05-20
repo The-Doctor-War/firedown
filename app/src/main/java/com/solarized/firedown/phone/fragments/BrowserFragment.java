@@ -710,6 +710,13 @@ public class BrowserFragment extends BaseBrowserFragment
             } else if (Lifecycle.Event.ON_START.equals(event)) {
                 Log.d(TAG, "onStart");
                 mSwipeRefreshLayout.setEnabled(true);
+                // Crash-report sheet — both CrashHandler and the
+                // GeckoCrashHandlerService write to CrashStorage; this
+                // is the single surface that shows whichever ran last.
+                // sShownThisLaunch guards against re-pop on subsequent
+                // ON_START events in the same process.
+                com.solarized.firedown.crash.CrashReportSheet.showIfPending(
+                        requireContext(), getParentFragmentManager());
 
             } else if (Lifecycle.Event.ON_RESUME.equals(event)) {
                 Log.d(TAG, "onResume");

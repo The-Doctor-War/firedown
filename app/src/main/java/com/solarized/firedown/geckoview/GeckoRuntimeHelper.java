@@ -13,6 +13,7 @@ import androidx.annotation.UiThread;
 
 import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.Preferences;
+import com.solarized.firedown.crash.GeckoCrashHandlerService;
 import com.solarized.firedown.data.di.Qualifiers;
 import com.solarized.firedown.data.entity.GeckoInspectEntity;
 import com.solarized.firedown.data.repository.BrowserDownloadRepository;
@@ -112,7 +113,11 @@ public class GeckoRuntimeHelper {
         }
 
         runtimeSettingsBuilder
-                .crashHandler(null)              // no custom handler
+                // GeckoCrashHandlerService runs in :crash and writes
+                // captured Gecko crashes to CrashStorage. The Java
+                // uncaught-exception handler installed in App.onCreate
+                // covers the main process; this covers Gecko children.
+                .crashHandler(GeckoCrashHandlerService.class)
                 .remoteDebuggingEnabled(BuildConfig.DEBUG)
                 .consoleOutput(BuildConfig.DEBUG)
                 .debugLogging(BuildConfig.DEBUG)

@@ -23,6 +23,7 @@ import androidx.hilt.work.HiltWorkerFactory;
 import androidx.preference.PreferenceManager;
 import androidx.work.Configuration;
 
+import com.solarized.firedown.crash.CrashHandler;
 import com.solarized.firedown.data.di.Qualifiers;
 import com.solarized.firedown.data.repository.WebHistoryDataRepository;
 import com.solarized.firedown.phone.BrowserActivity;
@@ -68,6 +69,13 @@ public class App extends Application implements Configuration.Provider{
     @Override
     public void onCreate() {
         Log.d(TAG, "App onCreate : " + getCurrentProcessName());
+        // Install the uncaught-exception handler ASAP — before super.onCreate
+        // and the isMainProcess gate — so Java crashes in any process
+        // (main app, Gecko child, the :crash service itself) get
+        // persisted. The handler stores to filesDir/crashes/ which is
+        // shared across all processes of the app.
+        mAppContext = getApplicationContext();
+        CrashHandler.install(mAppContext);
         if (BuildConfig.DEBUG) {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()
@@ -83,8 +91,6 @@ public class App extends Application implements Configuration.Provider{
                     .build());
         }
         super.onCreate();
-
-        mAppContext = getApplicationContext();
 
         if (!isMainProcess()) {
             // If this is not the main process then do not continue with the initialization here. Everything that

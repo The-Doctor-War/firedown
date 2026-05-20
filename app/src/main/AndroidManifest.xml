@@ -221,6 +221,20 @@
             tools:replace="android:enabled,android:exported"
             tools:node="merge" />
 
+        <!--
+            GeckoView spawns this service in its own process when a
+            Gecko child dies — the main app process may be gone by
+            then, so :crash gives us a guaranteed-alive landing zone
+            to write the minidump path / extras to disk. Registered
+            with GeckoRuntimeSettings.crashHandler() in
+            GeckoRuntimeHelper.
+        -->
+        <service
+            android:name="com.solarized.firedown.crash.GeckoCrashHandlerService"
+            android:enabled="true"
+            android:exported="false"
+            android:process=":crash" />
+
     </application>
 
 </manifest>

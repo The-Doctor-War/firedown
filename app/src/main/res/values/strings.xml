@@ -338,6 +338,12 @@
     <string name="settings_clear_browsing_dialog">Are you sure that you want to clear all the cookies and data for the site &lt;b&gt;%s&lt;/b&gt;? </string>
     <string name="settings_clear_browsing_error">Failed to clear data for %s</string>
     <string name="settings_clear_browsing_success">Data cleared for %s</string>
+    <string name="crash_sheet_title">Crash detected</string>
+    <string name="crash_sheet_report">Report on GitHub</string>
+    <string name="crash_sheet_copy">Copy</string>
+    <string name="crash_sheet_dismiss">Dismiss</string>
+    <string name="crash_sheet_copied">Crash report copied to clipboard</string>
+    <string name="crash_sheet_open_failed">Couldn\'t open a browser. Crash report is on your clipboard — paste it into a new GitHub issue.</string>
     <string name="wasm_snackbar_message">%s needs WebAssembly to work</string>
     <string name="wasm_snackbar_action_enable">Enable</string>
     <string name="settings_wasm_allowlist_title">Allowed sites</string>

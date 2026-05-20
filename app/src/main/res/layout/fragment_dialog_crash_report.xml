@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Crash-report sheet. Shown on next launch after either a Java
+  uncaught exception (CrashHandler) or a Gecko child-process crash
+  (GeckoCrashHandlerService) wrote a report to CrashStorage.
+
+  Single UI for both crash sources — fields are bound from the
+  CrashReport regardless of which handler captured it. The action
+  buttons open a pre-filled GitHub new-issue URL or stash the report
+  on the clipboard.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+
+    <include layout="@layout/dialog_drag_handle" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="56dp"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            app:srcCompat="@drawable/ic_baseline_check_circle_24"
+            app:tint="?attr/colorPrimary" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/crash_sheet_title"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/crash_subtitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="Last session · v3.0.4 · gecko/CONTENT" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <!-- Stack-trace preview in a monospace block. Capped height so
+         the sheet stays a sheet even on long traces; the inner
+         ScrollView lets the user skim before reporting. -->
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="12dp"
+        android:background="?attr/colorSurfaceContainerHigh"
+        android:maxHeight="240dp"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/crash_trace"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:fontFamily="monospace"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurface"
+            android:textIsSelectable="true"
+            android:textSize="11sp"
+            tools:text="java.lang.NullPointerException&#10;\tat com.solarized.firedown.…" />
+
+    </androidx.core.widget.NestedScrollView>
+
+
+    <!-- Action row. Material 3 layout: primary (filled) on the right,
+         secondary (text) on the left, dismiss (text) further left. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="end"
+        android:orientation="horizontal"
+        android:paddingHorizontal="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="12dp">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crash_dismiss"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/crash_sheet_dismiss" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crash_copy"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/crash_sheet_copy" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/crash_report"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@string/crash_sheet_report" />
+
+    </LinearLayout>
+
+
+</LinearLayout>

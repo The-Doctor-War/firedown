@@ -97,6 +97,10 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private TextView mHomeMediaTitle;
     private TextView mHomeMediaSubtitle;
     private androidx.appcompat.widget.AppCompatImageButton mHomeMediaToggle;
+    private MaterialCardView mTrackersCard;
+    private TextView mTrackersSubtitle;
+    @javax.inject.Inject
+    com.solarized.firedown.geckoview.GeckoUblockHelper mGeckoUblockHelper;
     @Nullable private java.util.List<DownloadEntity> mLastActiveList;
     @Nullable private Integer mLastFinishedCount;
     private long mLastFinishedSize = 0L;
@@ -197,6 +201,18 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mHomeVaultSubtitle = v.findViewById(R.id.home_vault_subtitle);
         vaultCard.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, VaultActivity.class)));
+
+        // Trackers-blocked shelf card. Subtitle reflects uBlock's
+        // cumulative requestStats.blockedCount, relayed live via
+        // GeckoUblockHelper. Tap routes to Settings — Privacy
+        // section is the natural follow-up surface for a user who's
+        // just looked at their blocked-count.
+        mTrackersCard = v.findViewById(R.id.home_trackers_card);
+        mTrackersSubtitle = v.findViewById(R.id.home_trackers_subtitle);
+        if (mTrackersCard != null) {
+            mTrackersCard.setOnClickListener(view ->
+                    mStartForResult.launch(new Intent(mActivity, SettingsActivity.class)));
+        }
 
         applyHomeCardStyle(v);
 
@@ -307,6 +323,19 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             } else {
                 mHomeVaultSubtitle.setVisibility(View.GONE);
             }
+        });
+
+        // Trackers-blocked subtitle. firedown.js pushes the cumulative
+        // value periodically; format with locale-aware grouping
+        // separators so 12345 reads as '12,345' or '12.345' depending
+        // on the user's locale.
+        mGeckoUblockHelper.getCumulativeBlockedLive().observe(getViewLifecycleOwner(), blocked -> {
+            if (mTrackersSubtitle == null) return;
+            long n = blocked == null ? 0L : blocked;
+            String formatted = java.text.NumberFormat
+                    .getInstance(java.util.Locale.getDefault())
+                    .format(n);
+            mTrackersSubtitle.setText(getString(R.string.home_trackers_subtitle, formatted));
         });
 
         // Background-media strip — visible iff GeckoMediaController has a
@@ -477,6 +506,8 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mHomeMediaTitle = null;
         mHomeMediaSubtitle = null;
         mHomeMediaToggle = null;
+        mTrackersCard = null;
+        mTrackersSubtitle = null;
     }
 
     /**

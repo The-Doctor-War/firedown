@@ -26,6 +26,14 @@ public class GeckoUblockHelper {
     // legacy callers and routes to the regular stream.
     private final MutableLiveData<String> mAdsBlockedLive = new MutableLiveData<>("0");
     private final MutableLiveData<String> mAdsBlockedLiveIncognito = new MutableLiveData<>("0");
+    /** Cumulative blocked requests since uBlock was installed.
+     *  Source of truth lives in {@code µb.requestStats.blockedCount}
+     *  inside the extension — firedown.js pushes the value over the
+     *  native message bus on load + every firewall update + a coarse
+     *  60s interval. Reads here are just a relay. Incognito sessions
+     *  don't contribute (uBlock excludes them from its persisted
+     *  stats). */
+    private final MutableLiveData<Long> mCumulativeBlockedLive = new MutableLiveData<>(0L);
 
     // Firewall activation is a global user preference — not per-mode.
     private final MutableLiveData<Boolean> mFirewallActiveLive = new MutableLiveData<>();
@@ -71,6 +79,26 @@ public class GeckoUblockHelper {
     private final MutableLiveData<Boolean> mCookieNoticesBlockedLive = new MutableLiveData<>(false);
 
     // --- State Management ---
+
+    /**
+     * @return LiveData carrying the cumulative blocked-request count
+     * since install. Updates whenever firedown.js relays a fresh
+     * value from {@code µb.requestStats.blockedCount}.
+     */
+    public LiveData<Long> getCumulativeBlockedLive() {
+        return mCumulativeBlockedLive;
+    }
+
+    /**
+     * Called from {@code handleUblockMessage} when the extension pushes
+     * a fresh cumulative-blocked count. Just relays — uBlock owns the
+     * source of truth, including legitimate resets when the user
+     * clears the request-stats counter.
+     */
+    public void onCumulativeBlocked(long blocked) {
+        if (blocked < 0) return;
+        mCumulativeBlockedLive.postValue(blocked);
+    }
 
     /**
      * Session-aware ads count. Routes to the correct per-mode stream.

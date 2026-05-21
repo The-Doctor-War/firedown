@@ -217,6 +217,32 @@ import {
                 cookies: cookieNoticesBlocked,
             }
         });
+        // Piggyback the cumulative-blocked counter on this trigger so
+        // the Home 'trackers blocked' card stays in sync without an
+        // extra round-trip. uBlock owns the storage; we just relay.
+        pushCumulativeStats();
     }
+
+    /**************************************************************************
+     * Pushes µb.requestStats.blockedCount (cumulative since install) to the
+     * native side. Read by GeckoUblockHelper to drive the Home 'trackers
+     * blocked' card. Sent on extension load + every firewall update + on a
+     * 60-second interval so the card refreshes while the user browses without
+     * polling uBlock internals from Java.
+     *************************************************************************/
+    function pushCumulativeStats() {
+        try {
+            const blocked = µb.requestStats && µb.requestStats.blockedCount;
+            if (typeof blocked !== 'number') { return; }
+            browser.runtime.sendNativeMessage("ublock", {
+                cumulativeBlocked: blocked
+            });
+        } catch (_) { /* extension still loading, retry on next tick */ }
+    }
+
+    // Initial push as soon as the extension is ready, then a coarse
+    // 60-second refresh while the runtime is alive.
+    µb.isReadyPromise.then(pushCumulativeStats);
+    setInterval(pushCumulativeStats, 60_000);
 
 })();

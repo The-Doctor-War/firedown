@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Trackers + ads info sheet. Spawned from the Home 'Trackers and
+  ads blocked' card. Three jobs:
+
+    - Make the privacy work the app does visible. The card itself
+      is a small subtitle line; this sheet shows the number big
+      and explains what it represents.
+    - Tell the user *what* is being blocked — trackers, ads,
+      cookie notices, etc. — so the metric is meaningful instead
+      of a vanity counter.
+    - Give a single clear CTA to the surface where the user can
+      adjust protection (Settings → Enhanced Tracking Protection).
+
+  Layout is a ScrollView so it doesn't truncate on small displays
+  in landscape; outer LinearLayout uses center_horizontal gravity
+  so the illustration + headline stack lines up nicely.
+-->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="20dp">
+
+        <!-- Illustration. ill_presents fits the 'look what we
+             saved you' framing without being pompous about it. -->
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginBottom="8dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ill_presents" />
+
+        <!-- Big number: '12,345' or 'Protection active' placeholder
+             when zero. Adapter swaps the binding at runtime. -->
+        <TextView
+            android:id="@+id/trackers_info_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceDisplaySmall"
+            android:textColor="?attr/colorPrimary"
+            tools:text="12,345" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:text="@string/trackers_info_count_label"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnSurface" />
+
+        <!-- Estimated bytes saved — only visible when count > 0,
+             otherwise zero * 50KB is meaningless. -->
+        <TextView
+            android:id="@+id/trackers_info_saved"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone"
+            tools:text="~580 MB of bandwidth saved"
+            tools:visibility="visible" />
+
+        <!-- Bullet list explaining what 'blocked' actually covers,
+             so the number reads as meaningful rather than a vanity
+             counter. Plain text rather than a chip row because
+             translation lengths blow up chip widths fast. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:lineSpacingExtra="4dp"
+            android:text="@string/trackers_info_breakdown"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/trackers_info_action"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/trackers_info_action" />
+
+    </LinearLayout>
+
+</ScrollView>

@@ -211,14 +211,15 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
         // Trackers-blocked shelf card. Subtitle reflects uBlock's
         // cumulative requestStats.blockedCount, relayed live via
-        // GeckoUblockHelper. Tap routes to Settings — Privacy
-        // section is the natural follow-up surface for a user who's
-        // just looked at their blocked-count.
+        // GeckoUblockHelper. Tap spawns a contextual info sheet —
+        // big number, bytes-saved estimate, breakdown of what's
+        // being blocked, and a CTA into Privacy settings.
         mTrackersCard = v.findViewById(R.id.home_trackers_card);
         mTrackersSubtitle = v.findViewById(R.id.home_trackers_subtitle);
         if (mTrackersCard != null) {
             mTrackersCard.setOnClickListener(view ->
-                    mStartForResult.launch(new Intent(mActivity, SettingsActivity.class)));
+                    com.solarized.firedown.phone.dialogs.TrackersInfoSheet.show(
+                            getChildFragmentManager()));
         }
 
         applyHomeCardStyle(v);

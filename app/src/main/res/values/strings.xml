@@ -571,6 +571,15 @@
          flags it as an estimate, not measured. -->
     <string name="home_trackers_title">Trackers and ads blocked</string>
     <string name="home_trackers_subtitle">%1$s · ~%2$s saved</string>
+    <!-- Trackers info bottom sheet — spawned from the Home Trackers
+         card. Shows the cumulative count big, an estimated bytes-
+         saved line, a short breakdown of what 'blocked' covers, and
+         a CTA into Privacy settings.
+         trackers_info_saved %1$s is the formatted bytes string. -->
+    <string name="trackers_info_count_label">trackers and ads blocked</string>
+    <string name="trackers_info_saved">~%1$s of bandwidth saved</string>
+    <string name="trackers_info_breakdown">Firedown blocks third-party trackers, advertising network requests, fingerprinting attempts, and the scripts behind cookie consent banners — every request that gets cancelled here is one Gecko never has to download, parse, or run.</string>
+    <string name="trackers_info_action">Manage protection</string>
     <!-- Subtitle placeholder for the initial state — uBlock hasn't
          pushed its cumulative count yet, or the count is genuinely
          zero (fresh install, no browsing). Avoids the cosmetic

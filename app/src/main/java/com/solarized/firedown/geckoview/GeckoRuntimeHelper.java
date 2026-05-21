@@ -459,9 +459,6 @@ public class GeckoRuntimeHelper {
                 if (firewall != null) {
                     mGeckoUblockHelper.onFirewallChanged(
                             firewall.optBoolean("activated"),
-                            firewall.optBoolean("noJavascript"),
-                            firewall.optBoolean("noMedia"),
-                            firewall.optBoolean("noFonts"),
                             // Wired in firedown.js' updateState() → firewall.cookies.
                             // Defaults to false if the extension hasn't reported yet,
                             // matching the "disabled by default" install behaviour.

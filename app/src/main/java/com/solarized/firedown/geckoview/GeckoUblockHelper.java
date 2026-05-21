@@ -49,12 +49,6 @@ public class GeckoUblockHelper {
     // Firewall activation is a global user preference — not per-mode.
     private final MutableLiveData<Boolean> mFirewallActiveLive = new MutableLiveData<>();
 
-    // Internal state variables — written from extension callbacks (potentially
-    // background) and read from UI getters; volatile guarantees visibility.
-    private volatile boolean mJavascriptDisabled;
-    private volatile boolean mFontsDisabled;
-    private volatile boolean mMediaDisabled;
-
     private final SharedPreferences mPrefs;
 
     /** Persists the last known cumulative-blocked count so the Home
@@ -191,48 +185,15 @@ public class GeckoUblockHelper {
     /**
      * Called when the uBlock firewall settings change.
      */
-    public void onFirewallChanged(boolean activated, boolean javascriptDisabled,
-                                  boolean mediaDisabled, boolean fontsDisabled,
-                                  boolean cookieNoticesBlocked) {
-
+    public void onFirewallChanged(boolean activated, boolean cookieNoticesBlocked) {
         Log.d(TAG, "onFirewallChanged: " + activated);
         mFirewallActiveLive.postValue(activated);
-        this.mJavascriptDisabled = javascriptDisabled;
-        this.mMediaDisabled = mediaDisabled;
-        this.mFontsDisabled = fontsDisabled;
         mCookieNoticesBlockedLive.postValue(cookieNoticesBlocked);
     }
-
-    // --- Standard Getters & Setters ---
-
 
     public boolean isActivated() {
         Boolean active = mFirewallActiveLive.getValue();
         return active != null && active;
-    }
-
-    public boolean isJavascriptDisabled() {
-        return mJavascriptDisabled;
-    }
-
-    public void setJavascriptDisabled(boolean javascriptDisabled) {
-        this.mJavascriptDisabled = javascriptDisabled;
-    }
-
-    public boolean isFontsDisabled() {
-        return mFontsDisabled;
-    }
-
-    public void setFontsDisabled(boolean fontsDisabled) {
-        this.mFontsDisabled = fontsDisabled;
-    }
-
-    public boolean isMediaDisabled() {
-        return mMediaDisabled;
-    }
-
-    public void setMediaDisabled(boolean mediaDisabled) {
-        this.mMediaDisabled = mediaDisabled;
     }
 
     /**
@@ -243,9 +204,6 @@ public class GeckoUblockHelper {
         mAdsBlockedLive.postValue("0");
         mAdsBlockedLiveIncognito.postValue("0");
         mFirewallActiveLive.postValue(false);
-        mJavascriptDisabled = false;
-        mFontsDisabled = false;
-        mMediaDisabled = false;
         mCookieNoticesBlockedLive.postValue(false);
     }
 }

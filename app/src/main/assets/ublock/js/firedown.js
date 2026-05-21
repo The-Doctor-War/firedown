@@ -1,18 +1,10 @@
 import µb from './background.js';
 
-import {
-    domainFromHostname,
-    hostnameFromURI,
-    originFromURI,
-} from './uri-utils.js';
+import { hostnameFromURI } from './uri-utils.js';
 
 import {
-    permanentFirewall,
     permanentSwitches,
-    permanentURLFiltering,
-    sessionFirewall,
     sessionSwitches,
-    sessionURLFiltering,
 } from './filtering-engines.js';
 
 /******************************************************************************/
@@ -209,21 +201,13 @@ import {
     async function updateState() {
         const tab = await vAPI.tabs.getCurrent();
         if (tab instanceof Object === false) { return; }
-        const normalURL = µb.normalizeTabURL(tab.id, tab.url);
         const currentState = µb.getNetFilteringSwitch(tab.url);
-        const hn = hostnameFromURI(normalURL);
-        const curProfileBits = µb.blockingModeFromHostname(hn);
-        const noLargeMedia = sessionSwitches.evaluateZ('no-large-media', hn);
-        const noFonts = sessionSwitches.evaluateZ('no-remote-fonts', hn);
         const cookieNoticesBlocked = COOKIE_NOTICE_LISTS.some(
             k => µb.selectedFilterLists.includes(k)
         );
         browser.runtime.sendNativeMessage("ublock", {
             firewall: {
                 activated: currentState,
-                profile: curProfileBits,
-                media: noLargeMedia,
-                fonts: noFonts,
                 cookies: cookieNoticesBlocked,
             }
         });

@@ -556,6 +556,13 @@
          Folder' becomes 'Carpeta segura' in es, 'Sicherer Ordner' in
          de, etc. -->
     <string name="home_vault_button">Safe Folder</string>
+    <!-- Subtitle shown on the Home Safe Folder card when the vault
+         is empty. Populated state uses the home_vault_item_count
+         plural ('12 items saved') instead. Keeps the card on two
+         lines so its height matches the Downloads and Trackers
+         shelves, and gives a first-time user a one-line explainer
+         for what the card stores. -->
+    <string name="home_vault_empty_subtitle">Private and encrypted</string>
     <!-- Home page 'Trackers and ads blocked' card. Subtitle reads
          '12,345 · ~580 MB saved'. %1$s is the formatted count (via
          NumberFormat with locale grouping), %2$s is the estimated

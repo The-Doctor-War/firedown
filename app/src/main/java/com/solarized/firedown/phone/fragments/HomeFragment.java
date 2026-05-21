@@ -316,19 +316,20 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             bindDownloadsSubtitle();
         });
 
-        // Vault count drives the empty-hero vault button's count badge.
-        // Button itself is always visible while the empty hero is
-        // showing — discoverability for users who haven't yet used
-        // vault — but the badge only appears when count > 0.
+        // Vault subtitle. Populated state shows 'N items saved'; empty
+        // state shows the 'Private and encrypted' explainer so the
+        // card has a stable two-line layout matching the Downloads
+        // and Trackers shelves, and a first-time user sees a
+        // one-line description of what the card even does.
         mRecentDownloadsViewModel.getVaultCount().observe(getViewLifecycleOwner(), count -> {
             if (mHomeVaultSubtitle == null) return;
             int n = count == null ? 0 : count;
+            mHomeVaultSubtitle.setVisibility(View.VISIBLE);
             if (n > 0) {
-                mHomeVaultSubtitle.setVisibility(View.VISIBLE);
                 mHomeVaultSubtitle.setText(getResources().getQuantityString(
                         R.plurals.home_vault_item_count, n, n));
             } else {
-                mHomeVaultSubtitle.setVisibility(View.GONE);
+                mHomeVaultSubtitle.setText(R.string.home_vault_empty_subtitle);
             }
         });
 

@@ -199,7 +199,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">გამოხვალთ ანგარიშებიდან უმეტეს საიტზე</string>
     <string name="settings_delete_browsing_data_tabs_title_2">გახსნილი ჩანართები</string>
     <string name="settings_doh_server">DNS სერვერი</string>
-<string name="settings_doh_server_error_format">Შეიყვანეთ სწორად ფორმატირებული URL</string>
     <string name="settings_doh_server_error_provider">Გთხოვთ, დაადასტუროთ, რომ არის სწორი პროვაიდერი ან სცადოთ მოგვიანებით</string>
     <string name="settings_doh_server_off">Გამოიყენეთ სისტემის DNS გადამწყვეტი</string>
     <string name="settings_doh_server_title">Გამოიყენეთ პროვაიდერი</string>

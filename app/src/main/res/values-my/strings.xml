@@ -187,7 +187,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">အများစုဆိုက်များကို သင်ထွက်သွားပါလိမ့်မည်။</string>
     <string name="settings_delete_browsing_data_tabs_title_2">တက်ဗ်များ ဖွင့်</string>
     <string name="settings_doh_server">DNS ဆာဗာ</string>
-    <string name="settings_doh_server_error_format">မှန်ကန်စွာ ဖော်မတ်လုပ်ထားသည့် URL ကို ထည့်ပါ။</string>
     <string name="settings_doh_server_error_provider">ကျေးဇူးပြု၍ ၎င်းသည် မှန်ကန်သောဝန်ဆောင်မှုပေးသူဖြစ်ကြောင်း အတည်ပြုပါ သို့မဟုတ် နောက်မှထပ်ကြိုးစားပါ။</string>
     <string name="settings_doh_server_off">စနစ် DNS ဖြေရှင်းသူကို သုံးပါ။</string>
     <string name="settings_doh_server_title">ပံ့ပိုးသူကိုသုံးပါ။</string>

@@ -194,7 +194,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Mala-log out ka sa karamihan ng mga site</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Mga nakabukas na tab</string>
     <string name="settings_doh_server">DNS Server</string>
-<string name="settings_doh_server_error_format">Maglagay ng tamang format na URL</string>
     <string name="settings_doh_server_error_provider">Paki-verify na ito ay isang wastong provider o subukang muli sa ibang pagkakataon</string>
     <string name="settings_doh_server_off">Gumamit ng system DNS resolver</string>
     <string name="settings_doh_server_title">Gamitin ang Provider</string>

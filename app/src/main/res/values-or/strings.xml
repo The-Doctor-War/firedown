@@ -162,7 +162,6 @@
     <string name="settings_cookies_isolate">କ୍ରସ୍ ସାଇଟ୍ କୁକିଜକୁ ଅବରୋଧ କରନ୍ତୁ |</string>
     <string name="settings_dark_theme">ଗାଢ଼</string>
     <string name="settings_doh_server">DNS ସର୍ଭର |</string>
-    <string name="settings_doh_server_error_format">ଏକ ସଠିକ୍ ଫର୍ମାଟ୍ ହୋଇଥିବା URL ପ୍ରବେଶ କରନ୍ତୁ |</string>
     <string name="settings_doh_server_error_provider">ଦୟାକରି ଯାଞ୍ଚ କରନ୍ତୁ ଯେ ଏହା ଏକ ବ valid ଧ ପ୍ରଦାନକାରୀ ଅଟେ କିମ୍ବା ପରେ ପୁନର୍ବାର ଚେଷ୍ଟା କରନ୍ତୁ |</string>
     <string name="settings_doh_server_off">ସିଷ୍ଟମ୍ DNS ସମାଧାନକାରୀ ବ୍ୟବହାର କରନ୍ତୁ |</string>
     <string name="settings_doh_server_title">ପ୍ରଦାନକାରୀ ବ୍ୟବହାର କରନ୍ତୁ |</string>

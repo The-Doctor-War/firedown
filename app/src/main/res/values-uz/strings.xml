@@ -187,7 +187,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Koʻp saytlardan chiqib ketasiz</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Varaqlarni ochish</string>
     <string name="settings_doh_server">DNS serveri</string>
-    <string name="settings_doh_server_error_format">To\'g\'ri formatlangan URL manzilini kiriting</string>
     <string name="settings_doh_server_error_provider">Bu yaroqli provayder ekanligini tasdiqlang yoki keyinroq qayta urinib ko‘ring</string>
     <string name="settings_doh_server_off">Tizim DNS rezolyutsiyasidan foydalaning</string>
     <string name="settings_doh_server_title">Provayderdan foydalaning</string>

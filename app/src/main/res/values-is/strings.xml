@@ -197,7 +197,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Þú verður skráður út af flestum vefsvæðum</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Opnir flipar</string>
     <string name="settings_doh_server">DNS þjónn</string>
-<string name="settings_doh_server_error_format">Sláðu inn rétt sniðið vefslóð</string>
     <string name="settings_doh_server_error_provider">Vinsamlegast staðfestið að þetta sé gild veitandi eða reyndu aftur síðar</string>
     <string name="settings_doh_server_off">Notaðu DNS lausnara kerfisins</string>
     <string name="settings_doh_server_title">Notaðu þjónustuveituna</string>

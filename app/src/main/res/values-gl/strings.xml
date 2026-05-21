@@ -199,7 +199,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Pechará a sesión na maioría dos sitios</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Lapelas abertas</string>
     <string name="settings_doh_server">Servidor DNS</string>
-<string name="settings_doh_server_error_format">Introduza un URL con formato correcto</string>
     <string name="settings_doh_server_error_provider">Verifique que é un provedor válido ou ténteo de novo máis tarde</string>
     <string name="settings_doh_server_off">Use o sistema de resolución DNS</string>
     <string name="settings_doh_server_title">Usar o provedor</string>

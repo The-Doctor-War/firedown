@@ -232,7 +232,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">올바른 형식의 URL을 입력하세요</string>
     <string name="settings_doh_server_error_provider">유효한 공급자인지 확인하거나 나중에 다시 시도하세요.</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>

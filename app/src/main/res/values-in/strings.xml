@@ -199,7 +199,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Anda\ akan keluar dari sebagian besar situs</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Tab terbuka</string>
     <string name="settings_doh_server">Server DNS</string>
-<string name="settings_doh_server_error_format">Masukkan URL yang diformat dengan benar</string>
     <string name="settings_doh_server_error_provider">Harap verifikasi bahwa itu adalah penyedia yang valid atau coba lagi nanti</string>
     <string name="settings_doh_server_off">Gunakan pemecah DNS sistem</string>
     <string name="settings_doh_server_title">Gunakan Penyedia</string>

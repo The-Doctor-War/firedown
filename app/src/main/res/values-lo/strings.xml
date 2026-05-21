@@ -192,7 +192,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ທ່ານຈະໄດ້ອອກຈາກລະບົບທັງຫມົດ</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ເປີດແທັບ</string>
     <string name="settings_doh_server">ເຊີບເວີ DNS</string>
-<string name="settings_doh_server_error_format">ໃສ່ URL ທີ່ມີຮູບແບບທີ່ຖືກຕ້ອງ</string>
     <string name="settings_doh_server_error_provider">ກະລຸນາຢືນຢັນວ່າເປັນຜູ້ໃຫ້ບໍລິການທີ່ຖືກຕ້ອງ ຫຼືລອງໃໝ່ໃນພາຍຫຼັງ</string>
     <string name="settings_doh_server_off">ໃຊ້ຕົວແກ້ໄຂ DNS ຂອງລະບົບ</string>
     <string name="settings_doh_server_title">ໃຊ້ຜູ້ໃຫ້ບໍລິການ</string>

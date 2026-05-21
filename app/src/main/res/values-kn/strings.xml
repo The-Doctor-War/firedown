@@ -179,7 +179,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ನೀವು ಹೆಚ್ಚಿನ ಸೈಟ್‌ಗಳಿಂದ ಹೊರ ಬರುತ್ತೀರಿ</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ತೆರೆದ ಟ್ಯಾಬ್‌ಗಳು</string>
     <string name="settings_doh_server">DNS ಸರ್ವರ್</string>
-    <string name="settings_doh_server_error_format">ಸರಿಯಾಗಿ ಫಾರ್ಮ್ಯಾಟ್ ಮಾಡಲಾದ URL ಅನ್ನು ನಮೂದಿಸಿ</string>
     <string name="settings_doh_server_error_provider">ದಯವಿಟ್ಟು ಅದು ಮಾನ್ಯವಾದ ಪೂರೈಕೆದಾರರೆಂದು ಪರಿಶೀಲಿಸಿ ಅಥವಾ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ</string>
     <string name="settings_doh_server_off">ಸಿಸ್ಟಮ್ DNS ಪರಿಹಾರಕವನ್ನು ಬಳಸಿ</string>
     <string name="settings_doh_server_title">ಒದಗಿಸುವವರನ್ನು ಬಳಸಿ</string>

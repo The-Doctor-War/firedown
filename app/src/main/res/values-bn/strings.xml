@@ -187,7 +187,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">আপনি বেশিরভাগ সাইট থেকে লগ আউট হয়ে যাবেন</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ট্যাব খুলুন</string>
     <string name="settings_doh_server">DNS সার্ভার</string>
-    <string name="settings_doh_server_error_format">সঠিকভাবে ফরম্যাট করা URL লিখুন</string>
     <string name="settings_doh_server_error_provider">অনুগ্রহ করে যাচাই করুন এটি একটি বৈধ প্রদানকারী অথবা পরে আবার চেষ্টা করুন</string>
     <string name="settings_doh_server_off">সিস্টেম DNS সমাধানকারী ব্যবহার করুন</string>
     <string name="settings_doh_server_title">প্রদানকারী ব্যবহার করুন</string>

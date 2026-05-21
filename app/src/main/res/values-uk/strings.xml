@@ -213,7 +213,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Введіть URL-адресу в правильному форматі</string>
     <string name="settings_doh_server_error_provider">Будь ласка, переконайтеся, що це дійсний постачальник, або повторіть спробу пізніше</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>

@@ -197,7 +197,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_error_format">Įveskite tinkamai suformatuotą URL</string>
     <string name="settings_doh_server_error_provider">Patvirtinkite, kad yra tinkamas teikėjas, arba bandykite dar kartą vėliau</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>

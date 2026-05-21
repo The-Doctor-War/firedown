@@ -180,7 +180,6 @@
     <string name="settings_dark_theme">Tünd</string>
     <string name="settings_delete_browsing_data_browsing_history_title">Tarixçə</string>
     <string name="settings_doh_server">DNS Server</string>
-    <string name="settings_doh_server_error_format">Düzgün formatlanmış URL daxil edin</string>
     <string name="settings_doh_server_error_provider">Lütfən, bunun etibarlı provayder olduğunu yoxlayın və ya daha sonra yenidən cəhd edin</string>
     <string name="settings_doh_server_off">Sistem DNS həlledicisindən istifadə edin</string>
     <string name="settings_doh_server_title">Provayderdən istifadə edin</string>

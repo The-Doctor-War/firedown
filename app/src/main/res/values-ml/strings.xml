@@ -195,7 +195,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">മിക്ക സൈറ്റുകളിൽ നിന്നും നിങ്ങൾ പുറത്തിറങ്ങും</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ടാബുകൾ തുറക്കുക</string>
     <string name="settings_doh_server">DNS സെർവർ</string>
-    <string name="settings_doh_server_error_format">ശരിയായി ഫോർമാറ്റ് ചെയ്ത URL നൽകുക</string>
     <string name="settings_doh_server_error_provider">അതൊരു സാധുവായ ദാതാവാണെന്ന് പരിശോധിക്കുക അല്ലെങ്കിൽ പിന്നീട് വീണ്ടും ശ്രമിക്കുക</string>
     <string name="settings_doh_server_off">സിസ്റ്റം DNS റിസോൾവർ ഉപയോഗിക്കുക</string>
     <string name="settings_doh_server_title">ദാതാവിനെ ഉപയോഗിക്കുക</string>

@@ -200,7 +200,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Webgune gehienetan saioa amaituko duzu</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Irekitako fitxak</string>
     <string name="settings_doh_server">DNS zerbitzaria</string>
-<string name="settings_doh_server_error_format">Sartu behar bezala formateatutako URL bat</string>
     <string name="settings_doh_server_error_provider">Egiaztatu baliozko hornitzaile bat dela edo saiatu berriro geroago</string>
     <string name="settings_doh_server_off">Erabili sistema DNS konpontzailea</string>
     <string name="settings_doh_server_title">Erabili hornitzailea</string>

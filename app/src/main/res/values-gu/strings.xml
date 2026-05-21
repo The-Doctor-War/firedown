@@ -156,7 +156,6 @@
     <string name="settings_cookies_accept_visited">હા, કૃપા કરીને</string>
     <string name="settings_cookies_isolate">ક્રોસ-સાઇટ કૂકીઝને અવરોધિત કરો</string>
     <string name="settings_doh_server">DNS સર્વર</string>
-    <string name="settings_doh_server_error_format">યોગ્ય રીતે ફોર્મેટ કરેલ URL દાખલ કરો</string>
     <string name="settings_doh_server_error_provider">કૃપા કરીને ચકાસો કે તે માન્ય પ્રદાતા છે અથવા પછીથી ફરી પ્રયાસ કરો</string>
     <string name="settings_doh_server_off">સિસ્ટમ DNS રિઝોલ્વરનો ઉપયોગ કરો</string>
     <string name="settings_doh_server_title">પ્રદાતાનો ઉપયોગ કરો</string>

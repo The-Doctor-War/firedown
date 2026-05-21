@@ -161,7 +161,6 @@
     <string name="settings_cookies_accept_visited">ਜੀ ਜਰੂਰ</string>
     <string name="settings_cookies_isolate">ਕਰਾਸ-ਸਾਈਟ ਕੂਕੀਜ਼ ਨੂੰ ਬਲੌਕ ਕਰੋ</string>
     <string name="settings_doh_server">DNS ਸਰਵਰ</string>
-    <string name="settings_doh_server_error_format">ਸਹੀ ਢੰਗ ਨਾਲ ਫਾਰਮੈਟ ਕੀਤਾ URL ਦਾਖਲ ਕਰੋ</string>
     <string name="settings_doh_server_error_provider">ਕਿਰਪਾ ਕਰਕੇ ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਇਹ ਇੱਕ ਵੈਧ ਪ੍ਰਦਾਤਾ ਹੈ ਜਾਂ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
     <string name="settings_doh_server_off">ਸਿਸਟਮ DNS ਰੈਜ਼ੋਲਵਰ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>
     <string name="settings_doh_server_title">ਪ੍ਰਦਾਤਾ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>

@@ -191,7 +191,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ඔබව බොහෝ අඩවි වලින් නික්මවෙනු ඇත</string>
     <string name="settings_delete_browsing_data_tabs_title_2">විවෘත පටිති</string>
     <string name="settings_doh_server">DNS සේවාදායකය</string>
-    <string name="settings_doh_server_error_format">නිවැරදිව ෆෝමැට් කළ URL එකක් ඇතුළු කරන්න</string>
     <string name="settings_doh_server_error_provider">කරුණාකර එය වලංගු සැපයුම්කරුවෙකු බව තහවුරු කරන්න හෝ පසුව නැවත උත්සාහ කරන්න</string>
     <string name="settings_doh_server_off">පද්ධති DNS විසඳුම් භාවිතා කරන්න</string>
     <string name="settings_doh_server_title">සපයන්නා භාවිතා කරන්න</string>

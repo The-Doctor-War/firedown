@@ -208,7 +208,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Adjon meg egy helyesen formázott URL-t</string>
     <string name="settings_doh_server_error_provider">Kérjük, ellenőrizze, hogy érvényes szolgáltató-e, vagy próbálja újra később</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>

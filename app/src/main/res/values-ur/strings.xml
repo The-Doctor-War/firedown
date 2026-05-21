@@ -193,7 +193,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">آپ کو زیادہ تر سائٹوں سے لاگ آؤٹ کر دیا جائےگا</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ٹیبز کھولیں</string>
     <string name="settings_doh_server">DNS سرور</string>
-    <string name="settings_doh_server_error_format">درست طریقے سے فارمیٹ شدہ URL درج کریں۔</string>
     <string name="settings_doh_server_error_provider">براہ کرم تصدیق کریں کہ یہ ایک درست فراہم کنندہ ہے یا بعد میں دوبارہ کوشش کریں۔</string>
     <string name="settings_doh_server_off">سسٹم DNS حل کرنے والا استعمال کریں۔</string>
     <string name="settings_doh_server_title">فراہم کنندہ کا استعمال کریں۔</string>

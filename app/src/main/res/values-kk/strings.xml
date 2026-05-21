@@ -199,7 +199,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Сіз сайттардың көбінен шығасыз</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Ашық беттер</string>
     <string name="settings_doh_server">DNS сервері</string>
-<string name="settings_doh_server_error_format">Дұрыс пішімделген URL мекенжайын енгізіңіз</string>
     <string name="settings_doh_server_error_provider">Бұл жарамды провайдер екенін растаңыз немесе кейінірек қайталап көріңіз</string>
     <string name="settings_doh_server_off">Жүйелік DNS шешу құралын пайдаланыңыз</string>
     <string name="settings_doh_server_title">Провайдерді пайдаланыңыз</string>

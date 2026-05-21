@@ -198,7 +198,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Do të bëhet dalja juaj nga shumica e sajteve</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Skeda të hapura</string>
     <string name="settings_doh_server">Serveri DNS</string>
-<string name="settings_doh_server_error_format">Fut një URL të formatuar saktë</string>
     <string name="settings_doh_server_error_provider">Ju lutemi verifikoni që është një ofrues i vlefshëm ose provoni përsëri më vonë</string>
     <string name="settings_doh_server_off">Përdorni zgjidhjen e sistemit DNS</string>
     <string name="settings_doh_server_title">Përdor Ofruesin</string>

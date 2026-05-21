@@ -40,13 +40,13 @@
         android:paddingTop="8dp"
         android:paddingBottom="20dp">
 
-        <!-- Privacy-themed illustration. Sized at 120dp so it
-             accents the sheet header without dominating it — the
-             hero number below is the page's main visual weight,
-             the illustration is supporting. -->
+        <!-- Privacy-themed illustration. 96dp so it accents the
+             sheet header without dominating it — the hero number
+             below is the page's main visual weight, the
+             illustration is supporting. -->
         <ImageView
             android:layout_width="wrap_content"
-            android:layout_height="120dp"
+            android:layout_height="96dp"
             android:layout_marginBottom="4dp"
             android:adjustViewBounds="true"
             android:contentDescription="@null"
@@ -87,14 +87,16 @@
             tools:text="~580 MB of bandwidth saved"
             tools:visibility="visible" />
 
-        <!-- Categories label — what 'blocked' actually covers, as
-             a short comma-list rather than a paragraph. Translation
-             length is bounded by 4 short nouns so it stays on one
-             or two lines in every locale. -->
+        <!-- Categories caption — what 'blocked' actually covers, as
+             a short comma-list rather than a paragraph. 8dp gap so
+             it reads as a natural continuation of the stat block
+             above, not a floating element. Translation length is
+             bounded by 4 short nouns so it stays on one or two
+             lines in every locale. -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="22dp"
+            android:layout_marginTop="8dp"
             android:gravity="center"
             android:text="@string/trackers_info_categories"
             android:textAppearance="?attr/textAppearanceBodySmall"

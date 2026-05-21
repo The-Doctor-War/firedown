@@ -555,10 +555,12 @@
          Folder' becomes 'Carpeta segura' in es, 'Sicherer Ordner' in
          de, etc. -->
     <string name="home_vault_button">Safe Folder</string>
-    <!-- Home page 'Trackers blocked' card. Title is the noun, subtitle
-         is the count rendered via NumberFormat with the locale's
-         thousand separator + ' since install'. %1$s is the formatted
-         number (already localised), see HomeFragment.bindTrackersCard. -->
+    <!-- Home page 'Trackers and ads blocked' card. Subtitle reads
+         '12,345 · ~580 MB saved'. %1$s is the formatted count (via
+         NumberFormat with locale grouping), %2$s is the estimated
+         bytes saved (count * 50KB average per blocked request,
+         matching Brave's published methodology). The '~' prefix
+         flags it as an estimate, not measured. -->
     <string name="home_trackers_title">Trackers and ads blocked</string>
-    <string name="home_trackers_subtitle">%1$s since install</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s saved</string>
 </resources>

@@ -105,6 +105,13 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     @Nullable private Integer mLastFinishedCount;
     private long mLastFinishedSize = 0L;
 
+    /** Estimated bytes that would have been transferred per blocked
+     *  request. uBlock cancels the request before the response, so the
+     *  real number is unknown — Brave's published methodology pegs the
+     *  average at ~50KB and we follow the same so users comparing
+     *  across browsers see consistent figures. */
+    private static final long AVG_BYTES_PER_BLOCKED_REQUEST = 50_000L;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -328,14 +335,19 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         // Trackers-blocked subtitle. firedown.js pushes the cumulative
         // value periodically; format with locale-aware grouping
         // separators so 12345 reads as '12,345' or '12.345' depending
-        // on the user's locale.
+        // on the user's locale, and append an estimated-bytes-saved
+        // figure (Brave's published methodology: 50KB average per
+        // blocked request — flagged with '~' so users read it as an
+        // estimate, not a measured value).
         mGeckoUblockHelper.getCumulativeBlockedLive().observe(getViewLifecycleOwner(), blocked -> {
             if (mTrackersSubtitle == null) return;
             long n = blocked == null ? 0L : blocked;
-            String formatted = java.text.NumberFormat
+            String formattedCount = java.text.NumberFormat
                     .getInstance(java.util.Locale.getDefault())
                     .format(n);
-            mTrackersSubtitle.setText(getString(R.string.home_trackers_subtitle, formatted));
+            String savedBytes = Utils.readableFileSize(n * AVG_BYTES_PER_BLOCKED_REQUEST);
+            mTrackersSubtitle.setText(getString(
+                    R.string.home_trackers_subtitle, formattedCount, savedBytes));
         });
 
         // Background-media strip — visible iff GeckoMediaController has a

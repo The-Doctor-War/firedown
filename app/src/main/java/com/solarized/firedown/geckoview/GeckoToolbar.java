@@ -209,7 +209,7 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
         mEditText.focusAndShowKeyboard();
     }
 
-    public void disableSearch() {
+    private void disableSearch() {
         mSearchMode = false;
 
         // Restore edit text to URL mode
@@ -274,11 +274,6 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
             return;
         }
         mEditText.setText(uri, autoComplete);
-    }
-
-    public void resetLocation() {
-        mEditText.resetLocation();
-        mEditText.setText("", false);
     }
 
     public void onLocationChange(String uri) {
@@ -389,10 +384,6 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
     public void setProgress(int progress) {
         mGeckoProgressBar.setProgress(progress);
         mGeckoProgressBar.setVisibility(progress > 0 && progress < 100 ? View.VISIBLE : View.GONE);
-    }
-
-    public int getProgress() {
-        return mGeckoProgressBar.getProgress();
     }
 
     public void setAutoCompleteVisible(boolean visible) {

@@ -272,6 +272,18 @@
     <string name="crash_sheet_dismiss">ඉවත් කරන්න</string>
     <string name="crash_sheet_copied">බිඳවැටීමේ වාර්තාව ක්ලිප්බෝඩයට පිටපත් කරන ලදී</string>
     <string name="crash_sheet_open_failed">බ්‍රවුසරය විවෘත කළ නොහැකි විය. වාර්තාව ක්ලිප්බෝඩයේ ඇත — එය නව GitHub issue එකකට අලවන්න.</string>
+    <string name="home_trackers_title">ට්‍රැකර් සහ දැන්වීම් අවහිර කළා</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ඉතිරි කළා</string>
+    <string name="home_trackers_subtitle_idle">ආරක්ෂාව සක්‍රියයි</string>
+    <string name="home_vault_empty_subtitle">පෞද්ගලික සහ සංකේතනය කළ</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB ඉතිරි කළා</string>
+    <string name="trackers_info_count_label">ට්‍රැකර් සහ දැන්වීම් අවහිර කළා</string>
+    <string name="trackers_info_saved">~%1$s කලාප පළල ඉතිරි කළා</string>
+    <string name="trackers_info_categories">ට්‍රැකර් · දැන්වීම් · ඇඟිලි සලකුණු · කුකීස්</string>
+    <string name="trackers_info_action">ආරක්ෂාව කළමනාකරණය</string>
+    <string name="trackers_info_today">%1$s අද අවහිර</string>
+
+
 
 
 </resources>

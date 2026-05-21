@@ -447,6 +447,12 @@ public class GeckoRuntimeHelper {
                 mGeckoUblockHelper.onAdsCount(count, isIncognito);
             }
 
+            // Cumulative blocked-request count from µb.requestStats —
+            // drives the Home 'trackers blocked' card.
+            if (json.has("cumulativeBlocked")) {
+                mGeckoUblockHelper.onCumulativeBlocked(json.optLong("cumulativeBlocked", 0));
+            }
+
             // uBlock sends a firewall state change
             if (json.has("firewall")) {
                 JSONObject firewall = json.optJSONObject("firewall");

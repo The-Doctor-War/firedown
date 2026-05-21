@@ -281,6 +281,18 @@
     <string name="crash_sheet_dismiss">Odbaci</string>
     <string name="crash_sheet_copied">Izvještaj o krahu kopiran u međuspremnik</string>
     <string name="crash_sheet_open_failed">Nije moguće otvoriti preglednik. Izvještaj je u međuspremniku — zalijepite ga u novi GitHub issue.</string>
+    <string name="home_trackers_title">Pratitelji i oglasi blokirani</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s sačuvano</string>
+    <string name="home_trackers_subtitle_idle">Zaštita aktivna</string>
+    <string name="home_vault_empty_subtitle">Privatno i šifrirano</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB sačuvano</string>
+    <string name="trackers_info_count_label">pratilaca i oglasa blokirano</string>
+    <string name="trackers_info_saved">~%1$s propusnosti sačuvano</string>
+    <string name="trackers_info_categories">Pratitelji · Oglasi · Otisci · Kolačići</string>
+    <string name="trackers_info_action">Upravljanje zaštitom</string>
+    <string name="trackers_info_today">%1$s blokirano danas</string>
+
+
 
 
 </resources>

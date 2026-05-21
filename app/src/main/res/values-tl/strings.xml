@@ -275,6 +275,18 @@
     <string name="crash_sheet_dismiss">Isara</string>
     <string name="crash_sheet_copied">Nakopya ang ulat ng pag-crash sa clipboard</string>
     <string name="crash_sheet_open_failed">Hindi mabuksan ang browser. Nasa clipboard ang ulat — i-paste ito sa bagong GitHub issue.</string>
+    <string name="home_trackers_title">Na-block ang mga tracker at ad</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s naitipid</string>
+    <string name="home_trackers_subtitle_idle">Aktibo ang proteksyon</string>
+    <string name="home_vault_empty_subtitle">Pribado at naka-encrypt</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB naitipid</string>
+    <string name="trackers_info_count_label">tracker at ad ang na-block</string>
+    <string name="trackers_info_saved">~%1$s ng bandwidth naitipid</string>
+    <string name="trackers_info_categories">Tracker · Ad · Fingerprinting · Cookies</string>
+    <string name="trackers_info_action">Pamahalaan ang proteksyon</string>
+    <string name="trackers_info_today">%1$s na-block ngayon</string>
+
+
 
 
 </resources>

@@ -237,6 +237,18 @@
     <string name="crash_sheet_dismiss">ବାତିଲ୍</string>
     <string name="crash_sheet_copied">କ୍ରାଶ୍ ରିପୋର୍ଟ କ୍ଲିପ୍ବୋର୍ଡକୁ କପି ହୋଇଛି</string>
     <string name="crash_sheet_open_failed">ବ୍ରାଉଜର୍ ଖୋଲିପାରିଲା ନାହିଁ। ରିପୋର୍ଟ କ୍ଲିପ୍ବୋର୍ଡରେ ଅଛି — ଏହାକୁ ଏକ ନୂଆ GitHub ଇସ୍ୟୁରେ ପେଷ୍ଟ କରନ୍ତୁ।</string>
+    <string name="home_trackers_title">ଟ୍ରାକର ଓ ବିଜ୍ଞାପନ ବ୍ଲକ ହୋଇଛି</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ସଞ୍ଚୟ</string>
+    <string name="home_trackers_subtitle_idle">ସୁରକ୍ଷା ସକ୍ରିୟ</string>
+    <string name="home_vault_empty_subtitle">ବ୍ୟକ୍ତିଗତ ଏବଂ ଏନକ୍ରିପ୍ଟେଡ୍</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB ସଞ୍ଚୟ</string>
+    <string name="trackers_info_count_label">ଟ୍ରାକର ଏବଂ ବିଜ୍ଞାପନ ବ୍ଲକ ହୋଇଛି</string>
+    <string name="trackers_info_saved">~%1$s ବ୍ୟାଣ୍ଡୱିଡଥ୍ ସଞ୍ଚୟ</string>
+    <string name="trackers_info_categories">ଟ୍ରାକର · ବିଜ୍ଞାପନ · ଆଙ୍ଗୁଠିଚିହ୍ନ · କୁକି</string>
+    <string name="trackers_info_action">ସୁରକ୍ଷା ପରିଚାଳନା</string>
+    <string name="trackers_info_today">%1$s ଆଜି ବ୍ଲକ୍</string>
+
+
 
 
 </resources>

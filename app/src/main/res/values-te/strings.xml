@@ -274,6 +274,18 @@
     <string name="crash_sheet_dismiss">తీసివేయండి</string>
     <string name="crash_sheet_copied">క్రాష్ నివేదిక క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది</string>
     <string name="crash_sheet_open_failed">బ్రౌజర్‌ను తెరవలేకపోయింది. నివేదిక క్లిప్‌బోర్డ్‌లో ఉంది — దానిని కొత్త GitHub ఇష్యూలో పేస్ట్ చేయండి.</string>
+    <string name="home_trackers_title">ట్రాకర్లు మరియు ప్రకటనలు బ్లాక్ చేయబడ్డాయి</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ఆదా</string>
+    <string name="home_trackers_subtitle_idle">రక్షణ క్రియాశీలంగా ఉంది</string>
+    <string name="home_vault_empty_subtitle">ప్రైవేట్ మరియు ఎన్‌క్రిప్ట్ చేయబడింది</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB ఆదా</string>
+    <string name="trackers_info_count_label">ట్రాకర్లు మరియు ప్రకటనలు బ్లాక్ చేయబడ్డాయి</string>
+    <string name="trackers_info_saved">~%1$s బ్యాండ్‌విడ్త్ ఆదా</string>
+    <string name="trackers_info_categories">ట్రాకర్లు · ప్రకటనలు · ఫింగర్‌ప్రింట్ · కుకీలు</string>
+    <string name="trackers_info_action">రక్షణను నిర్వహించండి</string>
+    <string name="trackers_info_today">%1$s ఈరోజు బ్లాక్ చేయబడింది</string>
+
+
 
 
 </resources>

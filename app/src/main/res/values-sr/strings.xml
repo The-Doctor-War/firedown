@@ -288,6 +288,18 @@
     <string name="crash_sheet_dismiss">Одбаци</string>
     <string name="crash_sheet_copied">Извештај о паду копиран у клипборд</string>
     <string name="crash_sheet_open_failed">Прегледач није могао да се отвори. Извештај је у клипборду — налепите га у нови GitHub проблем.</string>
+    <string name="home_trackers_title">Пратиоци и огласи блокирани</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s сачувано</string>
+    <string name="home_trackers_subtitle_idle">Заштита активна</string>
+    <string name="home_vault_empty_subtitle">Приватно и шифровано</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 МБ сачувано</string>
+    <string name="trackers_info_count_label">пратилаца и огласа блокирано</string>
+    <string name="trackers_info_saved">~%1$s протока сачувано</string>
+    <string name="trackers_info_categories">Пратиоци · Огласи · Отисци · Колачићи</string>
+    <string name="trackers_info_action">Управљање заштитом</string>
+    <string name="trackers_info_today">%1$s блокирано данас</string>
+
+
 
 
 </resources>

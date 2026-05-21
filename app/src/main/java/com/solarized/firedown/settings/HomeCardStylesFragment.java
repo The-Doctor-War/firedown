@@ -88,6 +88,15 @@ public class HomeCardStylesFragment extends BasePreferenceFragment {
                 row.findViewById(R.id.style_option_vault_subtitle),
                 style.vault(night));
 
+        MaterialCardView trackersCard = row.findViewById(R.id.style_option_trackers_card);
+        HomeCardStyle.applyToCard(
+                trackersCard,
+                row.findViewById(R.id.style_option_trackers_chip),
+                (AppCompatImageView) row.findViewById(R.id.style_option_trackers_icon),
+                row.findViewById(R.id.style_option_trackers_title),
+                row.findViewById(R.id.style_option_trackers_subtitle),
+                style.trackers(night));
+
         boolean selected = style.key.equals(mSelectedKey);
         radio.setChecked(selected);
         if (selected) mSelectedRow = row;

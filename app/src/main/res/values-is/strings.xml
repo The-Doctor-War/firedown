@@ -278,6 +278,18 @@
     <string name="crash_sheet_dismiss">Hafna</string>
     <string name="crash_sheet_copied">Hrunskýrsla afrituð á klemmuspjald</string>
     <string name="crash_sheet_open_failed">Tókst ekki að opna vafra. Skýrslan er á klemmuspjaldinu — límdu hana inn í nýja GitHub-vandamálatilkynningu.</string>
+    <string name="home_trackers_title">Rakningu og auglýsingar blokkað</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s sparað</string>
+    <string name="home_trackers_subtitle_idle">Vörn virk</string>
+    <string name="home_vault_empty_subtitle">Einkamál og dulkóðað</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB sparað</string>
+    <string name="trackers_info_count_label">rakningu og auglýsingar blokkað</string>
+    <string name="trackers_info_saved">~%1$s af bandbreidd sparað</string>
+    <string name="trackers_info_categories">Rakning · Auglýsingar · Fingrafar · Vafrakökur</string>
+    <string name="trackers_info_action">Stjórna vörn</string>
+    <string name="trackers_info_today">%1$s blokkað í dag</string>
+
+
 
 
 </resources>

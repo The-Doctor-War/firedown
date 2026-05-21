@@ -267,6 +267,18 @@
     <string name="crash_sheet_dismiss">ပိတ်</string>
     <string name="crash_sheet_copied">ပျက်စီးမှု အစီရင်ခံစာ ကလစ်ဘုတ်သို့ ကူးယူပြီး</string>
     <string name="crash_sheet_open_failed">ဘရောက်ဆာ ဖွင့်၍မရပါ။ အစီရင်ခံစာ ကလစ်ဘုတ်တွင်ရှိသည် — GitHub issue အသစ်တွင် ကူးထည့်ပါ။</string>
+    <string name="home_trackers_title">ခြေရာခံများနှင့် ကြော်ငြာများ ပိတ်ပင်ထား</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s သက်သာ</string>
+    <string name="home_trackers_subtitle_idle">ကာကွယ်မှု ဖွင့်ထား</string>
+    <string name="home_vault_empty_subtitle">ပုဂ္ဂလိက နှင့် စာဝှက်ထား</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB သက်သာ</string>
+    <string name="trackers_info_count_label">ခြေရာခံများနှင့် ကြော်ငြာများ ပိတ်ပင်ထား</string>
+    <string name="trackers_info_saved">~%1$s ဘန်းဝစ်သက်သာ</string>
+    <string name="trackers_info_categories">ခြေရာခံ · ကြော်ငြာ · လက်ဗွေ · Cookie</string>
+    <string name="trackers_info_action">ကာကွယ်မှု စီမံ</string>
+    <string name="trackers_info_today">%1$s ယနေ့ ပိတ်ပင်ထား</string>
+
+
 
 
 </resources>

@@ -378,6 +378,18 @@
     <string name="crash_sheet_dismiss">Kapat</string>
     <string name="crash_sheet_copied">Çökme raporu panoya kopyalandı</string>
     <string name="crash_sheet_open_failed">Tarayıcı açılamadı. Çökme raporu panonuzda — yeni bir GitHub konusuna yapıştırın.</string>
+    <string name="home_trackers_title">İzleyiciler ve reklamlar engellendi</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s tasarruf edildi</string>
+    <string name="home_trackers_subtitle_idle">Koruma etkin</string>
+    <string name="home_vault_empty_subtitle">Özel ve şifreli</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB tasarruf edildi</string>
+    <string name="trackers_info_count_label">izleyici ve reklam engellendi</string>
+    <string name="trackers_info_saved">~%1$s bant genişliği tasarruf edildi</string>
+    <string name="trackers_info_categories">İzleyiciler · Reklamlar · Parmak izi · Çerezler</string>
+    <string name="trackers_info_action">Korumayı yönet</string>
+    <string name="trackers_info_today">%1$s bugün engellendi</string>
+
+
 
 
 </resources>

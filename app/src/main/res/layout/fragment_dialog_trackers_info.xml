@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Trackers + ads info sheet. Spawned from the Home 'Trackers and
+  ads blocked' card. Three jobs:
+
+    - Make the privacy work the app does visible. The card itself
+      is a small subtitle line; this sheet shows the number big
+      and explains what it represents.
+    - Tell the user *what* is being blocked — trackers, ads,
+      cookie notices, etc. — so the metric is meaningful instead
+      of a vanity counter.
+    - Give a single clear CTA to the surface where the user can
+      adjust protection (Settings → Enhanced Tracking Protection).
+
+  Outer LinearLayout owns the sticky drag handle; the ScrollView
+  below holds the rest so content can grow past the sheet height
+  on small screens / landscape without clipping the handle.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/dialog_drag_handle" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true"
+        android:scrollbars="none">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="20dp">
+
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="120dp"
+            android:layout_marginBottom="4dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ill_privacy_red" />
+
+        <!-- Big number: '12,345' or 'Protection active' placeholder
+             when zero. Adapter swaps the binding at runtime. -->
+        <TextView
+            android:id="@+id/trackers_info_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceDisplaySmall"
+            android:textColor="?attr/colorPrimary"
+            tools:text="12,345" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="center"
+            android:text="@string/trackers_info_count_label"
+            android:textAppearance="?attr/textAppearanceTitleMedium"
+            android:textColor="?attr/colorOnSurface" />
+
+        <!-- Estimated bytes saved — only visible when count > 0,
+             otherwise zero * 50KB is meaningless. -->
+        <TextView
+            android:id="@+id/trackers_info_saved"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone"
+            tools:text="~580 MB of bandwidth saved"
+            tools:visibility="visible" />
+
+        <!-- Today vs all-time framing — derived from the cumulative
+             counter with a midnight baseline (no per-event storage,
+             see GeckoUblockHelper). Hidden when today's count is
+             zero so the sheet doesn't render a redundant '0 today'
+             on first launch or a quiet day. -->
+        <TextView
+            android:id="@+id/trackers_info_today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone"
+            tools:text="1,234 today"
+            tools:visibility="visible" />
+
+        <!-- Categories caption — what 'blocked' actually covers, as
+             a short comma-list rather than a paragraph. 8dp gap so
+             it reads as a natural continuation of the stat block
+             above, not a floating element. Translation length is
+             bounded by 4 short nouns so it stays on one or two
+             lines in every locale. -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="@string/trackers_info_categories"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/trackers_info_action"
+            style="@style/Widget.Material3.Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/trackers_info_action" />
+
+    </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>

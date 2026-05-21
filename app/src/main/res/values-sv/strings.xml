@@ -261,6 +261,18 @@
     <string name="crash_sheet_dismiss">Avvisa</string>
     <string name="crash_sheet_copied">Kraschrapport kopierad till urklipp</string>
     <string name="crash_sheet_open_failed">Det gick inte att öppna webbläsaren. Kraschrapporten finns i ditt urklipp — klistra in den i ett nytt GitHub-ärende.</string>
+    <string name="home_trackers_title">Spårare och annonser blockerade</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s sparade</string>
+    <string name="home_trackers_subtitle_idle">Skydd aktivt</string>
+    <string name="home_vault_empty_subtitle">Privat och krypterad</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB sparade</string>
+    <string name="trackers_info_count_label">spårare och annonser blockerade</string>
+    <string name="trackers_info_saved">~%1$s bandbredd sparad</string>
+    <string name="trackers_info_categories">Spårare · Annonser · Fingeravtryck · Cookies</string>
+    <string name="trackers_info_action">Hantera skydd</string>
+    <string name="trackers_info_today">%1$s blockerade idag</string>
+
+
 
 
 </resources>

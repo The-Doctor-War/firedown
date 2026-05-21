@@ -273,6 +273,18 @@
     <string name="crash_sheet_dismiss">ປິດ</string>
     <string name="crash_sheet_copied">ສຳເນົາລາຍງານການລົ້ມໄປຍັງຄລິບບອດແລ້ວ</string>
     <string name="crash_sheet_open_failed">ບໍ່ສາມາດເປີດເບຣົາເຊີໄດ້. ລາຍງານຢູ່ໃນຄລິບບອດ — ວາງລົງໃນ issue GitHub ໃໝ່.</string>
+    <string name="home_trackers_title">ບລັອກຕົວຕິດຕາມ ແລະ ໂຄສະນາແລ້ວ</string>
+    <string name="home_trackers_subtitle">%1$s · ປະຫຍັດ ~%2$s</string>
+    <string name="home_trackers_subtitle_idle">ການປ້ອງກັນເຮັດວຽກຢູ່</string>
+    <string name="home_vault_empty_subtitle">ສ່ວນຕົວ ແລະ ເຂົ້າລະຫັດ</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ປະຫຍັດ ~580 MB</string>
+    <string name="trackers_info_count_label">ຕົວຕິດຕາມ ແລະ ໂຄສະນາ ຖືກບລັອກ</string>
+    <string name="trackers_info_saved">ປະຫຍັດແບນວິດ ~%1$s</string>
+    <string name="trackers_info_categories">ຕົວຕິດຕາມ · ໂຄສະນາ · ລາຍນິ້ວມື · ຄຸກກີ</string>
+    <string name="trackers_info_action">ຈັດການການປ້ອງກັນ</string>
+    <string name="trackers_info_today">ບລັອກ %1$s ມື້ນີ້</string>
+
+
 
 
 </resources>

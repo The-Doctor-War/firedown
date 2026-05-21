@@ -318,6 +318,18 @@
     <string name="crash_sheet_dismiss">Закрити</string>
     <string name="crash_sheet_copied">Звіт про збій скопійовано в буфер обміну</string>
     <string name="crash_sheet_open_failed">Не вдалося відкрити браузер. Звіт у буфері обміну — вставте його в нову задачу GitHub.</string>
+    <string name="home_trackers_title">Трекери та реклама заблоковані</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s заощаджено</string>
+    <string name="home_trackers_subtitle_idle">Захист увімкнено</string>
+    <string name="home_vault_empty_subtitle">Приватно та зашифровано</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 МБ заощаджено</string>
+    <string name="trackers_info_count_label">трекерів та реклами заблоковано</string>
+    <string name="trackers_info_saved">~%1$s трафіку заощаджено</string>
+    <string name="trackers_info_categories">Трекери · Реклама · Відбитки · Cookie</string>
+    <string name="trackers_info_action">Налаштувати захист</string>
+    <string name="trackers_info_today">%1$s заблоковано сьогодні</string>
+
+
 
 
 </resources>

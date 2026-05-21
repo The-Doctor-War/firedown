@@ -73,6 +73,18 @@
     <string name="crash_sheet_dismiss">Փակել</string>
     <string name="crash_sheet_copied">Խափանման հաշվետվությունը պատճենվեց փոխանակման բուֆեր</string>
     <string name="crash_sheet_open_failed">Չհաջողվեց բացել զննարկիչը։ Հաշվետվությունը փոխանակման բուֆերում է — տեղադրեք այն նոր GitHub հարցում։</string>
+    <string name="home_trackers_title">Հետևորդները և գովազդները արգելափակվել են</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s խնայվել է</string>
+    <string name="home_trackers_subtitle_idle">Պաշտպանությունը միացված է</string>
+    <string name="home_vault_empty_subtitle">Մասնավոր և կոդավորված</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 ՄԲ խնայվել է</string>
+    <string name="trackers_info_count_label">հետևորդ և գովազդ արգելափակվել է</string>
+    <string name="trackers_info_saved">~%1$s թողունակություն խնայվել է</string>
+    <string name="trackers_info_categories">Հետևորդներ · Գովազդներ · Մատնահետք · Cookie</string>
+    <string name="trackers_info_action">Կառավարել պաշտպանությունը</string>
+    <string name="trackers_info_today">%1$s այսօր արգելափակվել է</string>
+
+
 
 
 </resources>

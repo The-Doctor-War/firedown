@@ -194,7 +194,7 @@ public class BrowserFragment extends BaseBrowserFragment
 
         Log.d(TAG, "onCreate");
 
-        mGeckoToolbarSize = getResources().getDimensionPixelSize(R.dimen.address_bar_layout);
+        mGeckoToolbarSize = getResources().getDimensionPixelSize(R.dimen.app_bar_size);
         mBottomBarSize    = getResources().getDimensionPixelSize(R.dimen.app_bar_size);
 
         mIncognitoStateViewModel = new ViewModelProvider(mActivity).get(IncognitoStateViewModel.class);

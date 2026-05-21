@@ -267,6 +267,18 @@
     <string name="crash_sheet_dismiss">Yopish</string>
     <string name="crash_sheet_copied">Ishlamay qolish hisoboti vaqtinchalik xotiraga nusxalandi</string>
     <string name="crash_sheet_open_failed">Brauzer ochilmadi. Hisobot vaqtinchalik xotirada — yangi GitHub muammosiga joylashtiring.</string>
+    <string name="home_trackers_title">Kuzatuvchilar va reklamalar bloklandi</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s tejaldi</string>
+    <string name="home_trackers_subtitle_idle">Himoya yoqilgan</string>
+    <string name="home_vault_empty_subtitle">Shaxsiy va shifrlangan</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB tejaldi</string>
+    <string name="trackers_info_count_label">kuzatuvchilar va reklamalar bloklandi</string>
+    <string name="trackers_info_saved">~%1$s tarmoq trafigi tejaldi</string>
+    <string name="trackers_info_categories">Kuzatuvchilar · Reklamalar · Izlar · Cookie</string>
+    <string name="trackers_info_action">Himoyani boshqarish</string>
+    <string name="trackers_info_today">%1$s bugun bloklandi</string>
+
+
 
 
 </resources>

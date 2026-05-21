@@ -40,6 +40,18 @@
     <string name="crash_sheet_dismiss">खारेज</string>
     <string name="crash_sheet_copied">क्र्यास रिपोर्ट क्लिपबोर्डमा प्रतिलिपि भयो</string>
     <string name="crash_sheet_open_failed">ब्राउजर खोल्न सकिएन। रिपोर्ट क्लिपबोर्डमा छ — यसलाई नयाँ GitHub इस्युमा टाँस्नुहोस्।</string>
+    <string name="home_trackers_title">ट्र्याकरहरू र विज्ञापनहरू ब्लक गरियो</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s बचत</string>
+    <string name="home_trackers_subtitle_idle">सुरक्षा सक्रिय</string>
+    <string name="home_vault_empty_subtitle">निजी र एन्क्रिप्टेड</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB बचत</string>
+    <string name="trackers_info_count_label">ट्र्याकर र विज्ञापन ब्लक गरियो</string>
+    <string name="trackers_info_saved">~%1$s ब्यान्डविड्थ बचत</string>
+    <string name="trackers_info_categories">ट्र्याकरहरू · विज्ञापनहरू · फिंगरप्रिन्ट · कुकीहरू</string>
+    <string name="trackers_info_action">सुरक्षा व्यवस्थापन गर्नुहोस्</string>
+    <string name="trackers_info_today">%1$s आज ब्लक</string>
+
+
 
 
 </resources>

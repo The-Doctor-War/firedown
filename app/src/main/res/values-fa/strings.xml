@@ -289,6 +289,18 @@
     <string name="crash_sheet_dismiss">رد کردن</string>
     <string name="crash_sheet_copied">گزارش خرابی در حافظه موقت کپی شد</string>
     <string name="crash_sheet_open_failed">مرورگر باز نشد. گزارش در حافظه موقت است — آن را در یک issue جدید GitHub بچسبانید.</string>
+    <string name="home_trackers_title">ردیاب‌ها و تبلیغات مسدود شد</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s صرفه‌جویی</string>
+    <string name="home_trackers_subtitle_idle">محافظت فعال است</string>
+    <string name="home_vault_empty_subtitle">خصوصی و رمزگذاری شده</string>
+    <string name="home_card_style_preview_trackers_subtitle">۱۲٬۳۴۵ · ~۵۸۰ مگابایت صرفه‌جویی</string>
+    <string name="trackers_info_count_label">ردیاب و تبلیغ مسدود شد</string>
+    <string name="trackers_info_saved">~%1$s پهنای باند صرفه‌جویی شد</string>
+    <string name="trackers_info_categories">ردیاب‌ها · تبلیغات · اثر انگشت · کوکی‌ها</string>
+    <string name="trackers_info_action">مدیریت محافظت</string>
+    <string name="trackers_info_today">%1$s امروز مسدود شد</string>
+
+
 
 
 </resources>

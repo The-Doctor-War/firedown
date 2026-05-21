@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rounded-square peach background for the Trackers-blocked leading
+    icon on Home. Completes the Downloads (primary coral) / Safe
+    Folder (tertiary raspberry) trio with the secondary tone so the
+    three shelf cards each own a distinct M3 container colour.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorSecondaryContainer" />
+    <corners android:radius="12dp" />
+</shape>

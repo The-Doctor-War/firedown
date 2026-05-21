@@ -259,6 +259,18 @@
     <string name="crash_sheet_dismiss">ತಿರಸ್ಕರಿಸಿ</string>
     <string name="crash_sheet_copied">ಕ್ರ್ಯಾಶ್ ವರದಿಯನ್ನು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ</string>
     <string name="crash_sheet_open_failed">ಬ್ರೌಸರ್ ತೆರೆಯಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ವರದಿಯು ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ನಲ್ಲಿದೆ — ಅದನ್ನು ಹೊಸ GitHub ಇಷ್ಯೂನಲ್ಲಿ ಅಂಟಿಸಿ.</string>
+    <string name="home_trackers_title">ಟ್ರ್ಯಾಕರ್‌ಗಳು ಮತ್ತು ಜಾಹೀರಾತುಗಳನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ಉಳಿತಾಯ</string>
+    <string name="home_trackers_subtitle_idle">ರಕ್ಷಣೆ ಸಕ್ರಿಯವಾಗಿದೆ</string>
+    <string name="home_vault_empty_subtitle">ಖಾಸಗಿ ಮತ್ತು ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗಿದೆ</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB ಉಳಿತಾಯ</string>
+    <string name="trackers_info_count_label">ಟ್ರ್ಯಾಕರ್‌ಗಳು ಮತ್ತು ಜಾಹೀರಾತುಗಳನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ</string>
+    <string name="trackers_info_saved">~%1$s ಬ್ಯಾಂಡ್‌ವಿಡ್ತ್ ಉಳಿತಾಯ</string>
+    <string name="trackers_info_categories">ಟ್ರ್ಯಾಕರ್‌ಗಳು · ಜಾಹೀರಾತುಗಳು · ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ · ಕುಕೀಗಳು</string>
+    <string name="trackers_info_action">ರಕ್ಷಣೆಯನ್ನು ನಿರ್ವಹಿಸಿ</string>
+    <string name="trackers_info_today">%1$s ಇಂದು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ</string>
+
+
 
 
 </resources>

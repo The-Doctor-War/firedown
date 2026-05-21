@@ -281,6 +281,18 @@
     <string name="crash_sheet_dismiss">დახურვა</string>
     <string name="crash_sheet_copied">გათიშვის ანგარიში დაკოპირდა გაცვლის ბუფერში</string>
     <string name="crash_sheet_open_failed">ბრაუზერი ვერ გაიხსნა. ანგარიში გაცვლის ბუფერშია — ჩასვით ის ახალ GitHub issue-ში.</string>
+    <string name="home_trackers_title">ტრეკერები და რეკლამები დაბლოკილია</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s დაზოგა</string>
+    <string name="home_trackers_subtitle_idle">დაცვა ჩართულია</string>
+    <string name="home_vault_empty_subtitle">კერძო და დაშიფრული</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 მბ დაზოგა</string>
+    <string name="trackers_info_count_label">ტრეკერი და რეკლამა დაბლოკილია</string>
+    <string name="trackers_info_saved">~%1$s გამტარუნარიანობა დაზოგა</string>
+    <string name="trackers_info_categories">ტრეკერები · რეკლამები · თითის ანაბეჭდი · ქუქი ფაილები</string>
+    <string name="trackers_info_action">დაცვის მართვა</string>
+    <string name="trackers_info_today">%1$s დღეს დაბლოკილია</string>
+
+
 
 
 </resources>

@@ -312,6 +312,18 @@
     <string name="crash_sheet_dismiss">Descarta</string>
     <string name="crash_sheet_copied">Informe de fallada copiat al porta-retalls</string>
     <string name="crash_sheet_open_failed">No s\'ha pogut obrir el navegador. L\'informe és al porta-retalls — enganxa\'l a una nova incidència de GitHub.</string>
+    <string name="home_trackers_title">Rastrejadors i anuncis bloquejats</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s estalviats</string>
+    <string name="home_trackers_subtitle_idle">Protecció activa</string>
+    <string name="home_vault_empty_subtitle">Privada i xifrada</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB estalviats</string>
+    <string name="trackers_info_count_label">rastrejadors i anuncis bloquejats</string>
+    <string name="trackers_info_saved">~%1$s d\'ample de banda estalviats</string>
+    <string name="trackers_info_categories">Rastrejadors · Anuncis · Empremta · Galetes</string>
+    <string name="trackers_info_action">Gestiona la protecció</string>
+    <string name="trackers_info_today">%1$s bloquejats avui</string>
+
+
 
 
 </resources>

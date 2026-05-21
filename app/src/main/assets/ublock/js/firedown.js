@@ -217,6 +217,56 @@ import {
                 cookies: cookieNoticesBlocked,
             }
         });
+        // Piggyback the cumulative-blocked counter on this trigger so
+        // the Home 'trackers blocked' card stays in sync without an
+        // extra round-trip. uBlock owns the storage; we just relay.
+        pushCumulativeStats();
     }
+
+    /**************************************************************************
+     * Pushes µb.requestStats.blockedCount (cumulative since install) to the
+     * native side. Read by GeckoUblockHelper to drive the Home 'trackers
+     * blocked' card. Sent on extension load + every firewall update + on a
+     * 60-second interval so the card refreshes while the user browses without
+     * polling uBlock internals from Java.
+     *************************************************************************/
+    function pushCumulativeStats() {
+        try {
+            const stats = µb.requestStats;
+            if (!stats || typeof stats.blockedCount !== 'number') { return; }
+            browser.runtime.sendNativeMessage("ublock", {
+                cumulativeBlocked: stats.blockedCount
+            });
+        } catch (_) { /* extension still loading, retry on next tick */ }
+    }
+
+    // Initial push as soon as the extension is ready, then hook
+    // µb.updateToolbarIcon — uBlock calls it on every badge change,
+    // which happens as new blocks land — so the Home 'trackers
+    // blocked' card refreshes the moment the user returns from a
+    // browsing tab instead of waiting for the 60s interval.
+    //
+    // Debounced 250ms so an ad-heavy page (dozens of blocks in a
+    // burst) coalesces into a single native message rather than
+    // storming the bus. The 60s interval is kept as a backstop for
+    // anything that bypasses updateToolbarIcon.
+    µb.isReadyPromise.then(() => {
+        pushCumulativeStats();
+        let pushTimer = null;
+        const originalUpdateToolbarIcon = µb.updateToolbarIcon;
+        if (typeof originalUpdateToolbarIcon === 'function') {
+            µb.updateToolbarIcon = function(tabId, newParts) {
+                const result = originalUpdateToolbarIcon.call(µb, tabId, newParts);
+                if (pushTimer === null) {
+                    pushTimer = setTimeout(() => {
+                        pushTimer = null;
+                        pushCumulativeStats();
+                    }, 250);
+                }
+                return result;
+            };
+        }
+    });
+    setInterval(pushCumulativeStats, 60_000);
 
 })();

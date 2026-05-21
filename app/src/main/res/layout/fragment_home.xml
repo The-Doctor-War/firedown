@@ -175,6 +175,16 @@
             </com.google.android.material.card.MaterialCardView>
 
 
+            <include
+                android:id="@+id/home_trackers_card"
+                layout="@layout/card_home_trackers_blocked"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/list_spacing"
+                android:layout_marginEnd="@dimen/list_spacing"
+                android:layout_marginBottom="12dp" />
+
+
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

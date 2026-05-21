@@ -379,6 +379,18 @@
     <string name="crash_sheet_dismiss">Sluiten</string>
     <string name="crash_sheet_copied">Crashrapport gekopieerd naar klembord</string>
     <string name="crash_sheet_open_failed">Kan de browser niet openen. Het crashrapport staat op je klembord — plak het in een nieuw GitHub-issue.</string>
+    <string name="home_trackers_title">Trackers en advertenties geblokkeerd</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s bespaard</string>
+    <string name="home_trackers_subtitle_idle">Bescherming actief</string>
+    <string name="home_vault_empty_subtitle">Privé en versleuteld</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB bespaard</string>
+    <string name="trackers_info_count_label">trackers en advertenties geblokkeerd</string>
+    <string name="trackers_info_saved">~%1$s aan bandbreedte bespaard</string>
+    <string name="trackers_info_categories">Trackers · Advertenties · Fingerprinting · Cookies</string>
+    <string name="trackers_info_action">Bescherming beheren</string>
+    <string name="trackers_info_today">%1$s vandaag geblokkeerd</string>
+
+
 
 
 </resources>

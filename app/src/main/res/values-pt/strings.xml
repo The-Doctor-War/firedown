@@ -310,6 +310,18 @@
     <string name="crash_sheet_dismiss">Dispensar</string>
     <string name="crash_sheet_copied">Relatório de falha copiado para a área de transferência</string>
     <string name="crash_sheet_open_failed">Não foi possível abrir o navegador. O relatório está na área de transferência — cole-o em uma nova issue do GitHub.</string>
+    <string name="home_trackers_title">Rastreadores e anúncios bloqueados</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s economizados</string>
+    <string name="home_trackers_subtitle_idle">Proteção ativa</string>
+    <string name="home_vault_empty_subtitle">Privada e criptografada</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB economizados</string>
+    <string name="trackers_info_count_label">rastreadores e anúncios bloqueados</string>
+    <string name="trackers_info_saved">~%1$s de largura de banda economizados</string>
+    <string name="trackers_info_categories">Rastreadores · Anúncios · Impressão digital · Cookies</string>
+    <string name="trackers_info_action">Gerenciar proteção</string>
+    <string name="trackers_info_today">%1$s bloqueados hoje</string>
+
+
 
 
 </resources>

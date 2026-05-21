@@ -2,7 +2,6 @@
 <resources>
     <dimen name="address_bar_height">64dp</dimen>
     <dimen name="address_bar_inset">16dp</dimen>
-    <dimen name="address_bar_layout">56dp</dimen>
     <dimen name="address_bar_margin">8dp</dimen>
     <dimen name="address_bar_padding">16dp</dimen>
     <dimen name="address_bar_radius">24dp</dimen>

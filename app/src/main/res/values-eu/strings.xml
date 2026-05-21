@@ -282,6 +282,18 @@
     <string name="crash_sheet_dismiss">Baztertu</string>
     <string name="crash_sheet_copied">Hutsegite txostena arbelean kopiatu da</string>
     <string name="crash_sheet_open_failed">Ezin izan da arakatzailea ireki. Txostena arbelean dago — itsatsi GitHub-eko gai berri batean.</string>
+    <string name="home_trackers_title">Jarraitzaileak eta iragarkiak blokeatuta</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s aurreztuta</string>
+    <string name="home_trackers_subtitle_idle">Babesa aktibo</string>
+    <string name="home_vault_empty_subtitle">Pribatua eta zifratua</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB aurreztuta</string>
+    <string name="trackers_info_count_label">jarraitzaileak eta iragarkiak blokeatuta</string>
+    <string name="trackers_info_saved">~%1$s banda-zabalera aurreztua</string>
+    <string name="trackers_info_categories">Jarraitzaileak · Iragarkiak · Hatz-marka · Cookieak</string>
+    <string name="trackers_info_action">Kudeatu babesa</string>
+    <string name="trackers_info_today">%1$s blokeatuta gaur</string>
+
+
 
 
 </resources>

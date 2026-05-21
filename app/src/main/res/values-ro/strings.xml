@@ -294,6 +294,18 @@
     <string name="crash_sheet_dismiss">Închide</string>
     <string name="crash_sheet_copied">Raportul de eroare copiat în clipboard</string>
     <string name="crash_sheet_open_failed">Nu s-a putut deschide browserul. Raportul este în clipboard — lipește-l într-un nou issue GitHub.</string>
+    <string name="home_trackers_title">Urmăritoare și reclame blocate</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s economisiți</string>
+    <string name="home_trackers_subtitle_idle">Protecție activă</string>
+    <string name="home_vault_empty_subtitle">Privat și criptat</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB economisiți</string>
+    <string name="trackers_info_count_label">urmăritoare și reclame blocate</string>
+    <string name="trackers_info_saved">~%1$s de lățime de bandă economisiți</string>
+    <string name="trackers_info_categories">Urmăritoare · Reclame · Amprentă · Cookie-uri</string>
+    <string name="trackers_info_action">Gestionează protecția</string>
+    <string name="trackers_info_today">%1$s blocate astăzi</string>
+
+
 
 
 </resources>

@@ -97,9 +97,20 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private TextView mHomeMediaTitle;
     private TextView mHomeMediaSubtitle;
     private androidx.appcompat.widget.AppCompatImageButton mHomeMediaToggle;
+    private MaterialCardView mTrackersCard;
+    private TextView mTrackersSubtitle;
+    @javax.inject.Inject
+    com.solarized.firedown.geckoview.GeckoUblockHelper mGeckoUblockHelper;
     @Nullable private java.util.List<DownloadEntity> mLastActiveList;
     @Nullable private Integer mLastFinishedCount;
     private long mLastFinishedSize = 0L;
+
+    /** Estimated bytes that would have been transferred per blocked
+     *  request. uBlock cancels the request before the response, so the
+     *  real number is unknown — Brave's published methodology pegs the
+     *  average at ~50KB and we follow the same so users comparing
+     *  across browsers see consistent figures. */
+    private static final long AVG_BYTES_PER_BLOCKED_REQUEST = 50_000L;
 
 
     @Override
@@ -198,6 +209,19 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         vaultCard.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, VaultActivity.class)));
 
+        // Trackers-blocked shelf card. Subtitle reflects uBlock's
+        // cumulative requestStats.blockedCount, relayed live via
+        // GeckoUblockHelper. Tap spawns a contextual info sheet —
+        // big number, bytes-saved estimate, breakdown of what's
+        // being blocked, and a CTA into Privacy settings.
+        mTrackersCard = v.findViewById(R.id.home_trackers_card);
+        mTrackersSubtitle = v.findViewById(R.id.home_trackers_subtitle);
+        if (mTrackersCard != null) {
+            mTrackersCard.setOnClickListener(view ->
+                    com.solarized.firedown.phone.dialogs.TrackersInfoSheet.show(
+                            getChildFragmentManager()));
+        }
+
         applyHomeCardStyle(v);
 
 
@@ -293,20 +317,48 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             bindDownloadsSubtitle();
         });
 
-        // Vault count drives the empty-hero vault button's count badge.
-        // Button itself is always visible while the empty hero is
-        // showing — discoverability for users who haven't yet used
-        // vault — but the badge only appears when count > 0.
+        // Vault subtitle. Populated state shows 'N items saved'; empty
+        // state shows the 'Private and encrypted' explainer so the
+        // card has a stable two-line layout matching the Downloads
+        // and Trackers shelves, and a first-time user sees a
+        // one-line description of what the card even does.
         mRecentDownloadsViewModel.getVaultCount().observe(getViewLifecycleOwner(), count -> {
             if (mHomeVaultSubtitle == null) return;
             int n = count == null ? 0 : count;
+            mHomeVaultSubtitle.setVisibility(View.VISIBLE);
             if (n > 0) {
-                mHomeVaultSubtitle.setVisibility(View.VISIBLE);
                 mHomeVaultSubtitle.setText(getResources().getQuantityString(
                         R.plurals.home_vault_item_count, n, n));
             } else {
-                mHomeVaultSubtitle.setVisibility(View.GONE);
+                mHomeVaultSubtitle.setText(R.string.home_vault_empty_subtitle);
             }
+        });
+
+        // Trackers-blocked subtitle. firedown.js pushes the cumulative
+        // value periodically; format with locale-aware grouping
+        // separators so 12345 reads as '12,345' or '12.345' depending
+        // on the user's locale, and append an estimated-bytes-saved
+        // figure (Brave's published methodology: 50KB average per
+        // blocked request — flagged with '~' so users read it as an
+        // estimate, not a measured value).
+        //
+        // Zero case → 'Protection active' placeholder instead of the
+        // cosmetic '0 · ~0 saved' you'd otherwise see between app
+        // start and the extension's first push, or on a fresh install
+        // before any browsing.
+        mGeckoUblockHelper.getCumulativeBlockedLive().observe(getViewLifecycleOwner(), blocked -> {
+            if (mTrackersSubtitle == null) return;
+            long n = blocked == null ? 0L : blocked;
+            if (n <= 0) {
+                mTrackersSubtitle.setText(R.string.home_trackers_subtitle_idle);
+                return;
+            }
+            String formattedCount = java.text.NumberFormat
+                    .getInstance(java.util.Locale.getDefault())
+                    .format(n);
+            String savedBytes = Utils.readableFileSize(n * AVG_BYTES_PER_BLOCKED_REQUEST);
+            mTrackersSubtitle.setText(getString(
+                    R.string.home_trackers_subtitle, formattedCount, savedBytes));
         });
 
         // Background-media strip — visible iff GeckoMediaController has a
@@ -477,6 +529,8 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mHomeMediaTitle = null;
         mHomeMediaSubtitle = null;
         mHomeMediaToggle = null;
+        mTrackersCard = null;
+        mTrackersSubtitle = null;
     }
 
     /**
@@ -594,6 +648,17 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                     root.findViewById(R.id.home_vault_title),
                     mHomeVaultSubtitle,
                     style.vault(night));
+        }
+
+        MaterialCardView trackersCard = root.findViewById(R.id.home_trackers_card);
+        if (trackersCard != null) {
+            com.solarized.firedown.ui.HomeCardStyle.applyToCard(
+                    trackersCard,
+                    root.findViewById(R.id.home_trackers_chip),
+                    root.findViewById(R.id.home_trackers_icon),
+                    root.findViewById(R.id.home_trackers_title),
+                    mTrackersSubtitle,
+                    style.trackers(night));
         }
     }
 

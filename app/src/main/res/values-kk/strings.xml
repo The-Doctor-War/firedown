@@ -281,6 +281,18 @@
     <string name="crash_sheet_dismiss">Жабу</string>
     <string name="crash_sheet_copied">Іркіліс есебі алмасу буферіне көшірілді</string>
     <string name="crash_sheet_open_failed">Браузерді ашу мүмкін болмады. Есеп алмасу буферінде — оны жаңа GitHub мәселесіне қойыңыз.</string>
+    <string name="home_trackers_title">Бақылаушылар мен жарнамалар бұғатталды</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s үнемделді</string>
+    <string name="home_trackers_subtitle_idle">Қорғаныс қосулы</string>
+    <string name="home_vault_empty_subtitle">Жеке және шифрленген</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 МБ үнемделді</string>
+    <string name="trackers_info_count_label">бақылаушы мен жарнама бұғатталды</string>
+    <string name="trackers_info_saved">~%1$s трафик үнемделді</string>
+    <string name="trackers_info_categories">Бақылаушылар · Жарнамалар · Іздер · Cookie</string>
+    <string name="trackers_info_action">Қорғанысты басқару</string>
+    <string name="trackers_info_today">%1$s бүгін бұғатталды</string>
+
+
 
 
 </resources>

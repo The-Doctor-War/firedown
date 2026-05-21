@@ -477,6 +477,7 @@
          preview cards don't look anaemic. -->
     <string name="home_card_style_preview_downloads_subtitle">150 files saved · 2.4 GB</string>
     <string name="home_card_style_preview_vault_subtitle">12 items saved</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB saved</string>
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">Disable WebGL</string>
     <string name="settings_webgl_disabled_summary">Blocks GPU fingerprinting, may break 3D content</string>
@@ -555,4 +556,34 @@
          Folder' becomes 'Carpeta segura' in es, 'Sicherer Ordner' in
          de, etc. -->
     <string name="home_vault_button">Safe Folder</string>
+    <!-- Subtitle shown on the Home Safe Folder card when the vault
+         is empty. Populated state uses the home_vault_item_count
+         plural ('12 items saved') instead. Keeps the card on two
+         lines so its height matches the Downloads and Trackers
+         shelves, and gives a first-time user a one-line explainer
+         for what the card stores. -->
+    <string name="home_vault_empty_subtitle">Private and encrypted</string>
+    <!-- Home page 'Trackers and ads blocked' card. Subtitle reads
+         '12,345 · ~580 MB saved'. %1$s is the formatted count (via
+         NumberFormat with locale grouping), %2$s is the estimated
+         bytes saved (count * 50KB average per blocked request,
+         matching Brave's published methodology). The '~' prefix
+         flags it as an estimate, not measured. -->
+    <string name="home_trackers_title">Trackers and ads blocked</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s saved</string>
+    <!-- Trackers info bottom sheet — spawned from the Home Trackers
+         card. Shows the cumulative count big, an estimated bytes-
+         saved line, a short categories caption, and a CTA into
+         Privacy settings. trackers_info_saved %1$s is the formatted
+         bytes string. -->
+    <string name="trackers_info_count_label">trackers and ads blocked</string>
+    <string name="trackers_info_saved">~%1$s of bandwidth saved</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+    <string name="trackers_info_categories">Trackers · Ads · Fingerprinting · Cookie banners</string>
+    <string name="trackers_info_action">Manage protection</string>
+    <!-- Subtitle placeholder for the initial state — uBlock hasn't
+         pushed its cumulative count yet, or the count is genuinely
+         zero (fresh install, no browsing). Avoids the cosmetic
+         '0 · ~0 saved' that would otherwise appear. -->
+    <string name="home_trackers_subtitle_idle">Protection active</string>
 </resources>

@@ -280,6 +280,18 @@
     <string name="crash_sheet_dismiss">Hidh poshtë</string>
     <string name="crash_sheet_copied">Raporti i rrëzimit u kopjua në kujtesë</string>
     <string name="crash_sheet_open_failed">Nuk u hap dot shfletuesi. Raporti është në kujtesë — ngjite në një issue të ri në GitHub.</string>
+    <string name="home_trackers_title">Gjurmuesit dhe reklamat të bllokuara</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s të kursyera</string>
+    <string name="home_trackers_subtitle_idle">Mbrojtja aktive</string>
+    <string name="home_vault_empty_subtitle">Privat dhe i koduar</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB të kursyera</string>
+    <string name="trackers_info_count_label">gjurmues dhe reklama të bllokuara</string>
+    <string name="trackers_info_saved">~%1$s gjerësi bande e kursyer</string>
+    <string name="trackers_info_categories">Gjurmues · Reklama · Gjurmë · Cookies</string>
+    <string name="trackers_info_action">Menaxho mbrojtjen</string>
+    <string name="trackers_info_today">%1$s të bllokuara sot</string>
+
+
 
 
 </resources>

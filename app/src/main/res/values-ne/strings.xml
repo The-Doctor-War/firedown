@@ -154,7 +154,6 @@
     <string name="settings_cookies_accept_visited">हो कृपया</string>
     <string name="settings_cookies_isolate">क्रस-साइट कुकीहरू रोक्नुहोस्</string>
     <string name="settings_doh_server">DNS सर्भर</string>
-    <string name="settings_doh_server_error_format">सही तरिकाले ढाँचा गरिएको URL प्रविष्ट गर्नुहोस्</string>
     <string name="settings_doh_server_error_provider">कृपया प्रमाणित गर्नुहोस् कि मान्य प्रदायक हो वा पछि पुन: प्रयास गर्नुहोस्</string>
     <string name="settings_doh_server_off">प्रणाली DNS समाधानकर्ता प्रयोग गर्नुहोस्</string>
     <string name="settings_doh_server_title">प्रदायक प्रयोग गर्नुहोस्</string>
@@ -203,7 +202,6 @@
     <string name="vault_decrypting">फाइल डिक्रिप्ट गर्दै, कृपया प्रतीक्षा गर्नुहोस्…</string>
     <string name="vault_encrypting">फाइल इन्क्रिप्ट गर्दै, कृपया प्रतीक्षा गर्नुहोस्…</string>
     <string name="vault_unsupported">यो फाइल खोल्न सकिँदैन। खोल्न, यसलाई सुरक्षित फोल्डरबाट बाहिर सार्नुहोस् र पुन: प्रयास गर्नुहोस्।</string>
-    <string name="downloads_quick_access_title">हालैका डाउनलोडहरू</string>
     <string name="home_onboarding_sites_label">Firedown प्रयास गर्नुहोस्</string>
     <string name="home_vault_button">सुरक्षित फोल्डर</string>
     <string name="home_media_playing">बजाइरहेको छ</string>

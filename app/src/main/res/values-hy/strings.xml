@@ -155,7 +155,6 @@
     <string name="settings_cookies_accept_visited">Այո խնդրում եմ</string>
     <string name="settings_cookies_isolate">Արգելափակել միջկայքային թխուկները</string>
     <string name="settings_doh_server">DNS սերվեր</string>
-    <string name="settings_doh_server_error_format">Մուտքագրեք ճիշտ ձևաչափված URL</string>
     <string name="settings_doh_server_error_provider">Խնդրում ենք ստուգել, ​​որ վավեր մատակարար է կամ ավելի ուշ նորից փորձեք</string>
     <string name="settings_doh_server_off">Օգտագործեք համակարգի DNS լուծիչ</string>
     <string name="settings_doh_server_title">Օգտագործեք Մատակարարը</string>
@@ -204,7 +203,6 @@
     <string name="vault_decrypting">Ֆայլի վերծանում, խնդրում ենք սպասել…</string>
     <string name="vault_encrypting">Ֆայլը գաղտնագրվում է, խնդրում ենք սպասել…</string>
     <string name="vault_unsupported">Հնարավոր չէ բացել այս ֆայլը: Բացելու համար տեղափոխեք այն Safe Folder-ից և նորից փորձեք:</string>
-    <string name="downloads_quick_access_title">Վերջին ներբեռնումներ</string>
     <string name="home_onboarding_sites_label">Փորձեք Firedown-ը</string>
     <string name="home_vault_button">Ապահով պանակ</string>
     <string name="home_media_playing">Նվագարկվում է</string>

@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Pois</string>
     <string name="delete_browsing_data_quit_on">Päällä</string>
     <string name="delete_downloads">Poista lataukset</string>
+    <string name="delete_history_all_time">Kaikki</string>
+    <string name="delete_history_last_15_minutes">Viimeiset 15 minuuttia</string>
+    <string name="delete_history_last_24_hours">Viimeiset 24 tuntia</string>
+    <string name="delete_history_last_hour">Viimeinen tunti</string>
+    <string name="delete_history_prompt_message">Valitun ajanjakson selaushistoria poistetaan pysyvästi tästä laitteesta.</string>
     <string name="delete_history_prompt_title">Tyhjennettävä aikajakso</string>
     <string name="delete_partial_tabs">Tämä poistaa kaikki suljettujen välilehtien tiedot.</string>
     <string name="delete_password">Poista salasana</string>
@@ -224,7 +229,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Anna oikein muotoiltu URL-osoite</string>
     <string name="settings_doh_server_error_provider">Varmista, että palveluntarjoaja on kelvollinen, tai yritä myöhemmin uudelleen</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -291,7 +295,6 @@
     <string name="play">Toista</string>
     <string name="pip_play">Toista</string>
     <string name="pip_pause">Tauko</string>
-    <string name="downloads_quick_access_title">Viimeisimmät lataukset</string>
     <string name="home_onboarding_sites_label">Kokeile Firedownia sivustolla</string>
     <string name="home_vault_button">Turvakansio</string>
     <string name="home_media_playing">Toistetaan</string>
@@ -299,8 +302,6 @@
     <string name="settings_webrtc_enabled_summary">Sallii reaaliaikaiset video- ja äänipuhelut. Käytöstä poistaminen pienentää verkkokartoituksen hyökkäyspintaa.</string>
     <string name="incognito_home_description">Yksityisessä ikkunassa Firedown ei tallenna:</string>
     <string name="incognito_home_warning">Yksityinen selaus ei piilota toimintaasi verkoltasi, työnantajaltasi tai vierailemiltasi sivustoilta.</string>
-    <string name="downloads_quick_access_view_all">Näytä kaikki lataukset</string>
-    <string name="downloads_quick_access_empty">Viimeisimmät lataukset näkyvät täällä</string>
 <string name="settings_theme_app_category">Sovelluksen teema</string>
     <string name="settings_theme_home_category">Aloitusnäyttö</string>
     <string name="settings_home_cards">Aloitusnäytön kortit</string>

@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Tắt</string>
     <string name="delete_browsing_data_quit_on">Bật</string>
     <string name="delete_downloads">Xóa Tải xuống</string>
+    <string name="delete_history_all_time">Mọi lúc</string>
+    <string name="delete_history_last_15_minutes">15 phút qua</string>
+    <string name="delete_history_last_24_hours">24 giờ qua</string>
+    <string name="delete_history_last_hour">1 giờ qua</string>
+    <string name="delete_history_prompt_message">Lịch sử duyệt web trong khoảng thời gian đã chọn sẽ bị xóa vĩnh viễn khỏi thiết bị này.</string>
     <string name="delete_history_prompt_title">Khoảng thời gian để xóa</string>
     <string name="delete_partial_tabs">Thao tác này sẽ xóa dữ liệu về các tab đã đóng của bạn.</string>
     <string name="delete_password">Xóa mật khẩu</string>
@@ -208,7 +213,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Nhập URL được định dạng đúng</string>
     <string name="settings_doh_server_error_provider">Vui lòng xác minh rằng đó là nhà cung cấp hợp lệ hoặc thử lại sau</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -274,7 +278,6 @@
     <string name="play">Phát</string>
     <string name="pip_play">Phát</string>
     <string name="pip_pause">Tạm dừng</string>
-    <string name="downloads_quick_access_title">Tải xuống gần đây</string>
     <string name="home_onboarding_sites_label">Thử Firedown trên</string>
     <string name="home_vault_button">Thư mục an toàn</string>
     <string name="home_media_playing">Đang phát</string>
@@ -282,8 +285,6 @@
     <string name="settings_webrtc_enabled_summary">Cho phép gọi video và thoại theo thời gian thực. Tắt sẽ giảm bề mặt thăm dò mạng.</string>
     <string name="incognito_home_description">Khi duyệt trong cửa sổ riêng tư, Firedown không lưu:</string>
     <string name="incognito_home_warning">Duyệt web riêng tư không che giấu hoạt động của bạn khỏi mạng, chủ lao động hoặc các trang bạn truy cập.</string>
-    <string name="downloads_quick_access_view_all">Xem tất cả tệp tải xuống</string>
-    <string name="downloads_quick_access_empty">Các tệp tải xuống gần đây sẽ xuất hiện ở đây</string>
     <string name="settings_theme_app_category">Chủ đề ứng dụng</string>
     <string name="settings_theme_home_category">Màn hình chính</string>
     <string name="settings_home_cards">Thẻ trang chính</string>

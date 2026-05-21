@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Vypnuto</string>
     <string name="delete_browsing_data_quit_on">Zapnuto</string>
     <string name="delete_downloads">Smazat stažené soubory</string>
+    <string name="delete_history_all_time">Vše</string>
+    <string name="delete_history_last_15_minutes">Posledních 15 minut</string>
+    <string name="delete_history_last_24_hours">Posledních 24 hodin</string>
+    <string name="delete_history_last_hour">Poslední hodina</string>
+    <string name="delete_history_prompt_message">Historie prohlížení z vybraného období bude trvale odstraněna z tohoto zařízení.</string>
     <string name="delete_history_prompt_title">Časové období mazání</string>
     <string name="delete_partial_tabs">Tím smažete všechna data vašich zavřených karet.</string>
     <string name="delete_password">Smazat heslo</string>
@@ -225,7 +230,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Zadejte správně formátovanou adresu URL</string>
     <string name="settings_doh_server_error_provider">Ověřte, zda se jedná o platného poskytovatele, nebo to zkuste znovu později</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -293,7 +297,6 @@
     <string name="play">Přehrát</string>
     <string name="pip_play">Přehrát</string>
     <string name="pip_pause">Pozastavit</string>
-    <string name="downloads_quick_access_title">Nedávná stahování</string>
     <string name="home_onboarding_sites_label">Vyzkoušejte Firedown na</string>
     <string name="home_vault_button">Bezpečná složka</string>
     <string name="home_media_playing">Přehrává se</string>
@@ -301,8 +304,6 @@
     <string name="settings_webrtc_enabled_summary">Umožňuje videohovory a hlasové hovory v reálném čase. Vypnutí zmenšuje plochu pro síťové sondování.</string>
     <string name="incognito_home_description">Při prohlížení v anonymním okně Firedown neukládá:</string>
     <string name="incognito_home_warning">Anonymní prohlížení neskrývá vaši aktivitu před sítí, zaměstnavatelem ani navštívenými stránkami.</string>
-    <string name="downloads_quick_access_view_all">Zobrazit všechna stahování</string>
-    <string name="downloads_quick_access_empty">Nedávná stahování se zobrazí zde</string>
     <string name="wasm_snackbar_message">%s vyžaduje WebAssembly</string>
     <string name="wasm_snackbar_action_enable">Povolit</string>
     <string name="settings_wasm_allowlist_title">Povolené weby</string>

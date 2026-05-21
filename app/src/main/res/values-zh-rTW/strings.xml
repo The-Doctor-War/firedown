@@ -55,6 +55,11 @@
     <string name="delete_browsing_data_quit_off">關閉</string>
     <string name="delete_browsing_data_quit_on">開啟</string>
     <string name="delete_downloads">刪除下載</string>
+    <string name="delete_history_all_time">全部歷史</string>
+    <string name="delete_history_last_15_minutes">過去 15 分鐘</string>
+    <string name="delete_history_last_24_hours">過去 24 小時</string>
+    <string name="delete_history_last_hour">過去 1 小時</string>
+    <string name="delete_history_prompt_message">所選時段的瀏覽記錄將從此裝置上永久移除。</string>
     <string name="delete_history_prompt_title">要清除的時間範圍</string>
     <string name="delete_partial_tabs">這將刪除所有已關閉的標籤資料。</string>
     <string name="delete_password">刪除密碼</string>
@@ -211,7 +216,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">輸入格式正確的 URL</string>
     <string name="settings_doh_server_error_provider">請驗證該提供者是否有效或稍後重試</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -281,7 +285,6 @@
         <item quantity="other">%d 個無痕下載進行中</item>
     </plurals>
     <string name="incognito_downloads_in_progress_subtitle">點按以在安全資料夾中檢視</string>
-    <string name="downloads_quick_access_title">最近下載</string>
     <string name="home_onboarding_sites_label">在以下網站試用 Firedown</string>
     <string name="home_vault_button">安全資料夾</string>
     <string name="home_media_playing">播放中</string>
@@ -289,8 +292,6 @@
     <string name="settings_webrtc_enabled_summary">啟用即時視訊和語音通話。停用可減少網路探測攻擊面。</string>
     <string name="incognito_home_description">在私密視窗瀏覽時，Firedown 不會保留：</string>
     <string name="incognito_home_warning">私密瀏覽不會向你的網路、雇主或造訪的網站隱藏你的活動。</string>
-    <string name="downloads_quick_access_view_all">查看全部下載</string>
-    <string name="downloads_quick_access_empty">最近的下載將顯示於此</string>
     <string name="wasm_snackbar_message">%s 需要 WebAssembly 才能執行</string>
     <string name="wasm_snackbar_action_enable">啟用</string>
     <string name="settings_wasm_allowlist_title">允許的網站</string>

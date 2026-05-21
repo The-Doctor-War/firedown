@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Vypnuté</string>
     <string name="delete_browsing_data_quit_on">Zapnuté</string>
     <string name="delete_downloads">Odstrániť stiahnuté súbory</string>
+    <string name="delete_history_all_time">Všetko</string>
+    <string name="delete_history_last_15_minutes">Posledných 15 minút</string>
+    <string name="delete_history_last_24_hours">Posledných 24 hodín</string>
+    <string name="delete_history_last_hour">Poslednú hodinu</string>
+    <string name="delete_history_prompt_message">História prehliadania z vybraného obdobia bude natrvalo odstránená z tohto zariadenia.</string>
     <string name="delete_history_prompt_title">Obdobie, za ktoré vymazať údaje</string>
     <string name="delete_partial_tabs">Týmto sa odstránia všetky údaje o zatvorených kartách.</string>
     <string name="delete_password">Odstrániť heslo</string>
@@ -208,7 +213,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Zadajte adresu URL v správnom formáte</string>
     <string name="settings_doh_server_error_provider">Overte, že ide o platného poskytovateľa, alebo to skúste znova neskôr</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -271,7 +275,6 @@
     <string name="vault_encrypting">Šifruje sa súbor, čakajte…</string>
     <string name="vault_unsupported">Tento súbor sa nedá otvoriť. Ak ho chcete otvoriť, presuňte ho z bezpečného priečinka a skúste to znova.</string>
     <string name="bookmark_name">Názov</string>
-    <string name="downloads_quick_access_title">Nedávne sťahovania</string>
     <string name="home_onboarding_sites_label">Vyskúšajte Firedown na</string>
     <string name="home_vault_button">Bezpečný priečinok</string>
     <string name="home_media_playing">Prehráva sa</string>
@@ -279,8 +282,6 @@
     <string name="settings_webrtc_enabled_summary">Umožňuje videohovory a hlasové hovory v reálnom čase. Vypnutie zmenšuje plochu sieťového sondovania.</string>
     <string name="incognito_home_description">Pri prehliadaní v anonymnom okne Firedown neukladá:</string>
     <string name="incognito_home_warning">Anonymné prehliadanie neskrýva vašu aktivitu pred sieťou, zamestnávateľom ani navštívenými stránkami.</string>
-    <string name="downloads_quick_access_view_all">Zobraziť všetky preberania</string>
-    <string name="downloads_quick_access_empty">Posledné preberania sa zobrazia tu</string>
 <string name="settings_theme_app_category">Vzhľad aplikácie</string>
     <string name="settings_theme_home_category">Domovská obrazovka</string>
     <string name="settings_home_cards">Karty domovskej obrazovky</string>

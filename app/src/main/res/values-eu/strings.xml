@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Desaktibatuta</string>
     <string name="delete_browsing_data_quit_on">Aktibatuta</string>
     <string name="delete_downloads">Ezabatu deskargak</string>
+    <string name="delete_history_all_time">Beti</string>
+    <string name="delete_history_last_15_minutes">Azken 15 minutuak</string>
+    <string name="delete_history_last_24_hours">Azken 24 orduak</string>
+    <string name="delete_history_last_hour">Azken ordua</string>
+    <string name="delete_history_prompt_message">Hautatutako epeko nabigazio-historia behin betiko ezabatuko da gailu honetatik.</string>
     <string name="delete_history_prompt_title">Ezabatu beharreko denbora-tartea</string>
     <string name="delete_partial_tabs">Honek zure fitxa itxien datuak ezabatuko ditu.</string>
     <string name="delete_password">Ezabatu pasahitza</string>
@@ -200,7 +205,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Webgune gehienetan saioa amaituko duzu</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Irekitako fitxak</string>
     <string name="settings_doh_server">DNS zerbitzaria</string>
-<string name="settings_doh_server_error_format">Sartu behar bezala formateatutako URL bat</string>
     <string name="settings_doh_server_error_provider">Egiaztatu baliozko hornitzaile bat dela edo saiatu berriro geroago</string>
     <string name="settings_doh_server_off">Erabili sistema DNS konpontzailea</string>
     <string name="settings_doh_server_title">Erabili hornitzailea</string>
@@ -260,7 +264,6 @@
     <string name="vault_encrypting">Fitxategia enkriptatzen, itxaron mesedez…</string>
     <string name="vault_unsupported">Ezin da fitxategi hau ireki. Irekitzeko, atera karpeta segurutik eta saiatu berriro.</string>
     <string name="bookmark_name">Izena</string>
-    <string name="downloads_quick_access_title">Azken deskargak</string>
     <string name="home_onboarding_sites_label">Probatu Firedown hemen</string>
     <string name="home_vault_button">Karpeta segurua</string>
     <string name="home_media_playing">Erreproduzitzen</string>

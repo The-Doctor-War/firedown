@@ -4,8 +4,7 @@
   the Safe Folder card — icon + title + 'N files saved · X.Y GB'
   subtitle — so the home reads as a small set of equal-weight
   destinations rather than competing surfaces. Tap routes to
-  DownloadsActivity; long-pressing the bottom-bar Downloads button
-  is the path to a quick-list preview (DownloadsQuickAccessSheet).
+  DownloadsActivity.
 -->
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"

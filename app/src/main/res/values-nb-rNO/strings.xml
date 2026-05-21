@@ -21,6 +21,11 @@
     <string name="delete_browsing_data_on_quit_action">Avslutt</string>
     <string name="delete_browsing_data_quit_off">Av</string>
     <string name="delete_browsing_data_quit_on">På</string>
+    <string name="delete_history_all_time">All tid</string>
+    <string name="delete_history_last_15_minutes">Siste 15 minutter</string>
+    <string name="delete_history_last_24_hours">Siste 24 timer</string>
+    <string name="delete_history_last_hour">Siste time</string>
+    <string name="delete_history_prompt_message">Nettleserloggen for den valgte perioden vil bli permanent fjernet fra denne enheten.</string>
     <string name="delete_history_prompt_title">Tidsrom for sletting</string>
     <string name="exit_fullscreen_with_back_button_short">Dra fra toppen, og trykk tilbake for å avslutte</string>
     <string name="library_bookmarks">Bokmerker</string>
@@ -52,15 +57,12 @@
     <string name="snackbar_tab_closed">Fane lukket</string>
     <string name="switch_to_tab_description">Bytt til fane</string>
     <string name="bookmark_name">Navn</string>
-    <string name="downloads_quick_access_title">Nylige nedlastinger</string>
     <string name="home_onboarding_sites_label">Prøv Firedown på</string>
     <string name="home_media_playing">Spiller av</string>
     <string name="home_media_paused">Satt på pause</string>
     <string name="settings_webrtc_enabled_summary">Tillater video- og taleanrop i sanntid. Å slå av reduserer nettverkssonderingsflaten.</string>
     <string name="incognito_home_description">Når du surfer i et privat vindu, lagrer ikke Firedown:</string>
     <string name="incognito_home_warning">Privat surfing skjuler ikke aktiviteten din fra nettverket ditt, arbeidsgiveren din eller nettstedene du besøker.</string>
-    <string name="downloads_quick_access_view_all">Vis alle nedlastinger</string>
-    <string name="downloads_quick_access_empty">Nylige nedlastinger vises her</string>
 <string name="settings_theme_app_category">Apptema</string>
     <string name="settings_theme_home_category">Startside</string>
     <string name="settings_home_cards">Startkort</string>

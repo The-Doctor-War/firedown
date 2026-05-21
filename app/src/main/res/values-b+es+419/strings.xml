@@ -163,7 +163,6 @@
   <string name="settings_doh_server_adguard" translatable="false">Adguard</string>
   <string name="settings_doh_server_cloudflare" translatable="false">Cloudflare</string>
   <string name="settings_doh_server_custom" translatable="false">Custom</string>
-  <string name="settings_doh_server_error_format">Introduce una URL con el formato correcto</string>
   <string name="settings_doh_server_error_provider">Por favor, verifica que sea un proveedor válido o inténtalo nuevamente más tarde</string>
   <string name="settings_doh_server_google" translatable="false">Google</string>
   <string name="settings_doh_server_mozilla" translatable="false">Mozilla</string>
@@ -215,7 +214,6 @@
     <string name="vault_decrypting">Descifrando archivo, espere…</string>
     <string name="vault_encrypting">Cifrando archivo, espere…</string>
     <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sácalo de la Carpeta segura y vuelve a intentarlo.</string>
-     <string name="downloads_quick_access_title">Descargas recientes</string>
     <string name="home_onboarding_sites_label">Probá Firedown en</string>
     <string name="home_vault_button">Carpeta segura</string>
     <string name="home_media_playing">Reproduciendo</string>

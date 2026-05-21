@@ -195,7 +195,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">മിക്ക സൈറ്റുകളിൽ നിന്നും നിങ്ങൾ പുറത്തിറങ്ങും</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ടാബുകൾ തുറക്കുക</string>
     <string name="settings_doh_server">DNS സെർവർ</string>
-    <string name="settings_doh_server_error_format">ശരിയായി ഫോർമാറ്റ് ചെയ്ത URL നൽകുക</string>
     <string name="settings_doh_server_error_provider">അതൊരു സാധുവായ ദാതാവാണെന്ന് പരിശോധിക്കുക അല്ലെങ്കിൽ പിന്നീട് വീണ്ടും ശ്രമിക്കുക</string>
     <string name="settings_doh_server_off">സിസ്റ്റം DNS റിസോൾവർ ഉപയോഗിക്കുക</string>
     <string name="settings_doh_server_title">ദാതാവിനെ ഉപയോഗിക്കുക</string>
@@ -254,7 +253,6 @@
     <string name="vault_encrypting">ഫയൽ എൻക്രിപ്റ്റ് ചെയ്യുന്നു, കാത്തിരിക്കൂ…</string>
     <string name="vault_unsupported">ഈ ഫയൽ തുറക്കാൻ കഴിയില്ല. തുറക്കാൻ, അത് സുരക്ഷിത ഫോൾഡറിൽ നിന്ന് നീക്കി വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="bookmark_name">പേരു്</string>
-    <string name="downloads_quick_access_title">സമീപകാല ഡൗൺലോഡുകൾ</string>
     <string name="home_onboarding_sites_label">Firedown പരീക്ഷിക്കൂ</string>
     <string name="home_vault_button">സുരക്ഷിത ഫോൾഡർ</string>
     <string name="home_media_playing">പ്ലേ ചെയ്യുന്നു</string>

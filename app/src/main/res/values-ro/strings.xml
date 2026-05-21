@@ -205,7 +205,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Introduceți o adresă URL formatată corect</string>
     <string name="settings_doh_server_error_provider">Verificați dacă este un furnizor valid sau încercați din nou mai târziu</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -267,7 +266,6 @@
     <string name="vault_encrypting">Se criptează fișierul, așteptați…</string>
     <string name="vault_unsupported">Nu se poate deschide acest fișier. Pentru a deschide, mutați-l din Folder sigur și încercați din nou.</string>
     <string name="bookmark_name">Nume</string>
-    <string name="downloads_quick_access_title">Descărcări recente</string>
     <string name="home_onboarding_sites_label">Încearcă Firedown pe</string>
     <string name="home_vault_button">Dosar sigur</string>
     <string name="home_media_playing">Se redă</string>
@@ -275,8 +273,6 @@
     <string name="settings_webrtc_enabled_summary">Permite apeluri video și vocale în timp real. Dezactivarea reduce suprafața de sondare a rețelei.</string>
     <string name="incognito_home_description">Când navighezi într-o fereastră privată, Firedown nu salvează:</string>
     <string name="incognito_home_warning">Navigarea privată nu îți ascunde activitatea față de rețea, angajator sau site-urile pe care le vizitezi.</string>
-    <string name="downloads_quick_access_view_all">Vezi toate descărcările</string>
-    <string name="downloads_quick_access_empty">Descărcările recente vor apărea aici</string>
 <string name="settings_theme_app_category">Temă aplicație</string>
     <string name="settings_theme_home_category">Pagina principală</string>
     <string name="settings_home_cards">Carduri principale</string>

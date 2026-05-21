@@ -55,6 +55,11 @@
     <string name="delete_browsing_data_quit_off">Wyłączone</string>
     <string name="delete_browsing_data_quit_on">Włączone</string>
     <string name="delete_downloads">Usuń pobrane pliki</string>
+    <string name="delete_history_all_time">Cała historia</string>
+    <string name="delete_history_last_15_minutes">Ostatnie 15 minut</string>
+    <string name="delete_history_last_24_hours">Ostatnie 24 godziny</string>
+    <string name="delete_history_last_hour">Ostatnia godzina</string>
+    <string name="delete_history_prompt_message">Historia przeglądania z wybranego okresu zostanie trwale usunięta z tego urządzenia.</string>
     <string name="delete_history_prompt_title">Okres do usunięcia</string>
     <string name="delete_partial_tabs">Spowoduje to usunięcie danych z zamkniętych kart.</string>
     <string name="delete_password">Usuń hasło</string>
@@ -246,7 +251,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Wprowadź poprawnie sformatowany adres URL</string>
     <string name="settings_doh_server_error_provider">Sprawdź, czy jest to prawidłowy dostawca lub spróbuj ponownie później</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -336,7 +340,6 @@
     <string name="play">Odtwórz</string>
     <string name="pip_play">Odtwórz</string>
     <string name="pip_pause">Wstrzymaj</string>
-    <string name="downloads_quick_access_title">Ostatnie pobrania</string>
     <string name="home_onboarding_sites_label">Wypróbuj Firedown na</string>
     <string name="home_vault_button">Bezpieczny folder</string>
     <string name="home_media_playing">Odtwarzanie</string>
@@ -344,8 +347,6 @@
     <string name="settings_webrtc_enabled_summary">Umożliwia połączenia wideo i głosowe w czasie rzeczywistym. Wyłączenie zmniejsza powierzchnię sondowania sieci.</string>
     <string name="incognito_home_description">W oknie prywatnym Firedown nie zapisuje:</string>
     <string name="incognito_home_warning">Tryb prywatny nie ukrywa twojej aktywności przed siecią, pracodawcą ani odwiedzanymi stronami.</string>
-    <string name="downloads_quick_access_view_all">Zobacz wszystkie pobrania</string>
-    <string name="downloads_quick_access_empty">Ostatnie pobrania pojawią się tutaj</string>
     <string name="wasm_snackbar_message">%s wymaga WebAssembly</string>
     <string name="wasm_snackbar_action_enable">Włącz</string>
     <string name="settings_wasm_allowlist_title">Dozwolone witryny</string>

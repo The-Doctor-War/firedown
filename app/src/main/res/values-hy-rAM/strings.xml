@@ -21,6 +21,11 @@
     <string name="delete_browsing_data_on_quit_action">Փակել</string>
     <string name="delete_browsing_data_quit_off">Անջ.</string>
     <string name="delete_browsing_data_quit_on">Միաց.</string>
+    <string name="delete_history_all_time">Ամբողջ ընթացքում</string>
+    <string name="delete_history_last_15_minutes">Վերջին 15 րոպեն</string>
+    <string name="delete_history_last_24_hours">Վերջին 24 ժամը</string>
+    <string name="delete_history_last_hour">Վերջին ժամը</string>
+    <string name="delete_history_prompt_message">Ընտրված ժամանակահատվածի դիտարկման պատմությունը մշտապես կհեռացվի այս սարքից։</string>
     <string name="delete_history_prompt_title">Ջնջելու ենթակա ժամանակահատվածը</string>
     <string name="exit_fullscreen_with_back_button_short">Քաշեք վերևից և սեղմեք ետ՝ դուրս գալու համար</string>
     <string name="library_bookmarks">Էջանիշեր</string>
@@ -52,7 +57,6 @@
     <string name="snackbar_tab_closed">Ներդիրը փակվեց</string>
     <string name="switch_to_tab_description">Անցնել ներդիրին</string>
     <string name="bookmark_name">Անուն</string>
-    <string name="downloads_quick_access_title">Վերջին ներբեռնումներ</string>
     <string name="home_onboarding_sites_label">Փորձեք Firedown-ը</string>
     <string name="home_media_playing">Նվագարկվում է</string>
     <string name="home_media_paused">Դադարեցված է</string>

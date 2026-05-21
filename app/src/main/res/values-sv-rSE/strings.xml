@@ -21,6 +21,11 @@
     <string name="delete_browsing_data_on_quit_action">Avsluta</string>
     <string name="delete_browsing_data_quit_off">Av</string>
     <string name="delete_browsing_data_quit_on">På</string>
+    <string name="delete_history_all_time">Hela tiden</string>
+    <string name="delete_history_last_15_minutes">Senaste 15 minuterna</string>
+    <string name="delete_history_last_24_hours">Senaste 24 timmarna</string>
+    <string name="delete_history_last_hour">Senaste timmen</string>
+    <string name="delete_history_prompt_message">Webbhistoriken från den valda perioden kommer att tas bort permanent från den här enheten.</string>
     <string name="delete_history_prompt_title">Tidsintervall att radera</string>
     <string name="exit_fullscreen_with_back_button_short">Dra från toppen och tryck bakåt för att avsluta</string>
     <string name="library_bookmarks">Bokmärken</string>
@@ -52,15 +57,12 @@
     <string name="snackbar_tab_closed">Flik stängd</string>
     <string name="switch_to_tab_description">Växla till flik</string>
     <string name="bookmark_name">Namn</string>
-    <string name="downloads_quick_access_title">Senaste nedladdningar</string>
     <string name="home_onboarding_sites_label">Prova Firedown på</string>
     <string name="home_media_playing">Spelar upp</string>
     <string name="home_media_paused">Pausad</string>
     <string name="settings_webrtc_enabled_summary">Tillåter video- och röstsamtal i realtid. Inaktivering minskar nätverkssonderingsytan.</string>
     <string name="incognito_home_description">När du surfar i ett privat fönster sparar Firedown inte:</string>
     <string name="incognito_home_warning">Privat surfning döljer inte din aktivitet för ditt nätverk, din arbetsgivare eller webbplatserna du besöker.</string>
-    <string name="downloads_quick_access_view_all">Visa alla nedladdningar</string>
-    <string name="downloads_quick_access_empty">Senaste nedladdningar visas här</string>
 <string name="settings_theme_app_category">Apptema</string>
     <string name="settings_theme_home_category">Startsida</string>
     <string name="settings_home_cards">Startkort</string>

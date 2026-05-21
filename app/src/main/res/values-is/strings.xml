@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">Óvirkt</string>
     <string name="delete_browsing_data_quit_on">Virkt</string>
     <string name="delete_downloads">Eyða niðurhali</string>
+    <string name="delete_history_all_time">Allur ferill</string>
+    <string name="delete_history_last_15_minutes">Síðustu 15 mínútur</string>
+    <string name="delete_history_last_24_hours">Síðustu 24 klukkustundir</string>
+    <string name="delete_history_last_hour">Síðasta klukkustund</string>
+    <string name="delete_history_prompt_message">Vafurferli frá valda tímabilinu verður varanlega fjarlægður af þessu tæki.</string>
     <string name="delete_history_prompt_title">Tímabil sem á að hreinsa</string>
     <string name="delete_partial_tabs">Þetta mun eyða gögnum um lokaða flipa.</string>
     <string name="delete_password">Eyða lykilorði</string>
@@ -197,7 +202,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Þú verður skráður út af flestum vefsvæðum</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Opnir flipar</string>
     <string name="settings_doh_server">DNS þjónn</string>
-<string name="settings_doh_server_error_format">Sláðu inn rétt sniðið vefslóð</string>
     <string name="settings_doh_server_error_provider">Vinsamlegast staðfestið að þetta sé gild veitandi eða reyndu aftur síðar</string>
     <string name="settings_doh_server_off">Notaðu DNS lausnara kerfisins</string>
     <string name="settings_doh_server_title">Notaðu þjónustuveituna</string>
@@ -256,7 +260,6 @@
     <string name="vault_encrypting">Dulkóðar skrá, vinsamlegast bíddu…</string>
     <string name="vault_unsupported">Ekki er hægt að opna þessa skrá. Til að opna skaltu færa það úr öruggri möppu og reyna aftur.</string>
     <string name="bookmark_name">Heiti</string>
-    <string name="downloads_quick_access_title">Nýleg niðurhal</string>
     <string name="home_onboarding_sites_label">Prófaðu Firedown á</string>
     <string name="home_vault_button">Örugg mappa</string>
     <string name="home_media_playing">Spilar</string>

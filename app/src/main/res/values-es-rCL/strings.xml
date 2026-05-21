@@ -21,6 +21,11 @@
     <string name="delete_browsing_data_on_quit_action">Salir</string>
     <string name="delete_browsing_data_quit_off">No</string>
     <string name="delete_browsing_data_quit_on">Sí</string>
+    <string name="delete_history_all_time">Todo el historial</string>
+    <string name="delete_history_last_15_minutes">Últimos 15 minutos</string>
+    <string name="delete_history_last_24_hours">Últimas 24 horas</string>
+    <string name="delete_history_last_hour">Última hora</string>
+    <string name="delete_history_prompt_message">El historial de navegación del período seleccionado se eliminará permanentemente de este dispositivo.</string>
     <string name="delete_history_prompt_title">Rango de tiempo para eliminar</string>
     <string name="exit_fullscreen_with_back_button_short">Arrastre desde la parte superior y presiona atrás para salir</string>
     <string name="library_bookmarks">Marcadores</string>
@@ -52,7 +57,6 @@
     <string name="snackbar_tab_closed">Pestaña cerrada</string>
     <string name="switch_to_tab_description">Cambiar a pestañas</string>
     <string name="bookmark_name">Nombre</string>
-    <string name="downloads_quick_access_title">Descargas recientes</string>
     <string name="home_onboarding_sites_label">Prueba Firedown en</string>
     <string name="home_media_playing">Reproduciendo</string>
     <string name="home_media_paused">En pausa</string>

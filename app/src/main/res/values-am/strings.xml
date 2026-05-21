@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">ጠፍቷል</string>
     <string name="delete_browsing_data_quit_on">በርቷል</string>
     <string name="delete_downloads">ውርዶችን ሰርዝ</string>
+    <string name="delete_history_all_time">ሁል ጊዜ</string>
+    <string name="delete_history_last_15_minutes">ያለፉት 15 ደቂቃዎች</string>
+    <string name="delete_history_last_24_hours">ያለፉት 24 ሰዓታት</string>
+    <string name="delete_history_last_hour">ያለፈው ሰዓት</string>
+    <string name="delete_history_prompt_message">በተመረጠው ጊዜ ውስጥ ያለው የአሰሳ ታሪክ ከዚህ መሣሪያ በቋሚነት ይወገዳል።</string>
     <string name="delete_history_prompt_title">የሚሰረዝበት ጊዜ</string>
     <string name="delete_partial_tabs">ይህ ሁሉንም የተዘጉ የትሮች ውሂብዎን ይሰርዛል።</string>
     <string name="delete_password">የይለፍ ቃል ሰርዝ</string>
@@ -204,7 +209,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">በትክክል የተቀረጸ URL ያስገቡ</string>
     <string name="settings_doh_server_error_provider">እባክዎ ትክክለኛ አቅራቢ መሆኑን ያረጋግጡ ወይም ቆይተው እንደገና ይሞክሩ</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -265,7 +269,6 @@
     <string name="vault_encrypting">ፋይል በማመስጠር ላይ፣ እባክዎ ይጠብቁ…</string>
     <string name="vault_unsupported">ይህን ፋይል መክፈት አልተቻለም። ለመክፈት ደህንነቱ ከተጠበቀ አቃፊ አውጥተው ይውሰዱ እና እንደገና ይሞክሩ።</string>
     <string name="bookmark_name">ስም</string>
-    <string name="downloads_quick_access_title">የቅርብ ጊዜ ውርዶች</string>
     <string name="home_onboarding_sites_label">Firedownን ይሞክሩ በ</string>
     <string name="home_vault_button">ደህንነቱ የተጠበቀ አቃፊ</string>
     <string name="home_media_playing">በማጫወት ላይ</string>

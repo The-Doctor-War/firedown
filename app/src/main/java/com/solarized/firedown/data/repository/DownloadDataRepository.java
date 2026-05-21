@@ -77,10 +77,6 @@ public class DownloadDataRepository {
 
     // --- Standard Queries ---
 
-    public LiveData<List<DownloadEntity>> getDownloadsLimit(int limit) {
-        return mDatabase.downloadDao().getDownloadsLimit(limit);
-    }
-
     /** Live count of vault-saved downloads. Drives the home empty-hero
      *  vault tile's visibility (any count > 0 → tile reads as occupied)
      *  and its badge label. */

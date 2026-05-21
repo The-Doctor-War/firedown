@@ -49,6 +49,11 @@
     <string name="delete_browsing_data_quit_off">ਬੰਦ</string>
     <string name="delete_browsing_data_quit_on">ਚਾਲੂ</string>
     <string name="delete_downloads">ਡਾਊਨਲੋਡ ਮਿਟਾਓ</string>
+    <string name="delete_history_all_time">ਸਾਰਾ ਸਮਾਂ</string>
+    <string name="delete_history_last_15_minutes">ਪਿਛਲੇ 15 ਮਿੰਟ</string>
+    <string name="delete_history_last_24_hours">ਪਿਛਲੇ 24 ਘੰਟੇ</string>
+    <string name="delete_history_last_hour">ਪਿਛਲਾ ਘੰਟਾ</string>
+    <string name="delete_history_prompt_message">ਚੁਣੀ ਮਿਆਦ ਦਾ ਬਰਾਊਜ਼ਿੰਗ ਇਤਿਹਾਸ ਇਸ ਡੀਵਾਈਸ ਤੋਂ ਪੱਕੇ ਤੌਰ \'ਤੇ ਹਟਾ ਦਿੱਤਾ ਜਾਵੇਗਾ।</string>
     <string name="delete_history_prompt_title">ਹਟਾਉਣ ਲਈ ਸਮਾਂ ਹੱਦ</string>
     <string name="delete_partial_tabs">ਇਹ ਤੁਹਾਡੇ ਬੰਦ ਟੈਬਾਂ ਦੇ ਡੇਟਾ ਨੂੰ ਮਿਟਾ ਦੇਵੇਗਾ।</string>
     <string name="delete_tabs_archive">ਬੰਦ ਟੈਬਾਂ ਮਿਟਾਓ</string>
@@ -243,7 +248,6 @@
     <string name="vault_encrypting">ਫ਼ਾਈਲ ਨੂੰ ਐਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ…</string>
     <string name="vault_unsupported">ਇਸ ਫ਼ਾਈਲ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਖੋਲ੍ਹਣ ਲਈ, ਇਸਨੂੰ ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ ਤੋਂ ਬਾਹਰ ਲੈ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
     <string name="bookmark_name">ਨਾਂ</string>
-    <string name="downloads_quick_access_title">ਹਾਲੀਆ ਡਾਊਨਲੋਡ</string>
     <string name="home_onboarding_sites_label">Firedown ਅਜ਼ਮਾਓ</string>
     <string name="home_vault_button">ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ</string>
     <string name="home_media_playing">ਚੱਲ ਰਿਹਾ ਹੈ</string>

@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">Искључено</string>
     <string name="delete_browsing_data_quit_on">Укључено</string>
     <string name="delete_downloads">Избриши преузимања</string>
+    <string name="delete_history_all_time">Цело време</string>
+    <string name="delete_history_last_15_minutes">Последњих 15 минута</string>
+    <string name="delete_history_last_24_hours">Последња 24 сата</string>
+    <string name="delete_history_last_hour">Последњи сат</string>
+    <string name="delete_history_prompt_message">Историја прегледавања из изабраног периода ће бити трајно уклоњена са овог уређаја.</string>
     <string name="delete_history_prompt_title">Временски распон за брисање</string>
     <string name="delete_partial_tabs">Ово ће избрисати све податке о затвореним картицама.</string>
     <string name="delete_password">Избриши лозинку</string>
@@ -203,7 +208,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_error_format">Унесите исправно форматиран URL</string>
     <string name="settings_doh_server_error_provider">Проверите да ли је исправан провајдер или покушајте поново касније</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -266,7 +270,6 @@
     <string name="vault_encrypting">Шифровање датотеке, сачекајте…</string>
     <string name="vault_unsupported">Не могу да отворим ову датотеку. Да бисте отворили, преместите је из безбедне фасцикле и покушајте поново.</string>
     <string name="bookmark_name">Назив</string>
-    <string name="downloads_quick_access_title">Недавна преузимања</string>
     <string name="home_onboarding_sites_label">Испробајте Firedown на</string>
     <string name="home_vault_button">Безбедан фолдер</string>
     <string name="home_media_playing">Репродукција</string>

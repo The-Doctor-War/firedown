@@ -85,6 +85,11 @@
     <string name="delete_browsing_data_quit_off">Désactivé</string>
     <string name="delete_browsing_data_quit_on">Activé</string>
     <string name="delete_downloads">Supprimer les téléchargements</string>
+    <string name="delete_history_all_time">Tout l\'historique</string>
+    <string name="delete_history_last_15_minutes">15 dernières minutes</string>
+    <string name="delete_history_last_24_hours">24 dernières heures</string>
+    <string name="delete_history_last_hour">Dernière heure</string>
+    <string name="delete_history_prompt_message">L\'historique de navigation pour la période sélectionnée sera supprimé définitivement de cet appareil.</string>
     <string name="delete_history_prompt_title">Intervalle à supprimer</string>
     <string name="delete_partial_tabs">Cela supprimera toutes les données de vos onglets fermés.</string>
     <string name="delete_password">Supprimer le mot de passe</string>
@@ -339,7 +344,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Entrez une URL correctement formatée</string>
     <string name="settings_doh_server_error_provider">Veuillez vérifier qu\'il s\'agit d\'un fournisseur valide ou réessayer plus tard</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -479,13 +483,10 @@
     <string name="play">Lecture</string>
     <string name="pip_play">Lecture</string>
     <string name="pip_pause">Pause</string>
-    <string name="downloads_quick_access_title">Téléchargements récents</string>
     <string name="home_onboarding_sites_label">Essayez Firedown sur</string>
     <string name="home_vault_button">Dossier sécurisé</string>
     <string name="home_media_playing">Lecture</string>
     <string name="home_media_paused">En pause</string>
-    <string name="downloads_quick_access_view_all">Voir tous les téléchargements</string>
-    <string name="downloads_quick_access_empty">Les téléchargements récents apparaîtront ici</string>
     <string name="wasm_snackbar_message">%s a besoin de WebAssembly pour fonctionner</string>
     <string name="wasm_snackbar_action_enable">Activer</string>
     <string name="settings_wasm_allowlist_title">Sites autorisés</string>

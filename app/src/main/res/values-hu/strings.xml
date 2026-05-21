@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Ki</string>
     <string name="delete_browsing_data_quit_on">Be</string>
     <string name="delete_downloads">Letöltések törlése</string>
+    <string name="delete_history_all_time">Teljes előzmények</string>
+    <string name="delete_history_last_15_minutes">Utolsó 15 perc</string>
+    <string name="delete_history_last_24_hours">Utolsó 24 óra</string>
+    <string name="delete_history_last_hour">Utolsó óra</string>
+    <string name="delete_history_prompt_message">A kiválasztott időszak böngészési előzményei véglegesen törlődnek erről az eszközről.</string>
     <string name="delete_history_prompt_title">Törlendő időtartomány</string>
     <string name="delete_partial_tabs">Ezzel törli a bezárt lapokra vonatkozó összes adatot.</string>
     <string name="delete_password">Jelszó törlése</string>
@@ -208,7 +213,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Adjon meg egy helyesen formázott URL-t</string>
     <string name="settings_doh_server_error_provider">Kérjük, ellenőrizze, hogy érvényes szolgáltató-e, vagy próbálja újra később</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -274,7 +278,6 @@
     <string name="play">Lejátszás</string>
     <string name="pip_play">Lejátszás</string>
     <string name="pip_pause">Szünet</string>
-    <string name="downloads_quick_access_title">Legutóbbi letöltések</string>
     <string name="home_onboarding_sites_label">Firedown kipróbálása</string>
     <string name="home_vault_button">Biztonságos mappa</string>
     <string name="home_media_playing">Lejátszás</string>
@@ -282,8 +285,6 @@
     <string name="settings_webrtc_enabled_summary">Engedélyezi a valós idejű video- és hanghívásokat. Kikapcsolása csökkenti a hálózati szondázási felületet.</string>
     <string name="incognito_home_description">Privát ablakban böngészve a Firedown nem tárolja a következőket:</string>
     <string name="incognito_home_warning">A privát böngészés nem rejti el a tevékenységedet a hálózatod, a munkáltatód vagy a meglátogatott oldalak elől.</string>
-    <string name="downloads_quick_access_view_all">Összes letöltés megtekintése</string>
-    <string name="downloads_quick_access_empty">A legutóbbi letöltések itt jelennek meg</string>
 <string name="settings_theme_app_category">Alkalmazás megjelenése</string>
     <string name="settings_theme_home_category">Kezdőlap</string>
     <string name="settings_home_cards">Kezdőlap kártyák</string>

@@ -3,12 +3,12 @@
 
 
     <string-array name="delete_history">
-        <item>Last 15 minutes</item>
-        <item>Last hour</item>
-        <item>Last 24 hours</item>
-        <item>Last 7 days</item>
-        <item>Last 30 days</item>
-        <item>All time</item>
+        <item>@string/delete_history_last_15_minutes</item>
+        <item>@string/delete_history_last_hour</item>
+        <item>@string/delete_history_last_24_hours</item>
+        <item>@string/interval_week</item>
+        <item>@string/interval_month</item>
+        <item>@string/delete_history_all_time</item>
     </string-array>
 
 

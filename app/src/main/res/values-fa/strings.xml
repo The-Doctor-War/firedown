@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">خاموش</string>
     <string name="delete_browsing_data_quit_on">روشن</string>
     <string name="delete_downloads">حذف دانلودها</string>
+    <string name="delete_history_all_time">همه</string>
+    <string name="delete_history_last_15_minutes">۱۵ دقیقه گذشته</string>
+    <string name="delete_history_last_24_hours">۲۴ ساعت گذشته</string>
+    <string name="delete_history_last_hour">ساعت گذشته</string>
+    <string name="delete_history_prompt_message">تاریخچه مرور از بازه زمانی انتخاب‌شده برای همیشه از این دستگاه حذف خواهد شد.</string>
     <string name="delete_history_prompt_title">بازهٔ زمانی برای حذف</string>
     <string name="delete_partial_tabs">با این کار تمام داده‌های برگه‌های بسته شما حذف می‌شود.</string>
     <string name="delete_password">حذف رمز عبور</string>
@@ -204,7 +209,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">یک URL با فرمت صحیح وارد کنید</string>
     <string name="settings_doh_server_error_provider">لطفاً تأیید کنید که این ارائه‌دهنده معتبری است یا بعداً دوباره امتحان کنید</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -267,7 +271,6 @@
     <string name="vault_encrypting">در حال رمزگذاری فایل، لطفا صبر کنید…</string>
     <string name="vault_unsupported">نمی توان این فایل را باز کرد. برای باز کردن، آن را از پوشه ایمن خارج کرده و دوباره امتحان کنید.</string>
     <string name="bookmark_name">نام</string>
-    <string name="downloads_quick_access_title">دانلودهای اخیر</string>
     <string name="home_onboarding_sites_label">Firedown را امتحان کنید در</string>
     <string name="home_vault_button">پوشه ایمن</string>
     <string name="home_media_playing">در حال پخش</string>

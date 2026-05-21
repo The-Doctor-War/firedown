@@ -55,6 +55,11 @@
     <string name="delete_browsing_data_quit_off">Uit</string>
     <string name="delete_browsing_data_quit_on">Aan</string>
     <string name="delete_downloads">Downloads verwijderen</string>
+    <string name="delete_history_all_time">Alles</string>
+    <string name="delete_history_last_15_minutes">Laatste 15 minuten</string>
+    <string name="delete_history_last_24_hours">Laatste 24 uur</string>
+    <string name="delete_history_last_hour">Laatste uur</string>
+    <string name="delete_history_prompt_message">De surfgeschiedenis uit de geselecteerde periode wordt permanent verwijderd van dit apparaat.</string>
     <string name="delete_history_prompt_title">Te verwijderen tijdsperiode</string>
     <string name="delete_partial_tabs">Hiermee worden alle gegevens van uw gesloten tabbladen verwijderd.</string>
     <string name="delete_password">Wachtwoord verwijderen</string>
@@ -245,7 +250,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Voer een correct geformatteerde URL in</string>
     <string name="settings_doh_server_error_provider">Controleer of het een geldige provider is of probeer het later opnieuw</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -341,7 +345,6 @@
         <item quantity="other">%d incognito-downloads bezig</item>
     </plurals>
     <string name="incognito_downloads_in_progress_subtitle">Tik om te bekijken in Beveiligde map</string>
-    <string name="downloads_quick_access_title">Recente downloads</string>
     <string name="home_onboarding_sites_label">Probeer Firedown op</string>
     <string name="home_vault_button">Beveiligde map</string>
     <string name="home_media_playing">Wordt afgespeeld</string>
@@ -349,8 +352,6 @@
     <string name="settings_webrtc_enabled_summary">Maakt realtime video- en spraakoproepen mogelijk. Uitschakelen verkleint het netwerk-onderzoeksoppervlak.</string>
     <string name="incognito_home_description">Wanneer je in een privévenster surft, bewaart Firedown geen:</string>
     <string name="incognito_home_warning">Privénavigatie verbergt je activiteit niet voor je netwerk, je werkgever of de sites die je bezoekt.</string>
-    <string name="downloads_quick_access_view_all">Alle downloads weergeven</string>
-    <string name="downloads_quick_access_empty">Recente downloads verschijnen hier</string>
     <string name="wasm_snackbar_message">%s heeft WebAssembly nodig</string>
     <string name="wasm_snackbar_action_enable">Inschakelen</string>
     <string name="settings_wasm_allowlist_title">Toegestane sites</string>

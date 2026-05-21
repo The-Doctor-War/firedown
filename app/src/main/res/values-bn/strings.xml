@@ -187,7 +187,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">আপনি বেশিরভাগ সাইট থেকে লগ আউট হয়ে যাবেন</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ট্যাব খুলুন</string>
     <string name="settings_doh_server">DNS সার্ভার</string>
-    <string name="settings_doh_server_error_format">সঠিকভাবে ফরম্যাট করা URL লিখুন</string>
     <string name="settings_doh_server_error_provider">অনুগ্রহ করে যাচাই করুন এটি একটি বৈধ প্রদানকারী অথবা পরে আবার চেষ্টা করুন</string>
     <string name="settings_doh_server_off">সিস্টেম DNS সমাধানকারী ব্যবহার করুন</string>
     <string name="settings_doh_server_title">প্রদানকারী ব্যবহার করুন</string>
@@ -245,7 +244,6 @@
     <string name="vault_decrypting">ফাইল ডিক্রিপ্ট করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন…</string>
     <string name="vault_encrypting">ফাইল এনক্রিপ্ট করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন…</string>
     <string name="vault_unsupported">এই ফাইলটি খুলতে পারছি না। খুলতে, এটিকে নিরাপদ ফোল্ডার থেকে সরান এবং আবার চেষ্টা করুন।</string>
-    <string name="downloads_quick_access_title">সাম্প্রতিক ডাউনলোড</string>
     <string name="home_onboarding_sites_label">Firedown ব্যবহার করুন</string>
     <string name="home_vault_button">নিরাপদ ফোল্ডার</string>
     <string name="home_media_playing">চলছে</string>

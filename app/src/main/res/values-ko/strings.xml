@@ -55,6 +55,11 @@
     <string name="delete_browsing_data_quit_off">꺼짐</string>
     <string name="delete_browsing_data_quit_on">켜짐</string>
     <string name="delete_downloads">다운로드 삭제</string>
+    <string name="delete_history_all_time">전체 기록</string>
+    <string name="delete_history_last_15_minutes">지난 15분</string>
+    <string name="delete_history_last_24_hours">지난 24시간</string>
+    <string name="delete_history_last_hour">지난 1시간</string>
+    <string name="delete_history_prompt_message">선택한 기간의 방문 기록이 이 기기에서 영구적으로 삭제됩니다.</string>
     <string name="delete_history_prompt_title">삭제할 시간 범위</string>
     <string name="delete_partial_tabs">닫은 탭 데이터가 모두 삭제됩니다.</string>
     <string name="delete_password">비밀번호 삭제</string>
@@ -232,7 +237,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">올바른 형식의 URL을 입력하세요</string>
     <string name="settings_doh_server_error_provider">유효한 공급자인지 확인하거나 나중에 다시 시도하세요.</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -320,7 +324,6 @@
         <item quantity="other">%d개의 시크릿 다운로드 진행 중</item>
     </plurals>
     <string name="incognito_downloads_in_progress_subtitle">보안 폴더에서 보려면 탭하세요</string>
-    <string name="downloads_quick_access_title">최근 다운로드</string>
     <string name="home_onboarding_sites_label">Firedown 사용해보기</string>
     <string name="home_vault_button">보안 폴더</string>
     <string name="home_media_playing">재생 중</string>
@@ -328,8 +331,6 @@
     <string name="settings_webrtc_enabled_summary">실시간 영상 및 음성 통화를 허용합니다. 비활성화하면 네트워크 탐지 공격면이 줄어듭니다.</string>
     <string name="incognito_home_description">비공개 창에서는 Firedown이 다음 항목을 저장하지 않습니다:</string>
     <string name="incognito_home_warning">비공개 탐색은 네트워크, 고용주 또는 방문한 사이트로부터 활동을 숨겨주지는 않습니다.</string>
-    <string name="downloads_quick_access_view_all">모든 다운로드 보기</string>
-    <string name="downloads_quick_access_empty">최근 다운로드가 여기에 표시됩니다</string>
     <string name="wasm_snackbar_message">%s에는 WebAssembly가 필요합니다</string>
     <string name="wasm_snackbar_action_enable">사용</string>
     <string name="settings_wasm_allowlist_title">허용된 사이트</string>

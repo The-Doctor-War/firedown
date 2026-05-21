@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Изключено</string>
     <string name="delete_browsing_data_quit_on">Включено</string>
     <string name="delete_downloads">Изтриване на изтеглянията</string>
+    <string name="delete_history_all_time">Цялата история</string>
+    <string name="delete_history_last_15_minutes">Последните 15 минути</string>
+    <string name="delete_history_last_24_hours">Последните 24 часа</string>
+    <string name="delete_history_last_hour">Последния час</string>
+    <string name="delete_history_prompt_message">Историята на сърфирането от избрания период ще бъде окончателно премахната от това устройство.</string>
     <string name="delete_history_prompt_title">Времеви обхват за изчистване</string>
     <string name="delete_partial_tabs">Това ще изтрие данните на всичките ви затворени раздели.</string>
     <string name="delete_password">Изтриване на паролата</string>
@@ -213,7 +218,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Въведете правилно форматиран URL</string>
     <string name="settings_doh_server_error_provider">Моля, проверете дали доставчикът е валиден, или опитайте отново по-късно</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -277,7 +281,6 @@
     <string name="vault_encrypting">Файлът се криптира, моля изчакайте…</string>
     <string name="vault_unsupported">Файлът не може да се отвори. За да го отворите, го преместете от Защитената папка и опитайте отново.</string>
     <string name="bookmark_name">Име</string>
-    <string name="downloads_quick_access_title">Скорошни изтегляния</string>
     <string name="home_onboarding_sites_label">Опитайте Firedown с</string>
     <string name="home_vault_button">Защитена папка</string>
     <string name="home_media_playing">Възпроизвежда се</string>

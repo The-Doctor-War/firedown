@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Вимкнено</string>
     <string name="delete_browsing_data_quit_on">Увімкнено</string>
     <string name="delete_downloads">Видалити завантаження</string>
+    <string name="delete_history_all_time">Увесь час</string>
+    <string name="delete_history_last_15_minutes">Останні 15 хвилин</string>
+    <string name="delete_history_last_24_hours">Останні 24 години</string>
+    <string name="delete_history_last_hour">Остання година</string>
+    <string name="delete_history_prompt_message">Журнал перегляду за вибраний період буде остаточно видалено з цього пристрою.</string>
     <string name="delete_history_prompt_title">Проміжок часу для видалення</string>
     <string name="delete_partial_tabs">Це видалить дані ваших закритих вкладок.</string>
     <string name="delete_password">Видалити пароль</string>
@@ -213,7 +218,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Введіть URL-адресу в правильному форматі</string>
     <string name="settings_doh_server_error_provider">Будь ласка, переконайтеся, що це дійсний постачальник, або повторіть спробу пізніше</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -280,7 +284,6 @@
     <string name="play">Відтворити</string>
     <string name="pip_play">Відтворити</string>
     <string name="pip_pause">Пауза</string>
-    <string name="downloads_quick_access_title">Останні завантаження</string>
     <string name="home_onboarding_sites_label">Спробуйте Firedown на</string>
     <string name="home_vault_button">Захищена папка</string>
     <string name="home_media_playing">Відтворення</string>
@@ -288,8 +291,6 @@
     <string name="settings_webrtc_enabled_summary">Дозволяє відео- та голосові виклики в реальному часі. Вимкнення зменшує поверхню сканування мережі.</string>
     <string name="incognito_home_description">У приватному вікні Firedown не зберігає:</string>
     <string name="incognito_home_warning">Приватний перегляд не приховує вашу активність від мережі, роботодавця чи відвідуваних сайтів.</string>
-    <string name="downloads_quick_access_view_all">Переглянути всі завантаження</string>
-    <string name="downloads_quick_access_empty">Тут з\'являться нещодавні завантаження</string>
     <string name="wasm_snackbar_message">Для %s потрібен WebAssembly</string>
     <string name="wasm_snackbar_action_enable">Увімкнути</string>
     <string name="settings_wasm_allowlist_title">Дозволені сайти</string>

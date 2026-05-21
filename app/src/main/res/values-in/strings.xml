@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">Nonaktif</string>
     <string name="delete_browsing_data_quit_on">Aktif</string>
     <string name="delete_downloads">Hapus Unduhan</string>
+    <string name="delete_history_all_time">Semua</string>
+    <string name="delete_history_last_15_minutes">15 menit terakhir</string>
+    <string name="delete_history_last_24_hours">24 jam terakhir</string>
+    <string name="delete_history_last_hour">1 jam terakhir</string>
+    <string name="delete_history_prompt_message">Riwayat penjelajahan dari periode yang dipilih akan dihapus permanen dari perangkat ini.</string>
     <string name="delete_history_prompt_title">Rentang waktu untuk menghapus</string>
     <string name="delete_partial_tabs">Ini akan menghapus data tab yang ditutup.</string>
     <string name="delete_password">Hapus Kata Sandi</string>
@@ -199,7 +204,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Anda\ akan keluar dari sebagian besar situs</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Tab terbuka</string>
     <string name="settings_doh_server">Server DNS</string>
-<string name="settings_doh_server_error_format">Masukkan URL yang diformat dengan benar</string>
     <string name="settings_doh_server_error_provider">Harap verifikasi bahwa itu adalah penyedia yang valid atau coba lagi nanti</string>
     <string name="settings_doh_server_off">Gunakan pemecah DNS sistem</string>
     <string name="settings_doh_server_title">Gunakan Penyedia</string>
@@ -259,7 +263,6 @@
     <string name="vault_encrypting">Mengenkripsi file, harap tunggu…</string>
     <string name="vault_unsupported">Tidak dapat membuka file ini. Untuk membukanya, keluarkan dari Folder Aman dan coba lagi.</string>
     <string name="bookmark_name">Nama</string>
-    <string name="downloads_quick_access_title">Unduhan terkini</string>
     <string name="home_onboarding_sites_label">Coba Firedown di</string>
     <string name="home_vault_button">Folder Aman</string>
     <string name="home_media_playing">Memutar</string>
@@ -267,8 +270,6 @@
     <string name="settings_webrtc_enabled_summary">Mengizinkan panggilan video dan suara realtime. Menonaktifkan mengurangi permukaan penyelidikan jaringan.</string>
     <string name="incognito_home_description">Saat menjelajah di jendela pribadi, Firedown tidak menyimpan:</string>
     <string name="incognito_home_warning">Penjelajahan pribadi tidak menyembunyikan aktivitas Anda dari jaringan, atasan, atau situs yang Anda kunjungi.</string>
-    <string name="downloads_quick_access_view_all">Lihat semua unduhan</string>
-    <string name="downloads_quick_access_empty">Unduhan terbaru akan muncul di sini</string>
 <string name="settings_theme_app_category">Tema aplikasi</string>
     <string name="settings_theme_home_category">Layar utama</string>
     <string name="settings_home_cards">Kartu layar utama</string>

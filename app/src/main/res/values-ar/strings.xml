@@ -223,7 +223,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_error_format">أدخل عنوان URL بتنسيق صحيح</string>
     <string name="settings_doh_server_error_provider">يرجى التأكد من أن هذا مقدم خدمة صالح أو حاول مرة أخرى لاحقًا</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -303,7 +302,6 @@
     <string name="play">تشغيل</string>
     <string name="pip_play">تشغيل</string>
     <string name="pip_pause">إيقاف مؤقت</string>
-    <string name="downloads_quick_access_title">التنزيلات الأخيرة</string>
     <string name="home_onboarding_sites_label">جرّب Firedown على</string>
     <string name="home_vault_button">مجلد آمن</string>
     <string name="home_media_playing">قيد التشغيل</string>
@@ -311,8 +309,6 @@
     <string name="settings_webrtc_enabled_summary">يتيح مكالمات الفيديو والصوت في الوقت الفعلي. التعطيل يقلل مساحة استكشاف الشبكة.</string>
     <string name="incognito_home_description">عند التصفح في نافذة خاصة، لن يحفظ Firedown:</string>
     <string name="incognito_home_warning">التصفح الخاص لا يخفي نشاطك عن شبكتك أو صاحب العمل أو المواقع التي تزورها.</string>
-    <string name="downloads_quick_access_view_all">عرض جميع التنزيلات</string>
-    <string name="downloads_quick_access_empty">ستظهر التنزيلات الأخيرة هنا</string>
     <string name="wasm_snackbar_message">يحتاج %s إلى WebAssembly</string>
     <string name="wasm_snackbar_action_enable">تفعيل</string>
     <string name="settings_wasm_allowlist_title">المواقع المسموح بها</string>

@@ -50,6 +50,11 @@
     <string name="delete_browsing_data_quit_off">අක්‍රිය</string>
     <string name="delete_browsing_data_quit_on">සක්‍රිය</string>
     <string name="delete_downloads">බාගැනීම් මකන්න</string>
+    <string name="delete_history_all_time">සියලු කාලය</string>
+    <string name="delete_history_last_15_minutes">අවසන් මිනිත්තු 15</string>
+    <string name="delete_history_last_24_hours">අවසන් පැය 24</string>
+    <string name="delete_history_last_hour">අවසන් පැය</string>
+    <string name="delete_history_prompt_message">තෝරාගත් කාලය තුළ පිහිටි බ්‍රවුස් ඉතිහාසය මෙම උපාංගයෙන් ස්ථිරව ඉවත් කරනු ලැබේ.</string>
     <string name="delete_history_prompt_title">මකා දමන කාල පරාසය</string>
     <string name="delete_partial_tabs">මෙය ඔබගේ වසා දැමූ ටැබ් දත්ත මකනු ඇත.</string>
     <string name="delete_password">මුරපදය මකන්න</string>
@@ -191,7 +196,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ඔබව බොහෝ අඩවි වලින් නික්මවෙනු ඇත</string>
     <string name="settings_delete_browsing_data_tabs_title_2">විවෘත පටිති</string>
     <string name="settings_doh_server">DNS සේවාදායකය</string>
-    <string name="settings_doh_server_error_format">නිවැරදිව ෆෝමැට් කළ URL එකක් ඇතුළු කරන්න</string>
     <string name="settings_doh_server_error_provider">කරුණාකර එය වලංගු සැපයුම්කරුවෙකු බව තහවුරු කරන්න හෝ පසුව නැවත උත්සාහ කරන්න</string>
     <string name="settings_doh_server_off">පද්ධති DNS විසඳුම් භාවිතා කරන්න</string>
     <string name="settings_doh_server_title">සපයන්නා භාවිතා කරන්න</string>
@@ -250,7 +254,6 @@
     <string name="vault_encrypting">ගොනුව සංකේතනය කරමින්, කරුණාකර රැඳී සිටින්න…</string>
     <string name="vault_unsupported">මෙම ගොනුව විවෘත කළ නොහැක. විවෘත කිරීමට, එය ආරක්ෂිත ෆෝල්ඩරයෙන් පිටතට ගෙන ගොස් නැවත උත්සාහ කරන්න.</string>
     <string name="bookmark_name">නම</string>
-    <string name="downloads_quick_access_title">මෑත බාගත කිරීම්</string>
     <string name="home_onboarding_sites_label">Firedown උත්සාහ කරන්න</string>
     <string name="home_vault_button">ආරක්ෂිත ෆෝල්ඩරය</string>
     <string name="home_media_playing">වාදනය වෙමින්</string>

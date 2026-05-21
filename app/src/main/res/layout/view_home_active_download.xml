@@ -31,6 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
+        android:minHeight="84dp"
         android:orientation="horizontal"
         android:paddingHorizontal="16dp"
         android:paddingVertical="14dp">
@@ -88,6 +89,7 @@
                 android:id="@+id/active_download_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceTitleSmall"

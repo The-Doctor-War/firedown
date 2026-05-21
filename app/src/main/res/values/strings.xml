@@ -83,6 +83,11 @@
     <string name="delete_browsing_data_quit_off">Off</string>
     <string name="delete_browsing_data_quit_on">On</string>
     <string name="delete_downloads">Delete Downloads</string>
+    <string name="delete_history_all_time">All time</string>
+    <string name="delete_history_last_15_minutes">Last 15 minutes</string>
+    <string name="delete_history_last_24_hours">Last 24 hours</string>
+    <string name="delete_history_last_hour">Last hour</string>
+    <string name="delete_history_prompt_message">Browsing history from the selected period will be permanently removed from this device.</string>
     <string name="delete_history_prompt_title">Time range to delete</string>
     <string name="delete_partial_tabs">This will delete your closed tabs data.</string>
     <string name="delete_password">Delete Password</string>
@@ -125,12 +130,9 @@
     <string name="donate_title">Value for Value</string>
     <string name="download">Download</string>
     <string name="download_finished_meta">%1$s - %2$s</string>
-    <string name="downloads_quick_access_title">Recent downloads</string>
-    <string name="downloads_quick_access_view_all">View all downloads</string>
     <!-- Trailing-action label on the home recent-downloads card. Kept
          short so it fits next to the section title on narrow phones
          even in longer Romance / Slavic locales. -->
-    <string name="downloads_quick_access_empty">Recent downloads will appear here</string>
     <!-- Section header on the home media strip — shown while a tab
          is actively producing audio / video. Pairs with
          home_media_paused for the paused-but-spotlit state so the
@@ -382,7 +384,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Enter a correctly formatted URL</string>
     <string name="settings_doh_server_error_provider">Please verify that is a valid provider or try again later</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>

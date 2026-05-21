@@ -25,6 +25,11 @@
     <string name="delete_browsing_data_on_quit_action">Sair</string>
     <string name="delete_browsing_data_quit_off">Desativado</string>
     <string name="delete_browsing_data_quit_on">Ativado</string>
+    <string name="delete_history_all_time">Todo o histórico</string>
+    <string name="delete_history_last_15_minutes">Últimos 15 minutos</string>
+    <string name="delete_history_last_24_hours">Últimas 24 horas</string>
+    <string name="delete_history_last_hour">Última hora</string>
+    <string name="delete_history_prompt_message">O histórico de navegação do período selecionado será removido permanentemente deste dispositivo.</string>
     <string name="delete_history_prompt_title">Intervalo de tempo a excluir</string>
     <string name="exit_fullscreen_with_back_button_short">Para sair de tela inteira, deslize do topo para baixo e toque em Voltar</string>
     <string name="if_preferences_security">Segurança</string>
@@ -86,7 +91,6 @@
         <item quantity="other">%d downloads anônimos em andamento</item>
     </plurals>
     <string name="incognito_downloads_in_progress_subtitle">Toque para ver na Pasta trancada</string>
-    <string name="downloads_quick_access_title">Downloads recentes</string>
     <string name="home_onboarding_sites_label">Experimente o Firedown em</string>
     <string name="home_vault_button">Pasta trancada</string>
     <string name="home_media_playing">Reproduzindo</string>
@@ -94,8 +98,6 @@
     <string name="settings_webrtc_enabled_summary">Permite chamadas de vídeo e voz em tempo real. Desativar reduz a superfície de sondagem de rede.</string>
     <string name="incognito_home_description">Quando você navega em uma janela privada, o Firedown não guarda:</string>
     <string name="incognito_home_warning">A navegação privada não esconde sua atividade da sua rede, do seu empregador ou dos sites que você visita.</string>
-    <string name="downloads_quick_access_view_all">Ver todos os downloads</string>
-    <string name="downloads_quick_access_empty">Os downloads recentes aparecerão aqui</string>
     <string name="wasm_snackbar_message">%s precisa do WebAssembly para funcionar</string>
     <string name="wasm_snackbar_action_enable">Ativar</string>
     <string name="settings_wasm_allowlist_title">Sites permitidos</string>

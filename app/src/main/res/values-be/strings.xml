@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">Выключана</string>
     <string name="delete_browsing_data_quit_on">Уключана</string>
     <string name="delete_downloads">Выдаліць спампоўкі</string>
+    <string name="delete_history_all_time">За ўвесь час</string>
+    <string name="delete_history_last_15_minutes">Апошнія 15 хвілін</string>
+    <string name="delete_history_last_24_hours">Апошнія 24 гадзіны</string>
+    <string name="delete_history_last_hour">Апошняя гадзіна</string>
+    <string name="delete_history_prompt_message">Гісторыя аглядання за выбраны перыяд будзе незваротна выдалена з гэтай прылады.</string>
     <string name="delete_history_prompt_title">Дыяпазон часу для выдалення</string>
     <string name="delete_partial_tabs">Гэта выдаліць даныя закрытых укладак.</string>
     <string name="delete_password">Выдаліць пароль</string>
@@ -197,7 +202,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Вы выйдзеце з большасці сайтаў</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Адкрытыя карткі</string>
     <string name="settings_doh_server">DNS-сервер</string>
-    <string name="settings_doh_server_error_format">Увядзіце правільна адфарматаваны URL</string>
     <string name="settings_doh_server_error_provider">Калі ласка, пераканайцеся, што гэта сапраўдны пастаўшчык, або паўтарыце спробу пазней</string>
     <string name="settings_doh_server_off">Выкарыстоўваць сістэмны DNS-рэзолвер</string>
     <string name="settings_doh_server_title">Выкарыстоўвайце пастаўшчыка</string>
@@ -257,7 +261,6 @@
     <string name="vault_encrypting">Шыфраванне файла, пачакайце…</string>
     <string name="vault_unsupported">Немагчыма адкрыць гэты файл. Каб адкрыць, перамясціце яго з бяспечнай папкі і паўтарыце спробу.</string>
     <string name="bookmark_name">Назва</string>
-    <string name="downloads_quick_access_title">Нядаўнія загрузкі</string>
     <string name="home_onboarding_sites_label">Паспрабуйце Firedown на</string>
     <string name="home_vault_button">Бяспечная тэчка</string>
     <string name="home_media_playing">Прайграецца</string>

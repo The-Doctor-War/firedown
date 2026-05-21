@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Ανενεργό</string>
     <string name="delete_browsing_data_quit_on">Ενεργό</string>
     <string name="delete_downloads">Διαγραφή λήψεων</string>
+    <string name="delete_history_all_time">Όλος ο χρόνος</string>
+    <string name="delete_history_last_15_minutes">Τελευταία 15 λεπτά</string>
+    <string name="delete_history_last_24_hours">Τελευταίες 24 ώρες</string>
+    <string name="delete_history_last_hour">Τελευταία ώρα</string>
+    <string name="delete_history_prompt_message">Το ιστορικό περιήγησης από την επιλεγμένη περίοδο θα διαγραφεί οριστικά από αυτή τη συσκευή.</string>
     <string name="delete_history_prompt_title">Χρονικό διάστημα διαγραφής</string>
     <string name="delete_partial_tabs">Αυτό θα διαγράψει τα δεδομένα των κλειστών καρτελών σας.</string>
     <string name="delete_password">Διαγραφή κωδικού πρόσβασης</string>
@@ -208,7 +213,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Εισαγάγετε μια σωστά μορφοποιημένη διεύθυνση URL</string>
     <string name="settings_doh_server_error_provider">Επαληθεύστε ότι είναι έγκυρος πάροχος ή δοκιμάστε ξανά αργότερα</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -274,7 +278,6 @@
     <string name="play">Αναπαραγωγή</string>
     <string name="pip_play">Αναπαραγωγή</string>
     <string name="pip_pause">Παύση</string>
-    <string name="downloads_quick_access_title">Πρόσφατες λήψεις</string>
     <string name="home_onboarding_sites_label">Δοκιμάστε το Firedown σε</string>
     <string name="home_vault_button">Ασφαλής φάκελος</string>
     <string name="home_media_playing">Αναπαραγωγή</string>
@@ -282,8 +285,6 @@
     <string name="settings_webrtc_enabled_summary">Επιτρέπει βιντεοκλήσεις και φωνητικές κλήσεις σε πραγματικό χρόνο. Η απενεργοποίηση μειώνει την επιφάνεια σάρωσης δικτύου.</string>
     <string name="incognito_home_description">Όταν περιηγείστε σε ιδιωτικό παράθυρο, το Firedown δεν αποθηκεύει:</string>
     <string name="incognito_home_warning">Η ιδιωτική περιήγηση δεν κρύβει τη δραστηριότητά σας από το δίκτυό σας, τον εργοδότη σας ή τις ιστοσελίδες που επισκέπτεστε.</string>
-    <string name="downloads_quick_access_view_all">Προβολή όλων των λήψεων</string>
-    <string name="downloads_quick_access_empty">Οι πρόσφατες λήψεις θα εμφανιστούν εδώ</string>
 <string name="settings_theme_app_category">Θέμα εφαρμογής</string>
     <string name="settings_theme_home_category">Αρχική</string>
     <string name="settings_home_cards">Κάρτες αρχικής</string>

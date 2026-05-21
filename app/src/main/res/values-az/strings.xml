@@ -180,7 +180,6 @@
     <string name="settings_dark_theme">Tünd</string>
     <string name="settings_delete_browsing_data_browsing_history_title">Tarixçə</string>
     <string name="settings_doh_server">DNS Server</string>
-    <string name="settings_doh_server_error_format">Düzgün formatlanmış URL daxil edin</string>
     <string name="settings_doh_server_error_provider">Lütfən, bunun etibarlı provayder olduğunu yoxlayın və ya daha sonra yenidən cəhd edin</string>
     <string name="settings_doh_server_off">Sistem DNS həlledicisindən istifadə edin</string>
     <string name="settings_doh_server_title">Provayderdən istifadə edin</string>
@@ -235,7 +234,6 @@
     <string name="vault_decrypting">Faylın şifrəsi açılır, gözləyin...</string>
     <string name="vault_encrypting">Fayl şifrələnir, gözləyin…</string>
     <string name="vault_unsupported">Bu faylı açmaq mümkün deyil. Açmaq üçün onu Təhlükəsiz Qovluqdan çıxarın və yenidən cəhd edin.</string>
-    <string name="downloads_quick_access_title">Son endirilənlər</string>
     <string name="home_onboarding_sites_label">Firedown-u sınayın</string>
     <string name="home_vault_button">Təhlükəsiz Qovluq</string>
     <string name="home_media_playing">Oxudulur</string>

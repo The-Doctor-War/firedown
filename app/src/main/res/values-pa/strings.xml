@@ -161,7 +161,6 @@
     <string name="settings_cookies_accept_visited">ਜੀ ਜਰੂਰ</string>
     <string name="settings_cookies_isolate">ਕਰਾਸ-ਸਾਈਟ ਕੂਕੀਜ਼ ਨੂੰ ਬਲੌਕ ਕਰੋ</string>
     <string name="settings_doh_server">DNS ਸਰਵਰ</string>
-    <string name="settings_doh_server_error_format">ਸਹੀ ਢੰਗ ਨਾਲ ਫਾਰਮੈਟ ਕੀਤਾ URL ਦਾਖਲ ਕਰੋ</string>
     <string name="settings_doh_server_error_provider">ਕਿਰਪਾ ਕਰਕੇ ਪੁਸ਼ਟੀ ਕਰੋ ਕਿ ਇਹ ਇੱਕ ਵੈਧ ਪ੍ਰਦਾਤਾ ਹੈ ਜਾਂ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
     <string name="settings_doh_server_off">ਸਿਸਟਮ DNS ਰੈਜ਼ੋਲਵਰ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>
     <string name="settings_doh_server_title">ਪ੍ਰਦਾਤਾ ਦੀ ਵਰਤੋਂ ਕਰੋ</string>
@@ -211,7 +210,6 @@
     <string name="vault_decrypting">ਫ਼ਾਈਲ ਨੂੰ ਡੀਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ…</string>
     <string name="vault_encrypting">ਫ਼ਾਈਲ ਨੂੰ ਐਨਕ੍ਰਿਪਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ, ਕਿਰਪਾ ਕਰਕੇ ਉਡੀਕ ਕਰੋ…</string>
     <string name="vault_unsupported">ਇਸ ਫ਼ਾਈਲ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਖੋਲ੍ਹਣ ਲਈ, ਇਸਨੂੰ ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ ਤੋਂ ਬਾਹਰ ਲੈ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
-    <string name="downloads_quick_access_title">ਹਾਲੀਆ ਡਾਊਨਲੋਡ</string>
     <string name="home_onboarding_sites_label">Firedown ਅਜ਼ਮਾਓ</string>
     <string name="home_vault_button">ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ</string>
     <string name="home_media_playing">ਚੱਲ ਰਿਹਾ ਹੈ</string>

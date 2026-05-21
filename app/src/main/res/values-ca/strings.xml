@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Desactivat</string>
     <string name="delete_browsing_data_quit_on">Activat</string>
     <string name="delete_downloads">Suprimeix les descàrregues</string>
+    <string name="delete_history_all_time">Tot l\'historial</string>
+    <string name="delete_history_last_15_minutes">Últims 15 minuts</string>
+    <string name="delete_history_last_24_hours">Últimes 24 hores</string>
+    <string name="delete_history_last_hour">Última hora</string>
+    <string name="delete_history_prompt_message">L\'historial de navegació del període seleccionat s\'eliminarà permanentment d\'aquest dispositiu.</string>
     <string name="delete_history_prompt_title">Interval de temps per suprimir</string>
     <string name="delete_partial_tabs">Això suprimirà totes les dades de les pestanyes tancades.</string>
     <string name="delete_password">Esborra la contrasenya</string>
@@ -208,7 +213,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Introdueix un URL amb el format correcte</string>
     <string name="settings_doh_server_error_provider">Verifica que sigui un proveïdor vàlid o torna-ho a provar més tard</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -274,7 +278,6 @@
     <string name="play">Reprodueix</string>
     <string name="pip_play">Reprodueix</string>
     <string name="pip_pause">Pausa</string>
-    <string name="downloads_quick_access_title">Baixades recents</string>
     <string name="home_onboarding_sites_label">Prova Firedown a</string>
     <string name="home_vault_button">Carpeta segura</string>
     <string name="home_media_playing">S\'està reproduint</string>
@@ -282,8 +285,6 @@
     <string name="settings_webrtc_enabled_summary">Permet videotrucades i trucades de veu en temps real. Desactivar-ho redueix la superfície de sondeig de xarxa.</string>
     <string name="incognito_home_description">Quan navegues en una finestra privada, el Firedown no desa:</string>
     <string name="incognito_home_warning">La navegació privada no amaga la teva activitat a la teva xarxa, al teu empleador o als llocs que visites.</string>
-    <string name="downloads_quick_access_view_all">Mostra totes les baixades</string>
-    <string name="downloads_quick_access_empty">Les baixades recents apareixeran aquí</string>
     <string name="wasm_snackbar_message">%s necessita WebAssembly per funcionar</string>
     <string name="wasm_snackbar_action_enable">Activa</string>
     <string name="settings_wasm_allowlist_title">Llocs permesos</string>

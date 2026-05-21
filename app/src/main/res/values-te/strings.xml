@@ -193,7 +193,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">మీరు చాలా సైట్ల నుండి లాగౌట్ చేయబడతారు</string>
     <string name="settings_delete_browsing_data_tabs_title_2">తెరిచివున్న ట్యాబులు</string>
     <string name="settings_doh_server">DNS సర్వర్</string>
-    <string name="settings_doh_server_error_format">సరిగ్గా ఫార్మాట్ చేయబడిన URLని నమోదు చేయండి</string>
     <string name="settings_doh_server_error_provider">దయచేసి అది చెల్లుబాటు అయ్యే ప్రొవైడర్ అని ధృవీకరించండి లేదా తర్వాత మళ్లీ ప్రయత్నించండి</string>
     <string name="settings_doh_server_off">సిస్టమ్ DNS పరిష్కరిణిని ఉపయోగించండి</string>
     <string name="settings_doh_server_title">ప్రొవైడర్‌ని ఉపయోగించండి</string>
@@ -252,7 +251,6 @@
     <string name="vault_encrypting">ఫైల్‌ని ఎన్‌క్రిప్ట్ చేస్తోంది, దయచేసి వేచి ఉండండి…</string>
     <string name="vault_unsupported">ఈ ఫైల్‌ను తెరవడం సాధ్యపడదు. తెరవడానికి, సురక్షిత ఫోల్డర్ నుండి దాన్ని తరలించి, మళ్లీ ప్రయత్నించండి.</string>
     <string name="bookmark_name">పేరు</string>
-    <string name="downloads_quick_access_title">ఇటీవలి డౌన్‌లోడ్‌లు</string>
     <string name="home_onboarding_sites_label">Firedown ప్రయత్నించండి</string>
     <string name="home_vault_button">సురక్షిత ఫోల్డర్</string>
     <string name="home_media_playing">ప్లే అవుతోంది</string>

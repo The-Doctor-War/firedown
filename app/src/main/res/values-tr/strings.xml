@@ -55,6 +55,11 @@
     <string name="delete_browsing_data_quit_off">Kapalı</string>
     <string name="delete_browsing_data_quit_on">Açık</string>
     <string name="delete_downloads">İndirilenleri Sil</string>
+    <string name="delete_history_all_time">Tüm zamanlar</string>
+    <string name="delete_history_last_15_minutes">Son 15 dakika</string>
+    <string name="delete_history_last_24_hours">Son 24 saat</string>
+    <string name="delete_history_last_hour">Son saat</string>
+    <string name="delete_history_prompt_message">Seçilen dönemin gezinme geçmişi bu cihazdan kalıcı olarak kaldırılacak.</string>
     <string name="delete_history_prompt_title">Silinecek zaman aralığı</string>
     <string name="delete_partial_tabs">Bu, tüm kapalı sekme verilerinizi siler.</string>
     <string name="delete_password">Şifreyi Sil</string>
@@ -245,7 +250,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Doğru biçimlendirilmiş bir URL girin</string>
     <string name="settings_doh_server_error_provider">Lütfen geçerli bir sağlayıcı olduğunu doğrulayın veya daha sonra tekrar deneyin</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -340,7 +344,6 @@
         <item quantity="other">%d gizli indirme devam ediyor</item>
     </plurals>
     <string name="incognito_downloads_in_progress_subtitle">Güvenli klasörde görüntülemek için dokunun</string>
-    <string name="downloads_quick_access_title">Son indirilenler</string>
     <string name="home_onboarding_sites_label">Firedown\'u şurada deneyin</string>
     <string name="home_vault_button">Güvenli klasör</string>
     <string name="home_media_playing">Oynatılıyor</string>
@@ -348,8 +351,6 @@
     <string name="settings_webrtc_enabled_summary">Gerçek zamanlı görüntülü ve sesli aramaları etkinleştirir. Devre dışı bırakmak ağ tarama yüzeyini azaltır.</string>
     <string name="incognito_home_description">Gizli pencerede gezinirken Firedown şunları saklamaz:</string>
     <string name="incognito_home_warning">Gizli gezinti, etkinliğinizi ağınızdan, işvereninizden veya ziyaret ettiğiniz sitelerden gizlemez.</string>
-    <string name="downloads_quick_access_view_all">Tüm indirmeleri görüntüle</string>
-    <string name="downloads_quick_access_empty">Son indirmeler burada görüntülenecek</string>
     <string name="wasm_snackbar_message">%s WebAssembly gerektiriyor</string>
     <string name="wasm_snackbar_action_enable">Etkinleştir</string>
     <string name="settings_wasm_allowlist_title">İzin verilen siteler</string>

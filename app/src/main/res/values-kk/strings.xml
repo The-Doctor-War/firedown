@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">Сөндірулі</string>
     <string name="delete_browsing_data_quit_on">Іске қосулы</string>
     <string name="delete_downloads">Жүктеп алынғандарды жою</string>
+    <string name="delete_history_all_time">Барлық уақыт</string>
+    <string name="delete_history_last_15_minutes">Соңғы 15 минут</string>
+    <string name="delete_history_last_24_hours">Соңғы 24 сағат</string>
+    <string name="delete_history_last_hour">Соңғы сағат</string>
+    <string name="delete_history_prompt_message">Таңдалған кезеңдегі шолу журналы осы құрылғыдан біржола жойылады.</string>
     <string name="delete_history_prompt_title">Жойылатын деректер мерзімі</string>
     <string name="delete_partial_tabs">Бұл жабық қойындылар деректерін жояды.</string>
     <string name="delete_password">Құпия сөзді жою</string>
@@ -199,7 +204,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Сіз сайттардың көбінен шығасыз</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Ашық беттер</string>
     <string name="settings_doh_server">DNS сервері</string>
-<string name="settings_doh_server_error_format">Дұрыс пішімделген URL мекенжайын енгізіңіз</string>
     <string name="settings_doh_server_error_provider">Бұл жарамды провайдер екенін растаңыз немесе кейінірек қайталап көріңіз</string>
     <string name="settings_doh_server_off">Жүйелік DNS шешу құралын пайдаланыңыз</string>
     <string name="settings_doh_server_title">Провайдерді пайдаланыңыз</string>
@@ -259,7 +263,6 @@
     <string name="vault_encrypting">Файл шифрлануда, күтіңіз…</string>
     <string name="vault_unsupported">Бұл файлды ашу мүмкін емес. Ашу үшін оны қауіпсіз қалтадан шығарып, әрекетті қайталаңыз.</string>
     <string name="bookmark_name">Аты</string>
-    <string name="downloads_quick_access_title">Соңғы жүктеулер</string>
     <string name="home_onboarding_sites_label">Firedown-ды қолданып көріңіз</string>
     <string name="home_vault_button">Қауіпсіз қалта</string>
     <string name="home_media_playing">Ойнатылуда</string>

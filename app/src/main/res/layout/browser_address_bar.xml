@@ -49,18 +49,6 @@
         app:shapeAppearance="@style/ShapeAppearanceOverlay.Button.Circle" />
 
 
-    <View
-        android:id="@+id/security_badge"
-        android:layout_width="7dp"
-        android:layout_height="7dp"
-        android:background="@drawable/badge"
-        android:elevation="8dp"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@id/security_button"
-        app:layout_constraintEnd_toEndOf="@id/security_button"
-        android:layout_marginBottom="15dp"
-        android:layout_marginEnd="12dp" />
-
     <com.solarized.firedown.autocomplete.AutoCompleteEditText
         android:id="@+id/edit_text"
         android:layout_width="0dp"

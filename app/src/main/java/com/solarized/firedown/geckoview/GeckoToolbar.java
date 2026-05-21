@@ -47,8 +47,6 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
 
     private View mSearchUpButton;
 
-    private View mBadgeButton;
-
     private View mSearchDownButton;
 
     private TextView mSearchText;
@@ -66,6 +64,14 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
     private boolean mHomeEnabled;
 
     private boolean mTrackingEnabled;
+
+    private boolean mAdsEnabled = true;
+
+    /** Last drawable id pushed to the shield button — used to skip
+     *  no-op icon swaps so we don't re-trigger the transition animation
+     *  every time {@link #updateShieldIcon()} is called on incidental
+     *  state pokes (e.g. URL change with identical protection state). */
+    private int mCurrentShieldRes;
 
     private boolean mSecureEnabled;
 
@@ -129,7 +135,6 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.browser_address_bar, this, true);
 
-        mBadgeButton = v.findViewById(R.id.security_badge);
         mReloadButton = v.findViewById(R.id.reload_button);
         mEditText = v.findViewById(R.id.edit_text);
         mGeckoProgressBar = v.findViewById(R.id.progress_bar);
@@ -204,7 +209,7 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
         mEditText.focusAndShowKeyboard();
     }
 
-    public void disableSearch() {
+    private void disableSearch() {
         mSearchMode = false;
 
         // Restore edit text to URL mode
@@ -271,11 +276,6 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
         mEditText.setText(uri, autoComplete);
     }
 
-    public void resetLocation() {
-        mEditText.resetLocation();
-        mEditText.setText("", false);
-    }
-
     public void onLocationChange(String uri) {
         if (GeckoResources.isOnboarding(uri)){
             mEditText.setLocation(GeckoResources.ABOUT_ONBOARDING);
@@ -314,24 +314,57 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
     }
 
     public void setAdsEnabled(boolean value) {
-        mBadgeButton.setVisibility(value ? INVISIBLE : VISIBLE);
+        mAdsEnabled = value;
+        updateShieldIcon();
     }
 
     /**
-     * Resolves the shield icon based on the current (secure × tracking) state.
+     * Resolves the shield icon from the protection state. The site is
+     * "fully protected" only when both ETP tracking and uBlock ad
+     * filtering are active for it; otherwise the icon flips to the
+     * privacy-tip variant. This collapses the previous matrix-plus-dot
+     * (4 shield variants + a red badge for ads-off) into a single
+     * binary glance: full shield = full protection, privacy-tip = a
+     * protection layer is off. The secure × insecure axis is preserved.
      *
-     *                  tracking ON              tracking OFF
-     * secure   true    ic_shield_24             ic_shield_privacy_tip_24
-     * secure   false   ic_shield_bad_24         ic_shield_privacy_tip_bad_24
+     *                       full protection         reduced
+     * secure   true         ic_shield_24            ic_shield_privacy_tip_24
+     * secure   false        ic_shield_bad_24        ic_shield_privacy_tip_bad_24
      */
     private void updateShieldIcon() {
+        final boolean fullProtection = mTrackingEnabled && mAdsEnabled;
         final int icon;
-        if (mTrackingEnabled) {
+        if (fullProtection) {
             icon = mSecureEnabled ? R.drawable.ic_shield_24 : R.drawable.ic_shield_bad_24;
         } else {
             icon = mSecureEnabled ? R.drawable.ic_shield_privacy_tip_24 : R.drawable.ic_shield_privacy_tip_bad_24;
         }
-        mAddressBarButton.setIconResource(icon);
+        if (icon == mCurrentShieldRes) { return; }
+
+        if (mCurrentShieldRes == 0) {
+            // First bind — no animation, just paint the icon.
+            mAddressBarButton.setIconResource(icon);
+        } else {
+            // Brief fade + scale pulse: shrinks to 85% while the icon
+            // swaps, then settles back. Reads as 'this changed' without
+            // being loud enough to draw the eye away from the page.
+            mAddressBarButton.animate()
+                    .alpha(0f)
+                    .scaleX(0.85f)
+                    .scaleY(0.85f)
+                    .setDuration(80L)
+                    .withEndAction(() -> {
+                        mAddressBarButton.setIconResource(icon);
+                        mAddressBarButton.animate()
+                                .alpha(1f)
+                                .scaleX(1f)
+                                .scaleY(1f)
+                                .setDuration(160L)
+                                .start();
+                    })
+                    .start();
+        }
+        mCurrentShieldRes = icon;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -351,10 +384,6 @@ public class GeckoToolbar extends FrameLayout implements View.OnClickListener, V
     public void setProgress(int progress) {
         mGeckoProgressBar.setProgress(progress);
         mGeckoProgressBar.setVisibility(progress > 0 && progress < 100 ? View.VISIBLE : View.GONE);
-    }
-
-    public int getProgress() {
-        return mGeckoProgressBar.getProgress();
     }
 
     public void setAutoCompleteVisible(boolean visible) {

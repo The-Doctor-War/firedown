@@ -52,6 +52,11 @@
     <string name="delete_browsing_data_quit_off">Fra</string>
     <string name="delete_browsing_data_quit_on">Til</string>
     <string name="delete_downloads">Slet downloads</string>
+    <string name="delete_history_all_time">Hele perioden</string>
+    <string name="delete_history_last_15_minutes">Sidste 15 minutter</string>
+    <string name="delete_history_last_24_hours">Sidste 24 timer</string>
+    <string name="delete_history_last_hour">Sidste time</string>
+    <string name="delete_history_prompt_message">Browserhistorik fra den valgte periode vil blive permanent fjernet fra denne enhed.</string>
     <string name="delete_history_prompt_title">Tidsinterval der skal slettes</string>
     <string name="delete_partial_tabs">Dette vil slette alle dine lukkede faner-data.</string>
     <string name="delete_password">Slet adgangskode</string>
@@ -220,7 +225,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-<string name="settings_doh_server_error_format">Indtast en korrekt formateret URL</string>
     <string name="settings_doh_server_error_provider">Bekræft venligst, at det er en gyldig udbyder, eller prøv igen senere</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -287,7 +291,6 @@
     <string name="play">Afspil</string>
     <string name="pip_play">Afspil</string>
     <string name="pip_pause">Pause</string>
-    <string name="downloads_quick_access_title">Seneste downloads</string>
     <string name="home_onboarding_sites_label">Prøv Firedown på</string>
     <string name="home_vault_button">Sikker mappe</string>
     <string name="home_media_playing">Afspiller</string>
@@ -295,8 +298,6 @@
     <string name="settings_webrtc_enabled_summary">Tillader video- og taleopkald i realtid. Deaktivering reducerer netværkssonderingsfladen.</string>
     <string name="incognito_home_description">Når du surfer i et privat vindue, gemmer Firedown ikke:</string>
     <string name="incognito_home_warning">Privat browsing skjuler ikke din aktivitet for dit netværk, din arbejdsgiver eller de sider, du besøger.</string>
-    <string name="downloads_quick_access_view_all">Vis alle downloads</string>
-    <string name="downloads_quick_access_empty">Seneste downloads vises her</string>
 <string name="settings_theme_app_category">App-tema</string>
     <string name="settings_theme_home_category">Startside</string>
     <string name="settings_home_cards">Startkort</string>

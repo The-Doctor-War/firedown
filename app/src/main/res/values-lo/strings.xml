@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">ປິດ</string>
     <string name="delete_browsing_data_quit_on">ເປີດ</string>
     <string name="delete_downloads">ລຶບການດາວໂຫຼດ</string>
+    <string name="delete_history_all_time">ທັງໝົດ</string>
+    <string name="delete_history_last_15_minutes">15 ນາທີຜ່ານມາ</string>
+    <string name="delete_history_last_24_hours">24 ຊົ່ວໂມງຜ່ານມາ</string>
+    <string name="delete_history_last_hour">ຊົ່ວໂມງຜ່ານມາ</string>
+    <string name="delete_history_prompt_message">ປະຫວັດການທ່ອງເວັບໃນຊ່ວງເວລາທີ່ເລືອກຈະຖືກລຶບອອກຈາກອຸປະກອນນີ້ຖາວອນ.</string>
     <string name="delete_history_prompt_title">ຊ່ວງເວລາທີ່ຈະລຶບ</string>
     <string name="delete_partial_tabs">ນີ້ຈະລຶບຂໍ້ມູນແຖບປິດຂອງທ່ານ.</string>
     <string name="delete_password">ລຶບລະຫັດຜ່ານ</string>
@@ -192,7 +197,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ທ່ານຈະໄດ້ອອກຈາກລະບົບທັງຫມົດ</string>
     <string name="settings_delete_browsing_data_tabs_title_2">ເປີດແທັບ</string>
     <string name="settings_doh_server">ເຊີບເວີ DNS</string>
-<string name="settings_doh_server_error_format">ໃສ່ URL ທີ່ມີຮູບແບບທີ່ຖືກຕ້ອງ</string>
     <string name="settings_doh_server_error_provider">ກະລຸນາຢືນຢັນວ່າເປັນຜູ້ໃຫ້ບໍລິການທີ່ຖືກຕ້ອງ ຫຼືລອງໃໝ່ໃນພາຍຫຼັງ</string>
     <string name="settings_doh_server_off">ໃຊ້ຕົວແກ້ໄຂ DNS ຂອງລະບົບ</string>
     <string name="settings_doh_server_title">ໃຊ້ຜູ້ໃຫ້ບໍລິການ</string>
@@ -251,7 +255,6 @@
     <string name="vault_encrypting">ກຳລັງເຂົ້າລະຫັດໄຟລ໌, ກະລຸນາລໍຖ້າ…</string>
     <string name="vault_unsupported">ບໍ່ສາມາດເປີດໄຟລ໌ນີ້ໄດ້. ເພື່ອເປີດ, ຍ້າຍມັນອອກຈາກໂຟນເດີປອດໄພ ແລະລອງໃໝ່ອີກ.</string>
     <string name="bookmark_name">ຊື່</string>
-    <string name="downloads_quick_access_title">ການດາວໂຫຼດຫຼ້າສຸດ</string>
     <string name="home_onboarding_sites_label">ລອງ Firedown ໃນ</string>
     <string name="home_vault_button">ໂຟນເດີປອດໄພ</string>
     <string name="home_media_playing">ກຳລັງຫຼິ້ນ</string>

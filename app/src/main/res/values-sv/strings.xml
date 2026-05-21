@@ -177,7 +177,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_error_format">Ange en korrekt formaterad URL</string>
     <string name="settings_doh_server_error_provider">Kontrollera att det är en giltig leverantör eller försök igen senare</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -234,7 +233,6 @@
     <string name="play">Spela upp</string>
     <string name="pip_play">Spela upp</string>
     <string name="pip_pause">Paus</string>
-    <string name="downloads_quick_access_title">Senaste nedladdningar</string>
     <string name="home_onboarding_sites_label">Prova Firedown på</string>
     <string name="home_vault_button">Säker mapp</string>
     <string name="home_media_playing">Spelar upp</string>
@@ -242,8 +240,6 @@
     <string name="settings_webrtc_enabled_summary">Tillåter video- och röstsamtal i realtid. Inaktivering minskar nätverkssonderingsytan.</string>
     <string name="incognito_home_description">När du surfar i ett privat fönster sparar Firedown inte:</string>
     <string name="incognito_home_warning">Privat surfning döljer inte din aktivitet för ditt nätverk, din arbetsgivare eller webbplatserna du besöker.</string>
-    <string name="downloads_quick_access_view_all">Visa alla nedladdningar</string>
-    <string name="downloads_quick_access_empty">Senaste nedladdningar visas här</string>
 <string name="settings_theme_app_category">Apptema</string>
     <string name="settings_theme_home_category">Startsida</string>
     <string name="settings_home_cards">Startkort</string>

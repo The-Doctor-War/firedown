@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">გამორთ.</string>
     <string name="delete_browsing_data_quit_on">ჩართ.</string>
     <string name="delete_downloads">Ჩამოტვირთვების წაშლა</string>
+    <string name="delete_history_all_time">სრული ისტორია</string>
+    <string name="delete_history_last_15_minutes">ბოლო 15 წუთი</string>
+    <string name="delete_history_last_24_hours">ბოლო 24 საათი</string>
+    <string name="delete_history_last_hour">ბოლო საათი</string>
+    <string name="delete_history_prompt_message">არჩეული პერიოდის ვებგვერდების ისტორია სამუდამოდ წაიშლება ამ მოწყობილობიდან.</string>
     <string name="delete_history_prompt_title">გასასუფთავებელი დროის შუალედი</string>
     <string name="delete_partial_tabs">Ეს წაშლის თქვენს დახურულ ჩანართების მონაცემებს.</string>
     <string name="delete_password">Პაროლის წაშლა</string>
@@ -199,7 +204,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">გამოხვალთ ანგარიშებიდან უმეტეს საიტზე</string>
     <string name="settings_delete_browsing_data_tabs_title_2">გახსნილი ჩანართები</string>
     <string name="settings_doh_server">DNS სერვერი</string>
-<string name="settings_doh_server_error_format">Შეიყვანეთ სწორად ფორმატირებული URL</string>
     <string name="settings_doh_server_error_provider">Გთხოვთ, დაადასტუროთ, რომ არის სწორი პროვაიდერი ან სცადოთ მოგვიანებით</string>
     <string name="settings_doh_server_off">Გამოიყენეთ სისტემის DNS გადამწყვეტი</string>
     <string name="settings_doh_server_title">Გამოიყენეთ პროვაიდერი</string>
@@ -259,7 +263,6 @@
     <string name="vault_encrypting">Მიმდინარეობს ფაილის დაშიფვრა, გთხოვთ დაელოდოთ…</string>
     <string name="vault_unsupported">Ამ ფაილის გახსნა შეუძლებელია. გასახსნელად გადაიტანეთ ის უსაფრთხო საქაღალდიდან და სცადეთ ხელახლა.</string>
     <string name="bookmark_name">სახელი</string>
-    <string name="downloads_quick_access_title">ბოლო ჩამოტვირთვები</string>
     <string name="home_onboarding_sites_label">სცადეთ Firedown-ი</string>
     <string name="home_vault_button">დაცული საქაღალდე</string>
     <string name="home_media_playing">უკრავს</string>

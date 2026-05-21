@@ -165,7 +165,6 @@
     <string name="settings_doh_server_adguard">Adguard</string>
     <string name="settings_doh_server_cloudflare">Cloudflare</string>
     <string name="settings_doh_server_custom">Custom</string>
-    <string name="settings_doh_server_error_format">Ievadiet pareizi formatētu vietrādi URL</string>
     <string name="settings_doh_server_error_provider">Pārbaudiet, vai pakalpojumu sniedzējs ir derīgs, vai vēlāk mēģiniet vēlreiz</string>
     <string name="settings_doh_server_google">Google</string>
     <string name="settings_doh_server_mozilla">Mozilla</string>
@@ -218,7 +217,6 @@
     <string name="vault_decrypting">Notiek faila atšifrēšana, uzgaidiet…</string>
     <string name="vault_encrypting">Notiek faila šifrēšana, uzgaidiet…</string>
     <string name="vault_unsupported">Nevar atvērt šo failu. Lai atvērtu, izņemiet to no drošās mapes un mēģiniet vēlreiz.</string>
-    <string name="downloads_quick_access_title">Nesenās lejupielādes</string>
     <string name="home_onboarding_sites_label">Izmēģiniet Firedown</string>
     <string name="home_vault_button">Drošā mape</string>
     <string name="home_media_playing">Atskaņo</string>

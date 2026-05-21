@@ -51,6 +51,11 @@
     <string name="delete_browsing_data_quit_off">Desactivado</string>
     <string name="delete_browsing_data_quit_on">Activado</string>
     <string name="delete_downloads">Eliminar Descargas</string>
+    <string name="delete_history_all_time">Todo o historial</string>
+    <string name="delete_history_last_15_minutes">Últimos 15 minutos</string>
+    <string name="delete_history_last_24_hours">Últimas 24 horas</string>
+    <string name="delete_history_last_hour">Última hora</string>
+    <string name="delete_history_prompt_message">O historial de navegación do período seleccionado eliminarase permanentemente deste dispositivo.</string>
     <string name="delete_history_prompt_title">Intervalo de tempo a eliminar</string>
     <string name="delete_partial_tabs">Isto eliminará os datos das túas pestanas pechadas.</string>
     <string name="delete_password">Eliminar contrasinal</string>
@@ -199,7 +204,6 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Pechará a sesión na maioría dos sitios</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Lapelas abertas</string>
     <string name="settings_doh_server">Servidor DNS</string>
-<string name="settings_doh_server_error_format">Introduza un URL con formato correcto</string>
     <string name="settings_doh_server_error_provider">Verifique que é un provedor válido ou ténteo de novo máis tarde</string>
     <string name="settings_doh_server_off">Use o sistema de resolución DNS</string>
     <string name="settings_doh_server_title">Usar o provedor</string>
@@ -259,7 +263,6 @@
     <string name="vault_encrypting">Cifrando o ficheiro, agarda…</string>
     <string name="vault_unsupported">Non se pode abrir este ficheiro. Para abrilo, saia do cartafol seguro e téntao de novo.</string>
     <string name="bookmark_name">Nome</string>
-    <string name="downloads_quick_access_title">Descargas recentes</string>
     <string name="home_onboarding_sites_label">Proba Firedown en</string>
     <string name="home_vault_button">Cartafol seguro</string>
     <string name="home_media_playing">Reproducindo</string>

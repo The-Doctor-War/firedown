@@ -341,6 +341,16 @@
     <string name="crash_sheet_dismiss">تجاهل</string>
     <string name="crash_sheet_copied">تم نسخ تقرير التعطل إلى الحافظة</string>
     <string name="crash_sheet_open_failed">تعذر فتح المتصفح. التقرير في الحافظة — الصقه في مشكلة جديدة على GitHub.</string>
+    <string name="home_trackers_title">تم حظر المتعقبات والإعلانات</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s تم توفيرها</string>
+    <string name="home_trackers_subtitle_idle">الحماية مفعّلة</string>
+    <string name="home_vault_empty_subtitle">خاصة ومشفّرة</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 ميجابايت تم توفيرها</string>
+    <string name="trackers_info_count_label">متعقّب وإعلان تم حظره</string>
+    <string name="trackers_info_saved">~%1$s من حجم البيانات تم توفيرها</string>
+    <string name="trackers_info_categories">المتعقبات · الإعلانات · بصمات الجهاز · ملفات تعريف الارتباط</string>
+    <string name="trackers_info_action">إدارة الحماية</string>
+
 
 
 </resources>

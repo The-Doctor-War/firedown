@@ -258,6 +258,16 @@
     <string name="crash_sheet_dismiss">Avvis</string>
     <string name="crash_sheet_copied">Krasjrapport kopiert til utklippstavlen</string>
     <string name="crash_sheet_open_failed">Kunne ikke åpne en nettleser. Krasjrapporten er på utklippstavlen — lim den inn i en ny GitHub-sak.</string>
+    <string name="home_trackers_title">Sporere og annonser blokkert</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s spart</string>
+    <string name="home_trackers_subtitle_idle">Beskyttelse aktiv</string>
+    <string name="home_vault_empty_subtitle">Privat og kryptert</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB spart</string>
+    <string name="trackers_info_count_label">sporere og annonser blokkert</string>
+    <string name="trackers_info_saved">~%1$s båndbredde spart</string>
+    <string name="trackers_info_categories">Sporere · Annonser · Fingeravtrykk · Informasjonskapsler</string>
+    <string name="trackers_info_action">Administrer beskyttelse</string>
+
 
 
 </resources>

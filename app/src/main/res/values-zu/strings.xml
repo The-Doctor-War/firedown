@@ -237,6 +237,16 @@
     <string name="crash_sheet_dismiss">Vala</string>
     <string name="crash_sheet_copied">Umbiko wokubhajwa ukopishelwe ebhodini lokukopisha</string>
     <string name="crash_sheet_open_failed">Akukwazanga ukuvulwa kwesiphequluli. Umbiko usebhodini lokukopisha — unamathisele endabeni entsha ye-GitHub.</string>
+    <string name="home_trackers_title">Abalandeli nezikhangiso zivinjelwe</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s konga</string>
+    <string name="home_trackers_subtitle_idle">Ukuvikela kuyasebenza</string>
+    <string name="home_vault_empty_subtitle">Eyimfihlo futhi ibhalwe ngokufihlekile</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB konga</string>
+    <string name="trackers_info_count_label">abalandeli nezikhangiso zivinjelwe</string>
+    <string name="trackers_info_saved">~%1$s ye-bandwidth konga</string>
+    <string name="trackers_info_categories">Abalandeli · Izikhangiso · Izigxivizo zeminwe · Amakhukhi</string>
+    <string name="trackers_info_action">Phatha ukuvikela</string>
+
 
 
 </resources>

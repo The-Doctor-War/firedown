@@ -360,6 +360,16 @@
     <string name="crash_sheet_dismiss">Ignora</string>
     <string name="crash_sheet_copied">Rapporto di arresto copiato negli appunti</string>
     <string name="crash_sheet_open_failed">Impossibile aprire il browser. Il rapporto è negli appunti — incollalo in un nuovo issue su GitHub.</string>
+    <string name="home_trackers_title">Tracker e annunci bloccati</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s risparmiati</string>
+    <string name="home_trackers_subtitle_idle">Protezione attiva</string>
+    <string name="home_vault_empty_subtitle">Privata e cifrata</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB risparmiati</string>
+    <string name="trackers_info_count_label">tracker e annunci bloccati</string>
+    <string name="trackers_info_saved">~%1$s di banda risparmiata</string>
+    <string name="trackers_info_categories">Tracker · Annunci · Fingerprinting · Cookie</string>
+    <string name="trackers_info_action">Gestisci protezione</string>
+
 
 
 </resources>

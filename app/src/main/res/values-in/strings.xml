@@ -286,6 +286,16 @@
     <string name="crash_sheet_dismiss">Tutup</string>
     <string name="crash_sheet_copied">Laporan crash disalin ke papan klip</string>
     <string name="crash_sheet_open_failed">Tidak dapat membuka browser. Laporan ada di papan klip — tempel ke issue GitHub baru.</string>
+    <string name="home_trackers_title">Pelacak dan iklan diblokir</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s dihemat</string>
+    <string name="home_trackers_subtitle_idle">Perlindungan aktif</string>
+    <string name="home_vault_empty_subtitle">Pribadi dan terenkripsi</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB dihemat</string>
+    <string name="trackers_info_count_label">pelacak dan iklan diblokir</string>
+    <string name="trackers_info_saved">~%1$s bandwidth dihemat</string>
+    <string name="trackers_info_categories">Pelacak · Iklan · Sidik jari · Cookie</string>
+    <string name="trackers_info_action">Kelola perlindungan</string>
+
 
 
 </resources>

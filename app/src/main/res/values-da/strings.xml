@@ -314,6 +314,16 @@
     <string name="crash_sheet_dismiss">Afvis</string>
     <string name="crash_sheet_copied">Nedbrudsrapport kopieret til udklipsholderen</string>
     <string name="crash_sheet_open_failed">Kunne ikke åbne en browser. Nedbrudsrapporten er i din udklipsholder — indsæt den i et nyt GitHub-issue.</string>
+    <string name="home_trackers_title">Sporing og annoncer blokeret</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s sparet</string>
+    <string name="home_trackers_subtitle_idle">Beskyttelse aktiv</string>
+    <string name="home_vault_empty_subtitle">Privat og krypteret</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB sparet</string>
+    <string name="trackers_info_count_label">sporing og annoncer blokeret</string>
+    <string name="trackers_info_saved">~%1$s båndbredde sparet</string>
+    <string name="trackers_info_categories">Sporing · Annoncer · Fingeraftryk · Cookies</string>
+    <string name="trackers_info_action">Administrer beskyttelse</string>
+
 
 
 </resources>

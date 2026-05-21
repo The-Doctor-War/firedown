@@ -298,6 +298,16 @@
     <string name="crash_sheet_dismiss">Zavrieť</string>
     <string name="crash_sheet_copied">Hlásenie o páde skopírované do schránky</string>
     <string name="crash_sheet_open_failed">Nepodarilo sa otvoriť prehliadač. Hlásenie je v schránke — vložte ho do nového GitHub issue.</string>
+    <string name="home_trackers_title">Sledovače a reklamy zablokované</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ušetrené</string>
+    <string name="home_trackers_subtitle_idle">Ochrana aktívna</string>
+    <string name="home_vault_empty_subtitle">Súkromné a šifrované</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB ušetrených</string>
+    <string name="trackers_info_count_label">sledovačov a reklám zablokovaných</string>
+    <string name="trackers_info_saved">~%1$s šírky pásma ušetrenej</string>
+    <string name="trackers_info_categories">Sledovače · Reklamy · Odtlačky · Cookies</string>
+    <string name="trackers_info_action">Spravovať ochranu</string>
+
 
 
 </resources>

@@ -280,6 +280,16 @@
     <string name="crash_sheet_dismiss">Atmesti</string>
     <string name="crash_sheet_copied">Strigties pranešimas nukopijuotas į iškarpinę</string>
     <string name="crash_sheet_open_failed">Nepavyko atidaryti naršyklės. Pranešimas yra iškarpinėje — įklijuokite jį į naują GitHub problemą.</string>
+    <string name="home_trackers_title">Sekikliai ir reklamos užblokuoti</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s sutaupyta</string>
+    <string name="home_trackers_subtitle_idle">Apsauga įjungta</string>
+    <string name="home_vault_empty_subtitle">Privatu ir užšifruota</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB sutaupyta</string>
+    <string name="trackers_info_count_label">sekiklių ir reklamų užblokuota</string>
+    <string name="trackers_info_saved">~%1$s pralaidumo sutaupyta</string>
+    <string name="trackers_info_categories">Sekikliai · Reklamos · Pirštų atspaudai · Slapukai</string>
+    <string name="trackers_info_action">Valdyti apsaugą</string>
+
 
 
 </resources>

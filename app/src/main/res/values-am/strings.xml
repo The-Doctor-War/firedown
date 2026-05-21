@@ -287,6 +287,16 @@
     <string name="crash_sheet_dismiss">ዝጋ</string>
     <string name="crash_sheet_copied">የብልሽት ሪፖርት ወደ ቅንጥብ ሰሌዳ ተቀድቷል</string>
     <string name="crash_sheet_open_failed">አሳሹን መክፈት አልተቻለም። ሪፖርቱ በቅንጥብ ሰሌዳ ላይ ነው — በአዲስ GitHub issue ውስጥ ይለጥፉት።</string>
+    <string name="home_trackers_title">ተከታታዮችና ማስታወቂያዎች ተዘግተዋል</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ተቆጥቧል</string>
+    <string name="home_trackers_subtitle_idle">ጥበቃ ስራ ላይ ነው</string>
+    <string name="home_vault_empty_subtitle">የግል እና የተመሰጠረ</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 ሜባ ተቆጥቧል</string>
+    <string name="trackers_info_count_label">ተከታታዮችና ማስታወቂያዎች ተዘግተዋል</string>
+    <string name="trackers_info_saved">~%1$s የጥቅም ስፋት ተቆጥቧል</string>
+    <string name="trackers_info_categories">ተከታታዮች · ማስታወቂያዎች · የጣት አሻራ · ኩኪዎች</string>
+    <string name="trackers_info_action">ጥበቃ አስተዳድር</string>
+
 
 
 </resources>

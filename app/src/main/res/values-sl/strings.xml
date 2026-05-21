@@ -293,6 +293,16 @@
     <string name="crash_sheet_dismiss">Zavrzi</string>
     <string name="crash_sheet_copied">Poročilo o sesutju kopirano v odložišče</string>
     <string name="crash_sheet_open_failed">Brskalnika ni bilo mogoče odpreti. Poročilo je v odložišču — prilepite ga v novo prijavo na GitHub.</string>
+    <string name="home_trackers_title">Sledilniki in oglasi blokirani</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s prihranjenih</string>
+    <string name="home_trackers_subtitle_idle">Zaščita aktivna</string>
+    <string name="home_vault_empty_subtitle">Zasebno in šifrirano</string>
+    <string name="home_card_style_preview_trackers_subtitle">12.345 · ~580 MB prihranjenih</string>
+    <string name="trackers_info_count_label">sledilniki in oglasi blokirani</string>
+    <string name="trackers_info_saved">~%1$s pasovne širine prihranjene</string>
+    <string name="trackers_info_categories">Sledilniki · Oglasi · Prstni odtisi · Piškotki</string>
+    <string name="trackers_info_action">Upravljanje zaščite</string>
+
 
 
 </resources>

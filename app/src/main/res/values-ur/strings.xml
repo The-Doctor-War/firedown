@@ -273,6 +273,16 @@
     <string name="crash_sheet_dismiss">مسترد</string>
     <string name="crash_sheet_copied">کریش رپورٹ کلپ بورڈ پر کاپی ہو گئی</string>
     <string name="crash_sheet_open_failed">براؤزر نہیں کھل سکا۔ رپورٹ آپ کے کلپ بورڈ پر ہے — اسے نئے GitHub مسئلے میں چسپاں کریں۔</string>
+    <string name="home_trackers_title">ٹریکر اور اشتہارات بلاک کیے گئے</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s بچ گیا</string>
+    <string name="home_trackers_subtitle_idle">تحفظ فعال ہے</string>
+    <string name="home_vault_empty_subtitle">نجی اور انکرپٹڈ</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB بچ گیا</string>
+    <string name="trackers_info_count_label">ٹریکرز اور اشتہارات بلاک ہوئے</string>
+    <string name="trackers_info_saved">~%1$s بینڈوڈتھ بچ گئی</string>
+    <string name="trackers_info_categories">ٹریکرز · اشتہارات · فنگرپرنٹنگ · کوکیز</string>
+    <string name="trackers_info_action">تحفظ کا انتظام کریں</string>
+
 
 
 </resources>

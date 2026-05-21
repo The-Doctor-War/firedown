@@ -314,6 +314,16 @@
     <string name="crash_sheet_dismiss">סגור</string>
     <string name="crash_sheet_copied">דוח הקריסה הועתק ללוח</string>
     <string name="crash_sheet_open_failed">לא ניתן לפתוח דפדפן. הדוח נמצא בלוח — הדבק אותו ב-issue חדש בגיטהאב.</string>
+    <string name="home_trackers_title">עוקבים ופרסומות חסומים</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s נחסכו</string>
+    <string name="home_trackers_subtitle_idle">ההגנה פעילה</string>
+    <string name="home_vault_empty_subtitle">פרטי ומוצפן</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB נחסכו</string>
+    <string name="trackers_info_count_label">עוקבים ופרסומות נחסמו</string>
+    <string name="trackers_info_saved">~%1$s רוחב פס נחסך</string>
+    <string name="trackers_info_categories">עוקבים · פרסומות · טביעת אצבע · עוגיות</string>
+    <string name="trackers_info_action">ניהול ההגנה</string>
+
 
 
 </resources>

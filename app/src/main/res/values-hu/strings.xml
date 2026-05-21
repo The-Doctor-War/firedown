@@ -301,6 +301,16 @@
     <string name="crash_sheet_dismiss">Elvetés</string>
     <string name="crash_sheet_copied">Összeomlási jelentés a vágólapra másolva</string>
     <string name="crash_sheet_open_failed">Nem sikerült megnyitni a böngészőt. A jelentés a vágólapon van — illessze be egy új GitHub bejegyzésbe.</string>
+    <string name="home_trackers_title">Nyomkövetők és hirdetések blokkolva</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s megtakarítva</string>
+    <string name="home_trackers_subtitle_idle">A védelem aktív</string>
+    <string name="home_vault_empty_subtitle">Privát és titkosított</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB megtakarítva</string>
+    <string name="trackers_info_count_label">nyomkövető és hirdetés blokkolva</string>
+    <string name="trackers_info_saved">~%1$s sávszélesség megtakarítva</string>
+    <string name="trackers_info_categories">Nyomkövetők · Hirdetések · Ujjlenyomat · Sütik</string>
+    <string name="trackers_info_action">Védelem kezelése</string>
+
 
 
 </resources>

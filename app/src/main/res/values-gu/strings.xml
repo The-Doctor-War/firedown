@@ -228,6 +228,16 @@
     <string name="crash_sheet_dismiss">બરતરફ</string>
     <string name="crash_sheet_copied">ક્રેશ રિપોર્ટ ક્લિપબોર્ડ પર કૉપિ થયો</string>
     <string name="crash_sheet_open_failed">બ્રાઉઝર ખોલી શકાયું નહીં. રિપોર્ટ ક્લિપબોર્ડ પર છે — તેને નવા GitHub ઈશ્યૂમાં પેસ્ટ કરો.</string>
+    <string name="home_trackers_title">ટ્રેકર્સ અને જાહેરાતો અવરોધિત</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s બચ્યું</string>
+    <string name="home_trackers_subtitle_idle">સુરક્ષા સક્રિય</string>
+    <string name="home_vault_empty_subtitle">ખાનગી અને એન્ક્રિપ્ટેડ</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB બચ્યું</string>
+    <string name="trackers_info_count_label">ટ્રેકર્સ અને જાહેરાતો અવરોધિત</string>
+    <string name="trackers_info_saved">~%1$s બેન્ડવિડ્થ બચી</string>
+    <string name="trackers_info_categories">ટ્રેકર્સ · જાહેરાતો · ફિંગરપ્રિન્ટિંગ · કૂકીઝ</string>
+    <string name="trackers_info_action">સુરક્ષાનું સંચાલન કરો</string>
+
 
 
 </resources>

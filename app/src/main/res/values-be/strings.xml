@@ -279,6 +279,16 @@
     <string name="crash_sheet_dismiss">Закрыць</string>
     <string name="crash_sheet_copied">Справаздача аб збоі скапіявана ў буфер абмену</string>
     <string name="crash_sheet_open_failed">Не атрымалася адкрыць браўзер. Справаздача ў буферы абмену — устаўце яе ў новы запыт GitHub.</string>
+    <string name="home_trackers_title">Трэкеры і рэклама заблакіраваны</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s зэканомлена</string>
+    <string name="home_trackers_subtitle_idle">Абарона ўключана</string>
+    <string name="home_vault_empty_subtitle">Прыватна і зашыфравана</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 МБ зэканомлена</string>
+    <string name="trackers_info_count_label">трэкераў і рэкламы заблакіравана</string>
+    <string name="trackers_info_saved">~%1$s трафіку зэканомлена</string>
+    <string name="trackers_info_categories">Трэкеры · Рэклама · Адбіткі · Cookie</string>
+    <string name="trackers_info_action">Кіраваць абаронай</string>
+
 
 
 </resources>

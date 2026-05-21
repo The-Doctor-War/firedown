@@ -288,6 +288,16 @@
     <string name="crash_sheet_dismiss">Loobu</string>
     <string name="crash_sheet_copied">Krahhi aruanne kopeeritud lõikelauale</string>
     <string name="crash_sheet_open_failed">Brauserit ei õnnestunud avada. Aruanne on lõikelaual — kleebi see uude GitHub probleemi.</string>
+    <string name="home_trackers_title">Jälitajad ja reklaamid blokeeritud</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s säästetud</string>
+    <string name="home_trackers_subtitle_idle">Kaitse aktiivne</string>
+    <string name="home_vault_empty_subtitle">Privaatne ja krüptitud</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB säästetud</string>
+    <string name="trackers_info_count_label">jälitajat ja reklaami blokeeritud</string>
+    <string name="trackers_info_saved">~%1$s ribalaiust säästetud</string>
+    <string name="trackers_info_categories">Jälitajad · Reklaamid · Sõrmejälg · Küpsised</string>
+    <string name="trackers_info_action">Halda kaitset</string>
+
 
 
 </resources>

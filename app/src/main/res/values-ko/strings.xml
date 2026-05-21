@@ -358,6 +358,16 @@
     <string name="crash_sheet_dismiss">닫기</string>
     <string name="crash_sheet_copied">충돌 보고서가 클립보드에 복사됨</string>
     <string name="crash_sheet_open_failed">브라우저를 열 수 없습니다. 보고서가 클립보드에 있습니다 — 새로운 GitHub 이슈에 붙여넣어 주세요.</string>
+    <string name="home_trackers_title">추적기 및 광고 차단됨</string>
+    <string name="home_trackers_subtitle">%1$s · 약 %2$s 절약</string>
+    <string name="home_trackers_subtitle_idle">보호 기능이 활성화됨</string>
+    <string name="home_vault_empty_subtitle">비공개 및 암호화됨</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · 약 580 MB 절약</string>
+    <string name="trackers_info_count_label">개의 추적기 및 광고 차단됨</string>
+    <string name="trackers_info_saved">약 %1$s 의 대역폭 절약</string>
+    <string name="trackers_info_categories">추적기 · 광고 · 핑거프린팅 · 쿠키 배너</string>
+    <string name="trackers_info_action">보호 관리</string>
+
 
 
 </resources>

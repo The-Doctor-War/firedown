@@ -267,6 +267,16 @@
     <string name="crash_sheet_dismiss">বাতিল</string>
     <string name="crash_sheet_copied">ক্র্যাশ রিপোর্ট ক্লিপবোর্ডে কপি করা হয়েছে</string>
     <string name="crash_sheet_open_failed">ব্রাউজার খোলা যায়নি। রিপোর্ট ক্লিপবোর্ডে আছে — এটি একটি নতুন GitHub ইস্যুতে পেস্ট করুন।</string>
+    <string name="home_trackers_title">ট্র্যাকার এবং বিজ্ঞাপন ব্লক করা হয়েছে</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s সাশ্রয়</string>
+    <string name="home_trackers_subtitle_idle">সুরক্ষা সক্রিয়</string>
+    <string name="home_vault_empty_subtitle">ব্যক্তিগত এবং এনক্রিপ্টেড</string>
+    <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB সাশ্রয়</string>
+    <string name="trackers_info_count_label">ট্র্যাকার এবং বিজ্ঞাপন ব্লক</string>
+    <string name="trackers_info_saved">~%1$s ব্যান্ডউইথ সাশ্রয়</string>
+    <string name="trackers_info_categories">ট্র্যাকার · বিজ্ঞাপন · ফিঙ্গারপ্রিন্টিং · কুকি</string>
+    <string name="trackers_info_action">সুরক্ষা পরিচালনা করুন</string>
+
 
 
 </resources>

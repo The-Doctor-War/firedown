@@ -240,6 +240,16 @@
     <string name="crash_sheet_dismiss">Aizvērt</string>
     <string name="crash_sheet_copied">Avārijas ziņojums kopēts starpliktuvē</string>
     <string name="crash_sheet_open_failed">Pārlūku neizdevās atvērt. Ziņojums ir starpliktuvē — ielīmējiet to jaunā GitHub problēmā.</string>
+    <string name="home_trackers_title">Izsekotāji un reklāmas bloķētas</string>
+    <string name="home_trackers_subtitle">%1$s · ~%2$s ietaupīti</string>
+    <string name="home_trackers_subtitle_idle">Aizsardzība aktīva</string>
+    <string name="home_vault_empty_subtitle">Privāts un šifrēts</string>
+    <string name="home_card_style_preview_trackers_subtitle">12 345 · ~580 MB ietaupīti</string>
+    <string name="trackers_info_count_label">izsekotāji un reklāmas bloķētas</string>
+    <string name="trackers_info_saved">~%1$s joslas platuma ietaupīts</string>
+    <string name="trackers_info_categories">Izsekotāji · Reklāmas · Pirkstu nospiedumi · Sīkfaili</string>
+    <string name="trackers_info_action">Pārvaldīt aizsardzību</string>
+
 
 
 </resources>

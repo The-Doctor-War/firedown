@@ -24,9 +24,10 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Packaged style for the four home-page cards — active download,
- * playing media, Downloads, Safe Folder. Five variants give the user
- * a single 'home cards' choice rather than per-card colour knobs.
+ * Packaged style for the five home-page cards — active download,
+ * playing media, Downloads, Safe Folder, Trackers blocked. Four
+ * variants give the user a single 'home cards' choice rather than
+ * per-card colour knobs.
  *
  * <p>Colours are raw hex (not theme attrs) because most variants are
  * deliberately off-palette (pale washes, full-saturation brand
@@ -36,7 +37,7 @@ import java.util.List;
  *
  * <p>Live cards (active download, playing media) keep their branded
  * coral / peach treatment across all variants — they're the home
- * page's two 'live' anchors. The picker UI only previews the two
+ * page's two 'live' anchors. The picker UI only previews the three
  * shelf cards because the live cards look identical across variants
  * and showing them four times would be noise — see
  * HomeCardStylesFragment.</p>
@@ -65,24 +66,28 @@ public final class HomeCardStyle {
     @StringRes public final int nameRes;
     @NonNull private final CardLook downloadsLight, downloadsDark;
     @NonNull private final CardLook vaultLight, vaultDark;
+    @NonNull private final CardLook trackersLight, trackersDark;
     @NonNull private final CardLook activeLight, activeDark;
     @NonNull private final CardLook mediaLight, mediaDark;
 
     private HomeCardStyle(@NonNull String key, @StringRes int nameRes,
                           @NonNull CardLook dl, @NonNull CardLook dd,
                           @NonNull CardLook vl, @NonNull CardLook vd,
+                          @NonNull CardLook tl, @NonNull CardLook td,
                           @NonNull CardLook al, @NonNull CardLook ad,
                           @NonNull CardLook ml, @NonNull CardLook md) {
         this.key = key;
         this.nameRes = nameRes;
         this.downloadsLight = dl;  this.downloadsDark = dd;
         this.vaultLight = vl;      this.vaultDark = vd;
+        this.trackersLight = tl;   this.trackersDark = td;
         this.activeLight = al;     this.activeDark = ad;
         this.mediaLight = ml;      this.mediaDark = md;
     }
 
     @NonNull public CardLook downloads(boolean night) { return night ? downloadsDark : downloadsLight; }
     @NonNull public CardLook vault(boolean night)     { return night ? vaultDark     : vaultLight;     }
+    @NonNull public CardLook trackers(boolean night)  { return night ? trackersDark  : trackersLight;  }
     @NonNull public CardLook active(boolean night)    { return night ? activeDark    : activeLight;    }
     @NonNull public CardLook media(boolean night)     { return night ? mediaDark     : mediaLight;     }
 
@@ -106,6 +111,8 @@ public final class HomeCardStyle {
             new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFFF66A66, 0xFF0F0000),
             new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFC8417B, 0xFFFFFFFF),
             new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFFC8417B, 0xFFFFFFFF),
+            new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFFFBF9B, 0xFF5D2E0D),
+            new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFFFAB186, 0xFF532606),
             ACTIVE_BRAND_LIGHT, ACTIVE_BRAND_DARK,
             MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
 
@@ -117,6 +124,8 @@ public final class HomeCardStyle {
             new CardLook(0xFF3A1F1C, 0xFFF4DDDB, null, 0xFFF66A66),
             new CardLook(0xFFFBE2EC, 0xFF5C1B3F, null, 0xFF8C1F49),
             new CardLook(0xFF3A1A28, 0xFFF4DDDB, null, 0xFFFFB0C9),
+            new CardLook(0xFFFFEEDC, 0xFF5D2E0D, null, 0xFFA85918),
+            new CardLook(0xFF332218, 0xFFF4DDDB, null, 0xFFFAB186),
             ACTIVE_BRAND_LIGHT, ACTIVE_BRAND_DARK,
             MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
 
@@ -128,17 +137,22 @@ public final class HomeCardStyle {
             new CardLook(0xFF3A1F1C, 0xFFF4DDDB, 0xFFF66A66, 0xFF0F0000),
             new CardLook(0xFFFBE2EC, 0xFF5C1B3F, 0xFFC8417B, 0xFFFFFFFF),
             new CardLook(0xFF3A1A28, 0xFFF4DDDB, 0xFFC8417B, 0xFFFFFFFF),
+            new CardLook(0xFFFFEEDC, 0xFF5D2E0D, 0xFFFFBF9B, 0xFF5D2E0D),
+            new CardLook(0xFF332218, 0xFFF4DDDB, 0xFFFAB186, 0xFF532606),
             ACTIVE_BRAND_LIGHT, ACTIVE_BRAND_DARK,
             MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
 
-    /** 3 — Coral. Full-saturation brand surface across both shelves —
-     *  Downloads goes coral, Safe Folder goes raspberry. */
+    /** 3 — Coral. Full-saturation brand surface across the three
+     *  shelves — Downloads coral, Safe Folder raspberry, Trackers
+     *  peach (each owns its M3 tonal container). */
     public static final HomeCardStyle CORAL = new HomeCardStyle("coral",
             R.string.home_card_style_coral,
             new CardLook(0xFFFF857F, 0xFF460005, null, 0xFF460005),
             new CardLook(0xFFF66A66, 0xFF0F0000, null, 0xFF0F0000),
             new CardLook(0xFFC8417B, 0xFFFFFFFF, null, 0xFFFFFFFF),
             new CardLook(0xFFC8417B, 0xFFFFFFFF, null, 0xFFFFFFFF),
+            new CardLook(0xFFFFBF9B, 0xFF5D2E0D, null, 0xFF5D2E0D),
+            new CardLook(0xFFFAB186, 0xFF532606, null, 0xFF532606),
             ACTIVE_BRAND_LIGHT, ACTIVE_BRAND_DARK,
             MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
 

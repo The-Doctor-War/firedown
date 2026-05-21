@@ -647,6 +647,17 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                     mHomeVaultSubtitle,
                     style.vault(night));
         }
+
+        MaterialCardView trackersCard = root.findViewById(R.id.home_trackers_card);
+        if (trackersCard != null) {
+            com.solarized.firedown.ui.HomeCardStyle.applyToCard(
+                    trackersCard,
+                    root.findViewById(R.id.home_trackers_chip),
+                    root.findViewById(R.id.home_trackers_icon),
+                    root.findViewById(R.id.home_trackers_title),
+                    mTrackersSubtitle,
+                    style.trackers(night));
+        }
     }
 
     /** Binds the 'N files saved · X.Y GB' subtitle on the Downloads

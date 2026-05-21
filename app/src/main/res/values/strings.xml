@@ -84,6 +84,7 @@
     <string name="delete_browsing_data_quit_on">On</string>
     <string name="delete_downloads">Delete Downloads</string>
     <string name="delete_history_prompt_title">Time range to delete</string>
+    <string name="delete_history_prompt_message">Browsing history from the selected period will be permanently removed from this device.</string>
     <string name="delete_partial_tabs">This will delete your closed tabs data.</string>
     <string name="delete_password">Delete Password</string>
     <string name="delete_password_description">Are you sure you want to delete this password?</string>

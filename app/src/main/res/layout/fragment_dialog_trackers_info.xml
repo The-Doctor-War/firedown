@@ -33,8 +33,10 @@
         android:paddingTop="8dp"
         android:paddingBottom="20dp">
 
-        <!-- Illustration. ill_presents fits the 'look what we
-             saved you' framing without being pompous about it. -->
+        <!-- Privacy-themed illustration — closer thematic fit for a
+             trackers/ads sheet than the 'presents' one we had first
+             (which read as 'look what we got you' / a bit twee for
+             a privacy stat). -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="180dp"
@@ -42,7 +44,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="@null"
             android:scaleType="fitCenter"
-            android:src="@drawable/ill_presents" />
+            android:src="@drawable/ill_privacy_purple" />
 
         <!-- Big number: '12,345' or 'Protection active' placeholder
              when zero. Adapter swaps the binding at runtime. -->

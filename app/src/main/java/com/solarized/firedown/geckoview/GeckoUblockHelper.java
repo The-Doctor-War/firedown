@@ -39,10 +39,6 @@ public class GeckoUblockHelper {
      *  don't contribute (uBlock excludes them from its persisted
      *  stats). */
     private final MutableLiveData<Long> mCumulativeBlockedLive = new MutableLiveData<>(0L);
-    /** Cumulative allowed-through requests, paired with the blocked
-     *  count so consumers can compute a ratio ('1 in N requests
-     *  blocked'). */
-    private final MutableLiveData<Long> mCumulativeAllowedLive = new MutableLiveData<>(0L);
 
     // Firewall activation is a global user preference — not per-mode.
     private final MutableLiveData<Boolean> mFirewallActiveLive = new MutableLiveData<>();
@@ -62,15 +58,12 @@ public class GeckoUblockHelper {
      *  immediately; the live value overrides it the moment the
      *  extension pushes a fresh number. */
     private static final String KEY_CUMULATIVE_BLOCKED = "ublock.cumulative.blocked";
-    private static final String KEY_CUMULATIVE_ALLOWED = "ublock.cumulative.allowed";
 
     @Inject
     public GeckoUblockHelper(@ApplicationContext Context context) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         long cachedBlocked = mPrefs.getLong(KEY_CUMULATIVE_BLOCKED, 0L);
-        long cachedAllowed = mPrefs.getLong(KEY_CUMULATIVE_ALLOWED, 0L);
         if (cachedBlocked > 0L) mCumulativeBlockedLive.postValue(cachedBlocked);
-        if (cachedAllowed > 0L) mCumulativeAllowedLive.postValue(cachedAllowed);
     }
 
 
@@ -125,21 +118,6 @@ public class GeckoUblockHelper {
         if (blocked < 0) return;
         mCumulativeBlockedLive.postValue(blocked);
         mPrefs.edit().putLong(KEY_CUMULATIVE_BLOCKED, blocked).apply();
-    }
-
-    /**
-     * Paired with {@link #onCumulativeBlocked} — fed from the same
-     * native message so the two stay in sync. The sheet uses the
-     * (blocked + allowed) sum to render '1 in N requests blocked'.
-     */
-    public void onCumulativeAllowed(long allowed) {
-        if (allowed < 0) return;
-        mCumulativeAllowedLive.postValue(allowed);
-        mPrefs.edit().putLong(KEY_CUMULATIVE_ALLOWED, allowed).apply();
-    }
-
-    public LiveData<Long> getCumulativeAllowedLive() {
-        return mCumulativeAllowedLive;
     }
 
     /**

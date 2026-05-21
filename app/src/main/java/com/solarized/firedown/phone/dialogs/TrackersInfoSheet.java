@@ -73,7 +73,6 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
 
         TextView countView = view.findViewById(R.id.trackers_info_count);
         TextView savedView = view.findViewById(R.id.trackers_info_saved);
-        TextView ratioView = view.findViewById(R.id.trackers_info_ratio);
         MaterialButton action = view.findViewById(R.id.trackers_info_action);
 
         mGeckoUblockHelper.getCumulativeBlockedLive().observe(getViewLifecycleOwner(), blocked -> {
@@ -92,48 +91,11 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
             savedView.setVisibility(View.VISIBLE);
             savedView.setText(getString(R.string.trackers_info_saved,
                     Utils.readableFileSize(n * AVG_BYTES_PER_BLOCKED_REQUEST)));
-            updateRatio(ratioView);
         });
-
-        // Allowed-count observer recomputes the ratio when the
-        // sibling stat lands. Both observers call updateRatio so
-        // whichever arrives second triggers the line to render.
-        mGeckoUblockHelper.getCumulativeAllowedLive().observe(getViewLifecycleOwner(), allowed ->
-                updateRatio(ratioView));
 
         action.setOnClickListener(v -> {
             startActivity(new Intent(requireContext(), SettingsActivity.class));
             dismissAllowingStateLoss();
         });
-    }
-
-    /**
-     * '1 in N' ratio of blocked to total (blocked+allowed) requests.
-     * Hidden when we don't yet have both halves, when the total is
-     * zero, or when nothing has been blocked. Caps at '1 in 100' as
-     * a single 'fewer than' string — past that the integer doesn't
-     * carry useful information.
-     */
-    private void updateRatio(@NonNull TextView ratioView) {
-        Long blocked = mGeckoUblockHelper.getCumulativeBlockedLive().getValue();
-        Long allowed = mGeckoUblockHelper.getCumulativeAllowedLive().getValue();
-        long b = blocked == null ? 0L : blocked;
-        long a = allowed == null ? 0L : allowed;
-        long total = b + a;
-        if (b <= 0 || total <= 0) {
-            ratioView.setVisibility(View.GONE);
-            return;
-        }
-        long n = Math.round((double) total / (double) b);
-        ratioView.setVisibility(View.VISIBLE);
-        if (n >= 100) {
-            ratioView.setText(R.string.trackers_info_ratio_high);
-        } else if (n < 1) {
-            // Defensive: if everything's blocked the ratio is 1:1,
-            // not 1:0 — clamp at 1 to avoid 'Roughly 1 in 0'.
-            ratioView.setText(getString(R.string.trackers_info_ratio, 1L));
-        } else {
-            ratioView.setText(getString(R.string.trackers_info_ratio, n));
-        }
     }
 }

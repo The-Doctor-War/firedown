@@ -573,15 +573,11 @@
     <string name="home_trackers_subtitle">%1$s · ~%2$s saved</string>
     <!-- Trackers info bottom sheet — spawned from the Home Trackers
          card. Shows the cumulative count big, an estimated bytes-
-         saved line, a 'roughly 1 in N web requests' ratio, a short
-         categories caption, and a CTA into Privacy settings.
-         trackers_info_saved %1$s is the formatted bytes string;
-         trackers_info_ratio %1$d is the (blocked+allowed)/blocked
-         ratio rounded to an integer. -->
+         saved line, a short categories caption, and a CTA into
+         Privacy settings. trackers_info_saved %1$s is the formatted
+         bytes string. -->
     <string name="trackers_info_count_label">trackers and ads blocked</string>
     <string name="trackers_info_saved">~%1$s of bandwidth saved</string>
-    <string name="trackers_info_ratio">Roughly 1 in %1$d web requests, since install</string>
-    <string name="trackers_info_ratio_high">Fewer than 1 in 100 web requests, since install</string>
     <string name="trackers_info_categories">Trackers · Ads · Fingerprinting · Cookie banners</string>
     <string name="trackers_info_action">Manage protection</string>
     <!-- Subtitle placeholder for the initial state — uBlock hasn't

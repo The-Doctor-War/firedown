@@ -15,7 +15,6 @@ import {
 
     port.onMessage.addListener(response => {
         port.postMessage({ listener: "ublock", message: response });
-        console.log("[onMessage] raw=" + JSON.stringify(response));
         if (Object.hasOwn(response, "ads")) {
             toggleAds({ enable: response.ads });
         } else if (Object.hasOwn(response, "javascript")) {
@@ -116,11 +115,8 @@ import {
             k => µb.selectedFilterLists.includes(k)
         );
         if (enable === haveCookieLists) {
-            console.log('[toggleCookieNotices] no-op (enable=' + enable + ')');
             return;
         }
-
-        console.log('[toggleCookieNotices] enable=' + enable + ' before=' + JSON.stringify(µb.selectedFilterLists));
 
         const details = enable
             ? { toSelect: COOKIE_NOTICE_LISTS, merge: true }
@@ -128,8 +124,6 @@ import {
 
         µb.applyFilterListSelection(details);
         await µb.loadFilterLists();
-
-        console.log('[toggleCookieNotices] after=' + JSON.stringify(µb.selectedFilterLists));
 
         const tab = await vAPI.tabs.getCurrent();
         if (tab instanceof Object) {
@@ -148,17 +142,13 @@ import {
     async function toggleAds(message) {
         const newState = message.enable === true;
         const tab = await vAPI.tabs.getCurrent();
-        if (tab instanceof Object === false) {
-            console.log('[toggleAds] no active tab; ignoring enable=' + newState);
-            return;
-        }
+        if (tab instanceof Object === false) { return; }
 
         // Use normalURL (= tabContext.normalURL) as the popup does, so the
         // URL passed to toggleNetFilteringSwitch is consistent with what
         // getNetFilteringSwitch will later look up. Scope '' → hostname
         // directive (ublock.js line 141), matching the popup default.
         const pageURL = µb.normalizeTabURL(tab.id, tab.url);
-        console.log('[toggleAds] enable=' + newState + ' tab=' + tab.id + ' url=' + pageURL);
 
         // Go through pageStore so the net-filtering cache is invalidated,
         // matching the upstream popup flow in messaging.js toggleNetFiltering.

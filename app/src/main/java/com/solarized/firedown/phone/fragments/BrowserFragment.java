@@ -204,6 +204,25 @@ public class BrowserFragment extends BaseBrowserFragment
         OnBackPressedCallback callback = new OnBackPressedCallback(true) {
             @Override
             public void handleOnBackPressed() {
+                // Autocomplete dismissal is independent of any current
+                // Gecko session — the URL-bar overlay can be open even
+                // after the current tab has gone away (closing the last
+                // tab, transient null between tab swaps, fragment
+                // restored before its session re-attaches). Check it
+                // before the geckoState null guard below so a back
+                // press while the overlay is up never falls through to
+                // the activity-finish path and closes the app.
+                if (mAutoCompleteView.getVisibility() == View.VISIBLE) {
+                    hideKeyboard(mAutoCompleteEditText);
+                    mBrowserDownloadViewModel.update();
+                    if (mUiState == UiState.BROWSING) {
+                        mGeckoToolbar.enableScrolling();
+                    }
+                    mGeckoToolbar.clearFocus();
+                    mGeckoToolbar.startAnimation(false);
+                    mAutoCompleteView.updateVisibility(false);
+                    return;
+                }
                 GeckoState geckoState = peekCurrentGeckoState();
                 if (geckoState == null) {
                     setEnabled(false);
@@ -217,15 +236,6 @@ public class BrowserFragment extends BaseBrowserFragment
                     geckoState.exitFullScreen();
                 } else if (mUiState == UiState.SEARCH) {
                     exitSearch();
-                } else if (mAutoCompleteView.getVisibility() == View.VISIBLE) {
-                    hideKeyboard(mAutoCompleteEditText);
-                    mBrowserDownloadViewModel.update();
-                    if (mUiState == UiState.BROWSING) {
-                        mGeckoToolbar.enableScrolling();
-                    }
-                    mGeckoToolbar.clearFocus();
-                    mGeckoToolbar.startAnimation(false);
-                    mAutoCompleteView.updateVisibility(false);
                 } else if (geckoState.canGoBackward()) {
                     geckoState.goBack();
                     enterBrowsing();

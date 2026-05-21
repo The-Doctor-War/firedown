@@ -524,6 +524,8 @@
     <string name="trackers_info_categories">Tracker · Werbung · Fingerprinting · Cookie-Banner</string>
     <string name="trackers_info_action">Schutz verwalten</string>
     <string name="trackers_info_today">%1$s heute blockiert</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -277,6 +277,8 @@
     <string name="trackers_info_categories">ট্র্যাকার · বিজ্ঞাপন · ফিঙ্গারপ্রিন্টিং · কুকি</string>
     <string name="trackers_info_action">সুরক্ষা পরিচালনা করুন</string>
     <string name="trackers_info_today">%1$s আজ ব্লক করা হয়েছে</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

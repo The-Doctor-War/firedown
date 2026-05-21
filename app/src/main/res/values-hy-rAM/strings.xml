@@ -83,6 +83,8 @@
     <string name="trackers_info_categories">Հետևորդներ · Գովազդներ · Մատնահետք · Cookie</string>
     <string name="trackers_info_action">Կառավարել պաշտպանությունը</string>
     <string name="trackers_info_today">%1$s այսօր արգելափակվել է</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

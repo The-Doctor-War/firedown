@@ -283,6 +283,8 @@
     <string name="trackers_info_categories">ຕົວຕິດຕາມ · ໂຄສະນາ · ລາຍນິ້ວມື · ຄຸກກີ</string>
     <string name="trackers_info_action">ຈັດການການປ້ອງກັນ</string>
     <string name="trackers_info_today">ບລັອກ %1$s ມື້ນີ້</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

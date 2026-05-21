@@ -247,6 +247,8 @@
     <string name="trackers_info_categories">ଟ୍ରାକର · ବିଜ୍ଞାପନ · ଆଙ୍ଗୁଠିଚିହ୍ନ · କୁକି</string>
     <string name="trackers_info_action">ସୁରକ୍ଷା ପରିଚାଳନା</string>
     <string name="trackers_info_today">%1$s ଆଜି ବ୍ଲକ୍</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -61,6 +61,8 @@
     <string name="trackers_info_categories">ટ્રેકર્સ · જાહેરાતો · ફિંગરપ્રિન્ટિંગ · કૂકીઝ</string>
     <string name="trackers_info_action">સુરક્ષાનું સંચાલન કરો</string>
     <string name="trackers_info_today">%1$s આજે અવરોધિત</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

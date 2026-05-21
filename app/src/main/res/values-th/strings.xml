@@ -308,6 +308,8 @@
     <string name="trackers_info_categories">ตัวติดตาม · โฆษณา · ลายนิ้วมือดิจิทัล · คุกกี้</string>
     <string name="trackers_info_action">จัดการการป้องกัน</string>
     <string name="trackers_info_today">บล็อก %1$s รายการวันนี้</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

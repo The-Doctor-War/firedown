@@ -264,6 +264,8 @@
     <string name="trackers_info_categories">Rastreadores · Anúncios · Impressão digital · Cookies</string>
     <string name="trackers_info_action">Gerenciar proteção</string>
     <string name="trackers_info_today">%1$s bloqueados hoje</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

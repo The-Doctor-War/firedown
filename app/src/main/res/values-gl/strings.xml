@@ -291,6 +291,8 @@
     <string name="trackers_info_categories">Rastrexadores · Anuncios · Pegada · Cookies</string>
     <string name="trackers_info_action">Xestionar protección</string>
     <string name="trackers_info_today">%1$s bloqueados hoxe</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

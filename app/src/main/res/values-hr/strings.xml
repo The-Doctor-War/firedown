@@ -306,6 +306,8 @@
     <string name="trackers_info_categories">Pratitelji · Oglasi · Otisci · Kolačići</string>
     <string name="trackers_info_action">Upravljanje zaštitom</string>
     <string name="trackers_info_today">%1$s blokirano danas</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

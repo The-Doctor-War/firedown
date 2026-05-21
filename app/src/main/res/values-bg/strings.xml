@@ -309,6 +309,8 @@
     <string name="trackers_info_categories">Тракери · Реклами · Отпечатъци · Бисквитки</string>
     <string name="trackers_info_action">Управление на защитата</string>
     <string name="trackers_info_today">%1$s блокирани днес</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -284,6 +284,8 @@
     <string name="trackers_info_categories">ట్రాకర్లు · ప్రకటనలు · ఫింగర్‌ప్రింట్ · కుకీలు</string>
     <string name="trackers_info_action">రక్షణను నిర్వహించండి</string>
     <string name="trackers_info_today">%1$s ఈరోజు బ్లాక్ చేయబడింది</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

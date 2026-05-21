@@ -288,6 +288,8 @@
     <string name="trackers_info_categories">Rakning · Auglýsingar · Fingrafar · Vafrakökur</string>
     <string name="trackers_info_action">Stjórna vörn</string>
     <string name="trackers_info_today">%1$s blokkað í dag</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

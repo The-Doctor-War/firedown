@@ -524,6 +524,8 @@
     <string name="trackers_info_categories">Rastreadores · Anuncios · Huella digital · Cookies</string>
     <string name="trackers_info_action">Gestionar protección</string>
     <string name="trackers_info_today">%1$s bloqueados hoy</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -328,6 +328,8 @@
     <string name="trackers_info_categories">Seuranta · Mainokset · Sormenjälki · Evästeet</string>
     <string name="trackers_info_action">Hallitse suojausta</string>
     <string name="trackers_info_today">%1$s estetty tänään</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

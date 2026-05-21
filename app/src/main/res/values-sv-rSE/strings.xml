@@ -88,6 +88,8 @@
     <string name="trackers_info_categories">Spårare · Annonser · Fingeravtryck · Cookies</string>
     <string name="trackers_info_action">Hantera skydd</string>
     <string name="trackers_info_today">%1$s blockerade idag</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

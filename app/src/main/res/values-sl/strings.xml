@@ -303,6 +303,8 @@
     <string name="trackers_info_categories">Sledilniki · Oglasi · Prstni odtisi · Piškotki</string>
     <string name="trackers_info_action">Upravljanje zaščite</string>
     <string name="trackers_info_today">%1$s blokiranih danes</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -311,6 +311,8 @@
     <string name="trackers_info_categories">Nyomkövetők · Hirdetések · Ujjlenyomat · Sütik</string>
     <string name="trackers_info_action">Védelem kezelése</string>
     <string name="trackers_info_today">%1$s blokkolva ma</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

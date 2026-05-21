@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * Packaged style for the five home-page cards — active download,
- * playing media, Downloads, Safe Folder, Trackers blocked. Four
+ * playing media, Downloads, Safe Folder, Trackers blocked. Five
  * variants give the user a single 'home cards' choice rather than
  * per-card colour knobs.
  *
@@ -103,10 +103,28 @@ public final class HomeCardStyle {
     private static final CardLook MEDIA_BRAND_DARK =
             new CardLook(0xFFFAB186, 0xFF532606, null, 0xFF532606);
 
-    /** 0 — Neutral. Neutral surface + tonal chip; matches what's on
-     *  main today. The 'no theme picked yet' baseline. */
+    /** 0 — Neutral. True greyscale shelves — neutral surface, neutral
+     *  chip backdrop (surfaceContainerHighest), icons tinted with
+     *  onSurfaceVariant so no brand colour leaks through. The
+     *  'minimal' option for users who don't want coral / raspberry /
+     *  peach on the home page at all. */
     public static final HomeCardStyle NEUTRAL = new HomeCardStyle("neutral",
             R.string.home_card_style_neutral,
+            new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFE4E2E5, 0xFF44474C),
+            new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFF343537, 0xFFC5C6CD),
+            new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFE4E2E5, 0xFF44474C),
+            new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFF343537, 0xFFC5C6CD),
+            new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFE4E2E5, 0xFF44474C),
+            new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFF343537, 0xFFC5C6CD),
+            ACTIVE_BRAND_LIGHT, ACTIVE_BRAND_DARK,
+            MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
+
+    /** 1 — Tonal. Neutral surface + tonal chips (coral Downloads,
+     *  raspberry Safe Folder, peach Trackers). What 'Neutral' used
+     *  to mean before the true-greyscale Neutral landed — kept under
+     *  a new name for users who liked the per-card colour identity. */
+    public static final HomeCardStyle TONAL = new HomeCardStyle("tonal",
+            R.string.home_card_style_tonal,
             new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFFF857F, 0xFF460005),
             new CardLook(0xFF1F1F22, 0xFFE4E2E5, 0xFFF66A66, 0xFF0F0000),
             new CardLook(0xFFEFEDF0, 0xFF1B1B1E, 0xFFC8417B, 0xFFFFFFFF),
@@ -157,7 +175,7 @@ public final class HomeCardStyle {
             MEDIA_BRAND_LIGHT,  MEDIA_BRAND_DARK);
 
     public static final List<HomeCardStyle> ALL =
-            Arrays.asList(NEUTRAL, BLUSH, BLOOM, CORAL);
+            Arrays.asList(NEUTRAL, TONAL, BLUSH, BLOOM, CORAL);
 
     @NonNull
     public static HomeCardStyle fromKey(@Nullable String key, @NonNull HomeCardStyle fallback) {

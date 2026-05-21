@@ -247,6 +247,8 @@
     <string name="trackers_info_categories">Traqueurs · Pubs · Empreinte · Cookies</string>
     <string name="trackers_info_action">Gérer la protection</string>
     <string name="trackers_info_today">%1$s bloqués aujourd\'hui</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -388,6 +388,8 @@
     <string name="trackers_info_categories">İzleyiciler · Reklamlar · Parmak izi · Çerezler</string>
     <string name="trackers_info_action">Korumayı yönet</string>
     <string name="trackers_info_today">%1$s bugün engellendi</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

@@ -296,6 +296,8 @@
     <string name="trackers_info_categories">Pelacak · Iklan · Sidik jari · Cookie</string>
     <string name="trackers_info_action">Kelola perlindungan</string>
     <string name="trackers_info_today">%1$s diblokir hari ini</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

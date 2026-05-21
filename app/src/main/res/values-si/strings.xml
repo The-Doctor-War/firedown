@@ -282,6 +282,8 @@
     <string name="trackers_info_categories">ට්‍රැකර් · දැන්වීම් · ඇඟිලි සලකුණු · කුකීස්</string>
     <string name="trackers_info_action">ආරක්ෂාව කළමනාකරණය</string>
     <string name="trackers_info_today">%1$s අද අවහිර</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

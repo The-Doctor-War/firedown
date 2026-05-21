@@ -250,6 +250,8 @@
     <string name="trackers_info_categories">Izsekotāji · Reklāmas · Pirkstu nospiedumi · Sīkfaili</string>
     <string name="trackers_info_action">Pārvaldīt aizsardzību</string>
     <string name="trackers_info_today">%1$s šodien bloķēts</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

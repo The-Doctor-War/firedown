@@ -250,6 +250,8 @@
     <string name="trackers_info_categories">Penjejak · Iklan · Cap jari · Kuki</string>
     <string name="trackers_info_action">Urus perlindungan</string>
     <string name="trackers_info_today">%1$s disekat hari ini</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

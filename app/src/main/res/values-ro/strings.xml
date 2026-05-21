@@ -304,6 +304,8 @@
     <string name="trackers_info_categories">Urmăritoare · Reclame · Amprentă · Cookie-uri</string>
     <string name="trackers_info_action">Gestionează protecția</string>
     <string name="trackers_info_today">%1$s blocate astăzi</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

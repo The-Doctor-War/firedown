@@ -277,6 +277,8 @@
     <string name="trackers_info_categories">Kuzatuvchilar · Reklamalar · Izlar · Cookie</string>
     <string name="trackers_info_action">Himoyani boshqarish</string>
     <string name="trackers_info_today">%1$s bugun bloklandi</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

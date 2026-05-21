@@ -299,6 +299,8 @@
     <string name="trackers_info_categories">ردیاب‌ها · تبلیغات · اثر انگشت · کوکی‌ها</string>
     <string name="trackers_info_action">مدیریت محافظت</string>
     <string name="trackers_info_today">%1$s امروز مسدود شد</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

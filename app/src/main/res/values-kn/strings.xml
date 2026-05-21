@@ -269,6 +269,8 @@
     <string name="trackers_info_categories">ಟ್ರ್ಯಾಕರ್‌ಗಳು · ಜಾಹೀರಾತುಗಳು · ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ · ಕುಕೀಗಳು</string>
     <string name="trackers_info_action">ರಕ್ಷಣೆಯನ್ನು ನಿರ್ವಹಿಸಿ</string>
     <string name="trackers_info_today">%1$s ಇಂದು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

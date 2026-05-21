@@ -243,6 +243,8 @@
     <string name="trackers_info_categories">ٹریکرز · اشتہار · فنگرپرنٹ · کوکیز</string>
     <string name="trackers_info_action">تحفظ دا انتظام</string>
     <string name="trackers_info_today">%1$s اج بلاک</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

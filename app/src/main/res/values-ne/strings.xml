@@ -235,6 +235,8 @@
     <string name="trackers_info_categories">ट्र्याकरहरू · विज्ञापनहरू · फिंगरप्रिन्ट · कुकीहरू</string>
     <string name="trackers_info_action">सुरक्षा व्यवस्थापन गर्नुहोस्</string>
     <string name="trackers_info_today">%1$s आज ब्लक</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

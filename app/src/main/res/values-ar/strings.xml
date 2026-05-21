@@ -351,6 +351,8 @@
     <string name="trackers_info_categories">المتعقبات · الإعلانات · بصمات الجهاز · ملفات تعريف الارتباط</string>
     <string name="trackers_info_action">إدارة الحماية</string>
     <string name="trackers_info_today">%1$s محظور اليوم</string>
+    <string name="home_card_style_tonal">Tonal</string>
+
 
 
 

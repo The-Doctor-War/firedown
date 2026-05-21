@@ -144,6 +144,7 @@ vAPI.defer = {
 
 vAPI.webextFlavor = {
     major: 0,
+    isGecko: false,
     soup: new Set(),
     get env() {
         return Array.from(this.soup);
@@ -180,6 +181,7 @@ vAPI.webextFlavor = {
 
     // Order of tests is important
     if ( browser.runtime.getURL('').startsWith('moz-extension://') ) {
+        flavor.isGecko = true;
         soup.add('firefox')
             .add('user_stylesheet')
             .add('html_filtering');

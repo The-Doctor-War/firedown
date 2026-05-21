@@ -103,19 +103,28 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
                 new OnBackPressedCallback(true) {
                     @Override
                     public void handleOnBackPressed() {
-                        if (mAutoCompleteView.getVisibility() == View.VISIBLE) {
-                            hideKeyboard(mAutoCompleteEditText);
-                            mGeckoToolbar.clearFocus();
-                            mGeckoToolbar.startAnimation(false);
-                            mGeckoToolbar.updateViewVisibility(false);
-                            mAutoCompleteView.updateVisibility(false);
-                        } else {
-                            // Go back to regular home
-                            setEnabled(false);
-                            mActivity.getOnBackPressedDispatcher().onBackPressed();
-                        }
+                        if (dismissAutocompleteOverlayIfVisible()) return;
+                        // Default back from incognito home pops to regular home.
+                        setEnabled(false);
+                        mActivity.getOnBackPressedDispatcher().onBackPressed();
                     }
                 });
+    }
+
+    /**
+     * Closes the URL-bar autocomplete overlay if it's currently up, and
+     * returns true to short-circuit the back-press handler. Returns
+     * false (no-op) when the overlay isn't visible, so the caller can
+     * fall through to its default back behavior.
+     */
+    private boolean dismissAutocompleteOverlayIfVisible() {
+        if (mAutoCompleteView.getVisibility() != View.VISIBLE) return false;
+        hideKeyboard(mAutoCompleteEditText);
+        mGeckoToolbar.clearFocus();
+        mGeckoToolbar.startAnimation(false);
+        mGeckoToolbar.updateViewVisibility(false);
+        mAutoCompleteView.updateVisibility(false);
+        return true;
     }
 
     @Nullable

@@ -129,21 +129,30 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
             @Override
             public void handleOnBackPressed() {
-                if(mAutoCompleteView.getVisibility() == View.VISIBLE){
-                    hideKeyboard(mAutoCompleteEditText);
-                    mGeckoToolbar.clearFocus();
-                    mGeckoToolbar.startAnimation(false);
-                    mGeckoToolbar.updateViewVisibility(false);
-                    mAutoCompleteView.updateVisibility(false);
-                }else{
-                    setEnabled(false);
-                    mActivity.getOnBackPressedDispatcher().onBackPressed();
-                }
+                if (dismissAutocompleteOverlayIfVisible()) return;
+                setEnabled(false);
+                mActivity.getOnBackPressedDispatcher().onBackPressed();
             }
         };
 
         mActivity.getOnBackPressedDispatcher().addCallback(this, callback);
 
+    }
+
+    /**
+     * Closes the URL-bar autocomplete overlay if it's currently up, and
+     * returns true to short-circuit the back-press handler. Returns
+     * false (no-op) when the overlay isn't visible, so the caller can
+     * fall through to its default back behavior.
+     */
+    private boolean dismissAutocompleteOverlayIfVisible() {
+        if (mAutoCompleteView.getVisibility() != View.VISIBLE) return false;
+        hideKeyboard(mAutoCompleteEditText);
+        mGeckoToolbar.clearFocus();
+        mGeckoToolbar.startAnimation(false);
+        mGeckoToolbar.updateViewVisibility(false);
+        mAutoCompleteView.updateVisibility(false);
+        return true;
     }
 
 

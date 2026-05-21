@@ -311,5 +311,4 @@
     <string name="trackers_info_section_top_trackers">Trình theo dõi hàng đầu</string>
     <string name="trackers_info_stat_blocked">Đã chặn</string>
     <string name="trackers_info_stat_saved">Dữ liệu đã lưu</string>
-    <string name="trackers_info_top_trackers_clear">Xóa</string>
 </resources>

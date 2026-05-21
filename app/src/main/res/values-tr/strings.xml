@@ -395,7 +395,6 @@
     <string name="trackers_info_section_top_trackers">En sık takipçiler</string>
     <string name="trackers_info_stat_blocked">Engellendi</string>
     <string name="trackers_info_stat_saved">Tasarruf edilen veri</string>
-    <string name="trackers_info_top_trackers_clear">Temizle</string>
     <string name="trackers_info_action">Korumayı yönet</string>
     <string name="trackers_info_today">%1$s bugün engellendi</string>
     <string name="home_card_style_tonal">Tonlu</string>

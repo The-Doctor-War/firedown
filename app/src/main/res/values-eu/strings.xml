@@ -301,7 +301,6 @@
     <string name="trackers_info_section_top_trackers">Jarraitzaile nagusiak</string>
     <string name="trackers_info_stat_blocked">Blokeatuta</string>
     <string name="trackers_info_stat_saved">Aurreztutako datuak</string>
-    <string name="trackers_info_top_trackers_clear">Garbitu</string>
     <string name="trackers_info_action">Kudeatu babesa</string>
     <string name="trackers_info_today">%1$s blokeatuta gaur</string>
     <string name="home_card_style_tonal">Tonala</string>

@@ -299,7 +299,6 @@
     <string name="trackers_info_section_top_trackers">Gjurmuesit kryesorë</string>
     <string name="trackers_info_stat_blocked">Bllokuar</string>
     <string name="trackers_info_stat_saved">Të dhëna të kursyera</string>
-    <string name="trackers_info_top_trackers_clear">Pastro</string>
     <string name="trackers_info_action">Menaxho mbrojtjen</string>
     <string name="trackers_info_today">%1$s të bllokuara sot</string>
     <string name="home_card_style_tonal">Tonal</string>

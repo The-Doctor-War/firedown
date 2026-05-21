@@ -348,7 +348,6 @@
     <string name="trackers_info_section_top_trackers">Hlavní sledovače</string>
     <string name="trackers_info_stat_blocked">Blokováno</string>
     <string name="trackers_info_stat_saved">Uložená data</string>
-    <string name="trackers_info_top_trackers_clear">Vymazat</string>
     <string name="trackers_info_action">Spravovat ochranu</string>
     <string name="trackers_info_today">%1$s zablokováno dnes</string>
     <string name="home_card_style_tonal">Tónový</string>

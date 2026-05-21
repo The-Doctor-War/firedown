@@ -29,12 +29,6 @@ import { PageStore } from './pagestore.js';
             toggleCookieNotices({ enable: response.cookies });
         } else if (Object.hasOwn(response, "update")) {
             updateState();
-        } else if (response.clearTopTrackers === true) {
-            // Java side asked us to wipe the per-host map. One-tap
-            // user action from the sheet's 'Clear' button. Recording
-            // continues — disabling the feature entirely is a future
-            // Settings-level control, not an in-sheet one.
-            clearTrackerBlocks();
         }
     });
 
@@ -266,9 +260,27 @@ import { PageStore } from './pagestore.js';
      * batched commit point) rather than per-request, so the hook overhead
      * matches uBO's own update cadence. Persisted to vAPI.storage.local so
      * the numbers survive across app launches.
+     *
+     * Window: today only. Mirrors the day-baseline rollover that
+     * GeckoUblockHelper applies to the cumulative count, so the four
+     * buckets sum to the hero 'Today' tile instead of a private
+     * 'since this build first ran' window the user can't predict.
+     * Day key matches Java's todayKey() format (yyyy-MM-dd, local
+     * time) so both sides cross midnight in lockstep.
      *************************************************************************/
     const CATEGORY_STORAGE_KEY = 'firedownCategoryBlocked';
     const CATEGORY_NAMES = ['scripts', 'pixels', 'frames', 'other'];
+
+    // Local-time yyyy-MM-dd. Must match GeckoUblockHelper.todayKey()
+    // exactly so a rollover detected on one side is detected on the
+    // other on the same push.
+    function dayKeyLocal() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
 
     // Mirror filtering-context.js' itype bit positions. Duplicated here so
     // we don't have to widen pagestore.js' export surface.
@@ -282,6 +294,24 @@ import { PageStore } from './pagestore.js';
 
     const categoryCounters = { scripts: 0, pixels: 0, frames: 0, other: 0 };
     let categoryDirty = false;
+    let categoryDay = dayKeyLocal();
+
+    function resetCategoryCounters() {
+        for (const name of CATEGORY_NAMES) { categoryCounters[name] = 0; }
+    }
+
+    // Detect midnight rollover. Called before every read/write of the
+    // counters so we never push or persist a value that mixes two days.
+    // Marks the counters dirty even when zeroing so saveCategoryStats
+    // overwrites yesterday's blob on disk (otherwise a quiet first
+    // hour after midnight would leave stale numbers persisted).
+    function ensureCategoryToday() {
+        const today = dayKeyLocal();
+        if (today === categoryDay) { return; }
+        categoryDay = today;
+        resetCategoryCounters();
+        categoryDirty = true;
+    }
 
     function bucketItype(itype) {
         if (itype === ITYPE_SCRIPT || itype === ITYPE_INLINE_SCRIPT) {
@@ -297,6 +327,7 @@ import { PageStore } from './pagestore.js';
     }
 
     function pushCategoryStats() {
+        ensureCategoryToday();
         try {
             browser.runtime.sendNativeMessage("ublock", {
                 categoryBlocked: { ...categoryCounters }
@@ -308,33 +339,48 @@ import { PageStore } from './pagestore.js';
         if (!categoryDirty) { return; }
         categoryDirty = false;
         try {
-            await vAPI.storage.set({ [CATEGORY_STORAGE_KEY]: { ...categoryCounters } });
+            await vAPI.storage.set({
+                [CATEGORY_STORAGE_KEY]: {
+                    day: categoryDay,
+                    counts: { ...categoryCounters },
+                }
+            });
         } catch (_) { /* best-effort; numbers are recoverable from next run */ }
     }
 
     // Restore persisted counters before installing the hook so we don't
-    // start from zero on every cold start. Push immediately after so the
-    // Java side has the cached totals before the first journalProcess
-    // tick lands.
+    // start from zero on every cold start within the same day. If the
+    // saved day key doesn't match today the blob is dropped (yesterday's
+    // counts are not today's); the next journalProcess tick repopulates.
+    // Old (pre-today-scope) blobs without a 'day' key are treated the
+    // same way — discard, start fresh.
     vAPI.storage.get(CATEGORY_STORAGE_KEY).then(bin => {
-        if (bin instanceof Object && bin[CATEGORY_STORAGE_KEY] instanceof Object) {
-            const saved = bin[CATEGORY_STORAGE_KEY];
-            for (const name of CATEGORY_NAMES) {
-                if (typeof saved[name] === 'number' && saved[name] >= 0) {
-                    categoryCounters[name] = saved[name];
-                }
+        if (!(bin instanceof Object)) { return; }
+        const saved = bin[CATEGORY_STORAGE_KEY];
+        if (!(saved instanceof Object)) { return; }
+        if (saved.day !== dayKeyLocal()) { return; }
+        const counts = saved.counts;
+        if (!(counts instanceof Object)) { return; }
+        for (const name of CATEGORY_NAMES) {
+            if (typeof counts[name] === 'number' && counts[name] >= 0) {
+                categoryCounters[name] = counts[name];
             }
-            pushCategoryStats();
         }
+        pushCategoryStats();
     });
 
     /**************************************************************************
      * Top trackers list.
      *
-     * Persistent map of {thirdPartyHostname: blockedCount} drawn from the
-     * same journal triples we bucket for the category breakdown. The
-     * TrackersInfoSheet renders the top 10 entries; first 'meaningful' use
-     * appears once the map has at least three entries.
+     * Map of {thirdPartyHostname: blockedCount} drawn from the same
+     * journal triples we bucket for the category breakdown. The
+     * TrackersInfoSheet renders the top 10 entries; first 'meaningful'
+     * use appears once the map has at least three entries.
+     *
+     * Window: today only. Same midnight rollover as categoryCounters
+     * above so the list pairs with the day-scoped breakdown instead of
+     * accumulating since-install. There's no in-sheet 'Clear' button
+     * any more — the daily reset replaces it.
      *
      * Privacy contract:
      *   - Hard incognito carve-out. Tabs known to be private mode never
@@ -343,9 +389,6 @@ import { PageStore } from './pagestore.js';
      *     .onRemoved listeners that read tab.incognito.
      *   - Data lives in vAPI.storage.local. Never crosses the native port
      *     except as an aggregated top-N list (no full map to Java side).
-     *   - User can wipe the map in one tap from inside the sheet's 'Clear'
-     *     button. Recording itself continues — toggling the feature off
-     *     entirely is a future Settings-level control, not an in-sheet one.
      *
      * Eviction: TRACKER_MAP_CAP = 500. On overflow, drop the entry with the
      * smallest count. Approximates LFU without bookkeeping cost.
@@ -357,6 +400,15 @@ import { PageStore } from './pagestore.js';
     const trackerBlocks = new Map();
     const incognitoTabIds = new Set();
     let trackerDirty = false;
+    let trackerDay = dayKeyLocal();
+
+    function ensureTrackerToday() {
+        const today = dayKeyLocal();
+        if (today === trackerDay) { return; }
+        trackerDay = today;
+        trackerBlocks.clear();
+        trackerDirty = true;
+    }
 
     // Seed and maintain incognitoTabIds. The journal hook gates on
     // incognitoTabIds.has(tabId) synchronously, so the set has to be
@@ -406,6 +458,7 @@ import { PageStore } from './pagestore.js';
     }
 
     function pushTopTrackers() {
+        ensureTrackerToday();
         try {
             browser.runtime.sendNativeMessage("ublock", {
                 topTrackers: topTrackersList(),
@@ -419,21 +472,23 @@ import { PageStore } from './pagestore.js';
         try {
             const obj = {};
             for (const [h, c] of trackerBlocks) { obj[h] = c; }
-            await vAPI.storage.set({ [TRACKER_STORAGE_KEY]: obj });
+            await vAPI.storage.set({
+                [TRACKER_STORAGE_KEY]: {
+                    day: trackerDay,
+                    blocks: obj,
+                }
+            });
         } catch (_) { /* best-effort */ }
     }
 
-    function clearTrackerBlocks() {
-        trackerBlocks.clear();
-        trackerDirty = true;
-        saveTrackerState();
-        pushTopTrackers();
-    }
-
-    // Restore persisted state.
+    // Restore persisted state — only if the saved day key still matches
+    // today. Stale (yesterday's) data is dropped; old pre-today-scope
+    // blobs without a 'day' key are dropped the same way.
     vAPI.storage.get(TRACKER_STORAGE_KEY).then(bin => {
-        if (bin instanceof Object) {
-            const map = bin[TRACKER_STORAGE_KEY];
+        if (!(bin instanceof Object)) { pushTopTrackers(); return; }
+        const saved = bin[TRACKER_STORAGE_KEY];
+        if (saved instanceof Object && saved.day === dayKeyLocal()) {
+            const map = saved.blocks;
             if (map instanceof Object) {
                 for (const [h, c] of Object.entries(map)) {
                     if (typeof c === 'number' && c > 0) { trackerBlocks.set(h, c); }
@@ -451,6 +506,11 @@ import { PageStore } from './pagestore.js';
     // into the cumulative count) are bucketed too.
     const originalJournalProcess = PageStore.prototype.journalProcess;
     PageStore.prototype.journalProcess = function() {
+        // Roll over before any increment so a journal that fires the
+        // moment after midnight doesn't fold yesterday's counts into
+        // today's first push.
+        ensureCategoryToday();
+        ensureTrackerToday();
         const journal = this.journal;
         const isIncognito = incognitoTabIds.has(this.tabId);
         for (let i = 0; i < journal.length; i += 3) {

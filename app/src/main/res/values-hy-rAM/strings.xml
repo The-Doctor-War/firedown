@@ -93,7 +93,6 @@
     <string name="trackers_info_section_top_trackers">Հիմնական հետևորդներ</string>
     <string name="trackers_info_stat_blocked">Արգելափակված</string>
     <string name="trackers_info_stat_saved">Խնայված տվյալներ</string>
-    <string name="trackers_info_top_trackers_clear">Մաքրել</string>
     <string name="trackers_info_action">Կառավարել պաշտպանությունը</string>
     <string name="trackers_info_today">%1$s այսօր արգելափակվել է</string>
     <string name="home_card_style_tonal">Տոնային</string>

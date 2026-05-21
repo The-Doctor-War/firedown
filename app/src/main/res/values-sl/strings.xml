@@ -312,7 +312,6 @@
     <string name="trackers_info_section_top_trackers">Glavni sledilniki</string>
     <string name="trackers_info_stat_blocked">Blokirano</string>
     <string name="trackers_info_stat_saved">Prihranjeni podatki</string>
-    <string name="trackers_info_top_trackers_clear">Počisti</string>
     <string name="trackers_info_action">Upravljanje zaščite</string>
     <string name="trackers_info_today">%1$s blokiranih danes</string>
     <string name="home_card_style_tonal">Tonski</string>

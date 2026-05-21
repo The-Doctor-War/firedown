@@ -771,24 +771,6 @@ public class GeckoRuntimeHelper {
         }
     }
 
-    /**
-     * Pushes the 'Clear' user action down to firedown.js. The JS side
-     * wipes the per-host map, persists, and pushes an empty list back so
-     * the sheet refreshes. Recording itself stays on — wiping is not
-     * disabling. No confirmation flow on either side: the action is a
-     * soft delete (the map rebuilds in seconds of browsing).
-     */
-    public void clearTopTrackers() {
-        try {
-            JSONObject msg = new JSONObject();
-            msg.put("clearTopTrackers", true);
-            sendPortMessage("ublock", msg);
-        } catch (JSONException e) {
-            Log.e(TAG, "clearTopTrackers error", e);
-        }
-    }
-
-
     @OptIn(markerClass = ExperimentalGeckoViewApi.class)
     public void setWebRTC(boolean enable) {
         GeckoResult<Void> geckoResult = GeckoPreferenceController

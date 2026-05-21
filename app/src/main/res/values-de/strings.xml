@@ -531,7 +531,6 @@
     <string name="trackers_info_section_top_trackers">Häufigste Tracker</string>
     <string name="trackers_info_stat_blocked">Blockiert</string>
     <string name="trackers_info_stat_saved">Daten gespart</string>
-    <string name="trackers_info_top_trackers_clear">Löschen</string>
     <string name="trackers_info_action">Schutz verwalten</string>
     <string name="trackers_info_today">%1$s heute blockiert</string>
     <string name="home_card_style_tonal">Tonal</string>

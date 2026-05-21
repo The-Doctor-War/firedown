@@ -108,8 +108,6 @@ public class VaultFragment extends BaseDownloadFragment implements OnItemClickLi
 
     private void setupRecyclerView() {
         mRecyclerView = mLCEERecyclerView.getRecyclerView();
-
-        mLCEERecyclerView.setEmptyImageView(R.drawable.ill_presents);
         mAdapter = new DownloadItemAdapter(getContext(), new DownloadDiffCallback(), this, mEnableGrid);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setVerticalScrollBarEnabled(true);

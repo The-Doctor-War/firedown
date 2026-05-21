@@ -105,17 +105,31 @@ import {
     async function toggleCookieNotices(message) {
         await defaultsReady;
 
-            const enable = message.enable === true;
-            console.log('[toggleCookieNotices] enable=' + enable + ' before=' + JSON.stringify(µb.selectedFilterLists));
+        const enable = message.enable === true;
 
-            const details = enable
-                ? { toSelect: COOKIE_NOTICE_LISTS, merge: true }
-                : { toRemove: COOKIE_NOTICE_LISTS };
+        // Short-circuit if uBlock is already in the desired state. The
+        // on-connect handshake in GeckoRuntimeHelper.onConnect pushes
+        // {cookies:true} every time the port attaches, which happens at
+        // least once per app launch — without this gate every launch
+        // would force-reload the active tab even though nothing changed.
+        const haveCookieLists = COOKIE_NOTICE_LISTS.every(
+            k => µb.selectedFilterLists.includes(k)
+        );
+        if (enable === haveCookieLists) {
+            console.log('[toggleCookieNotices] no-op (enable=' + enable + ')');
+            return;
+        }
 
-            µb.applyFilterListSelection(details);
-            await µb.loadFilterLists();
+        console.log('[toggleCookieNotices] enable=' + enable + ' before=' + JSON.stringify(µb.selectedFilterLists));
 
-            console.log('[toggleCookieNotices] after=' + JSON.stringify(µb.selectedFilterLists));
+        const details = enable
+            ? { toSelect: COOKIE_NOTICE_LISTS, merge: true }
+            : { toRemove: COOKIE_NOTICE_LISTS };
+
+        µb.applyFilterListSelection(details);
+        await µb.loadFilterLists();
+
+        console.log('[toggleCookieNotices] after=' + JSON.stringify(µb.selectedFilterLists));
 
         const tab = await vAPI.tabs.getCurrent();
         if (tab instanceof Object) {

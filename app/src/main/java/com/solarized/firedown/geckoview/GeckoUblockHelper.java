@@ -1,10 +1,15 @@
 package com.solarized.firedown.geckoview;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.preference.PreferenceManager;
+
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -44,9 +49,23 @@ public class GeckoUblockHelper {
     private volatile boolean mFontsDisabled;
     private volatile boolean mMediaDisabled;
 
-    @Inject
-    public GeckoUblockHelper() {
+    private final SharedPreferences mPrefs;
 
+    /** Persists the last known cumulative-blocked count so the Home
+     *  card has something to show on cold start, before uBlock has
+     *  initialised (which only happens when a tab opens, not when
+     *  the user lands on Home). The card shows the cached value
+     *  immediately; the live value overrides it the moment the
+     *  extension pushes a fresh number. */
+    private static final String KEY_CUMULATIVE_BLOCKED = "ublock.cumulative.blocked";
+
+    @Inject
+    public GeckoUblockHelper(@ApplicationContext Context context) {
+        mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+        long cached = mPrefs.getLong(KEY_CUMULATIVE_BLOCKED, 0L);
+        if (cached > 0L) {
+            mCumulativeBlockedLive.postValue(cached);
+        }
     }
 
 
@@ -93,11 +112,14 @@ public class GeckoUblockHelper {
      * Called from {@code handleUblockMessage} when the extension pushes
      * a fresh cumulative-blocked count. Just relays — uBlock owns the
      * source of truth, including legitimate resets when the user
-     * clears the request-stats counter.
+     * clears the request-stats counter. Caches to SharedPreferences
+     * so the Home card has something to show on the next cold start
+     * before the extension finishes loading.
      */
     public void onCumulativeBlocked(long blocked) {
         if (blocked < 0) return;
         mCumulativeBlockedLive.postValue(blocked);
+        mPrefs.edit().putLong(KEY_CUMULATIVE_BLOCKED, blocked).apply();
     }
 
     /**

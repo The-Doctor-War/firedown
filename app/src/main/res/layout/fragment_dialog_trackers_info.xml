@@ -237,14 +237,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/trackers_info_breakdown_pixels" />
+                    android:text="@string/trackers_info_breakdown_other" />
 
                 <TextView
-                    android:id="@+id/trackers_info_breakdown_pixels"
+                    android:id="@+id/trackers_info_breakdown_other"
                     style="@style/TrackersInfoBreakdownCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="2,103" />
+                    tools:text="1,432" />
             </LinearLayout>
 
             <LinearLayout
@@ -257,14 +257,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="@string/trackers_info_breakdown_other" />
+                    android:text="@string/trackers_info_breakdown_pixels" />
 
                 <TextView
-                    android:id="@+id/trackers_info_breakdown_other"
+                    android:id="@+id/trackers_info_breakdown_pixels"
                     style="@style/TrackersInfoBreakdownCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    tools:text="1,432" />
+                    tools:text="2,103" />
             </LinearLayout>
 
             <LinearLayout

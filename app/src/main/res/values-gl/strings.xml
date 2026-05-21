@@ -300,7 +300,6 @@
     <string name="trackers_info_section_top_trackers">Principais rastreadores</string>
     <string name="trackers_info_stat_blocked">Bloqueado</string>
     <string name="trackers_info_stat_saved">Datos aforrados</string>
-    <string name="trackers_info_top_trackers_clear">Borrar</string>
     <string name="trackers_info_action">Xestionar protección</string>
     <string name="trackers_info_today">%1$s bloqueados hoxe</string>
     <string name="home_card_style_tonal">Tonal</string>

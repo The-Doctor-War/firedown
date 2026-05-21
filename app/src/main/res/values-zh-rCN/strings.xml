@@ -530,7 +530,6 @@
     <string name="trackers_info_section_top_trackers">主要跟踪器</string>
     <string name="trackers_info_stat_blocked">已拦截</string>
     <string name="trackers_info_stat_saved">节省数据</string>
-    <string name="trackers_info_top_trackers_clear">清除</string>
     <string name="trackers_info_action">管理保护</string>
     <string name="trackers_info_today">今日已拦截 %1$s</string>
     <string name="home_card_style_tonal">色调</string>

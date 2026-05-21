@@ -56,25 +56,26 @@ public class GeckoUblockHelper {
      *  per-event storage. */
     private final MutableLiveData<Long> mTodayBlockedLive = new MutableLiveData<>(0L);
 
-    /** Per-category breakdown of blocked requests since install,
-     *  bucketed by request type at the uBlock side. uBlock's static
-     *  engine doesn't preserve filter-list origin, so we can't honestly
+    /** Per-category breakdown of today's blocked requests, bucketed
+     *  by request type at the uBlock side. uBlock's static engine
+     *  doesn't preserve filter-list origin, so we can't honestly
      *  bucket by 'Tracker vs Ad'; instead firedown.js groups by the
      *  filter context's itype (script / image-or-pixel / frame /
      *  other) and pushes the four-key map alongside the cumulative
-     *  total. The TrackersInfoSheet renders each bucket under the
-     *  hero number to give 'what was blocked' some texture. */
+     *  total. Scoped to today (local-time midnight rollover, same key
+     *  as the cumulative day baseline) so the four buckets sum to the
+     *  'Today' hero tile instead of accumulating since-install. */
     public enum Category { SCRIPTS, PIXELS, FRAMES, OTHER }
 
     private final MutableLiveData<Map<Category, Long>> mCategoryBlockedLive =
             new MutableLiveData<>(emptyCategoryMap());
 
-    /** Top blocked third-party hostnames since install (or since the user
-     *  last hit 'Disable & clear' from the sheet). uBlock's firedown.js
-     *  maintains a per-host counter map, evicts at 500 entries, gates on
+    /** Top blocked third-party hostnames today. firedown.js maintains
+     *  a per-host counter map (rebuilt at local-time midnight along
+     *  with the category breakdown), evicts at 500 entries, gates on
      *  per-tab incognito state, and pushes the sorted top 10 over the
-     *  native port. The TrackersInfoSheet renders these as a list under
-     *  the per-type breakdown. */
+     *  native port. The TrackersInfoSheet renders these as a list
+     *  under the per-type breakdown. */
     public static final class HostCount {
         public final String host;
         public final long count;

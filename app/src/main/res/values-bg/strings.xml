@@ -318,7 +318,6 @@
     <string name="trackers_info_section_top_trackers">Топ проследяващи</string>
     <string name="trackers_info_stat_blocked">Блокирани</string>
     <string name="trackers_info_stat_saved">Спестени данни</string>
-    <string name="trackers_info_top_trackers_clear">Изчистване</string>
     <string name="trackers_info_action">Управление на защитата</string>
     <string name="trackers_info_today">%1$s блокирани днес</string>
     <string name="home_card_style_tonal">Тонален</string>

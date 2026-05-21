@@ -329,7 +329,6 @@
     <string name="trackers_info_section_top_trackers">Rastrejadors principals</string>
     <string name="trackers_info_stat_blocked">Blocat</string>
     <string name="trackers_info_stat_saved">Dades estalviades</string>
-    <string name="trackers_info_top_trackers_clear">Esborra</string>
     <string name="trackers_info_action">Gestiona la protecció</string>
     <string name="trackers_info_today">%1$s bloquejats avui</string>
     <string name="home_card_style_tonal">Tonal</string>

@@ -331,7 +331,6 @@
     <string name="trackers_info_section_top_trackers">גששים מובילים</string>
     <string name="trackers_info_stat_blocked">נחסם</string>
     <string name="trackers_info_stat_saved">נתונים שנחסכו</string>
-    <string name="trackers_info_top_trackers_clear">נקה</string>
     <string name="trackers_info_action">ניהול ההגנה</string>
     <string name="trackers_info_today">%1$s נחסמו היום</string>
     <string name="home_card_style_tonal">טונאלי</string>

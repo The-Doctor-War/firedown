@@ -292,7 +292,6 @@
     <string name="trackers_info_section_top_trackers">ຕົວຕິດຕາມຍອດນິຍົມ</string>
     <string name="trackers_info_stat_blocked">ບລັອກແລ້ວ</string>
     <string name="trackers_info_stat_saved">ຂໍ້ມູນທີ່ປະຢັດໄດ້</string>
-    <string name="trackers_info_top_trackers_clear">ລ້າງ</string>
     <string name="trackers_info_action">ຈັດການການປ້ອງກັນ</string>
     <string name="trackers_info_today">ບລັອກ %1$s ມື້ນີ້</string>
     <string name="home_card_style_tonal">ໂທນ</string>

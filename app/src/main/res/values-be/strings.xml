@@ -298,7 +298,6 @@
     <string name="trackers_info_section_top_trackers">Найбольш частыя трэкеры</string>
     <string name="trackers_info_stat_blocked">Заблакіравана</string>
     <string name="trackers_info_stat_saved">Зэканомлена</string>
-    <string name="trackers_info_top_trackers_clear">Ачысціць</string>
     <string name="trackers_info_action">Кіраваць абаронай</string>
     <string name="trackers_info_today">%1$s заблакіравана сёння</string>
     <string name="home_card_style_tonal">Танальны</string>

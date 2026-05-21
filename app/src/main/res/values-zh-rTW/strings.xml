@@ -336,7 +336,6 @@
     <string name="trackers_info_section_top_trackers">主要追蹤器</string>
     <string name="trackers_info_stat_blocked">已封鎖</string>
     <string name="trackers_info_stat_saved">節省資料</string>
-    <string name="trackers_info_top_trackers_clear">清除</string>
     <string name="trackers_info_action">管理防護</string>
     <string name="trackers_info_today">今日已封鎖 %1$s</string>
     <string name="home_card_style_tonal">色調</string>

@@ -318,7 +318,6 @@
     <string name="trackers_info_section_top_trackers">Κορυφαίοι ιχνηλάτες</string>
     <string name="trackers_info_stat_blocked">Αποκλεισμένα</string>
     <string name="trackers_info_stat_saved">Δεδομένα που εξοικονομήθηκαν</string>
-    <string name="trackers_info_top_trackers_clear">Εκκαθάριση</string>
     <string name="trackers_info_action">Διαχείριση προστασίας</string>
     <string name="trackers_info_today">%1$s αποκλείστηκαν σήμερα</string>
     <string name="home_card_style_tonal">Τονικό</string>

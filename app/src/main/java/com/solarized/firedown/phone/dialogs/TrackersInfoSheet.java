@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.button.MaterialButton;
 import com.solarized.firedown.R;
-import com.solarized.firedown.geckoview.GeckoRuntimeHelper;
 import com.solarized.firedown.geckoview.GeckoUblockHelper;
 import com.solarized.firedown.geckoview.GeckoUblockHelper.Category;
 import com.solarized.firedown.phone.SettingsActivity;
@@ -58,8 +57,6 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
 
     @Inject
     GeckoUblockHelper mGeckoUblockHelper;
-    @Inject
-    GeckoRuntimeHelper mGeckoRuntimeHelper;
 
     public static void show(@NonNull FragmentManager fm) {
         if (fm.findFragmentByTag(TAG) != null) return;
@@ -97,7 +94,6 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
         TextView otherView   = view.findViewById(R.id.trackers_info_breakdown_other);
         View topTrackersHdr  = view.findViewById(R.id.trackers_info_top_trackers_header);
         RecyclerView topTrackersList = view.findViewById(R.id.trackers_info_top_trackers);
-        MaterialButton topTrackersToggle = view.findViewById(R.id.trackers_info_top_trackers_toggle);
 
         TopTrackersAdapter topTrackersAdapter = new TopTrackersAdapter();
         topTrackersList.setLayoutManager(new LinearLayoutManager(view.getContext()));
@@ -158,21 +154,18 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
         });
 
         // Top-trackers list. firedown.js sends a pre-sorted top-N
-        // payload; the adapter handles binding + diffing. Section +
-        // Clear button stay hidden until the map has at least
-        // TOP_TRACKERS_MIN_REVEAL entries so a fresh install (or the
-        // moment after a Clear) doesn't render an empty section
-        // header floating with no rows beneath it.
+        // payload; the adapter handles binding + diffing. Section stays
+        // hidden until the map has at least TOP_TRACKERS_MIN_REVEAL
+        // entries so a fresh install (or the first hour after midnight,
+        // when the list rebuilds for the day) doesn't render an empty
+        // section header floating with no rows beneath it.
         mGeckoUblockHelper.getTopTrackersLive().observe(getViewLifecycleOwner(), trackers -> {
             int size = trackers == null ? 0 : trackers.size();
             boolean showSection = size >= TOP_TRACKERS_MIN_REVEAL;
             topTrackersHdr.setVisibility(showSection ? View.VISIBLE : View.GONE);
             topTrackersList.setVisibility(showSection ? View.VISIBLE : View.GONE);
-            topTrackersToggle.setVisibility(showSection ? View.VISIBLE : View.GONE);
             topTrackersAdapter.submitList(trackers);
         });
-
-        topTrackersToggle.setOnClickListener(v -> mGeckoRuntimeHelper.clearTopTrackers());
 
         action.setOnClickListener(v -> {
             startActivity(new Intent(requireContext(), SettingsActivity.class));

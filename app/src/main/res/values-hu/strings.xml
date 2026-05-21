@@ -318,7 +318,6 @@
     <string name="trackers_info_section_top_trackers">Leggyakoribb nyomkövetők</string>
     <string name="trackers_info_stat_blocked">Blokkolva</string>
     <string name="trackers_info_stat_saved">Megtakarított adat</string>
-    <string name="trackers_info_top_trackers_clear">Törlés</string>
     <string name="trackers_info_action">Védelem kezelése</string>
     <string name="trackers_info_today">%1$s blokkolva ma</string>
     <string name="home_card_style_tonal">Tónusos</string>

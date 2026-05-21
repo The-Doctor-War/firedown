@@ -306,7 +306,6 @@
     <string name="trackers_info_section_top_trackers">ምርጥ መከታተያዎች</string>
     <string name="trackers_info_stat_blocked">የተከለከለ</string>
     <string name="trackers_info_stat_saved">የተቀመጠ ዳታ</string>
-    <string name="trackers_info_top_trackers_clear">አጽዳ</string>
     <string name="trackers_info_action">ጥበቃ አስተዳድር</string>
     <string name="trackers_info_today">%1$s ዛሬ ተዘግተዋል</string>
     <string name="home_card_style_tonal">ቀለም</string>

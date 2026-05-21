@@ -294,7 +294,6 @@
     <string name="trackers_info_section_top_trackers">Pangunahing tagasubaybay</string>
     <string name="trackers_info_stat_blocked">Naharang</string>
     <string name="trackers_info_stat_saved">Naipong data</string>
-    <string name="trackers_info_top_trackers_clear">Linisin</string>
     <string name="trackers_info_action">Pamahalaan ang proteksyon</string>
     <string name="trackers_info_today">%1$s na-block ngayon</string>
     <string name="home_card_style_tonal">Tonal</string>

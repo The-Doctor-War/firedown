@@ -377,7 +377,6 @@
     <string name="trackers_info_section_top_trackers">Tracker principali</string>
     <string name="trackers_info_stat_blocked">Bloccati</string>
     <string name="trackers_info_stat_saved">Dati risparmiati</string>
-    <string name="trackers_info_top_trackers_clear">Cancella</string>
     <string name="trackers_info_action">Gestisci protezione</string>
     <string name="trackers_info_today">%1$s bloccati oggi</string>
     <string name="home_card_style_tonal">Tonale</string>

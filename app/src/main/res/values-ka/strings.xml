@@ -300,7 +300,6 @@
     <string name="trackers_info_section_top_trackers">მთავარი თვალთვალები</string>
     <string name="trackers_info_stat_blocked">დაბლოკილი</string>
     <string name="trackers_info_stat_saved">შენახული მონაცემები</string>
-    <string name="trackers_info_top_trackers_clear">გასუფთავება</string>
     <string name="trackers_info_action">დაცვის მართვა</string>
     <string name="trackers_info_today">%1$s დღეს დაბლოკილია</string>
     <string name="home_card_style_tonal">ტონალური</string>

@@ -300,7 +300,6 @@
     <string name="trackers_info_section_top_trackers">Үздік трекерлер</string>
     <string name="trackers_info_stat_blocked">Бұғатталған</string>
     <string name="trackers_info_stat_saved">Сақталған деректер</string>
-    <string name="trackers_info_top_trackers_clear">Тазалау</string>
     <string name="trackers_info_action">Қорғанысты басқару</string>
     <string name="trackers_info_today">%1$s бүгін бұғатталды</string>
     <string name="home_card_style_tonal">Тонды</string>

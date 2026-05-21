@@ -73,6 +73,7 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
 
         TextView countView = view.findViewById(R.id.trackers_info_count);
         TextView savedView = view.findViewById(R.id.trackers_info_saved);
+        TextView todayView = view.findViewById(R.id.trackers_info_today);
         MaterialButton action = view.findViewById(R.id.trackers_info_action);
 
         mGeckoUblockHelper.getCumulativeBlockedLive().observe(getViewLifecycleOwner(), blocked -> {
@@ -91,6 +92,19 @@ public class TrackersInfoSheet extends BaseBottomSheetDialogFragment {
             savedView.setVisibility(View.VISIBLE);
             savedView.setText(getString(R.string.trackers_info_saved,
                     Utils.readableFileSize(n * AVG_BYTES_PER_BLOCKED_REQUEST)));
+        });
+
+        // 'Today' line — hidden at zero so it doesn't render a redundant
+        // '0 today' on first launch or a quiet day.
+        mGeckoUblockHelper.getTodayBlockedLive().observe(getViewLifecycleOwner(), today -> {
+            long n = today == null ? 0L : today;
+            if (n <= 0) {
+                todayView.setVisibility(View.GONE);
+                return;
+            }
+            todayView.setVisibility(View.VISIBLE);
+            todayView.setText(getString(R.string.trackers_info_today,
+                    NumberFormat.getInstance(Locale.getDefault()).format(n)));
         });
 
         action.setOnClickListener(v -> {

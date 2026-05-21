@@ -296,6 +296,8 @@
     <string name="trackers_info_saved">~%1$s የጥቅም ስፋት ተቆጥቧል</string>
     <string name="trackers_info_categories">ተከታታዮች · ማስታወቂያዎች · የጣት አሻራ · ኩኪዎች</string>
     <string name="trackers_info_action">ጥበቃ አስተዳድር</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

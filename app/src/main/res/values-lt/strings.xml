@@ -289,6 +289,8 @@
     <string name="trackers_info_saved">~%1$s pralaidumo sutaupyta</string>
     <string name="trackers_info_categories">Sekikliai · Reklamos · Pirštų atspaudai · Slapukai</string>
     <string name="trackers_info_action">Valdyti apsaugą</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

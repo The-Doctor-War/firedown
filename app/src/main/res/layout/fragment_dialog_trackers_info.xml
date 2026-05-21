@@ -84,6 +84,23 @@
             tools:text="~580 MB of bandwidth saved"
             tools:visibility="visible" />
 
+        <!-- Today vs all-time framing — derived from the cumulative
+             counter with a midnight baseline (no per-event storage,
+             see GeckoUblockHelper). Hidden when today's count is
+             zero so the sheet doesn't render a redundant '0 today'
+             on first launch or a quiet day. -->
+        <TextView
+            android:id="@+id/trackers_info_today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:visibility="gone"
+            tools:text="1,234 today"
+            tools:visibility="visible" />
+
         <!-- Categories caption — what 'blocked' actually covers, as
              a short comma-list rather than a paragraph. 8dp gap so
              it reads as a natural continuation of the stat block

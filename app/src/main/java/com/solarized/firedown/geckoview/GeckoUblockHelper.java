@@ -39,6 +39,12 @@ public class GeckoUblockHelper {
      *  don't contribute (uBlock excludes them from its persisted
      *  stats). */
     private final MutableLiveData<Long> mCumulativeBlockedLive = new MutableLiveData<>(0L);
+    /** Blocked count since the start of the current calendar day.
+     *  Derived from {@code cumulative - baselineAtMidnight}; baseline
+     *  rolls forward on the first push of a new day. Gives the info
+     *  sheet a 'X today, Y since install' framing without persistent
+     *  per-event storage. */
+    private final MutableLiveData<Long> mTodayBlockedLive = new MutableLiveData<>(0L);
 
     // Firewall activation is a global user preference — not per-mode.
     private final MutableLiveData<Boolean> mFirewallActiveLive = new MutableLiveData<>();
@@ -58,12 +64,24 @@ public class GeckoUblockHelper {
      *  immediately; the live value overrides it the moment the
      *  extension pushes a fresh number. */
     private static final String KEY_CUMULATIVE_BLOCKED = "ublock.cumulative.blocked";
+    private static final String KEY_DAY_BASELINE_DATE  = "ublock.day.baseline.date";
+    private static final String KEY_DAY_BASELINE_COUNT = "ublock.day.baseline.count";
 
     @Inject
     public GeckoUblockHelper(@ApplicationContext Context context) {
         mPrefs = PreferenceManager.getDefaultSharedPreferences(context);
         long cachedBlocked = mPrefs.getLong(KEY_CUMULATIVE_BLOCKED, 0L);
         if (cachedBlocked > 0L) mCumulativeBlockedLive.postValue(cachedBlocked);
+        // Seed today's count from the cached baseline so the sheet
+        // has something to show on cold start before the extension
+        // pushes a fresh cumulative. If the baseline is for an older
+        // date the next push will roll it forward; meanwhile this
+        // value is at worst stale, not wrong.
+        String savedDate = mPrefs.getString(KEY_DAY_BASELINE_DATE, null);
+        if (cachedBlocked > 0L && todayKey().equals(savedDate)) {
+            long baseline = mPrefs.getLong(KEY_DAY_BASELINE_COUNT, cachedBlocked);
+            mTodayBlockedLive.postValue(Math.max(0L, cachedBlocked - baseline));
+        }
     }
 
 
@@ -117,7 +135,36 @@ public class GeckoUblockHelper {
     public void onCumulativeBlocked(long blocked) {
         if (blocked < 0) return;
         mCumulativeBlockedLive.postValue(blocked);
-        mPrefs.edit().putLong(KEY_CUMULATIVE_BLOCKED, blocked).apply();
+
+        // Roll the day baseline if we've crossed midnight since the
+        // last push. Baseline = the cumulative value the day started
+        // at, so 'today' = current - baseline. Storing date as ISO
+        // yyyy-MM-dd keeps the comparison locale-stable. clamp to
+        // zero so a clock skew (user winds backwards, cumulative
+        // suddenly < baseline) doesn't render a negative count.
+        String today = todayKey();
+        String savedDate = mPrefs.getString(KEY_DAY_BASELINE_DATE, null);
+        long baseline = mPrefs.getLong(KEY_DAY_BASELINE_COUNT, blocked);
+        SharedPreferences.Editor editor = mPrefs.edit().putLong(KEY_CUMULATIVE_BLOCKED, blocked);
+        if (!today.equals(savedDate)) {
+            baseline = blocked;
+            editor.putString(KEY_DAY_BASELINE_DATE, today)
+                  .putLong(KEY_DAY_BASELINE_COUNT, baseline);
+        }
+        editor.apply();
+        mTodayBlockedLive.postValue(Math.max(0L, blocked - baseline));
+    }
+
+    public LiveData<Long> getTodayBlockedLive() {
+        return mTodayBlockedLive;
+    }
+
+    private static String todayKey() {
+        java.util.Calendar c = java.util.Calendar.getInstance();
+        return String.format(java.util.Locale.US, "%04d-%02d-%02d",
+                c.get(java.util.Calendar.YEAR),
+                c.get(java.util.Calendar.MONTH) + 1,
+                c.get(java.util.Calendar.DAY_OF_MONTH));
     }
 
     /**

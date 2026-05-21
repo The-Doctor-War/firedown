@@ -388,6 +388,8 @@
     <string name="trackers_info_saved">~%1$s aan bandbreedte bespaard</string>
     <string name="trackers_info_categories">Trackers · Advertenties · Fingerprinting · Cookies</string>
     <string name="trackers_info_action">Bescherming beheren</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

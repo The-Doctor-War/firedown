@@ -284,6 +284,8 @@
     <string name="trackers_info_saved">~%1$s ng bandwidth naitipid</string>
     <string name="trackers_info_categories">Tracker · Ad · Fingerprinting · Cookies</string>
     <string name="trackers_info_action">Pamahalaan ang proteksyon</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

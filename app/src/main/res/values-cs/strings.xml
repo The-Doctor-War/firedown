@@ -340,6 +340,8 @@
     <string name="trackers_info_saved">~%1$s šířky pásma ušetřeno</string>
     <string name="trackers_info_categories">Sledovače · Reklamy · Otisky · Cookies</string>
     <string name="trackers_info_action">Spravovat ochranu</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

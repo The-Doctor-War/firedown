@@ -270,6 +270,8 @@
     <string name="trackers_info_saved">~%1$s bandbredd sparad</string>
     <string name="trackers_info_categories">Spårare · Annonser · Fingeravtryck · Cookies</string>
     <string name="trackers_info_action">Hantera skydd</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

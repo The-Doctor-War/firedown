@@ -282,6 +282,8 @@
     <string name="trackers_info_saved">ປະຫຍັດແບນວິດ ~%1$s</string>
     <string name="trackers_info_categories">ຕົວຕິດຕາມ · ໂຄສະນາ · ລາຍນິ້ວມື · ຄຸກກີ</string>
     <string name="trackers_info_action">ຈັດການການປ້ອງກັນ</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

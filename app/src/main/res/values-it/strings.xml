@@ -369,6 +369,8 @@
     <string name="trackers_info_saved">~%1$s di banda risparmiata</string>
     <string name="trackers_info_categories">Tracker · Annunci · Fingerprinting · Cookie</string>
     <string name="trackers_info_action">Gestisci protezione</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

@@ -288,6 +288,8 @@
     <string name="trackers_info_saved">~%1$s трафіку зэканомлена</string>
     <string name="trackers_info_categories">Трэкеры · Рэклама · Адбіткі · Cookie</string>
     <string name="trackers_info_action">Кіраваць абаронай</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

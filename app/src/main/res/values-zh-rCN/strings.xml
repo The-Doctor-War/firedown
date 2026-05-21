@@ -522,6 +522,8 @@
     <string name="trackers_info_saved">约节省 %1$s 流量</string>
     <string name="trackers_info_categories">跟踪器 · 广告 · 指纹识别 · Cookie 横幅</string>
     <string name="trackers_info_action">管理保护</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

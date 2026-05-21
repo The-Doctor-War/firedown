@@ -323,6 +323,8 @@
     <string name="trackers_info_saved">~%1$s רוחב פס נחסך</string>
     <string name="trackers_info_categories">עוקבים · פרסומות · טביעת אצבע · עוגיות</string>
     <string name="trackers_info_action">ניהול ההגנה</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

@@ -290,6 +290,8 @@
     <string name="trackers_info_saved">~%1$s de largura de banda aforrados</string>
     <string name="trackers_info_categories">Rastrexadores · Anuncios · Pegada · Cookies</string>
     <string name="trackers_info_action">Xestionar protección</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

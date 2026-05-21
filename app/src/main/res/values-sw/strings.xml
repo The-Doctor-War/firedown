@@ -249,6 +249,8 @@
     <string name="trackers_info_saved">~%1$s ya bandwidth imehifadhiwa</string>
     <string name="trackers_info_categories">Vifuatiliaji · Matangazo · Alama za kidole · Vidakuzi</string>
     <string name="trackers_info_action">Simamia ulinzi</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

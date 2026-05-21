@@ -297,6 +297,8 @@
     <string name="trackers_info_saved">~%1$s протока сачувано</string>
     <string name="trackers_info_categories">Пратиоци · Огласи · Отисци · Колачићи</string>
     <string name="trackers_info_action">Управљање заштитом</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

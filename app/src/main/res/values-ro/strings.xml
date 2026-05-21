@@ -303,6 +303,8 @@
     <string name="trackers_info_saved">~%1$s de lățime de bandă economisiți</string>
     <string name="trackers_info_categories">Urmăritoare · Reclame · Amprentă · Cookie-uri</string>
     <string name="trackers_info_action">Gestionează protecția</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

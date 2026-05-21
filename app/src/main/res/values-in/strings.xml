@@ -295,6 +295,8 @@
     <string name="trackers_info_saved">~%1$s bandwidth dihemat</string>
     <string name="trackers_info_categories">Pelacak · Iklan · Sidik jari · Cookie</string>
     <string name="trackers_info_action">Kelola perlindungan</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

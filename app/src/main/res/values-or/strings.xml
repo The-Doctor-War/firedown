@@ -246,6 +246,8 @@
     <string name="trackers_info_saved">~%1$s ବ୍ୟାଣ୍ଡୱିଡଥ୍ ସଞ୍ଚୟ</string>
     <string name="trackers_info_categories">ଟ୍ରାକର · ବିଜ୍ଞାପନ · ଆଙ୍ଗୁଠିଚିହ୍ନ · କୁକି</string>
     <string name="trackers_info_action">ସୁରକ୍ଷା ପରିଚାଳନା</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

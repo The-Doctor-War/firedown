@@ -60,6 +60,8 @@
     <string name="trackers_info_saved">~%1$s બેન્ડવિડ્થ બચી</string>
     <string name="trackers_info_categories">ટ્રેકર્સ · જાહેરાતો · ફિંગરપ્રિન્ટિંગ · કૂકીઝ</string>
     <string name="trackers_info_action">સુરક્ષાનું સંચાલન કરો</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

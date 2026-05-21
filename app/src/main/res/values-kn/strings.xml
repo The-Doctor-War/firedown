@@ -268,6 +268,8 @@
     <string name="trackers_info_saved">~%1$s ಬ್ಯಾಂಡ್‌ವಿಡ್ತ್ ಉಳಿತಾಯ</string>
     <string name="trackers_info_categories">ಟ್ರ್ಯಾಕರ್‌ಗಳು · ಜಾಹೀರಾತುಗಳು · ಫಿಂಗರ್‌ಪ್ರಿಂಟ್ · ಕುಕೀಗಳು</string>
     <string name="trackers_info_action">ರಕ್ಷಣೆಯನ್ನು ನಿರ್ವಹಿಸಿ</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

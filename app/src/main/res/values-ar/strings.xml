@@ -350,6 +350,8 @@
     <string name="trackers_info_saved">~%1$s من حجم البيانات تم توفيرها</string>
     <string name="trackers_info_categories">المتعقبات · الإعلانات · بصمات الجهاز · ملفات تعريف الارتباط</string>
     <string name="trackers_info_action">إدارة الحماية</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

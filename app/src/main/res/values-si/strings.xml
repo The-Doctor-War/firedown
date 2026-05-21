@@ -281,6 +281,8 @@
     <string name="trackers_info_saved">~%1$s කලාප පළල ඉතිරි කළා</string>
     <string name="trackers_info_categories">ට්‍රැකර් · දැන්වීම් · ඇඟිලි සලකුණු · කුකීස්</string>
     <string name="trackers_info_action">ආරක්ෂාව කළමනාකරණය</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

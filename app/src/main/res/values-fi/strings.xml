@@ -327,6 +327,8 @@
     <string name="trackers_info_saved">~%1$s kaistaa säästetty</string>
     <string name="trackers_info_categories">Seuranta · Mainokset · Sormenjälki · Evästeet</string>
     <string name="trackers_info_action">Hallitse suojausta</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

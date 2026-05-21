@@ -246,6 +246,8 @@
     <string name="trackers_info_saved">~%1$s de bande passante économisée</string>
     <string name="trackers_info_categories">Traqueurs · Pubs · Empreinte · Cookies</string>
     <string name="trackers_info_action">Gérer la protection</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

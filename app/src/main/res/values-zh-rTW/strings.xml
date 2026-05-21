@@ -328,6 +328,8 @@
     <string name="trackers_info_saved">約節省 %1$s 流量</string>
     <string name="trackers_info_categories">追蹤器 · 廣告 · 指紋辨識 · Cookie 橫幅</string>
     <string name="trackers_info_action">管理防護</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

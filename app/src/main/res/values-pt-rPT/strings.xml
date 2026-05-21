@@ -263,6 +263,8 @@
     <string name="trackers_info_saved">~%1$s de largura de banda economizados</string>
     <string name="trackers_info_categories">Rastreadores · Anúncios · Impressão digital · Cookies</string>
     <string name="trackers_info_action">Gerenciar proteção</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

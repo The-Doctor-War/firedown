@@ -523,6 +523,8 @@
     <string name="trackers_info_saved">~%1$s Bandbreite gespart</string>
     <string name="trackers_info_categories">Tracker · Werbung · Fingerprinting · Cookie-Banner</string>
     <string name="trackers_info_action">Schutz verwalten</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

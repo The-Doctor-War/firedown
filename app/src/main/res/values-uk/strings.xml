@@ -327,6 +327,8 @@
     <string name="trackers_info_saved">~%1$s трафіку заощаджено</string>
     <string name="trackers_info_categories">Трекери · Реклама · Відбитки · Cookie</string>
     <string name="trackers_info_action">Налаштувати захист</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

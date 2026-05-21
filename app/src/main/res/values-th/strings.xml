@@ -307,6 +307,8 @@
     <string name="trackers_info_saved">ประหยัดแบนด์วิดท์ ~%1$s</string>
     <string name="trackers_info_categories">ตัวติดตาม · โฆษณา · ลายนิ้วมือดิจิทัล · คุกกี้</string>
     <string name="trackers_info_action">จัดการการป้องกัน</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

@@ -387,6 +387,8 @@
     <string name="trackers_info_saved">~%1$s bant genişliği tasarruf edildi</string>
     <string name="trackers_info_categories">İzleyiciler · Reklamlar · Parmak izi · Çerezler</string>
     <string name="trackers_info_action">Korumayı yönet</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

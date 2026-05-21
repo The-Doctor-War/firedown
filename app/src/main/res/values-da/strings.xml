@@ -323,6 +323,8 @@
     <string name="trackers_info_saved">~%1$s båndbredde sparet</string>
     <string name="trackers_info_categories">Sporing · Annoncer · Fingeraftryk · Cookies</string>
     <string name="trackers_info_action">Administrer beskyttelse</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

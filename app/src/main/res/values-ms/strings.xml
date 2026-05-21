@@ -249,6 +249,8 @@
     <string name="trackers_info_saved">~%1$s lebar jalur dijimatkan</string>
     <string name="trackers_info_categories">Penjejak · Iklan · Cap jari · Kuki</string>
     <string name="trackers_info_action">Urus perlindungan</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

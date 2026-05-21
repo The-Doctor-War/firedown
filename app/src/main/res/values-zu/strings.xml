@@ -246,6 +246,8 @@
     <string name="trackers_info_saved">~%1$s ye-bandwidth konga</string>
     <string name="trackers_info_categories">Abalandeli · Izikhangiso · Izigxivizo zeminwe · Amakhukhi</string>
     <string name="trackers_info_action">Phatha ukuvikela</string>
+    <string name="trackers_info_today">%1$s blocked today</string>
+
 
 
 

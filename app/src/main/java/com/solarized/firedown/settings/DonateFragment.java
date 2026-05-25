@@ -50,10 +50,11 @@ import okhttp3.OkHttpClient;
 /**
  * Native value-for-value donate screen.
  *
- * <p>Three collapsed cards — Lightning, Bitcoin on-chain, and fiat (via
- * Ko-fi) — let the user pick the rail that fits their situation. Only
- * Lightning and Bitcoin have expandable bodies; the fiat row hands off
- * directly to Ko-fi in the system browser.</p>
+ * <p>Three collapsed cards — Lightning, Bitcoin on-chain, and fiat
+ * (via Buy Me a Coffee) — let the user pick the rail that fits their
+ * situation. Only Lightning and Bitcoin have expandable bodies; the
+ * fiat row hands off directly to Buy Me a Coffee in the system
+ * browser.</p>
  *
  * <p>Only one card is open at a time; tapping a different header
  * collapses the previously open one. This keeps the screen short
@@ -68,8 +69,10 @@ public class DonateFragment extends BasePreferenceFragment {
     /** Lightning Address — same one used in donate.html. */
     private static final String LIGHTNING_ADDRESS = "solarized@getalby.com";
 
-    /** Ko-fi page handing off to Stripe / PayPal. */
-    private static final String KOFI_URL = "https://ko-fi.com/solarized";
+    /** Buy Me a Coffee page — hands off to Stripe / card / PayPal in
+     *  the system browser. Pure handoff: no embedded WebView, no
+     *  cookie set on Firedown's own session. */
+    private static final String FIAT_URL = "https://buymeacoffee.com/solarized";
 
     private static final int DEFAULT_SATS = 5000;
 
@@ -84,6 +87,7 @@ public class DonateFragment extends BasePreferenceFragment {
     // Card containers (used to enforce single-open behavior)
     private View mLightningHeader, mLightningBody, mLightningChevron;
     private View mBitcoinHeader,   mBitcoinBody,   mBitcoinChevron;
+    private View mFiatHeader;
 
     // Lightning body
     private MaterialButtonToggleGroup mAmountGroup;
@@ -136,6 +140,8 @@ public class DonateFragment extends BasePreferenceFragment {
         mBitcoinBody       = view.findViewById(R.id.donate_bitcoin_body);
         mBitcoinChevron    = view.findViewById(R.id.donate_bitcoin_chevron);
 
+        mFiatHeader        = view.findViewById(R.id.donate_fiat_header);
+
 
         // ── Lightning body views ────────────────────────────────────
         mAmountGroup         = view.findViewById(R.id.donate_amount_group);
@@ -156,6 +162,7 @@ public class DonateFragment extends BasePreferenceFragment {
         setupCardHeaders();
         setupLightningSection();
         setupBitcoinSection(btcCopyBtn, btcWalletBtn);
+        setupFiatSection();
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -166,6 +173,34 @@ public class DonateFragment extends BasePreferenceFragment {
         mLightningHeader.setOnClickListener(v -> toggleCard(0));
         mBitcoinHeader  .setOnClickListener(v -> toggleCard(1));
         // Fiat header is a direct handoff, no toggle. Wired in setupFiatSection.
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // Fiat (Buy Me a Coffee handoff)
+    // ─────────────────────────────────────────────────────────────────
+
+    /**
+     * Fiat card has no expandable body — tapping the header opens
+     * Buy Me a Coffee in Firedown's own browser via the existing
+     * Settings → BrowserActivity result handshake. We set an
+     * {@link Intent#ACTION_VIEW} result on the hosting activity and
+     * finish; the launcher that started SettingsActivity catches the
+     * result through its mStartForResult registration and feeds it
+     * back through {@code BaseActivity.handleIntent}, which opens
+     * the URL in a normal Firedown tab.
+     *
+     * Mirrors {@code BaseFocusFragment.setSessionResult} — done
+     * inline here because DonateFragment extends
+     * BasePreferenceFragment, not BaseFocusFragment.
+     */
+    private void setupFiatSection() {
+        if (mFiatHeader == null) return;
+        mFiatHeader.setOnClickListener(v -> {
+            Intent resultIntent = new Intent(Intent.ACTION_VIEW)
+                    .setData(Uri.parse(FIAT_URL));
+            requireActivity().setResult(android.app.Activity.RESULT_OK, resultIntent);
+            requireActivity().finish();
+        });
     }
 
     /**

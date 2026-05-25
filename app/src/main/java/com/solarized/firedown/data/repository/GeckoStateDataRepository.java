@@ -251,12 +251,22 @@ public class GeckoStateDataRepository {
                 + " isHome=" + geckoState.isHome()
                 + " active=" + active
                 + " prevCurrentId=" + mCurrentId);
+        boolean changed = false;
         synchronized (mGeckoStates) {
             if (!mGeckoStates.contains(geckoState)) {
                 Log.d(TAG, "setGeckoState: adding NEW tab to list (size was " + mGeckoStates.size() + ")");
                 mGeckoStates.add(geckoState);
+                changed = true;
             }
-            if (active) {
+            if (active && geckoState.getEntityId() != mCurrentId) {
+                // Skip the iterate-and-deactivate sweep when the state is
+                // already the current one. Every tab switch through
+                // TabsFragment fires setGeckoState(_, true) twice (once
+                // from BaseTabsFragment.activateGeckoState, once from
+                // BrowserFragment.setActiveSession via the OPEN_SESSION
+                // observer); the second call previously did a redundant
+                // clearCachedThumb pass on every non-active tab plus a
+                // notifyTabs emission for no state change.
                 mCurrentId = geckoState.getEntityId();
                 Log.d(TAG, "setGeckoState: mCurrentId → " + mCurrentId);
                 for (GeckoState state : mGeckoStates) {
@@ -266,9 +276,10 @@ public class GeckoStateDataRepository {
                         state.clearCachedThumb();
                     }
                 }
+                changed = true;
             }
         }
-        notifyTabs();
+        if (changed) notifyTabs();
     }
 
     public void deleteAll() {
@@ -477,9 +488,15 @@ public class GeckoStateDataRepository {
                     if (!mIds.contains(geckoState.getEntityId()) && !geckoState.isHome()) {
                         mGeckoStates.add(geckoState);
                         mIds.add(geckoState.getEntityId());
-                    }
-                    if (geckoState.isActive()) {
-                        mCurrentId = geckoState.getEntityId();
+                        // Only entities we actually keep can claim mCurrentId.
+                        // The previous unconditional check let a (dropped)
+                        // home entity's stale isActive flag set mCurrentId
+                        // to an id that wasn't in mGeckoStates, leaving
+                        // peekCurrentGeckoState returning null and the user
+                        // bounced to home instead of their last non-home tab.
+                        if (geckoState.isActive()) {
+                            mCurrentId = geckoState.getEntityId();
+                        }
                     }
                 }
 

@@ -449,6 +449,13 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
                 + " wasHome=" + geckoStateEntity.isHome());
         geckoStateEntity.setHome(false);
         geckoStateEntity.setUri(url);
+        // Parity with HomeFragment.openUri: clear any persisted SessionState
+        // before publishing OPEN_URI so a typed URL isn't silently overridden
+        // by restoreState's auto-nav to the entity's previous URL. Today
+        // incognito getOrCreateGeckoSession skips restoreState entirely
+        // (GeckoState.java) so this is a no-op in practice — kept for
+        // symmetry so the two home flows can't diverge.
+        geckoStateEntity.setSessionState("");
         mBrowserURIViewModel.onEventSelected(geckoStateEntity, IntentActions.OPEN_URI);
         NavigationUtils.navigateSafe(mNavController, R.id.browser);
     }

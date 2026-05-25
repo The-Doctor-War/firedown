@@ -177,18 +177,25 @@ public class IncognitoStateRepository {
     // ── Mutation ─────────────────────────────────────────────────────
 
     public void setGeckoState(GeckoState geckoState, boolean active) {
+        boolean changed = false;
         synchronized (mGeckoStates) {
             if (!mGeckoStates.contains(geckoState)) {
                 mGeckoStates.add(geckoState);
+                changed = true;
             }
-            if (active) {
+            if (active && geckoState.getEntityId() != mCurrentId) {
+                // Skip the iterate-and-set-active sweep when this state is
+                // already current. Mirrors the regular GeckoStateDataRepository
+                // fix: TabsFragment-style switches fire setGeckoState twice
+                // per tap, the second call did a redundant pass.
                 mCurrentId = geckoState.getEntityId();
                 for (GeckoState state : mGeckoStates) {
                     state.setActive(state.getEntityId() == mCurrentId);
                 }
+                changed = true;
             }
         }
-        notifyTabs();
+        if (changed) notifyTabs();
     }
 
     public void closeGeckoState(GeckoState geckoState) {

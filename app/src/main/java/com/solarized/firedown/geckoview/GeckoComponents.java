@@ -689,7 +689,12 @@ public class GeckoComponents {
             if(geckoState == null){
                 return;
             }
-            if (session == geckoState.getOrCreateGeckoSession()) {
+            // getOrCreateGeckoSession() here would silently spawn a fresh
+            // session (with restoreState's auto-nav queued behind it) if
+            // mGeckoSession was ever null at this point — wasteful for a
+            // pure identity comparison. findGeckoState above already matched
+            // by session identity, so the non-creating getter is correct.
+            if (session == geckoState.getGeckoSession()) {
                 if (geckoState.getGeckoStateEntity().isIncognito()) {
                     mIncognitoStateRepository.closeGeckoState(geckoState);
                 } else {

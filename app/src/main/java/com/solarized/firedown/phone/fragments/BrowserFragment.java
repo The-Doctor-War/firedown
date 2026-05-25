@@ -906,7 +906,12 @@ public class BrowserFragment extends BaseBrowserFragment
 
         GeckoState geckoState = peekCurrentGeckoState();
         if (geckoState != null) {
-            geckoState.getOrCreateGeckoSession().getFinder().clear();
+            // Non-creating getter: if mGeckoSession is null (tab whose
+            // session was never instantiated, or killed and discarded via
+            // discardGeckoSession), there's no finder state to clear and
+            // we don't want to spawn a fresh content process for it.
+            GeckoSession session = geckoState.getGeckoSession();
+            if (session != null) session.getFinder().clear();
             geckoState.setSearchMode(false);
         }
 
@@ -2039,7 +2044,13 @@ public class BrowserFragment extends BaseBrowserFragment
         GeckoState geckoState = peekCurrentGeckoState();
         if (geckoState == null)
             return;
-        geckoState.getOrCreateGeckoSession().getFinder().find(currentText, flags).then(result -> {
+        // Non-creating getter: a find request only makes sense on an
+        // already-open session. Spawning a fresh content process via
+        // getOrCreateGeckoSession just to search would attach the finder
+        // to a session that's not the one rendered in mGeckoView.
+        GeckoSession session = geckoState.getGeckoSession();
+        if (session == null) return;
+        session.getFinder().find(currentText, flags).then(result -> {
             if (mStop || mGeckoToolbar == null) {
                 Log.w(TAG, "onValue Stopped Search");
                 return null;

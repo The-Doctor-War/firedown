@@ -1383,6 +1383,12 @@ public class BrowserFragment extends BaseBrowserFragment
     @Override
     public void onCrash(GeckoState geckoState) {
         stopMedia(mGeckoMediaController, geckoState);
+        // Discard the dead session so getOrCreateGeckoSession() reconstructs
+        // a fresh one and re-queues restoreState's auto-navigation. Without
+        // this, openSession's setGeckoViewSession would just reopen the same
+        // (post-crash) GeckoSession without a navigation queued behind it
+        // and applyOpenUriUi would leave the tab blank.
+        geckoState.discardGeckoSession();
         openSession(geckoState);
     }
 
@@ -1582,6 +1588,14 @@ public class BrowserFragment extends BaseBrowserFragment
         //     switch for non-current tabs.
         // Matches Fenix's onProcessKilled → KillEngineSessionAction:
         // tear down, no eager rebuild.
+        //
+        // Discard the dead session reference so the lazy recovery path
+        // reconstructs a fresh GeckoSession (which re-queues restoreState
+        // and makes the saved history actually navigate on reopen).
+        // Reopening the same (post-kill) GeckoSession via open() does NOT
+        // replay restoreState — that only fires on a fresh construction —
+        // which is why killed tabs used to come back blank.
+        geckoState.discardGeckoSession();
     }
 
     // ─────────────────────────────────────────────────────────────────────────────────────────────

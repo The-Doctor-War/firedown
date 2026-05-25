@@ -80,6 +80,28 @@ public class GeckoState {
         setCachedThumb(null);
     }
 
+    /**
+     * Closes the current GeckoSession AND nulls out the cached reference.
+     * The next {@link #getOrCreateGeckoSession()} will construct a brand-new
+     * {@link GeckoSession} and re-call {@code restoreState()} (which queues
+     * auto-navigation to the last history entry).
+     *
+     * <p>Use after the underlying content process is gone but the tab
+     * itself should come back — onKill (OS reclaim), onCrash (renderer
+     * crash). The plain {@link #closeGeckoSession()} only calls
+     * {@code close()}; it leaves {@code mGeckoSession} non-null so a
+     * subsequent reopen via {@code mGeckoSession.open()} does NOT replay
+     * the queued restoreState (that only fires on a fresh construction),
+     * which is why kills/crashes used to leave tabs blank on return.</p>
+     */
+    public void discardGeckoSession() {
+        if (mGeckoSession != null) {
+            mGeckoSession.close();
+            mGeckoSession = null;
+        }
+        setCachedThumb(null);
+    }
+
     public void setEntityIncognito(boolean value){
         mGeckoStateEntity.setIncognito(value);
     }

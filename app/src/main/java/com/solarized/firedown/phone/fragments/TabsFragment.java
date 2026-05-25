@@ -128,8 +128,18 @@ public class TabsFragment extends BaseTabsFragment {
     @Override
     protected void onTabClosed(GeckoStateEntity entity, GeckoState geckoState) {
         mActiveSnackbar = makeSnackbar(getString(R.string.snackbar_tab_closed));
-        mActiveSnackbar.setAction(R.string.snackbar_deleted_undo, view ->
-                mGeckoStateViewModel.setGeckoState(geckoState, true));
+        mActiveSnackbar.setAction(R.string.snackbar_deleted_undo, view -> {
+            mGeckoStateViewModel.setGeckoState(geckoState, true);
+            // closeTab() deactivated this tab's WebExtensionController slot
+            // (uBlock and other tab-scoped extensions stop running). The
+            // setGeckoState above re-adds the entity but doesn't re-active
+            // extensions — that only happens inside setGeckoViewSession,
+            // and ensureSessionConnected on the return path takes the
+            // fast no-reconnect branch when viewSession == stateSession.
+            // Without this call, the undone tab silently loses extension
+            // support until the next reload / tab switch.
+            reactivateExtensionTab(geckoState);
+        });
         mActiveSnackbar.addCallback(new Snackbar.Callback() {
             @Override
             public void onDismissed(Snackbar transientBottomBar, int event) {
@@ -139,6 +149,18 @@ public class TabsFragment extends BaseTabsFragment {
             }
         });
         mActiveSnackbar.show();
+    }
+
+    private void reactivateExtensionTab(GeckoState geckoState) {
+        org.mozilla.geckoview.GeckoSession session = geckoState.getGeckoSession();
+        if (session == null) return;
+        try {
+            mGeckoRuntimeHelper.getGeckoRuntime()
+                    .getWebExtensionController()
+                    .setTabActive(session, true);
+        } catch (NullPointerException e) {
+            Log.e(TAG, "reactivateExtensionTab", e);
+        }
     }
 
     // adjustPosition / getLeadingAdapterCount come from BaseTabsFragment now;

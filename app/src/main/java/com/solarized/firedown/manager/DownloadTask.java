@@ -2,10 +2,14 @@ package com.solarized.firedown.manager;
 
 import android.text.TextUtils;
 
+import androidx.preference.PreferenceManager;
+
+import com.solarized.firedown.Preferences;
 import com.solarized.firedown.StoragePaths;
 import com.solarized.firedown.data.Download;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.data.repository.DownloadDataRepository;
+import com.solarized.firedown.utils.GalleryPublisher;
 import com.solarized.firedown.utils.Utils;
 
 import org.apache.commons.io.FilenameUtils;
@@ -328,6 +332,22 @@ public class DownloadTask implements DownloadCallback {
     public void onFinished() {
         if (sealed.get()) return;
         repository.add(entity);
+        publishToGalleryIfEnabled();
+    }
+
+    /**
+     * Surfaces the finished file to the system gallery when the user
+     * has opted in via "Add to Media Gallery". Skipped for vault /
+     * incognito downloads — the whole point of those is that they
+     * stay out of every other app's index.
+     */
+    private void publishToGalleryIfEnabled() {
+        if (entity.isFileSafe()) return;
+        if (!Preferences.getSaveToGallery(
+                PreferenceManager.getDefaultSharedPreferences(runnableManager))) {
+            return;
+        }
+        GalleryPublisher.publish(runnableManager, entity.getFilePath(), entity.getFileMimeType());
     }
 
     // ========================================================================

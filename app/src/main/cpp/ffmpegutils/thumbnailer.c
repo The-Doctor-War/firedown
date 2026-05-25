@@ -623,6 +623,35 @@ void jni_dealloc_thumbnailer(JNIEnv *env, jobject thiz) {
 }
 
 
+/**
+ * Diagnostic helper — log every stream the demuxer registered after
+ * avformat_find_stream_info. Called from each setDataSource variant so
+ * a single grep against logcat can tell apart "this source had no
+ * embedded art / no video track at all" from "art exists but past the
+ * probe window so av_find_best_stream(VIDEO) missed it". Disposition
+ * is logged in hex — AV_DISPOSITION_ATTACHED_PIC = 0x400 is what an
+ * MP3/M4A/FLAC cover art surface looks like in FFmpeg's model.
+ */
+static void log_stream_info(struct Thumbnail *thumbnail, const char *caller) {
+    if (thumbnail == NULL || thumbnail->format_ctx == NULL) return;
+    LOGI(1, "%s nb_streams=%u", caller, thumbnail->format_ctx->nb_streams);
+    for (unsigned i = 0; i < thumbnail->format_ctx->nb_streams; i++) {
+        AVStream *s = thumbnail->format_ctx->streams[i];
+        if (s == NULL || s->codecpar == NULL) {
+            LOGI(1, "  stream[%u] <null>", i);
+            continue;
+        }
+        const char *type = av_get_media_type_string(s->codecpar->codec_type);
+        LOGI(1, "  stream[%u] codec_type=%s codec_id=%s disposition=0x%x bit_rate=%lld",
+             i,
+             type != NULL ? type : "unknown",
+             avcodec_get_name(s->codecpar->codec_id),
+             s->disposition,
+             (long long) s->codecpar->bit_rate);
+    }
+}
+
+
 int jni_extract_bitmap_setdata_source_inputstream(JNIEnv * env, jobject thiz, jobject jstream, jobject jdict){
 
     struct Thumbnail *thumbnail = thumbnail_get_thumbnailer_field(env, thiz);
@@ -705,6 +734,8 @@ int jni_extract_bitmap_setdata_source_inputstream(JNIEnv * env, jobject thiz, jo
         err = -ERROR_FIND_STREAM_INFO;
         goto error;
     }
+
+    log_stream_info(thumbnail, "jni_extract_bitmap_setdata_source_inputstream");
 
     LOGI(1, "jni_extract_bitmap_setdata_source_inputstream success");
 
@@ -818,6 +849,8 @@ int jni_extract_bitmap_setdata_source_fd(JNIEnv * env, jobject thiz, jobject jde
         goto error;
     }
 
+    log_stream_info(thumbnail, "jni_extract_bitmap_setdata_source_fd");
+
     LOGI(1, "jni_extract_bitmap_setdata_source_fd success");
 
     goto end;
@@ -904,6 +937,8 @@ int jni_extract_bitmap_setdata_source(JNIEnv * env, jobject thiz, jstring uri, j
         err = -ERROR_FIND_STREAM_INFO;
         goto error;
     }
+
+    log_stream_info(thumbnail, "jni_extract_bitmap_setdata_source");
 
     LOGI(1, "jni_extract_bitmap_setdata_source success");
 

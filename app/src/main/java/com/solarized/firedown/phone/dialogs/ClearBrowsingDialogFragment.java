@@ -32,11 +32,7 @@ public class ClearBrowsingDialogFragment extends BaseDialogFragment {
         super.onCreate(savedInstanceState);
 
         Bundle bundle = getArguments();
-
-        if (bundle == null)
-            throw new IllegalStateException("Bundle can not be Null " + getClass().getSimpleName());
-
-        mHost = bundle.getString(Keys.ITEM_ID);
+        mHost = bundle != null ? bundle.getString(Keys.ITEM_ID) : null;
 
         mBrowserDialogViewModel = new ViewModelProvider(mActivity)
                 .get(BrowserDialogViewModel.class);
@@ -46,6 +42,13 @@ public class ClearBrowsingDialogFragment extends BaseDialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+        if (mHost == null) {
+            // Args lost on restore — dismiss instead of crashing.
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setOnShowListener(d -> dismissAllowingStateLoss());
+            return dialog;
+        }
 
         int themeResId = mIsIncognito
                 ? R.style.Theme_FireDown_VaultDialogTheme

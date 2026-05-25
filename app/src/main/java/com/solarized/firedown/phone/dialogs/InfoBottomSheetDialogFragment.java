@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,6 +25,7 @@ import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.diffs.InfoDiffCallback;
 import com.solarized.firedown.utils.DateUtils;
 import com.solarized.firedown.utils.FileUriHelper;
+import com.solarized.firedown.utils.FragmentArgs;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.utils.Utils;
 
@@ -39,13 +41,20 @@ public class InfoBottomSheetDialogFragment extends BaseBottomSheetDialogFragment
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
+        mDownloadEntity = FragmentArgs.parcelable(this, Keys.ITEM_ID, DownloadEntity.class);
+        // Null on restore is handled by onCreateDialog / onCreateView —
+        // dialog dismisses on show, view returns null.
+    }
 
-        if(bundle == null)
-            throw new IllegalStateException("Bundle can not be Null " + getClass().getSimpleName());
-
-        mDownloadEntity =  bundle.getParcelable(Keys.ITEM_ID);
-
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        if (mDownloadEntity == null) {
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setOnShowListener(d -> dismissAllowingStateLoss());
+            return dialog;
+        }
+        return super.onCreateDialog(savedInstanceState);
     }
 
     @Nullable
@@ -53,6 +62,8 @@ public class InfoBottomSheetDialogFragment extends BaseBottomSheetDialogFragment
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
+        if (mDownloadEntity == null) return null;
 
         // get the views and attach the listener
 

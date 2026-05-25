@@ -21,6 +21,10 @@ import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.entity.OptionEntity;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
+import com.solarized.firedown.utils.FileUriHelper;
+import com.solarized.firedown.utils.FragmentArgs;
+
+import org.apache.commons.io.FilenameUtils;
 
 
 public class SaveFileDialog extends BaseDialogFragment {
@@ -50,24 +54,70 @@ public class SaveFileDialog extends BaseDialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
+        BrowserDownloadEntity browserDownloadEntity =
+                FragmentArgs.parcelable(this, Keys.ITEM_ID, BrowserDownloadEntity.class);
 
-        BrowserDownloadEntity browserDownloadEntity = bundle != null ? bundle.getParcelable(Keys.ITEM_ID) : null;
-
-        if(browserDownloadEntity == null)
-            throw new IllegalStateException("Bundle can not be Null " + getClass().getSimpleName());
+        if (browserDownloadEntity == null) {
+            // Args lost on restore or never set — onCreateDialog dismisses
+            // on first show so the user lands behind the dialog and can
+            // re-tap Save.
+            return;
+        }
 
         mBrowserDownloadEntity = new BrowserDownloadEntity(browserDownloadEntity);
 
-        mFilename = mBrowserDownloadEntity.getFileName();
+        mFilename = displayFilenameFor(mBrowserDownloadEntity);
 
 
+    }
+
+
+    /**
+     * Filename to seed the EditText with. Captured-media entities from
+     * sites like x.com / Twitter arrive with a human "Author - tweet text"
+     * name and no extension — the downstream FFmpeg mux appends ".mp4"
+     * when saving, but the dialog would otherwise show a bare (and often
+     * trailing-dot) name. Strip dangling dots and append the extension
+     * the saved file will actually have.
+     */
+    private static String displayFilenameFor(BrowserDownloadEntity entity) {
+        String name = entity.getFileName();
+        if (TextUtils.isEmpty(name)) return name;
+        if (!TextUtils.isEmpty(FilenameUtils.getExtension(name))) return name;
+        String base = name.replaceAll("[.\\s]+$", "");
+        if (base.isEmpty()) return name;
+        return base + "." + outputExtension(entity.getMimeType());
+    }
+
+    private static String outputExtension(String mime) {
+        if (!TextUtils.isEmpty(mime)) {
+            if (FileUriHelper.isAudio(mime)) {
+                String ext = FileUriHelper.getFileExtensionFromMimeType(mime);
+                if (!TextUtils.isEmpty(ext) && !"bin".equals(ext)) return ext;
+                return "mp3";
+            }
+            if (FileUriHelper.isImage(mime)) {
+                String ext = FileUriHelper.getFileExtensionFromMimeType(mime);
+                if (!TextUtils.isEmpty(ext) && !"bin".equals(ext)) return ext;
+                return "jpg";
+            }
+        }
+        // Video / HLS / unknown all get muxed to mp4 by FFmpegMuxStrategy.
+        return "mp4";
     }
 
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+        if (mBrowserDownloadEntity == null) {
+            // See onCreate — args parcelable was lost. Return a stub that
+            // dismisses on first show so the lifecycle completes cleanly.
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setOnShowListener(d -> dismissAllowingStateLoss());
+            return dialog;
+        }
 
         int themeResId = mIsIncognito
                 ? R.style.Theme_FireDown_VaultDialogTheme

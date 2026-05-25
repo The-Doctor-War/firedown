@@ -22,6 +22,7 @@ import com.solarized.firedown.ui.adapters.BrowserOptionVariantAdapter;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
+import com.solarized.firedown.utils.FragmentArgs;
 
 
 public class BrowserOptionVariantsFragment extends BaseFocusFragment implements OnItemClickListener, View.OnClickListener {
@@ -36,12 +37,10 @@ public class BrowserOptionVariantsFragment extends BaseFocusFragment implements 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
-        if (bundle == null)
-            throw new IllegalStateException("Bundle can not be Null " + getClass().getSimpleName());
-
-        mEntity = bundle.getParcelable(Keys.ITEM_ID);
+        mEntity = FragmentArgs.parcelable(this, Keys.ITEM_ID, BrowserDownloadEntity.class);
         mFragmentsViewModel = new ViewModelProvider(mActivity).get(FragmentsOptionsViewModel.class);
+        // Null on restore is handled in onCreateView — pop back to the
+        // previous destination since the variant grid has nothing to show.
     }
 
 
@@ -50,6 +49,13 @@ public class BrowserOptionVariantsFragment extends BaseFocusFragment implements 
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
+        if (mEntity == null) {
+            // Args lost on restore — the holder sheet listens for the
+            // cancel event and pops us off its child stack.
+            dispatchCancel();
+            return null;
+        }
 
         View view = inflater.inflate(R.layout.fragment_dialog_browser_options_variants, container, false);
 

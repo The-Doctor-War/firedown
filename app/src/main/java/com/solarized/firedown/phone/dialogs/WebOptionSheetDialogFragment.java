@@ -2,11 +2,13 @@ package com.solarized.firedown.phone.dialogs;
 
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ShareCompat;
 import androidx.lifecycle.ViewModelProvider;
@@ -41,14 +43,19 @@ public class WebOptionSheetDialogFragment extends BaseBottomSheetDialogFragment 
 
     private boolean mEdit;
 
+    private boolean mArgsMissing;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
 
         Bundle bundle = getArguments();
 
-        if(bundle == null)
-            throw new IllegalStateException("Bundle can not be Null " + getClass().getSimpleName());
+        if (bundle == null) {
+            // Args lost on restore — onCreateDialog dismisses on show.
+            mArgsMissing = true;
+            return;
+        }
 
         mId = bundle.getInt(Keys.ITEM_ID, 0);
 
@@ -66,12 +73,25 @@ public class WebOptionSheetDialogFragment extends BaseBottomSheetDialogFragment 
 
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        if (mArgsMissing) {
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setOnShowListener(d -> dismissAllowingStateLoss());
+            return dialog;
+        }
+        return super.onCreateDialog(savedInstanceState);
+    }
+
     @SuppressLint("InvalidSetHasFixedSize")
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+
+        if (mArgsMissing) return null;
 
         // get the views and attach the listener
         mView = inflater.inflate(R.layout.fragment_dialog_options, container, false);

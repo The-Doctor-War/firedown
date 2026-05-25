@@ -31,23 +31,29 @@ public class BrowserDownloadDialogFragment extends BaseDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Bundle bundle = getArguments();
-
-        if (bundle == null) {
-            throw new IllegalStateException("Bundle can not be Null " + getClass().getSimpleName());
-        }
-
         mBrowserDialogViewModel = new ViewModelProvider(mActivity).get(BrowserDialogViewModel.class);
         GeckoStateViewModel geckoStateViewModel = new ViewModelProvider(mActivity).get(GeckoStateViewModel.class);
 
+        Bundle bundle = getArguments();
+        if (bundle == null) return;
+
         int sessionId = bundle.getInt(Keys.ITEM_ID);
         mGeckoState = geckoStateViewModel.getGeckoState(sessionId);
+        // mGeckoState is null when the session has been collected (process
+        // death wipes session state). onCreateDialog dismisses in that case.
+        if (mGeckoState == null || mGeckoState.getWebResponse() == null) return;
         mEntity = new BrowserDownloadEntity(mGeckoState);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+        if (mEntity == null) {
+            Dialog dialog = new Dialog(requireContext());
+            dialog.setOnShowListener(d -> dismissAllowingStateLoss());
+            return dialog;
+        }
 
         int themeResId = mIsIncognito
                 ? R.style.Theme_FireDown_VaultDialogTheme

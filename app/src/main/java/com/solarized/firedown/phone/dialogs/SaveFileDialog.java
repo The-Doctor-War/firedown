@@ -21,6 +21,7 @@ import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.entity.OptionEntity;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
+import com.solarized.firedown.manager.DownloadRequest;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.FragmentArgs;
 
@@ -36,6 +37,16 @@ public class SaveFileDialog extends BaseDialogFragment {
     private EditText mEditText;
 
     private BrowserDownloadEntity mBrowserDownloadEntity;
+
+    /**
+     * Optional — non-null when SaveFileDialog is the second step of the
+     * variant-picker flow (BrowserOptionHolderSheetDialogFragment passes
+     * the variant's pre-built DownloadRequest through so we don't lose
+     * stream selection). Null for the primary-item-click flow, where we
+     * build a fresh request from the entity on Download.
+     */
+    @Nullable
+    private DownloadRequest mIncomingRequest;
 
 
     @Override
@@ -65,6 +76,11 @@ public class SaveFileDialog extends BaseDialogFragment {
         }
 
         mBrowserDownloadEntity = new BrowserDownloadEntity(browserDownloadEntity);
+
+        // Optional: variant flow passes a pre-built request alongside the
+        // entity. Keep it so the Download button can re-emit it (with the
+        // user's filename override) and we don't lose stream selection.
+        mIncomingRequest = FragmentArgs.parcelable(this, Keys.DOWNLOAD_REQUEST, DownloadRequest.class);
 
         mFilename = displayFilenameFor(mBrowserDownloadEntity);
 
@@ -151,6 +167,19 @@ public class SaveFileDialog extends BaseDialogFragment {
                     if(navBackStackEntry != null){
                         OptionEntity optionEntity = new OptionEntity();
                         optionEntity.setBrowserDownloadEntity(mBrowserDownloadEntity);
+                        // The holder's observer fires startDownload() only when
+                        // a DownloadRequest is present. Variant flow gave us one
+                        // upstream — re-emit it with the user's filename override
+                        // so stream selection survives. Primary-item flow had no
+                        // request; build a fresh one from the (now-mutated)
+                        // entity.
+                        DownloadRequest outgoing = mIncomingRequest != null
+                                ? mIncomingRequest.toBuilder()
+                                        .name(mBrowserDownloadEntity.getFileName())
+                                        .fileNameForced(true)
+                                        .build()
+                                : DownloadRequest.from(mBrowserDownloadEntity);
+                        optionEntity.setDownloadRequest(outgoing);
                         navBackStackEntry.getSavedStateHandle().set(IntentActions.DOWNLOAD, optionEntity);
                     }
 

@@ -199,6 +199,47 @@ public class DownloadRequest implements Parcelable {
         }
     }
 
+    /**
+     * Returns a Builder pre-populated with this request's fields, so a
+     * caller can produce a near-identical copy with one or two fields
+     * overridden. Used by SaveFileDialog to apply the user's filename
+     * edit on top of a request built upstream from a selected variant —
+     * rebuilding via {@link #from} would lose stream selection.
+     */
+    public Builder toBuilder() {
+        return new Builder(url)
+                .audioUrl(audioUrl)
+                .name(name)
+                .description(description)
+                .origin(origin)
+                .mimeType(mimeType)
+                .headers(headers)
+                .cookieHeader(cookieHeader)
+                .fileType(fileType)
+                .videoNumber(videoNumber)
+                .audioNumber(audioNumber)
+                .fileLength(fileLength)
+                .durationTime(durationTime)
+                .durationFormatted(durationFormatted)
+                .fileNameForced(fileNameForced)
+                .sessionId(sessionId)
+                .sabrUrl(sabrUrl)
+                .sabrConfig(sabrConfig)
+                .sabrPoToken(sabrPoToken)
+                .sabrClientVersion(sabrClientVersion)
+                .sabrVideoId(sabrVideoId)
+                .sabrVisitorData(sabrVisitorData)
+                .sabrVideoItag(sabrVideoItag)
+                .sabrVideoLastModified(sabrVideoLastModified)
+                .sabrVideoXtags(sabrVideoXtags)
+                .sabrAudioItag(sabrAudioItag)
+                .sabrAudioLastModified(sabrAudioLastModified)
+                .sabrAudioXtags(sabrAudioXtags)
+                .sabrAudioTrackId(sabrAudioTrackId)
+                .sabrTargetHeight(sabrTargetHeight)
+                .saveToVault(saveToVault);
+    }
+
     // ========================================================================
     // Getters
     // ========================================================================
@@ -217,8 +258,7 @@ public class DownloadRequest implements Parcelable {
     public long getFileLength()             { return fileLength; }
     public long getDurationTime()           { return durationTime; }
     @Nullable public String getDurationFormatted() { return durationFormatted; }
-    public boolean isFileNameForced()       { return fileNameForced; }
-    public int getSessionId()               { return sessionId; }
+    public boolean isFileNameForced()       { return fileNameForced; }    public int getSessionId()               { return sessionId; }
     public boolean isSaveToVault() { return saveToVault; }
 
     // SABR getters

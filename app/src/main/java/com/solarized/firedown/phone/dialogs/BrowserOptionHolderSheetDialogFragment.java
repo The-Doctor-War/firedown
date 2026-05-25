@@ -297,8 +297,16 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
                     OptionEntity optionEntity = navBackStackEntry.getSavedStateHandle().get(IntentActions.DOWNLOAD);
                     navBackStackEntry.getSavedStateHandle().remove(IntentActions.DOWNLOAD);
                     if (optionEntity != null) {
-                        // Try new path first, fall back to legacy
+                        // Prefer the request that came in (preserves variant
+                        // stream selection); fall back to building one from
+                        // the entity if SaveFileDialog only forwarded that.
                         DownloadRequest request = optionEntity.getDownloadRequest();
+                        if (request == null) {
+                            BrowserDownloadEntity entity = optionEntity.getBrowserDownloadEntity();
+                            if (entity != null) {
+                                request = DownloadRequest.from(entity);
+                            }
+                        }
                         if (request != null) {
                             startDownload(request, mAnchorView);
                         }

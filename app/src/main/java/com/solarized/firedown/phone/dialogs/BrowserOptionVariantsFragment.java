@@ -115,6 +115,10 @@ public class BrowserOptionVariantsFragment extends BaseFocusFragment implements 
         OptionEntity optionEntity = new OptionEntity();
         optionEntity.setId(R.id.button);
         optionEntity.setDownloadRequest(request);
+        // Pass the entity too — the holder forwards it to SaveFileDialog
+        // when "Ask filename" is on, so the dialog can display the
+        // pre-filled name without rehydrating from the request alone.
+        optionEntity.setBrowserDownloadEntity(mEntity);
         optionEntity.setAction(IntentActions.DOWNLOAD_START);
         mFragmentsViewModel.onOptionsSelected(optionEntity);
     }

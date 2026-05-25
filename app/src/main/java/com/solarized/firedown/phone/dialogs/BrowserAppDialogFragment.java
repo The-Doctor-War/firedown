@@ -58,8 +58,6 @@ public class BrowserAppDialogFragment extends BaseDialogFragment {
                     try{
                         if (mIntent.resolveActivity(mActivity.getPackageManager()) != null) {
                             mActivity.startActivity(mIntent);
-                        }else{
-
                         }
                     }catch(ActivityNotFoundException e){
                         Log.e(TAG, "No Activity found: " + mIntent.toString(), e);

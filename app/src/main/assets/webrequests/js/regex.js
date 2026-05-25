@@ -22,6 +22,7 @@ const DEFAULT_PATTERNS = [
   'copilot\\.microsoft\\.com\\/(fd\\/ls\\/l|cl\\/eus2\\/collect)',
 
   // TikTok
+  'v\\d+-webapp-prime\\.tiktok\\.com\\/video\\/.*mime_type=video_mp4',
   'tiktok\\.com\\/aweme\\/v1\\/report',
   'tiktokw.*\\/web\\/report',
 

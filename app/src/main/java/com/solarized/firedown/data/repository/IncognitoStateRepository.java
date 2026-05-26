@@ -206,6 +206,10 @@ public class IncognitoStateRepository {
     public void closeGeckoState(GeckoState geckoState) {
         mGeckoMediaController.onTabClosed(geckoState.getEntityId());
         geckoState.clearCachedThumb();
+        // Dismiss any prompt dialog still open for this tab (mirrors
+        // the regular-repo path; the incognito repo lacks an undo so
+        // the session closes immediately downstream).
+        geckoState.dismissActivePrompt();
         synchronized (mGeckoStates) {
             int currentPosition = mGeckoStates.indexOf(geckoState);
             if (currentPosition == -1) return;
@@ -254,13 +258,18 @@ public class IncognitoStateRepository {
         }
         mCurrentId = GeckoState.NULL_SESSION_ID;
 
+        // dismissActivePrompt invokes AlertDialog.dismiss(), which must
+        // run on the main thread — co-locate it with the closeGeckoSession
+        // dispatch so both share the same main-thread guarantee.
         if (Looper.myLooper() == Looper.getMainLooper()) {
             for (GeckoState state : toClose) {
+                state.dismissActivePrompt();
                 state.closeGeckoSession();
             }
         } else {
             new android.os.Handler(Looper.getMainLooper()).post(() -> {
                 for (GeckoState state : toClose) {
+                    state.dismissActivePrompt();
                     state.closeGeckoSession();
                 }
             });

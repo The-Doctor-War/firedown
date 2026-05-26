@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,6 +25,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
@@ -32,6 +34,7 @@ import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.entity.WebBookmarkEntity;
 import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.WebBookmarkViewModel;
+import com.solarized.firedown.data.repository.WebBookmarkDataRepository;
 import com.solarized.firedown.utils.NavigationUtils;
 import com.solarized.firedown.utils.WebUtils;
 
@@ -45,8 +48,7 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
 
     private MaterialButton mSaveButton;
     private View mDeleteButton;
-    private View mOpenInBrowserRow;
-    private View mShareRow;
+    private TextInputLayout mHostLayout;
     private TextInputEditText mHostnameInput;
     private TextInputEditText mTitleNameInput;
     private TextView mTitlePreview;
@@ -78,8 +80,7 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
 
         mDeleteButton = v.findViewById(R.id.delete_button);
         mSaveButton = v.findViewById(R.id.save_button);
-        mOpenInBrowserRow = v.findViewById(R.id.open_in_browser_row);
-        mShareRow = v.findViewById(R.id.share_row);
+        mHostLayout = v.findViewById(R.id.host_text_input_layout);
         mHostnameInput = v.findViewById(R.id.host_field);
         mTitleNameInput = v.findViewById(R.id.title_field);
         mTitlePreview = v.findViewById(R.id.edit_title_preview);
@@ -88,8 +89,6 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
 
         mSaveButton.setOnClickListener(this);
         mDeleteButton.setOnClickListener(this);
-        mOpenInBrowserRow.setOnClickListener(this);
-        mShareRow.setOnClickListener(this);
 
         // Rounded-corner transform so the favicon visually sits inside
         // the chip background rather than poking through its corners.
@@ -115,13 +114,22 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
             if (result != null) {
                 mWebBookmarkEntity = result;
                 mPreviousId = result.getId();
-                mTitleNameInput.setText(result.getTitle());
-                mHostnameInput.setText(result.getUrl());
-                updatePreview(result.getTitle(), result.getUrl());
+                // Cache the loaded strings BEFORE any setText. The text
+                // watcher fires on each setText and writes back into
+                // mWebBookmarkEntity (== result), which means the title
+                // setText mutates result.getUrl() to "https://" while
+                // the host field is still empty — and the next line
+                // would then pick that mutated value up instead of the
+                // original. Holding the snapshot in locals avoids that.
+                String loadedTitle = result.getTitle();
+                String loadedUrl = result.getUrl();
+                mTitleNameInput.setText(loadedTitle);
+                mHostnameInput.setText(loadedUrl);
+                updatePreview(loadedTitle, loadedUrl);
                 // Same Glide call shape the bookmark list adapter uses
                 // — falls back to a domain-derived placeholder when the
                 // entity's icon column is empty.
-                GlideHelper.load(result.getIcon(), result.getUrl(),
+                GlideHelper.load(result.getIcon(), loadedUrl,
                         mFaviconView, mFaviconRequestOptions);
                 // Both fields populated → save is meaningful. The text
                 // watcher will keep the state in sync as the user edits.
@@ -139,16 +147,44 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
                 if (mWebBookmarkEntity == null) return;
 
                 String title = mTitleNameInput.getText().toString();
-                String url = mHostnameInput.getText().toString();
+                String rawUrl = mHostnameInput.getText().toString();
 
-                mSaveButton.setEnabled(!TextUtils.isEmpty(title) && !TextUtils.isEmpty(url));
+                boolean urlEmpty = TextUtils.isEmpty(rawUrl);
+                boolean urlValid = !urlEmpty
+                        && Patterns.WEB_URL.matcher(rawUrl).matches();
+
+                // Inline error only when the user has typed something
+                // invalid — leaving the field empty shouldn't badge it,
+                // Save being disabled already communicates "incomplete".
+                if (mHostLayout != null) {
+                    mHostLayout.setError(!urlEmpty && !urlValid
+                            ? getString(R.string.bookmark_url_invalid)
+                            : null);
+                }
+
+                mSaveButton.setEnabled(!TextUtils.isEmpty(title) && urlValid);
 
                 mWebBookmarkEntity.setFileTitle(title);
-                if (!url.startsWith("http")) url = "https://" + url;
-                mWebBookmarkEntity.setFileUrl(url);
-                mWebBookmarkEntity.setId(url.hashCode());
-
-                updatePreview(title, url);
+                // Only fold the URL into the entity once it parses, so
+                // the persisted id (= url.hashCode) doesn't churn off
+                // invalid keystrokes like "ahdhdhdh" → "https://ahdhdhdh"
+                // and end up saving garbage if the button somehow fires
+                // before this watcher catches up.
+                if (urlValid) {
+                    String normalized = rawUrl.startsWith("http")
+                            ? rawUrl : "https://" + rawUrl;
+                    mWebBookmarkEntity.setFileUrl(normalized);
+                    // Route the id through the repository's canonical
+                    // hash so the saved bookmark matches what the
+                    // browser popup looks up when the user later visits
+                    // this URL — keeps trailing-slash and case variants
+                    // pointing to the same row.
+                    mWebBookmarkEntity.setId(
+                            WebBookmarkDataRepository.bookmarkIdFor(normalized));
+                    updatePreview(title, normalized);
+                } else {
+                    updatePreview(title, rawUrl);
+                }
             }
         };
 
@@ -176,16 +212,53 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
         mToolbar = v.findViewById(R.id.toolbar);
         mToolbar.setNavigationOnClickListener(v1 -> handleBack());
         mToolbar.addMenuProvider(new MenuProvider() {
-            @Override public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {}
+            @Override
+            public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater) {
+                menuInflater.inflate(R.menu.menu_web_bookmark_edit, menu);
+            }
+
             @Override
             public boolean onMenuItemSelected(@NonNull MenuItem item) {
-                if (item.getItemId() == android.R.id.home) {
+                int itemId = item.getItemId();
+                if (itemId == android.R.id.home) {
                     handleBack();
+                    return true;
+                }
+                if (itemId == R.id.menu_open_in_browser) {
+                    openInBrowser();
+                    return true;
+                }
+                if (itemId == R.id.menu_share) {
+                    shareBookmarkUrl();
                     return true;
                 }
                 return false;
             }
         }, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+    }
+
+    /**
+     * Mirror of the bookmark list's "tap to open" flow: publish an
+     * OPEN_URI event on the shared ViewModel, then navigate to the
+     * browser via the action that pops back to home so the edit
+     * surface isn't left on the back stack.
+     */
+    private void openInBrowser() {
+        if (mWebBookmarkEntity == null) return;
+        GeckoStateEntity entity = new GeckoStateEntity(false);
+        entity.setUri(mWebBookmarkEntity.getUrl());
+        mBrowserURIViewModel.onEventSelected(entity, IntentActions.OPEN_URI);
+        NavigationUtils.navigateSafe(mNavController,
+                R.id.action_web_bookmark_edit_to_browser);
+    }
+
+    private void shareBookmarkUrl() {
+        if (mWebBookmarkEntity == null) return;
+        new ShareCompat.IntentBuilder(mActivity)
+                .setType("text/plain")
+                .setChooserTitle(R.string.share_url)
+                .setText(mWebBookmarkEntity.getUrl())
+                .startChooser();
     }
 
     private void handleBack() {
@@ -212,24 +285,6 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
                 mWebBookmarkViewModel.delete(mWebBookmarkEntity);
             }
             mNavController.popBackStack();
-        } else if (viewId == R.id.open_in_browser_row) {
-            if (mWebBookmarkEntity == null) return;
-            // Mirror the bookmark list's "tap to open" flow: publish an
-            // OPEN_URI event on the shared ViewModel, then navigate to
-            // browser via the action that pops back to home so the
-            // edit surface isn't left on the back stack.
-            GeckoStateEntity entity = new GeckoStateEntity(false);
-            entity.setUri(mWebBookmarkEntity.getUrl());
-            mBrowserURIViewModel.onEventSelected(entity, IntentActions.OPEN_URI);
-            NavigationUtils.navigateSafe(mNavController,
-                    R.id.action_web_bookmark_edit_to_browser);
-        } else if (viewId == R.id.share_row) {
-            if (mWebBookmarkEntity == null) return;
-            new ShareCompat.IntentBuilder(mActivity)
-                    .setType("text/plain")
-                    .setChooserTitle(R.string.share_url)
-                    .setText(mWebBookmarkEntity.getUrl())
-                    .startChooser();
         }
     }
 
@@ -238,10 +293,9 @@ public class WebBookmarkEditFragment extends BaseFocusFragment implements View.O
         super.onDestroyView();
         mTitleNameInput = null;
         mHostnameInput = null;
+        mHostLayout = null;
         mSaveButton = null;
         mDeleteButton = null;
-        mOpenInBrowserRow = null;
-        mShareRow = null;
         mTitlePreview = null;
         mUrlPreview = null;
         mFaviconView = null;

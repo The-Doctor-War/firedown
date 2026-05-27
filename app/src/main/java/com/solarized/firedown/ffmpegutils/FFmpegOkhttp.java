@@ -22,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import okhttp3.Headers;
+import com.solarized.firedown.okhttp.SafeHeaders;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -105,6 +106,21 @@ public class FFmpegOkhttp {
                 case "content-type":
                 case "content-length":
                 case "transfer-encoding":
+                    it.remove();
+                    break;
+
+                case "headers":
+                    // Defence in depth: 'headers' is the name of the AVDictionary
+                    // option ffmpeg uses to pass the joined header bag into the
+                    // okhttp protocol — it is never a real HTTP header. When
+                    // native serialises the option dict back into mHeaders and
+                    // we split it on \r\n / =, the first chunk lands as the
+                    // literal key 'headers' with the first real header as its
+                    // value (e.g. 'headers: Sec-Fetch-Mode=cors'). Nginx
+                    // tolerates the bogus header, but stricter origins (HTTP/2
+                    // servers that enforce token grammar on header names) reject
+                    // the request. Strip it unconditionally so no okhttp Request
+                    // ever leaves the device carrying it.
                     it.remove();
                     break;
 
@@ -196,7 +212,7 @@ public class FFmpegOkhttp {
             }
 
             Request request = new Request.Builder()
-                    .headers(Headers.of(headers))
+                    .headers(SafeHeaders.of(headers))
                     .url(mUrl)
                     .build();
 

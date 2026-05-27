@@ -24,7 +24,7 @@ import java.net.HttpURLConnection;
 import java.util.Locale;
 import java.util.Map;
 
-import okhttp3.Headers;
+import com.solarized.firedown.okhttp.SafeHeaders;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -68,7 +68,7 @@ public class FFmpegMuxStrategy implements DownloadStrategy, FFmpegListener {
             // Probe
             Request httpRequest = new Request.Builder()
                     .url(contentAddress)
-                    .headers(Headers.of(context.getHeaders()))
+                    .headers(SafeHeaders.of(context.getHeaders()))
                     .build();
 
             httpResponse = client.newCall(httpRequest).execute();
@@ -130,13 +130,24 @@ public class FFmpegMuxStrategy implements DownloadStrategy, FFmpegListener {
             downloader = new FFmpegDownloader();
             downloader.addListener(this);
 
-            Map<String, String> dict = FFmpegUtils.buildFFmpegOptions(context.getHeaders());
-
+            // FFmpegDownloader.start() runs the headers through
+            // buildFFmpegOptions itself — passing a pre-wrapped dict
+            // here meant buildFFmpegOptions ran twice. The second
+            // pass's headersToFFmpegString stripped all the \r\n
+            // separators out of the already-joined 'headers' value
+            // (see FFmpegUtils.headersToFFmpegString line 120), so
+            // FFmpegOkhttp ended up reading back a single garbage
+            // header named 'headers' whose value was every original
+            // request header concatenated without delimiters. The
+            // upstream HTTP/2 server then RSTed the stream with
+            // PROTOCOL_ERROR, killing the m3u8 download with
+            // 'End of file' / 'StreamResetException'. Hand start()
+            // the raw header map; it will wrap exactly once.
             StreamSelection selection = request.toStreamSelection();
             int videoStream = selection.getVideoNumber() >= 0 ? selection.getVideoNumber() : -1;
             int audioStream = selection.getAudioNumber() >= 0 ? selection.getAudioNumber() : -1;
 
-            int error = downloader.start(dict, null, contentAddress,
+            int error = downloader.start(context.getHeaders(), null, contentAddress,
                     file.getAbsolutePath(), videoStream, audioStream, totalLength);
 
             // Free after start() returns (C threads have exited)
@@ -155,7 +166,7 @@ public class FFmpegMuxStrategy implements DownloadStrategy, FFmpegListener {
                     // Fresh request for raw byte copy fallback
                     Request fallbackRequest = new Request.Builder()
                             .url(contentAddress)
-                            .headers(Headers.of(context.getHeaders()))
+                            .headers(SafeHeaders.of(context.getHeaders()))
                             .build();
                     httpResponse = client.newCall(fallbackRequest).execute();
                     body = httpResponse.body();

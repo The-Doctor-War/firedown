@@ -120,6 +120,24 @@ public class FFmpegMetaData {
         return mFormatName;
     }
 
+    /**
+     * ISO BMFF major_brand from the container header (the {@code ftyp} box's
+     * first compatible brand). Returned lowercased and trimmed so callers can
+     * match against known image-in-MP4 brands ({@code avif}, {@code heic},
+     * etc.) and avoid mis-classifying still images whose container probe lands
+     * in the {@code mov,mp4,m4a,3gp,3g2,mj2} format family.
+     *
+     * <p>Returns null when the container isn't ISO BMFF or the demuxer didn't
+     * surface the tag in {@link #mMetadata}.</p>
+     */
+    public String getMajorBrand() {
+        if (mMetadata == null) return null;
+        String brand = mMetadata.get("major_brand");
+        if (brand == null) return null;
+        brand = brand.trim().toLowerCase();
+        return brand.isEmpty() ? null : brand;
+    }
+
     public FFmpegStreamInfo[] getFFmpegStreamInfo() {
         return mFFmpegStreamInfo;
     }
@@ -225,6 +243,31 @@ public class FFmpegMetaData {
         }
 
         Log.d(TAG, "Format Image Name: " + mFormatName);
+
+        // AVIF / HEIF still images live in the ISO BMFF container, so
+        // ffprobe reports them in the mov,mp4,m4a,3gp,3g2,mj2 family —
+        // none of which would match the format-name list below.
+        // Discriminate via the ftyp major_brand, mirroring the brand
+        // list in FFmpegMetaDataReader.getMimeType. Without this,
+        // FFmpegMetaDataReader.getStreams falls into the "%dp" video
+        // formatter and the BrowserOption row renders "190p" for a
+        // 190x190 still — the user-visible "IMAGE 190p" symptom.
+        if (mFormatName.contains("mp4")) {
+            String brand = getMajorBrand();
+            if (brand != null) {
+                switch (brand) {
+                    case "avif":
+                    case "avis":
+                    case "heic":
+                    case "heix":
+                    case "heim":
+                    case "heis":
+                    case "mif1":
+                    case "msf1":
+                        return true;
+                }
+            }
+        }
 
         return (mFormatName.equals("webp")
                 || mFormatName.contains("jpeg")

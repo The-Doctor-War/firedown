@@ -44,6 +44,7 @@ import com.solarized.firedown.data.entity.OptionEntity;
 import com.solarized.firedown.data.models.DownloadsViewModel;
 import com.solarized.firedown.data.models.TaskViewModel;
 import com.solarized.firedown.manager.ServiceActions;
+import com.solarized.firedown.manager.tasks.TaskManager;
 import com.solarized.firedown.phone.DownloadsActivity;
 import com.solarized.firedown.phone.SettingsActivity;
 import com.solarized.firedown.phone.VaultActivity;
@@ -213,7 +214,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
                     Bundle gifArgs = handle.get(IntentActions.DOWNLOAD_START_MAKE_GIF);
                     handle.remove(IntentActions.DOWNLOAD_START_MAKE_GIF);
                     if (gifArgs != null && mActivity != null) {
-                        Intent gifIntent = new Intent(mActivity, com.solarized.firedown.manager.TaskManager.class);
+                        Intent gifIntent = new Intent(mActivity, TaskManager.class);
                         gifIntent.setAction(IntentActions.DOWNLOAD_START_MAKE_GIF);
                         gifIntent.putExtras(gifArgs);
                         mActivity.startService(gifIntent);

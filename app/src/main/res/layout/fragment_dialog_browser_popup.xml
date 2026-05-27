@@ -12,11 +12,15 @@
     Shape (top→bottom):
       1. Drag handle (shared include).                    [pinned]
       2. Site-identity row: favicon + page title +        [pinned]
-         hostname + close X. Same identity vocabulary
-         the SecuritySheet uses, scoped to "act on this
+         hostname. Same identity vocabulary the
+         SecuritySheet uses, scoped to "act on this
          page". Stays pinned — it's the anchor, scrolling
          the title away would lose the context the rest
-         of the rows act on.
+         of the rows act on. Dismiss is swipe-down or
+         scrim-tap; no inline X — the drag handle and the
+         taller header read clearly enough as a sheet,
+         and dropping the X also drops a second dismiss
+         affordance that did the same job.
       3. Identity / quick-row divider.                    [pinned]
       4. ─── scroll boundary ───
       5. Quick-row header: Back · Forward · Share · Refresh.
@@ -26,7 +30,10 @@
       9. App + exit      — Settings, optional Quit
 
     Row anatomy:
-      • 56dp tall, 16dp horizontal padding
+      • 48dp tall, 16dp horizontal padding — denser than the
+        56dp the sheet used to render at, fits more rows on
+        short screens without the list feeling crowded since
+        each row is still icon + single line
       • TextView with drawableStartCompat icon at 16dp drawablePadding,
         TitleMedium / 15sp text, onSurfaceVariant
       • Desktop site carries a MaterialSwitch as duplicate-parent-state
@@ -57,17 +64,18 @@
 
     <!-- Site identity. Mirrors the SecuritySheet's identity block
          (favicon + title + host) so the two sheets read as siblings
-         on the browser surface, with a trailing close button as an
-         explicit dismiss affordance besides swipe-down. -->
+         on the browser surface. Renders taller than the menu rows
+         (minHeight 72dp via 12dp vertical padding) so it reads as a
+         header, not just another list row. -->
     <LinearLayout
         android:id="@+id/popup_identity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
         android:gravity="center_vertical"
+        android:minHeight="72dp"
         android:orientation="horizontal"
-        android:paddingStart="20dp"
-        android:paddingEnd="8dp">
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="12dp">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/popup_identity_favicon"
@@ -104,18 +112,6 @@
                 tools:text="elpais.com" />
 
         </LinearLayout>
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/popup_identity_close"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="8dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/close"
-            android:padding="8dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/ic_baseline_close_24"
-            app:tint="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>
 
@@ -159,7 +155,7 @@
             <LinearLayout
                 android:id="@+id/popup_bookmark_page"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -188,7 +184,7 @@
             <LinearLayout
                 android:id="@+id/popup_find"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -218,7 +214,7 @@
             <LinearLayout
                 android:id="@+id/popup_desktop"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -262,7 +258,7 @@
             <LinearLayout
                 android:id="@+id/popup_bookmarks"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -290,7 +286,7 @@
             <LinearLayout
                 android:id="@+id/popup_history"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -319,7 +315,7 @@
             <LinearLayout
                 android:id="@+id/popup_vault"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -354,7 +350,7 @@
             <LinearLayout
                 android:id="@+id/popup_settings"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -384,7 +380,7 @@
             <LinearLayout
                 android:id="@+id/popup_quit"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
+                android:layout_height="48dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"

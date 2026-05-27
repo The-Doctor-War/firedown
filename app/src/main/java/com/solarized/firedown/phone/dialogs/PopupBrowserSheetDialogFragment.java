@@ -112,18 +112,16 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
 
 
     /**
-     * Populates the site-identity row: favicon, page title, hostname,
-     * and wires the trailing close button. Mirrors the identity block
-     * the SecuritySheet uses on the same browser surface so the two
-     * sheets read as siblings. Onboarding pages get the static
-     * about:firedown placeholder title rather than the live tab title,
-     * matching SecuritySheet's behaviour.
+     * Populates the site-identity row: favicon, page title, hostname.
+     * Mirrors the identity block the SecuritySheet uses on the same
+     * browser surface so the two sheets read as siblings. Onboarding
+     * pages get the static about:firedown placeholder title rather
+     * than the live tab title, matching SecuritySheet's behaviour.
      */
     private void bindIdentity() {
         TextView title = mView.findViewById(R.id.popup_identity_title);
         TextView host = mView.findViewById(R.id.popup_identity_host);
         AppCompatImageView favicon = mView.findViewById(R.id.popup_identity_favicon);
-        View close = mView.findViewById(R.id.popup_identity_close);
 
         String url = mGeckoState.getEntityUri();
         String domain = WebUtils.getDomainName(url);
@@ -142,10 +140,6 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
                     : (domain.startsWith("http") ? domain : "https://" + domain);
             GlideHelper.load(mGeckoState.getEntityIcon(), fullDomain, favicon,
                     RequestOptions.bitmapTransform(new RoundedCorners(radius)));
-        }
-        if (close != null) {
-            close.setOnClickListener(v ->
-                    NavigationUtils.popBackStackSafe(mNavController, R.id.dialog_browser_popup));
         }
     }
 

@@ -11,10 +11,13 @@
 
     Shape (top→bottom):
       1. Drag handle (shared include).
-      2. Quick-row header: Back · Forward · Share · Refresh.
-      3. Page actions    — Bookmark page, Find in page, Desktop site
-      4. Library         — Bookmarks, History, Safe Folder
-      5. App + exit      — Settings, optional Quit
+      2. Site-identity row: favicon + page title + hostname + close X.
+         Same identity vocabulary the SecuritySheet uses, scoped to
+         "act on this page".
+      3. Quick-row header: Back · Forward · Share · Refresh.
+      4. Page actions    — Bookmark page, Find in page, Desktop site
+      5. Library         — Bookmarks, History, Safe Folder
+      6. App + exit      — Settings, optional Quit
 
     Row anatomy:
       • 56dp tall, 16dp horizontal padding
@@ -44,6 +47,72 @@
 
     <include
         layout="@layout/dialog_drag_handle" />
+
+
+    <!-- Site identity. Mirrors the SecuritySheet's identity block
+         (favicon + title + host) so the two sheets read as siblings
+         on the browser surface, with a trailing close button as an
+         explicit dismiss affordance besides swipe-down. -->
+    <LinearLayout
+        android:id="@+id/popup_identity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="8dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/popup_identity_favicon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="16dp"
+            android:contentDescription="@null"
+            tools:src="@drawable/ic_firedown" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/popup_identity_title"
+                style="@style/TextAppearance.Material3.TitleSmall.Emphasized"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="EL PAÍS: el periódico global" />
+
+            <TextView
+                android:id="@+id/popup_identity_host"
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                tools:text="elpais.com" />
+
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/popup_identity_close"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/close"
+            android:padding="8dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_baseline_close_24"
+            app:tint="?attr/colorOnSurfaceVariant" />
+
+    </LinearLayout>
+
 
     <include
         layout="@layout/fragment_dialog_browser_popup_header"

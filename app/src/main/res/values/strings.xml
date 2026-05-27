@@ -65,6 +65,7 @@
     <string name="cert_section_validity">Validity Period</string>
     <string name="clipboard">Copied to clipboard</string>
     <string name="clipboard_delete">Remove suggestion from clipboard?</string>
+    <string name="close">Close</string>
     <string name="close_tab">Close tab</string>
 <string name="close_tabs_after_one_day">After one day</string>
     <string name="close_tabs_after_one_day_summary">Close after one day</string>

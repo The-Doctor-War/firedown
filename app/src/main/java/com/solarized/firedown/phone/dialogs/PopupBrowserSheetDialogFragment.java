@@ -3,6 +3,7 @@ package com.solarized.firedown.phone.dialogs;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,9 +11,13 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.google.android.material.materialswitch.MaterialSwitch;
+import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.Preferences;
 import com.solarized.firedown.R;
@@ -20,12 +25,14 @@ import com.solarized.firedown.data.entity.OptionEntity;
 import com.solarized.firedown.data.models.BrowserDialogViewModel;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
 import com.solarized.firedown.data.models.IncognitoStateViewModel;
+import com.solarized.firedown.geckoview.GeckoResources;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.ui.browser.BackwardBrowserButton;
 import com.solarized.firedown.ui.browser.BasicBrowserButton;
 import com.solarized.firedown.ui.browser.ForwardBrowserButton;
 import com.solarized.firedown.ui.browser.ReloadBrowserButton;
 import com.solarized.firedown.utils.NavigationUtils;
+import com.solarized.firedown.utils.WebUtils;
 
 import javax.inject.Inject;
 
@@ -92,6 +99,7 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
             return mView;
         }
 
+        bindIdentity();
         bindQuickRow();
         bindRows();
         applyBookmarkState();
@@ -100,6 +108,45 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
         applyQuitVisibility();
 
         return mView;
+    }
+
+
+    /**
+     * Populates the site-identity row: favicon, page title, hostname,
+     * and wires the trailing close button. Mirrors the identity block
+     * the SecuritySheet uses on the same browser surface so the two
+     * sheets read as siblings. Onboarding pages get the static
+     * about:firedown placeholder title rather than the live tab title,
+     * matching SecuritySheet's behaviour.
+     */
+    private void bindIdentity() {
+        TextView title = mView.findViewById(R.id.popup_identity_title);
+        TextView host = mView.findViewById(R.id.popup_identity_host);
+        AppCompatImageView favicon = mView.findViewById(R.id.popup_identity_favicon);
+        View close = mView.findViewById(R.id.popup_identity_close);
+
+        String url = mGeckoState.getEntityUri();
+        String domain = WebUtils.getDomainName(url);
+        if (title != null) {
+            title.setText(GeckoResources.isOnboarding(url)
+                    ? GeckoResources.ABOUT_ONBOARDING
+                    : mGeckoState.getEntityTitle());
+        }
+        if (host != null) {
+            host.setText(domain);
+        }
+        if (favicon != null) {
+            int radius = getResources().getDimensionPixelOffset(R.dimen.icon_rounded);
+            String fullDomain = TextUtils.isEmpty(domain)
+                    ? null
+                    : (domain.startsWith("http") ? domain : "https://" + domain);
+            GlideHelper.load(mGeckoState.getEntityIcon(), fullDomain, favicon,
+                    RequestOptions.bitmapTransform(new RoundedCorners(radius)));
+        }
+        if (close != null) {
+            close.setOnClickListener(v ->
+                    NavigationUtils.popBackStackSafe(mNavController, R.id.dialog_browser_popup));
+        }
     }
 
 

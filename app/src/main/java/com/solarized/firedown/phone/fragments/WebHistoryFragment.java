@@ -22,6 +22,7 @@ import com.solarized.firedown.data.entity.WebHistoryEntity;
 import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.WebHistoryViewModel;
 import com.solarized.firedown.ui.OnItemClickListener;
+import com.solarized.firedown.ui.EqualSpacingItemDecoration;
 import com.solarized.firedown.ui.adapters.WebHistoryAdapter;
 import com.solarized.firedown.ui.diffs.WebHistoryDiffCallback;
 import com.solarized.firedown.utils.NavigationUtils;
@@ -140,6 +141,12 @@ public class WebHistoryFragment extends BaseFocusFragment implements SearchView.
         mToolbar = v.findViewById(R.id.toolbar);
         mToolbar.setContentInsetsAbsolute(getResources().getDimensionPixelSize(R.dimen.address_bar_inset), 0);
         mAdapter = new WebHistoryAdapter(mActivity, new WebHistoryDiffCallback(), this);
+        // Match WebBookmarkFragment: EqualSpacingItemDecoration gives
+        // halfSpacing between rows + full list_spacing on the edges,
+        // so adjacent 2dp card strokes don't touch (which would have
+        // read as a doubled border in action mode). Previously this
+        // fragment had no decoration and items ran edge-to-edge.
+        mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(mActivity, R.dimen.list_spacing));
         mRecyclerView.setAdapter(mAdapter);
 
         mWebHistoryViewModel.getWebHistory().observe(getViewLifecycleOwner(), data -> {

@@ -54,21 +54,21 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="4dp"
-            android:minHeight="64dp">
+            android:minHeight="@dimen/list_download_image_height">
 
-            <!-- Thumbnail. 78x64 landscape (the original aspect that
-                 was in place before the brief detour to square). Most
-                 captured media is landscape — 16:9 video, magazine-shape
-                 imagery — so a square thumb made everything look
-                 letterboxed top and bottom. The shared
-                 list_download_image_* dimens are inlined here because
-                 fragment_browser_options_item_list and
-                 fragment_tabs_item_list still reference them with the
-                 original sizing. -->
+            <!-- Thumbnail. Landscape aspect picked to match captured
+                 media (16:9 video, magazine imagery). Sizing comes from
+                 list_download_image_width / _height — overridden per
+                 device class under res/values-sw600dp and -sw720dp so
+                 tablets and foldable inner displays get a larger
+                 thumbnail without rewriting the row layout. The same
+                 dimens drive fragment_browser_options_item_list and
+                 fragment_tabs_item_list, so all three 'list row with
+                 thumbnail' surfaces scale together. -->
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image"
-                android:layout_width="78dp"
-                android:layout_height="64dp"
+                android:layout_width="@dimen/list_download_image_width"
+                android:layout_height="@dimen/list_download_image_height"
                 android:adjustViewBounds="true"
                 android:background="@drawable/mask_image_rounded"
                 android:contentDescription="@null"

@@ -2,4 +2,11 @@
 <resources>
     <dimen name="empty_image_height_big">200dp</dimen>
     <dimen name="empty_image_button_width">180dp</dimen>
+
+    <!-- Large tablet / foldable inner (≥ sw720dp). Another step up
+         from the sw600dp value so the row reads at roughly the same
+         visual share of screen as it does on a phone. Same aspect
+         ratio as the phone default. -->
+    <dimen name="list_download_image_width">112dp</dimen>
+    <dimen name="list_download_image_height">96dp</dimen>
 </resources>

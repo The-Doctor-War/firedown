@@ -45,10 +45,20 @@
         app:cardCornerRadius="8dp"
         app:strokeWidth="2dp">
 
+        <!-- Horizontal margin intentionally 0 so the thumbnail sits flush
+             against the card edge, matching grid mode where the tile *is*
+             the thumbnail. With list_margin on the sides too, list-row
+             content sat 8dp further in than grid tiles and 8dp further
+             in than the section headers (which use list_spacing from
+             screen edge), making the header look offset to the left of
+             everything beneath it. Keep top/bottom margin for vertical
+             breathing room — without it the action button at the right
+             edge would hug the card stroke. -->
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/list_margin"
+            android:layout_marginTop="@dimen/list_margin"
+            android:layout_marginBottom="@dimen/list_margin"
             android:minHeight="@dimen/list_download_image_height">
 
             <!-- Thumbnail -->

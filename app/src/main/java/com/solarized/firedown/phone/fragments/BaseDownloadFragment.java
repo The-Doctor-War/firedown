@@ -47,7 +47,6 @@ import com.solarized.firedown.manager.ServiceActions;
 import com.solarized.firedown.phone.DownloadsActivity;
 import com.solarized.firedown.phone.SettingsActivity;
 import com.solarized.firedown.phone.VaultActivity;
-import com.solarized.firedown.ui.CardViewListItemDecoration;
 import com.solarized.firedown.ui.EqualSpacingItemDecoration;
 import com.solarized.firedown.ui.adapters.DownloadItemAdapter;
 import com.solarized.firedown.utils.NavigationUtils;
@@ -498,15 +497,21 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             }
         });
 
-        // 2. Handle Decorations
+        // 2. Handle Decorations — same EqualSpacingItemDecoration for
+        // list and grid. List rows are 1-span, full-width; the decoration
+        // gives them list_spacing on every side and halfSpacing between,
+        // matching the gutter grid tiles get. Was CardViewListItemDecoration
+        // for list (which only emitted top/bottom on the first/last item
+        // and relied on per-card marginStart/marginEnd for horizontal
+        // spacing). With the card margins removed, list items lost their
+        // gutter; switching the list to EqualSpacingItemDecoration too
+        // restores it without re-adding per-row layout margins.
         int spacing = getResources().getDimensionPixelSize(R.dimen.list_spacing);
         while (mRecyclerView.getItemDecorationCount() > 0) {
             mRecyclerView.removeItemDecorationAt(0);
         }
 
-        mRecyclerView.addItemDecoration(isGrid
-                ? new EqualSpacingItemDecoration(spacing)
-                : new CardViewListItemDecoration(spacing));
+        mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(spacing));
 
         // 3. Update Adapter state
         adapter.enableGrid(isGrid);

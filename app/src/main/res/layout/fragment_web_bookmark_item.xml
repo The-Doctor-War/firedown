@@ -1,98 +1,110 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!--
+  Web bookmark list row. Root is the MaterialCardView itself; the
+  selection check sits inside as a constrained overlay sharing the
+  more-button's anchors. Adapter swaps item_web_selected VISIBLE ↔
+  file_more INVISIBLE on action mode, so the two never paint at
+  once and the row geometry stays stable across the toggle.
+
+  Files-by-Google pattern: strokeWidth=0 and (per the adapter) a
+  transparent default cardBackgroundColor mean the row is flat by
+  default — the only chrome that paints is the selected wash. The
+  inner ConstraintLayout's 8dp layout_margin insets file_icon from
+  the card edge by list_spacing; combined with the row decoration's
+  8dp gutter the icon lands 16dp from the screen edge, same column
+  as fragment_item_header's text.
+
+  Same pattern is mirrored in fragment_download_item.xml and
+  fragment_web_history_item.xml — keep them aligned.
+-->
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/item_web_history_holder"
+    android:id="@+id/item_web_bookmark"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    app:cardCornerRadius="8dp"
+    app:strokeWidth="0dp">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/item_web_selected"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/list_spacing"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_baseline_check_circle_24" />
+        android:layout_margin="8dp">
 
-    <Space
-        android:id="@+id/spacer"
-        android:layout_width="@dimen/list_spacing"
-        android:layout_height="match_parent"
-        android:visibility="gone"/>
+        <!-- Favicon sits at the start of the row with no decoration.
+             Tried wrapping it in a tonal/outlined 40dp frame to match
+             the downloads thumbnail's visual weight, but the frame
+             read as part of the favicon's brand (especially the
+             square-around-circle case). Plain 28dp icon at the
+             leading inset is cleaner and still lines up with the
+             section header's text column at 16dp from the screen
+             edge (8dp decoration + 8dp inner layout_margin). -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/file_icon"
+            android:layout_width="@dimen/list_web_image_height"
+            android:layout_height="@dimen/list_web_image_height"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/item_web_bookmark"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="8dp"
-        app:strokeWidth="2dp">
-
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/file_name"
+            style="@style/TextAppearance.Material3.TitleMedium"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_margin="8dp">
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            app:layout_constraintBottom_toTopOf="@id/file_url"
+            app:layout_constraintEnd_toStartOf="@id/file_more"
+            app:layout_constraintStart_toEndOf="@id/file_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="packed" />
 
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/file_icon"
-                android:layout_width="@dimen/list_web_image_height"
-                android:layout_height="@dimen/list_web_image_height"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
-                android:contentDescription="@null"
-                android:scaleType="fitCenter"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+        <TextView
+            android:id="@+id/file_url"
+            style="@style/TextAppearance.Material3.BodySmall"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:ellipsize="marquee"
+            android:singleLine="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/file_more"
+            app:layout_constraintStart_toEndOf="@id/file_icon"
+            app:layout_constraintTop_toBottomOf="@id/file_name" />
 
-            <TextView
-                android:id="@+id/file_name"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="4dp"
-                android:layout_marginEnd="12dp"
-                android:ellipsize="marquee"
-                android:singleLine="true"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                app:layout_constraintEnd_toStartOf="@id/file_more"
-                app:layout_constraintStart_toEndOf="@id/file_icon"
-                app:layout_constraintTop_toTopOf="parent"/>
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/file_more"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:nextFocusLeft="@id/item_web_bookmark"
+            android:padding="6dp"
+            android:src="@drawable/ic_baseline_more_vert_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-            <TextView
-                android:id="@+id/file_url"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/file_name"
-                android:layout_marginStart="12dp"
-                android:layout_marginTop="2dp"
-                android:layout_marginEnd="12dp"
-                android:layout_marginBottom="12dp"
-                android:ellipsize="marquee"
-                android:singleLine="true"
-                style="@style/TextAppearance.Material3.BodySmall"
-                app:layout_constraintStart_toEndOf="@id/file_icon"
-                app:layout_constraintEnd_toStartOf="@id/file_more"
-                app:layout_constraintTop_toBottomOf="@id/file_name"/>
+        <!-- Selection check — same constraints as file_more so it
+             renders in the more-button's slot when action mode flips
+             file_more to INVISIBLE. No outer LinearLayout, no spacer
+             View; the card doesn't shift on toggle. -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_web_selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/file_more"
+            app:layout_constraintEnd_toEndOf="@id/file_more"
+            app:layout_constraintStart_toStartOf="@id/file_more"
+            app:layout_constraintTop_toTopOf="@id/file_more"
+            app:srcCompat="@drawable/ic_baseline_check_circle_24" />
 
-            <androidx.appcompat.widget.AppCompatImageButton
-                android:id="@+id/file_more"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:layout_gravity="end"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:nextFocusLeft="@id/item_web_bookmark"
-                android:padding="6dp"
-                android:src="@drawable/ic_baseline_more_vert_24"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintBottom_toBottomOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-    </com.google.android.material.card.MaterialCardView>
-
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

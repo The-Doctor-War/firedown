@@ -5,4 +5,15 @@
     <!-- Tablet (≥ sw600dp): wider sheet than the landscape-phone 480dp,
          still capped so it doesn't span the full tablet width. -->
     <dimen name="bottom_sheet_max_width">560dp</dimen>
+
+    <!-- List-row thumbnail. Scaled up from the phone default of 78x64
+         (about +23%) so the 'list row with thumbnail' surfaces
+         (downloads list, browser options variants list, tabs archive
+         list) keep similar proportions on a 600dp+ smallest-width
+         device. Aspect stays close to the phone value
+         (96 / 80 = 1.20, vs phone 78 / 64 = 1.22) so existing
+         captures composed for the phone layout don't get visibly
+         re-cropped on tablets. -->
+    <dimen name="list_download_image_width">96dp</dimen>
+    <dimen name="list_download_image_height">80dp</dimen>
 </resources>

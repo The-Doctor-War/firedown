@@ -130,7 +130,6 @@ public class WebHistoryAdapter extends PagingDataAdapter<Object, RecyclerView.Vi
 
             // Selection & Action Mode UI logic
             historyHolder.selected.setVisibility(mActionMode ? View.VISIBLE : View.GONE);
-            historyHolder.file_spacer.setVisibility(mActionMode ? View.VISIBLE : View.GONE);
             historyHolder.file_more.setVisibility(mActionMode ? View.INVISIBLE : View.VISIBLE);
 
             if (mActionMode) {
@@ -213,8 +212,6 @@ public class WebHistoryAdapter extends PagingDataAdapter<Object, RecyclerView.Vi
         AppCompatImageButton file_more;
         AppCompatImageView selected;
 
-        View file_spacer;
-
         public WebHistoryViewHolder(View view, OnItemClickListener onItemClickListener) {
             super(view);
             mOnItemClickListener = onItemClickListener;
@@ -224,7 +221,6 @@ public class WebHistoryAdapter extends PagingDataAdapter<Object, RecyclerView.Vi
             file_url = view.findViewById(R.id.file_url);
             file_more = view.findViewById(R.id.file_more);
             file_icon = view.findViewById(R.id.file_icon);
-            file_spacer = view.findViewById(R.id.spacer);
             file_more.setOnClickListener(this);
             item.setOnClickListener(this);
             item.setOnClickListener(this);

@@ -31,12 +31,14 @@
                 android:visibility="gone"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Thumbnail -->
+            <!-- Thumbnail. match_parent both ways inside the 16:10
+                 ratio card — adjustViewBounds is intentionally absent
+                 because the dimensions are fixed; the platform would
+                 still evaluate it on every measure. -->
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/image"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:adjustViewBounds="true"
                 android:background="@drawable/mask_image_rounded"
                 android:contentDescription="@null"
                 android:duplicateParentState="true"
@@ -86,9 +88,16 @@
 
             </LinearLayout>
 
-            <!-- Bottom status: error text -->
+            <!-- Bottom status: unified ERROR / QUEUED row. List layout
+                 also shares this id; the adapter sets text + color per
+                 state. FINISHED has no status string in grid mode
+                 (covered by the top scrim + mime duration badge), and
+                 QUEUED currently has no grid-mode treatment in the
+                 adapter — keeping the view here means a future
+                 'Pending…' label can be wired in without re-touching
+                 the layout. -->
             <TextView
-                android:id="@+id/error_text"
+                android:id="@+id/status_text"
                 style="@style/TextAppearance.Material3.BodySmall"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -101,21 +110,6 @@
                 app:layout_constraintEnd_toStartOf="@id/row_mime"
                 app:layout_constraintStart_toStartOf="parent"
                 tools:text="@string/error_check_internet_connection" />
-
-            <!-- Bottom status: queued text -->
-            <TextView
-                android:id="@+id/queued_text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/list_item_margin"
-                android:gravity="center_vertical"
-                android:text="@string/download_queued"
-                android:textSize="12sp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/row_mime"
-                app:layout_constraintStart_toStartOf="parent"
-                tools:text="Queued" />
 
             <!-- Action button -->
             <com.google.android.material.button.MaterialButton

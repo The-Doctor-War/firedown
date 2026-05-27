@@ -1,239 +1,247 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Downloads list row. Three logical layers: thumbnail on the left,
-  text column in the middle, action button on the right edge. The
-  text column is a vertical LinearLayout (gravity=center_vertical)
-  so its three lines — filename, mime · domain, status — distribute
-  evenly inside the 64dp row and stay visually balanced regardless
-  of which status variant is showing.
+  Downloads list row. Three logical layers inside the MaterialCardView:
+  thumbnail on the left, text column in the middle, action button on
+  the right edge. The text column is a vertical LinearLayout
+  (gravity=center_vertical) so its three lines — filename,
+  mime · domain, status — distribute evenly inside the row and stay
+  visually balanced regardless of which status variant is showing.
 
   mime_text is the list-mode plain-text label (style
   MimePrimaryLabel); the adapter appends ' · ' so the line reads as
   'VÍDEO · youtube.com'. Grid uses the filled chip style in its own
   layout — see fragment_download_item_grid.xml.
 
-  The status row contains all four mutually-exclusive states stacked
-  vertically; the adapter sets visibility on the appropriate one and
-  GONE on the rest, so wrap_content collapses to a single line.
+  status_text is a single TextView whose text + color are set by the
+  adapter for finished / queued / error states. Progress is its own
+  row because it pairs percent text with a LinearProgressIndicator,
+  which doesn't compose with a single TextView. Previously each state
+  was a separate TextView with mutual VISIBLE/GONE toggling — three
+  views per row that the layout pass had to measure even though only
+  one was ever shown.
+
+  Selection checkmark (item_download_selected) lives as an overlay
+  inside the card. When action mode is on, the adapter flips it
+  VISIBLE; it sits on top of the thumbnail's top-left corner rather
+  than pushing the whole card right. Previously the card was wrapped
+  in an outer LinearLayout next to the checkmark; that wrapper is
+  gone — the MaterialCardView is the root, so the recycler builds one
+  fewer ViewGroup per row.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/item_holder"
+    android:id="@+id/item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="horizontal">
+    app:cardCornerRadius="8dp"
+    app:strokeWidth="0dp">
 
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/item_download_selected"
-        android:layout_width="wrap_content"
+    <!-- Files-by-Google pattern: card has no stroke and (per the
+         adapter) a transparent default background, so the only thing
+         that ever paints is the selected wash. The 8dp horizontal
+         margin insets the thumbnail from the card edge so the wash
+         reads as a pill around the row rather than a flush band.
+         Combined with the row decoration's 8dp gutter, the thumbnail
+         starts 16dp from the screen edge — same column as the
+         section header (which has its own 8dp internal padding).
+         Vertical 4dp top + 4dp bottom keeps the row at the M3
+         three-line metric (64dp thumb + 8dp = 72dp). -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/list_spacing"
-        android:visibility="gone"
-        app:srcCompat="@drawable/ic_baseline_check_circle_24" />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:minHeight="@dimen/list_download_image_height">
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/item"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/list_spacing"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="@dimen/list_spacing"
-        android:layout_marginBottom="4dp"
-        android:layout_weight="1"
-        app:cardCornerRadius="8dp"
-        app:strokeWidth="2dp">
+        <!-- Thumbnail. Landscape aspect picked to match captured
+             media (16:9 video, magazine imagery). Sizing comes from
+             list_download_image_width / _height — overridden per
+             device class under res/values-sw600dp and -sw720dp so
+             tablets and foldable inner displays get a larger
+             thumbnail without rewriting the row layout. The same
+             dimens drive fragment_browser_options_item_list and
+             fragment_tabs_item_list, so all three 'list row with
+             thumbnail' surfaces scale together. -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/image"
+            android:layout_width="@dimen/list_download_image_width"
+            android:layout_height="@dimen/list_download_image_height"
+            android:background="@drawable/mask_image_rounded"
+            android:contentDescription="@null"
+            android:duplicateParentState="true"
+            android:outlineProvider="background"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
+        <!-- Progress overlay on thumbnail (PROGRESS only) -->
+        <com.solarized.firedown.ui.ProgressOverlayView
+            android:id="@+id/image_progress"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/image"
+            app:layout_constraintEnd_toEndOf="@id/image"
+            app:layout_constraintStart_toStartOf="@id/image"
+            app:layout_constraintTop_toTopOf="@id/image" />
+
+        <!-- Selection checkmark — sits in the same slot as the more
+             button on the right edge; the adapter swaps them on the
+             action-mode toggle (action button INVISIBLE, this VISIBLE).
+             That keeps the row geometry stable (no reflow when
+             entering/leaving action mode) and gives the check icon a
+             plain surface to render against instead of overlaying it
+             on arbitrary thumbnail content. -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_download_selected"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/list_margin"
-            android:minHeight="@dimen/list_download_image_height">
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@id/item_download_action"
+            app:layout_constraintEnd_toEndOf="@id/item_download_action"
+            app:layout_constraintStart_toStartOf="@id/item_download_action"
+            app:layout_constraintTop_toTopOf="@id/item_download_action"
+            app:srcCompat="@drawable/ic_baseline_check_circle_24" />
 
-            <!-- Thumbnail -->
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image"
-                android:layout_width="@dimen/list_download_image_width"
-                android:layout_height="@dimen/list_download_image_height"
-                android:adjustViewBounds="true"
-                android:background="@drawable/mask_image_rounded"
-                android:contentDescription="@null"
-                android:duplicateParentState="true"
-                android:outlineProvider="background"
-                android:scaleType="centerCrop"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+        <!-- Text column: filename / meta line / status. wrap_content
+             with top+bottom parent constraints — centred when the
+             column is shorter than the thumbnail, but the row
+             expands when it's taller (large font scales). Letting
+             the row grow instead of capping at 64dp keeps the
+             meta / status lines from clipping at accessibility
+             font scales. -->
+        <LinearLayout
+            android:id="@+id/text_column"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingStart="@dimen/list_margin"
+            android:paddingEnd="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/item_download_action"
+            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!-- Progress overlay on thumbnail (PROGRESS only) -->
-            <com.solarized.firedown.ui.ProgressOverlayView
-                android:id="@+id/image_progress"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:visibility="gone"
-                app:layout_constraintBottom_toBottomOf="@id/image"
-                app:layout_constraintEnd_toEndOf="@id/image"
-                app:layout_constraintStart_toStartOf="@id/image"
-                app:layout_constraintTop_toTopOf="@id/image" />
-
-            <!-- Text column: filename / meta line / status. wrap_content
-                 with top+bottom parent constraints — centred when the
-                 column is shorter than the thumbnail, but the row
-                 expands when it's taller (large font scales). Letting
-                 the row grow instead of capping at 64dp keeps the
-                 meta / status lines from clipping at accessibility
-                 font scales. -->
-            <LinearLayout
-                android:id="@+id/text_column"
-                android:layout_width="0dp"
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/file_name"
+                style="@style/TextAppearance.Material3.TitleSmall"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:paddingStart="@dimen/list_margin"
-                android:paddingEnd="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/item_download_action"
-                app:layout_constraintStart_toEndOf="@id/image"
-                app:layout_constraintTop_toTopOf="parent">
+                android:ellipsize="marquee"
+                android:singleLine="true"
+                android:textColor="?attr/colorOnSurface"
+                tools:text="The Knight Who Chose the Dawn" />
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/file_name"
-                    style="@style/TextAppearance.Material3.TitleSmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="marquee"
-                    android:singleLine="true"
-                    android:textColor="?attr/colorOnSurface"
-                    tools:text="The Knight Who Chose the Dawn" />
+            <!-- Meta line: mime label · globe · domain. -->
+            <LinearLayout
+                android:id="@+id/row_meta"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-                <!-- Meta line: mime label · globe · domain. -->
-                <LinearLayout
-                    android:id="@+id/row_meta"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:id="@+id/mime_text"
-                        style="@style/MimePrimaryLabel"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        tools:text="VÍDEO · " />
-
-                    <ImageView
-                        android:id="@+id/file_url_icon"
-                        android:layout_width="@dimen/list_item_domain"
-                        android:layout_height="@dimen/list_item_domain"
-                        android:contentDescription="@null"
-                        android:src="@drawable/ic_baseline_language_24"
-                        app:tint="?attr/colorOnSurfaceVariant" />
-
-                    <TextView
-                        android:id="@+id/file_url"
-                        style="@style/TextAppearance.Material3.LabelSmall"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_weight="1"
-                        android:ellipsize="end"
-                        android:singleLine="true"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        tools:text="youtube.com" />
-
-                </LinearLayout>
-
-                <!-- Status row: one of progress / finished / queued /
-                     error visible at a time. Sits in the bottom slot
-                     of the text column; when nothing is visible (no
-                     status to show) the row's wrap_content collapses
-                     and the column re-centres. -->
-
-                <!-- PROGRESS: percent + bar inline. -->
-                <LinearLayout
-                    android:id="@+id/progress_row"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-
-                    <TextView
-                        android:id="@+id/progress_text"
-                        style="@style/TextAppearance.Material3.BodySmall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="?attr/colorOnSurfaceVariant"
-                        tools:text="80%" />
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/progress_bar"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="8dp"
-                        android:layout_weight="1"
-                        android:indeterminate="true"
-                        android:max="100"
-                        android:progress="0"
-                        app:indicatorTrackGapSize="0dp"
-                        app:trackCornerRadius="3dp"
-                        app:trackStopIndicatorSize="0dp"
-                        app:trackThickness="5dp" />
-
-                </LinearLayout>
-
-                <!-- FINISHED: size · date. -->
                 <TextView
-                    android:id="@+id/item_download_finished"
-                    style="@style/TextAppearance.Material3.BodySmall"
-                    android:layout_width="match_parent"
+                    android:id="@+id/mime_text"
+                    style="@style/MimePrimaryLabel"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
+                    tools:text="VÍDEO · " />
+
+                <ImageView
+                    android:id="@+id/file_url_icon"
+                    android:layout_width="@dimen/list_item_domain"
+                    android:layout_height="@dimen/list_item_domain"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_baseline_language_24"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+                <TextView
+                    android:id="@+id/file_url"
+                    style="@style/TextAppearance.Material3.LabelSmall"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
                     android:ellipsize="end"
                     android:singleLine="true"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:visibility="gone"
-                    tools:text="11.6 MB · 20 may 2026" />
-
-                <!-- QUEUED: 'Pending…'. -->
-                <TextView
-                    android:id="@+id/queued_text"
-                    style="@style/TextAppearance.Material3.BodySmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:singleLine="true"
-                    android:text="@string/download_queued"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:visibility="gone" />
-
-                <!-- ERROR: red message. -->
-                <TextView
-                    android:id="@+id/error_text"
-                    style="@style/TextAppearance.Material3.BodySmall"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:singleLine="true"
-                    android:textColor="?attr/colorPrimary"
-                    android:visibility="gone"
-                    tools:text="@string/error_check_internet_connection" />
+                    tools:text="youtube.com" />
 
             </LinearLayout>
 
-            <!-- Action button (more / remove) -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/item_download_action"
-                style="@style/Theme.FireDown.More.Button"
-                app:icon="@drawable/ic_baseline_more_vert_24"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+            <!-- Status row: one of progress / unified status visible at
+                 a time. The unified status_text covers FINISHED ('size ·
+                 date'), QUEUED ('Pending…'), and ERROR (red message) —
+                 the adapter sets text + color based on state. PROGRESS
+                 stays its own row because it pairs a percent label with
+                 a LinearProgressIndicator. -->
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- PROGRESS: percent + bar inline. -->
+            <LinearLayout
+                android:id="@+id/progress_row"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone">
 
-    </com.google.android.material.card.MaterialCardView>
+                <TextView
+                    android:id="@+id/progress_text"
+                    style="@style/TextAppearance.Material3.BodySmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/colorOnSurfaceVariant"
+                    tools:text="80%" />
 
-</LinearLayout>
+                <com.google.android.material.progressindicator.LinearProgressIndicator
+                    android:id="@+id/progress_bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:indeterminate="true"
+                    android:max="100"
+                    android:progress="0"
+                    app:indicatorTrackGapSize="0dp"
+                    app:trackCornerRadius="3dp"
+                    app:trackStopIndicatorSize="0dp"
+                    app:trackThickness="5dp" />
+
+            </LinearLayout>
+
+            <!-- FINISHED ('size · date') / QUEUED ('Pending…') /
+                 ERROR (red message). The adapter swaps text and
+                 textColor based on the entity's status. -->
+            <TextView
+                android:id="@+id/status_text"
+                style="@style/TextAppearance.Material3.BodySmall"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:singleLine="true"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:visibility="gone"
+                tools:text="11.6 MB · 20 may 2026" />
+
+        </LinearLayout>
+
+        <!-- Action button (more / remove) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/item_download_action"
+            style="@style/Theme.FireDown.More.Button"
+            app:icon="@drawable/ic_baseline_more_vert_24"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</com.google.android.material.card.MaterialCardView>

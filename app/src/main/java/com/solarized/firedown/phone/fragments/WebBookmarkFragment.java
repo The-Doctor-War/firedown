@@ -28,7 +28,7 @@ import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.entity.WebBookmarkEntity;
 import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.WebBookmarkViewModel;
-import com.solarized.firedown.ui.CardViewListItemDecoration;
+import com.solarized.firedown.ui.EqualSpacingItemDecoration;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.diffs.WebBookmarkDiffCallback;
 import com.solarized.firedown.ui.adapters.WebBookmarkAdapter;
@@ -140,7 +140,13 @@ public class WebBookmarkFragment extends BaseFocusFragment implements OnItemClic
 
         mRecyclerView = mLCEERecyclerView.getRecyclerView();
         mRecyclerView.setVerticalScrollBarEnabled(true);
-        mRecyclerView.addItemDecoration(new CardViewListItemDecoration(mActivity, R.dimen.list_spacing));
+        // EqualSpacingItemDecoration: halfSpacing between rows, full
+        // list_spacing at the top/bottom and on left/right edges.
+        // CardViewListItemDecoration emitted spacing only on the very
+        // first and last items and zero between, so adjacent 2dp card
+        // strokes touched and read as a doubled border in action mode.
+        // Same decoration the downloads list now uses.
+        mRecyclerView.addItemDecoration(new EqualSpacingItemDecoration(mActivity, R.dimen.list_spacing));
         mAdapter = new WebBookmarkAdapter(mActivity, new WebBookmarkDiffCallback(), this);
         mRecyclerView.setAdapter(mAdapter);
 

@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
     Browser popup quick-row: page-context transient actions only —
-    Back · Forward · Share · Refresh. Bookmarking is a page-state
-    toggle and lives as the first row of the page-state card below,
-    not here.
+    Back · Forward · New tab · Share · Refresh. Bookmarking is a
+    page-state toggle and lives as the first row of the page-state
+    card below, not here.
+
+    Five equal columns. New tab is widely high-frequency enough to
+    earn a quick-row slot rather than burying it in the body; it
+    sits next to Forward so the navigation triplet (Back · Forward ·
+    New tab) reads as a unit before the page-state pair (Share ·
+    Refresh).
+
+    Labels are ellipsize="end" + lines="1": at five-up each chip is
+    narrow enough that long translations (e.g. de "Aktualisieren",
+    "Neuer Tab") truncate rather than wrap or push the icon stack
+    off-centre.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -46,6 +57,29 @@
         android:lines="1"
         android:ellipsize="end"
         android:text="@string/browser_menu_forward"
+        app:iconGravity="textTop"
+        app:iconTint="@color/popup_header_selector" />
+
+
+
+    <!-- New tab: reuses @id/new_tab so the popup's view-id-as-
+         dispatch wire matches BrowserFragment's existing handler
+         (BrowserFragment.onOptionSelected R.id.new_tab branch) —
+         no fragment changes needed. -->
+    <com.solarized.firedown.ui.browser.BasicBrowserButton
+        android:id="@id/new_tab"
+        style="@style/Widget.Material3.Button.IconButton"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textColor="@color/popup_header_selector"
+        android:lines="1"
+        android:ellipsize="end"
+        app:icon="@drawable/add_24"
+        app:cornerRadius="16dp"
+        app:iconPadding="8dp"
+        android:text="@string/popup_tabs_new"
+        android:textAlignment="center"
         app:iconGravity="textTop"
         app:iconTint="@color/popup_header_selector" />
 

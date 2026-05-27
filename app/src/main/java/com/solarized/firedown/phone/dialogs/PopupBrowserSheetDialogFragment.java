@@ -82,8 +82,12 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
     private ReloadBrowserButton mReloadBrowserButton;
     private GeckoState mGeckoState;
     private AppCompatImageView mFavicon;
+    private TextView mTitle;
+    private TextView mHost;
     private String mDomain;
     private String mLastIconUrl;
+    private String mLastTitle;
+    private String mLastUri;
 
     @Inject SharedPreferences mSharedPreferences;
 
@@ -92,6 +96,8 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
         super.onDestroyView();
         mReloadBrowserButton = null;
         mFavicon = null;
+        mTitle = null;
+        mHost = null;
     }
 
 
@@ -130,22 +136,41 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
      * than the live tab title, matching SecuritySheet's behaviour.
      */
     private void bindIdentity() {
-        TextView title = mView.findViewById(R.id.popup_identity_title);
-        TextView host = mView.findViewById(R.id.popup_identity_host);
+        mTitle = mView.findViewById(R.id.popup_identity_title);
+        mHost = mView.findViewById(R.id.popup_identity_host);
         mFavicon = mView.findViewById(R.id.popup_identity_favicon);
 
-        String url = mGeckoState.getEntityUri();
-        mDomain = WebUtils.getDomainName(url);
+        mLastUri = mGeckoState.getEntityUri();
+        mLastTitle = mGeckoState.getEntityTitle();
         mLastIconUrl = mGeckoState.getEntityIcon();
-        if (title != null) {
-            title.setText(GeckoResources.isOnboarding(url)
-                    ? GeckoResources.ABOUT_ONBOARDING
-                    : mGeckoState.getEntityTitle());
-        }
-        if (host != null) {
-            host.setText(mDomain);
-        }
+        mDomain = WebUtils.getDomainName(mLastUri);
+
+        renderTitle();
+        renderHost();
         loadFavicon();
+    }
+
+
+    /**
+     * Paints the identity title TextView from the cached
+     * {@code mGeckoState}. Onboarding pages render the static
+     * about:firedown label rather than whatever live title the
+     * placeholder tab happens to expose, matching SecuritySheet's
+     * carve-out.
+     */
+    private void renderTitle() {
+        if (mTitle == null) return;
+        mTitle.setText(GeckoResources.isOnboarding(mLastUri)
+                ? GeckoResources.ABOUT_ONBOARDING
+                : mLastTitle);
+    }
+
+
+    /**
+     * Paints the identity host TextView from the cached domain.
+     */
+    private void renderHost() {
+        if (mHost != null) mHost.setText(mDomain);
     }
 
 
@@ -291,22 +316,45 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
             }
         });
 
-        // Favicon resolution is async — when the popup opens immediately
-        // after a navigation, GeckoSession's onPageFavicon callback can
-        // land seconds later. Observe the tabs LiveData (notified by
-        // GeckoStateDataRepository.updateIcon) and re-render whenever
-        // *this* entity's icon string actually changes. Other tab-list
-        // events (new tab, close tab, title update) short-circuit on
-        // the equality check, keeping per-emission work O(1). Same
-        // pattern SecuritySheet uses on the same surface.
+        // Page identity (favicon, title, URL) resolves asynchronously —
+        // when the popup opens immediately after a navigation,
+        // GeckoSession's onPageTitleChange / onLocationChange /
+        // onPageFavicon callbacks routinely land after bindIdentity
+        // has already snapshotted whatever values were cached. Observe
+        // the tabs LiveData (notified by GeckoStateDataRepository's
+        // update* methods) and re-render whenever *this* entity's
+        // title / URI / icon string actually changes. Other tab-list
+        // events (new tab, close tab, sibling-tab updates) short-
+        // circuit on the equality checks, keeping per-emission work
+        // O(1). Same pattern SecuritySheet uses on the same surface.
         LiveData<List<GeckoStateEntity>> tabsLive = mIsIncognito
                 ? mIncognitoStateViewModel.getTabs()
                 : mGeckoStateViewModel.getTabs();
         tabsLive.observe(getViewLifecycleOwner(), tabs -> {
-            if (tabs == null || mGeckoState == null || mFavicon == null) return;
+            if (tabs == null || mGeckoState == null) return;
             int id = mGeckoState.getEntityId();
             for (GeckoStateEntity entity : tabs) {
                 if (entity.getId() != id) continue;
+
+                String uri = entity.getUri();
+                if (!Objects.equals(uri, mLastUri)) {
+                    mLastUri = uri;
+                    mGeckoState.setEntityUri(uri);
+                    mDomain = WebUtils.getDomainName(uri);
+                    renderHost();
+                    // Title carve-out for about:firedown is URL-driven,
+                    // so a URI swap can flip the rendered title even
+                    // when the entity's title string hasn't moved yet.
+                    renderTitle();
+                }
+
+                String title = entity.getTitle();
+                if (!Objects.equals(title, mLastTitle)) {
+                    mLastTitle = title;
+                    mGeckoState.setEntityTitle(title);
+                    renderTitle();
+                }
+
                 String icon = entity.getIcon();
                 if (!Objects.equals(icon, mLastIconUrl)) {
                     mLastIconUrl = icon;

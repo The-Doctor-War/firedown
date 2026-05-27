@@ -78,6 +78,18 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
      *  progress bar indicator colour. */
     private final int mDefaultPrimary;
     private final int mDefaultPrimaryAlpha;
+    /** colorOnSurfaceVariant resolved once at construction; the list-mode
+     *  action button's icon tint. setActionIcon was previously calling
+     *  MaterialColors.getColor inline on every bind, which is a theme
+     *  attribute resolution per row — caching the int once removes that
+     *  lookup from the hot scroll path. */
+    private final int mActionIconTintList;
+    /** ColorStateList wrappers cached per surface — setIconTint takes a
+     *  ColorStateList, and wrapping a plain int with valueOf allocates
+     *  on every bind. Two surfaces (grid = white, list =
+     *  colorOnSurfaceVariant), so two cached lists cover every call. */
+    private final ColorStateList mActionIconTintListCsl;
+    private final ColorStateList mActionIconTintGridCsl;
     private boolean mActionMode;
     private boolean mEnabled;
     private boolean mEnableGrid;
@@ -119,6 +131,10 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 android.R.attr.colorPrimary, Color.BLACK);
         mDefaultPrimaryAlpha = androidx.core.graphics.ColorUtils
                 .setAlphaComponent(mDefaultPrimary, 0x33);
+        mActionIconTintList = MaterialColors.getColor(context,
+                com.google.android.material.R.attr.colorOnSurfaceVariant, Color.BLACK);
+        mActionIconTintListCsl = ColorStateList.valueOf(mActionIconTintList);
+        mActionIconTintGridCsl = ColorStateList.valueOf(Color.WHITE);
     }
 
 
@@ -603,15 +619,17 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         if (view != null) view.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
-    private static void setActionIcon(DownloadViewHolder holder, boolean isGrid, int iconRes) {
+    private void setActionIcon(DownloadViewHolder holder, boolean isGrid, int iconRes) {
         // Works for both AppCompatImageButton (list) and MaterialButton (grid)
 
         if (holder.actionButton instanceof MaterialButton btn) {
             btn.setIconResource(iconRes);
-            btn.setIconTint(ColorStateList.valueOf(
-                    isGrid ? Color.WHITE
-                            : MaterialColors.getColor(btn, com.google.android.material.R.attr.colorOnSurfaceVariant)
-            ));
+            // Cached tint CSL — see mActionIconTintListCsl. Was a
+            // MaterialColors.getColor + ColorStateList.valueOf on every
+            // bind; both are tiny on their own, but the bind path runs
+            // for every visible row on every scroll, and the int never
+            // changes after the theme is resolved.
+            btn.setIconTint(isGrid ? mActionIconTintGridCsl : mActionIconTintListCsl);
         }
     }
 

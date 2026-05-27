@@ -1,10 +1,12 @@
 package com.solarized.firedown;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.TextUtils;
+import android.util.LruCache;
 import android.util.Log;
 import android.widget.ImageView;
 
@@ -78,15 +80,42 @@ public class GlideHelper {
     }
 
 
-    private static BitmapDrawable generateThumbnail(@NonNull String mimeType,
-                                                    @NonNull AppCompatImageView image) {
+    /**
+     * Small process-wide LRU of MimeTypeThumbnail bitmaps, keyed by
+     * (mimeType, width, height). Without the cache every loadFallback()
+     * call (PROGRESS / QUEUED / ERROR row bind, every Glide failure)
+     * allocated a fresh ARGB_8888 bitmap of the row size and ran the
+     * canvas + tint pipeline. On cold-start scroll with 10-15 visible
+     * non-FINISHED rows that's ~10 fresh ~180 KB bitmaps per layout
+     * pass plus the GC churn — visible as a stutter during the first
+     * few frames.
+     *
+     * Capacity sized for the realistic key cardinality:
+     *   mime buckets (~12) × view sizes (~4: list / grid / sw600 /
+     *   sw720) ≈ 48. 64 gives headroom for any odd one-off mime that
+     *   slips through FileUriHelper.
+     */
+    private static final LruCache<String, Bitmap> FALLBACK_BITMAP_CACHE = new LruCache<>(64);
+
+    private static Drawable generateThumbnail(@NonNull String mimeType,
+                                              @NonNull AppCompatImageView image) {
         Context ctx = image.getContext();
         int width = image.getWidth();
         int height = image.getHeight();
         if (width <= 0) width = (int) (ctx.getResources().getDisplayMetrics().density * 256);
         if (height <= 0) height = (int) (ctx.getResources().getDisplayMetrics().density * 180);
-        return new BitmapDrawable(ctx.getResources(),
-                MimeTypeThumbnail.generate(ctx, mimeType, width, height));
+
+        String key = mimeType + "@" + width + "x" + height;
+        Bitmap bmp = FALLBACK_BITMAP_CACHE.get(key);
+        if (bmp == null || bmp.isRecycled()) {
+            bmp = MimeTypeThumbnail.generate(ctx, mimeType, width, height);
+            FALLBACK_BITMAP_CACHE.put(key, bmp);
+        }
+        // Fresh BitmapDrawable wrapping the cached Bitmap — the Bitmap is
+        // shared (no per-bind allocation) but each call returns a new
+        // Drawable so per-View state (bounds, alpha, filter) can't race
+        // across recycled holders.
+        return new BitmapDrawable(ctx.getResources(), bmp);
     }
 
     private static <T> RequestListener<T> fallbackListener(@NonNull String mimeType,

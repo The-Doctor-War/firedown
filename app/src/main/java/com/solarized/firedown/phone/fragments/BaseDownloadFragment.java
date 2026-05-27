@@ -424,8 +424,12 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         mRecyclerView.setHasFixedSize(true);
         // Default off-screen view cache is 2; bumping it means a quick
         // scroll-back doesn't re-bind (and re-trigger Glide loads) for the
-        // rows that just left the viewport.
-        mRecyclerView.setItemViewCacheSize(8);
+        // rows that just left the viewport. Sized to roughly half the
+        // paging page size (Preferences.LIST_LIMIT = 25) so the cache
+        // typically holds the previous viewport plus a row or two of
+        // headroom — past that the recycled-view pool takes over and
+        // re-bind is cheap.
+        mRecyclerView.setItemViewCacheSize(12);
 
         installThumbnailPreloader(adapter);
 
@@ -534,7 +538,16 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
                 new FixedPreloadSizeProvider<>(
                         GlideHelper.downloadThumbWidth(),
                         GlideHelper.downloadThumbHeight()),
-                8);
+                // Match a viewport's worth of upcoming rows so the
+                // preloader warms Glide's memory cache for the rows
+                // that bind next. The old 8 was a leftover from the
+                // pre-paging adapter; with a 25-row paging page size
+                // the previous window kept stalling because paging
+                // fired requests for rows the preloader hadn't reached
+                // yet. 16 covers a full list viewport plus a row of
+                // headroom on dense layouts without paying for
+                // wasteful pre-decodes that the user never scrolls to.
+                16);
         mRecyclerView.addOnScrollListener(preloader);
         mPreloaderInstalledOn = mRecyclerView;
     }

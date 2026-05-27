@@ -31,20 +31,19 @@
         android:layout_height="wrap_content"
         android:layout_margin="8dp">
 
-        <!-- Favicon wrapped in an outlined frame (40dp tile,
-             1dp colorOutlineVariant stroke, 10dp corners). 6dp padding
-             pins the favicon back to list_web_image_height (28dp).
-             Outlined rather than tonal-filled so brand favicons that
-             already carry their own background don't read as
-             pill-in-pill; the frame is a column slot, not a chip. -->
-
+        <!-- Favicon sits at the start of the row with no decoration.
+             Tried wrapping it in a tonal/outlined 40dp frame to match
+             the downloads thumbnail's visual weight, but the frame
+             read as part of the favicon's brand (especially the
+             square-around-circle case). Plain 28dp icon at the
+             leading inset is cleaner and still lines up with the
+             section header's text column at 16dp from the screen
+             edge (8dp decoration + 8dp inner layout_margin). -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/file_icon"
-            android:layout_width="@dimen/list_web_image_frame"
-            android:layout_height="@dimen/list_web_image_frame"
-            android:background="@drawable/bg_favicon_frame_outlined"
+            android:layout_width="@dimen/list_web_image_height"
+            android:layout_height="@dimen/list_web_image_height"
             android:contentDescription="@null"
-            android:padding="6dp"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

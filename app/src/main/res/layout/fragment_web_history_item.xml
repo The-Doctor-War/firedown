@@ -36,18 +36,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- Favicon wrapped in a tonal frame — see fragment_web_bookmark_item.
-             The historic layout_marginStart=list_spacing on top of the inner
-             ConstraintLayout's 8dp layout_margin double-billed the leading
-             inset (16dp here vs 8dp on bookmark); dropping it lines history
-             up with bookmark and with the section-header column. -->
+        <!-- Plain 28dp favicon — see fragment_web_bookmark_item for the
+             frame experiment we reverted. The historic
+             layout_marginStart=list_spacing here was double-billing on
+             top of the inner ConstraintLayout's 8dp layout_margin;
+             without it the favicon lands at 16dp from the screen edge,
+             same column as the section header's text. -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/file_icon"
-            android:layout_width="@dimen/list_web_image_frame"
-            android:layout_height="@dimen/list_web_image_frame"
-            android:background="@drawable/bg_favicon_frame_outlined"
+            android:layout_width="@dimen/list_web_image_height"
+            android:layout_height="@dimen/list_web_image_height"
             android:contentDescription="@null"
-            android:padding="6dp"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

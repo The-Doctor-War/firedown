@@ -1,98 +1,83 @@
 # Baseline profile for the downloads-list cold-start scroll path.
 #
-# Format: HRF — Human Readable Format. Each line is either:
-#   - a class:  `L<class>;`           (no flags allowed on class rules)
-#   - a method: `<flags>L<class>;-><method><signature>`
-# Method flags:
-#   H = Hot (called many times)
-#   S = Startup (called during startup)
-#   P = Post-startup (called soon after startup completes)
+# SCOPE — trace-confirmed only:
+# Every class in this file either showed up as `JIT compiling
+# com.solarized.firedown.*` in a perfetto trace of cold-start scroll
+# OR is called from the per-bind hot path that those JIT'd classes
+# call into (the trace was captured AFTER cache fixes that suppressed
+# some of those utilities' JIT events, but the per-bind utilities
+# still run for every visible row and benefit from AOT). No
+# speculative cold-start coverage for paths we haven't profiled:
+# BrowserActivity, VaultActivity, BaseActivity, the GeckoView wiring,
+# the ViewModels and repositories — all left to ART's normal JIT
+# warmup, which on a fast device finishes during the initial
+# inflation pass before the user starts scrolling.
+#
+# Format: HRF — Human Readable Format.
+#   - Class:  `L<class>;`           (no flags allowed on class rules)
+#   - Method: `<flags>L<class>;-><method><signature>`
 #
 # We use class-level rules everywhere — AOT-compiles all methods in
 # the class, doesn't silently rot when method descriptors change
-# during refactor. Tradeoff: bigger compiled output than a
-# Macrobenchmark-generated profile that targets only the actually-
-# executed methods, but this surface is small enough that the
-# wholesale-class approach is fine.
+# during refactor.
 #
-# Why this exists: traces of cold-start scroll on the downloads list
-# showed ~900 baseline JIT compilations happening DURING the scroll,
-# with hot methods like DownloadItemAdapter.bindFull, GlideHelper.load,
-# and ConstraintLayout measure paths running interpreted on their
-# first ~hundred invocations (10-50x slower than AOT-compiled). The
-# user-visible result is jerky scroll for the first viewport or two
-# of every cold start; even on a tiny library (<50 rows) the JIT
-# pressure stacks on top of the actual bind work and drops ~30% of
-# frames in the first 10s.
-#
-# This profile lists the methods that need to run compiled from byte 1
-# so the first cold-start scroll doesn't pay the interpreter tax. It's
-# hand-curated rather than Macrobenchmark-generated — fine because the
-# downloads-list scroll surface is small and stable.
-#
-# To verify after install:
-#   adb shell cmd package compile -m speed-profile com.solarized.firedown
+# Verify after install:
+#   adb shell cmd package compile -m speed-profile -f com.solarized.firedown
 #   adb shell dumpsys package dexopt | grep -A2 com.solarized.firedown
-#   (look for "status=speed-profile" on base.apk)
-#
-# To verify it took effect at runtime: capture a perfetto trace of the
-# cold-start scroll; the "JIT compiling ..." slices for the listed
-# classes should disappear (or be drastically reduced).
+#   (expect status=speed-profile reason=cmdline on base.apk)
 
-# ── App: downloads list adapter + view holders ───────────────────────
+# ── Downloads adapter bind path ──────────────────────────────────────
+# DownloadItemAdapter.bindFull was the top app-side JIT-compile event
+# during cold-start scroll. View holders share the same hot path —
+# each holder construction + recycle round-trip runs a bunch of
+# inner-class methods. DiffCallback runs on every Paging snapshot.
 Lcom/solarized/firedown/ui/adapters/DownloadItemAdapter;
 Lcom/solarized/firedown/ui/adapters/DownloadItemAdapter$DownloadViewHolder;
 Lcom/solarized/firedown/ui/adapters/DownloadItemAdapter$HeaderViewHolder;
 Lcom/solarized/firedown/ui/adapters/DownloadItemAdapter$EmptyViewHolder;
-Lcom/solarized/firedown/ui/adapters/IncognitoInProgressHeaderAdapter;
-Lcom/solarized/firedown/ui/adapters/WrapContentLinearLayoutManager;
 Lcom/solarized/firedown/ui/diffs/DownloadDiffCallback;
 
-# ── App: fragments + activity in the downloads cold path ─────────────
-Lcom/solarized/firedown/phone/DownloadsActivity;
-Lcom/solarized/firedown/phone/fragments/BaseDownloadFragment;
-Lcom/solarized/firedown/phone/fragments/BaseFocusFragment;
-Lcom/solarized/firedown/phone/fragments/DownloadFragment;
-
-# ── App: ViewModel + paging + aggregator ─────────────────────────────
-Lcom/solarized/firedown/data/models/DownloadsViewModel;
-Lcom/solarized/firedown/data/models/DownloadsViewModel$DownloadsState;
-Lcom/solarized/firedown/data/models/TaskViewModel;
-Lcom/solarized/firedown/data/repository/DownloadDataRepository;
-Lcom/solarized/firedown/utils/DownloadAggregator;
-Lcom/solarized/firedown/utils/DownloadSortOrganizer;
-Lcom/solarized/firedown/utils/GroupAggregate;
-
-# ── App: entities & related data classes ─────────────────────────────
+# ── Per-row entity access ────────────────────────────────────────────
+# DownloadEntity getters fire 6+ times per bind (status, mime, url,
+# origin, name, date, size, finished label, etc).
 Lcom/solarized/firedown/data/entity/DownloadEntity;
 Lcom/solarized/firedown/data/entity/DownloadSeparatorEntity;
-Lcom/solarized/firedown/data/Download;
 
-# ── App: Glide wiring + thumbnail synthesis ──────────────────────────
-Lcom/solarized/firedown/GlideHelper;
-Lcom/solarized/firedown/glide/MimeTypeThumbnail;
-Lcom/solarized/firedown/glide/DomainThumbnail;
-Lcom/solarized/firedown/GlideRequestOptions;
-
-# ── App: bind-path utilities (hot per-row) ───────────────────────────
+# ── Per-bind utilities ───────────────────────────────────────────────
+# All called from DownloadItemAdapter.bindFull for every visible row:
+#   WebUtils.getDomainName       — URI parse + getHost + regex
+#   FileUriHelper.getLongMimeText + isVideo/isAudio/isImage checks
+#   Utils.getFileSize / readableFileSize  — file-size formatting
+#   DateUtils.getFileDate        — date formatting
+# Cached at the adapter level by recent commits, but the cache-miss
+# (first sight of a mime / first bind of a row) still runs these and
+# benefits from AOT.
 Lcom/solarized/firedown/utils/WebUtils;
 Lcom/solarized/firedown/utils/FileUriHelper;
 Lcom/solarized/firedown/utils/Utils;
 Lcom/solarized/firedown/utils/DateUtils;
-Lcom/solarized/firedown/utils/SelectionStyling;
-Lcom/solarized/firedown/utils/MessageHelper;
-Lcom/solarized/firedown/utils/BrowserHeaders;
 
-# ── App: custom views drawn per row ──────────────────────────────────
+# ── Per-row custom views (drawn every frame during scroll) ───────────
+# ProgressOverlayView's draw + indeterminate tick run for every
+# in-flight PROGRESS row visible on screen.
 Lcom/solarized/firedown/ui/ProgressOverlayView;
-Lcom/solarized/firedown/ui/LCEERecyclerView;
 Lcom/solarized/firedown/ui/EqualSpacingItemDecoration;
-Lcom/solarized/firedown/ui/CardViewListItemDecoration;
 
-# ── Glide: hot internal classes Glide doesn't ship a profile for ─────
-# Engine.load is the synchronous dispatch path; DecodeJob is the
-# decode pipeline; SingleRequest is the per-request orchestrator.
-# All three showed up in JIT-compile traces during cold-start scroll.
+# ── Glide app-side ──────────────────────────────────────────────────
+# GlideHelper.load was a JIT-compile event during the trace; it's the
+# entry the bind path calls for every FINISHED row. MimeTypeThumbnail
+# generates the fallback bitmap (per-mime-per-size; cache hits most
+# of the time but the first-sight allocation path still runs through).
+Lcom/solarized/firedown/GlideHelper;
+Lcom/solarized/firedown/GlideRequestOptions;
+Lcom/solarized/firedown/glide/MimeTypeThumbnail;
+
+# ── Glide internals (Glide doesn't ship its own baseline profile) ───
+# Engine.load, DecodeJob.init, SingleRequest.<init>, RequestBuilder,
+# RequestManager were all JIT-compile events in the cold-start trace.
+# BaseRequestOptions / RequestOptions / Image targets are on the same
+# request-dispatch path. RecyclerViewPreloader is called per scroll
+# event by BaseDownloadFragment.installThumbnailPreloader.
 Lcom/bumptech/glide/Glide;
 Lcom/bumptech/glide/GlideContext;
 Lcom/bumptech/glide/RequestBuilder;
@@ -111,68 +96,3 @@ Lcom/bumptech/glide/request/target/DrawableImageViewTarget;
 Lcom/bumptech/glide/integration/recyclerview/RecyclerViewPreloader;
 Lcom/bumptech/glide/ListPreloader;
 Lcom/bumptech/glide/util/FixedPreloadSizeProvider;
-
-# ── Cold-start spine (shared across Browser / Downloads / Vault) ─────
-# BaseActivity owns the splash gate + intent routing; IntentHandler
-# drives cold-start navigation; the BaseFocusFragment superclass is
-# already listed above for the downloads cold path but is hot for
-# every activity entry too.
-Lcom/solarized/firedown/BaseActivity;
-Lcom/solarized/firedown/IntentHandler;
-Lcom/solarized/firedown/Keys;
-Lcom/solarized/firedown/IntentActions;
-Lcom/solarized/firedown/Preferences;
-
-# ── App: Browser cold-start path ─────────────────────────────────────
-# Tab-restore cold start lands on BrowserFragment; home variants are
-# possible alternate destinations on the same cold-start intent path.
-Lcom/solarized/firedown/phone/BrowserActivity;
-Lcom/solarized/firedown/phone/fragments/BaseBrowserFragment;
-Lcom/solarized/firedown/phone/fragments/BrowserFragment;
-Lcom/solarized/firedown/phone/fragments/HomeFragment;
-Lcom/solarized/firedown/phone/fragments/HomeIncognitoFragment;
-Lcom/solarized/firedown/phone/fragments/TabsFragment;
-Lcom/solarized/firedown/phone/fragments/TabsHolderFragment;
-Lcom/solarized/firedown/phone/fragments/TabsIncognitoFragment;
-
-# ── GeckoView wiring exercised on browser cold-start ─────────────────
-# GeckoState wraps the session lifecycle; GeckoRuntimeHelper owns the
-# runtime singleton; the behaviors / toolbar / observer chain is what
-# CoordinatorLayout calls on first frame to lay out the browser shell.
-Lcom/solarized/firedown/geckoview/GeckoState;
-Lcom/solarized/firedown/geckoview/GeckoRuntimeHelper;
-Lcom/solarized/firedown/geckoview/GeckoComponents;
-Lcom/solarized/firedown/geckoview/GeckoToolbar;
-Lcom/solarized/firedown/geckoview/GeckoToolbarBehavior;
-Lcom/solarized/firedown/geckoview/NestedGeckoViewBehavior;
-Lcom/solarized/firedown/geckoview/toolbar/BottomNavigationBehavior;
-Lcom/solarized/firedown/geckoview/media/GeckoMediaController;
-Lcom/solarized/firedown/geckoview/GeckoObserver;
-Lcom/solarized/firedown/geckoview/GeckoObserverInvoker;
-Lcom/solarized/firedown/geckoview/prompt/GeckoPromptManager;
-Lcom/solarized/firedown/geckoview/prompt/PromptViewFactory;
-Lcom/solarized/firedown/geckoview/prompt/GeckoChoiceAdapter;
-Lcom/solarized/firedown/geckoview/PoTokenGenerator;
-
-# ── Browser-side ViewModels + repositories ───────────────────────────
-# All four ViewModels are observed in BrowserFragment.onViewCreated,
-# so the first scroll / first tab-switch hits them while interpreted
-# if not AOT'd.
-Lcom/solarized/firedown/data/models/GeckoStateViewModel;
-Lcom/solarized/firedown/data/models/IncognitoStateViewModel;
-Lcom/solarized/firedown/data/models/BrowserURIViewModel;
-Lcom/solarized/firedown/data/models/BrowserDialogViewModel;
-Lcom/solarized/firedown/data/repository/GeckoStateDataRepository;
-Lcom/solarized/firedown/data/repository/IncognitoStateRepository;
-Lcom/solarized/firedown/data/repository/SearchRepository;
-Lcom/solarized/firedown/data/entity/GeckoStateEntity;
-Lcom/solarized/firedown/data/entity/CertificateInfoEntity;
-
-# ── App: Vault cold-start path ───────────────────────────────────────
-# VaultActivity → VaultFragment, which extends BaseDownloadFragment
-# (already in the profile above). Only the activity + the fragment
-# itself need adding; the adapter / view holders / paging /
-# aggregator / utilities are shared with DownloadFragment and
-# already covered.
-Lcom/solarized/firedown/phone/VaultActivity;
-Lcom/solarized/firedown/phone/fragments/VaultFragment;

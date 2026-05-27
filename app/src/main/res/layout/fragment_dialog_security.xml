@@ -117,17 +117,11 @@
         android:paddingBottom="8dp">
 
 
-        <!-- ── PROTECTION ─────────────────────────────────────────── -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="4dp"
-            android:letterSpacing="0.08"
-            android:text="@string/security_section_protection"
-            android:textAllCaps="true"
-            android:textAppearance="?attr/textAppearanceTitleSmallEmphasized"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+        <!-- ── Protection toggles ─────────────────────────────────── -->
+        <!-- Block ads + Tracking protection — placed at the top
+             because they're the primary reason users open this
+             sheet, and they double as the legend for the count
+             rows below. -->
 
 
         <!--
@@ -139,6 +133,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
@@ -228,17 +223,15 @@
         </LinearLayout>
 
 
-        <!-- ── BLOCKED ON THIS PAGE ───────────────────────────────── -->
-        <TextView
+        <!-- Group divider — separates the protection toggles above
+             from the per-page block counts below. colorOutlineVariant
+             at 1dp matches the standard M3 inline divider. -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
             android:layout_marginBottom="4dp"
-            android:letterSpacing="0.08"
-            android:text="@string/security_section_blocked_on_page"
-            android:textAllCaps="true"
-            android:textAppearance="?attr/textAppearanceTitleSmallEmphasized"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:background="?attr/colorOutlineVariant" />
 
 
         <!--
@@ -358,17 +351,14 @@
         </LinearLayout>
 
 
-        <!-- ── MANAGE ─────────────────────────────────────────────── -->
-        <TextView
+        <!-- Group divider — separates the count rows above from the
+             site-management actions below. -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
             android:layout_marginBottom="4dp"
-            android:letterSpacing="0.08"
-            android:text="@string/security_section_manage"
-            android:textAllCaps="true"
-            android:textAppearance="?attr/textAppearanceTitleSmallEmphasized"
-            android:textColor="?attr/colorOnSurfaceVariant" />
+            android:background="?attr/colorOutlineVariant" />
 
 
         <!-- Connection — drill-down to cert details. Icon and label

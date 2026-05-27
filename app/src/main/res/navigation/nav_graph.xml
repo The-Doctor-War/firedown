@@ -46,6 +46,9 @@
             app:destination="@id/home"
             app:popUpTo="@id/nav_graph"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_home_incognito_to_bookmarks"
+            app:destination="@id/web_bookmark" />
     </fragment>
     <fragment
         android:id="@+id/browser"

@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.Window;
-import android.view.inputmethod.InputMethodManager;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -323,11 +322,12 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
             Intent downloadsIntent = new Intent(mActivity, VaultActivity.class);
             mStartForResult.launch(downloadsIntent);
         } else if (id == R.id.search_button) {
-            mAutoCompleteViewModel.resetEngines();
-            mAutoCompleteView.showEmpty();
-            mAutoCompleteEditText.requestFocus();
-            InputMethodManager imm = (InputMethodManager) mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(mAutoCompleteEditText, InputMethodManager.SHOW_FORCED);
+            // Same cradle action as normal home: Bookmarks. The list
+            // is just URLs the user explicitly chose to save earlier —
+            // showing it inside an incognito session doesn't leak any
+            // private-session browsing state out, and the URL bar at
+            // the top already covers the search path.
+            NavigationUtils.navigateSafe(mNavController, R.id.action_home_incognito_to_bookmarks);
         }
     }
 

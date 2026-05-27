@@ -2,12 +2,20 @@
 <!--
     Rounded-square frame behind the popup identity favicon.
     Matches the DuckDuckGo-style site-header treatment: a 40dp
-    surface-container tile padded down to a 24dp favicon, so any
+    surface-variant tile padded down to a 24dp favicon, so any
     favicon (square, transparent, monochrome) reads as a single
     coherent identity chip rather than floating on the sheet.
+
+    The sheet itself paints colorSurfaceContainerHigh
+    (dialog_rounded_top.xml), so using the same tone or even the
+    one-step-up colorSurfaceContainerHighest is too low-contrast
+    to render as a frame. colorSurfaceVariant sits in a different
+    tonal family and lands ~10 luminance units off the sheet in
+    dark mode (#292A2C vs #44474C), which is what the eye reads
+    as "tile behind icon" rather than "no border".
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="?attr/colorSurfaceContainerHigh" />
+    <solid android:color="?attr/colorSurfaceVariant" />
     <corners android:radius="10dp" />
 </shape>

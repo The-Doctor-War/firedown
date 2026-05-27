@@ -346,6 +346,7 @@
     <string name="security_stat_trackers_blocked">Trackers</string>
     <string name="security_section_protection">Protection</string>
     <string name="security_section_manage">Manage</string>
+    <string name="security_section_blocked_on_page">Blocked on this page</string>
     <string name="select_all">Select all</string>
     <string name="select_all_not">Deselect all</string>
     <string name="separator">-</string>

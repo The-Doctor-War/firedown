@@ -2,28 +2,33 @@
 <!--
     Per-site security / protection sheet.
 
-    Layout vocabulary mirrors fragment_dialog_trackers_info.xml so the
-    two sheets read as siblings on the browser surface — three equal
-    stat cards near the top, then small-caps section headers above
-    flat row lists. Earlier this sheet used a filled MaterialCard with
-    internal 1dp dividers; data-display + control hybrids read better
-    as labelled sections than as one unlabelled grouped list.
-
     Sections (top → bottom):
       1. Site identity header (favicon + host + URL) — anchors the
          sheet to a specific site.
-      2. Stats row — Ads blocked / Trackers blocked / Data saved.
-         All three are per-page numerics. Data saved is computed in
-         the fragment as (adsBlocked + trackersBlocked) × 50_000
-         bytes, matching the formula HomeFragment and the
-         TrackersInfoSheet use for the same display.
-      3. PROTECTION section — Block ads toggle, Tracking protection
-         toggle (with subtext describing the current state).
-      4. THIS PAGE section (header + row both visibility="gone" until
-         ETP is on for this site AND blocked-tracker count > 0). Row
-         drills into the per-host blocked-tracker detail sheet.
-      5. MANAGE section — Connection (drill-down to cert details),
+      2. PROTECTION section — Block ads toggle, Tracking protection
+         toggle (with subtext describing the current state). Moved to
+         the top: protection toggles are the primary reason users
+         open this sheet, and they double as the legend for the
+         "Blocked on this page" rows below.
+      3. BLOCKED ON THIS PAGE section — two list rows (Ads, Trackers)
+         showing the per-page block count as a trailing number with a
+         chevron. Tap drills into the per-mechanism detail sheet:
+           - Ads → BlockedAdsDetailDialogFragment (uBlock blocks)
+           - Trackers → BlockedTrackersDetailDialogFragment (ETP blocks)
+         Previously these were two clickable stat cards sharing a
+         style with TrackersInfoSheet's three-card stat row — same
+         visual, different interaction (TrackersInfoSheet's cards
+         are passive numbers). The list-row format makes the tap
+         affordance explicit and removes the SecuritySheet ↔
+         TrackersInfoSheet visual collision.
+      4. MANAGE section — Connection (drill-down to cert details),
          Clear browsing data (drill-down).
+
+    All row IDs (ads_stat_card, trackers_stat_card, ads_counter,
+    trackers_counter, ads_toogle, tracking_toogle, tracking_subtext,
+    tracking_icon, host_secure, host_secure_text, host_clear) are
+    preserved from the previous layout so the fragment's findViewById
+    + click-handler wiring stays untouched.
 
     Outer LinearLayout is left unpadded because
     BaseBottomSheetDialogFragment's window-insets listener applies
@@ -94,13 +99,10 @@
 
     <!--
         Body container — wrapped in a NestedScrollView so the sheet's
-        full content (stats + PROTECTION toggles + MANAGE drill-downs)
-        stays reachable in landscape and on short screens, where the
-        bottom-sheet height would otherwise clip the MANAGE section
-        off the bottom. The drag-handle + site-identity rows above
-        stay outside the scroller — that's the bottom-sheet drag
-        zone, scroll happens in here. paddingHorizontal mirrors
-        TrackersInfoSheet (24dp) so the two sheets line up.
+        full content stays reachable in landscape and on short screens.
+        The drag-handle + site-identity rows above stay outside the
+        scroller (they're the bottom-sheet drag zone). paddingHorizontal
+        mirrors TrackersInfoSheet (24dp).
     -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -115,93 +117,11 @@
         android:paddingBottom="8dp">
 
 
-        <!--
-            Stats row. Two equal cards using weight=1 with an 8dp Space
-            between. Same Widget.Material3.CardView.Filled tonal style
-            the TrackersInfoSheet uses for its three-card row, but
-            scoped to the per-page actionable counters only — Ads and
-            Trackers each carry a tappable list drill-down beneath
-            them. A previous iteration had a third "Data saved" card
-            here, but it was a derived stat (count × ~50KB) with no
-            list to drill into, so it sat alongside two tappable peers
-            as a non-tappable look-alike — the worst of both worlds.
-        -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="horizontal">
-
-            <!--
-                Ads card. Tap drills into BlockedAdsDetailDialogFragment
-                which lists every uBlock-blocked host on the current
-                page. selectableItemBackground gives ripple feedback so
-                the user can tell the card is interactive even though
-                it carries no chevron.
-            -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/ads_stat_card"
-                style="@style/TrackersInfoStatCard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout style="@style/TrackersInfoStatBody">
-
-                    <TextView
-                        android:id="@+id/ads_counter"
-                        style="@style/TrackersInfoStatValue"
-                        tools:text="24" />
-
-                    <TextView
-                        style="@style/TrackersInfoStatLabel"
-                        android:text="@string/security_stat_ads_blocked" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <Space
-                android:layout_width="8dp"
-                android:layout_height="match_parent" />
-
-            <!--
-                Trackers card. Tap drills into
-                BlockedTrackersDetailDialogFragment (the existing per-
-                category sheet). Same ripple foreground as the Ads card.
-            -->
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/trackers_stat_card"
-                style="@style/TrackersInfoStatCard"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:foreground="?attr/selectableItemBackground">
-
-                <LinearLayout style="@style/TrackersInfoStatBody">
-
-                    <TextView
-                        android:id="@+id/trackers_counter"
-                        style="@style/TrackersInfoStatValue"
-                        tools:text="14" />
-
-                    <TextView
-                        style="@style/TrackersInfoStatLabel"
-                        android:text="@string/security_stat_trackers_blocked" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-        </LinearLayout>
-
-
         <!-- ── PROTECTION ─────────────────────────────────────────── -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="4dp"
             android:letterSpacing="0.08"
             android:text="@string/security_section_protection"
@@ -304,6 +224,136 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp" />
+
+        </LinearLayout>
+
+
+        <!-- ── BLOCKED ON THIS PAGE ───────────────────────────────── -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="4dp"
+            android:letterSpacing="0.08"
+            android:text="@string/security_section_blocked_on_page"
+            android:textAllCaps="true"
+            android:textAppearance="?attr/textAppearanceTitleSmallEmphasized"
+            android:textColor="?attr/colorOnSurfaceVariant" />
+
+
+        <!--
+            Ads row. Tap drills into BlockedAdsDetailDialogFragment.
+            ID preserved as ads_stat_card so the fragment's existing
+            findViewById + setOnClickListener wiring doesn't move.
+            Counter id preserved as ads_counter for the same reason.
+        -->
+        <LinearLayout
+            android:id="@+id/ads_stat_card"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ads_click_24"
+                app:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/security_stat_ads_blocked"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="15sp" />
+
+            <!-- Tabular-numeric so the count column lines up between
+                 the Ads and Trackers rows even as values shift. -->
+            <TextView
+                android:id="@+id/ads_counter"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFeatureSettings="tnum"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="15sp"
+                tools:text="24" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ic_chevron_right_24"
+                app:tint="?attr/colorOnSurfaceVariant" />
+
+        </LinearLayout>
+
+
+        <!--
+            Trackers row. Tap drills into
+            BlockedTrackersDetailDialogFragment, gated in the fragment
+            on (mTrackingEnabledForSite && mTrackersBlockedTotal > 0).
+            ID preserved as trackers_stat_card. Counter preserved as
+            trackers_counter.
+        -->
+        <LinearLayout
+            android:id="@+id/trackers_stat_card"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ic_shield_24"
+                app:tint="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/security_stat_trackers_blocked"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/trackers_counter"
+                style="@style/TextAppearance.Material3.TitleMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:fontFeatureSettings="tnum"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="15sp"
+                tools:text="14" />
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ic_chevron_right_24"
+                app:tint="?attr/colorOnSurfaceVariant" />
 
         </LinearLayout>
 

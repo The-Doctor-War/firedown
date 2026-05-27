@@ -406,6 +406,18 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             mBottomProgressView.setTitle(R.string.task_gif_failed);
             mBottomProgressView.setActionButtonVisibility(View.GONE);
             showErrorSnackbar(R.string.task_gif_failed);
+        } else if (action == ServiceActions.CANCEL_AUDIO_ENCODE) {
+            /* User-initiated cancel — brief acknowledgment in the bar
+             * itself before the existing slide-down hides it. No
+             * snackbar: the user just tapped Cancel, they know what
+             * they did; the title flip is enough to confirm the task
+             * actually stopped (vs. e.g. failing silently). Cancel
+             * button hidden because there's nothing left to cancel. */
+            mBottomProgressView.setTitle(R.string.task_audio_cancelled);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.CANCEL_MAKE_GIF) {
+            mBottomProgressView.setTitle(R.string.task_gif_cancelled);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
         } else if (action == ServiceActions.ENCRYPTION) {
             setupEncryptionFinishUI((int) obj);
         } else if(action == ServiceActions.DECRYPTION) {

@@ -77,12 +77,20 @@
         android:paddingHorizontal="20dp"
         android:paddingVertical="12dp">
 
+        <!-- 40dp tinted surface tile with the 24dp favicon centred
+             inside (8dp padding → 24dp content). DuckDuckGo-style
+             frame so transparent / monochrome / oddly-cropped
+             favicons still read as a single identity chip rather
+             than floating on the sheet. -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/popup_identity_favicon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_popup_favicon"
             android:contentDescription="@null"
+            android:padding="8dp"
+            android:scaleType="centerInside"
             tools:src="@drawable/ic_firedown" />
 
         <LinearLayout

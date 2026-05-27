@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Rounded-square frame behind the popup identity favicon.
+    Matches the DuckDuckGo-style site-header treatment: a 40dp
+    surface-container tile padded down to a 24dp favicon, so any
+    favicon (square, transparent, monochrome) reads as a single
+    coherent identity chip rather than floating on the sheet.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="?attr/colorSurfaceContainerHigh" />
+    <corners android:radius="10dp" />
+</shape>

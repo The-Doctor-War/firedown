@@ -409,6 +409,33 @@
     </style>
 
 
+    <!-- Browser popup quick-row chip — icon stacked over a label at
+         5-up. Default Widget.Material3.Button.IconButton ships ~16dp
+         of internal horizontal padding and 14sp text, which truncates
+         even short labels like "Forward" at 5-up on a 360dp screen.
+         Zero out the insets + inner horizontal padding, reduce the
+         text to 11sp, and tighten iconPadding to 4dp so the visible
+         label width is ~95% of the chip's weight column. Same recipe
+         the DuckDuckGo browser menu uses for the same row shape. -->
+    <style name="Firedown.Widget.PopupQuickRowButton" parent="Widget.Material3.Button.IconButton">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textColor">@color/popup_header_selector</item>
+        <item name="android:textSize">11sp</item>
+        <item name="android:textAlignment">center</item>
+        <item name="android:lines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:insetLeft">0dp</item>
+        <item name="android:insetRight">0dp</item>
+        <item name="android:paddingHorizontal">0dp</item>
+        <item name="cornerRadius">16dp</item>
+        <item name="iconPadding">4dp</item>
+        <item name="iconGravity">textTop</item>
+        <item name="iconTint">@color/popup_header_selector</item>
+    </style>
+
+
     <style name="Theme.FireDown.Play.Toolbar" parent="ThemeOverlay.AppCompat.ActionBar">
         <!-- Customize color of navigation drawer icon and back arrow -->
         <item name="colorOnPrimary">@color/white</item>

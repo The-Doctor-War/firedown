@@ -5,16 +5,16 @@
     page-state toggle and lives as the first row of the page-state
     card below, not here.
 
-    Five equal columns. New tab is widely high-frequency enough to
-    earn a quick-row slot rather than burying it in the body; it
-    sits next to Forward so the navigation triplet (Back · Forward ·
-    New tab) reads as a unit before the page-state pair (Share ·
-    Refresh).
+    Five equal columns. New tab is high-frequency enough to earn a
+    quick-row slot rather than burying it in the body; it sits next
+    to Forward so the navigation triplet (Back · Forward · New tab)
+    reads as a unit before the page-state pair (Share · Refresh).
 
-    Labels are ellipsize="end" + lines="1": at five-up each chip is
-    narrow enough that long translations (e.g. de "Aktualisieren",
-    "Neuer Tab") truncate rather than wrap or push the icon stack
-    off-centre.
+    All five buttons share Firedown.Widget.PopupQuickRowButton —
+    zero inset + 0dp inner horizontal padding + 11sp text — so at
+    5-up the labels fit on a 360dp screen and long localised labels
+    (e.g. de "Aktualisieren") still render in one ellipsised line
+    rather than wrapping or pushing the icon stack off-centre.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -28,38 +28,16 @@
 
     <com.solarized.firedown.ui.browser.BackwardBrowserButton
         android:id="@+id/popup_go_backward"
-        style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:textColor="@color/popup_header_selector"
-        android:lines="1"
-        android:ellipsize="end"
+        style="@style/Firedown.Widget.PopupQuickRowButton"
         app:icon="@drawable/ic_arrow_back_24"
-        app:cornerRadius="16dp"
-        app:iconPadding="8dp"
-        android:text="@string/browser_menu_back"
-        app:iconGravity="textTop"
-        app:iconTint="@color/popup_header_selector" />
-
+        android:text="@string/browser_menu_back" />
 
 
     <com.solarized.firedown.ui.browser.ForwardBrowserButton
         android:id="@+id/popup_go_forward"
-        style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:textColor="@color/popup_header_selector"
+        style="@style/Firedown.Widget.PopupQuickRowButton"
         app:icon="@drawable/ic_arrow_forward_24"
-        app:cornerRadius="16dp"
-        app:iconPadding="8dp"
-        android:lines="1"
-        android:ellipsize="end"
-        android:text="@string/browser_menu_forward"
-        app:iconGravity="textTop"
-        app:iconTint="@color/popup_header_selector" />
-
+        android:text="@string/browser_menu_forward" />
 
 
     <!-- New tab: reuses @id/new_tab so the popup's view-id-as-
@@ -68,58 +46,23 @@
          no fragment changes needed. -->
     <com.solarized.firedown.ui.browser.BasicBrowserButton
         android:id="@id/new_tab"
-        style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:textColor="@color/popup_header_selector"
-        android:lines="1"
-        android:ellipsize="end"
+        style="@style/Firedown.Widget.PopupQuickRowButton"
         app:icon="@drawable/add_24"
-        app:cornerRadius="16dp"
-        app:iconPadding="8dp"
-        android:text="@string/popup_tabs_new"
-        android:textAlignment="center"
-        app:iconGravity="textTop"
-        app:iconTint="@color/popup_header_selector" />
-
+        android:text="@string/popup_tabs_new" />
 
 
     <com.solarized.firedown.ui.browser.ShareBrowserButton
         android:id="@+id/popup_share"
-        style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:lines="1"
-        android:ellipsize="end"
-        android:textColor="@color/popup_header_selector"
+        style="@style/Firedown.Widget.PopupQuickRowButton"
         app:icon="@drawable/ic_share_24"
-        app:cornerRadius="16dp"
-        android:textAlignment="center"
-        app:iconPadding="8dp"
-        android:text="@string/browser_menu_share"
-        app:iconGravity="textTop"
-        app:iconTint="@color/popup_header_selector" />
-
+        android:text="@string/browser_menu_share" />
 
 
     <com.solarized.firedown.ui.browser.ReloadBrowserButton
         android:id="@+id/popup_reload"
-        style="@style/Widget.Material3.Button.IconButton"
-        android:layout_width="0dp"
-        android:layout_weight="1"
-        android:layout_height="wrap_content"
-        android:textColor="@color/popup_header_selector"
-        android:lines="1"
-        android:ellipsize="end"
-        app:cornerRadius="16dp"
-        app:iconPadding="8dp"
+        style="@style/Firedown.Widget.PopupQuickRowButton"
         app:icon="@drawable/ic_refresh_24"
-        android:text="@string/browser_menu_refresh"
-        android:textAlignment="center"
-        app:iconGravity="textTop"
-        app:iconTint="@color/popup_header_selector" />
+        android:text="@string/browser_menu_refresh" />
 
 
 </LinearLayout>

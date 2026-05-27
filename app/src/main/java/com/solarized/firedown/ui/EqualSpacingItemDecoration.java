@@ -86,14 +86,16 @@ public class EqualSpacingItemDecoration extends RecyclerView.ItemDecoration {
             outRect.bottom = spacing;
         }
 
-        // Full-span rows (headers, banners) carry their own horizontal margins
-        // in their layouts so they line up with list-mode (LinearLayoutManager,
-        // no horizontal decoration). Skip decoration gutters here to avoid
-        // doubling them up in grid mode.
-        if (itemSpanSize == spanCount) {
-            outRect.left = 0;
-            outRect.right = 0;
-        }
+        // Note: previously we zeroed out left/right when itemSpanSize ==
+        // spanCount as an exception for headers/banners that carried
+        // their own list_spacing internally so they'd line up with
+        // list-mode rows (which used CardViewListItemDecoration, no
+        // horizontal gutter). The downloads RecyclerView now uses this
+        // same decoration in list mode too — list rows are 1-span so
+        // every item would have hit that exception and lost its
+        // gutter. We rely on the header layout dropping its internal
+        // horizontal padding so the decoration is the single source of
+        // truth for horizontal spacing.
     }
 
     @SuppressWarnings("all")

@@ -409,6 +409,27 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             } else {
                 header.subtitle.setVisibility(View.GONE);
             }
+
+            // Section-header inset: align with the start of the filename
+            // text column, not with the thumbnail. Material 3 list pattern
+            // — the thumbnail reads as a leading icon column that headers
+            // visually 'skip over', and labels sit above the textual content
+            // they describe. The text column inside fragment_download_item
+            // starts at list_spacing (card margin) + list_download_image_width
+            // (thumbnail) + list_margin (text column paddingStart). In grid
+            // mode there is no icon column, so the header stays at plain
+            // list_spacing to align with the tile edge.
+            android.content.res.Resources res = header.itemView.getResources();
+            int basePad = res.getDimensionPixelSize(R.dimen.list_spacing);
+            int leadingInset = mEnableGrid
+                    ? 0
+                    : res.getDimensionPixelSize(R.dimen.list_download_image_width)
+                            + res.getDimensionPixelSize(R.dimen.list_margin);
+            header.itemView.setPaddingRelative(
+                    basePad + leadingInset,
+                    header.itemView.getPaddingTop(),
+                    basePad,
+                    header.itemView.getPaddingBottom());
             return;
         }
 

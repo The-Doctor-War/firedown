@@ -86,20 +86,22 @@
             app:layout_constraintStart_toStartOf="@id/image"
             app:layout_constraintTop_toTopOf="@id/image" />
 
-        <!-- Selection checkmark — visible only in action mode, sits
-             over the thumbnail's top-left. Used to be a sibling of
-             the card under an outer LinearLayout that pushed the
-             whole row right; making it an overlay drops the wrapper
-             ViewGroup and lets the action mode in/out animate without
-             reflowing the card. -->
+        <!-- Selection checkmark — sits in the same slot as the more
+             button on the right edge; the adapter swaps them on the
+             action-mode toggle (action button INVISIBLE, this VISIBLE).
+             That keeps the row geometry stable (no reflow when
+             entering/leaving action mode) and gives the check icon a
+             plain surface to render against instead of overlaying it
+             on arbitrary thumbnail content. -->
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_download_selected"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
             android:visibility="gone"
-            app:layout_constraintStart_toStartOf="@id/image"
-            app:layout_constraintTop_toTopOf="@id/image"
+            app:layout_constraintBottom_toBottomOf="@id/item_download_action"
+            app:layout_constraintEnd_toEndOf="@id/item_download_action"
+            app:layout_constraintStart_toStartOf="@id/item_download_action"
+            app:layout_constraintTop_toTopOf="@id/item_download_action"
             app:srcCompat="@drawable/ic_baseline_check_circle_24" />
 
         <!-- Text column: filename / meta line / status. wrap_content

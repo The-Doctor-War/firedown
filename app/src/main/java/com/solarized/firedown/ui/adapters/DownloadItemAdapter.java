@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Trace;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,6 +36,7 @@ import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.GroupAggregate;
 import com.solarized.firedown.utils.MessageHelper;
 import com.solarized.firedown.utils.SelectionStyling;
+import com.solarized.firedown.utils.Tracing;
 import com.solarized.firedown.utils.Utils;
 import com.solarized.firedown.utils.WebUtils;
 
@@ -353,23 +353,23 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         // start scroll. android.os.Trace.isEnabled is a cheap volatile
         // read when tracing isn't active, so the cost in non-trace
         // builds is negligible.
-        Trace.beginSection("DLA.onCreateViewHolder");
+        Tracing.begin("DLA.onCreateViewHolder");
         try {
             LayoutInflater inflater = LayoutInflater.from(parent.getContext());
 
             if (viewType == Download.HEADER) {
-                Trace.beginSection("inflate:header");
+                Tracing.begin("inflate:header");
                 try {
                     return new HeaderViewHolder(
                             inflater.inflate(R.layout.fragment_item_header, parent, false));
-                } finally { Trace.endSection(); }
+                } finally { Tracing.end(); }
             }
 
             if (viewType == Download.EMPTY) {
-                Trace.beginSection("inflate:empty");
+                Tracing.begin("inflate:empty");
                 try {
                     return new EmptyViewHolder(inflater.inflate(R.layout.fragment_download_empty_item, parent, false));
-                } finally { Trace.endSection(); }
+                } finally { Tracing.end(); }
             }
 
             boolean isGrid = isGridType(viewType);
@@ -377,11 +377,11 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                     ? R.layout.fragment_download_item_grid
                     : R.layout.fragment_download_item;
 
-            Trace.beginSection(isGrid ? "inflate:row(grid)" : "inflate:row(list)");
+            Tracing.begin(isGrid ? "inflate:row(grid)" : "inflate:row(list)");
             try {
                 return new DownloadViewHolder(inflater.inflate(layoutRes, parent, false), mOnItemClickListener);
-            } finally { Trace.endSection(); }
-        } finally { Trace.endSection(); }
+            } finally { Tracing.end(); }
+        } finally { Tracing.end(); }
     }
 
     // ── Bind ────────────────────────────────────────────────────────────
@@ -398,12 +398,12 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder,
                                  int position,
                                  @NonNull List<Object> payloads) {
-        Trace.beginSection("DLA.onBindVH(payload)");
+        Tracing.begin("DLA.onBindVH(payload)");
         try {
             if (!payloads.isEmpty()
                     && Collections.frequency(payloads, PAYLOAD_SELECTION) == payloads.size()
                     && viewHolder instanceof DownloadViewHolder holder) {
-                Trace.beginSection("bind:selectionOnly");
+                Tracing.begin("bind:selectionOnly");
                 try {
                     Object item = peek(position);
                     if (!(item instanceof DownloadEntity entity)) return;
@@ -426,22 +426,22 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                                     ? R.drawable.ic_clear_24
                                     : R.drawable.ic_baseline_more_vert_24);
                     return;
-                } finally { Trace.endSection(); }
+                } finally { Tracing.end(); }
             }
 
             // Aggregates-only payload: header subtitle text. Items ignore.
             if (!payloads.isEmpty()
                     && Collections.frequency(payloads, PAYLOAD_AGGREGATES) == payloads.size()) {
-                Trace.beginSection("bind:aggregatesOnly");
+                Tracing.begin("bind:aggregatesOnly");
                 try {
                     applyAggregatesPayload(viewHolder, position);
-                } finally { Trace.endSection(); }
+                } finally { Tracing.end(); }
                 return;
             }
 
             // Anything else (or no payload, or mixed payloads) → full rebind.
             super.onBindViewHolder(viewHolder, position, payloads);
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void applyAggregatesPayload(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
@@ -459,10 +459,10 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
-        Trace.beginSection("DLA.onBindVH(full)");
+        Tracing.begin("DLA.onBindVH(full)");
         try {
             bindFull(viewHolder, position);
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void bindFull(@NonNull RecyclerView.ViewHolder viewHolder, int position) {
@@ -470,7 +470,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         if (item == null) return;
 
         if (viewHolder instanceof HeaderViewHolder header && item instanceof DownloadSeparatorEntity sep) {
-            Trace.beginSection("bind:header");
+            Tracing.begin("bind:header");
             try {
                 int category = sep.getCategory();
 
@@ -488,7 +488,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                     header.subtitle.setVisibility(View.GONE);
                 }
                 return;
-            } finally { Trace.endSection(); }
+            } finally { Tracing.end(); }
         }
 
         if (!(viewHolder instanceof DownloadViewHolder holder) || !(item instanceof DownloadEntity entity))
@@ -522,10 +522,10 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             String originUrl = entity.getOriginUrl();
             String fileUrl = entity.getFileUrl();
             String urlSource = TextUtils.isEmpty(originUrl) ? fileUrl : originUrl;
-            Trace.beginSection("bind:domainParse");
+            Tracing.begin("bind:domainParse");
             try {
                 domain = WebUtils.getDomainName(urlSource);
-            } finally { Trace.endSection(); }
+            } finally { Tracing.end(); }
             holder.cachedDomainEntityId = entityId;
             holder.cachedDomain = domain;
         }
@@ -591,10 +591,10 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     }
 
     private void bindProgress(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
-        Trace.beginSection(isGrid ? "bind:progress(grid)" : "bind:progress(list)");
+        Tracing.begin(isGrid ? "bind:progress(grid)" : "bind:progress(list)");
         try {
             bindProgressInner(holder, entity, isGrid);
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void bindProgressInner(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
@@ -634,17 +634,17 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 holder.progressBar.setIndeterminate(retrieving);
                 if (!retrieving) holder.progressBar.setProgress(entity.getFileProgress());
             }
-            Trace.beginSection("Glide.loadFallback");
+            Tracing.begin("Glide.loadFallback");
             try { GlideHelper.loadFallback(entity, holder.image); }
-            finally { Trace.endSection(); }
+            finally { Tracing.end(); }
         }
     }
 
     private void bindFinished(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
-        Trace.beginSection(isGrid ? "bind:finished(grid)" : "bind:finished(list)");
+        Tracing.begin(isGrid ? "bind:finished(grid)" : "bind:finished(list)");
         try {
             bindFinishedInner(holder, entity, isGrid);
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void bindFinishedInner(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
@@ -669,9 +669,9 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             holder.statusText.setVisibility(View.VISIBLE);
         }
 
-        Trace.beginSection("Glide.load(finished)");
+        Tracing.begin("Glide.load(finished)");
         try { GlideHelper.load(entity, mRequestOptions, holder.image); }
-        finally { Trace.endSection(); }
+        finally { Tracing.end(); }
     }
 
 
@@ -692,7 +692,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 && holder.cachedFinishedKeyDate == date) {
             return holder.cachedFinishedLabel;
         }
-        Trace.beginSection("finishedLabel:miss");
+        Tracing.begin("finishedLabel:miss");
         try {
             String label = holder.itemView.getContext().getString(
                     R.string.download_finished_meta,
@@ -703,14 +703,14 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             holder.cachedFinishedKeyDate = date;
             holder.cachedFinishedLabel = label;
             return label;
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void bindError(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
-        Trace.beginSection(isGrid ? "bind:error(grid)" : "bind:error(list)");
+        Tracing.begin(isGrid ? "bind:error(grid)" : "bind:error(list)");
         try {
             bindErrorInner(holder, entity, isGrid);
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void bindErrorInner(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
@@ -733,16 +733,16 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             holder.statusText.setText(errorId);
             holder.statusText.setVisibility(View.VISIBLE);
         }
-        Trace.beginSection("Glide.loadFallback");
+        Tracing.begin("Glide.loadFallback");
         try { GlideHelper.loadFallback(entity, holder.image); }
-        finally { Trace.endSection(); }
+        finally { Tracing.end(); }
     }
 
     private void bindQueued(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
-        Trace.beginSection(isGrid ? "bind:queued(grid)" : "bind:queued(list)");
+        Tracing.begin(isGrid ? "bind:queued(grid)" : "bind:queued(list)");
         try {
             bindQueuedInner(holder, entity, isGrid);
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void bindQueuedInner(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
@@ -753,9 +753,9 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             holder.statusText.setText(R.string.download_queued);
             holder.statusText.setVisibility(View.VISIBLE);
         }
-        Trace.beginSection("Glide.loadFallback");
+        Tracing.begin("Glide.loadFallback");
         try { GlideHelper.loadFallback(entity, holder.image); }
-        finally { Trace.endSection(); }
+        finally { Tracing.end(); }
     }
 
 
@@ -776,14 +776,14 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         java.util.HashMap<String, String> cache = isGrid ? mMimeLabelCache : mMimeLabelListCache;
         String cached = cache.get(mimeType);
         if (cached != null) return cached;
-        Trace.beginSection("mimeLabel:miss");
+        Tracing.begin("mimeLabel:miss");
         try {
             String base = FileUriHelper.getLongMimeText(mContext, mimeType);
             if (base == null) return null;
             String label = isGrid ? base : base + " · ";
             cache.put(mimeType, label);
             return label;
-        } finally { Trace.endSection(); }
+        } finally { Tracing.end(); }
     }
 
     private void setActionIcon(DownloadViewHolder holder, boolean isGrid, int iconRes) {

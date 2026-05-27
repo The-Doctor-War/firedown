@@ -168,17 +168,17 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             // Clear tag too — a bind after recycle calls setTag(null) and relies on it,
             // and any future caller reading the tag should not see a stale key.
             h.image.setTag(null);
-            // Drop the FINISHED-row label cache. The id-mismatch check in
-            // getFinishedLabel would already rebuild on the next bind, but
-            // nulling here lets the String be GC'd while the holder sits
-            // in the RecycledViewPool.
-            h.cachedFinishedLabel = null;
-            // Same for the domain string — the cached parse is only
-            // valid against the holder's last bound entity, and pinning
-            // the URL reference here would keep the prior entity's URL
-            // string reachable from the pool.
-            h.cachedDomain = null;
-            h.cachedDomainUrlSource = null;
+            // Keep the cached label / domain strings on recycle. The
+            // id-keyed equality checks in getFinishedLabel and the
+            // domain-cache block already invalidate on entity change,
+            // so leaving the values pinned across the pool round-trip
+            // turns scroll-back into a cache hit when the pool hands
+            // the holder back to the same entity. Trace data with
+            // these nulled showed 100% miss rate
+            // (finishedLabel:miss == bind:finished). The pinned
+            // strings are ~20-50 bytes each; the alloc + format cost
+            // they save on every recycled-pool rebind is the bigger
+            // number on cold-start scroll.
         }
     }
 
@@ -507,21 +507,26 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         // (originUrl|fileUrl) string identity, which is stable for any
         // row that hasn't actually changed source.
         long entityId = entity.getId();
-        String originUrl = entity.getOriginUrl();
-        String fileUrl = entity.getFileUrl();
-        String urlSource = TextUtils.isEmpty(originUrl) ? fileUrl : originUrl;
         String domain;
         if (holder.cachedDomain != null
-                && holder.cachedDomainEntityId == entityId
-                && holder.cachedDomainUrlSource == urlSource) {
+                && holder.cachedDomainEntityId == entityId) {
+            // Same entity id → URL is stable (URL changes go through
+            // delete+reinsert, so the id changes too). Skip the parse.
+            // Was previously also gated on a string-identity check of
+            // the URL ref, which broke on Room re-hydration: aggregate
+            // / paging refresh rebuilds the DownloadEntity with a new
+            // String for the same logical URL, missing the identity
+            // check and dropping the cache. Trace showed 100% miss rate.
             domain = holder.cachedDomain;
         } else {
+            String originUrl = entity.getOriginUrl();
+            String fileUrl = entity.getFileUrl();
+            String urlSource = TextUtils.isEmpty(originUrl) ? fileUrl : originUrl;
             Trace.beginSection("bind:domainParse");
             try {
                 domain = WebUtils.getDomainName(urlSource);
             } finally { Trace.endSection(); }
             holder.cachedDomainEntityId = entityId;
-            holder.cachedDomainUrlSource = urlSource;
             holder.cachedDomain = domain;
         }
 
@@ -836,14 +841,14 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         @Nullable String cachedFinishedLabel;
 
         // Cache for the parsed domain string. WebUtils.getDomainName
-        // does URI construction + getHost + regex strip per call; the
-        // input URL doesn't change unless the holder rebinds to a
-        // different entity (or the entity's origin/file URL itself
-        // changes, which only happens on edit). Keyed by id + the
-        // exact URL string reference we ran the parse on, so a string-
-        // identity mismatch on rebind invalidates without an equals().
+        // does URI construction + getHost + regex strip per call;
+        // keyed by entity id only — URL field changes go through a
+        // delete+reinsert (different id), so a matching id implies
+        // the same logical URL. Earlier version also checked
+        // string-identity of the URL reference and broke when Room
+        // re-hydrated the entity (new String for same logical URL,
+        // identity mismatch, cache always missed).
         long cachedDomainEntityId = Long.MIN_VALUE;
-        @Nullable String cachedDomainUrlSource;
         @Nullable String cachedDomain;
 
         DownloadViewHolder(View view, OnItemClickListener onItemClickListener) {

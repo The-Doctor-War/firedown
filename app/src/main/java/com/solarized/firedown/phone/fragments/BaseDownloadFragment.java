@@ -568,16 +568,16 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
                 new FixedPreloadSizeProvider<>(
                         GlideHelper.downloadThumbWidth(),
                         GlideHelper.downloadThumbHeight()),
-                // Match a viewport's worth of upcoming rows so the
-                // preloader warms Glide's memory cache for the rows
-                // that bind next. The old 8 was a leftover from the
-                // pre-paging adapter; with a 25-row paging page size
-                // the previous window kept stalling because paging
-                // fired requests for rows the preloader hadn't reached
-                // yet. 16 covers a full list viewport plus a row of
-                // headroom on dense layouts without paying for
-                // wasteful pre-decodes that the user never scrolls to.
-                16);
+                // 8 ahead — kept conservative on purpose. Bumping this
+                // floods Glide with concurrent FFmpeg decodes during
+                // fast cold-start scroll (every preload kicks a fresh
+                // MediaMetadataRetriever / FFmpegThumbnailer chain),
+                // and the decode contention hurts the visible bind more
+                // than the prefetch helps the next viewport. A larger
+                // window only pays off if Glide's decoders can finish
+                // ahead of the scroll, which isn't true with FFmpeg in
+                // the chain.
+                8);
         mRecyclerView.addOnScrollListener(preloader);
         mPreloaderInstalledOn = mRecyclerView;
     }

@@ -605,12 +605,17 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             // Grid scrim is darker so the error reads better on
             // colorPrimaryContainer; the list row is on plain surface
             // and uses colorPrimary for the same legibility against a
-            // lighter ground. Mirrors the textColor split the two
-            // separate XML TextViews previously had.
-            holder.statusText.setTextColor(MaterialColors.getColor(
-                    holder.statusText,
-                    isGrid ? com.google.android.material.R.attr.colorPrimaryContainer
-                            : com.google.android.material.R.attr.colorPrimary));
+            // lighter ground. mDefaultPrimary is the same
+            // android.R.attr.colorPrimary already cached in the
+            // constructor — reuse it instead of running a MaterialColors
+            // lookup every bind. (com.google.android.material.R.attr
+            // does not export colorPrimary; it lives in the platform /
+            // appcompat namespace.)
+            int color = isGrid
+                    ? MaterialColors.getColor(holder.statusText,
+                            com.google.android.material.R.attr.colorPrimaryContainer)
+                    : mDefaultPrimary;
+            holder.statusText.setTextColor(color);
             int errorId = MessageHelper.getResourceIdFromCode(entity.getFileErrorType());
             holder.statusText.setText(errorId);
             holder.statusText.setVisibility(View.VISIBLE);

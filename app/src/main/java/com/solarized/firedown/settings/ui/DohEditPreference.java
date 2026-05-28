@@ -41,8 +41,13 @@ public class DohEditPreference extends Preference {
         mCurrentUrl = charSequence;
         if(textInputEditText != null){
             textInputEditText.setText(charSequence);
-            persistString(charSequence.toString());
         }
+        // Deliberately does NOT persist: this is a display-only setter
+        // (refreshUiState shows the selected provider's URL in the field).
+        // SETTINGS_DOH_CUSTOM is only written by showSuccess() after the
+        // user enters and validates a custom URL. Persisting here wiped a
+        // saved custom URL whenever the custom slot was (re)selected, since
+        // refreshUiState fed it the empty settings_doh_servers placeholder.
     }
 
 

@@ -92,9 +92,17 @@ public class DohFragment extends BasePreferenceFragment implements SharedPrefere
             boolean isCustom = (dohIndex == Preferences.SETTINGS_DOH_CUSOTM_INT);
             dohEditPreference.setEnabled(isDohEnabled && isCustom);
 
-            String[] servers = getResources().getStringArray(R.array.settings_doh_servers);
-            if (dohIndex < servers.length) {
-                dohEditPreference.setTextInputText(servers[dohIndex]);
+            if (isCustom) {
+                // Show the user's saved custom URL — the custom slot in
+                // settings_doh_servers is an empty placeholder, so feeding
+                // that to the field would blank the input.
+                dohEditPreference.setTextInputText(
+                        mSharedPreferences.getString(Preferences.SETTINGS_DOH_CUSTOM, ""));
+            } else {
+                String[] servers = getResources().getStringArray(R.array.settings_doh_servers);
+                if (dohIndex < servers.length) {
+                    dohEditPreference.setTextInputText(servers[dohIndex]);
+                }
             }
         }
     }

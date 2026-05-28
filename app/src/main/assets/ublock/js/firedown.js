@@ -501,10 +501,11 @@ import { PageStore } from './pagestore.js';
      * Lifecycle:
      *   - Counters accumulate at journalProcess time alongside the
      *     category + tracker counters above.
-     *   - Cleared per-tab on navigation away (tabs.onUpdated with
-     *     {status:"loading", url:...}) so the list always reflects
-     *     the page the user is currently looking at, not the previous
-     *     one in the same tab.
+     *   - Cleared per-tab when a new top-level document commits
+     *     (webNavigation.onCommitted, frameId 0) so the list always
+     *     reflects the page the user is currently looking at, not the
+     *     previous one — and resets on reload — without being wiped by
+     *     SPA pushState updates.
      *   - Cleared per-tab on close (tabs.onRemoved).
      *   - Never persisted. Never crosses the native port except when
      *     Java explicitly requests the active tab's tally.
@@ -584,33 +585,32 @@ import { PageStore } from './pagestore.js';
         } catch (_) { /* port not ready */ }
     }
 
-    // Wipe the per-tab list when the user navigates away (loading a
-    // new URL in the same tab) — the next page starts with a clean
-    // counter. Also wipe on tab close so the Map doesn't leak entries
-    // for tabs that no longer exist.
+    // Wipe the per-tab list when a new top-level document commits — the
+    // next page starts with a clean counter. Also wipe on tab close so
+    // the Map doesn't leak entries for tabs that no longer exist.
     //
-    // tabs.onUpdated fires with `changeInfo.url` set every time the page
-    // signals a location update — including SPA pushState/replaceState
-    // calls that keep the same URL, and the post-load notification that
-    // arrives after blocks for the page have already been recorded. We
-    // only treat a *different* URL as a real navigation pivot; same-URL
-    // updates would otherwise wipe blocks that were just journalled for
-    // the current page (visible as an empty Ads-blocked drill-down even
-    // though the badge shows a non-zero count).
-    const pageBlocksLastUrl = new Map();
-    if (browser.tabs && browser.tabs.onUpdated) {
-        browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
-            if (!changeInfo || typeof changeInfo.url !== 'string') { return; }
-            const previousUrl = pageBlocksLastUrl.get(tabId);
-            if (previousUrl === changeInfo.url) { return; }
-            pageBlocksLastUrl.set(tabId, changeInfo.url);
-            pageBlocks.delete(tabId);
+    // webNavigation.onCommitted (frameId 0) is the right reset signal:
+    // it fires once per real top-level load *and* on reloads, but NOT on
+    // SPA pushState/replaceState (those go through onHistoryStateUpdated,
+    // which we deliberately ignore). Commit happens before the page's
+    // subresource requests are filtered, so the wipe lands ahead of the
+    // new page's blocks rather than racing them.
+    //
+    // An earlier version reset on tabs.onUpdated, which fired on every
+    // location signal — including same-URL SPA updates that wiped blocks
+    // just journalled for the current page (empty Ads-blocked drill-down
+    // despite a non-zero badge). Gating that on a URL change fixed the
+    // SPA case but left reloads (same URL) accumulating counts across
+    // loads. onCommitted avoids both failure modes.
+    if (browser.webNavigation && browser.webNavigation.onCommitted) {
+        browser.webNavigation.onCommitted.addListener(details => {
+            if (details.frameId !== 0) { return; }
+            pageBlocks.delete(details.tabId);
         });
     }
     if (browser.tabs && browser.tabs.onRemoved) {
         browser.tabs.onRemoved.addListener(tabId => {
             pageBlocks.delete(tabId);
-            pageBlocksLastUrl.delete(tabId);
         });
     }
 

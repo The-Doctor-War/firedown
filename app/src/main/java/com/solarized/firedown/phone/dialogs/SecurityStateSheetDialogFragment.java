@@ -59,8 +59,6 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     private AppCompatImageView mHostImage;
     private String mDomain;
     private String mLastIconUrl;
-    private boolean mTrackingEnabledForSite;
-    private int mTrackersBlockedTotal;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -252,7 +250,6 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
                 if (v != null) total += v;
             }
         }
-        mTrackersBlockedTotal = total;
         if (mTrackersCounterTextView != null) {
             mTrackersCounterTextView.setText(String.valueOf(total));
         }
@@ -324,7 +321,6 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     }
 
     private void updateTrackingUI(boolean isEnabled) {
-        mTrackingEnabledForSite = isEnabled;
         mTrackingSwitch.setChecked(isEnabled);
         mTrackingIcon.setImageResource(isEnabled ? R.drawable.ic_shield_24 : R.drawable.ic_shield_privacy_tip_24);
         mTrackingSubtext.setText(isEnabled ?

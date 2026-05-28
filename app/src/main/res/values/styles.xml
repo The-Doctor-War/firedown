@@ -47,7 +47,14 @@
         <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer</item>
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
-        <item name="popupFaviconBackgroundColor">@color/md_theme_surfaceVariant</item>
+        <!-- surfaceBright (light #FBF9FB / dark #39393B) sits ~16–18
+             luminance units brighter than the sheet's container_high
+             bg in both modes, so the tile reads as a raised chip. The
+             obvious sibling, colorSurfaceVariant, works in dark mode
+             but in light mode (#E1E2E9 vs sheet #E9E7EA, ~5 units
+             apart) the frame disappears into the sheet — that was the
+             "no frame on regular tabs in light theme" regression. -->
+        <item name="popupFaviconBackgroundColor">@color/md_theme_surfaceBright</item>
         <item name="enableEdgeToEdge">true</item>
         <item name="android:navigationBarColor">@color/md_theme_surfaceContainerHigh</item>
         <item name="bottomSheetStyle">@style/Theme.FireDown.BottomSheetDialogStyle</item>

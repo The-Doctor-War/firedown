@@ -358,4 +358,15 @@
 
 
 
+    <string name="security_stat_ads_blocked">Reklamy zablokovány</string>
+    <string name="security_stat_trackers_blocked">Sledovače zablokovány</string>
+    <string name="security_stat_scope_on_this_page">na této stránce</string>
+    <plurals name="blocked_ads_summary">
+        <item quantity="one">%d požadavek blokován na této stránce</item>
+        <item quantity="few">%d požadavky blokovány na této stránce</item>
+        <item quantity="other">%d požadavků blokováno na této stránce</item>
+    </plurals>
+    <string name="blocked_ads_detail_title">Zablokované reklamy</string>
+    <string name="security_block_ads">Blokovat reklamy</string>
+    <string name="security_tracking_protection">Ochrana před sledováním</string>
 </resources>

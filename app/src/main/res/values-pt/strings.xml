@@ -324,4 +324,14 @@
 
 
 
+    <string name="security_stat_ads_blocked">Anúncios bloqueados</string>
+    <string name="security_stat_trackers_blocked">Rastreadores bloqueados</string>
+    <string name="security_stat_scope_on_this_page">nesta página</string>
+    <plurals name="blocked_ads_summary">
+        <item quantity="one">%d solicitação bloqueada nesta página</item>
+        <item quantity="other">%d solicitações bloqueadas nesta página</item>
+    </plurals>
+    <string name="blocked_ads_detail_title">Anúncios bloqueados</string>
+    <string name="security_block_ads">Bloquear anúncios</string>
+    <string name="security_tracking_protection">Proteção contra rastreamento</string>
 </resources>

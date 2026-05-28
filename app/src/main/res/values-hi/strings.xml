@@ -273,4 +273,14 @@
 
 
 
+    <string name="security_stat_ads_blocked">विज्ञापन अवरुद्ध</string>
+    <string name="security_stat_trackers_blocked">ट्रैकर अवरुद्ध</string>
+    <string name="security_stat_scope_on_this_page">इस पेज पर</string>
+    <plurals name="blocked_ads_summary">
+        <item quantity="one">इस पृष्ठ पर %d अनुरोध अवरुद्ध</item>
+        <item quantity="other">इस पृष्ठ पर %d अनुरोध अवरुद्ध</item>
+    </plurals>
+    <string name="blocked_ads_detail_title">अवरुद्ध विज्ञापन</string>
+    <string name="security_block_ads">विज्ञापन अवरुद्ध करें</string>
+    <string name="security_tracking_protection">ट्रैकिंग सुरक्षा</string>
 </resources>

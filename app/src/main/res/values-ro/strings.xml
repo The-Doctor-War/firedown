@@ -202,14 +202,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Vei fi deconectat(ă) de pe majoritatea site-urilor</string>
     <string name="settings_delete_browsing_data_tabs_title_2">File deschise</string>
     <string name="settings_doh_server">Server DNS</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Verificați dacă este un furnizor valid sau încercați din nou mai târziu</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Utilizați soluția DNS de sistem</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Utilizați furnizorul</string>
     <string name="settings_doh_summary">Creșteți confidențialitatea prin prevenirea interceptării și manipulării datelor DNS.</string>
     <string name="settings_doh_title">DNS prin HTTPS</string>

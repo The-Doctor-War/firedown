@@ -162,14 +162,8 @@
     <string name="settings_cookies_accept_visited">Jā</string>
     <string name="settings_cookies_isolate">Bloķēt starpvietņu sīkfailus</string>
     <string name="settings_doh_server">DNS serveris</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Pārbaudiet, vai pakalpojumu sniedzējs ir derīgs, vai vēlāk mēģiniet vēlreiz</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Izmantojiet sistēmas DNS risinātāju</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Izmantojiet pakalpojumu sniedzēju</string>
     <string name="settings_doh_summary">Palieliniet konfidencialitāti, novēršot noklausīšanos un manipulācijas ar DNS datiem.</string>
     <string name="settings_doh_title">DNS, izmantojot HTTPS</string>

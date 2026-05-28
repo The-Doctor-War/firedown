@@ -160,14 +160,8 @@
   <string name="settings_cookies_accept_visited">Sí, por favor</string>
   <string name="settings_cookies_isolate">Bloquear cookies entre sitios</string>
   <string name="settings_doh_server">Servidor DNS</string>
-  <string name="settings_doh_server_adguard" translatable="false">Adguard</string>
-  <string name="settings_doh_server_cloudflare" translatable="false">Cloudflare</string>
-  <string name="settings_doh_server_custom" translatable="false">Custom</string>
   <string name="settings_doh_server_error_provider">Por favor, verifica que sea un proveedor válido o inténtalo nuevamente más tarde</string>
-  <string name="settings_doh_server_google" translatable="false">Google</string>
-  <string name="settings_doh_server_mozilla" translatable="false">Mozilla</string>
   <string name="settings_doh_server_off">Utiliza el solucionador DNS del sistema</string>
-  <string name="settings_doh_server_quad9" translatable="false">Quad9</string>
   <string name="settings_doh_server_title">Utilizar el proveedor</string>
   <string name="settings_doh_summary">Aumenta la privacidad evitando escuchas clandestinas y manipulaciones de datos DNS.</string>
     <string name="settings_doh_title">DNS sobre HTTPS</string>

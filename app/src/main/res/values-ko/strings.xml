@@ -234,14 +234,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">대부분 웹 사이트 자동 로그아웃</string>
     <string name="settings_delete_browsing_data_tabs_title_2">열린 탭</string>
     <string name="settings_doh_server">DNS 서버</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">유효한 공급자인지 확인하거나 나중에 다시 시도하세요.</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">시스템 DNS 확인자 사용</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">공급자 사용</string>
     <string name="settings_doh_summary">DNS 데이터의 도청 및 조작을 방지하여 개인 정보 보호를 강화합니다.</string>
     <string name="settings_doh_title">HTTPS를 통한 DNS</string>

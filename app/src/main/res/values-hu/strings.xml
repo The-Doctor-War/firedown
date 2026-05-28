@@ -210,14 +210,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">A legtöbb webhelyről ki lesz jelentkeztetve</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Nyitott lapok</string>
     <string name="settings_doh_server">DNS szerver</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Kérjük, ellenőrizze, hogy érvényes szolgáltató-e, vagy próbálja újra később</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Használja a rendszer DNS-feloldóját</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Használja a Szolgáltatót</string>
     <string name="settings_doh_summary">Növelje az adatvédelmet azáltal, hogy megakadályozza a DNS-adatok lehallgatását és manipulálását.</string>
     <string name="settings_doh_title">DNS HTTPS-en keresztül</string>

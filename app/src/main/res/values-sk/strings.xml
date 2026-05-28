@@ -210,14 +210,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Príde k vášmu odhláseniu z väčšiny webových stránok</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Otvorené karty</string>
     <string name="settings_doh_server">DNS server</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Overte, že ide o platného poskytovateľa, alebo to skúste znova neskôr</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Použite systémový DNS resolver</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Použiť poskytovateľa</string>
     <string name="settings_doh_summary">Zvýšte súkromie tým, že zabránite odpočúvaniu a manipulácii s údajmi DNS.</string>
     <string name="settings_doh_title">DNS cez HTTPS</string>

@@ -409,14 +409,14 @@
     <string name="settings_doh_provider_custom_dialog_error_https">URL must start with “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Invalid URL</string>
     <string name="settings_doh_server">DNS Server</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
+    <string name="settings_doh_server_adguard" translatable="false">Adguard</string>
+    <string name="settings_doh_server_cloudflare" translatable="false">Cloudflare</string>
+    <string name="settings_doh_server_custom" translatable="false">Custom</string>
     <string name="settings_doh_server_error_provider">Please verify that is a valid provider or try again later</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
+    <string name="settings_doh_server_google" translatable="false">Google</string>
+    <string name="settings_doh_server_mozilla" translatable="false">Mozilla</string>
     <string name="settings_doh_server_off">Use system DNS resolver</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
+    <string name="settings_doh_server_quad9" translatable="false">Quad9</string>
     <string name="settings_doh_server_title">Use Provider</string>
     <string name="settings_doh_server_working">It\'s working!</string>
     <string name="settings_doh_summary">Increase privacy by preventing eavesdropping and manipulation of DNS data.</string>

@@ -178,14 +178,8 @@
     <string name="settings_cookies_accept_visited">जी कहिए</string>
     <string name="settings_cookies_isolate">क्रॉस-साइट कुकीज़ को ब्लॉक करें</string>
     <string name="settings_doh_server">DNS सर्वर</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">कृपया सत्यापित करें कि यह वैध प्रदाता है या बाद में पुनः प्रयास करें</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">सिस्टम DNS रिज़ॉल्वर का उपयोग करें</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">प्रदाता का उपयोग करें</string>
     <string name="settings_doh_summary">DNS डेटा की चोरी और हेरफेर को रोककर गोपनीयता बढ़ाएं.</string>
     <string name="settings_doh_title">DNS ओवर HTTPS</string>

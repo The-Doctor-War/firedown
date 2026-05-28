@@ -249,14 +249,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Вы выйдете с большинства сайтов</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Открытые вкладки</string>
     <string name="settings_doh_server">DNS-сервер</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Пожалуйста, проверьте, является ли поставщик действительным, или повторите попытку позже.</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Использовать системный DNS-резолвер</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Использовать провайдера</string>
     <string name="settings_doh_summary">Повысьте конфиденциальность, предотвратив перехват и манипулирование данными DNS.</string>
     <string name="settings_doh_title">DNS через HTTPS</string>

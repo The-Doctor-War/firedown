@@ -247,14 +247,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">U wordt bij de meeste websites afgemeld</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Open tabbladen</string>
     <string name="settings_doh_server">DNS server</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Controleer of het een geldige provider is of probeer het later opnieuw</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Gebruik de DNS-resolver van het systeem</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Gebruik provider</string>
     <string name="settings_doh_summary">Verhoog uw privacy door afluisteren en manipulatie van DNS-gegevens te voorkomen.</string>
     <string name="settings_doh_title">DNS via HTTPS</string>

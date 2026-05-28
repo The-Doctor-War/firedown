@@ -350,14 +350,8 @@
     <string name="settings_doh_provider_custom_dialog_error_https">L’URL doit commencer par « https:// »</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">URL invalide</string>
     <string name="settings_doh_server">Serveur dns</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Veuillez vérifier qu\'il s\'agit d\'un fournisseur valide ou réessayer plus tard</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Utiliser le résolveur DNS du système</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Utiliser le fournisseur</string>
     <string name="settings_doh_server_working">Ça fonctionne !</string>
     <string name="settings_doh_summary">Améliorez la confidentialité en empêchant l’écoute clandestine et la manipulation des données DNS.</string>

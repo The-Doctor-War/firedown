@@ -162,14 +162,8 @@
     <string name="settings_cookies_accept_visited">Ya silakan</string>
     <string name="settings_cookies_isolate">Sekat kuki merentas tapak</string>
     <string name="settings_doh_server">Pelayan DNS</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Sila sahkan bahawa pembekal yang sah atau cuba lagi kemudian</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Gunakan penyelesai DNS sistem</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Gunakan Pembekal</string>
     <string name="settings_doh_summary">Tingkatkan privasi dengan menghalang penyadapan dan manipulasi data DNS.</string>
     <string name="settings_doh_title">DNS melalui HTTPS</string>

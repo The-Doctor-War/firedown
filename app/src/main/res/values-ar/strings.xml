@@ -220,14 +220,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">ستخرج من معظم المواقع</string>
     <string name="settings_delete_browsing_data_tabs_title_2">الألسنة المفتوحة</string>
     <string name="settings_doh_server">خادم DNS</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">يرجى التأكد من أن هذا مقدم خدمة صالح أو حاول مرة أخرى لاحقًا</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">استخدم مُحلل نظام DNS</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">استخدم المزود</string>
     <string name="settings_doh_summary">قم بتعزيز الخصوصية من خلال منع التنصت والتلاعب ببيانات DNS.</string>
     <string name="settings_doh_title">DNS عبر HTTPS</string>

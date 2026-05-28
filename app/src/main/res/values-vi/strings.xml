@@ -210,14 +210,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Bạn sẽ bị đăng xuất khỏi hầu hết các trang web</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Các thẻ đang mở</string>
     <string name="settings_doh_server">Máy chủ DNS</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Vui lòng xác minh rằng đó là nhà cung cấp hợp lệ hoặc thử lại sau</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Sử dụng trình phân giải DNS của hệ thống</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Sử dụng Nhà cung cấp</string>
     <string name="settings_doh_summary">Tăng cường quyền riêng tư bằng cách ngăn chặn nghe lén và thao túng dữ liệu DNS.</string>
     <string name="settings_doh_title">DNS qua HTTPS</string>

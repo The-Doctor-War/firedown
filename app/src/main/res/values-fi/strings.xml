@@ -226,14 +226,8 @@
     <string name="settings_delete_browsing_data_cookies_subtitle">Sinut kirjataan ulos useimmilta sivustoilta</string>
     <string name="settings_delete_browsing_data_tabs_title_2">Avoimet välilehdet</string>
     <string name="settings_doh_server">DNS-palvelin</string>
-    <string name="settings_doh_server_adguard">Adguard</string>
-    <string name="settings_doh_server_cloudflare">Cloudflare</string>
-    <string name="settings_doh_server_custom">Custom</string>
     <string name="settings_doh_server_error_provider">Varmista, että palveluntarjoaja on kelvollinen, tai yritä myöhemmin uudelleen</string>
-    <string name="settings_doh_server_google">Google</string>
-    <string name="settings_doh_server_mozilla">Mozilla</string>
     <string name="settings_doh_server_off">Käytä järjestelmän DNS-selvitinta</string>
-    <string name="settings_doh_server_quad9">Quad9</string>
     <string name="settings_doh_server_title">Käytä Palveluntarjoajaa</string>
     <string name="settings_doh_summary">Lisää yksityisyyttä estämällä DNS-tietojen salakuuntelu ja manipulointi.</string>
     <string name="settings_doh_title">DNS HTTPS:n kautta</string>

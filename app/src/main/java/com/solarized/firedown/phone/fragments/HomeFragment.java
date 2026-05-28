@@ -39,7 +39,6 @@ import com.solarized.firedown.data.models.BrowserURIViewModel;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
 import com.solarized.firedown.data.models.IncognitoStateViewModel;
 import com.solarized.firedown.data.models.RecentDownloadsViewModel;
-import com.solarized.firedown.geckoview.GeckoResources;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.geckoview.GeckoToolbar;
 import com.solarized.firedown.manager.DownloadRequest;
@@ -49,7 +48,6 @@ import com.solarized.firedown.phone.SettingsActivity;
 import com.solarized.firedown.phone.VaultActivity;
 import com.solarized.firedown.autocomplete.AutoCompleteEditText;
 import com.solarized.firedown.autocomplete.AutoCompleteView;
-import com.solarized.firedown.ui.OnBoardingCard;
 import com.solarized.firedown.geckoview.toolbar.BottomNavigationBar;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.adapters.SearchAutocompleteAdapter;
@@ -65,7 +63,7 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class HomeFragment extends BaseBrowserFragment implements BottomNavigationBar.OnBottomBarListener,
         AutoCompleteEditText.OnCommitListener, AutoCompleteEditText.OnFilterListener, AutoCompleteEditText.OnFocusChangedListener,
         AutoCompleteEditText.OnTextChangedListener, AutoCompleteEditText.OnSearchStateChangeListener,
-        GeckoToolbar.OnToolbarListener , OnBoardingCard.OnBoardingCardListener, OnItemClickListener {
+        GeckoToolbar.OnToolbarListener , OnItemClickListener {
 
 
     private static final String TAG = HomeFragment.class.getName();
@@ -77,7 +75,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private AutoCompleteEditText mAutoCompleteEditText;
     private AutoCompleteView mAutoCompleteView;
     private View mNewTabView;
-    private OnBoardingCard mOnBoardingCard;
     private GeckoToolbar mGeckoToolbar;
     private BottomNavigationBar mBottomNavigationBar;
     private MaterialCardView mRecentDownloadsCard;
@@ -173,8 +170,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
         mNewTabView = v.findViewById(R.id.bottom_new_tab);
         mAutoCompleteView = v.findViewById(R.id.auto_complete_view);
-        mOnBoardingCard = v.findViewById(R.id.onboarding);
-        mOnBoardingCard.setCallback(this);
 
         mRecentDownloadsCard = v.findViewById(R.id.recent_downloads_card);
 
@@ -559,7 +554,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mGeckoToolbar = null;
         mNewTabView = null;
         mBottomNavigationBar = null;
-        mOnBoardingCard = null;
         mRecentDownloadsCard = null;
         mActiveStrip = null;
         mActiveStripLabel = null;
@@ -1195,15 +1189,5 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
 
     }
 
-    @Override
-    public void OnBoardingCardClicked(int id) {
-        if (id == R.id.onboarding_card) {
-            String uri = GeckoResources.createFiredownTab(mActivity);
-            openUri(uri);
-        } else if (id == R.id.onboarding_remove) {
-            mSharedPreferences.edit().putBoolean(Preferences.ONBOARDING_INFO, false).apply();
-            mOnBoardingCard.setVisibility(View.GONE);
-        }
-    }
 
 }

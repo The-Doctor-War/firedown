@@ -101,6 +101,11 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private androidx.appcompat.widget.AppCompatImageView mHomeReturnTabIcon;
     private TextView mHomeReturnTabTitle;
     private TextView mHomeReturnTabSubtitle;
+    /** Id of the tab currently bound to the return card, or 0 when the
+     *  card is hidden. Lets bindReturnTab skip the Glide reload (which
+     *  flickers) when re-invoked for an unchanged target — e.g. on
+     *  every play/pause toggle of the media strip. */
+    private int mReturnTabBoundId = 0;
     private MaterialCardView mTrackersCard;
     private TextView mTrackersSubtitle;
     @javax.inject.Inject
@@ -575,6 +580,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mHomeReturnTabIcon = null;
         mHomeReturnTabTitle = null;
         mHomeReturnTabSubtitle = null;
+        mReturnTabBoundId = 0;
         mTrackersCard = null;
         mTrackersSubtitle = null;
     }
@@ -944,6 +950,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         if (target == null) {
             mHomeReturnTab.setVisibility(View.GONE);
             mHomeReturnTab.setTag(null);
+            mReturnTabBoundId = 0;
             return;
         }
 
@@ -956,11 +963,22 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 && mHomeMediaStrip.getVisibility() == View.VISIBLE) {
             mHomeReturnTab.setVisibility(View.GONE);
             mHomeReturnTab.setTag(null);
+            mReturnTabBoundId = 0;
+            return;
+        }
+
+        // Already bound to this tab and visible — nothing changed, so
+        // skip the rebind. Re-running GlideHelper.load on an unchanged
+        // icon makes it flicker (e.g. on every media play/pause toggle,
+        // which re-emits the session LiveData this method observes).
+        if (mReturnTabBoundId == target.getId()
+                && mHomeReturnTab.getVisibility() == View.VISIBLE) {
             return;
         }
 
         mHomeReturnTab.setTag(target.getId());
         mHomeReturnTab.setVisibility(View.VISIBLE);
+        mReturnTabBoundId = target.getId();
 
         String title = target.getTitle();
         if (title == null || title.isEmpty()) title = target.getUri();

@@ -97,6 +97,15 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private TextView mHomeMediaTitle;
     private TextView mHomeMediaSubtitle;
     private androidx.appcompat.widget.AppCompatImageButton mHomeMediaToggle;
+    private MaterialCardView mHomeReturnTab;
+    private androidx.appcompat.widget.AppCompatImageView mHomeReturnTabIcon;
+    private TextView mHomeReturnTabTitle;
+    private TextView mHomeReturnTabSubtitle;
+    /** Id of the tab currently bound to the return card, or 0 when the
+     *  card is hidden. Lets bindReturnTab skip the Glide reload (which
+     *  flickers) when re-invoked for an unchanged target — e.g. on
+     *  every play/pause toggle of the media strip. */
+    private int mReturnTabBoundId = 0;
     private MaterialCardView mTrackersCard;
     private TextView mTrackersSubtitle;
     @javax.inject.Inject
@@ -202,6 +211,19 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             } else {
                 mGeckoMediaController.play();
             }
+        });
+
+
+        mHomeReturnTab = v.findViewById(R.id.home_return_tab);
+        mHomeReturnTabIcon = v.findViewById(R.id.home_return_tab_icon);
+        mHomeReturnTabTitle = v.findViewById(R.id.home_return_tab_title);
+        mHomeReturnTabSubtitle = v.findViewById(R.id.home_return_tab_subtitle);
+        // Tap → jump straight back into the most recent open tab. The
+        // target id is computed in bindReturnTab; capture it via a tag
+        // so the listener always uses the freshest binding.
+        mHomeReturnTab.setOnClickListener(view -> {
+            Object tag = view.getTag();
+            if (tag instanceof Integer) openSessionId((Integer) tag);
         });
 
 
@@ -386,9 +408,16 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 sessionId -> {
                     bindMediaStrip();
                     applyActiveStripVisibility();
+                    bindReturnTab();
                 });
         mGeckoMediaController.getIsPlayingLiveData().observe(getViewLifecycleOwner(),
                 playing -> bindMediaStrip());
+
+        // "Continue browsing" card — refresh whenever the tab set
+        // changes (open / close / switch) so it always points at the
+        // newest open tab, and once now for the initial bind.
+        mGeckoStateViewModel.getTabs().observe(getViewLifecycleOwner(), tabs -> bindReturnTab());
+        bindReturnTab();
 
         mRecentDownloadsCard.setVisibility(View.VISIBLE);
         applyActiveStripVisibility();
@@ -498,6 +527,11 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 // and only its chip backgrounds need to flip.
                 View root = getView();
                 if (root != null) applyHomeCardStyle(root);
+                // The tab set may have changed while we were away
+                // (a tab opened / closed in the browser), and the
+                // getTabs observer doesn't necessarily re-emit on a
+                // pure navigation back to home — rebind explicitly.
+                bindReturnTab();
             }
         });
 
@@ -542,6 +576,11 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mHomeMediaTitle = null;
         mHomeMediaSubtitle = null;
         mHomeMediaToggle = null;
+        mHomeReturnTab = null;
+        mHomeReturnTabIcon = null;
+        mHomeReturnTabTitle = null;
+        mHomeReturnTabSubtitle = null;
+        mReturnTabBoundId = 0;
         mTrackersCard = null;
         mTrackersSubtitle = null;
     }
@@ -869,6 +908,110 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                     mHomeMediaIcon, new com.bumptech.glide.request.RequestOptions());
         } else {
             mHomeMediaIcon.setImageDrawable(null);
+        }
+    }
+
+    /**
+     * Binds the "Continue browsing" card to the user's most recent
+     * open, non-home tab. Prefers the currently-active tab when it's a
+     * real page; otherwise picks the newest non-home tab by creation
+     * date. Hidden when there's no such tab, or when the target is the
+     * tab already surfaced by the playing-media strip (no point showing
+     * two cards for the same tab). Regular mode only — incognito tabs
+     * are never considered.
+     */
+    private void bindReturnTab() {
+        if (mHomeReturnTab == null) return;
+
+        GeckoStateEntity target = null;
+
+        // Prefer the active tab if it's a real page (not a home tab).
+        GeckoState current = mGeckoStateViewModel.peekCurrentGeckoState();
+        if (current != null) {
+            GeckoStateEntity entity = current.getGeckoStateEntity();
+            if (entity != null && !entity.isHome() && !entity.isIncognito()) {
+                target = entity;
+            }
+        }
+
+        // Otherwise the most recently used non-home tab. Rank by
+        // lastAccess (bumped on every activation) rather than creation
+        // date, so re-visiting an older tab promotes it ahead of a
+        // newer-but-untouched one.
+        if (target == null) {
+            java.util.List<GeckoStateEntity> tabs = mGeckoStateViewModel.getTabs().getValue();
+            if (tabs != null) {
+                for (GeckoStateEntity entity : tabs) {
+                    if (entity == null || entity.isHome() || entity.isIncognito()) continue;
+                    if (target == null || entity.getLastAccess() > target.getLastAccess()) {
+                        target = entity;
+                    }
+                }
+            }
+        }
+
+        if (target == null) {
+            mHomeReturnTab.setVisibility(View.GONE);
+            mHomeReturnTab.setTag(null);
+            mReturnTabBoundId = 0;
+            return;
+        }
+
+        // De-dup against the media strip: if the tab we'd point at is
+        // the one already playing in the strip above, don't show a
+        // second card for it.
+        int mediaSessionId = mGeckoMediaController.getCurrentSessionId();
+        if (mediaSessionId != 0 && mediaSessionId == target.getId()
+                && mHomeMediaStrip != null
+                && mHomeMediaStrip.getVisibility() == View.VISIBLE) {
+            mHomeReturnTab.setVisibility(View.GONE);
+            mHomeReturnTab.setTag(null);
+            mReturnTabBoundId = 0;
+            return;
+        }
+
+        // Already bound to this tab and visible — nothing changed, so
+        // skip the rebind. Re-running GlideHelper.load on an unchanged
+        // icon makes it flicker (e.g. on every media play/pause toggle,
+        // which re-emits the session LiveData this method observes).
+        if (mReturnTabBoundId == target.getId()
+                && mHomeReturnTab.getVisibility() == View.VISIBLE) {
+            return;
+        }
+
+        mHomeReturnTab.setTag(target.getId());
+        mHomeReturnTab.setVisibility(View.VISIBLE);
+        mReturnTabBoundId = target.getId();
+
+        String title = target.getTitle();
+        if (title == null || title.isEmpty()) title = target.getUri();
+        mHomeReturnTabTitle.setText(title);
+
+        String host = hostOf(target.getUri());
+        if (host != null && !host.isEmpty() && !host.equals(title)) {
+            mHomeReturnTabSubtitle.setVisibility(View.VISIBLE);
+            mHomeReturnTabSubtitle.setText(host);
+        } else {
+            mHomeReturnTabSubtitle.setVisibility(View.GONE);
+        }
+
+        // GlideHelper.load falls back to the generated domain thumbnail
+        // (same letter-tile generator used by the tabs / bookmarks
+        // lists) when the icon is missing or fails to load, so the card
+        // never shows a blank slot.
+        com.solarized.firedown.GlideHelper.load(target.getIcon(), target.getUri(),
+                mHomeReturnTabIcon, new com.bumptech.glide.request.RequestOptions());
+    }
+
+    @Nullable
+    private static String hostOf(@Nullable String uri) {
+        if (uri == null || uri.isEmpty()) return null;
+        try {
+            String host = android.net.Uri.parse(uri).getHost();
+            if (host != null && host.startsWith("www.")) host = host.substring(4);
+            return host;
+        } catch (Exception e) {
+            return null;
         }
     }
 

@@ -280,10 +280,16 @@ public class GeckoStateDataRepository {
                 // notifyTabs emission for no state change.
                 mCurrentId = geckoState.getEntityId();
                 Log.d(TAG, "setGeckoState: mCurrentId → " + mCurrentId);
+                long now = System.currentTimeMillis();
                 for (GeckoState state : mGeckoStates) {
                     boolean isActive = state.getEntityId() == mCurrentId;
                     state.setActive(isActive);
-                    if (!isActive) {
+                    if (isActive) {
+                        // Stamp "most recently used" so the Continue-browsing
+                        // card and auto-archive can rank by real usage rather
+                        // than creation order.
+                        state.getGeckoStateEntity().setLastAccess(now);
+                    } else {
                         state.clearCachedThumb();
                     }
                 }
@@ -448,7 +454,11 @@ public class GeckoStateDataRepository {
 
     private GeckoStateEntity parseEntity(JSONObject jsonObject) {
         GeckoStateEntity entity = new GeckoStateEntity(false);
-        entity.setCreationDate(jsonObject.optLong(GeckoStateEntity.KEYS.DATE, System.currentTimeMillis()));
+        long creationDate = jsonObject.optLong(GeckoStateEntity.KEYS.DATE, System.currentTimeMillis());
+        entity.setCreationDate(creationDate);
+        // Tabs persisted before lastAccess existed have no UPDATE key —
+        // fall back to creation date so they still order sensibly.
+        entity.setLastAccess(jsonObject.optLong(GeckoStateEntity.KEYS.UPDATE, creationDate));
         entity.setIcon(jsonObject.optString(GeckoStateEntity.KEYS.ICON, ""));
         entity.setIconResolution(jsonObject.optInt(GeckoStateEntity.KEYS.ICON_RESOLUTION, 0));
         entity.setThumb(jsonObject.optString(GeckoStateEntity.KEYS.THUMB, ""));
@@ -586,7 +596,10 @@ public class GeckoStateDataRepository {
         for (GeckoState state : mGeckoStates) {
             if (state.isActive() || state.isHome()) continue;
             if (state.getGeckoStateEntity().isIncognito()) continue; // never archive incognito
-            if (state.getCreationDate() < cutoff) {
+            // Inactivity is measured from last use, not creation — a tab
+            // the user keeps returning to shouldn't be archived just
+            // because it's old.
+            if (state.getGeckoStateEntity().getLastAccess() < cutoff) {
                 toArchive.add(state);
             }
         }

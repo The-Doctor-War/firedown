@@ -41,6 +41,14 @@ public class GeckoStateEntity implements TabState, Parcelable {
 
     private long mCreationDate;
 
+    /** Wall-clock time this tab was last made the active tab. Distinct
+     *  from {@link #mCreationDate}, which is stamped once at creation:
+     *  this is bumped on every activation so "most recently used" can be
+     *  ranked correctly (the Continue-browsing card, auto-archive).
+     *  Initialised to the creation time so a never-activated tab still
+     *  orders sensibly. */
+    private long mLastAccess;
+
     boolean isFullScreen;
 
     boolean canGoForward;
@@ -93,6 +101,7 @@ public class GeckoStateEntity implements TabState, Parcelable {
         useTrackingProtection = in.readByte() != 0;
         iconResolution = in.readInt();
         isIncognito = in.readByte() != 0;
+        mLastAccess = in.readLong();
     }
 
     public static final Creator<GeckoStateEntity> CREATOR = new Creator<>() {
@@ -314,6 +323,14 @@ public class GeckoStateEntity implements TabState, Parcelable {
         return mCreationDate;
     }
 
+    public long getLastAccess() {
+        return mLastAccess;
+    }
+
+    public void setLastAccess(long lastAccess) {
+        this.mLastAccess = lastAccess;
+    }
+
     @Override
     public boolean isActive() {
         return isActive;
@@ -392,11 +409,13 @@ public class GeckoStateEntity implements TabState, Parcelable {
         this.useTrackingProtection = geckoStateEntity.useTrackingProtection();
         this.iconResolution = geckoStateEntity.getIconResolution();
         this.isIncognito = geckoStateEntity.isIncognito();
+        this.mLastAccess = geckoStateEntity.getLastAccess();
     }
 
     public GeckoStateEntity(boolean home){
         mId = UUID.randomUUID().hashCode();
         mCreationDate = System.currentTimeMillis();
+        mLastAccess = mCreationDate;
         isInitialLoad = true;
         useTrackingProtection = true;
         enableHome = home;
@@ -405,6 +424,7 @@ public class GeckoStateEntity implements TabState, Parcelable {
     public GeckoStateEntity(boolean home, String uri){
         mId = UUID.randomUUID().hashCode();
         mCreationDate = System.currentTimeMillis();
+        mLastAccess = mCreationDate;
         isInitialLoad = true;
         useTrackingProtection = true;
         mUri = uri;
@@ -443,6 +463,7 @@ public class GeckoStateEntity implements TabState, Parcelable {
         dest.writeByte((byte) (useTrackingProtection ? 1 : 0));
         dest.writeInt(iconResolution);
         dest.writeByte((byte) (isIncognito ? 1 : 0));
+        dest.writeLong(mLastAccess);
     }
 
     public static final class KEYS {

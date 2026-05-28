@@ -75,6 +75,7 @@ public final class GeckoStateObserver implements Observer<List<GeckoStateEntity>
     private JSONObject toJson(GeckoStateEntity e) throws JSONException {
         JSONObject o = new JSONObject();
         o.put(GeckoStateEntity.KEYS.DATE, e.getCreationDate());
+        o.put(GeckoStateEntity.KEYS.UPDATE, e.getLastAccess());
         o.put(GeckoStateEntity.KEYS.ICON, e.getIcon());
         o.put(GeckoStateEntity.KEYS.ICON_RESOLUTION, e.getIconResolution());
         o.put(GeckoStateEntity.KEYS.THUMB, e.getThumb());

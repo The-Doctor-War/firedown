@@ -408,4 +408,11 @@
     <string name="security_stat_ads_blocked">Reklamlar engellendi</string>
     <string name="security_stat_trackers_blocked">İzleyiciler engellendi</string>
     <string name="security_stat_scope_on_this_page">bu sayfada</string>
+    <plurals name="blocked_ads_summary">
+        <item quantity="one">Bu sayfada %d istek engellendi</item>
+        <item quantity="other">Bu sayfada %d istek engellendi</item>
+    </plurals>
+    <string name="blocked_ads_detail_title">Engellenen reklamlar</string>
+    <string name="security_block_ads">Reklamları engelle</string>
+    <string name="security_tracking_protection">Takip Koruması</string>
 </resources>

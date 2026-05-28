@@ -409,4 +409,11 @@
     <string name="security_stat_ads_blocked">Advertenties geblokkeerd</string>
     <string name="security_stat_trackers_blocked">Trackers geblokkeerd</string>
     <string name="security_stat_scope_on_this_page">op deze pagina</string>
+    <plurals name="blocked_ads_summary">
+        <item quantity="one">%d verzoek geblokkeerd op deze pagina</item>
+        <item quantity="other">%d verzoeken geblokkeerd op deze pagina</item>
+    </plurals>
+    <string name="blocked_ads_detail_title">Geblokkeerde advertenties</string>
+    <string name="security_block_ads">Advertenties blokkeren</string>
+    <string name="security_tracking_protection">Trackingbescherming</string>
 </resources>

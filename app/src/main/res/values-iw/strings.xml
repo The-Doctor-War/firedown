@@ -344,4 +344,13 @@
     <string name="security_stat_ads_blocked">פרסומות חסומות</string>
     <string name="security_stat_trackers_blocked">עוקבים חסומים</string>
     <string name="security_stat_scope_on_this_page">בדף זה</string>
+    <plurals name="blocked_ads_summary">
+        <item quantity="one">בקשה אחת נחסמה בעמוד זה</item>
+        <item quantity="two">%d בקשות נחסמו בעמוד זה</item>
+        <item quantity="many">%d בקשות נחסמו בעמוד זה</item>
+        <item quantity="other">%d בקשות נחסמו בעמוד זה</item>
+    </plurals>
+    <string name="blocked_ads_detail_title">פרסומות חסומות</string>
+    <string name="security_block_ads">חסום פרסומות</string>
+    <string name="security_tracking_protection">הגנת מעקב</string>
 </resources>

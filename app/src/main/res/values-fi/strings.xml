@@ -345,4 +345,7 @@
 
 
 
+    <string name="security_stat_ads_blocked">Mainoksia estetty</string>
+    <string name="security_stat_trackers_blocked">Seurantoja estetty</string>
+    <string name="security_stat_scope_on_this_page">tällä sivulla</string>
 </resources>

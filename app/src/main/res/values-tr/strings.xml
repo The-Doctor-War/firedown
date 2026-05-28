@@ -405,4 +405,7 @@
 
 
 
+    <string name="security_stat_ads_blocked">Reklamlar engellendi</string>
+    <string name="security_stat_trackers_blocked">İzleyiciler engellendi</string>
+    <string name="security_stat_scope_on_this_page">bu sayfada</string>
 </resources>

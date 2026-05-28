@@ -527,11 +527,7 @@ import { PageStore } from './pagestore.js';
         // string the Map lookup would miss. Force both sides through
         // Number() so the Map keys agree regardless of provenance.
         tabId = Number(tabId);
-        if (!Number.isFinite(tabId) || tabId <= 0) {
-            console.log('[firedown] recordPageBlock skipped: tabId='
-                + JSON.stringify(arguments[0]) + ' host=' + hostname);
-            return;
-        }
+        if (!Number.isFinite(tabId) || tabId <= 0) { return; }
         if (!hostname || hostname === '') { return; }
         let m = pageBlocks.get(tabId);
         if (m === undefined) {
@@ -554,17 +550,9 @@ import { PageStore } from './pagestore.js';
         // Mirror the coercion in recordPageBlock so the lookup key
         // matches the recording key regardless of provenance.
         tabId = Number(tabId);
-        if (!Number.isFinite(tabId) || tabId <= 0) {
-            console.log('[firedown] pageBlocksList bad tabId='
-                + JSON.stringify(arguments[0]));
-            return [];
-        }
+        if (!Number.isFinite(tabId) || tabId <= 0) { return []; }
         const m = pageBlocks.get(tabId);
-        if (m === undefined) {
-            console.log('[firedown] pageBlocksList miss: tabId=' + tabId
-                + ' known=' + Array.from(pageBlocks.keys()).join(','));
-            return [];
-        }
+        if (m === undefined) { return []; }
         const arr = Array.from(m, ([host, count]) => ({ host, count }));
         arr.sort((a, b) => b.count - a.count);
         return arr;
@@ -581,20 +569,6 @@ import { PageStore } from './pagestore.js';
                 tabId = tab.id;
             }
             const items = pageBlocksList(tabId);
-            // Diagnostic: piggyback the full pageBlocks map state on the
-            // response so Java's existing logcat (handleUblockMessage)
-            // surfaces what's actually stored. The console.log path
-            // doesn't reach the user's logcat filter because WebExt
-            // console output goes through GeckoConsole, not
-            // GeckoRuntimeHelper. Remove this "_debug" block once the
-            // pageBlocks-empty bug is resolved — temporary scaffolding.
-            const debugDump = {};
-            for (const [k, v] of pageBlocks) {
-                debugDump[k] = {};
-                for (const [host, count] of v) {
-                    debugDump[k][host] = count;
-                }
-            }
             browser.runtime.sendNativeMessage("ublock", {
                 pageBlocks: {
                     tabId,
@@ -605,12 +579,6 @@ import { PageStore } from './pagestore.js';
                     // itself.
                     isIncognito: incognitoTabIds.has(tabId),
                     items,
-                    _debug: {
-                        requestedTabId: tabId,
-                        requestedTabIdType: typeof tabIdArg,
-                        knownTabIds: Array.from(pageBlocks.keys()),
-                        allEntries: debugDump,
-                    },
                 }
             });
         } catch (_) { /* port not ready */ }
@@ -620,16 +588,29 @@ import { PageStore } from './pagestore.js';
     // new URL in the same tab) — the next page starts with a clean
     // counter. Also wipe on tab close so the Map doesn't leak entries
     // for tabs that no longer exist.
+    //
+    // tabs.onUpdated fires with `changeInfo.url` set every time the page
+    // signals a location update — including SPA pushState/replaceState
+    // calls that keep the same URL, and the post-load notification that
+    // arrives after blocks for the page have already been recorded. We
+    // only treat a *different* URL as a real navigation pivot; same-URL
+    // updates would otherwise wipe blocks that were just journalled for
+    // the current page (visible as an empty Ads-blocked drill-down even
+    // though the badge shows a non-zero count).
+    const pageBlocksLastUrl = new Map();
     if (browser.tabs && browser.tabs.onUpdated) {
         browser.tabs.onUpdated.addListener((tabId, changeInfo) => {
-            if (changeInfo && typeof changeInfo.url === 'string') {
-                pageBlocks.delete(tabId);
-            }
+            if (!changeInfo || typeof changeInfo.url !== 'string') { return; }
+            const previousUrl = pageBlocksLastUrl.get(tabId);
+            if (previousUrl === changeInfo.url) { return; }
+            pageBlocksLastUrl.set(tabId, changeInfo.url);
+            pageBlocks.delete(tabId);
         });
     }
     if (browser.tabs && browser.tabs.onRemoved) {
         browser.tabs.onRemoved.addListener(tabId => {
             pageBlocks.delete(tabId);
+            pageBlocksLastUrl.delete(tabId);
         });
     }
 
@@ -666,15 +647,6 @@ import { PageStore } from './pagestore.js';
         const journal = this.journal;
         const isIncognito = incognitoTabIds.has(this.tabId);
         const tabId = this.tabId;
-        // Diagnostic: see what tabId PageStore is carrying when blocks
-        // get recorded, so we can confirm it matches the tabId Java
-        // sends in requestPageBlocks. Logs once per non-empty journal
-        // tick to avoid spam.
-        if (journal.length > 0) {
-            console.log('[firedown] journalProcess tabId=' + tabId
-                + ' (typeof=' + (typeof tabId) + ') entries='
-                + (journal.length / 3));
-        }
         for (let i = 0; i < journal.length; i += 3) {
             if (journal[i + 1] !== 1) { continue; } // allowed
             categoryCounters[bucketItype(journal[i + 2])] += 1;

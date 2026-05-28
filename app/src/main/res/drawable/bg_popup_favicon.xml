@@ -7,15 +7,21 @@
     coherent identity chip rather than floating on the sheet.
 
     The sheet itself paints colorSurfaceContainerHigh
-    (dialog_rounded_top.xml), so using the same tone or even the
-    one-step-up colorSurfaceContainerHighest is too low-contrast
-    to render as a frame. colorSurfaceVariant sits in a different
-    tonal family and lands ~10 luminance units off the sheet in
-    dark mode (#292A2C vs #44474C), which is what the eye reads
-    as "tile behind icon" rather than "no border".
+    (dialog_rounded_top.xml). In the standard theme that's
+    #E9E7EA (light) / #292A2C (dark); the same-tone or one-step-up
+    colorSurfaceContainerHighest is too low-contrast to render as a
+    frame, so we fall back on colorSurfaceVariant which sits in a
+    different tonal family (#44474C in dark) and reads as "tile
+    behind icon".
+
+    Incognito sheets paint a purple container_high (#4a2779) instead
+    — there the gray-blue surfaceVariant would clash with the purple,
+    so the incognito sheet theme remaps popupFaviconBackgroundColor
+    to incognito_surface_container_highest (#553090), which stays in
+    the purple family while still reading as a tile.
 -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="?attr/colorSurfaceVariant" />
+    <solid android:color="?attr/popupFaviconBackgroundColor" />
     <corners android:radius="10dp" />
 </shape>

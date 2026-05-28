@@ -47,6 +47,7 @@
         <item name="colorSurfaceContainer">@color/md_theme_surfaceContainer</item>
         <item name="colorSurfaceContainerHigh">@color/md_theme_surfaceContainerHigh</item>
         <item name="colorSurfaceContainerHighest">@color/md_theme_surfaceContainerHighest</item>
+        <item name="popupFaviconBackgroundColor">@color/md_theme_surfaceVariant</item>
         <item name="enableEdgeToEdge">true</item>
         <item name="android:navigationBarColor">@color/md_theme_surfaceContainerHigh</item>
         <item name="bottomSheetStyle">@style/Theme.FireDown.BottomSheetDialogStyle</item>
@@ -97,6 +98,11 @@
         <item name="colorSurfaceContainer">@color/incognito_surface_container</item>
         <item name="colorSurfaceContainerHigh">@color/incognito_surface_container_high</item>
         <item name="colorSurfaceContainerHighest">@color/incognito_surface_container_highest</item>
+        <!-- Step-up from the sheet's container_high purple (#4a2779 →
+             #553090) instead of the gray-blue surfaceVariant used by
+             the standard theme, which would clash with the incognito
+             purple. -->
+        <item name="popupFaviconBackgroundColor">@color/incognito_surface_container_highest</item>
         <item name="enableEdgeToEdge">true</item>
         <item name="android:navigationBarColor">@color/incognito_surface_container_high</item>
         <item name="bottomSheetStyle">@style/Theme.FireDown.BottomSheetDialogStyle</item>
@@ -141,6 +147,11 @@
         <item name="colorSurfaceContainer">@color/incognito_surface_container</item>
         <item name="colorSurfaceContainerHigh">@color/incognito_surface_container_high</item>
         <item name="colorSurfaceContainerHighest">@color/incognito_surface_container_highest</item>
+        <!-- Step-up from the sheet's container_high purple (#4a2779 →
+             #553090) instead of the gray-blue surfaceVariant used by
+             the standard theme, which would clash with the incognito
+             purple. -->
+        <item name="popupFaviconBackgroundColor">@color/incognito_surface_container_highest</item>
         <item name="enableEdgeToEdge">true</item>
         <item name="android:navigationBarColor">@color/incognito_surface_container_high</item>
         <item name="bottomSheetStyle">@style/Theme.FireDown.BottomSheetDialogStyle</item>

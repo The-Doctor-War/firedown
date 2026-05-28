@@ -47,4 +47,12 @@
          true-black overlay for them. Without this guard the overlay's
          pure-black surfaces clobber the incognito purple. -->
     <attr name="isIncognitoTheme" format="boolean" />
+
+    <!-- Fill color for the rounded-square tile that frames identity
+         favicons on bottom sheets (bg_popup_favicon). Standard sheets
+         pick a surfaceVariant tone (different tonal family from the
+         sheet bg → reads as "tile behind icon"); the incognito sheet
+         theme overrides this with a purple-family container tone so
+         the tile doesn't clash with the incognito sheet's purple bg. -->
+    <attr name="popupFaviconBackgroundColor" format="color|reference" />
 </resources>

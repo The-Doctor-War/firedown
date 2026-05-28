@@ -46,6 +46,8 @@ public class UrlStringUtils {
 
     private static final String MOZ_EXTENSION = "moz-extension://";
 
+    private static final String BLOB = "blob:";
+
     private static final Pattern SVG_PATTERN = Pattern.compile("https?://.*\\.(:?svg)(?:\\?.*|$)");
 
     private static final Pattern ICO_PATTERN = Pattern.compile("https?://.*\\.(:?ico)(?:\\?.*|$)");
@@ -114,6 +116,18 @@ public class UrlStringUtils {
 
     public static boolean isMozExtensionLike(String string){
         return string != null && string.startsWith(MOZ_EXTENSION);
+    }
+
+    /**
+     * True for blob: URLs (e.g. {@code blob:https://host/uuid}). These are
+     * engine-generated object URLs — content the web engine produced and
+     * must handle itself (rendered inline, or handed to onExternalResponse
+     * for download). They are never external-app links, so the
+     * NavigationDelegate must allow them rather than routing them to the
+     * "open in another app" dialog.
+     */
+    public static boolean isBlobLike(String string){
+        return string != null && string.startsWith(BLOB);
     }
 
     public static boolean isAdaptive(String string){

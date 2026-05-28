@@ -1438,7 +1438,12 @@ public class BrowserFragment extends BaseBrowserFragment
         Intent browsableIntent = AppLinkUseCases.createBrowsableIntent(uri);
         if (browsableIntent == null
                 || UrlStringUtils.isHttpOrHttps(uri)
-                || UrlStringUtils.isMozExtensionLike(uri))
+                || UrlStringUtils.isMozExtensionLike(uri)
+                // Defence-in-depth: blob: is engine content, never an
+                // external-app link. The NavigationDelegate already allows it
+                // so it shouldn't reach here, but guard anyway so a blob can
+                // never surface the "open in app" dialog.
+                || UrlStringUtils.isBlobLike(uri))
             return;
         try {
             Bundle bundle = new Bundle();

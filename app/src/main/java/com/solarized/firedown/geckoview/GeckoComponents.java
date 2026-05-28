@@ -1447,7 +1447,13 @@ public class GeckoComponents {
                 return GeckoResult.allow();
             }else if(UrlStringUtils.isURLDataLike(request.uri) || UrlStringUtils.isURLResouceLike(request.uri)
                     || UrlStringUtils.isViewSource(request.uri) || UrlStringUtils.isMozExtensionLike(request.uri)
-                    || UrlStringUtils.isURLFileLike(request.uri)) {
+                    || UrlStringUtils.isURLFileLike(request.uri) || UrlStringUtils.isBlobLike(request.uri)) {
+                // blob: URLs are engine-generated object URLs (e.g. a site
+                // doing URL.createObjectURL on a file to trigger a download).
+                // They are web-engine content, never external-app links — let
+                // Gecko handle them so a downloadable blob reaches
+                // onExternalResponse (download dialog) instead of falling to
+                // the deny branch and the bogus "open in app" dialog.
                 return GeckoResult.allow();
             }else{
                 mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST, geckoState, request.uri);

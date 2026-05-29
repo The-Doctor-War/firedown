@@ -880,8 +880,12 @@ public class BrowserFragment extends BaseBrowserFragment
         if (needsReconnect) {
             openSession(current);
         } else {
+            // Binding intact: re-theme but do NOT re-arm the first-paint
+            // cover — the page is already painted, so a re-armed cover would
+            // sit on top of the live surface (the "stuck cover colour after
+            // returning from Settings" bug) until the next forced repaint.
             applyBrowserIncognitoTheme(
-                    current.getGeckoStateEntity().isIncognito());
+                    current.getGeckoStateEntity().isIncognito(), false);
             // The view↔session binding is intact, but the session itself
             // may have been deactivated out-of-band (URL-bar focus,
             // backgrounding, …). Re-assert active so the surface resumes
@@ -1942,6 +1946,21 @@ public class BrowserFragment extends BaseBrowserFragment
 
 
     private void applyBrowserIncognitoTheme(boolean incognito) {
+        // Default callers re-arm the first-paint cover: they attach/replace a
+        // session that genuinely produces a fresh first frame.
+        applyBrowserIncognitoTheme(incognito, true);
+    }
+
+    /**
+     * @param armFirstPaintCover when true, re-arm GeckoView's first-paint
+     *     cover so the pre-paint frame matches the (incognito) chrome. Pass
+     *     false on a plain theme re-apply over an already-attached, already-
+     *     painted session (e.g. resume from Settings with the view↔session
+     *     binding intact): no new first paint is coming, so re-arming would
+     *     leave the cover colour stuck over the live page until the next
+     *     repaint.
+     */
+    private void applyBrowserIncognitoTheme(boolean incognito, boolean armFirstPaintCover) {
         // Sync FLAG_SECURE every call. The Activity's Window may hold
         // FLAG_SECURE from a previous fragment incarnation regardless
         // of what mIsIncognitoThemed currently says.
@@ -1973,8 +1992,10 @@ public class BrowserFragment extends BaseBrowserFragment
 
         // Keep GeckoView's first-paint cover in sync with the theme so any
         // pre-paint frame matches the chrome — purple in incognito — rather
-        // than the regular surface set once at view creation.
-        if (mGeckoView != null) {
+        // than the regular surface set once at view creation. Only when a
+        // fresh first paint is actually coming (session open / view re-create);
+        // re-arming over an already-painted surface strands the cover colour.
+        if (mGeckoView != null && armFirstPaintCover) {
             mGeckoView.coverUntilFirstPaint(IncognitoColors.getSurface(mActivity, incognito));
         }
 

@@ -353,11 +353,21 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     public void onClick(View v) {
         int id = v.getId();
         if (id == R.id.host_clear) {
+            // Use mDomain, not mCertificateInfoEntity.host: the clear row is
+            // enabled on isUrlValidForCleaning(mDomain) regardless of whether
+            // a certificate has resolved, so the cert entity can be null here
+            // (http pages, or before the async cert callback lands). mDomain is
+            // always populated (cert host when present, else derived from the
+            // URL) and is the value cleaning operates on.
             Bundle bundle = new Bundle();
-            bundle.putString(Keys.ITEM_ID, mCertificateInfoEntity.host);
+            bundle.putString(Keys.ITEM_ID, mDomain);
             bundle.putBoolean(Keys.IS_INCOGNITO, mIsIncognito);
             NavigationUtils.navigateSafe(mNavController, R.id.action_security_to_clear, bundle);
         } else if (id == R.id.host_secure) {
+            // Connection drill-down needs the cert. The row is enabled only
+            // when the cert exists (mHostCert.setEnabled(... != null)), but
+            // guard anyway so a race can't crash.
+            if (mCertificateInfoEntity == null) return;
             Bundle bundle = new Bundle();
             bundle.putParcelable(Keys.ITEM_ID, mCertificateInfoEntity);
             bundle.putBoolean(Keys.IS_INCOGNITO, mIsIncognito);

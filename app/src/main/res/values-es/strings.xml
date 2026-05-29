@@ -548,9 +548,6 @@
     </plurals>
     <string name="blocked_ads_detail_title">Anuncios bloqueados</string>
     <string name="security_block_ads">Bloquear anuncios</string>
-    <string name="security_stat_scope_on_this_page">en esta página</string>
-    <string name="security_stat_hero_caption">Anuncios y rastreadores bloqueados en esta página</string>
-    <string name="security_stat_ads_blocked">anuncios</string>
-    <string name="security_stat_trackers_blocked">rastreadores</string>
     <string name="security_tracking_protection">Protección de seguimiento</string>
+    <string name="security_stat_blocked_scope">bloqueado en esta página</string>
 </resources>

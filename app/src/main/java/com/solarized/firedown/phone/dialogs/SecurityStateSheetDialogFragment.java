@@ -27,7 +27,6 @@ import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.models.GeckoStateViewModel;
 import com.solarized.firedown.data.models.IncognitoStateViewModel;
 import com.solarized.firedown.geckoview.GeckoState;
-import com.solarized.firedown.geckoview.TrackingCategory;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.ui.IncognitoColors;
 import com.solarized.firedown.utils.NavigationUtils;
@@ -35,7 +34,6 @@ import com.solarized.firedown.utils.UrlStringUtils;
 import com.solarized.firedown.utils.WebUtils;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragment
@@ -45,21 +43,18 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     private IncognitoStateViewModel mIncognitoStateViewModel;
     private GeckoState mGeckoState;
     private CertificateInfoEntity mCertificateInfoEntity;
-    private TextView mAdsCounterTextView;
-    private TextView mTrackersCounterTextView;
+    // Summary count = uBlock ad/filter blocks for this page (getAdsCount).
+    // Matches what the drill-in (BlockedAdsDetailDialogFragment) itemizes, so
+    // the number always equals the list length. ETP trackers are still blocked
+    // and govern the Tracking-protection toggle, but they expose categories not
+    // a clean per-host list, so they're not folded into this host-count.
     private TextView mTotalCountTextView;
-    // Latest per-mechanism counts, summed into the hero total. Ads arrives
-    // as a String stream, trackers as a category map, on separate emissions,
-    // so cache both and recompute the total whenever either changes.
-    private int mAdsCount;
-    private int mTrackersCount;
     private MaterialSwitch mAdsSwitch;
     private MaterialSwitch mTrackingSwitch;
     private TextView mTrackingSubtext;
     private TextView mHostText;
     private View mHostCert;
     private View mAdsStatCard;
-    private View mTrackersStatCard;
     private AppCompatImageView mTrackingIcon;
     private AppCompatImageView mHostImage;
     private String mDomain;
@@ -110,38 +105,24 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         mTrackingIcon = mView.findViewById(R.id.tracking_icon);
         mTrackingSwitch = mView.findViewById(R.id.tracking_toogle);
         mTrackingSubtext = mView.findViewById(R.id.tracking_subtext);
-        mAdsCounterTextView = mView.findViewById(R.id.ads_counter);
-        mTrackersCounterTextView = mView.findViewById(R.id.trackers_counter);
         mTotalCountTextView = mView.findViewById(R.id.security_total_count);
         mAdsSwitch = mView.findViewById(R.id.ads_toogle);
         mHostText = mView.findViewById(R.id.host_secure_text);
         mHostCert = mView.findViewById(R.id.host_secure);
         mAdsStatCard = mView.findViewById(R.id.ads_stat_card);
-        mTrackersStatCard = mView.findViewById(R.id.trackers_stat_card);
 
-        // Stat-card taps drill into per-mechanism detail sheets.
-        // - Ads card  → BlockedAdsDetailDialogFragment (uBlock blocks)
-        // - Trackers card → BlockedTrackersDetailDialogFragment (ETP blocks)
-        // Both nav actions popUpTo dialog_security_info inclusive, so
-        // back from a detail sheet returns to the browser rather than
-        // re-opening the security parent. Both fragments paint their
-        // own "nothing blocked yet" empty state, so the rows always
-        // open regardless of count — the prior tracker-row gating
-        // (require ETP on + count > 0) gave the two rows inconsistent
-        // tap affordances.
+        // The single "N blocked on this page" summary row drills into the
+        // blocked-host list (uBlock's per-page blocked hosts — the meaningful
+        // "what got blocked here"). The nav action popUpTo dialog_security_info
+        // is inclusive, so back from the detail returns to the browser rather
+        // than re-opening this sheet; the detail fragment paints its own
+        // "nothing blocked yet" empty state, so the row opens regardless of
+        // count.
         mAdsStatCard.setOnClickListener(v -> {
             Bundle args = new Bundle();
             args.putBoolean(Keys.IS_INCOGNITO, mIsIncognito);
             NavigationUtils.navigateSafe(mNavController,
                     R.id.action_security_to_blocked_ads_detail,
-                    R.id.dialog_security_info,
-                    args);
-        });
-        mTrackersStatCard.setOnClickListener(v -> {
-            Bundle args = new Bundle();
-            args.putBoolean(Keys.IS_INCOGNITO, mIsIncognito);
-            NavigationUtils.navigateSafe(mNavController,
-                    R.id.action_security_to_blocked_trackers_detail,
                     R.id.dialog_security_info,
                     args);
         });
@@ -208,11 +189,11 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
                 : mGeckoStateViewModel.getAdsCount();
 
         adsCountLive.observe(getViewLifecycleOwner(), count -> {
-            mAdsCounterTextView.setText(count);
             int parsed = 0;
             try { parsed = Integer.parseInt(count.trim()); } catch (NumberFormatException ignored) { }
-            mAdsCount = parsed;
-            updateTotalCount();
+            if (mTotalCountTextView != null) {
+                mTotalCountTextView.setText(String.valueOf(parsed));
+            }
         });
 
         // Ads filter enabled state is a per-URL whitelist concept (netWhitelist
@@ -230,50 +211,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
 
         updateTrackingUI(trackingEnabled);
 
-        // Per-page blocked-trackers breakdown. The repository's LiveData
-        // is "current tab's counts" but it can carry a stale value from
-        // whichever tab last emitted before this one was activated, so
-        // ask the ViewModel to re-emit the snapshot for *this* tab
-        // before subscribing.
-        if (mIsIncognito) {
-            mIncognitoStateViewModel.refreshBlockedTrackerCounts();
-            mIncognitoStateViewModel.getBlockedTrackerCounts()
-                    .observe(getViewLifecycleOwner(), this::renderBlockedTrackerCounts);
-        } else {
-            mGeckoStateViewModel.refreshBlockedTrackerCounts();
-            mGeckoStateViewModel.getBlockedTrackerCounts()
-                    .observe(getViewLifecycleOwner(), this::renderBlockedTrackerCounts);
-        }
-
         return mView;
-    }
-
-
-    /**
-     * Updates the Trackers blocked stat card from the page's running
-     * tracker-category counters and keeps the running total around
-     * for the stat card's drill-down gate (the Trackers card is only
-     * tappable when something has actually been blocked).
-     */
-    private void renderBlockedTrackerCounts(Map<TrackingCategory, Integer> counts) {
-        int total = 0;
-        if (counts != null) {
-            for (Integer v : counts.values()) {
-                if (v != null) total += v;
-            }
-        }
-        if (mTrackersCounterTextView != null) {
-            mTrackersCounterTextView.setText(String.valueOf(total));
-        }
-        mTrackersCount = total;
-        updateTotalCount();
-    }
-
-    /** Sets the hero summary number to ads + trackers blocked on this page. */
-    private void updateTotalCount() {
-        if (mTotalCountTextView != null) {
-            mTotalCountTextView.setText(String.valueOf(mAdsCount + mTrackersCount));
-        }
     }
 
 
@@ -402,14 +340,11 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         mHostText = null;
         mAdsSwitch = null;
         mTrackingSwitch = null;
-        mAdsCounterTextView = null;
-        mTrackersCounterTextView = null;
         mTotalCountTextView = null;
         mTrackingIcon = null;
         mTrackingSubtext = null;
         mHostImage = null;
         mAdsStatCard = null;
-        mTrackersStatCard = null;
         mView = null;
     }
 }

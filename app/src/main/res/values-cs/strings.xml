@@ -361,10 +361,7 @@
     </plurals>
     <string name="blocked_ads_detail_title">Zablokované reklamy</string>
     <string name="security_block_ads">Blokovat reklamy</string>
-    <string name="security_stat_scope_on_this_page">na této stránce</string>
-    <string name="security_stat_hero_caption">Reklamy a sledovače blokované na této stránce</string>
-    <string name="security_stat_ads_blocked">reklamy</string>
-    <string name="security_stat_trackers_blocked">sledovače</string>
     <string name="security_tracking_protection">Ochrana před sledováním</string>
+    <string name="security_stat_blocked_scope">blokováno na této stránce</string>
     <string name="tabs_incognito_empty">Žádné soukromé karty</string>
 </resources>

@@ -314,8 +314,5 @@
 
 
     <string name="tabs_incognito_empty">Tidak ada tab privat</string>
-    <string name="security_stat_scope_on_this_page">di halaman ini</string>
-    <string name="security_stat_hero_caption">Iklan &amp; pelacak diblokir di halaman ini</string>
-    <string name="security_stat_ads_blocked">iklan</string>
-    <string name="security_stat_trackers_blocked">pelacak</string>
+    <string name="security_stat_blocked_scope">diblokir di halaman ini</string>
 </resources>

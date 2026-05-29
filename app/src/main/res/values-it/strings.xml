@@ -389,10 +389,7 @@
     </plurals>
     <string name="blocked_ads_detail_title">Annunci bloccati</string>
     <string name="security_block_ads">Blocca annunci</string>
-    <string name="security_stat_scope_on_this_page">in questa pagina</string>
-    <string name="security_stat_hero_caption">Annunci e tracker bloccati in questa pagina</string>
-    <string name="security_stat_ads_blocked">annunci</string>
-    <string name="security_stat_trackers_blocked">tracker</string>
     <string name="security_tracking_protection">Protezione dal tracciamento</string>
+    <string name="security_stat_blocked_scope">bloccati in questa pagina</string>
     <string name="tabs_incognito_empty">Nessuna scheda privata</string>
 </resources>

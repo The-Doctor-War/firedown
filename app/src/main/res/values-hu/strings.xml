@@ -323,8 +323,5 @@
 
 
     <string name="tabs_incognito_empty">Nincsenek privát lapok</string>
-    <string name="security_stat_scope_on_this_page">ezen az oldalon</string>
-    <string name="security_stat_hero_caption">Hirdetések és követők letiltva ezen az oldalon</string>
-    <string name="security_stat_ads_blocked">hirdetések</string>
-    <string name="security_stat_trackers_blocked">követők</string>
+    <string name="security_stat_blocked_scope">letiltva ezen az oldalon</string>
 </resources>

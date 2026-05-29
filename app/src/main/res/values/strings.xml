@@ -342,12 +342,11 @@
     <!-- Hero summary on the security sheet: scope caption under the big
          combined block count, and the labels inside the ads / trackers
          drill-in chips. -->
-    <string name="security_stat_scope_on_this_page">on this page</string>
     <!-- Caption under the hero block-count total on the security sheet —
          spells out what the number counts. -->
-    <string name="security_stat_hero_caption">Ads &amp; trackers blocked on this page</string>
-    <string name="security_stat_ads_blocked">ads</string>
-    <string name="security_stat_trackers_blocked">trackers</string>
+    <!-- Security sheet summary row label, follows the count: "7 blocked
+         on this page". -->
+    <string name="security_stat_blocked_scope">blocked on this page</string>
     <string name="select_all">Select all</string>
     <string name="select_all_not">Deselect all</string>
     <string name="separator">-</string>

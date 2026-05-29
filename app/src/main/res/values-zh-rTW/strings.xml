@@ -341,8 +341,5 @@
 
 
     <string name="tabs_incognito_empty">沒有隱私分頁</string>
-    <string name="security_stat_scope_on_this_page">在此頁面</string>
-    <string name="security_stat_hero_caption">已在此頁面攔截的廣告與追蹤器</string>
-    <string name="security_stat_ads_blocked">廣告</string>
-    <string name="security_stat_trackers_blocked">追蹤器</string>
+    <string name="security_stat_blocked_scope">已在此頁面攔截</string>
 </resources>

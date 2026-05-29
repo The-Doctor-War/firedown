@@ -546,9 +546,6 @@
     </plurals>
     <string name="blocked_ads_detail_title">已拦截的广告</string>
     <string name="security_block_ads">拦截广告</string>
-    <string name="security_stat_scope_on_this_page">在此页面</string>
-    <string name="security_stat_hero_caption">已在此页面拦截的广告和跟踪器</string>
-    <string name="security_stat_ads_blocked">广告</string>
-    <string name="security_stat_trackers_blocked">跟踪器</string>
     <string name="security_tracking_protection">跟踪保护</string>
+    <string name="security_stat_blocked_scope">已在此页面拦截</string>
 </resources>

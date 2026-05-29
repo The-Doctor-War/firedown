@@ -119,154 +119,72 @@
         android:paddingBottom="8dp">
 
 
-        <!-- ── Blocked-on-this-page hero summary ──────────────────────
-            Big combined total + two drill-in chips (ads / trackers). The
-            chips keep the ads_stat_card / trackers_stat_card ids (drill
-            target) and the ads_counter / trackers_counter ids (the number
-            inside each), so the fragment's click wiring + count observers
-            are unchanged. The hero total (security_total_count) is the sum
-            of the two, set by the fragment. -->
+        <!-- ── Blocked-on-this-page summary ───────────────────────────
+            One quiet, left-aligned list row instead of a centered hero +
+            pills: "[N] blocked on this page  ›". The whole row drills into
+            the blocked-host list (BlockedAdsDetailDialogFragment — uBlock's
+            per-page blocked hosts, the meaningful "what got blocked here").
+            security_total_count holds the number (ads + trackers, set by the
+            fragment); id ads_stat_card stays so the existing drill wiring is
+            unchanged. Reads as a peer of the toggle / manage rows below —
+            controls are the content, the count is a quiet readout. -->
         <LinearLayout
+            android:id="@+id/ads_stat_card"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:gravity="center_horizontal"
-            android:orientation="vertical">
+            android:layout_height="56dp"
+            android:layout_marginTop="4dp"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="2dp">
 
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginEnd="16dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ic_shield_24"
+                app:tint="?attr/colorOnSurfaceVariant" />
 
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_horizontal"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="64dp"
-                    android:paddingVertical="16dp">
-
-                    <TextView
-                        android:id="@+id/security_total_count"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFeatureSettings="tnum"
-                        android:textColor="?attr/colorPrimary"
-                        android:textSize="40sp"
-                        android:textStyle="bold"
-                        tools:text="38" />
-
-                    <TextView
-                        style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:gravity="center"
-                        android:text="@string/security_stat_hero_caption"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                </LinearLayout>
-
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/security_total_count"
+                style="@style/TextAppearance.Material3.TitleMedium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                android:orientation="horizontal">
+                android:fontFeatureSettings="tnum"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="15sp"
+                tools:text="7" />
 
-                <!-- Ads chip → BlockedAdsDetailDialogFragment. Plain pill;
-                     the big total above is the card. -->
-                <LinearLayout
-                    android:id="@+id/ads_stat_card"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_security_count_pill"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="8dp"
-                    android:paddingVertical="8dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="@string/security_stat_blocked_scope"
+                android:textColor="?attr/colorOnSurface"
+                android:textSize="15sp" />
 
-                    <TextView
-                        android:id="@+id/ads_counter"
-                        style="@style/TextAppearance.Material3.TitleMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFeatureSettings="tnum"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="15sp"
-                        tools:text="24" />
-
-                    <TextView
-                        style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="@string/security_stat_ads_blocked"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="2dp"
-                        android:contentDescription="@null"
-                        app:srcCompat="@drawable/ic_chevron_right_24"
-                        app:tint="?attr/colorOnSurfaceVariant" />
-
-                </LinearLayout>
-
-                <!-- Trackers chip → BlockedTrackersDetailDialogFragment -->
-                <LinearLayout
-                    android:id="@+id/trackers_stat_card"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/bg_security_count_pill"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:paddingStart="14dp"
-                    android:paddingEnd="8dp"
-                    android:paddingVertical="8dp">
-
-                    <TextView
-                        android:id="@+id/trackers_counter"
-                        style="@style/TextAppearance.Material3.TitleMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:fontFeatureSettings="tnum"
-                        android:textColor="?attr/colorOnSurface"
-                        android:textSize="15sp"
-                        tools:text="14" />
-
-                    <TextView
-                        style="@style/TextAppearance.Material3.BodyMedium"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="6dp"
-                        android:text="@string/security_stat_trackers_blocked"
-                        android:textColor="?attr/colorOnSurfaceVariant" />
-
-                    <androidx.appcompat.widget.AppCompatImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:layout_marginStart="2dp"
-                        android:contentDescription="@null"
-                        app:srcCompat="@drawable/ic_chevron_right_24"
-                        app:tint="?attr/colorOnSurfaceVariant" />
-
-                </LinearLayout>
-
-            </LinearLayout>
+            <androidx.appcompat.widget.AppCompatImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="@null"
+                app:srcCompat="@drawable/ic_chevron_right_24"
+                app:tint="?attr/colorOnSurfaceVariant" />
 
         </LinearLayout>
 
 
-        <!-- Group divider — hero summary above, protection toggles below. -->
+        <!-- Group divider — summary above, protection toggles below. -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:layout_marginBottom="4dp"
             android:background="?attr/colorOutlineVariant" />
 

@@ -343,10 +343,7 @@
     </plurals>
     <string name="blocked_ads_detail_title">Blokerede reklamer</string>
     <string name="security_block_ads">Bloker reklamer</string>
-    <string name="security_stat_scope_on_this_page">på denne side</string>
-    <string name="security_stat_hero_caption">Annoncer og sporere blokeret på denne side</string>
-    <string name="security_stat_ads_blocked">annoncer</string>
-    <string name="security_stat_trackers_blocked">sporere</string>
     <string name="security_tracking_protection">Sporingsbeskyttelse</string>
+    <string name="security_stat_blocked_scope">blokeret på denne side</string>
     <string name="tabs_incognito_empty">Ingen private faner</string>
 </resources>

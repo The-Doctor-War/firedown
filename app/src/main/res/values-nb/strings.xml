@@ -268,9 +268,6 @@
 
 
 
-    <string name="security_stat_ads_blocked">Annonser blokkert</string>
-    <string name="security_stat_trackers_blocked">Sporere blokkert</string>
-    <string name="security_stat_scope_on_this_page">på denne siden</string>
     <plurals name="blocked_ads_summary">
         <item quantity="one">%d forespørsel blokkert på denne siden</item>
         <item quantity="other">%d forespørsler blokkert på denne siden</item>

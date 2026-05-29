@@ -5,30 +5,25 @@
     Sections (top → bottom):
       1. Site identity header (favicon + host + URL) — anchors the
          sheet to a specific site.
-      2. PROTECTION section — Block ads toggle, Tracking protection
-         toggle (with subtext describing the current state). Moved to
-         the top: protection toggles are the primary reason users
-         open this sheet, and they double as the legend for the
-         "Blocked on this page" rows below.
-      3. BLOCKED ON THIS PAGE section — two list rows (Ads, Trackers)
-         showing the per-page block count as a trailing number with a
-         chevron. Tap drills into the per-mechanism detail sheet:
+      2. PROTECTION section — one row per mechanism (Block ads,
+         Tracking protection). Each row merges the protection toggle
+         with that mechanism's live per-page block count: the count is
+         a tappable pill (drills into the detail sheet), the switch
+         flips protection. Previously these were split across two
+         sections — a PROTECTION toggle row and a separate BLOCKED ON
+         THIS PAGE count row — which showed each concept (and its icon)
+         twice. Detail sheets:
            - Ads → BlockedAdsDetailDialogFragment (uBlock blocks)
            - Trackers → BlockedTrackersDetailDialogFragment (ETP blocks)
-         Previously these were two clickable stat cards sharing a
-         style with TrackersInfoSheet's three-card stat row — same
-         visual, different interaction (TrackersInfoSheet's cards
-         are passive numbers). The list-row format makes the tap
-         affordance explicit and removes the SecuritySheet ↔
-         TrackersInfoSheet visual collision.
-      4. MANAGE section — Connection (drill-down to cert details),
+      3. MANAGE section — Connection (drill-down to cert details),
          Clear browsing data (drill-down).
 
-    All row IDs (ads_stat_card, trackers_stat_card, ads_counter,
+    All IDs (ads_stat_card, trackers_stat_card, ads_counter,
     trackers_counter, ads_toogle, tracking_toogle, tracking_subtext,
     tracking_icon, host_secure, host_secure_text, host_clear) are
-    preserved from the previous layout so the fragment's findViewById
-    + click-handler wiring stays untouched.
+    preserved — relocated into the merged rows — so the fragment's
+    findViewById + click-handler wiring stays untouched. The count pills
+    keep the ads_stat_card / trackers_stat_card ids as the drill target.
 
     Outer LinearLayout is left unpadded because
     BaseBottomSheetDialogFragment's window-insets listener applies
@@ -124,24 +119,29 @@
         android:paddingBottom="8dp">
 
 
-        <!-- ── Protection toggles ─────────────────────────────────── -->
-        <!-- Block ads + Tracking protection — placed at the top
-             because they're the primary reason users open this
-             sheet, and they double as the legend for the count
-             rows below. -->
-
-
+        <!-- ── Protection ─────────────────────────────────────────── -->
         <!--
-            Block ads — toggle row. The row's whole surface is the
-            click target; the switch carries duplicateParentState so
-            tapping anywhere in the row flips it, matching how the
-            popup's Desktop site row behaves.
+            One row per protection mechanism (Block ads, Tracking
+            protection). Each row merges what used to be split across two
+            sections: the toggle that governs the mechanism AND the live
+            per-page block count for it. Two trailing controls:
+              • count pill (ads_stat_card / trackers_stat_card) — the
+                drill-in target into the per-mechanism detail sheet;
+              • switch (ads_toogle / tracking_toogle) — flips protection.
+            The label area itself is inert, so the two actions never
+            collide. All IDs are preserved from the previous two-section
+            layout, so the fragment's findViewById + listener wiring is
+            unchanged.
         -->
+
+
+        <!-- Block ads -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
+            android:minHeight="60dp"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -163,21 +163,52 @@
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="15sp" />
 
+            <!-- Count pill — drills into BlockedAdsDetailDialogFragment.
+                 ID + counter ID preserved (ads_stat_card / ads_counter). -->
+            <LinearLayout
+                android:id="@+id/ads_stat_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_security_count_pill"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minWidth="56dp"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="6dp"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:id="@+id/ads_counter"
+                    style="@style/TextAppearance.Material3.TitleMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="15sp"
+                    tools:text="24" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="2dp"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+            </LinearLayout>
+
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/ads_toogle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
 
-        <!--
-            Tracking protection — toggle row with a subtitle line for
-            the "if something looks broken, try turning it off" hint.
-            Subtitle copy is swapped in updateTrackingUI based on the
-            current toggle state.
-        -->
+        <!-- Tracking protection (with state-dependent subtext) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -221,186 +252,54 @@
 
             </LinearLayout>
 
+            <!-- Count pill — drills into BlockedTrackersDetailDialogFragment.
+                 ID + counter ID preserved (trackers_stat_card / trackers_counter). -->
+            <LinearLayout
+                android:id="@+id/trackers_stat_card"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_security_count_pill"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center_vertical"
+                android:minWidth="56dp"
+                android:orientation="horizontal"
+                android:paddingStart="12dp"
+                android:paddingEnd="6dp"
+                android:paddingVertical="6dp">
+
+                <TextView
+                    android:id="@+id/trackers_counter"
+                    style="@style/TextAppearance.Material3.TitleMedium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFeatureSettings="tnum"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="15sp"
+                    tools:text="14" />
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:layout_marginStart="2dp"
+                    android:contentDescription="@null"
+                    app:srcCompat="@drawable/ic_chevron_right_24"
+                    app:tint="?attr/colorOnSurfaceVariant" />
+
+            </LinearLayout>
+
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/tracking_toogle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp" />
+                android:layout_height="wrap_content" />
 
         </LinearLayout>
 
 
-        <!-- Group divider — separates the protection toggles above
-             from the per-page block counts below. colorOutlineVariant
-             at 1dp matches the standard M3 inline divider. -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="12dp"
-            android:layout_marginBottom="4dp"
-            android:background="?attr/colorOutlineVariant" />
-
-
-        <!--
-            Ads row. Two-line: title (label) + subtitle ("on this
-            page") so the row is self-sufficient now that the
-            BLOCKED ON THIS PAGE section header is gone. Same shape
-            as the Tracking protection row above. Tap drills into
-            BlockedAdsDetailDialogFragment. IDs preserved
-            (ads_stat_card, ads_counter) so the fragment's
-            findViewById + setOnClickListener wiring stays untouched.
-        -->
-        <LinearLayout
-            android:id="@+id/ads_stat_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:minHeight="64dp"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                app:srcCompat="@drawable/ads_click_24"
-                app:tint="?attr/colorOnSurfaceVariant" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/security_stat_ads_blocked"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/security_stat_scope_on_this_page"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <!-- Tabular-numeric so the count column lines up between
-                 the Ads and Trackers rows even as values shift. -->
-            <TextView
-                android:id="@+id/ads_counter"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:fontFeatureSettings="tnum"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="15sp"
-                tools:text="24" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:contentDescription="@null"
-                app:srcCompat="@drawable/ic_chevron_right_24"
-                app:tint="?attr/colorOnSurfaceVariant" />
-
-        </LinearLayout>
-
-
-        <!--
-            Trackers row. Tap drills into
-            BlockedTrackersDetailDialogFragment, gated in the fragment
-            on (mTrackingEnabledForSite && mTrackersBlockedTotal > 0).
-            ID preserved as trackers_stat_card. Counter preserved as
-            trackers_counter.
-        -->
-        <LinearLayout
-            android:id="@+id/trackers_stat_card"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/selectableItemBackground"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical"
-            android:minHeight="64dp"
-            android:orientation="horizontal"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp">
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginEnd="16dp"
-                android:contentDescription="@null"
-                app:srcCompat="@drawable/ic_shield_24"
-                app:tint="?attr/colorOnSurfaceVariant" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/security_stat_trackers_blocked"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:ellipsize="end"
-                    android:maxLines="1"
-                    android:text="@string/security_stat_scope_on_this_page"
-                    android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="12sp" />
-
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/trackers_counter"
-                style="@style/TextAppearance.Material3.TitleMedium"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="12dp"
-                android:fontFeatureSettings="tnum"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="15sp"
-                tools:text="14" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:contentDescription="@null"
-                app:srcCompat="@drawable/ic_chevron_right_24"
-                app:tint="?attr/colorOnSurfaceVariant" />
-
-        </LinearLayout>
-
-
-        <!-- Group divider — separates the count rows above from the
-             site-management actions below. -->
+        <!-- Group divider — separates protection from the site-management
+             actions below. -->
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"

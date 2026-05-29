@@ -541,9 +541,6 @@
 
 
 
-    <string name="security_stat_ads_blocked">已拦截广告</string>
-    <string name="security_stat_trackers_blocked">已拦截跟踪器</string>
-    <string name="security_stat_scope_on_this_page">在此页面</string>
     <plurals name="blocked_ads_summary">
         <item quantity="other">本页面已拦截 %d 个请求</item>
     </plurals>

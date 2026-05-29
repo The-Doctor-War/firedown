@@ -381,9 +381,6 @@
 
 
 
-    <string name="security_stat_ads_blocked">광고 차단됨</string>
-    <string name="security_stat_trackers_blocked">추적기 차단됨</string>
-    <string name="security_stat_scope_on_this_page">이 페이지에서</string>
     <plurals name="blocked_ads_summary">
         <item quantity="other">이 페이지에서 요청 %d개 차단됨</item>
     </plurals>

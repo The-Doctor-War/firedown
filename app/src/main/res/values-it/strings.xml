@@ -383,9 +383,6 @@
 
 
 
-    <string name="security_stat_ads_blocked">Annunci bloccati</string>
-    <string name="security_stat_trackers_blocked">Tracker bloccati</string>
-    <string name="security_stat_scope_on_this_page">in questa pagina</string>
     <plurals name="blocked_ads_summary">
         <item quantity="one">%d richiesta bloccata in questa pagina</item>
         <item quantity="other">%d richieste bloccate in questa pagina</item>

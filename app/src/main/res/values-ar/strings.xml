@@ -351,9 +351,6 @@
 
 
 
-    <string name="security_stat_ads_blocked">تم حظر الإعلانات</string>
-    <string name="security_stat_trackers_blocked">تم حظر المتعقبات</string>
-    <string name="security_stat_scope_on_this_page">في هذه الصفحة</string>
     <plurals name="blocked_ads_summary">
         <item quantity="one">تم حظر %d طلب على هذه الصفحة</item>
         <item quantity="other">تم حظر %d طلب على هذه الصفحة</item>

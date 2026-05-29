@@ -541,9 +541,6 @@
 
 
 
-    <string name="security_stat_ads_blocked">広告をブロック</string>
-    <string name="security_stat_trackers_blocked">トラッカーをブロック</string>
-    <string name="security_stat_scope_on_this_page">このページで</string>
     <plurals name="blocked_ads_summary">
         <item quantity="other">このページで %d 件のリクエストをブロック</item>
     </plurals>

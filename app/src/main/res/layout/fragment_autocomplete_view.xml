@@ -19,20 +19,21 @@
 
     <!--
         Single Material 3 container card holding the suggestion list. It
-        fills the space under the address bar (height 0 + weight 1) so a long
-        list scrolls inside it rather than overflowing the keyboard. The card
-        is GONE while empty (its only child, search_view, drives content) so
-        no blank panel shows; the existing showEmpty()/hideAll() toggles on
-        search_view stay the source of truth and the card mirrors them.
-        Rows are flat inside — the card supplies the one rounded surface
-        (replaces the old per-row cards whose corners were morphed by
-        position to fake a single container).
+        wraps its content (the RecyclerView is wrap_content too) so the card
+        grows and shrinks with the number of suggestions instead of showing
+        a tall fixed panel under the address bar. The result set is small and
+        capped (search/tab/history limits), so wrap_content never overflows
+        in practice. The card is GONE while empty (its only child drives the
+        content) so no blank surface shows; showEmpty()/hideAll() on
+        search_view stay the source of truth and the card mirrors them. Rows
+        are flat inside — the card supplies the one rounded surface (replaces
+        the old per-row cards whose corners were morphed by position to fake
+        a single container).
     -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/search_card"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/address_bar_margin"
         android:layout_marginEnd="@dimen/address_bar_margin"
         android:layout_marginTop="6dp"
@@ -45,7 +46,7 @@
         <com.solarized.firedown.autocomplete.AutoCompleteRecyclerView
             android:id="@+id/search_view"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:clipToPadding="false"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"

@@ -264,8 +264,6 @@
     <string name="vault_unsupported">Ezin da fitxategi hau ireki. Irekitzeko, atera karpeta segurutik eta saiatu berriro.</string>
     <string name="bookmark_name">Izena</string>
     <string name="home_vault_button">Karpeta segurua</string>
-    <string name="home_media_playing">Erreproduzitzen</string>
-    <string name="home_media_paused">Pausatuta</string>
 <string name="settings_theme_app_category">Aplikazioaren itxura</string>
     <string name="settings_theme_home_category">Hasiera-orria</string>
     <string name="settings_home_cards">Hasierako txartelak</string>

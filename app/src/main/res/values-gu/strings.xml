@@ -205,8 +205,6 @@
     <string name="vault_encrypting">ફાઇલ એન્ક્રિપ્ટ કરી રહ્યું છે, કૃપા કરીને રાહ જુઓ…</string>
     <string name="vault_unsupported">આ ફાઇલ ખોલી શકાતી નથી. ખોલવા માટે, તેને સેફ ફોલ્ડરની બહાર ખસેડો અને ફરી પ્રયાસ કરો.</string>
     <string name="home_vault_button">સુરક્ષિત ફોલ્ડર</string>
-    <string name="home_media_playing">ચલાવી રહ્યું છે</string>
-    <string name="home_media_paused">થોભાવ્યું</string>
 <string name="settings_theme_app_category">ઍપ થીમ</string>
     <string name="settings_theme_home_category">હોમ સ્ક્રીન</string>
     <string name="settings_home_cards">હોમ કાર્ડ</string>

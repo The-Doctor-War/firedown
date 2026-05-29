@@ -251,8 +251,6 @@
     <string name="vault_unsupported">ఈ ఫైల్‌ను తెరవడం సాధ్యపడదు. తెరవడానికి, సురక్షిత ఫోల్డర్ నుండి దాన్ని తరలించి, మళ్లీ ప్రయత్నించండి.</string>
     <string name="bookmark_name">పేరు</string>
     <string name="home_vault_button">సురక్షిత ఫోల్డర్</string>
-    <string name="home_media_playing">ప్లే అవుతోంది</string>
-    <string name="home_media_paused">పాజ్ చేయబడింది</string>
 <string name="settings_theme_app_category">యాప్ థీమ్</string>
     <string name="settings_theme_home_category">హోమ్ స్క్రీన్</string>
     <string name="settings_home_cards">హోమ్ కార్డ్‌లు</string>

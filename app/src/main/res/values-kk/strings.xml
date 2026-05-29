@@ -263,8 +263,6 @@
     <string name="vault_unsupported">Бұл файлды ашу мүмкін емес. Ашу үшін оны қауіпсіз қалтадан шығарып, әрекетті қайталаңыз.</string>
     <string name="bookmark_name">Аты</string>
     <string name="home_vault_button">Қауіпсіз қалта</string>
-    <string name="home_media_playing">Ойнатылуда</string>
-    <string name="home_media_paused">Кідіртілді</string>
 <string name="settings_theme_app_category">Қолданба тақырыбы</string>
     <string name="settings_theme_home_category">Басты бет</string>
     <string name="settings_home_cards">Басты бет карточкалары</string>

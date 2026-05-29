@@ -249,8 +249,6 @@
     <string name="vault_encrypting">Fayl shifrlanmoqda, kuting…</string>
     <string name="vault_unsupported">Bu faylni ochib boʻlmadi. Ochish uchun uni xavfsiz jilddan olib tashlang va qaytadan urinib ko‘ring.</string>
     <string name="home_vault_button">Xavfsiz jild</string>
-    <string name="home_media_playing">Ijro etilmoqda</string>
-    <string name="home_media_paused">Toʻxtatilgan</string>
 <string name="settings_theme_app_category">Ilova mavzusi</string>
     <string name="settings_theme_home_category">Bosh sahifa</string>
     <string name="settings_home_cards">Bosh sahifa kartalari</string>

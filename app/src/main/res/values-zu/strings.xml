@@ -208,8 +208,6 @@
     <string name="vault_encrypting">Ibethela ifayela, sicela ulinde…</string>
     <string name="vault_unsupported">Ayikwazi ukuvula leli fayela. Ukuze uyivule, ikhiphe Kufolda Evikelekile bese uzama futhi.</string>
     <string name="home_vault_button">Ifolda ephephile</string>
-    <string name="home_media_playing">Iyadlala</string>
-    <string name="home_media_paused">Imisiwe</string>
 <string name="settings_theme_app_category">Itimu yohlelo lokusebenza</string>
     <string name="settings_theme_home_category">Isikrini sasekhaya</string>
     <string name="settings_home_cards">Amakhadi asekhaya</string>

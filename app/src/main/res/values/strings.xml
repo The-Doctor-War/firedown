@@ -138,12 +138,6 @@
     <!-- Trailing-action label on the home recent-downloads card. Kept
          short so it fits next to the section title on narrow phones
          even in longer Romance / Slavic locales. -->
-    <!-- Section header on the home media strip — shown while a tab
-         is actively producing audio / video. Pairs with
-         home_media_paused for the paused-but-spotlit state so the
-         user can resume from the card. -->
-    <string name="home_media_playing">Playing</string>
-    <string name="home_media_paused">Paused</string>
     <!-- Section header on the home active-download strip when there
          are more downloads in flight than the single one the card
          shows. %1$d is the count of additional downloads beyond the

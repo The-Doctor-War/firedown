@@ -264,8 +264,6 @@
     <string name="vault_unsupported">Не могу да отворим ову датотеку. Да бисте отворили, преместите је из безбедне фасцикле и покушајте поново.</string>
     <string name="bookmark_name">Назив</string>
     <string name="home_vault_button">Безбедан фолдер</string>
-    <string name="home_media_playing">Репродукција</string>
-    <string name="home_media_paused">Паузирано</string>
 <string name="settings_theme_app_category">Тема апликације</string>
     <string name="settings_theme_home_category">Почетни екран</string>
     <string name="settings_home_cards">Картице почетног екрана</string>

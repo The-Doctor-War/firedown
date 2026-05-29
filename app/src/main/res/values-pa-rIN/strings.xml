@@ -248,8 +248,6 @@
     <string name="vault_unsupported">ਇਸ ਫ਼ਾਈਲ ਨੂੰ ਖੋਲ੍ਹਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ। ਖੋਲ੍ਹਣ ਲਈ, ਇਸਨੂੰ ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ ਤੋਂ ਬਾਹਰ ਲੈ ਜਾਓ ਅਤੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
     <string name="bookmark_name">ਨਾਂ</string>
     <string name="home_vault_button">ਸੁਰੱਖਿਅਤ ਫੋਲਡਰ</string>
-    <string name="home_media_playing">ਚੱਲ ਰਿਹਾ ਹੈ</string>
-    <string name="home_media_paused">ਰੁਕਿਆ</string>
 <string name="settings_theme_app_category">ایپ تھیم</string>
     <string name="settings_theme_home_category">ہوم اسکرین</string>
     <string name="settings_home_cards">ہوم کارڈز</string>

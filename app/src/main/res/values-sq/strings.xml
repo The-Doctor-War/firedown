@@ -262,8 +262,6 @@
     <string name="vault_unsupported">Ky skedar nuk mund të hapet. Për ta hapur, zhvendoseni atë nga \"Dosja e sigurt\" dhe provoni përsëri.</string>
     <string name="bookmark_name">Emër</string>
     <string name="home_vault_button">Dosja e sigurt</string>
-    <string name="home_media_playing">Po luan</string>
-    <string name="home_media_paused">Në pauzë</string>
 <string name="settings_theme_app_category">Tema e aplikacionit</string>
     <string name="settings_theme_home_category">Faqja kryesore</string>
     <string name="settings_home_cards">Kartat e faqes kryesore</string>

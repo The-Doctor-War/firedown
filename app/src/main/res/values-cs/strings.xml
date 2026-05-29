@@ -293,8 +293,6 @@
     <string name="pip_play">Přehrát</string>
     <string name="pip_pause">Pozastavit</string>
     <string name="home_vault_button">Bezpečná složka</string>
-    <string name="home_media_playing">Přehrává se</string>
-    <string name="home_media_paused">Pozastaveno</string>
     <string name="settings_webrtc_enabled_summary">Umožňuje videohovory a hlasové hovory v reálném čase. Vypnutí zmenšuje plochu pro síťové sondování.</string>
     <string name="incognito_home_description">Při prohlížení v anonymním okně Firedown neukládá:</string>
     <string name="incognito_home_warning">Anonymní prohlížení neskrývá vaši aktivitu před sítí, zaměstnavatelem ani navštívenými stránkami.</string>

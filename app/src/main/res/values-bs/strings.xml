@@ -263,8 +263,6 @@
     <string name="vault_unsupported">Ne mogu otvoriti ovaj fajl. Da ga otvorite, premjestite ga iz sigurnog foldera i pokušajte ponovo.</string>
     <string name="bookmark_name">Naziv</string>
     <string name="home_vault_button">Sigurni folder</string>
-    <string name="home_media_playing">Reprodukcija</string>
-    <string name="home_media_paused">Pauzirano</string>
 <string name="settings_theme_app_category">Tema aplikacije</string>
     <string name="settings_theme_home_category">Početni ekran</string>
     <string name="settings_home_cards">Kartice početnog ekrana</string>

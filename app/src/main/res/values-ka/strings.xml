@@ -263,8 +263,6 @@
     <string name="vault_unsupported">Ამ ფაილის გახსნა შეუძლებელია. გასახსნელად გადაიტანეთ ის უსაფრთხო საქაღალდიდან და სცადეთ ხელახლა.</string>
     <string name="bookmark_name">სახელი</string>
     <string name="home_vault_button">დაცული საქაღალდე</string>
-    <string name="home_media_playing">უკრავს</string>
-    <string name="home_media_paused">შეჩერებულია</string>
 <string name="settings_theme_app_category">აპლიკაციის თემა</string>
     <string name="settings_theme_home_category">მთავარი გვერდი</string>
     <string name="settings_home_cards">მთავარი გვერდის ბარათები</string>

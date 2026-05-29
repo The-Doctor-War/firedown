@@ -251,8 +251,6 @@
     <string name="vault_encrypting">Šifruojamas failas, prašom palaukti…</string>
     <string name="vault_unsupported">Nepavyko atidaryti šio failo. Norėdami atidaryti, iškelkite jį iš saugaus aplanko ir bandykite dar kartą.</string>
     <string name="home_vault_button">Saugus aplankas</string>
-    <string name="home_media_playing">Grojama</string>
-    <string name="home_media_paused">Pristabdyta</string>
 <string name="settings_theme_app_category">Programos tema</string>
     <string name="settings_theme_home_category">Pradžios ekranas</string>
     <string name="settings_home_cards">Pradžios ekrano kortelės</string>

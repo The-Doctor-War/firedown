@@ -263,8 +263,6 @@
     <string name="vault_unsupported">ይህን ፋይል መክፈት አልተቻለም። ለመክፈት ደህንነቱ ከተጠበቀ አቃፊ አውጥተው ይውሰዱ እና እንደገና ይሞክሩ።</string>
     <string name="bookmark_name">ስም</string>
     <string name="home_vault_button">ደህንነቱ የተጠበቀ አቃፊ</string>
-    <string name="home_media_playing">በማጫወት ላይ</string>
-    <string name="home_media_paused">ቆሟል</string>
 <string name="settings_theme_app_category">የመተግበሪያ ገጽታ</string>
     <string name="settings_theme_home_category">መነሻ ማያ ገጽ</string>
     <string name="settings_home_cards">የመነሻ ካርዶች</string>

@@ -253,8 +253,6 @@
     <string name="vault_unsupported">ഈ ഫയൽ തുറക്കാൻ കഴിയില്ല. തുറക്കാൻ, അത് സുരക്ഷിത ഫോൾഡറിൽ നിന്ന് നീക്കി വീണ്ടും ശ്രമിക്കുക.</string>
     <string name="bookmark_name">പേരു്</string>
     <string name="home_vault_button">സുരക്ഷിത ഫോൾഡർ</string>
-    <string name="home_media_playing">പ്ലേ ചെയ്യുന്നു</string>
-    <string name="home_media_paused">താൽക്കാലികമായി നിർത്തി</string>
 <string name="settings_theme_app_category">ആപ്പ് തീം</string>
     <string name="settings_theme_home_category">ഹോം സ്ക്രീൻ</string>
     <string name="settings_home_cards">ഹോം കാർഡുകൾ</string>

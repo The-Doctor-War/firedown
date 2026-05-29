@@ -275,8 +275,6 @@
     <string name="vault_unsupported">Файлът не може да се отвори. За да го отворите, го преместете от Защитената папка и опитайте отново.</string>
     <string name="bookmark_name">Име</string>
     <string name="home_vault_button">Защитена папка</string>
-    <string name="home_media_playing">Възпроизвежда се</string>
-    <string name="home_media_paused">На пауза</string>
 <string name="settings_theme_app_category">Тема на приложението</string>
     <string name="settings_theme_home_category">Начален екран</string>
     <string name="settings_home_cards">Карти на началния екран</string>

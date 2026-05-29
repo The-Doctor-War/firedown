@@ -260,8 +260,6 @@
     <string name="vault_unsupported">Ekki er hægt að opna þessa skrá. Til að opna skaltu færa það úr öruggri möppu og reyna aftur.</string>
     <string name="bookmark_name">Heiti</string>
     <string name="home_vault_button">Örugg mappa</string>
-    <string name="home_media_playing">Spilar</string>
-    <string name="home_media_paused">Í bið</string>
 <string name="settings_theme_app_category">Þema forrits</string>
     <string name="settings_theme_home_category">Forsíða</string>
     <string name="settings_home_cards">Forsíðuspjöld</string>

@@ -263,8 +263,6 @@
     <string name="vault_unsupported">Non se pode abrir este ficheiro. Para abrilo, saia do cartafol seguro e téntao de novo.</string>
     <string name="bookmark_name">Nome</string>
     <string name="home_vault_button">Cartafol seguro</string>
-    <string name="home_media_playing">Reproducindo</string>
-    <string name="home_media_paused">En pausa</string>
 <string name="settings_theme_app_category">Tema da aplicación</string>
     <string name="settings_theme_home_category">Páxina de inicio</string>
     <string name="settings_home_cards">Tarxetas de inicio</string>

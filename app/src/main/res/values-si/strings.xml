@@ -254,8 +254,6 @@
     <string name="vault_unsupported">මෙම ගොනුව විවෘත කළ නොහැක. විවෘත කිරීමට, එය ආරක්ෂිත ෆෝල්ඩරයෙන් පිටතට ගෙන ගොස් නැවත උත්සාහ කරන්න.</string>
     <string name="bookmark_name">නම</string>
     <string name="home_vault_button">ආරක්ෂිත ෆෝල්ඩරය</string>
-    <string name="home_media_playing">වාදනය වෙමින්</string>
-    <string name="home_media_paused">විරාම කර ඇත</string>
 <string name="settings_theme_app_category">යෙදුම් තේමාව</string>
     <string name="settings_theme_home_category">මුල් පිටුව</string>
     <string name="settings_home_cards">මුල් පිටුවේ කාඩ්පත්</string>

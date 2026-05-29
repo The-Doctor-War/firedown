@@ -239,8 +239,6 @@
     <string name="vault_encrypting">கோப்பை என்க்ரிப்ட் செய்கிறது, காத்திருக்கவும்…</string>
     <string name="vault_unsupported">இந்தக் கோப்பைத் திறக்க முடியவில்லை. திறக்க, பாதுகாப்பான கோப்புறையிலிருந்து அதை நகர்த்தி மீண்டும் முயற்சிக்கவும்.</string>
     <string name="home_vault_button">பாதுகாப்பான ஃபோல்டர்</string>
-    <string name="home_media_playing">இயக்கப்படுகிறது</string>
-    <string name="home_media_paused">இடைநிறுத்தப்பட்டது</string>
 <string name="settings_theme_app_category">ஆப் தீம்</string>
     <string name="settings_theme_home_category">முகப்புத் திரை</string>
     <string name="settings_home_cards">முகப்பு கார்டுகள்</string>

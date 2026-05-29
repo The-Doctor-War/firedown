@@ -287,8 +287,6 @@
     <string name="pip_play">Afspil</string>
     <string name="pip_pause">Pause</string>
     <string name="home_vault_button">Sikker mappe</string>
-    <string name="home_media_playing">Afspiller</string>
-    <string name="home_media_paused">Sat på pause</string>
     <string name="settings_webrtc_enabled_summary">Tillader video- og taleopkald i realtid. Deaktivering reducerer netværkssonderingsfladen.</string>
     <string name="incognito_home_description">Når du surfer i et privat vindue, gemmer Firedown ikke:</string>
     <string name="incognito_home_warning">Privat browsing skjuler ikke din aktivitet for dit netværk, din arbejdsgiver eller de sider, du besøger.</string>

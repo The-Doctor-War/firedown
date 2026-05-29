@@ -211,8 +211,6 @@
     <string name="vault_encrypting">Inasimba faili, tafadhali subiri…</string>
     <string name="vault_unsupported">Haiwezi kufungua faili hii. Ili kuifungua, iondoe kwenye Folda Salama na ujaribu tena.</string>
     <string name="home_vault_button">Folda salama</string>
-    <string name="home_media_playing">Inacheza</string>
-    <string name="home_media_paused">Imesimamishwa</string>
 <string name="settings_theme_app_category">Mandhari ya programu</string>
     <string name="settings_theme_home_category">Skrini ya nyumbani</string>
     <string name="settings_home_cards">Kadi za skrini ya nyumbani</string>

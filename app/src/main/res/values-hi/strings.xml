@@ -230,8 +230,6 @@
     <string name="vault_encrypting">फ़ाइल एन्क्रिप्ट की जा रही है, कृपया प्रतीक्षा करें…</string>
     <string name="vault_unsupported">यह फ़ाइल नहीं खुल सकती. खोलने के लिए, इसे सुरक्षित फ़ोल्डर से बाहर निकालें और पुनः प्रयास करें.</string>
     <string name="home_vault_button">सुरक्षित फ़ोल्डर</string>
-    <string name="home_media_playing">चल रहा है</string>
-    <string name="home_media_paused">रोका गया</string>
 <string name="settings_theme_app_category">ऐप थीम</string>
     <string name="settings_theme_home_category">होम स्क्रीन</string>
     <string name="settings_home_cards">होम कार्ड</string>

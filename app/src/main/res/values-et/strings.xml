@@ -259,8 +259,6 @@
     <string name="vault_unsupported">Seda faili ei saa avada. Avamiseks teisaldage see turvalisest kaustast välja ja proovige uuesti.</string>
     <string name="bookmark_name">Nimi</string>
     <string name="home_vault_button">Turvaline kaust</string>
-    <string name="home_media_playing">Esitamine</string>
-    <string name="home_media_paused">Peatatud</string>
 <string name="settings_theme_app_category">Rakenduse teema</string>
     <string name="settings_theme_home_category">Avaleht</string>
     <string name="settings_home_cards">Avalehe kaardid</string>

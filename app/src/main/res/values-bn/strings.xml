@@ -244,8 +244,6 @@
     <string name="vault_encrypting">ফাইল এনক্রিপ্ট করা হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন…</string>
     <string name="vault_unsupported">এই ফাইলটি খুলতে পারছি না। খুলতে, এটিকে নিরাপদ ফোল্ডার থেকে সরান এবং আবার চেষ্টা করুন।</string>
     <string name="home_vault_button">নিরাপদ ফোল্ডার</string>
-    <string name="home_media_playing">চলছে</string>
-    <string name="home_media_paused">বিরতি</string>
 <string name="settings_theme_app_category">অ্যাপ থিম</string>
     <string name="settings_theme_home_category">হোম স্ক্রিন</string>
     <string name="settings_home_cards">হোম কার্ড</string>

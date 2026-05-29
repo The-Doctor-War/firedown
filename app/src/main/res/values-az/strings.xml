@@ -234,8 +234,6 @@
     <string name="vault_encrypting">Fayl şifrələnir, gözləyin…</string>
     <string name="vault_unsupported">Bu faylı açmaq mümkün deyil. Açmaq üçün onu Təhlükəsiz Qovluqdan çıxarın və yenidən cəhd edin.</string>
     <string name="home_vault_button">Təhlükəsiz Qovluq</string>
-    <string name="home_media_playing">Oxudulur</string>
-    <string name="home_media_paused">Dayandırıldı</string>
 <string name="settings_theme_app_category">Tətbiq mövzusu</string>
     <string name="settings_theme_home_category">Ana səhifə</string>
     <string name="settings_home_cards">Ana səhifə kartları</string>

@@ -244,8 +244,6 @@
     <string name="vault_encrypting">ဖိုင်ကို ကုဒ်ဝှက်နေသည်၊ ခဏစောင့်ပါ…</string>
     <string name="vault_unsupported">ဤဖိုင်ကို ဖွင့်၍မရပါ။ ဖွင့်ရန်၊ ၎င်းကို Safe Folder မှရွှေ့ပြီး ထပ်စမ်းကြည့်ပါ။</string>
     <string name="home_vault_button">"'လုံခြုံရေး' ဖိုင်တွဲ"</string>
-    <string name="home_media_playing">ဖွင့်ထားသည်</string>
-    <string name="home_media_paused">ခေတ္တရပ်ထား</string>
 <string name="settings_theme_app_category">အက်ပ်အပြင်အဆင်</string>
     <string name="settings_theme_home_category">ပင်မစာမျက်နှာ</string>
     <string name="settings_home_cards">ပင်မစာမျက်နှာ ကတ်များ</string>

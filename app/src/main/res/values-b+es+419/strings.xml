@@ -208,8 +208,6 @@
     <string name="vault_encrypting">Cifrando archivo, espere…</string>
     <string name="vault_unsupported">No se puede abrir este archivo. Para abrirlo, sácalo de la Carpeta segura y vuelve a intentarlo.</string>
     <string name="home_vault_button">Carpeta segura</string>
-    <string name="home_media_playing">Reproduciendo</string>
-    <string name="home_media_paused">En pausa</string>
 <string name="settings_theme_app_category">Tema de la aplicación</string>
     <string name="settings_theme_home_category">Página de inicio</string>
     <string name="settings_home_cards">Tarjetas de inicio</string>

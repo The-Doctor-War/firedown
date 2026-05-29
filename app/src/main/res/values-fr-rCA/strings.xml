@@ -208,8 +208,6 @@
     <string name="vault_encrypting">Cryptage du fichier, veuillez patienter…</string>
     <string name="vault_unsupported">Impossible d\'ouvrir ce fichier. Pour l\'ouvrir, retirez-le du dossier sécurisé et réessayez.</string>
     <string name="home_vault_button">Dossier sécurisé</string>
-    <string name="home_media_playing">Lecture</string>
-    <string name="home_media_paused">En pause</string>
 <string name="settings_theme_app_category">Thème de l\'app</string>
     <string name="settings_theme_home_category">Page d\'accueil</string>
     <string name="settings_home_cards">Cartes d\'accueil</string>

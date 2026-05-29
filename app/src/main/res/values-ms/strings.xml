@@ -211,8 +211,6 @@
     <string name="vault_encrypting">Menyulitkan fail, sila tunggu…</string>
     <string name="vault_unsupported">Tidak dapat membuka fail ini. Untuk membuka, alihkannya keluar daripada Folder Selamat dan cuba lagi.</string>
     <string name="home_vault_button">Folder selamat</string>
-    <string name="home_media_playing">Memainkan</string>
-    <string name="home_media_paused">Dijeda</string>
 <string name="settings_theme_app_category">Tema aplikasi</string>
     <string name="settings_theme_home_category">Skrin utama</string>
     <string name="settings_home_cards">Kad skrin utama</string>

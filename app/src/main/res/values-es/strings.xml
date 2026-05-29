@@ -488,8 +488,6 @@
     <string name="pip_play">Reproducir</string>
     <string name="pip_pause">Pausa</string>
     <string name="home_vault_button">Carpeta segura</string>
-    <string name="home_media_playing">Reproduciendo</string>
-    <string name="home_media_paused">En pausa</string>
     <string name="wasm_snackbar_message">%s necesita WebAssembly para funcionar</string>
     <string name="wasm_snackbar_action_enable">Activar</string>
     <string name="settings_wasm_allowlist_title">Sitios permitidos</string>

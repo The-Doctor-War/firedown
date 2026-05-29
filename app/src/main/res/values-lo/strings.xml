@@ -255,8 +255,6 @@
     <string name="vault_unsupported">ບໍ່ສາມາດເປີດໄຟລ໌ນີ້ໄດ້. ເພື່ອເປີດ, ຍ້າຍມັນອອກຈາກໂຟນເດີປອດໄພ ແລະລອງໃໝ່ອີກ.</string>
     <string name="bookmark_name">ຊື່</string>
     <string name="home_vault_button">ໂຟນເດີປອດໄພ</string>
-    <string name="home_media_playing">ກຳລັງຫຼິ້ນ</string>
-    <string name="home_media_paused">ຢຸດຊົ່ວຄາວ</string>
 <string name="settings_theme_app_category">ຮູບແບບແອັບ</string>
     <string name="settings_theme_home_category">ໜ້າຫຼັກ</string>
     <string name="settings_home_cards">ບັດໜ້າຫຼັກ</string>

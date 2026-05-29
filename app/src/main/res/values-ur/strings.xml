@@ -250,8 +250,6 @@
     <string name="vault_encrypting">فائل کو خفیہ کر رہا ہے، براہ کرم انتظار کریں…</string>
     <string name="vault_unsupported">اس فائل کو نہیں کھولا جا سکتا۔ کھولنے کے لیے، اسے محفوظ فولڈر سے باہر لے جائیں اور دوبارہ کوشش کریں۔</string>
     <string name="home_vault_button">محفوظ فولڈر</string>
-    <string name="home_media_playing">چل رہا ہے</string>
-    <string name="home_media_paused">روکا ہوا</string>
 <string name="settings_theme_app_category">ایپ تھیم</string>
     <string name="settings_theme_home_category">ہوم اسکرین</string>
     <string name="settings_home_cards">ہوم کارڈز</string>

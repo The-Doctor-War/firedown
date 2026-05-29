@@ -261,8 +261,6 @@
     <string name="vault_unsupported">Немагчыма адкрыць гэты файл. Каб адкрыць, перамясціце яго з бяспечнай папкі і паўтарыце спробу.</string>
     <string name="bookmark_name">Назва</string>
     <string name="home_vault_button">Бяспечная тэчка</string>
-    <string name="home_media_playing">Прайграецца</string>
-    <string name="home_media_paused">Паўза</string>
 <string name="settings_theme_app_category">Тэма прыкладання</string>
     <string name="settings_theme_home_category">Галоўны экран</string>
     <string name="settings_home_cards">Карткі галоўнага экрана</string>

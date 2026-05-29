@@ -236,8 +236,6 @@
     <string name="vault_encrypting">ಫೈಲ್ ಎನ್‌ಕ್ರಿಪ್ಟ್ ಮಾಡಲಾಗುತ್ತಿದೆ, ದಯವಿಟ್ಟು ನಿರೀಕ್ಷಿಸಿ…</string>
     <string name="vault_unsupported">ಈ ಫೈಲ್ ಅನ್ನು ತೆರೆಯಲು ಸಾಧ್ಯವಿಲ್ಲ. ತೆರೆಯಲು, ಅದನ್ನು ಸುರಕ್ಷಿತ ಫೋಲ್ಡರ್‌ನಿಂದ ಹೊರಗೆ ಸರಿಸಿ ಮತ್ತು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.</string>
     <string name="home_vault_button">ಸುರಕ್ಷಿತ ಫೋಲ್ಡರ್</string>
-    <string name="home_media_playing">ಪ್ಲೇ ಆಗುತ್ತಿದೆ</string>
-    <string name="home_media_paused">ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ</string>
 <string name="settings_theme_app_category">ಆ್ಯಪ್ ಥೀಮ್</string>
     <string name="settings_theme_home_category">ಮುಖಪುಟ</string>
     <string name="settings_home_cards">ಮುಖಪುಟ ಕಾರ್ಡ್‌ಗಳು</string>

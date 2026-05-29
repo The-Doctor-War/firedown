@@ -488,8 +488,6 @@
     <string name="pip_play">Lecture</string>
     <string name="pip_pause">Pause</string>
     <string name="home_vault_button">Dossier sécurisé</string>
-    <string name="home_media_playing">Lecture</string>
-    <string name="home_media_paused">En pause</string>
     <string name="wasm_snackbar_message">%s a besoin de WebAssembly pour fonctionner</string>
     <string name="wasm_snackbar_action_enable">Activer</string>
     <string name="settings_wasm_allowlist_title">Sites autorisés</string>

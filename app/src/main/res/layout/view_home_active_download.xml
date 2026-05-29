@@ -96,6 +96,25 @@
                 android:textColor="?attr/colorOnPrimaryContainer"
                 tools:text="my_video_file_name.mp4" />
 
+            <!--
+                Progress context line: percent + total size (e.g. "37% · 11 MB"),
+                or 'Pending…' / live byte-size while the size is unknown. Lives
+                in the text column now (was a trailing-slot number) so the
+                trailing slot can hold the cancel button. Id preserved
+                (active_download_percent) — HomeFragment.bindActiveStrip sets
+                its text and applyHomeCardStyle tints it.
+            -->
+            <TextView
+                android:id="@+id/active_download_percent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textAppearance="?attr/textAppearanceBodySmall"
+                android:textColor="?attr/colorOnPrimaryContainer"
+                tools:text="37% · 11 MB" />
+
             <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/active_download_bar"
                 android:layout_width="match_parent"
@@ -109,22 +128,24 @@
         </LinearLayout>
 
         <!--
-            Percent (or 'Pending…' / live byte-size) lives in a 44dp
-            trailing slot — same width as the media card's play/pause
-            toggle so the two strips share a right-edge anchor when
-            stacked. gravity=center keeps the text centred under the
-            slot regardless of '5%' vs '100%' width.
+            Cancel button — aborts the in-flight download (and removes its
+            partial file) without leaving Home. Sits in the trailing slot the
+            percent number used to occupy, so it shares a right-edge anchor
+            with the media card's play/pause toggle when the strips stack.
+            Borderless so it reads as an icon action on the tinted card; the
+            click is wired separately from the card-body tap (which still
+            opens Downloads) in HomeFragment.
         -->
-        <TextView
-            android:id="@+id/active_download_percent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <androidx.appcompat.widget.AppCompatImageButton
+            android:id="@+id/active_download_cancel"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_marginStart="8dp"
-            android:gravity="center"
-            android:minWidth="44dp"
-            android:textAppearance="?attr/textAppearanceBodySmallEmphasized"
-            android:textColor="?attr/colorOnPrimaryContainer"
-            tools:text="45%" />
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/cancel"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_baseline_close_24"
+            app:tint="?attr/colorOnPrimaryContainer" />
 
     </LinearLayout>
 

@@ -84,6 +84,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     private TextView mActiveStripTitle;
     private TextView mActiveStripPercent;
     private LinearProgressIndicator mActiveStripBar;
+    private View mActiveStripCancel;
     private View mActiveStripIcon;
     @Nullable private android.animation.ObjectAnimator mActiveStripPulse;
     private TextView mHomeVaultSubtitle;
@@ -164,8 +165,18 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mActiveStripTitle = v.findViewById(R.id.active_download_title);
         mActiveStripPercent = v.findViewById(R.id.active_download_percent);
         mActiveStripBar = v.findViewById(R.id.active_download_bar);
+        mActiveStripCancel = v.findViewById(R.id.active_download_cancel);
         mActiveStrip.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, DownloadsActivity.class)));
+        // Cancel the in-flight download from Home. DOWNLOAD_DELETE routes
+        // through RunnableManager.cancelDownloadTask, which stops the active
+        // (or queued) task and removes its partial file — the same path the
+        // Downloads list uses. Acts on the head item the strip is bound to.
+        mActiveStripCancel.setOnClickListener(view -> {
+            if (mLastActiveList != null && !mLastActiveList.isEmpty()) {
+                handleItemAction(IntentActions.DOWNLOAD_DELETE, mLastActiveList.get(0));
+            }
+        });
 
         mHomeScroll = v.findViewById(R.id.home_scroll);
         mBottomNavigationBar = v.findViewById(R.id.bottom_app_bar);
@@ -482,6 +493,7 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mActiveStripTitle = null;
         mActiveStripPercent = null;
         mActiveStripBar = null;
+        mActiveStripCancel = null;
         stopActiveStripPulse();
         mActiveStripIcon = null;
         mHomeVaultSubtitle = null;
@@ -695,11 +707,20 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         if (queued) {
             mActiveStripPercent.setText(R.string.download_queued);
         } else if (live) {
+            // Size not yet known (live/streamed) — show bytes-so-far alone.
             mActiveStripPercent.setText(Utils.readableFileSize(item.getFileSize()));
         } else {
             int pct = item.getFileProgress();
             mActiveStripBar.setProgress(pct);
-            mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%%", pct));
+            // Percent + total size, e.g. "37% · 11 MB". No downloaded-bytes
+            // field exists, so this is percent + total rather than X / Y.
+            long size = item.getFileSize();
+            if (size > 0) {
+                mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%% · %s",
+                        pct, Utils.readableFileSize(size)));
+            } else {
+                mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%%", pct));
+            }
         }
     }
 

@@ -35,3 +35,9 @@ between them show *why* we ended up where we did.
   globe/search icon + one forward arrow, 16dp corners), B two explicit
   actions, C compact + dismiss. Shipped A — also matches the radius of
   the single-container suggestion card.
+- `security-sheet-layouts.html` — Per-site security sheet. CURRENT shows
+  ads + trackers twice each (a PROTECTION toggle and a separate
+  BLOCKED-ON-THIS-PAGE count row, 4 rows + duplicated icons for 2
+  concepts) vs A merged rows (one row per concept: toggle + count pill
+  that drills in), B hero "total blocked" summary, C minimal/dense.
+  Proposed A. Not yet implemented.

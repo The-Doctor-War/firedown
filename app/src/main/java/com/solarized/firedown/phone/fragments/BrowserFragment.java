@@ -1041,6 +1041,7 @@ public class BrowserFragment extends BaseBrowserFragment
                 anchor,
                 getString(R.string.wasm_snackbar_message, reportedHost),
                 mIsIncognitoThemed);
+        snackbar.setAnchorView(R.id.anchor_view);
         snackbar.setAction(R.string.wasm_snackbar_action_enable, v -> {
             if (incognito) {
                 mIncognitoStateViewModel.allowWasmFor(reportedUrl);
@@ -1515,15 +1516,13 @@ public class BrowserFragment extends BaseBrowserFragment
         if (autoBlock) {
             // Pref is on — silent block path. Show a Snackbar so the
             // denial isn't invisible to the user.
-            View anchor = getSnackAnchorView();
-            if (anchor != null) {
-                Snackbar snackbar = makeSnackbar(
-                        anchor,
-                        getString(R.string.block_redirect_snackbar),
-                        mIsIncognitoThemed);
-                snackbar.setAnchorView(R.id.anchor_view);
-                snackbar.show();
-            }
+            Snackbar snackbar = makeSnackbar(
+                    getSnackAnchorView(),
+                    getString(R.string.block_redirect_snackbar),
+                    mIsIncognitoThemed);
+            snackbar.setAnchorView(R.id.anchor_view);
+            snackbar.show();
+
             return;
         }
         Bundle bundle = new Bundle();

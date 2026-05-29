@@ -709,21 +709,44 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         if (queued) {
             mActiveStripPercent.setText(R.string.download_queued);
         } else if (live) {
-            // Size not yet known (live/streamed) — show bytes-so-far alone.
-            mActiveStripPercent.setText(Utils.readableFileSize(item.getFileSize()));
+            // Live / streamed: total size is unknown. getFileSize() is bytes
+            // flushed to disk, which is 0 for FFmpeg muxes until completion,
+            // so prefer the media-type label ("Video", "Audio") over a "0 B"
+            // — and only show a byte count once there's a real one.
+            long live_size = item.getFileSize();
+            mActiveStripPercent.setText(live_size > 0
+                    ? Utils.readableFileSize(live_size)
+                    : mediaTypeLabel(item));
         } else {
             int pct = item.getFileProgress();
             mActiveStripBar.setProgress(pct);
-            // Percent + total size, e.g. "37% · 11 MB". No downloaded-bytes
-            // field exists, so this is percent + total rather than X / Y.
             long size = item.getFileSize();
+            // size here is bytes-on-disk-so-far (no total-size field exists).
+            // For FFmpeg/m3u8 it stays 0 until the mux finishes, so the line
+            // would otherwise be a lonely "2%". Pair the percent with the
+            // media-type label in that case — honest, and it explains why
+            // there's no size yet. When a byte count is available (direct HTTP
+            // downloads), show "37% · 11 MB".
             if (size > 0) {
                 mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%% · %s",
                         pct, Utils.readableFileSize(size)));
             } else {
-                mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%%", pct));
+                mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%% · %s",
+                        pct, mediaTypeLabel(item)));
             }
         }
+    }
+
+    /**
+     * Localized media-type label ("Video", "Audio", …) for the active-download
+     * line, used to fill the context slot when no byte size is available yet
+     * (e.g. an in-progress m3u8/FFmpeg mux). Falls back to "Downloading" if the
+     * mime is missing so the line is never blank.
+     */
+    private String mediaTypeLabel(DownloadEntity item) {
+        String label = com.solarized.firedown.utils.FileUriHelper.getLongMimeText(
+                requireContext(), item.getFileMimeType());
+        return label != null ? label : getString(R.string.downloading);
     }
 
     @Override

@@ -94,7 +94,7 @@
     <color name="incognito_surface_container_low">#FF3D1F60</color>
     <color name="incognito_surface_container_high">#FF4A2779</color>
     <color name="incognito_surface_container_highest">#FF553090</color>
-    <color name="incognito_surface_container_lowest">#FF140A20</color>
+    <color name="incognito_surface_container_lowest">#FF170B30</color>
 
     <!-- Incognito-home fact chips: soft translucent fills (drawn over the
          deep-purple surface) paired with a full-opacity accent icon. Each

@@ -405,6 +405,9 @@
     </plurals>
     <string name="blocked_ads_detail_title">Zablokowane reklamy</string>
     <string name="security_block_ads">Blokuj reklamy</string>
+    <string name="security_stat_scope_on_this_page">na tej stronie</string>
+    <string name="security_stat_ads_blocked">reklamy</string>
+    <string name="security_stat_trackers_blocked">trackery</string>
     <string name="security_tracking_protection">Ochrona przed śledzeniem</string>
     <string name="tabs_incognito_empty">Brak prywatnych kart</string>
 </resources>

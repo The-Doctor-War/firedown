@@ -334,4 +334,7 @@
 
 
     <string name="tabs_incognito_empty">Cap pestanya privada</string>
+    <string name="security_stat_scope_on_this_page">en aquesta pàgina</string>
+    <string name="security_stat_ads_blocked">anuncis</string>
+    <string name="security_stat_trackers_blocked">rastrejadors</string>
 </resources>

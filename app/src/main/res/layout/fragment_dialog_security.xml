@@ -119,29 +119,151 @@
         android:paddingBottom="8dp">
 
 
-        <!-- ── Protection ─────────────────────────────────────────── -->
-        <!--
-            One row per protection mechanism (Block ads, Tracking
-            protection). Each row merges what used to be split across two
-            sections: the toggle that governs the mechanism AND the live
-            per-page block count for it. Two trailing controls:
-              • count pill (ads_stat_card / trackers_stat_card) — the
-                drill-in target into the per-mechanism detail sheet;
-              • switch (ads_toogle / tracking_toogle) — flips protection.
-            The label area itself is inert, so the two actions never
-            collide. All IDs are preserved from the previous two-section
-            layout, so the fragment's findViewById + listener wiring is
-            unchanged.
-        -->
+        <!-- ── Blocked-on-this-page hero summary ──────────────────────
+            Big combined total + two drill-in chips (ads / trackers). The
+            chips keep the ads_stat_card / trackers_stat_card ids (drill
+            target) and the ads_counter / trackers_counter ids (the number
+            inside each), so the fragment's click wiring + count observers
+            are unchanged. The hero total (security_total_count) is the sum
+            of the two, set by the fragment. -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/security_total_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFeatureSettings="tnum"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                tools:text="38" />
+
+            <TextView
+                style="@style/TextAppearance.Material3.BodyMedium"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/security_stat_scope_on_this_page"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:orientation="horizontal">
+
+                <!-- Ads chip → BlockedAdsDetailDialogFragment -->
+                <LinearLayout
+                    android:id="@+id/ads_stat_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:background="@drawable/bg_security_count_pill"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="8dp"
+                    android:paddingVertical="8dp">
+
+                    <TextView
+                        android:id="@+id/ads_counter"
+                        style="@style/TextAppearance.Material3.TitleMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFeatureSettings="tnum"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="15sp"
+                        tools:text="24" />
+
+                    <TextView
+                        style="@style/TextAppearance.Material3.BodyMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="@string/security_stat_ads_blocked"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="2dp"
+                        android:contentDescription="@null"
+                        app:srcCompat="@drawable/ic_chevron_right_24"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                </LinearLayout>
+
+                <!-- Trackers chip → BlockedTrackersDetailDialogFragment -->
+                <LinearLayout
+                    android:id="@+id/trackers_stat_card"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_security_count_pill"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="14dp"
+                    android:paddingEnd="8dp"
+                    android:paddingVertical="8dp">
+
+                    <TextView
+                        android:id="@+id/trackers_counter"
+                        style="@style/TextAppearance.Material3.TitleMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFeatureSettings="tnum"
+                        android:textColor="?attr/colorPrimary"
+                        android:textSize="15sp"
+                        tools:text="14" />
+
+                    <TextView
+                        style="@style/TextAppearance.Material3.BodyMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="@string/security_stat_trackers_blocked"
+                        android:textColor="?attr/colorOnSurfaceVariant" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:layout_width="20dp"
+                        android:layout_height="20dp"
+                        android:layout_marginStart="2dp"
+                        android:contentDescription="@null"
+                        app:srcCompat="@drawable/ic_chevron_right_24"
+                        app:tint="?attr/colorOnSurfaceVariant" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+
+        <!-- Group divider — hero summary above, protection toggles below. -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="4dp"
+            android:background="?attr/colorOutlineVariant" />
+
+
+        <!-- ── Protection toggles ─────────────────────────────────── -->
 
 
         <!-- Block ads -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_height="56dp"
             android:gravity="center_vertical"
-            android:minHeight="60dp"
             android:orientation="horizontal">
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -163,47 +285,11 @@
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="15sp" />
 
-            <!-- Count pill — drills into BlockedAdsDetailDialogFragment.
-                 ID + counter ID preserved (ads_stat_card / ads_counter). -->
-            <LinearLayout
-                android:id="@+id/ads_stat_card"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_security_count_pill"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minWidth="56dp"
-                android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="6dp"
-                android:paddingVertical="6dp">
-
-                <TextView
-                    android:id="@+id/ads_counter"
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFeatureSettings="tnum"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="15sp"
-                    tools:text="24" />
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="2dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_chevron_right_24"
-                    app:tint="?attr/colorOnSurfaceVariant" />
-
-            </LinearLayout>
-
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/ads_toogle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" />
 
         </LinearLayout>
 
@@ -252,48 +338,11 @@
 
             </LinearLayout>
 
-            <!-- Count pill — drills into BlockedTrackersDetailDialogFragment.
-                 ID + counter ID preserved (trackers_stat_card / trackers_counter). -->
-            <LinearLayout
-                android:id="@+id/trackers_stat_card"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                android:background="@drawable/bg_security_count_pill"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center_vertical"
-                android:minWidth="56dp"
-                android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="6dp"
-                android:paddingVertical="6dp">
-
-                <TextView
-                    android:id="@+id/trackers_counter"
-                    style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:fontFeatureSettings="tnum"
-                    android:textColor="?attr/colorPrimary"
-                    android:textSize="15sp"
-                    tools:text="14" />
-
-                <androidx.appcompat.widget.AppCompatImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:layout_marginStart="2dp"
-                    android:contentDescription="@null"
-                    app:srcCompat="@drawable/ic_chevron_right_24"
-                    app:tint="?attr/colorOnSurfaceVariant" />
-
-            </LinearLayout>
-
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/tracking_toogle"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" />
 
         </LinearLayout>
 

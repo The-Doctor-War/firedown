@@ -408,6 +408,9 @@
     </plurals>
     <string name="blocked_ads_detail_title">Geblokkeerde advertenties</string>
     <string name="security_block_ads">Advertenties blokkeren</string>
+    <string name="security_stat_scope_on_this_page">op deze pagina</string>
+    <string name="security_stat_ads_blocked">advertenties</string>
+    <string name="security_stat_trackers_blocked">trackers</string>
     <string name="security_tracking_protection">Trackingbescherming</string>
     <string name="tabs_incognito_empty">Geen privétabbladen</string>
 </resources>

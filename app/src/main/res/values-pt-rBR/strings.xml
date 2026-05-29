@@ -155,4 +155,7 @@
     <string name="browser_tabs_empty">Nenhuma aba aberta</string>
     <string name="tabs_incognito_empty">Nenhuma aba privada</string>
     <string name="clipboard_from">Da área de transferência</string>
+    <string name="security_stat_scope_on_this_page">nesta página</string>
+    <string name="security_stat_ads_blocked">anúncios</string>
+    <string name="security_stat_trackers_blocked">rastreadores</string>
 </resources>

@@ -274,6 +274,9 @@
     </plurals>
     <string name="blocked_ads_detail_title">Blokkerte annonser</string>
     <string name="security_block_ads">Blokker annonser</string>
+    <string name="security_stat_scope_on_this_page">på denne siden</string>
+    <string name="security_stat_ads_blocked">annonser</string>
+    <string name="security_stat_trackers_blocked">sporere</string>
     <string name="security_tracking_protection">Sporingsbeskyttelse</string>
     <string name="tabs_incognito_empty">Ingen private faner</string>
 </resources>

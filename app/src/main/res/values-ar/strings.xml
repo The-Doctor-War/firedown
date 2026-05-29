@@ -357,6 +357,9 @@
     </plurals>
     <string name="blocked_ads_detail_title">الإعلانات المحظورة</string>
     <string name="security_block_ads">حظر الإعلانات</string>
+    <string name="security_stat_scope_on_this_page">في هذه الصفحة</string>
+    <string name="security_stat_ads_blocked">إعلانات</string>
+    <string name="security_stat_trackers_blocked">متتبعات</string>
     <string name="security_tracking_protection">حماية التتبع</string>
     <string name="tabs_incognito_empty">لا توجد علامات تبويب خاصة</string>
 </resources>

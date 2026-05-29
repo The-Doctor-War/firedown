@@ -277,6 +277,9 @@
     </plurals>
     <string name="blocked_ads_detail_title">Blockerade annonser</string>
     <string name="security_block_ads">Blockera annonser</string>
+    <string name="security_stat_scope_on_this_page">på den här sidan</string>
+    <string name="security_stat_ads_blocked">annonser</string>
+    <string name="security_stat_trackers_blocked">spårare</string>
     <string name="security_tracking_protection">Spårningsskydd</string>
     <string name="tabs_incognito_empty">Inga privata flikar</string>
 </resources>

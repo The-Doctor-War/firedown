@@ -308,4 +308,7 @@
     <string name="trackers_info_stat_blocked">Đã chặn</string>
     <string name="trackers_info_stat_saved">Dữ liệu đã lưu</string>
     <string name="tabs_incognito_empty">Không có thẻ riêng tư</string>
+    <string name="security_stat_scope_on_this_page">trên trang này</string>
+    <string name="security_stat_ads_blocked">quảng cáo</string>
+    <string name="security_stat_trackers_blocked">trình theo dõi</string>
 </resources>

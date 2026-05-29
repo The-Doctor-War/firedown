@@ -47,6 +47,12 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
     private CertificateInfoEntity mCertificateInfoEntity;
     private TextView mAdsCounterTextView;
     private TextView mTrackersCounterTextView;
+    private TextView mTotalCountTextView;
+    // Latest per-mechanism counts, summed into the hero total. Ads arrives
+    // as a String stream, trackers as a category map, on separate emissions,
+    // so cache both and recompute the total whenever either changes.
+    private int mAdsCount;
+    private int mTrackersCount;
     private MaterialSwitch mAdsSwitch;
     private MaterialSwitch mTrackingSwitch;
     private TextView mTrackingSubtext;
@@ -106,6 +112,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         mTrackingSubtext = mView.findViewById(R.id.tracking_subtext);
         mAdsCounterTextView = mView.findViewById(R.id.ads_counter);
         mTrackersCounterTextView = mView.findViewById(R.id.trackers_counter);
+        mTotalCountTextView = mView.findViewById(R.id.security_total_count);
         mAdsSwitch = mView.findViewById(R.id.ads_toogle);
         mHostText = mView.findViewById(R.id.host_secure_text);
         mHostCert = mView.findViewById(R.id.host_secure);
@@ -200,7 +207,13 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
                 ? mIncognitoStateViewModel.getAdsCount()
                 : mGeckoStateViewModel.getAdsCount();
 
-        adsCountLive.observe(getViewLifecycleOwner(), count -> mAdsCounterTextView.setText(count));
+        adsCountLive.observe(getViewLifecycleOwner(), count -> {
+            mAdsCounterTextView.setText(count);
+            int parsed = 0;
+            try { parsed = Integer.parseInt(count.trim()); } catch (NumberFormatException ignored) { }
+            mAdsCount = parsed;
+            updateTotalCount();
+        });
 
         // Ads filter enabled state is a per-URL whitelist concept (netWhitelist
         // Map in µb), not per-mode. Always read from the regular ViewModel.
@@ -251,6 +264,15 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         }
         if (mTrackersCounterTextView != null) {
             mTrackersCounterTextView.setText(String.valueOf(total));
+        }
+        mTrackersCount = total;
+        updateTotalCount();
+    }
+
+    /** Sets the hero summary number to ads + trackers blocked on this page. */
+    private void updateTotalCount() {
+        if (mTotalCountTextView != null) {
+            mTotalCountTextView.setText(String.valueOf(mAdsCount + mTrackersCount));
         }
     }
 
@@ -372,6 +394,7 @@ public class SecurityStateSheetDialogFragment extends BaseBottomSheetDialogFragm
         mTrackingSwitch = null;
         mAdsCounterTextView = null;
         mTrackersCounterTextView = null;
+        mTotalCountTextView = null;
         mTrackingIcon = null;
         mTrackingSubtext = null;
         mHostImage = null;

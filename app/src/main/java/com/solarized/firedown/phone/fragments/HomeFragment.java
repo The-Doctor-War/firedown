@@ -88,12 +88,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     @Nullable private android.animation.ObjectAnimator mActiveStripPulse;
     private TextView mHomeVaultSubtitle;
     private TextView mRecentDownloadsSubtitle;
-    private MaterialCardView mHomeMediaStrip;
-    private androidx.appcompat.widget.AppCompatImageView mHomeMediaIcon;
-    private TextView mHomeMediaLabel;
-    private TextView mHomeMediaTitle;
-    private TextView mHomeMediaSubtitle;
-    private androidx.appcompat.widget.AppCompatImageButton mHomeMediaToggle;
     private MaterialCardView mTrackersCard;
     private TextView mTrackersSubtitle;
     @javax.inject.Inject
@@ -172,33 +166,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mActiveStripBar = v.findViewById(R.id.active_download_bar);
         mActiveStrip.setOnClickListener(view ->
                 mStartForResult.launch(new Intent(mActivity, DownloadsActivity.class)));
-
-        mHomeMediaStrip = v.findViewById(R.id.home_media_strip);
-        mHomeMediaIcon = v.findViewById(R.id.home_media_icon);
-        mHomeMediaLabel = v.findViewById(R.id.home_media_label);
-        mHomeMediaTitle = v.findViewById(R.id.home_media_title);
-        mHomeMediaSubtitle = v.findViewById(R.id.home_media_subtitle);
-        mHomeMediaToggle = v.findViewById(R.id.home_media_toggle);
-        // Tap → switch to the playing tab. Same flow IntentHandler.handleMainMedia
-        // uses for the foreground media notification: look up the session,
-        // promote it, fire OPEN_SESSION, navigate to browser.
-        mHomeMediaStrip.setOnClickListener(view -> {
-            int sessionId = mGeckoMediaController.getCurrentSessionId();
-            if (sessionId != 0) openSessionId(sessionId);
-        });
-        // Trailing toggle button: play / pause the current session in
-        // place without navigating away. Borderless ripple on the
-        // button + tap on the rest of the card → openSessionId; tap
-        // here → toggle playback only.
-        mHomeMediaToggle.setOnClickListener(view -> {
-            Boolean playing = mGeckoMediaController.getIsPlayingLiveData().getValue();
-            if (playing != null && playing) {
-                mGeckoMediaController.pause();
-            } else {
-                mGeckoMediaController.play();
-            }
-        });
-
 
         mHomeScroll = v.findViewById(R.id.home_scroll);
         mBottomNavigationBar = v.findViewById(R.id.bottom_app_bar);
@@ -365,25 +332,14 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                     R.string.home_trackers_subtitle, formattedCount, savedBytes));
         });
 
-        // Background-media strip — visible iff GeckoMediaController has a
-        // current session (something is playing or recently paused).
-        // currentSessionId == 0 means no media surface; hide the strip.
-        // isPlaying drives the PLAYING / PAUSED label so the user can
-        // tell at a glance whether tapping the card resumes or just
-        // switches.
-        // Also refresh the active-download strip on session changes:
-        // its visibility now depends on whether the current media
-        // session is incognito (see applyActiveStripVisibility). The
-        // downloads LiveData doesn't fire on session changes, so
-        // without this the incognito gate would only take effect on
-        // the next download mutation.
+        // Refresh the active-download strip on media-session changes:
+        // its visibility depends on whether the current media session
+        // is incognito (see applyActiveStripVisibility), and the
+        // downloads LiveData doesn't fire on session changes — without
+        // this the incognito gate would only take effect on the next
+        // download mutation.
         mGeckoMediaController.getCurrentSessionIdLiveData().observe(getViewLifecycleOwner(),
-                sessionId -> {
-                    bindMediaStrip();
-                    applyActiveStripVisibility();
-                });
-        mGeckoMediaController.getIsPlayingLiveData().observe(getViewLifecycleOwner(),
-                playing -> bindMediaStrip());
+                sessionId -> applyActiveStripVisibility());
 
         mRecentDownloadsCard.setVisibility(View.VISIBLE);
         applyActiveStripVisibility();
@@ -530,12 +486,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
         mActiveStripIcon = null;
         mHomeVaultSubtitle = null;
         mRecentDownloadsSubtitle = null;
-        mHomeMediaStrip = null;
-        mHomeMediaIcon = null;
-        mHomeMediaLabel = null;
-        mHomeMediaTitle = null;
-        mHomeMediaSubtitle = null;
-        mHomeMediaToggle = null;
         mTrackersCard = null;
         mTrackersSubtitle = null;
     }
@@ -606,17 +556,13 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
     }
 
     /**
-     * Paints all four home cards — active download, playing media,
-     * Downloads, Safe Folder — with the user's picked
-     * {@link com.solarized.firedown.ui.HomeCardStyle}. One pref, four
+     * Paints the home cards — active download, Downloads, Safe Folder,
+     * Trackers blocked — with the user's picked
+     * {@link com.solarized.firedown.ui.HomeCardStyle}. One pref, all
      * cards flip together; the picker rewards a coherent look rather
      * than per-card tweaks. Called from {@code onCreateView} and again
      * on {@code ON_RESUME} so a style change made in Settings shows up
      * when the user navigates back, without forcing a fragment rebuild.
-     *
-     * <p>The media card's favicon is left untouched — it's loaded via
-     * Glide and a tint would discolour real site icons. The play/pause
-     * toggle is the themed icon there.</p>
      */
     private void applyHomeCardStyle(@NonNull View root) {
         SharedPreferences prefs = androidx.preference.PreferenceManager
@@ -644,17 +590,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             // applyToCard subtitle (alpha B3) path.
             if (mActiveStripPercent != null) mActiveStripPercent.setTextColor(activeLook.fg);
             if (mActiveStripBar != null) mActiveStripBar.setIndicatorColor(activeLook.fg);
-        }
-
-        if (mHomeMediaStrip != null) {
-            com.solarized.firedown.ui.HomeCardStyle.applyToCard(
-                    mHomeMediaStrip,
-                    null,
-                    mHomeMediaToggle,
-                    mHomeMediaTitle,
-                    mHomeMediaSubtitle,
-                    mHomeMediaLabel,
-                    style.media(night));
         }
 
         MaterialCardView downloadsCard = root.findViewById(R.id.recent_downloads_card);
@@ -765,104 +700,6 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
             int pct = item.getFileProgress();
             mActiveStripBar.setProgress(pct);
             mActiveStripPercent.setText(String.format(java.util.Locale.US, "%d%%", pct));
-        }
-    }
-
-    /**
-     * Binds the home media strip from the {@link GeckoMediaController}'s
-     * current session. Re-runs on every emission from either
-     * currentSessionId or isPlaying — both observers route here so the
-     * label flips reactively between PLAYING and PAUSED as the user
-     * pauses / resumes from the notification.
-     *
-     * <p>Strip visibility: shown iff there's a current session AND we
-     * have metadata for it. Hidden otherwise (no media on screen → no
-     * card on home).</p>
-     *
-     * <p>Image source priority: iconBitmap (favicon bitmap) → Glide
-     * load of favicon URL — the card represents the playing tab, so
-     * the tab favicon is the right identity (album art goes on the
-     * media notification, not here). Title priority: metadata title
-     * → metadata album → metadata URL (domain). Subtitle is artist
-     * when present, otherwise the domain — never both, to avoid
-     * 'YouTube · youtube.com' duplication.</p>
-     */
-    private void bindMediaStrip() {
-        if (mHomeMediaStrip == null) return;
-        // Snapshot once: getGeckoMetaData() re-reads mCurrentSessionId
-        // internally, so independent reads here can disagree if the
-        // controller mutates between them (tab close, deactivate,
-        // session switch) — the strip would then flicker GONE on a
-        // metadata-lookup miss even though we just received a valid
-        // id from the observer.
-        int sessionId = mGeckoMediaController.getCurrentSessionId();
-        if (sessionId == 0) {
-            mHomeMediaStrip.setVisibility(View.GONE);
-            return;
-        }
-        // Incognito sessions live in IncognitoStateRepository; the
-        // regular home must never surface them. Hide the strip and
-        // bail so no incognito metadata leaks into the regular UI.
-        if (mIncognitoStateViewModel.getGeckoState(sessionId) != null) {
-            mHomeMediaStrip.setVisibility(View.GONE);
-            return;
-        }
-        com.solarized.firedown.geckoview.media.GeckoMetaData meta =
-                mGeckoMediaController.getGeckoMetaData(sessionId);
-        if (meta == null) {
-            mHomeMediaStrip.setVisibility(View.GONE);
-            return;
-        }
-        mHomeMediaStrip.setVisibility(View.VISIBLE);
-
-        Boolean playingValue = mGeckoMediaController.getIsPlayingLiveData().getValue();
-        boolean playing = playingValue != null && playingValue;
-        mHomeMediaLabel.setText(playing ? R.string.home_media_playing : R.string.home_media_paused);
-        // Toggle button mirrors the playing state — pause icon when
-        // playing (tap → pause), play icon when paused (tap → resume).
-        // contentDescription announces the *current* state for a
-        // screen reader (the action to take is the inverse).
-        if (mHomeMediaToggle != null) {
-            mHomeMediaToggle.setImageResource(playing
-                    ? R.drawable.ic_pause_24
-                    : R.drawable.ic_play_arrow_24);
-            mHomeMediaToggle.setContentDescription(getString(playing
-                    ? R.string.home_media_playing
-                    : R.string.home_media_paused));
-        }
-
-        String title = meta.getTitle();
-        if (title == null || title.isEmpty()) title = meta.getAlbum();
-        if (title == null || title.isEmpty()) title = meta.getUrl();
-        mHomeMediaTitle.setText(title);
-
-        String subtitle = meta.getArtist();
-        if (subtitle == null || subtitle.isEmpty()) {
-            // Skip the URL if it's identical to the title (already shown).
-            String urlPart = meta.getUrl();
-            subtitle = (urlPart != null && !urlPart.equals(title)) ? urlPart : null;
-        }
-        if (subtitle != null && !subtitle.isEmpty()) {
-            mHomeMediaSubtitle.setVisibility(View.VISIBLE);
-            mHomeMediaSubtitle.setText(subtitle);
-        } else {
-            mHomeMediaSubtitle.setVisibility(View.GONE);
-        }
-
-        // Use the tab's favicon, not the page's MediaSession artwork —
-        // the card reads as 'tab playing in the background' and the
-        // tab's identity is its favicon. Album art looks great on the
-        // notification but here it competes with the playing tab's
-        // identity (and pages without artwork would fall through to
-        // the favicon anyway, so we'd ship two visual styles).
-        android.graphics.Bitmap favicon = meta.getIconBitmap();
-        if (favicon != null) {
-            mHomeMediaIcon.setImageBitmap(favicon);
-        } else if (meta.getIcon() != null && !meta.getIcon().isEmpty()) {
-            com.solarized.firedown.GlideHelper.load(meta.getIcon(), meta.getUrl(),
-                    mHomeMediaIcon, new com.bumptech.glide.request.RequestOptions());
-        } else {
-            mHomeMediaIcon.setImageDrawable(null);
         }
     }
 

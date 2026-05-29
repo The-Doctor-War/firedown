@@ -34,6 +34,8 @@ public class AutoCompleteView extends FrameLayout {
 
     private View mSearchCard;
 
+    private com.solarized.firedown.ui.AutocompleteSectionDecoration mSectionDecoration;
+
     private MaterialButton mVisibilityView;
 
     private TextView mClipboardTextView;
@@ -107,6 +109,10 @@ public class AutoCompleteView extends FrameLayout {
         //Avoid blinking
         mSearchView.setItemAnimator(null);
 
+        // Inset hairlines between suggestion sections (search / history / tabs).
+        mSectionDecoration = new com.solarized.firedown.ui.AutocompleteSectionDecoration(context);
+        mSearchView.addItemDecoration(mSectionDecoration);
+
         mClipboardView.setOnClickListener(v2 -> {
             if(mCallback != null)
                 mCallback.onClipboardClick(mClipboardTextView.getText());
@@ -171,6 +177,15 @@ public class AutoCompleteView extends FrameLayout {
         //    in the adapter via setIncognito().
         if (mSearchCard instanceof com.google.android.material.card.MaterialCardView card) {
             card.setCardBackgroundColor(surfaceContainerHighest);
+        }
+
+        // 8. Section dividers. Derive a hairline from onSurfaceVariant at low
+        //    alpha so it reads as a subtle outline in both regular and
+        //    incognito (no dedicated outline token exists for incognito).
+        if (mSectionDecoration != null) {
+            mSectionDecoration.setColor(
+                    androidx.core.graphics.ColorUtils.setAlphaComponent(onSurfaceVariant, 0x40));
+            mSearchView.invalidateItemDecorations();
         }
     }
 

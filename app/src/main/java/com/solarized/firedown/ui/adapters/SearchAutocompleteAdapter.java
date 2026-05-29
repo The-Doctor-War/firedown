@@ -29,7 +29,8 @@ import com.solarized.firedown.ui.IncognitoColors;
 import com.solarized.firedown.ui.OnItemClickListener;
 
 
-public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, RecyclerView.ViewHolder>{
+public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, RecyclerView.ViewHolder>
+        implements com.solarized.firedown.ui.AutocompleteSectionDecoration.Sectioned {
 
     private static final int SEARCH = 0;
 
@@ -98,6 +99,20 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
             return SEARCH;
         else
             return LIST;
+    }
+
+    /**
+     * Section key for the inset dividers. The search header and its engine
+     * suggestions are one block (0); history (1) and open tabs (2) are their
+     * own sections. Matches the build order in AutoCompleteSearch
+     * (header + results, then history, then tabs).
+     */
+    @Override
+    public int sectionAt(int position) {
+        int type = getItem(position).getType();
+        if (type == AutoCompleteEntity.HISTORY) return 1;
+        if (type == AutoCompleteEntity.TAB) return 2;
+        return 0; // SEARCH + RESULTS
     }
 
     public void setIncognito(boolean incognito) {

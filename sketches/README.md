@@ -60,3 +60,11 @@ between them show *why* we ended up where we did.
   cue, C split view/dismiss zones. Shipped A (brand wash only; the bare
   icon already matched the shipped incognito banner, so no icon chip).
   Note: the ✕ stays — this banner is genuinely dismissible.
+- `security-sheet-minimal.html` — Security sheet "less is more" pass.
+  The shipped hero layout reads off because a centered dashboard (big
+  total + pills) sits on a left-aligned settings list — two visual
+  languages — plus a redundant total and a dead "0 trackers ›" pill.
+  Options: A count as a quiet subtitle on each toggle row (no stats
+  block, no pills), B a single summary line + plain toggles, C calm
+  per-category stat rows instead of pills. Proposed A. Supersedes the
+  hero (B) from security-sheet-layouts.html.

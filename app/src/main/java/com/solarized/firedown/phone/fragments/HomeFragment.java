@@ -383,6 +383,8 @@ public class HomeFragment extends BaseBrowserFragment implements BottomNavigatio
                 NavigationUtils.navigateSafe(mNavController, R.id.action_home_to_home_incognito);
             } else if (id == R.id.popup_history) {
                 NavigationUtils.navigateSafe(mNavController, R.id.action_home_to_history);
+            } else if (id == R.id.popup_vault) {
+                mStartForResult.launch(new Intent(mActivity, VaultActivity.class));
             } else if (id == R.id.popup_settings) {
                 Intent settingsIntent = new Intent(mActivity, SettingsActivity.class);
                 mStartForResult.launch(settingsIntent);

@@ -22,8 +22,8 @@
         layout="@layout/dialog_drag_handle" />
 
 
-    <!-- History. Fragment repaints drawableStart + label to
-         Downloads under incognito. -->
+    <!-- History — regular home only (GONE under incognito; no persisted
+         history in private browsing). -->
     <LinearLayout
         android:id="@+id/popup_history"
         android:layout_width="match_parent"
@@ -47,6 +47,67 @@
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="15sp"
             app:drawableStartCompat="@drawable/ic_history_24"
+            app:drawableTint="?attr/colorOnSurfaceVariant" />
+
+    </LinearLayout>
+
+
+    <!-- Safe Folder — regular home only. (Incognito downloads already land
+         in the Safe Folder, so a dedicated entry there would be redundant.) -->
+    <LinearLayout
+        android:id="@+id/popup_vault"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp">
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/home_vault_button"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="15sp"
+            app:drawableStartCompat="@drawable/ic_lock_24"
+            app:drawableTint="?attr/colorOnSurfaceVariant" />
+
+    </LinearLayout>
+
+
+    <!-- Downloads — incognito home only (regular home already has a
+         Downloads card; incognito home does not). GONE by default; the
+         fragment shows it under incognito. -->
+    <LinearLayout
+        android:id="@+id/popup_downloads"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleMedium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:drawablePadding="16dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/navigation_downloads"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="15sp"
+            app:drawableStartCompat="@drawable/download_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>

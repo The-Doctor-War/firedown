@@ -30,11 +30,11 @@ import dagger.hilt.android.AndroidEntryPoint;
  * on Home: History (no card), Settings, and Quit when
  * {@link Preferences#SETTINGS_QUIT_PREF} is on.</p>
  *
- * <p>Incognito home reuses this fragment: when launched with
- * {@code IS_INCOGNITO=true} the History row's drawableStart icon,
- * label, and dispatched id all swap to Downloads, since incognito
- * home lacks a Downloads card and History is irrelevant under
- * private browsing.</p>
+ * <p>Mode-specific rows (visibility toggled by {@code IS_INCOGNITO}):
+ * regular home shows History + Safe Folder; incognito home shows
+ * Downloads instead (it has no Downloads card, and persisted History /
+ * a separate Safe-Folder entry don't apply under private browsing —
+ * incognito downloads already land in the Safe Folder).</p>
  */
 @AndroidEntryPoint
 public class PopupHomeSheetDialogFragment extends BaseBottomSheetDialogFragment
@@ -59,7 +59,7 @@ public class PopupHomeSheetDialogFragment extends BaseBottomSheetDialogFragment
         mView = inflater.inflate(R.layout.fragment_dialog_home_popup, container, false);
 
         bindRows();
-        applyIncognitoSwap();
+        applyModeVisibility();
         applyQuitVisibility();
 
         return mView;
@@ -67,35 +67,33 @@ public class PopupHomeSheetDialogFragment extends BaseBottomSheetDialogFragment
 
 
     /**
-     * Hooks every row. Settings and Quit use the shared
-     * {@link #onClick(View)} since the view id matches the wire id
-     * the home fragments listen for; History has a specialised
-     * listener because its dispatched id flips to Downloads under
-     * incognito (see {@link #applyIncognitoSwap()}).
+     * Hooks every row. Each row's view id is the wire id the home
+     * fragments listen for, so they all share {@link #onClick(View)}.
      */
     private void bindRows() {
         mView.findViewById(R.id.popup_settings).setOnClickListener(this);
         mView.findViewById(R.id.popup_quit).setOnClickListener(this);
-
-        mView.findViewById(R.id.popup_history).setOnClickListener(view -> dispatch(
-                mIsIncognito ? R.id.popup_downloads : R.id.popup_history));
+        mView.findViewById(R.id.popup_history).setOnClickListener(this);
+        mView.findViewById(R.id.popup_vault).setOnClickListener(this);
+        mView.findViewById(R.id.popup_downloads).setOnClickListener(this);
     }
 
 
     /**
-     * Repaints the History row as Downloads when launched from
-     * incognito home. The row id stays {@code popup_history} — only
-     * the inner label's drawableStart icon and text change; the
-     * dispatched OptionEntity id is set in {@link #bindRows()} based
-     * on the same {@code mIsIncognito} flag.
+     * Shows the right per-mode rows. Regular home: History + Safe Folder.
+     * Incognito home: Downloads (no Downloads card there; History and a
+     * separate Safe-Folder entry don't apply — incognito downloads already
+     * go to the Safe Folder). Settings + Quit are common to both.
      */
-    private void applyIncognitoSwap() {
-        if (!mIsIncognito) return;
-        TextView label = mView.findViewById(R.id.popup_history_text);
-        if (label == null) return;
-        label.setCompoundDrawablesRelativeWithIntrinsicBounds(
-                R.drawable.download_24, 0, 0, 0);
-        label.setText(R.string.navigation_downloads);
+    private void applyModeVisibility() {
+        toggle(R.id.popup_history, !mIsIncognito);
+        toggle(R.id.popup_vault, !mIsIncognito);
+        toggle(R.id.popup_downloads, mIsIncognito);
+    }
+
+    private void toggle(int id, boolean visible) {
+        View row = mView.findViewById(id);
+        if (row != null) row.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
 

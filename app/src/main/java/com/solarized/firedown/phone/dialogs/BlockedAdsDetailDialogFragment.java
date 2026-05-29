@@ -52,22 +52,6 @@ public class BlockedAdsDetailDialogFragment extends BaseBottomSheetDialogFragmen
     private TextView mEmptyView;
     private RecyclerView mRecyclerView;
 
-    /** Re-poll cadence while the sheet is visible. firedown.js only emits
-     *  pageBlocks in response to requestPageBlocks(), so the list would
-     *  otherwise freeze at the open-time snapshot; poll so blocks landing
-     *  while the user reads the sheet keep it live. Started in onResume,
-     *  stopped in onPause. */
-    private static final long POLL_INTERVAL_MS = 1000L;
-    private final android.os.Handler mPollHandler =
-            new android.os.Handler(android.os.Looper.getMainLooper());
-    private final Runnable mPollRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mGeckoRuntimeHelper.requestPageBlocks();
-            mPollHandler.postDelayed(this, POLL_INTERVAL_MS);
-        }
-    };
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,39 +92,21 @@ public class BlockedAdsDetailDialogFragment extends BaseBottomSheetDialogFragmen
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Subscribe to the per-mode page-blocks stream — empty by
-        // cold-start, populates after the onResume requestPageBlocks poll
-        // round-trips through firedown.js.
+        // Subscribe to the per-mode page-blocks stream. firedown.js now pushes
+        // pageBlocks for the active tab on every block burst (piggybacked on its
+        // updateToolbarIcon hook, debounced 250ms), so this list updates live
+        // while the sheet is open — no polling. The requestPageBlocks() below is
+        // just a one-shot seed for the current state on open.
         LiveData<List<GeckoUblockHelper.HostCount>> stream = mIsIncognito
                 ? mIncognitoStateViewModel.getPageBlocks()
                 : mGeckoStateViewModel.getPageBlocks();
 
         stream.observe(getViewLifecycleOwner(), this::render);
-        // The first JS round-trip + the ongoing live polling are driven by
-        // onResume/onPause so the list both populates on open and keeps
-        // refreshing as new blocks land while the sheet stays open.
-    }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        // Fire one request now (the previous stream value keeps painting
-        // until it lands, so a quick reopen doesn't blank the list), then
-        // keep polling on the interval.
-        mPollHandler.removeCallbacks(mPollRunnable);
-        mPollHandler.post(mPollRunnable);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mPollHandler.removeCallbacks(mPollRunnable);
-    }
-
-    @Override
-    public void onDestroyView() {
-        mPollHandler.removeCallbacks(mPollRunnable);
-        super.onDestroyView();
+        // Seed the initial state. The previous stream value (if any) keeps
+        // painting until the response lands, so a quick open→close→reopen
+        // doesn't blank the list.
+        mGeckoRuntimeHelper.requestPageBlocks();
     }
 
 

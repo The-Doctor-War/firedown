@@ -698,6 +698,13 @@ import { PageStore } from './pagestore.js';
                         pushCumulativeStats();
                         pushCategoryStats();
                         pushTopTrackers();
+                        // Also push the per-page blocked-host list for the tab
+                        // whose badge just changed, so the SecuritySheet "Ads
+                        // blocked" drill-down updates live while it's open
+                        // instead of freezing at its open-time snapshot. Java
+                        // routes by the echoed tabId/isIncognito and ignores
+                        // pushes for tabs it isn't showing.
+                        pushPageBlocks(tabId);
                     }, 250);
                 }
                 return result;

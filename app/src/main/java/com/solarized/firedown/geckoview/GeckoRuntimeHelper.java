@@ -507,9 +507,20 @@ public class GeckoRuntimeHelper {
             if (json.has("pageBlocks")) {
                 JSONObject payload = json.optJSONObject("pageBlocks");
                 if (payload != null) {
-                    JSONArray items = payload.optJSONArray("items");
-                    boolean isIncognito = payload.optBoolean("isIncognito", false);
-                    mGeckoUblockHelper.onPageBlocks(items, isIncognito);
+                    // The JS now pushes pageBlocks proactively on every block
+                    // burst (piggybacked on updateToolbarIcon), which fires for
+                    // whichever tab's badge changed — not necessarily the one
+                    // the user is looking at. Only apply pushes for the active
+                    // tab so the SecuritySheet detail list can't be overwritten
+                    // by a background tab's blocks. tabId<=0 means the JS used
+                    // its getCurrent() fallback (explicit requestPageBlocks),
+                    // which is already active-tab-scoped, so accept those.
+                    int payloadTabId = payload.optInt("tabId", 0);
+                    if (payloadTabId <= 0 || payloadTabId == mTabId) {
+                        JSONArray items = payload.optJSONArray("items");
+                        boolean isIncognito = payload.optBoolean("isIncognito", false);
+                        mGeckoUblockHelper.onPageBlocks(items, isIncognito);
+                    }
                 }
             }
 

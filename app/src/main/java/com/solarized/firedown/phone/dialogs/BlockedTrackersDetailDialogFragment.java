@@ -58,28 +58,6 @@ public class BlockedTrackersDetailDialogFragment extends BaseBottomSheetDialogFr
     private TextView mEmptyView;
     private RecyclerView mRecyclerView;
 
-    /** Re-poll cadence while the sheet is visible. New blocks land via
-     *  onContentBlocked into the GeckoState host map, but the counts
-     *  LiveData only re-emits when a block fires on the *current* page
-     *  while we're open — which rarely happens, since trackers mostly fire
-     *  during page load before the sheet opens. Re-snapshotting on an
-     *  interval keeps the list live regardless. Started in onResume,
-     *  stopped in onPause. */
-    private static final long POLL_INTERVAL_MS = 1000L;
-    private final android.os.Handler mPollHandler =
-            new android.os.Handler(android.os.Looper.getMainLooper());
-    private final Runnable mPollRunnable = new Runnable() {
-        @Override
-        public void run() {
-            if (mIsIncognito) {
-                mIncognitoStateViewModel.refreshBlockedTrackerCounts();
-            } else {
-                mGeckoStateViewModel.refreshBlockedTrackerCounts();
-            }
-            mPollHandler.postDelayed(this, POLL_INTERVAL_MS);
-        }
-    };
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,36 +91,22 @@ public class BlockedTrackersDetailDialogFragment extends BaseBottomSheetDialogFr
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Observe the same per-page counts LiveData the parent security
-        // sheet uses — when a new tracker is blocked while we're open,
-        // we re-snapshot from the GeckoState and rebuild the list.
+        // Observe the per-page counts LiveData. onContentBlocked re-posts it
+        // on every tracker blocked on the active page, so the list updates
+        // live while the sheet is open. The one-shot refresh below seeds the
+        // initial emission from the current GeckoState snapshot (covers
+        // trackers already blocked before the sheet opened).
         LiveData<Map<TrackingCategory, Integer>> counts = mIsIncognito
                 ? mIncognitoStateViewModel.getBlockedTrackerCounts()
                 : mGeckoStateViewModel.getBlockedTrackerCounts();
 
+        if (mIsIncognito) {
+            mIncognitoStateViewModel.refreshBlockedTrackerCounts();
+        } else {
+            mGeckoStateViewModel.refreshBlockedTrackerCounts();
+        }
+
         counts.observe(getViewLifecycleOwner(), this::rebuildList);
-        // Initial refresh + ongoing live polling are driven by
-        // onResume/onPause so the list both populates on open and keeps
-        // refreshing as new trackers are blocked while the sheet stays open.
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mPollHandler.removeCallbacks(mPollRunnable);
-        mPollHandler.post(mPollRunnable);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mPollHandler.removeCallbacks(mPollRunnable);
-    }
-
-    @Override
-    public void onDestroyView() {
-        mPollHandler.removeCallbacks(mPollRunnable);
-        super.onDestroyView();
     }
 
 

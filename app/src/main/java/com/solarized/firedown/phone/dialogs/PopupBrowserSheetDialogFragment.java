@@ -102,6 +102,21 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
     }
 
 
+    /**
+     * Opt out of the 640dp bottom_sheet_max_height cap. The popup is a
+     * fixed, bounded menu (identity header + quick-action row + a handful of
+     * list rows), not unbounded long content — its natural height lands right
+     * around the cap, so the cap was clamping it mid-screen and forcing the
+     * inner list to scroll with empty space left above. With the cap off and
+     * the layout sized wrap_content, the sheet grows to its content and is
+     * still screen-bounded by BottomSheetBehavior (scrolls only if a screen
+     * genuinely can't fit it). Mirrors BrowserOptionHolderSheetDialogFragment.
+     */
+    @Override
+    protected boolean isMaxHeightCapped() {
+        return false;
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater,

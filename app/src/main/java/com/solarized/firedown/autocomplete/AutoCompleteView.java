@@ -32,6 +32,8 @@ public class AutoCompleteView extends FrameLayout {
 
     private AutoCompleteRecyclerView mSearchView;
 
+    private View mSearchCard;
+
     private MaterialButton mVisibilityView;
 
     private TextView mClipboardTextView;
@@ -98,6 +100,8 @@ public class AutoCompleteView extends FrameLayout {
 
         mSearchView = v.findViewById(R.id.search_view);
 
+        mSearchCard = v.findViewById(R.id.search_card);
+
         mClipboardView = v.findViewById(R.id.clipboard_view);
 
         //Avoid blinking
@@ -159,6 +163,15 @@ public class AutoCompleteView extends FrameLayout {
         if (mVisibilityView != null) {
             mVisibilityView.setIconTint(ColorStateList.valueOf(onSurfaceVariant));
         }
+
+        // 7. Suggestion container card. Carries the single list surface now
+        //    that rows are flat. Match the focused address-bar pill (which
+        //    resolves to the 'highest' tone) so the list and the pill above
+        //    it sit on the same surface. Per-row text/icon tints are handled
+        //    in the adapter via setIncognito().
+        if (mSearchCard instanceof com.google.android.material.card.MaterialCardView card) {
+            card.setCardBackgroundColor(surfaceContainerHighest);
+        }
     }
 
     public void setClipboardCallback(OnClipboardListener onClipboardListener){
@@ -173,11 +186,15 @@ public class AutoCompleteView extends FrameLayout {
     public void showEmpty() {
         showClipboard();
         mSearchView.setVisibility(View.GONE);
+        // Hide the container card too, otherwise its filled surface would
+        // show as an empty panel under the address bar with no rows in it.
+        if (mSearchCard != null) mSearchCard.setVisibility(View.GONE);
     }
 
     public void hideAll(){
         hideClipboard();
         mSearchView.setVisibility(View.VISIBLE);
+        if (mSearchCard != null) mSearchCard.setVisibility(View.VISIBLE);
     }
 
     public void updateVisibility(boolean hasFocus){

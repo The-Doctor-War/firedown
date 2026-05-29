@@ -1132,7 +1132,7 @@ public class BrowserFragment extends BaseBrowserFragment
             } else if (id == R.id.search_down) {
                 findNextResult(mGeckoToolbar.getText(), 0);
             } else if (id == R.id.reload_button) {
-                geckoState.reload();
+                reloadOrReopen(geckoState);
             } else if (id == R.id.stop_button) {
                 geckoState.stop();
                 mGeckoToolbar.setLoading(false);
@@ -1285,7 +1285,7 @@ public class BrowserFragment extends BaseBrowserFragment
             return;
         }
         mSwipeRefreshLayout.setRefreshing(true);
-        geckoState.reload();
+        reloadOrReopen(geckoState);
     }
 
     @Override
@@ -1943,6 +1943,16 @@ public class BrowserFragment extends BaseBrowserFragment
 
         controller.setTabActive(newSession, true);
 
+        // Always (re)activate the session we just attached. Previously
+        // setActive(true) ran only in the !isOpen branch above, so switching
+        // back to an already-open tab relied on the focus-loss handler or the
+        // repo sweep to un-suspend it — and a focus-gain setActive(false) that
+        // wasn't symmetrically restored (current tab changed before focus
+        // loss) left the GeckoView painting a blank, frozen surface.
+        // setActive is idempotent, so asserting it here is safe and removes
+        // that dependency.
+        newSession.setActive(true);
+
         if (geckoState.getGeckoStateEntity().isIncognito()) {
             mIncognitoStateViewModel.setGeckoState(geckoState, true);
         } else {
@@ -2108,9 +2118,40 @@ public class BrowserFragment extends BaseBrowserFragment
 
     private void openUri(GeckoState geckoState) {
         Log.d(TAG, "openUri: " + geckoState.getEntityUri());
+        // Lazy onKill recovery: if the content process was reclaimed
+        // (discardGeckoSession nulls mGeckoSession) or the session was never
+        // opened, getOrCreateGeckoSession() would hand back a fresh DETACHED,
+        // unopened session and loadUri() on it silently does nothing. Route
+        // through openSession() so the session is opened + attached to the
+        // GeckoView before the load. We only pay this when the user actually
+        // navigates the tab again, so it doesn't undo onKill's memory reclaim.
+        GeckoSession session = geckoState.getGeckoSession();
+        if (session == null || !session.isOpen()) {
+            openSession(geckoState);
+            return;
+        }
         String currentUri = geckoState.getEntityUri();
-        geckoState.getOrCreateGeckoSession().loadUri(currentUri);
+        session.loadUri(currentUri);
         applyOpenUriUi(geckoState, currentUri);
+    }
+
+    /**
+     * Reload the tab, transparently reopening it first when its content
+     * process was reclaimed (onKill → discardGeckoSession leaves the session
+     * null / {@code !isOpen}). This is the lazy "verify the session is opened
+     * once the tab is active again" recovery that the onKill teardown relies
+     * on — a killed session's {@link GeckoState#reload()} is a no-op, so
+     * without this the reload / pull-to-refresh button silently did nothing.
+     * Reopening only when the user returns to the tab keeps onKill's memory
+     * reclaim intact.
+     */
+    private void reloadOrReopen(GeckoState geckoState) {
+        GeckoSession session = geckoState.getGeckoSession();
+        if (session == null || !session.isOpen()) {
+            openSession(geckoState);
+        } else {
+            geckoState.reload();
+        }
     }
 
     /**

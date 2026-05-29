@@ -47,7 +47,10 @@ public class IncognitoStateRepository {
     private final GeckoMediaController mGeckoMediaController;
     private final IncognitoTrackingPermissionRepository mTrackingRepository;
     private final IncognitoWasmAllowlistRepository mWasmAllowlistRepository;
-    private int mCurrentId = GeckoState.NULL_SESSION_ID;
+    // volatile for parity with GeckoStateDataRepository: written under
+    // synchronized(mGeckoStates), read lock-free in peek/isCurrent. Keeps the
+    // lock-free reads from seeing a stale id under weak memory ordering.
+    private volatile int mCurrentId = GeckoState.NULL_SESSION_ID;
 
     @Inject
     public IncognitoStateRepository(GeckoMediaController geckoMediaController) {

@@ -61,7 +61,12 @@ public class GeckoStateDataRepository {
     private final GeckoMediaController mGeckoMediaController;
     private final TabStateArchivedRepository mArchivedRepository;
 
-    private int mCurrentId = GeckoState.NULL_SESSION_ID;
+    // volatile: written under synchronized(mGeckoStates) — including on the
+    // disk-executor thread in initializeGeckoStates — but read without the
+    // lock in peekCurrentGeckoState/isCurrentGeckoState. volatile gives those
+    // lock-free reads a happens-before edge so the main thread can't see a
+    // stale id (e.g. the init value 0) after init set it on another thread.
+    private volatile int mCurrentId = GeckoState.NULL_SESSION_ID;
 
     @Inject
     public GeckoStateDataRepository(

@@ -248,6 +248,15 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
             } else if (id == R.id.popup_downloads) {
                 Intent downloadsIntent = new Intent(mActivity, DownloadsActivity.class);
                 mStartForResult.launch(downloadsIntent);
+            } else if (id == R.id.popup_history) {
+                // Opens the saved regular-session history read-only (incognito
+                // records none), with the incognito flag so the list paints in
+                // incognito tones and entries open incognito tabs — same
+                // treatment as the bookmarks entry.
+                Bundle args = new Bundle();
+                args.putBoolean(Keys.IS_INCOGNITO, true);
+                NavigationUtils.navigateSafe(mNavController,
+                        R.id.action_home_incognito_to_history, args);
             } else if (id == R.id.popup_settings) {
                 Intent settingsIntent = new Intent(mActivity, SettingsActivity.class);
                 mStartForResult.launch(settingsIntent);

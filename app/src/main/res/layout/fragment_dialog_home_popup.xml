@@ -22,10 +22,18 @@
         layout="@layout/dialog_drag_handle" />
 
 
-    <!-- History — regular home only (GONE under incognito; no persisted
-         history in private browsing). -->
+    <!-- Row order is Downloads → Safe Folder → History so each mode reads
+         consistently with History last, above Settings:
+           regular  : Safe Folder, History   (Downloads GONE)
+           incognito: Downloads, History      (Safe Folder GONE)
+         Visibility is toggled in PopupHomeSheetDialogFragment. -->
+
+
+    <!-- Downloads — incognito home only (regular home already has a
+         Downloads card; incognito home does not). GONE by default; the
+         fragment shows it under incognito. -->
     <LinearLayout
-        android:id="@+id/popup_history"
+        android:id="@+id/popup_downloads"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="?attr/selectableItemBackground"
@@ -33,20 +41,21 @@
         android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp">
+        android:paddingHorizontal="16dp"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <TextView
-            android:id="@+id/popup_history_text"
             style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawablePadding="16dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/library_history"
+            android:text="@string/navigation_downloads"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="15sp"
-            app:drawableStartCompat="@drawable/ic_history_24"
+            app:drawableStartCompat="@drawable/download_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>
@@ -81,11 +90,11 @@
     </LinearLayout>
 
 
-    <!-- Downloads — incognito home only (regular home already has a
-         Downloads card; incognito home does not). GONE by default; the
-         fragment shows it under incognito. -->
+    <!-- History — both modes. Under incognito it opens the saved
+         regular-session history read-only (incognito records none),
+         with the incognito flag passed through. -->
     <LinearLayout
-        android:id="@+id/popup_downloads"
+        android:id="@+id/popup_history"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:background="?attr/selectableItemBackground"
@@ -93,21 +102,20 @@
         android:focusable="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:visibility="gone"
-        tools:visibility="visible">
+        android:paddingHorizontal="16dp">
 
         <TextView
+            android:id="@+id/popup_history_text"
             style="@style/TextAppearance.Material3.TitleMedium"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:drawablePadding="16dp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:text="@string/navigation_downloads"
+            android:text="@string/library_history"
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="15sp"
-            app:drawableStartCompat="@drawable/download_24"
+            app:drawableStartCompat="@drawable/ic_history_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
     </LinearLayout>

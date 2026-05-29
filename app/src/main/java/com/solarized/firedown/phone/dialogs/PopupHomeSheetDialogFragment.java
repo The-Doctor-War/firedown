@@ -80,13 +80,18 @@ public class PopupHomeSheetDialogFragment extends BaseBottomSheetDialogFragment
 
 
     /**
-     * Shows the right per-mode rows. Regular home: History + Safe Folder.
-     * Incognito home: Downloads (no Downloads card there; History and a
-     * separate Safe-Folder entry don't apply — incognito downloads already
-     * go to the Safe Folder). Settings + Quit are common to both.
+     * Shows the right per-mode rows for a consistent triplet above
+     * Settings (+Quit):
+     *   regular  : History + Safe Folder
+     *   incognito: Downloads + History
+     * History is common to both (it opens the saved regular-session
+     * history read-only, same as bookmarks are shown under incognito).
+     * Safe Folder is regular-only (incognito downloads already land in
+     * the Safe Folder); Downloads is incognito-only (regular home has a
+     * Downloads card).
      */
     private void applyModeVisibility() {
-        toggle(R.id.popup_history, !mIsIncognito);
+        toggle(R.id.popup_history, true);
         toggle(R.id.popup_vault, !mIsIncognito);
         toggle(R.id.popup_downloads, mIsIncognito);
     }

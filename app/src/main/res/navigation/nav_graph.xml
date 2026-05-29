@@ -49,6 +49,9 @@
         <action
             android:id="@+id/action_home_incognito_to_bookmarks"
             app:destination="@id/web_bookmark" />
+        <action
+            android:id="@+id/action_home_incognito_to_history"
+            app:destination="@id/web_history" />
     </fragment>
     <fragment
         android:id="@+id/browser"

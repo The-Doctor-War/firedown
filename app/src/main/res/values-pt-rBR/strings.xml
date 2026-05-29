@@ -94,6 +94,12 @@
     <string name="home_vault_button">Pasta trancada</string>
     <string name="settings_webrtc_enabled_summary">Permite chamadas de vídeo e voz em tempo real. Desativar reduz a superfície de sondagem de rede.</string>
     <string name="incognito_home_warning">A navegação privada não esconde sua atividade da sua rede, do seu empregador ou dos sites que você visita.</string>
+    <string name="incognito_fact_history_title">Sem histórico</string>
+    <string name="incognito_fact_history_sub">Páginas, buscas e cache não são salvos.</string>
+    <string name="incognito_fact_cookies_title">Sem cookies</string>
+    <string name="incognito_fact_cookies_sub">Apagados ao fechar estas abas.</string>
+    <string name="incognito_fact_downloads_title">Downloads ficam privados</string>
+    <string name="incognito_fact_downloads_sub">Salvos na sua Pasta trancada, visíveis apenas dentro do Firedown.</string>
     <string name="wasm_snackbar_message">%s precisa do WebAssembly para funcionar</string>
     <string name="wasm_snackbar_action_enable">Ativar</string>
     <string name="settings_wasm_allowlist_title">Sites permitidos</string>

@@ -937,7 +937,12 @@ public class BrowserFragment extends BaseBrowserFragment
         mUiState = UiState.BROWSING;
         geckoState.setSearchMode(false);
         mGeckoObserverRegistry.register(this);
-        mDownloadButton.setVisibility(View.VISIBLE);
+        // show()/hide() (vs setVisibility) so the FAB scales + fades on
+        // every state change — including the home→browser arrival, where
+        // the flat bookmark cradle slot on home gives way to this flame
+        // FAB. Material's tuned motion spec; falls back to an instant
+        // show when the view isn't laid out yet, so it never regresses.
+        mDownloadButton.show();
         mGeckoView.setVisibility(View.VISIBLE);
         mGeckoToolbar.enableScrolling();
         mGeckoToolbar.onLocationChange(geckoState.getEntityUri());
@@ -959,7 +964,7 @@ public class BrowserFragment extends BaseBrowserFragment
         mGeckoToolbar.disableScrolling();
         mGeckoToolbar.enableSearch();
         mBottomNavigationBar.setVisibility(View.GONE);
-        mDownloadButton.setVisibility(View.GONE);
+        mDownloadButton.hide();
     }
 
     /**
@@ -986,7 +991,7 @@ public class BrowserFragment extends BaseBrowserFragment
         mGeckoToolbar.enableScrolling();
         mBottomNavigationBar.setVisibility(View.VISIBLE);
         mBottomNavigationBar.show();
-        mDownloadButton.setVisibility(View.VISIBLE);
+        mDownloadButton.show();
 
         enterBrowsing();
     }
@@ -1057,7 +1062,7 @@ public class BrowserFragment extends BaseBrowserFragment
     private void enterFullScreen(View decorView) {
         decorView.setBackgroundColor(Color.BLACK);
         mUiState = UiState.FULL_SCREEN;
-        mDownloadButton.setVisibility(View.GONE);
+        mDownloadButton.hide();
         makeSnackbar(mBottomNavigationBar, R.string.exit_fullscreen_with_back_button_short, mIsIncognitoThemed).show();
     }
 
@@ -1072,7 +1077,7 @@ public class BrowserFragment extends BaseBrowserFragment
         mActivity.getTheme().resolveAttribute(android.R.attr.colorBackground, typedValue, true);
         decorView.setBackgroundColor(typedValue.data);
         mUiState = UiState.INIT;
-        mDownloadButton.setVisibility(View.VISIBLE);
+        mDownloadButton.show();
         enterBrowsing();
     }
 
@@ -2082,7 +2087,7 @@ public class BrowserFragment extends BaseBrowserFragment
         mUiState = UiState.BROWSING;
         geckoState.setSearchMode(false);
         mGeckoObserverRegistry.register(this);
-        mDownloadButton.setVisibility(View.VISIBLE);
+        mDownloadButton.show();
         mGeckoView.setVisibility(View.VISIBLE);
         mGeckoToolbar.enableScrolling();
         mGeckoToolbar.onLocationChange(geckoState.getEntityUri());

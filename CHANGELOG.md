@@ -1,3 +1,15 @@
+## [1.1.74] - 2026-05-29
+
+- Redesigned the home screen and a calmer incognito start page
+- Material 3 address-bar suggestions with a cleaner clipboard card
+- Simpler page-security sheet — blocked count plus protection toggles
+- Polished the active-download, incognito and archived-tab banners
+- Added Safe Folder, Downloads and History shortcuts to the menu
+- Fixed tabs that could stop responding or return blank
+- Fixed browser-menu and certificate-details dialog sizing
+- Translations for the new strings
+- Minor bugfixes and improvements
+
 ## [1.1.73] - 2026-05-25
 
 - Added TikTok video and metadata capture

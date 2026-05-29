@@ -158,7 +158,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
-                        android:text="@string/security_stat_scope_on_this_page"
+                        android:gravity="center"
+                        android:text="@string/security_stat_hero_caption"
                         android:textColor="?attr/colorOnSurfaceVariant" />
 
                 </LinearLayout>

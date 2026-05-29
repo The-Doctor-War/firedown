@@ -341,6 +341,7 @@
 
     <string name="tabs_incognito_empty">Немає приватних вкладок</string>
     <string name="security_stat_scope_on_this_page">на цій сторінці</string>
+    <string name="security_stat_hero_caption">Рекламу та трекери заблоковано на цій сторінці</string>
     <string name="security_stat_ads_blocked">реклама</string>
     <string name="security_stat_trackers_blocked">трекери</string>
 </resources>

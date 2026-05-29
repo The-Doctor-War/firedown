@@ -304,6 +304,7 @@
 
     <string name="tabs_incognito_empty">Nicio filă privată</string>
     <string name="security_stat_scope_on_this_page">pe această pagină</string>
+    <string name="security_stat_hero_caption">Reclame și urmăritoare blocate pe această pagină</string>
     <string name="security_stat_ads_blocked">reclame</string>
     <string name="security_stat_trackers_blocked">urmăritoare</string>
 </resources>

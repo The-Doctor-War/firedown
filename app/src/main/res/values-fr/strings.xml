@@ -549,6 +549,7 @@
     <string name="blocked_ads_detail_title">Publicités bloquées</string>
     <string name="security_block_ads">Bloquer les publicités</string>
     <string name="security_stat_scope_on_this_page">sur cette page</string>
+    <string name="security_stat_hero_caption">Pubs et traqueurs bloqués sur cette page</string>
     <string name="security_stat_ads_blocked">pubs</string>
     <string name="security_stat_trackers_blocked">traqueurs</string>
     <string name="security_tracking_protection">Protection contre le suivi</string>

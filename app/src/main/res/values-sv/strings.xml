@@ -10,7 +10,7 @@
     <string name="browser_error_image_title">Fire är borta</string>
     <string name="browser_find_in_page">Hitta på sidan</string>
     <string name="browser_settings">Inställningar</string>
-    <string name="browser_tabs_empty">Dina öppna flikar kommer att visas här.</string>
+    <string name="browser_tabs_empty">Inga öppna flikar</string>
     <string name="browser_tabs_empty_archive">Inga nyligen stängda flikar.</string>
     <string name="cancel">Annullera</string>
     <string name="capture_empty_audio_message">Inga ljudfiler tillgängliga.</string>
@@ -280,4 +280,5 @@
     <string name="blocked_ads_detail_title">Blockerade annonser</string>
     <string name="security_block_ads">Blockera annonser</string>
     <string name="security_tracking_protection">Spårningsskydd</string>
+    <string name="tabs_incognito_empty">Inga privata flikar</string>
 </resources>

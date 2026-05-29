@@ -23,7 +23,7 @@
     <string name="browser_menu_share">Udostępnij</string>
     <string name="browser_menu_stop">Zatrzymaj</string>
     <string name="browser_settings">Ustawienia</string>
-    <string name="browser_tabs_empty">Tutaj zostaną wyświetlone Twoje otwarte karty.</string>
+    <string name="browser_tabs_empty">Brak otwartych kart</string>
     <string name="browser_tabs_empty_archive">Brak ostatnio zamkniętych kart.</string>
     <string name="cancel">Anulować</string>
     <string name="capture_empty_audio_message">Brak dostępnych plików audio.</string>
@@ -408,4 +408,5 @@
     <string name="blocked_ads_detail_title">Zablokowane reklamy</string>
     <string name="security_block_ads">Blokuj reklamy</string>
     <string name="security_tracking_protection">Ochrona przed śledzeniem</string>
+    <string name="tabs_incognito_empty">Brak prywatnych kart</string>
 </resources>

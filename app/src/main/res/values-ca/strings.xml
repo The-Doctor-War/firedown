@@ -20,7 +20,7 @@
     <string name="browser_menu_share">Comparteix</string>
     <string name="browser_menu_stop">Atura</string>
     <string name="browser_settings">Configuració</string>
-    <string name="browser_tabs_empty">Les pestanyes que tinguis obertes es mostraran aquí.</string>
+    <string name="browser_tabs_empty">Cap pestanya oberta</string>
     <string name="browser_tabs_empty_archive">No hi ha pestanyes tancades recentment.</string>
     <string name="cancel">Cancel·lar</string>
     <string name="capture_empty_audio_message">No hi ha fitxers d\'àudio disponibles.</string>
@@ -332,4 +332,5 @@
 
 
 
+    <string name="tabs_incognito_empty">Cap pestanya privada</string>
 </resources>

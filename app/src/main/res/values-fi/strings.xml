@@ -20,7 +20,7 @@
     <string name="browser_menu_share">Jaa</string>
     <string name="browser_menu_stop">Pysäytä</string>
     <string name="browser_settings">Asetukset</string>
-    <string name="browser_tabs_empty">Avoimet välilehdet näkyvät tässä.</string>
+    <string name="browser_tabs_empty">Ei avoimia välilehtiä</string>
     <string name="browser_tabs_empty_archive">Ei äskettäin suljettuja välilehtiä.</string>
     <string name="cancel">Peruuttaa</string>
     <string name="capture_empty_audio_message">Äänitiedostoja ei ole saatavilla.</string>
@@ -350,4 +350,5 @@
     <string name="blocked_ads_detail_title">Estetyt mainokset</string>
     <string name="security_block_ads">Estä mainokset</string>
     <string name="security_tracking_protection">Seurantasuojaus</string>
+    <string name="tabs_incognito_empty">Ei yksityisiä välilehtiä</string>
 </resources>

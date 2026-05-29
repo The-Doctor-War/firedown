@@ -10,7 +10,7 @@
     <string name="browser_error_image_title">O fogo se foi</string>
     <string name="browser_find_in_page">Encontrar na página</string>
     <string name="browser_settings">Configurações</string>
-    <string name="browser_tabs_empty">Suas guias abertas serão mostradas aqui.</string>
+    <string name="browser_tabs_empty">Sem separadores abertos</string>
     <string name="browser_tabs_empty_archive">Nenhuma guia fechada recentemente.</string>
     <string name="cancel">Cancelar</string>
     <string name="capture_empty_audio_message">Nenhum arquivo de áudio disponível.</string>
@@ -329,4 +329,5 @@
     <string name="blocked_ads_detail_title">Anúncios bloqueados</string>
     <string name="security_block_ads">Bloquear anúncios</string>
     <string name="security_tracking_protection">Proteção contra rastreamento</string>
+    <string name="tabs_incognito_empty">Sem separadores privados</string>
 </resources>

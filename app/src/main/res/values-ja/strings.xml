@@ -23,7 +23,7 @@
     <string name="browser_menu_share">共有</string>
     <string name="browser_menu_stop">中止</string>
     <string name="browser_settings">設定</string>
-    <string name="browser_tabs_empty">開いているタブがここに表示されます。</string>
+    <string name="browser_tabs_empty">開いているタブはありません</string>
     <string name="browser_tabs_empty_archive">最近閉じたタブはありません。</string>
     <string name="cancel">キャンセル</string>
     <string name="capture_empty_audio_message">利用可能な音声ファイルがありません。</string>

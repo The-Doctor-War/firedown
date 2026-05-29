@@ -23,7 +23,7 @@
     <string name="browser_menu_share">공유</string>
     <string name="browser_menu_stop">중지</string>
     <string name="browser_settings">설정</string>
-    <string name="browser_tabs_empty">열려 있는 탭이 여기에 표시됩니다.</string>
+    <string name="browser_tabs_empty">열린 탭 없음</string>
     <string name="browser_tabs_empty_archive">최근에 닫은 탭이 없습니다.</string>
     <string name="cancel">취소</string>
     <string name="capture_empty_audio_message">사용 가능한 오디오 파일이 없습니다.</string>
@@ -389,4 +389,5 @@
     <string name="blocked_ads_detail_title">차단된 광고</string>
     <string name="security_block_ads">광고 차단</string>
     <string name="security_tracking_protection">추적 보호</string>
+    <string name="tabs_incognito_empty">비공개 탭 없음</string>
 </resources>

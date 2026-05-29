@@ -23,7 +23,7 @@
     <string name="browser_menu_share">Compartir</string>
     <string name="browser_menu_stop">Detener</string>
     <string name="browser_settings">Ajustes</string>
-    <string name="browser_tabs_empty">Tus pestañas abiertas se mostrarán aquí.</string>
+    <string name="browser_tabs_empty">No hay pestañas abiertas</string>
     <string name="browser_tabs_empty_archive">No hay pestañas cerradas recientemente.</string>
     <string name="cancel">Cancelar</string>
     <string name="capture_empty_audio_message">No hay archivos de audio disponibles.</string>

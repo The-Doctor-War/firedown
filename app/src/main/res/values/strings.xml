@@ -24,7 +24,7 @@
     <string name="browser_menu_share">Share</string>
     <string name="browser_menu_stop">Stop</string>
     <string name="browser_settings">Settings</string>
-    <string name="browser_tabs_empty">Your open tabs will be shown here.</string>
+    <string name="browser_tabs_empty">No open tabs</string>
     <string name="browser_tabs_empty_archive">No recently closed tabs.</string>
     <string name="cancel">Cancel</string>
     <string name="capture_empty_audio_message">No Audio files available.</string>

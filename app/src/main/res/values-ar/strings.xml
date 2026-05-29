@@ -19,7 +19,7 @@
     <string name="browser_menu_share">شارِك</string>
     <string name="browser_menu_stop">أوقف</string>
     <string name="browser_settings">إعدادات</string>
-    <string name="browser_tabs_empty">سيتم عرض علامات التبويب المفتوحة هنا.</string>
+    <string name="browser_tabs_empty">لا توجد علامات تبويب مفتوحة</string>
     <string name="browser_tabs_empty_archive">لا توجد علامات تبويب مغلقة مؤخرًا.</string>
     <string name="cancel">يلغي</string>
     <string name="capture_empty_audio_message">لا توجد ملفات صوتية متاحة.</string>
@@ -360,4 +360,5 @@
     <string name="blocked_ads_detail_title">الإعلانات المحظورة</string>
     <string name="security_block_ads">حظر الإعلانات</string>
     <string name="security_tracking_protection">حماية التتبع</string>
+    <string name="tabs_incognito_empty">لا توجد علامات تبويب خاصة</string>
 </resources>

@@ -23,7 +23,7 @@
     <string name="browser_menu_share">Paylaş</string>
     <string name="browser_menu_stop">Durdur</string>
     <string name="browser_settings">Ayarlar</string>
-    <string name="browser_tabs_empty">Açık sekmeleriniz burada gösterilecektir.</string>
+    <string name="browser_tabs_empty">Açık sekme yok</string>
     <string name="browser_tabs_empty_archive">Yakın zamanda kapatılmış sekme yok.</string>
     <string name="cancel">İptal etmek</string>
     <string name="capture_empty_audio_message">Kullanılabilir Ses dosyası yok.</string>
@@ -410,4 +410,5 @@
     <string name="blocked_ads_detail_title">Engellenen reklamlar</string>
     <string name="security_block_ads">Reklamları engelle</string>
     <string name="security_tracking_protection">Takip Koruması</string>
+    <string name="tabs_incognito_empty">Özel sekme yok</string>
 </resources>

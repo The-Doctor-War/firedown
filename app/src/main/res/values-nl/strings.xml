@@ -23,7 +23,7 @@
     <string name="browser_menu_share">Delen</string>
     <string name="browser_menu_stop">Stoppen</string>
     <string name="browser_settings">Instellingen</string>
-    <string name="browser_tabs_empty">Uw geopende tabbladen worden hier weergegeven.</string>
+    <string name="browser_tabs_empty">Geen open tabbladen</string>
     <string name="browser_tabs_empty_archive">Geen recent gesloten tabbladen.</string>
     <string name="cancel">Annuleren</string>
     <string name="capture_empty_audio_message">Geen audiobestanden beschikbaar.</string>
@@ -411,4 +411,5 @@
     <string name="blocked_ads_detail_title">Geblokkeerde advertenties</string>
     <string name="security_block_ads">Advertenties blokkeren</string>
     <string name="security_tracking_protection">Trackingbescherming</string>
+    <string name="tabs_incognito_empty">Geen privétabbladen</string>
 </resources>

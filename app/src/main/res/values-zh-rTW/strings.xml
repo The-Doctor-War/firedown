@@ -23,7 +23,7 @@
     <string name="browser_menu_share">分享</string>
     <string name="browser_menu_stop">停止</string>
     <string name="browser_settings">設定</string>
-    <string name="browser_tabs_empty">您開啟的選項卡將顯示在此。</string>
+    <string name="browser_tabs_empty">沒有開啟的分頁</string>
     <string name="browser_tabs_empty_archive">沒有最近關閉的標籤。</string>
     <string name="cancel">取消</string>
     <string name="capture_empty_audio_message">沒有可用的音訊檔案。</string>
@@ -339,4 +339,5 @@
 
 
 
+    <string name="tabs_incognito_empty">沒有隱私分頁</string>
 </resources>

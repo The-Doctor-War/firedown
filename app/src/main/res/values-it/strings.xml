@@ -23,7 +23,7 @@
     <string name="browser_menu_share">Condividi</string>
     <string name="browser_menu_stop">Interrompi</string>
     <string name="browser_settings">Impostazioni</string>
-    <string name="browser_tabs_empty">Le tue schede aperte verranno mostrate qui.</string>
+    <string name="browser_tabs_empty">Nessuna scheda aperta</string>
     <string name="browser_tabs_empty_archive">Nessuna scheda chiusa di recente.</string>
     <string name="cancel">Annulla</string>
     <string name="capture_empty_audio_message">Nessun file audio disponibile.</string>
@@ -392,4 +392,5 @@
     <string name="blocked_ads_detail_title">Annunci bloccati</string>
     <string name="security_block_ads">Blocca annunci</string>
     <string name="security_tracking_protection">Protezione dal tracciamento</string>
+    <string name="tabs_incognito_empty">Nessuna scheda privata</string>
 </resources>

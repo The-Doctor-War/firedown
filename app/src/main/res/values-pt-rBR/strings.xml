@@ -152,4 +152,6 @@
 
 
 
+    <string name="browser_tabs_empty">Nenhuma aba aberta</string>
+    <string name="tabs_incognito_empty">Nenhuma aba privada</string>
 </resources>

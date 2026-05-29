@@ -20,7 +20,7 @@
     <string name="browser_menu_share">Del</string>
     <string name="browser_menu_stop">Stop</string>
     <string name="browser_settings">Indstillinger</string>
-    <string name="browser_tabs_empty">Dine åbne faner vil blive vist her.</string>
+    <string name="browser_tabs_empty">Ingen åbne faner</string>
     <string name="browser_tabs_empty_archive">Ingen nyligt lukkede faner.</string>
     <string name="cancel">Afbestil</string>
     <string name="capture_empty_audio_message">Ingen tilgængelige lydfiler.</string>
@@ -346,4 +346,5 @@
     <string name="blocked_ads_detail_title">Blokerede reklamer</string>
     <string name="security_block_ads">Bloker reklamer</string>
     <string name="security_tracking_protection">Sporingsbeskyttelse</string>
+    <string name="tabs_incognito_empty">Ingen private faner</string>
 </resources>

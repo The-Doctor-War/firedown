@@ -20,7 +20,7 @@
     <string name="browser_menu_share">Chia sẻ</string>
     <string name="browser_menu_stop">Dừng</string>
     <string name="browser_settings">Cài đặt</string>
-    <string name="browser_tabs_empty">Các tab đang mở của bạn sẽ được hiển thị ở đây.</string>
+    <string name="browser_tabs_empty">Không có thẻ đang mở</string>
     <string name="browser_tabs_empty_archive">Không có tab nào đã đóng gần đây.</string>
     <string name="cancel">Hủy</string>
     <string name="capture_empty_audio_message">Không có sẵn tập tin âm thanh.</string>
@@ -306,4 +306,5 @@
     <string name="trackers_info_section_top_trackers">Trình theo dõi hàng đầu</string>
     <string name="trackers_info_stat_blocked">Đã chặn</string>
     <string name="trackers_info_stat_saved">Dữ liệu đã lưu</string>
+    <string name="tabs_incognito_empty">Không có thẻ riêng tư</string>
 </resources>

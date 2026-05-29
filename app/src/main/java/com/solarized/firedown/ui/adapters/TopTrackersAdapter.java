@@ -30,7 +30,7 @@ public class TopTrackersAdapter extends ListAdapter<HostCount, TopTrackersAdapte
         super(new TopTrackerDiffCallback());
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         final TextView count;
         final TextView host;
 

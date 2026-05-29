@@ -1953,6 +1953,13 @@ public class BrowserFragment extends BaseBrowserFragment
         mAutoCompleteViewModel.setIncognito(incognito);
         mSearchAutocompleteAdapter.setIncognito(incognito);
 
+        // Keep GeckoView's first-paint cover in sync with the theme so any
+        // pre-paint frame matches the chrome — purple in incognito — rather
+        // than the regular surface set once at view creation.
+        if (mGeckoView != null) {
+            mGeckoView.coverUntilFirstPaint(IncognitoColors.getSurface(mActivity, incognito));
+        }
+
         int nightMode = getResources().getConfiguration().uiMode
                 & Configuration.UI_MODE_NIGHT_MASK;
         boolean lightBars = !incognito && nightMode != Configuration.UI_MODE_NIGHT_YES;

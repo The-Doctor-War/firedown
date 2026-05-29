@@ -397,6 +397,16 @@ vAPI.Tabs = class {
     // - popup: 'popup' => open in a new window
 
     async create(url, details) {
+        // Firedown: neutralised. uBlock's dashboard / logger / context-menu /
+        // "open in new tab" flows are unused — the app drives everything via
+        // native Java messaging. A browser.tabs.create() here reaches the
+        // app's WebExtension TabDelegate.onNewTab, which spins up a
+        // GeckoSession that is never tracked in the Java tab repo nor closed:
+        // a leaked, invisible content process. Returning early nulls every
+        // tab/window *creation* path (the existing-tab update path in open()
+        // is unaffected — it calls vAPI.tabs.update directly).
+        return;
+        // eslint-disable-next-line no-unreachable
         if ( details.active === undefined ) {
             details.active = true;
         }

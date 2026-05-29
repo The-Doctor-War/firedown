@@ -311,8 +311,6 @@ public class Preferences {
 
     public static final int DEFAULT_DOWNLOADS = 0;
 
-    public static final String ONBOARDING_INFO = "com.solarized.firedown.preferences.onboarding.info";
-
     public static final long FIVE_MINUTES_INTERVAL = 300_000L;
     public static final long FIFTEEN_MINUTES_INTERVAL = 900_000L;
     public static final long ONE_HOUR_INTERVAL = 3_600_000L;

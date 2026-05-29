@@ -104,11 +104,16 @@
                 (active_download_percent) — HomeFragment.bindActiveStrip sets
                 its text and applyHomeCardStyle tints it.
             -->
+            <!-- Grouped with the bar below (not the title above): the percent
+                 labels the progress bar, so it gets more breathing room from
+                 the filename (6dp) and sits tight to the bar (4dp). Otherwise
+                 a lone short value (e.g. "2%" on an m3u8 with unknown size)
+                 reads as an orphaned subtitle of the filename. -->
             <TextView
                 android:id="@+id/active_download_percent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="6dp"
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:textAppearance="?attr/textAppearanceBodySmall"
@@ -119,7 +124,7 @@
                 android:id="@+id/active_download_bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 app:indicatorColor="?attr/colorOnPrimaryContainer"
                 app:indicatorTrackGapSize="0dp"
                 app:trackCornerRadius="2dp"

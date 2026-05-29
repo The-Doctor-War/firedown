@@ -39,15 +39,6 @@ public class TabStateArchivedRepository {
     }
 
     /**
-     * Live count of archived tabs. TabsFragment observes this to drive
-     * the archive banner: visible whenever {@code count} exceeds the
-     * "dismissed at" snapshot the user last cleared.
-     */
-    public LiveData<Integer> getArchivedCountLive() {
-        return mTabStateDao.getCountLive();
-    }
-
-    /**
      * Live count of tabs archived since {@code sinceMs}. Used to drive the
      * "X tabs archived in the last [interval]" banner — TabsFragment
      * computes sinceMs as {@code now - interval} where interval is the

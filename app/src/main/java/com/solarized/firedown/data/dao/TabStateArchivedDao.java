@@ -19,15 +19,6 @@ public interface TabStateArchivedDao {
     List<TabStateArchivedEntity> getAllRaw();
 
     /**
-     * Live count of archived tabs. Drives the persistent archive banner —
-     * see TabsFragment.observeArchiveBanner. Updates whenever
-     * archiveInactiveTabs (or any other path) inserts / deletes from
-     * tabstate.
-     */
-    @Query("SELECT COUNT(*) FROM tabstate")
-    LiveData<Integer> getCountLive();
-
-    /**
      * Live count of tabs archived at or after {@code sinceMs}. Powers the
      * "X tabs archived in the last [interval]" banner — TabsFragment
      * passes {@code now - interval} so the banner reflects only tabs

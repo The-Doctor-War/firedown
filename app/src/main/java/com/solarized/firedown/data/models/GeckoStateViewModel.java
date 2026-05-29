@@ -234,19 +234,6 @@ public class GeckoStateViewModel extends ViewModel {
     }
 
     /**
-     * Live count of archived tabs in the database. TabsFragment observes
-     * this and shows the archive banner whenever the count exceeds the
-     * "dismissed at" snapshot the user last cleared.
-     *
-     * <p>Driven by Room: archives, deletes, and clear-all all update
-     * this LiveData automatically. Doesn't depend on whether the
-     * archive operation just ran or happened in a previous app session.</p>
-     */
-    public LiveData<Integer> getArchivedTabCount() {
-        return mArchivedRepository.getArchivedCountLive();
-    }
-
-    /**
      * Live count of tabs archived at or after {@code sinceMs}. Drives the
      * "X tabs archived in the last [interval]" banner — TabsFragment
      * passes {@code now - autoArchiveInterval}.
@@ -259,7 +246,7 @@ public class GeckoStateViewModel extends ViewModel {
      * Archives tabs inactive for longer than {@code maxInactiveMillis}.
      * Runs on the disk I/O executor so it never blocks the main thread.
      * Banner visibility is now driven by the live archived-tab count
-     * (see {@link #getArchivedTabCount()}); no event posting needed.
+     * (see {@link #getArchivedTabCountSince(long)}); no event posting needed.
      *
      * @param maxInactiveMillis inactivity threshold in milliseconds
      */

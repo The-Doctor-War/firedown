@@ -39,20 +39,17 @@
             android:paddingStart="24dp"
             android:paddingEnd="24dp">
 
-            <!-- Spacer to push content toward center. The mascot that used to
-                 sit here moved to the incognito tabs empty state, where it
-                 gives that screen its own identity; the title + three facts
-                 carry Home on their own. -->
-            <Space
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+            <!-- Anchor the content to the upper area rather than the vertical
+                 centre: the mascot that used to balance the top moved to the
+                 incognito tabs empty state, so a fixed gap under the search bar
+                 + a bottom spacer reads better than floating it mid-screen. -->
 
             <!-- Title -->
             <TextView
                 android:id="@+id/incognito_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="40dp"
                 android:text="@string/incognito_home_title"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textColor="@color/incognito_on_surface" />

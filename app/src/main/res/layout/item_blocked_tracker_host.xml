@@ -10,13 +10,18 @@
     android:paddingTop="6dp"
     android:paddingBottom="6dp">
 
+    <!-- Host + count share the Top-trackers list typography: 13sp
+         monospace at textColorPrimary (see item_top_tracker), so the two
+         blocked detail sheets and the Home "Top trackers" list read
+         identically. Monospace keeps the count column intrinsically
+         tabular. -->
     <TextView
         android:id="@+id/host_label"
-        style="@style/TextAppearance.Material3.BodyMedium"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="?attr/colorOnSurfaceVariant"
+        android:fontFamily="monospace"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="13sp"
         android:maxLines="1"
         android:ellipsize="middle"
@@ -27,8 +32,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:textSize="11sp"
+        android:fontFamily="monospace"
+        android:textColor="?android:attr/textColorPrimary"
+        android:textSize="13sp"
         android:maxLines="1"
         tools:text="×3" />
 

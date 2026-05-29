@@ -144,12 +144,6 @@
          user can resume from the card. -->
     <string name="home_media_playing">Playing</string>
     <string name="home_media_paused">Paused</string>
-    <!-- Section header on the home "return to your last tab" card —
-         a one-tap shortcut back into the most recent open (non-home)
-         tab, so a user landing on home can jump straight back to what
-         they were reading. Regular mode only; never shown for
-         incognito sessions. -->
-    <string name="home_return_tab">Continue browsing</string>
     <!-- Section header on the home active-download strip when there
          are more downloads in flight than the single one the card
          shows. %1$d is the count of additional downloads beyond the

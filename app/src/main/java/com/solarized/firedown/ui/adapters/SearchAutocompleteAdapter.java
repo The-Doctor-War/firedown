@@ -21,8 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.shape.ShapeAppearanceModel;
 import com.solarized.firedown.App;
 import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.R;
@@ -53,14 +51,6 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
 
     private final RequestOptions mRequestOptions;
 
-    private final ShapeAppearanceModel singleShapeAppearance;
-
-    private final ShapeAppearanceModel topShapeAppearance;
-
-    private final ShapeAppearanceModel middleShapeAppearance;
-
-    private final ShapeAppearanceModel bottomShapeAppearance;
-
     private boolean mIncognito = false;
 
     public SearchAutocompleteAdapter(Context context, @NonNull DiffUtil.ItemCallback<AutoCompleteEntity> diffCallback, OnItemClickListener onItemClickListener) {
@@ -86,16 +76,6 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
         int mRoundedPixels = context.getResources().getDimensionPixelOffset(R.dimen.icon_rounded);
         RoundedCorners mRoundedCorners = new RoundedCorners(mRoundedPixels);
         mRequestOptions = RequestOptions.bitmapTransform(mRoundedCorners);
-        int cardSmallRadius = context.getResources().getDimensionPixelOffset(R.dimen.list_autocomplete_card_small_radius);
-        int cardBigRadius = context.getResources().getDimensionPixelOffset(R.dimen.list_autocomplete_card_big_radius);
-        singleShapeAppearance = ShapeAppearanceModel.builder().setAllCornerSizes(cardBigRadius).build();
-        middleShapeAppearance = ShapeAppearanceModel.builder().setAllCornerSizes(cardSmallRadius).build();
-        topShapeAppearance = ShapeAppearanceModel.builder().setBottomLeftCornerSize(cardSmallRadius)
-                .setBottomRightCornerSize(cardSmallRadius).setTopLeftCornerSize(cardBigRadius)
-                .setTopRightCornerSize(cardBigRadius).build();
-        bottomShapeAppearance = ShapeAppearanceModel.builder().setBottomLeftCornerSize(cardBigRadius)
-                .setBottomRightCornerSize(cardBigRadius).setTopLeftCornerSize(cardSmallRadius)
-                .setTopRightCornerSize(cardSmallRadius).build();
     }
 
     @Override
@@ -118,10 +98,6 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
             return SEARCH;
         else
             return LIST;
-    }
-
-    public boolean isBottom(int position){
-        return (position == getItemCount() -1);
     }
 
     public void setIncognito(boolean incognito) {
@@ -159,12 +135,10 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
 
         if(type == SEARCH){
             SearchViewHolderPhoneSearch searchViewHolderPhoneSearch = (SearchViewHolderPhoneSearch) holder;
-            searchViewHolderPhoneSearch.item.setShapeAppearanceModel(getItemCount() == 1 ? singleShapeAppearance : topShapeAppearance);
             searchViewHolderPhoneSearch.textView.setText(searchEntity.getTitle());
         }else{
             int searchType = searchEntity.getType();
             SearchViewHolderPhone searchViewHolderPhone = (SearchViewHolderPhone) holder;
-            searchViewHolderPhone.item.setShapeAppearanceModel(isBottom(position) ? bottomShapeAppearance : middleShapeAppearance);
             switch (searchType) {
                 case AutoCompleteEntity.RESULTS:
                     Glide.with(searchViewHolderPhone.buttonSearchView).load(searchEntity.getDrawableId()).fallback(searchDrawable).into(searchViewHolderPhone.buttonSearchView);
@@ -190,23 +164,17 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
 
     private void applyIncognitoColors(RecyclerView.ViewHolder holder) {
         Context context = holder.itemView.getContext();
-        // Match the XML layouts (?attr/colorSurfaceContainerHighest) and the
-        // toolbar's focused state (GeckoToolbar's animColorTo) — those both
-        // resolve to the 'highest' tone in the regular theme, so incognito
-        // should land on the incognito-highest tone too. Was 'high' here,
-        // which made the autocomplete card sit one step darker than the
-        // focused pill above it in incognito.
-        int cardBg = IncognitoColors.getSurfaceContainerHighest(context, true);
+        // Rows are flat now — the container card (search_card) carries the
+        // surface and is themed in AutoCompleteView.updateTheme; here we only
+        // recolour the per-row text + icons for the incognito palette.
         int onSurface = IncognitoColors.getOnSurface(context, true);
         int onSurfaceVariant = IncognitoColors.getOnSurfaceVariant(context, true);
         ColorStateList variantTint = ColorStateList.valueOf(onSurfaceVariant);
         if (holder instanceof SearchViewHolderPhone h) {
-            h.item.setCardBackgroundColor(cardBg);
             h.textView.setTextColor(onSurface);
             h.subTextView.setTextColor(onSurfaceVariant);
             ImageViewCompat.setImageTintList(h.buttonTextView, variantTint);
         } else if (holder instanceof SearchViewHolderPhoneSearch h) {
-            h.item.setCardBackgroundColor(cardBg);
             h.textView.setTextColor(onSurface);
             ImageViewCompat.setImageTintList(h.icon, variantTint);
         }
@@ -215,7 +183,7 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
 
     static class SearchViewHolderPhone extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        MaterialCardView item;
+        View item;
         TextView textView;
         TextView subTextView;
         AppCompatImageView buttonSearchView;
@@ -245,7 +213,7 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
 
     static class SearchViewHolderPhoneSearch extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        MaterialCardView item;
+        View item;
         TextView textView;
         AppCompatImageView icon;
         OnItemClickListener mOnItemClickListener;

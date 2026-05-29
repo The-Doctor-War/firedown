@@ -307,12 +307,20 @@ public class TabsFragment extends BaseTabsFragment {
      * snapshot. The banner observer compares the live count against
      * this value, so the banner only re-appears if more tabs land in
      * the archive after dismissal.
+     *
+     * <p>Must snapshot the SAME windowed count the show logic compares
+     * against — {@code getArchivedTabCountSince}, cached in LAST_COUNT by
+     * the observer. The previous version read the all-time
+     * {@code getArchivedTabCount()} LiveData, which is never observed
+     * here, so {@code getValue()} returned null → dismissedAt was stored
+     * as 0 → the banner reappeared on every launch.</p>
      */
     private void snapshotDismissedAt() {
-        Integer live = mGeckoStateViewModel.getArchivedTabCount().getValue();
-        int current = live != null ? live : 0;
+        int current = mSharedPreferences.getInt(
+                Preferences.SETTINGS_TABS_ARCHIVE_BANNER_LAST_COUNT, 0);
         mSharedPreferences.edit()
-                .putInt(Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT, current)
+                .putInt(Preferences.SETTINGS_TABS_ARCHIVE_BANNER_DISMISSED_AT,
+                        Math.max(current, 0))
                 .apply();
     }
 

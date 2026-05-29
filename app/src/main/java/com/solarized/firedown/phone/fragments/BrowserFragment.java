@@ -937,11 +937,11 @@ public class BrowserFragment extends BaseBrowserFragment
         mUiState = UiState.BROWSING;
         geckoState.setSearchMode(false);
         mGeckoObserverRegistry.register(this);
-        // show()/hide() (vs setVisibility) so the FAB scales + fades on
-        // every state change — including the home→browser arrival, where
-        // the flat bookmark cradle slot on home gives way to this flame
-        // FAB. Material's tuned motion spec; falls back to an instant
-        // show when the view isn't laid out yet, so it never regresses.
+        // show()/hide() (vs setVisibility) so the FAB scales + fades on the
+        // state changes where it's visible — re-appearing after find-in-page
+        // or fullscreen exit. On the initial home→browser arrival this is
+        // called before the first layout pass, so show() takes its documented
+        // instant fallback (no animation); harmless, and never a regression.
         mDownloadButton.show();
         mGeckoView.setVisibility(View.VISIBLE);
         mGeckoToolbar.enableScrolling();

@@ -76,20 +76,25 @@
     <color name="incognito_on_error">#FF690005</color>
     <color name="incognito_error_container">#FF93000A</color>
     <color name="incognito_on_error_container">#FFFFDAD6</color>
-    <!-- Surface -->
+    <!-- Surface — one purple family (hue ~265°), ordered by elevation so
+         the tones ramp consistently instead of mixing neutral greys with
+         purple. Lightness ascends: lowest < dim < surface < container_low
+         < container < high < highest < bright. Previously surface_variant /
+         surface_dim / container_lowest were neutral greys, container_low was
+         brighter than highest, and bright was darker than highest. -->
     <color name="incognito_surface">#FF391D5B</color>
     <color name="incognito_on_surface">#FFE4E2E5</color>
-    <color name="incognito_surface_variant">#FF44474C</color>
-    <color name="incognito_on_surface_variant">#FFC5C6CD</color>
-    <color name="incognito_surface_inverse">#FFE4E2E5</color>
-    <color name="incognito_on_surface_inverse">#FF303033</color>
-    <color name="incognito_surface_dim">#FF131315</color>
-    <color name="incognito_surface_bright">#FF4d287d</color>
+    <color name="incognito_surface_variant">#FF4A3A5E</color>
+    <color name="incognito_on_surface_variant">#FFCAC2D6</color>
+    <color name="incognito_surface_inverse">#FFE9E0F0</color>
+    <color name="incognito_on_surface_inverse">#FF322B3D</color>
+    <color name="incognito_surface_dim">#FF1F1032</color>
+    <color name="incognito_surface_bright">#FF5C3496</color>
     <color name="incognito_surface_container">#FF402167</color>
-    <color name="incognito_surface_container_low">#FF6D3D94</color>
-    <color name="incognito_surface_container_high">#FF4a2779</color>
+    <color name="incognito_surface_container_low">#FF3D1F60</color>
+    <color name="incognito_surface_container_high">#FF4A2779</color>
     <color name="incognito_surface_container_highest">#FF553090</color>
-    <color name="incognito_surface_container_lowest">#FF0D0E10</color>
+    <color name="incognito_surface_container_lowest">#FF140A20</color>
 
     <!-- Incognito-home fact chips: soft translucent fills (drawn over the
          deep-purple surface) paired with a full-opacity accent icon. Each

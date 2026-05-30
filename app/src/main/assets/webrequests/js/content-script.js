@@ -55,6 +55,18 @@ console.log('[cs] loaded', location.href);
     try { browser.runtime.sendMessage(payload); } catch (_) {}
   }
 
+  // --- DEBUG: did the page-world probe actually execute? -------------------
+  // The probe is injected as an INLINE <script>, which is subject to the
+  // page's CSP. Strict sites (x.com) can block inline scripts, in which case
+  // the probe — and ALL wasm detection — silently never runs even though
+  // `[cs] loaded` (isolated world, CSP-exempt) printed. The probe dispatches
+  // this event as its first act; if we don't hear it, CSP ate the probe.
+  let probeRan = false;
+  document.addEventListener('__firedown_probe_alive__', () => {
+    probeRan = true;
+    console.log('[cs] WASM-DEBUG: page-world probe RAN on', location.href);
+  }, { capture: true, once: true });
+
   // --- Page-world probe: injected as a <script> so it runs with the same
   //     globals the site uses. Hooks every surface a WASM error might
   //     show up on. Dispatches the signal event on document so our
@@ -63,6 +75,9 @@ console.log('[cs] loaded', location.href);
     const PATTERN = /WebAssembly|wasm\\b/i;
     const NAME = ${JSON.stringify(SIGNAL_EVENT)};
     let fired = false;
+    // First act: tell the isolated world we executed (CSP-block detection).
+    try { document.dispatchEvent(new CustomEvent('__firedown_probe_alive__')); } catch (_) {}
+    try { console.log('[fd-probe] running on ' + location.href + ' | typeof WebAssembly=' + (typeof window.WebAssembly)); } catch (_) {}
     function fire(detail) {
       if (fired) return;
       fired = true;
@@ -143,11 +158,13 @@ console.log('[cs] loaded', location.href);
           // throws (or Module is absent) when disabled.
           new WA.Module(new Uint8Array([0,0x61,0x73,0x6d,1,0,0,0]));
         } catch (probeErr) { wasmDisabled = true; }
+        try { console.log('[fd-probe] WASM present (object); disabledProbe=' + wasmDisabled); } catch (_) {}
         if (wasmDisabled && !WA.__firedown_trap) {
           WA.__firedown_trap = true;
           USE.forEach(function (name) {
             var orig = WA[name];
             WA[name] = function () {
+              try { console.log('[fd-probe] WASM use attempt: ' + name); } catch (_) {}
               fire('WebAssembly.' + name);
               if (typeof orig !== 'function') {
                 throw new TypeError('WebAssembly.' + name + ' is disabled');
@@ -155,15 +172,18 @@ console.log('[cs] loaded', location.href);
               return new.target ? Reflect.construct(orig, arguments) : orig.apply(this, arguments);
             };
           });
+          try { console.log('[fd-probe] use-trap installed: ' + USE.join(',')); } catch (_) {}
         }
       } else if (typeof WA === 'undefined') {
         // Global removed entirely: reaching for any wasm member is a use
         // attempt. Return undefined for members so callers fail exactly as
         // they would with wasm disabled (graceful fallbacks that test a
         // method's truthiness still fall back).
+        try { console.log('[fd-probe] WASM ABSENT (typeof undefined) → installing proxy trap'); } catch (_) {}
         var trap = new Proxy(function () {}, {
           get: function (_t, prop) {
             if (prop === Symbol.toStringTag || prop === Symbol.toPrimitive) return undefined;
+            try { console.log('[fd-probe] WASM member access: ' + String(prop)); } catch (_) {}
             fire('WebAssembly.' + String(prop));
             return undefined;
           },
@@ -171,8 +191,12 @@ console.log('[cs] loaded', location.href);
           construct: function () { fire('new WebAssembly'); throw new TypeError('WebAssembly is disabled'); }
         });
         Object.defineProperty(window, 'WebAssembly', { configurable: true, get: function () { return trap; } });
+      } else {
+        try { console.log('[fd-probe] WASM typeof=' + (typeof WA) + ' (unexpected)'); } catch (_) {}
       }
-    } catch (trapSetupErr) {}
+    } catch (trapSetupErr) {
+      try { console.log('[fd-probe] trap setup error: ' + (trapSetupErr && trapSetupErr.message)); } catch (_) {}
+    }
   })();`;
 
   try {
@@ -183,6 +207,17 @@ console.log('[cs] loaded', location.href);
   } catch (e) {
     console.log('[cs] wasm probe injection failed:', e && e.message);
   }
+
+  // CSP-block detector: if the probe never signalled within 1.5s the inline
+  // <script> was almost certainly refused by the page CSP.
+  setTimeout(() => {
+    if (!probeRan) {
+      console.log('[cs] WASM-DEBUG: page-world probe DID NOT RUN within 1.5s on '
+        + location.href + ' — the inline <script> was blocked by the page CSP '
+        + '(x.com ships a strict script-src). Inline injection cannot detect wasm '
+        + 'here; the probe needs to be an external web_accessible_resource script.');
+    }
+  }, 1500);
 })();
 
 // Top-frame metadata responder. We only answer in the top frame so the

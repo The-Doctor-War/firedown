@@ -122,6 +122,57 @@ console.log('[cs] loaded', location.href);
     // "analytics replaces console" pattern.
     Promise.resolve().then(wrapConsoleError);
     document.addEventListener('DOMContentLoaded', wrapConsoleError, { once: true });
+
+    // --- Proactive WASM-use trap -------------------------------------------
+    // The hooks above only catch wasm failures that reach the console / error
+    // surfaces — kick.com throws an uncaught error, so it works. Sites that
+    // SWALLOW the failure never surface one: x.com's login try/catches the
+    // wasm error and shows its own "Something went wrong", so nothing matching
+    // ever reaches us and no snackbar fires. So also detect the wasm *use
+    // attempt* itself. This fires (once — fire() is latched) only on a real
+    // wasm call/instantiation while wasm is disabled; it never fires on mere
+    // feature detection (typeof checks don't call a method) nor when wasm
+    // actually works (the disabled-probe gates the wrappers).
+    try {
+      var WA = window.WebAssembly;
+      var USE = ['instantiate','compile','instantiateStreaming','compileStreaming','Module','Instance'];
+      if (WA && typeof WA === 'object') {
+        var wasmDisabled = false;
+        try {
+          // canonical empty-module header: succeeds when wasm is enabled,
+          // throws (or Module is absent) when disabled.
+          new WA.Module(new Uint8Array([0,0x61,0x73,0x6d,1,0,0,0]));
+        } catch (probeErr) { wasmDisabled = true; }
+        if (wasmDisabled && !WA.__firedown_trap) {
+          WA.__firedown_trap = true;
+          USE.forEach(function (name) {
+            var orig = WA[name];
+            WA[name] = function () {
+              fire('WebAssembly.' + name);
+              if (typeof orig !== 'function') {
+                throw new TypeError('WebAssembly.' + name + ' is disabled');
+              }
+              return new.target ? Reflect.construct(orig, arguments) : orig.apply(this, arguments);
+            };
+          });
+        }
+      } else if (typeof WA === 'undefined') {
+        // Global removed entirely: reaching for any wasm member is a use
+        // attempt. Return undefined for members so callers fail exactly as
+        // they would with wasm disabled (graceful fallbacks that test a
+        // method's truthiness still fall back).
+        var trap = new Proxy(function () {}, {
+          get: function (_t, prop) {
+            if (prop === Symbol.toStringTag || prop === Symbol.toPrimitive) return undefined;
+            fire('WebAssembly.' + String(prop));
+            return undefined;
+          },
+          apply: function () { fire('WebAssembly()'); return undefined; },
+          construct: function () { fire('new WebAssembly'); throw new TypeError('WebAssembly is disabled'); }
+        });
+        Object.defineProperty(window, 'WebAssembly', { configurable: true, get: function () { return trap; } });
+      }
+    } catch (trapSetupErr) {}
   })();`;
 
   try {

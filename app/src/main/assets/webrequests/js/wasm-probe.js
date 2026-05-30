@@ -84,8 +84,15 @@
   // surface one — x.com's login try/catches it and shows "Something went
   // wrong" — so also detect the wasm reference itself.
   try {
-    var WA = window.WebAssembly;
-    if (WA && typeof WA === 'object') {
+    if (window.__firedown_wasm_prearmed) {
+      // The content script already installed the read-trap synchronously via
+      // wrappedJSObject (earlier than this async script, and CSP-immune).
+      // Don't re-install — and crucially don't read window.WebAssembly here,
+      // which would trip that getter and self-report. Error hooks above still
+      // run, so console/throw-based detection (kick.com) is unaffected.
+    } else {
+      var WA = window.WebAssembly;
+      if (WA && typeof WA === 'object') {
       // Present but possibly disabled (some engines keep the global and throw
       // on use). Gate on an actual disabled-probe so we never fire when wasm
       // works, then fire on a real call.

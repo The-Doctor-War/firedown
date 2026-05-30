@@ -63,6 +63,38 @@ console.log('[cs] loaded', location.href);
     probeRan = true;
   }, { capture: true, once: true });
 
+  // --- Synchronous pre-arm of the WebAssembly read-trap -------------------
+  // The external probe below loads async, so a very early page script could
+  // read WebAssembly before it arms. Content scripts run synchronously at
+  // document_start, before any page script, so additionally install the
+  // read-trap right now via Firefox's Xray wrappedJSObject — no <script>, so
+  // it's also immune to the page CSP. Strictly additive and fully guarded:
+  // only acts when wasm is disabled (the global is removed), and silently
+  // falls back to the external probe if any Xray API is missing or throws.
+  // Sets a flag so the external probe doesn't re-install (and doesn't trip
+  // this getter by reading the global).
+  try {
+    if (typeof exportFunction === 'function') {
+      const pageWin = window.wrappedJSObject;
+      if (pageWin && typeof pageWin.WebAssembly === 'undefined' && !pageWin.__firedown_wasm_prearmed) {
+        let prearmFired = false;
+        const getter = exportFunction(function () {
+          if (!prearmFired) {
+            prearmFired = true;
+            try {
+              document.dispatchEvent(new CustomEvent('__firedown_wasm_unavailable__', {
+                detail: { detail: 'WebAssembly read (pre-arm)' }
+              }));
+            } catch (_) {}
+          }
+          return undefined;
+        }, pageWin);
+        Object.defineProperty(pageWin, 'WebAssembly', { configurable: true, get: getter });
+        pageWin.__firedown_wasm_prearmed = true;
+      }
+    }
+  } catch (_) { /* Xray unavailable / refused — the external probe handles it */ }
+
   // --- Page-world probe injection -----------------------------------------
   // The probe must run in the PAGE world to hook the page's WebAssembly /
   // console / error surfaces. We load it as an EXTERNAL moz-extension:

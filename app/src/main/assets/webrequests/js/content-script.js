@@ -55,16 +55,12 @@ console.log('[cs] loaded', location.href);
     try { browser.runtime.sendMessage(payload); } catch (_) {}
   }
 
-  // --- DEBUG: did the page-world probe actually execute? -------------------
-  // The probe is injected as an INLINE <script>, which is subject to the
-  // page's CSP. Strict sites (x.com) can block inline scripts, in which case
-  // the probe — and ALL wasm detection — silently never runs even though
-  // `[cs] loaded` (isolated world, CSP-exempt) printed. The probe dispatches
-  // this event as its first act; if we don't hear it, CSP ate the probe.
+  // The probe signals this the moment it runs; if we never hear it, the page
+  // refused even the external moz-extension script (CSP) and wasm detection is
+  // off on this page — surfaced by the timeout warning below.
   let probeRan = false;
   document.addEventListener('__firedown_probe_alive__', () => {
     probeRan = true;
-    console.log('[cs] WASM-DEBUG: page-world probe RAN on', location.href);
   }, { capture: true, once: true });
 
   // --- Page-world probe injection -----------------------------------------

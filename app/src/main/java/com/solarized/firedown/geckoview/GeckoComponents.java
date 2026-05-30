@@ -924,6 +924,14 @@ public class GeckoComponents {
             // Only persist session state for regular tabs — incognito is in-memory only
             if (!geckoState.isIncognito()) {
                 geckoState.setEntityState(sessionState);
+                // Push through notifyTabs so GeckoStateObserver writes the new
+                // state to disk now. setEntityState alone only mutates the
+                // in-memory entity; without this emission the sessions file is
+                // only rewritten when something else triggers notifyTabs (a tab
+                // open/close, or the onThumbnail capture on backgrounding) — so
+                // killing the app straight from a page lost its latest URL /
+                // history, while backgrounding first happened to flush it.
+                notifyTabs(geckoState);
             }
 
             Log.d(TAG, "onSessionStateChange end");

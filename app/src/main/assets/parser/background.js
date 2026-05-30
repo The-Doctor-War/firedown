@@ -1247,7 +1247,20 @@ async function fetchTwitterData(details, headers) {
 
 browser.webRequest.onSendHeaders.addListener(
     handleTwitterHeaders,
-    { urls: ["*://api.x.com/graphql/*"], types: ["xmlhttprequest"] },
+    {
+        urls: [
+            // Logged-out / embeds use the api.x.com host…
+            "*://api.x.com/graphql/*",
+            // …but signed-in TweetDetail goes to x.com/i/api/graphql/ — the
+            // filter missed it, which is why signed-in video never parsed
+            // (confirmed from a captured TweetDetail request). Match both
+            // hosts and the twitter.com legacy domain.
+            "*://x.com/i/api/graphql/*",
+            "*://api.twitter.com/graphql/*",
+            "*://twitter.com/i/api/graphql/*"
+        ],
+        types: ["xmlhttprequest"]
+    },
     ["requestHeaders"]
 );
 

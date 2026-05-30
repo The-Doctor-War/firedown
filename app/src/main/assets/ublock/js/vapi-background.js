@@ -633,8 +633,6 @@ vAPI.Tabs = class {
             // Cookie-notice blocking is a global filter-list selection, not
             // per-hostname. Mirror the key used by firedown.js' toggle.
             const cookieNoticesBlocked = µBlock.selectedFilterLists.includes('fanboy-cookiemonster');
-            console.log(`[onUpdatedHandler] complete url=${tab.url} currentState=${currentState}` + ` cookies=${cookieNoticesBlocked}`);
-            console.log(`selectedFilterLists: ${JSON.stringify(µBlock.selectedFilterLists)}`);
             browser.runtime.sendNativeMessage("ublock", {firewall: {activated: currentState, cookies: cookieNoticesBlocked}});
         }
         //const hn =  hostnameFromURI(normalURL);

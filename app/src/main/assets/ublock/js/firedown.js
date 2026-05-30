@@ -121,10 +121,25 @@ import { PageStore } from './pagestore.js';
         // {cookies:true} every time the port attaches, which happens at
         // least once per app launch — without this gate every launch
         // would force-reload the active tab even though nothing changed.
-        const haveCookieLists = COOKIE_NOTICE_LISTS.every(
+        //
+        // The gate must be direction-aware and mirror how the "on" state is
+        // reported back to Java: updateState() uses .some() and
+        // vapi-background.js' onUpdatedHandler keys on fanboy-cookiemonster
+        // alone, so "on" means *any* cookie list is selected and "off" means
+        // *none* are. The old `enable === every(...)` check treated a partial
+        // selection (only one of the two lists present — which can happen
+        // when a list is dropped on a recompile, or when the on-connect
+        // handshake re-adds just one) as "not on", so a disable request
+        // short-circuited as a no-op and left the present list still
+        // blocking — the toggle looked dead. Enabling still requires *both*
+        // lists, so gate enable on every() and disable on some().
+        const fullyEnabled = COOKIE_NOTICE_LISTS.every(
             k => µb.selectedFilterLists.includes(k)
         );
-        if (enable === haveCookieLists) {
+        const anyEnabled = COOKIE_NOTICE_LISTS.some(
+            k => µb.selectedFilterLists.includes(k)
+        );
+        if (enable ? fullyEnabled : !anyEnabled) {
             return;
         }
 

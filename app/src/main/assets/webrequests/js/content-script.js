@@ -67,158 +67,35 @@ console.log('[cs] loaded', location.href);
     console.log('[cs] WASM-DEBUG: page-world probe RAN on', location.href);
   }, { capture: true, once: true });
 
-  // --- Page-world probe: injected as a <script> so it runs with the same
-  //     globals the site uses. Hooks every surface a WASM error might
-  //     show up on. Dispatches the signal event on document so our
-  //     isolated-world listener above can pick it up.
-  const PROBE = `(() => {
-    const PATTERN = /WebAssembly|wasm\\b/i;
-    const NAME = ${JSON.stringify(SIGNAL_EVENT)};
-    let fired = false;
-    // First act: tell the isolated world we executed (CSP-block detection).
-    try { document.dispatchEvent(new CustomEvent('__firedown_probe_alive__')); } catch (_) {}
-    try { console.log('[fd-probe] running on ' + location.href + ' | typeof WebAssembly=' + (typeof window.WebAssembly)); } catch (_) {}
-    function fire(detail) {
-      if (fired) return;
-      fired = true;
-      try {
-        document.dispatchEvent(new CustomEvent(NAME, {
-          detail: { detail: String(detail || '').slice(0, 200) }
-        }));
-      } catch (_) {}
-    }
-    function textOf(thing) {
-      if (!thing) return '';
-      if (typeof thing === 'string') return thing;
-      try {
-        if (thing.message) return String(thing.message);
-        if (thing.toString) return thing.toString();
-        return String(thing);
-      } catch (_) { return ''; }
-    }
-    window.addEventListener('error', function (e) {
-      const m = textOf(e && (e.message || e.error));
-      if (PATTERN.test(m)) fire(m);
-    }, true);
-    // Older surface — sites that assign window.onerror skip addEventListener.
-    const origOnError = window.onerror;
-    window.onerror = function (msg, src, line, col, err) {
-      try {
-        const text = textOf(err) || textOf(msg);
-        if (PATTERN.test(text)) fire(text);
-      } catch (_) {}
-      if (typeof origOnError === 'function') {
-        return origOnError.apply(this, arguments);
-      }
-      return false;
-    };
-    window.addEventListener('unhandledrejection', function (e) {
-      const m = textOf(e && e.reason);
-      if (m && PATTERN.test(m)) fire(m);
-    });
-    // console.error wrap. Re-wrap if the page replaces console.error later
-    // (some analytics SDKs do this on init) so we keep intercepting.
-    function wrapConsoleError() {
-      const orig = console.error;
-      if (orig && orig.__firedown_wrapped) return;
-      const wrapped = function () {
-        try {
-          const j = Array.prototype.map.call(arguments, textOf).join(' ');
-          if (PATTERN.test(j)) fire(j);
-        } catch (_) {}
-        return orig.apply(console, arguments);
-      };
-      wrapped.__firedown_wrapped = true;
-      try { console.error = wrapped; } catch (_) {}
-    }
-    wrapConsoleError();
-    // Re-wrap if console.error gets reassigned later. Cheap: only runs once
-    // after a microtask + once on DOMContentLoaded; that catches the common
-    // "analytics replaces console" pattern.
-    Promise.resolve().then(wrapConsoleError);
-    document.addEventListener('DOMContentLoaded', wrapConsoleError, { once: true });
-
-    // --- Proactive WASM-use trap -------------------------------------------
-    // The hooks above only catch wasm failures that reach the console / error
-    // surfaces — kick.com throws an uncaught error, so it works. Sites that
-    // SWALLOW the failure never surface one: x.com's login try/catches the
-    // wasm error and shows its own "Something went wrong", so nothing matching
-    // ever reaches us and no snackbar fires. So also detect the wasm *use
-    // attempt* itself. This fires (once — fire() is latched) only on a real
-    // wasm call/instantiation while wasm is disabled; it never fires on mere
-    // feature detection (typeof checks don't call a method) nor when wasm
-    // actually works (the disabled-probe gates the wrappers).
-    try {
-      var WA = window.WebAssembly;
-      var USE = ['instantiate','compile','instantiateStreaming','compileStreaming','Module','Instance'];
-      if (WA && typeof WA === 'object') {
-        var wasmDisabled = false;
-        try {
-          // canonical empty-module header: succeeds when wasm is enabled,
-          // throws (or Module is absent) when disabled.
-          new WA.Module(new Uint8Array([0,0x61,0x73,0x6d,1,0,0,0]));
-        } catch (probeErr) { wasmDisabled = true; }
-        try { console.log('[fd-probe] WASM present (object); disabledProbe=' + wasmDisabled); } catch (_) {}
-        if (wasmDisabled && !WA.__firedown_trap) {
-          WA.__firedown_trap = true;
-          USE.forEach(function (name) {
-            var orig = WA[name];
-            WA[name] = function () {
-              try { console.log('[fd-probe] WASM use attempt: ' + name); } catch (_) {}
-              fire('WebAssembly.' + name);
-              if (typeof orig !== 'function') {
-                throw new TypeError('WebAssembly.' + name + ' is disabled');
-              }
-              return new.target ? Reflect.construct(orig, arguments) : orig.apply(this, arguments);
-            };
-          });
-          try { console.log('[fd-probe] use-trap installed: ' + USE.join(',')); } catch (_) {}
-        }
-      } else if (typeof WA === 'undefined') {
-        // Global removed entirely: reaching for any wasm member is a use
-        // attempt. Return undefined for members so callers fail exactly as
-        // they would with wasm disabled (graceful fallbacks that test a
-        // method's truthiness still fall back).
-        try { console.log('[fd-probe] WASM ABSENT (typeof undefined) → installing proxy trap'); } catch (_) {}
-        var trap = new Proxy(function () {}, {
-          get: function (_t, prop) {
-            if (prop === Symbol.toStringTag || prop === Symbol.toPrimitive) return undefined;
-            try { console.log('[fd-probe] WASM member access: ' + String(prop)); } catch (_) {}
-            fire('WebAssembly.' + String(prop));
-            return undefined;
-          },
-          apply: function () { fire('WebAssembly()'); return undefined; },
-          construct: function () { fire('new WebAssembly'); throw new TypeError('WebAssembly is disabled'); }
-        });
-        Object.defineProperty(window, 'WebAssembly', { configurable: true, get: function () { return trap; } });
-      } else {
-        try { console.log('[fd-probe] WASM typeof=' + (typeof WA) + ' (unexpected)'); } catch (_) {}
-      }
-    } catch (trapSetupErr) {
-      try { console.log('[fd-probe] trap setup error: ' + (trapSetupErr && trapSetupErr.message)); } catch (_) {}
-    }
-  })();`;
-
+  // --- Page-world probe injection -----------------------------------------
+  // The probe must run in the PAGE world to hook the page's WebAssembly /
+  // console / error surfaces. We load it as an EXTERNAL moz-extension:
+  // web_accessible_resource <script>, NOT inline: strict-CSP sites (x.com
+  // ships script-src with a nonce / strict-dynamic, which voids
+  // 'unsafe-inline') refuse an injected inline <script>, so the old
+  // textContent probe never executed there. Extension-origin resource loads
+  // bypass the page CSP, so the external probe runs everywhere.
   try {
     const s = document.createElement('script');
-    s.textContent = PROBE;
+    s.src = browser.runtime.getURL('js/wasm-probe.js');
+    s.async = false; // execute ASAP, before the page's own scripts use wasm
+    s.onload = () => s.remove();
     (document.documentElement || document.head || document.body).appendChild(s);
-    s.remove();
   } catch (e) {
     console.log('[cs] wasm probe injection failed:', e && e.message);
   }
 
-  // CSP-block detector: if the probe never signalled within 1.5s the inline
-  // <script> was almost certainly refused by the page CSP.
+  // CSP-block detector: if the probe never signals within 1.5s, even the
+  // external moz-extension script was refused — we'd need a deeper hook.
   setTimeout(() => {
     if (!probeRan) {
       console.log('[cs] WASM-DEBUG: page-world probe DID NOT RUN within 1.5s on '
-        + location.href + ' — the inline <script> was blocked by the page CSP '
-        + '(x.com ships a strict script-src). Inline injection cannot detect wasm '
-        + 'here; the probe needs to be an external web_accessible_resource script.');
+        + location.href + ' — even the external web_accessible_resource script '
+        + 'was blocked. Page CSP is rejecting moz-extension: scripts too.');
     }
   }, 1500);
 })();
+
 
 // Top-frame metadata responder. We only answer in the top frame so the
 // background's tabs.sendMessage (which broadcasts to all frames in a tab

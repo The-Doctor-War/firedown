@@ -279,7 +279,6 @@ public class SettingsFragment extends BasePreferenceFragment
 
             boolean value = sharedPreferences.getBoolean(key, false);
 
-            android.util.Log.d("COOKIE_DBG", "pref changed: block_cookie_notices=" + value);
             mGeckoRuntimeHelper.setCookies(value);
 
             // firedown.js' toggleCookieNotices already reloads the active

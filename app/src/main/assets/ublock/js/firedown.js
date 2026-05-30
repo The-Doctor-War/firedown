@@ -26,7 +26,6 @@ import { PageStore } from './pagestore.js';
         } else if (Object.hasOwn(response, "fonts")) {
             toggleFonts({ enable: response.fonts });
         } else if (Object.hasOwn(response, "cookies")) {
-            console.log('[cookie-dbg] port received cookies=' + response.cookies);
             toggleCookieNotices({ enable: response.cookies });
         } else if (Object.hasOwn(response, "update")) {
             updateState();
@@ -149,9 +148,6 @@ import { PageStore } from './pagestore.js';
         await defaultsReady;
 
         const enable = message.enable === true;
-        console.log('[cookie-dbg] toggleCookieNotices enter enable=' + enable
-            + ' before=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
-                k => µb.selectedFilterLists.includes(k))));
 
         // 1) Immediate feedback, before the multi-second recompile below.
         pushCookieState(enable);
@@ -161,7 +157,6 @@ import { PageStore } from './pagestore.js';
         //    stack another loadFilterLists/reload.
         cookieToggleDesired = enable;
         if (cookieToggleInFlight) {
-            console.log('[cookie-dbg] coalesced into in-flight toggle');
             return;
         }
         cookieToggleInFlight = true;
@@ -192,9 +187,6 @@ import { PageStore } from './pagestore.js';
                     : { toRemove: COOKIE_NOTICE_LISTS });
                 await µb.loadFilterLists();
                 appliedAny = true;
-                console.log('[cookie-dbg] applied enable=' + target
-                    + ' after=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
-                        k => µb.selectedFilterLists.includes(k))));
                 if (cookieToggleDesired === target) {
                     break; // no newer request arrived during the recompile
                 }

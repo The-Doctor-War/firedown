@@ -111,7 +111,40 @@ import { PageStore } from './pagestore.js';
     /**************************************************************************
      * Cookie-notice toggle — global filter-list selection.
      * Mutates µb.selectedFilterLists. Must wait for migration.
+     *
+     * loadFilterLists() recompiles the entire engine (~60k+ rules), which
+     * takes several seconds. Two consequences are handled here:
+     *
+     *   1. Immediate feedback — push the *intended* cookie state to the
+     *      native side before the recompile, so any cookie indicator flips
+     *      at once instead of lagging the recompile.
+     *
+     *   2. Coalescing — without a guard, flipping on/off/on while a recompile
+     *      is in flight queues a serial recompile + tab reload per flip and
+     *      the toggle looks frozen. A single in-flight worker drains to the
+     *      latest requested state ({@link cookieToggleDesired}), collapsing a
+     *      burst into at most one recompile per distinct end state and a
+     *      single reload.
      *************************************************************************/
+    let cookieToggleInFlight = false;
+    let cookieToggleDesired = null;
+
+    // Optimistic native-side state push. Mirrors updateState()'s firewall
+    // shape (activated from the net-filtering switch) but forces the cookie
+    // flag to the caller-supplied intended value rather than reading it back
+    // from the not-yet-recompiled selectedFilterLists.
+    async function pushCookieState(cookies) {
+        try {
+            const tab = await vAPI.tabs.getCurrent();
+            const activated = tab instanceof Object
+                ? µb.getNetFilteringSwitch(tab.url)
+                : true;
+            browser.runtime.sendNativeMessage("ublock", {
+                firewall: { activated, cookies },
+            });
+        } catch (_) { /* extension still settling — onUpdated will resync */ }
+    }
+
     async function toggleCookieNotices(message) {
         await defaultsReady;
 
@@ -120,49 +153,64 @@ import { PageStore } from './pagestore.js';
             + ' before=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
                 k => µb.selectedFilterLists.includes(k))));
 
-        // Short-circuit if uBlock is already in the desired state. The
-        // on-connect handshake in GeckoRuntimeHelper.onConnect pushes
-        // {cookies:true} every time the port attaches, which happens at
-        // least once per app launch — without this gate every launch
-        // would force-reload the active tab even though nothing changed.
-        //
-        // The gate must be direction-aware and mirror how the "on" state is
-        // reported back to Java: updateState() uses .some() and
-        // vapi-background.js' onUpdatedHandler keys on fanboy-cookiemonster
-        // alone, so "on" means *any* cookie list is selected and "off" means
-        // *none* are. The old `enable === every(...)` check treated a partial
-        // selection (only one of the two lists present — which can happen
-        // when a list is dropped on a recompile, or when the on-connect
-        // handshake re-adds just one) as "not on", so a disable request
-        // short-circuited as a no-op and left the present list still
-        // blocking — the toggle looked dead. Enabling still requires *both*
-        // lists, so gate enable on every() and disable on some().
-        const fullyEnabled = COOKIE_NOTICE_LISTS.every(
-            k => µb.selectedFilterLists.includes(k)
-        );
-        const anyEnabled = COOKIE_NOTICE_LISTS.some(
-            k => µb.selectedFilterLists.includes(k)
-        );
-        if (enable ? fullyEnabled : !anyEnabled) {
-            console.log('[cookie-dbg] short-circuit (already in desired state)'
-                + ' enable=' + enable + ' fullyEnabled=' + fullyEnabled
-                + ' anyEnabled=' + anyEnabled);
+        // 1) Immediate feedback, before the multi-second recompile below.
+        pushCookieState(enable);
+
+        // 2) Record the latest desired state and coalesce. If a recompile is
+        //    already running it will pick this up when it loops, so we don't
+        //    stack another loadFilterLists/reload.
+        cookieToggleDesired = enable;
+        if (cookieToggleInFlight) {
+            console.log('[cookie-dbg] coalesced into in-flight toggle');
             return;
         }
+        cookieToggleInFlight = true;
+        try {
+            let appliedAny = false;
+            // Drain to the newest requested state. The gate is direction-aware
+            // and mirrors how "on" is reported back to Java (updateState uses
+            // .some(); onUpdatedHandler keys on fanboy-cookiemonster alone):
+            // "on" = *any* cookie list selected, "off" = *none*. The old
+            // `enable === every(...)` check treated a partial selection as
+            // "not on", so a disable short-circuited as a no-op and left the
+            // present list still blocking — the toggle looked dead. Enabling
+            // still requires *both* lists, so gate enable on every(), disable
+            // on some().
+            while (true) {
+                const target = cookieToggleDesired;
+                const fullyEnabled = COOKIE_NOTICE_LISTS.every(
+                    k => µb.selectedFilterLists.includes(k)
+                );
+                const anyEnabled = COOKIE_NOTICE_LISTS.some(
+                    k => µb.selectedFilterLists.includes(k)
+                );
+                if (target ? fullyEnabled : !anyEnabled) {
+                    break; // already in the desired end state
+                }
+                µb.applyFilterListSelection(target
+                    ? { toSelect: COOKIE_NOTICE_LISTS, merge: true }
+                    : { toRemove: COOKIE_NOTICE_LISTS });
+                await µb.loadFilterLists();
+                appliedAny = true;
+                console.log('[cookie-dbg] applied enable=' + target
+                    + ' after=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
+                        k => µb.selectedFilterLists.includes(k))));
+                if (cookieToggleDesired === target) {
+                    break; // no newer request arrived during the recompile
+                }
+            }
 
-        const details = enable
-            ? { toSelect: COOKIE_NOTICE_LISTS, merge: true }
-            : { toRemove: COOKIE_NOTICE_LISTS };
-
-        µb.applyFilterListSelection(details);
-        await µb.loadFilterLists();
-        console.log('[cookie-dbg] applied enable=' + enable
-            + ' after=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
-                k => µb.selectedFilterLists.includes(k))));
-
-        const tab = await vAPI.tabs.getCurrent();
-        if (tab instanceof Object) {
-            vAPI.tabs.reload(tab.id);
+            // Single reload reflecting the settled state — only if the
+            // selection actually changed (an on→off→on burst that nets out to
+            // the starting state needs no reload).
+            if (appliedAny) {
+                const tab = await vAPI.tabs.getCurrent();
+                if (tab instanceof Object) {
+                    vAPI.tabs.reload(tab.id);
+                }
+            }
+        } finally {
+            cookieToggleInFlight = false;
         }
     }
 

@@ -1058,30 +1058,6 @@ browser.runtime.onMessage.addListener((msg, sender) => {
 // Twitter / X
 // ============================================================================
 
-const processedTwitterUrls = new Set();
-
-// HomeTimeline (and some other timelines) are sent as POST with their
-// variables/features in the REQUEST BODY, not the URL. onSendHeaders doesn't
-// carry the body, so capture it in onBeforeRequest keyed by requestId and
-// replay the fetch with the original method + body. Replaying a POST as GET
-// dropped the body, so x.com returned an error and no feed videos parsed —
-// it looked VPN-specific but was really the POST timeline variant.
-const twitterRequestBodies = new Map();
-
-function decodeTwitterRequestBody(requestBody) {
-    if (!requestBody) return null;
-    try {
-        if (requestBody.raw && requestBody.raw.length) {
-            const dec = new TextDecoder("utf-8");
-            return requestBody.raw.map(p => p.bytes ? dec.decode(p.bytes) : "").join("");
-        }
-        if (requestBody.formData) {
-            return JSON.stringify(requestBody.formData);
-        }
-    } catch (e) { /* fall through */ }
-    return null;
-}
-
 // GraphQL queries that resolve to a single focal tweet (open-tweet view /
 // embed). Parsed via extractTwitterFocalResult so we grab only the tweet the
 // user is looking at, not replies in the thread.
@@ -1100,26 +1076,6 @@ function twitterQueryKind(url) {
     if (TWITTER_TWEET_QUERIES.some(q => url.includes(q))) return "tweet";
     if (TWITTER_TIMELINE_QUERIES.some(q => url.includes(q))) return "timeline";
     return null;
-}
-
-function handleTwitterHeaders(details) {
-    const kind = twitterQueryKind(details.url);
-    if (!kind) return;
-    log("TWITTER", "header hit", { kind, url: details.url.split('?')[0], type: details.type });
-
-    const urlKey = details.url.split('&')[0];
-    if (processedTwitterUrls.has(urlKey)) return;
-
-    const headers = {};
-    for (const h of details.requestHeaders) headers[h.name] = h.value;
-
-    processedTwitterUrls.add(urlKey);
-    setTimeout(() => processedTwitterUrls.delete(urlKey), 5000);
-    if (processedTwitterUrls.size > 100) {
-        processedTwitterUrls.delete(processedTwitterUrls.values().next().value);
-    }
-
-    fetchTwitterData(details, headers, kind);
 }
 
 function extractScreenNameFromUrl(details) {
@@ -1250,55 +1206,30 @@ function emitTwitterTweetVideos(details, result) {
     return emitted;
 }
 
-async function fetchTwitterData(details, headers, kind) {
-    await ensureTabId(details);
-
-    // Replay with the ORIGINAL method + body. POST timelines (HomeTimeline)
-    // carry their variables in the body; a GET replay loses them and x.com
-    // errors out, so no feed videos parse.
-    const method = details.method || "GET";
-    const body = (method !== "GET" && method !== "HEAD")
-        ? twitterRequestBodies.get(details.requestId)
-        : null;
-    twitterRequestBodies.delete(details.requestId);
-
-    try {
-        const init = { method, headers, credentials: "include" };
-        if (body != null) init.body = body;
-        const response = await fetch(details.url, init);
-        const bodyText = await response.text();
-        const parsed = tryParseJson(bodyText);
-        if (!parsed) {
-            log("TWITTER", "bail: response not JSON", { status: response.status, len: bodyText.length, head: bodyText.slice(0, 120) });
-            return;
+// Process one already-parsed GraphQL response, branching on query kind.
+function processTwitterResponse(details, kind, parsed) {
+    if (kind === "timeline") {
+        // Feed / profile / search: emit every video tweet in the timeline.
+        const results = [];
+        collectTweetResults(parsed.data, results, new Set());
+        let withVideo = 0;
+        for (const r of results) {
+            if (emitTwitterTweetVideos(details, r)) withVideo++;
         }
-
-        if (kind === "timeline") {
-            // Feed / profile / search: emit every video tweet in the timeline.
-            const results = [];
-            collectTweetResults(parsed.data, results, new Set());
-            let withVideo = 0;
-            for (const r of results) {
-                if (emitTwitterTweetVideos(details, r)) withVideo++;
-            }
-            log("TWITTER", `timeline: ${withVideo}/${results.length} tweet(s) with video`);
-            return;
-        }
-
-        // Single-tweet view (TweetResultByRestId / TweetDetail).
-        const rawResult = extractTwitterFocalResult(parsed, details);
-        if (!rawResult) {
-            log("TWITTER", "bail: no focal result", {
-                topKeys: Object.keys(parsed.data || {}),
-                errors: parsed.errors ? parsed.errors.map(e => e.message) : null
-            });
-            return;
-        }
-        const ok = emitTwitterTweetVideos(details, rawResult);
-        log("TWITTER", ok ? "focal: video emitted" : "focal: no video in tweet");
-    } catch (e) {
-        log("TWITTER", `Error`, e.message);
+        log("TWITTER", `timeline: ${withVideo}/${results.length} tweet(s) with video`);
+        return;
     }
+    // Single-tweet view (TweetResultByRestId / TweetDetail).
+    const rawResult = extractTwitterFocalResult(parsed, details);
+    if (!rawResult) {
+        log("TWITTER", "no focal result", {
+            topKeys: Object.keys(parsed.data || {}),
+            errors: parsed.errors ? parsed.errors.map(e => e.message) : null
+        });
+        return;
+    }
+    const ok = emitTwitterTweetVideos(details, rawResult);
+    log("TWITTER", ok ? "focal: video emitted" : "focal: no video in tweet");
 }
 
 // Logged-out / embeds use api.x.com/graphql/; signed-in TweetDetail and the
@@ -1310,30 +1241,53 @@ const TWITTER_GRAPHQL_URLS = [
     "*://twitter.com/i/api/graphql/*"
 ];
 
-// Capture POST bodies before send (keyed by requestId) so handleTwitterHeaders
-// can replay HomeTimeline & co. with their original body. Only stash POSTs for
-// queries we handle; 15s expiry + 100-cap so a request that never reaches
-// onSendHeaders (blocked / dedup-skipped) can't leak the entry.
-browser.webRequest.onBeforeRequest.addListener(
-    (details) => {
-        if (details.method !== "POST") return;
-        if (!twitterQueryKind(details.url)) return;
-        const body = decodeTwitterRequestBody(details.requestBody);
-        if (body == null) return;
-        twitterRequestBodies.set(details.requestId, body);
-        setTimeout(() => twitterRequestBodies.delete(details.requestId), 15000);
-        if (twitterRequestBodies.size > 100) {
-            twitterRequestBodies.delete(twitterRequestBodies.keys().next().value);
-        }
-    },
-    { urls: TWITTER_GRAPHQL_URLS, types: ["xmlhttprequest"] },
-    ["requestBody"]
-);
+// Read the GraphQL response INLINE as it streams through, the same way the
+// Instagram / Vimeo paths do (collectFilteredResponse). This replaces the old
+// re-fetch-the-request approach, which: doubled every request (risking x.com's
+// rate limit), had to copy auth/CSRF headers, and broke on POST timelines
+// because a GET replay dropped the body (the "VPN" bug). filterResponseData
+// taps the user's own authenticated response, so method/body/auth are never
+// our concern and there are zero extra requests.
+function listenerTwitterGraphql(details) {
+    const kind = twitterQueryKind(details.url);
+    if (!kind) return {};
 
-browser.webRequest.onSendHeaders.addListener(
-    handleTwitterHeaders,
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log("TWITTER", "filter create failed", { error: e.message });
+        return {};
+    }
+
+    const chunks = [];
+    filter.ondata = (event) => {
+        chunks.push(new Uint8Array(event.data));
+        filter.write(event.data); // pass through unmodified
+    };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) return;
+        const combined = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
+        const parsed = tryParseJson(new TextDecoder("utf-8").decode(combined));
+        if (!parsed) { log("TWITTER", "response not JSON", { kind, bytes: total }); return; }
+        // Off the filter callback to avoid holding the stream stop.
+        Promise.resolve().then(() => processTwitterResponse(details, kind, parsed));
+    };
+    filter.onerror = () => {
+        try { filter.close(); } catch (_) {}
+    };
+
+    return {};
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerTwitterGraphql,
     { urls: TWITTER_GRAPHQL_URLS, types: ["xmlhttprequest"] },
-    ["requestHeaders"]
+    ["blocking"]
 );
 
 // ============================================================================

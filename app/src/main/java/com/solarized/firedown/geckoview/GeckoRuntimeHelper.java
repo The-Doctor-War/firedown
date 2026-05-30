@@ -815,6 +815,8 @@ public class GeckoRuntimeHelper {
      */
     public void setCookies(boolean enable) {
         try {
+            Log.d("COOKIE_DBG", "setCookies enable=" + enable
+                    + " ublockPortConnected=" + (mPorts.get("ublock") != null));
             JSONObject msg = new JSONObject();
             msg.put("cookies", enable);
             sendPortMessage("ublock", msg);
@@ -839,6 +841,9 @@ public class GeckoRuntimeHelper {
         WebExtension.Port port = mPorts.get(portName);
         if (port != null) {
             port.postMessage(message);
+        } else {
+            Log.d("COOKIE_DBG", "sendPortMessage DROPPED (port '" + portName
+                    + "' not connected): " + message);
         }
     }
 

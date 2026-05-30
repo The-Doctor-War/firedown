@@ -26,6 +26,7 @@ import { PageStore } from './pagestore.js';
         } else if (Object.hasOwn(response, "fonts")) {
             toggleFonts({ enable: response.fonts });
         } else if (Object.hasOwn(response, "cookies")) {
+            console.log('[cookie-dbg] port received cookies=' + response.cookies);
             toggleCookieNotices({ enable: response.cookies });
         } else if (Object.hasOwn(response, "update")) {
             updateState();
@@ -115,6 +116,9 @@ import { PageStore } from './pagestore.js';
         await defaultsReady;
 
         const enable = message.enable === true;
+        console.log('[cookie-dbg] toggleCookieNotices enter enable=' + enable
+            + ' before=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
+                k => µb.selectedFilterLists.includes(k))));
 
         // Short-circuit if uBlock is already in the desired state. The
         // on-connect handshake in GeckoRuntimeHelper.onConnect pushes
@@ -140,6 +144,9 @@ import { PageStore } from './pagestore.js';
             k => µb.selectedFilterLists.includes(k)
         );
         if (enable ? fullyEnabled : !anyEnabled) {
+            console.log('[cookie-dbg] short-circuit (already in desired state)'
+                + ' enable=' + enable + ' fullyEnabled=' + fullyEnabled
+                + ' anyEnabled=' + anyEnabled);
             return;
         }
 
@@ -149,6 +156,9 @@ import { PageStore } from './pagestore.js';
 
         µb.applyFilterListSelection(details);
         await µb.loadFilterLists();
+        console.log('[cookie-dbg] applied enable=' + enable
+            + ' after=' + JSON.stringify(COOKIE_NOTICE_LISTS.filter(
+                k => µb.selectedFilterLists.includes(k))));
 
         const tab = await vAPI.tabs.getCurrent();
         if (tab instanceof Object) {

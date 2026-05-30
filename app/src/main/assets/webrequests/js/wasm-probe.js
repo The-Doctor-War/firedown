@@ -135,30 +135,24 @@
       // reaching for any wasm member is a use attempt. Return undefined for
       // members so callers fail exactly as with wasm disabled (graceful
       // fallbacks that test a method's truthiness still fall back).
-      try { console.log('[fd-probe] WASM ABSENT (typeof undefined) -> installing proxy trap'); } catch (_) {}
-      var trap = new Proxy(function () {}, {
-        get: function (_t, prop) {
-          if (prop === Symbol.toStringTag || prop === Symbol.toPrimitive) return undefined;
-          try { console.log('[fd-probe] WASM member access: ' + String(prop)); } catch (_) {}
-          fire('WebAssembly.' + String(prop));
-          return undefined;
-        },
-        apply: function () { fire('WebAssembly()'); return undefined; },
-        construct: function () { fire('new WebAssembly'); throw new TypeError('WebAssembly is disabled'); }
-      });
-      // DEBUG: log the first time the page reads window.WebAssembly at all.
-      // If we see this but no "member access", the page only does a bare
-      // typeof/existence check and bails (and may have cached it BEFORE our
-      // async script installed the trap — a timing problem). If we never see
-      // it, the page isn't touching the main-thread global (Worker?).
-      var waReads = 0;
+      // Gecko removes the WebAssembly global when wasm is disabled. Some sites
+      // instantiate wasm inside a Web Worker (x.com's login uses a blob: worker
+      // — confirmed by the Worker-creation log), a scope this page-world probe
+      // can't reach. But the MAIN thread first READS window.WebAssembly to
+      // feature-detect before going down the wasm path. So treat any read of
+      // the (absent) global while disabled as "this site wants wasm" and fire.
+      // Return undefined so graceful-fallback sites keep seeing wasm as absent
+      // (we don't pretend it exists) — the read itself is the signal. Firing
+      // on a read is appropriate because wasm is enabled by default now;
+      // disabling it is a deliberate privacy opt-in where "offer to re-enable
+      // on wasm-using sites" is the wanted behaviour.
+      try { console.log('[fd-probe] WASM ABSENT (typeof undefined) -> installing read-trap'); } catch (_) {}
       Object.defineProperty(window, 'WebAssembly', {
         configurable: true,
         get: function () {
-          if (waReads++ === 0) {
-            try { console.log('[fd-probe] window.WebAssembly READ by page'); } catch (_) {}
-          }
-          return trap;
+          try { console.log('[fd-probe] window.WebAssembly READ by page (firing)'); } catch (_) {}
+          fire('WebAssembly accessed while disabled');
+          return undefined;
         }
       });
     } else {

@@ -517,8 +517,8 @@
     <string name="settings_drm_enabled_summary">Allows Widevine on sites that require DRM (Netflix, Spotify, …). Firedown still cannot download DRM-protected content.</string>
     <string name="settings_webrtc_enabled">Enable WebRTC</string>
     <string name="settings_webrtc_enabled_summary">Allows real-time video / voice calls. Disabling reduces network-probing surface.</string>
-    <string name="settings_webassembly_enabled">Enable WebAssembly</string>
-    <string name="settings_webassembly_enabled_summary">Allows sites to run compiled WASM modules. Disabling reduces attack surface but may break some modern web apps</string>
+    <string name="settings_wasm_disabled">Disable WebAssembly</string>
+    <string name="settings_wasm_disabled_summary">Blocks sites from running compiled WASM modules. Reduces attack surface but breaks some apps — allowed sites below stay enabled</string>
     <string name="settings_https_only_title">HTTPS-only mode</string>
     <string name="settings_https_only_summary">Block plaintext HTTP loads, show a warning page with a per-site override</string>
     <string name="settings_disk_cache_disabled">Disable disk cache</string>

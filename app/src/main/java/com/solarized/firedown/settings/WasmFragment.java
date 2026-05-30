@@ -58,11 +58,14 @@ public class WasmFragment extends BasePreferenceFragment {
         // SharedPreferenceChangeListener is unregistered while this
         // fragment is in the foreground, so the global pref wouldn't
         // otherwise propagate to the runtime.
-        SwitchPreferenceCompat toggle = findPreference(Preferences.SETTINGS_ENABLE_WEBASSEMBLY);
+        SwitchPreferenceCompat toggle = findPreference(Preferences.SETTINGS_DISABLE_WASM);
         if (toggle != null) {
             toggle.setOnPreferenceChangeListener((p, value) -> {
-                boolean enabled = Boolean.TRUE.equals(value);
-                mGeckoRuntimeHelper.setWebAssembly(enabled);
+                boolean disabled = Boolean.TRUE.equals(value);
+                // Switch is "Disable WebAssembly" → runtime pref is the inverse.
+                // When disabling, the per-site allowlist still re-enables WASM
+                // for allowlisted hosts on their next navigation.
+                mGeckoRuntimeHelper.setWebAssembly(!disabled);
                 return true;
             });
         }

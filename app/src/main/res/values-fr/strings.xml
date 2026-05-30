@@ -426,8 +426,8 @@
     <string name="settings_drm_enabled_summary">Autorise Widevine sur les sites nécessitant le DRM (Netflix, Spotify, …). Firedown ne peut toujours pas télécharger les contenus protégés par DRM.</string>
     <string name="settings_webrtc_enabled">Activer WebRTC</string>
     <string name="settings_webrtc_enabled_summary">Permet les appels vidéo et audio en temps réel. La désactivation réduit la surface de sondage réseau.</string>
-    <string name="settings_webassembly_enabled">Activer WebAssembly</string>
-    <string name="settings_webassembly_enabled_summary">Permet aux sites d\'exécuter des modules WASM compilés. La désactivation réduit la surface d\'attaque mais peut casser certaines applications web modernes</string>
+    <string name="settings_wasm_disabled">Désactiver WebAssembly</string>
+    <string name="settings_wasm_disabled_summary">Empêche les sites d\'exécuter des modules WASM compilés. Réduit la surface d\'attaque mais casse certaines applis — les sites autorisés ci-dessous restent activés</string>
     <string name="settings_https_only_title">Mode HTTPS uniquement</string>
     <string name="settings_https_only_summary">Bloque les chargements HTTP en clair et affiche une page d\'avertissement avec dérogation par site</string>
     <string name="settings_disk_cache_disabled">Désactiver le cache disque</string>

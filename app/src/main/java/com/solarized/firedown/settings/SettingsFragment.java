@@ -327,11 +327,11 @@ public class SettingsFragment extends BasePreferenceFragment
 
             mGeckoRuntimeHelper.setWebRTC(value);
 
-        } else if (Preferences.SETTINGS_ENABLE_WEBASSEMBLY.equals(key)) {
+        } else if (Preferences.SETTINGS_DISABLE_WASM.equals(key)) {
 
-            boolean value = sharedPreferences.getBoolean(key, Preferences.DEFAULT_ENABLE_WEBASSEMBLY);
+            boolean disabled = sharedPreferences.getBoolean(key, Preferences.DEFAULT_DISABLE_WASM);
 
-            mGeckoRuntimeHelper.setWebAssembly(value);
+            mGeckoRuntimeHelper.setWebAssembly(!disabled);
 
         } else if (Preferences.SETTINGS_DISABLE_WEBGL.equals(key)) {
 

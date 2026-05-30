@@ -114,9 +114,20 @@ public class Preferences {
 
     public static final boolean DEFAULT_ENABLE_WEBRTC = false;
 
-    public static final String SETTINGS_ENABLE_WEBASSEMBLY = "com.solarized.firedown.preferences.browser.enable.webassembly";
+    /**
+     * WebAssembly is ENABLED by default — disabling it globally broke sites
+     * that hard-require WASM (x.com login, kick.com) with no obvious recovery.
+     * This is a "Disable WebAssembly" switch (default OFF = WASM enabled),
+     * mirroring the SETTINGS_DISABLE_WEBGL convention. The per-site allowlist
+     * acts as exceptions that keep WASM on when this is turned ON.
+     *
+     * <p>Deliberately a NEW key: the previous SETTINGS_ENABLE_WEBASSEMBLY
+     * (default-disabled) value must not carry over on update, or users who
+     * never touched it would stay on the old disabled baseline.</p>
+     */
+    public static final String SETTINGS_DISABLE_WASM = "com.solarized.firedown.preferences.browser.disable.webassembly";
 
-    public static final boolean DEFAULT_ENABLE_WEBASSEMBLY = false;
+    public static final boolean DEFAULT_DISABLE_WASM = false;
 
     /** Click key for the WASM settings sub-screen entry. */
     public static final String SETTINGS_WASM = "com.solarized.firedown.preferences.browser.wasm";

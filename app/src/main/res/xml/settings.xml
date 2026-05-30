@@ -217,8 +217,8 @@
 
         <Preference
             android:key="com.solarized.firedown.preferences.browser.wasm"
-            android:summary="@string/settings_webassembly_enabled_summary"
-            android:title="@string/settings_webassembly_enabled"
+            android:summary="@string/settings_wasm_disabled_summary"
+            android:title="@string/settings_wasm"
             app:icon="@drawable/memory_alt_24"
             app:singleLineTitle="false" />
 

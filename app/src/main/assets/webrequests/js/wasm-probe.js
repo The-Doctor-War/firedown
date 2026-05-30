@@ -80,6 +80,23 @@
   Promise.resolve().then(wrapConsoleError);
   document.addEventListener('DOMContentLoaded', wrapConsoleError, { once: true });
 
+  // --- DEBUG: Worker creation -----------------------------------------------
+  // If x.com runs its challenge / transaction-id WASM inside a Web Worker, the
+  // worker has its own WebAssembly global that this page-world probe cannot
+  // reach — so log worker creation + script URL to spot that case.
+  try {
+    var OrigWorker = window.Worker;
+    if (typeof OrigWorker === 'function' && !OrigWorker.__firedown_wrapped) {
+      var WrappedWorker = function (url) {
+        try { console.log('[fd-probe] Worker created: ' + String(url)); } catch (_) {}
+        return Reflect.construct(OrigWorker, arguments, new.target || WrappedWorker);
+      };
+      WrappedWorker.__firedown_wrapped = true;
+      WrappedWorker.prototype = OrigWorker.prototype;
+      window.Worker = WrappedWorker;
+    }
+  } catch (_) {}
+
   // --- Proactive WASM-use trap ----------------------------------------------
   // The hooks above only catch wasm failures that reach the console / error
   // surfaces (kick.com throws uncaught). Sites that SWALLOW the failure never
@@ -129,7 +146,21 @@
         apply: function () { fire('WebAssembly()'); return undefined; },
         construct: function () { fire('new WebAssembly'); throw new TypeError('WebAssembly is disabled'); }
       });
-      Object.defineProperty(window, 'WebAssembly', { configurable: true, get: function () { return trap; } });
+      // DEBUG: log the first time the page reads window.WebAssembly at all.
+      // If we see this but no "member access", the page only does a bare
+      // typeof/existence check and bails (and may have cached it BEFORE our
+      // async script installed the trap — a timing problem). If we never see
+      // it, the page isn't touching the main-thread global (Worker?).
+      var waReads = 0;
+      Object.defineProperty(window, 'WebAssembly', {
+        configurable: true,
+        get: function () {
+          if (waReads++ === 0) {
+            try { console.log('[fd-probe] window.WebAssembly READ by page'); } catch (_) {}
+          }
+          return trap;
+        }
+      });
     } else {
       try { console.log('[fd-probe] WASM typeof=' + (typeof WA) + ' (unexpected)'); } catch (_) {}
     }

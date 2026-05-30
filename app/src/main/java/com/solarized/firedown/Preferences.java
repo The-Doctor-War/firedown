@@ -153,7 +153,7 @@ public class Preferences {
      * ON means the privacy-preferring action.
      */
     public static final String SETTINGS_DISABLE_DISK_CACHE = "com.solarized.firedown.preferences.browser.disable.disk.cache";
-    public static final boolean DEFAULT_DISABLE_DISK_CACHE = true;
+    public static final boolean DEFAULT_DISABLE_DISK_CACHE = false;
 
     /**
      * Disable Google Safe Browsing — its blocklist of malware / phishing

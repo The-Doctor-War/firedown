@@ -1,3 +1,13 @@
+## [1.1.75] - 2026-05-30
+
+- WebAssembly now enabled by default, with a Disable WebAssembly toggle and per-site exceptions
+- Sites needing WebAssembly while disabled now reliably offer a one-tap enable
+- Download videos from X / Twitter when signed in, and straight from the feed
+- Tabs now remember the last page you visited after closing the app
+- Fixed tabs that could stop responding or return blank
+- Trimmed unused extension code and closed background resource leaks
+- Minor bugfixes and improvements
+
 ## [1.1.74] - 2026-05-29
 
 - Redesigned the home screen and a calmer incognito start page

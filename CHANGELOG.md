@@ -1,3 +1,10 @@
+## [1.1.76] - 2026-05-30
+
+- Disk cache is now on by default for faster repeat visits; the memory-only option stays available for advanced users
+- Fixed the cookie-notice blocker toggle that could appear to do nothing
+- Cookie-notice toggle now responds instantly instead of stalling while filters rebuild
+- Minor bugfixes and improvements
+
 ## [1.1.75] - 2026-05-30
 
 - WebAssembly now enabled by default, with a Disable WebAssembly toggle and per-site exceptions

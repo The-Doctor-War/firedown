@@ -609,12 +609,6 @@ public class BrowserFragment extends BaseBrowserFragment
                 editArgs.putBoolean(Keys.IS_INCOGNITO, mIsIncognitoThemed);
                 NavigationUtils.navigateSafe(mNavController,
                         R.id.action_browser_to_bookmark_edit, R.id.browser, editArgs);
-            } else if (id == R.id.popup_bookmark_remove) {
-                GeckoState mGeckoState = peekCurrentGeckoState();
-                if (mGeckoState == null) return;
-                mWebBookmarkViewModel.delete(
-                        WebBookmarkDataRepository.bookmarkIdFor(mGeckoState.getEntityUri()));
-                makeAnchoredSnackbar(R.string.browser_bookmark_removed).show();
             } else if (id == R.id.popup_reload) {
                 GeckoState gs = peekCurrentGeckoState();
                 if (gs != null) gs.reload();

@@ -5,7 +5,6 @@
     <string name="app_unlock">Unlock</string>
     <string name="archive_banner_subtitle">Tap to view or reopen</string>
     <string name="browser_bookmark_added">Bookmark Saved!</string>
-    <string name="browser_bookmark_removed">Bookmark removed</string>
     <string name="browser_cache_cleared">Browsing data cleared</string>
     <string name="browser_desktop">Desktop site</string>
     <string name="browser_enter_url">Search or Type URL</string>

@@ -253,8 +253,6 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
 
         mView.findViewById(R.id.popup_bookmark_page).setOnClickListener(view -> dispatch(
                 mHasBookmark ? R.id.popup_bookmark_edit : R.id.popup_bookmark_add));
-        mView.findViewById(R.id.popup_bookmark_remove).setOnClickListener(
-                view -> dispatch(R.id.popup_bookmark_remove));
 
         mView.findViewById(R.id.popup_vault).setOnClickListener(view -> dispatch(
                 mIsIncognito ? R.id.popup_downloads : R.id.popup_vault));
@@ -283,10 +281,6 @@ public class PopupBrowserSheetDialogFragment extends BaseBottomSheetDialogFragme
         label.setText(mHasBookmark
                 ? R.string.browser_menu_edit_bookmark
                 : R.string.browser_menu_bookmark_this_page_2);
-        View remove = mView.findViewById(R.id.popup_bookmark_remove);
-        if (remove != null) {
-            remove.setVisibility(mHasBookmark ? View.VISIBLE : View.GONE);
-        }
     }
 
 

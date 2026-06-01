@@ -31,7 +31,7 @@
             android:duplicateParentState="true"
             android:scaleType="centerCrop" />
 
-        <!-- Top scrim for variant button readability -->
+        <!-- Top scrim for the more button's readability against bright art. -->
         <View
             android:id="@+id/dim_view"
             android:layout_width="match_parent"
@@ -39,75 +39,86 @@
             android:background="@drawable/top_scrim"
             android:elevation="12dp" />
 
-        <!-- Tag row: mime + duration + quality clustered at the start; CC
-             count (when present) pushed to the row end by a weighted spacer.
-             match_parent width so the spacer can do that — the row sits in
-             the bottom gradient shade and reads "format · length" on the
-             left, captions affordance on the right. -->
+        <!-- Bottom info block: a gradient scrim carrying the title + a single
+             metadata row. Replaces the old bottom corner chip cluster that had
+             no title and overflowed in 2-column width. -->
         <LinearLayout
-            android:id="@+id/tag_row"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:gravity="center_vertical"
-            android:layout_margin="6dp">
+            android:background="@drawable/bottom_scrim"
+            android:orientation="vertical"
+            android:paddingHorizontal="8dp"
+            android:paddingTop="14dp"
+            android:paddingBottom="7dp">
 
             <TextView
-                android:id="@+id/mime_text"
-                style="@style/MimePrimary"
-                android:layout_width="wrap_content"
+                android:id="@+id/file_name"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                tools:text="mp4" />
-
-            <TextView
-                android:id="@+id/tag_duration"
-                style="@style/MimeTertiary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:visibility="gone"
-                tools:text="03:45"
-                tools:visibility="visible" />
-
-            <TextView
-                android:id="@+id/tag_quality"
-                style="@style/MimeTertiary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
                 android:ellipsize="end"
-                android:maxLines="1"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:visibility="gone"
-                tools:text="Adaptive"
-                tools:visibility="visible" />
+                android:maxLines="2"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:shadowColor="#80000000"
+                android:shadowDx="0"
+                android:shadowDy="1"
+                android:shadowRadius="2"
+                tools:text="Soto Ivars: CUANDO ME RECIBEN ASÍ, SUELEN SALIR…" />
 
-            <!-- Weighted spacer: pushes the CC chip to the row's trailing
-                 edge. Zero width, takes all slack. -->
-            <Space
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
-            <!-- Caption-count chip — trailing, primary-tinted so it reads as
-                 the "extra" affordance distinct from the format/length chips.
-                 GONE when the video has no captured captions. -->
-            <TextView
-                android:id="@+id/tag_cc"
-                style="@style/MimePrimary"
-                android:layout_width="wrap_content"
+            <!-- Metadata row: mime + duration clustered at the start, CC count
+                 (when present) pushed to the trailing edge by a weighted
+                 spacer. Quality/Adaptive is intentionally omitted from the
+                 tile — it overflows the narrow cell and is available in the
+                 download sheet anyway. -->
+            <LinearLayout
+                android:id="@+id/tag_row"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:paddingLeft="6dp"
-                android:paddingRight="6dp"
-                android:visibility="gone"
-                tools:text="CC 52"
-                tools:visibility="visible" />
+                android:layout_marginTop="5dp"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/mime_text"
+                    style="@style/MimePrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    tools:text="VIDEO" />
+
+                <TextView
+                    android:id="@+id/tag_duration"
+                    style="@style/MimeTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:visibility="gone"
+                    tools:text="53:25"
+                    tools:visibility="visible" />
+
+                <!-- Weighted spacer pushes the CC chip to the trailing edge. -->
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tag_cc"
+                    style="@style/MimePrimary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:visibility="gone"
+                    tools:text="CC 52"
+                    tools:visibility="visible" />
+
+            </LinearLayout>
 
         </LinearLayout>
 

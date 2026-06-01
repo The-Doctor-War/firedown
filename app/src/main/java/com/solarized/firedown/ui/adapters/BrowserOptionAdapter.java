@@ -147,9 +147,13 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         // ── Tags ─────────────────────────────────────────────────────────
         bindTags(context, holder, entity);
 
+        // Title is now shown in both layouts — list as the primary row text,
+        // grid as a 2-line overlay in the bottom scrim. fileUrl/domain stays
+        // list-only (no room on the tile).
+        holder.setTextOrHide(holder.fileName, entity.getFileName());
+
         // ── Layout-specific bindings ─────────────────────────────────────
         if (holder.isList) {
-            holder.setTextOrHide(holder.fileName, entity.getFileName());
             holder.setTextOrHide(holder.fileUrl, domain);
             holder.more.setVisibility(hasVariants ? View.VISIBLE : View.GONE);
         } else {
@@ -178,10 +182,15 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
     private void bindTags(@NonNull Context context,
                           @NonNull ViewHolder holder,
                           @NonNull BrowserDownloadEntity entity) {
-        if (holder.tagQuality == null || holder.tagDuration == null) return;
+        // tagDuration is the one slot present in both layouts; tagQuality is
+        // omitted from the grid tile (no room beside the title), so it's
+        // null-checked everywhere below rather than required up front.
+        if (holder.tagDuration == null) return;
 
         // Reset
-        holder.tagQuality.setVisibility(View.GONE);
+        if (holder.tagQuality != null) {
+            holder.tagQuality.setVisibility(View.GONE);
+        }
         holder.tagDuration.setVisibility(View.GONE);
         if (holder.tagSeparator != null) {
             holder.tagSeparator.setVisibility(View.GONE);
@@ -201,6 +210,7 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
             // Show separator only when both slots are visible
             if (holder.tagSeparator != null
+                    && holder.tagQuality != null
                     && holder.tagQuality.getVisibility() == View.VISIBLE
                     && holder.tagDuration.getVisibility() == View.VISIBLE) {
                 holder.tagSeparator.setVisibility(View.VISIBLE);
@@ -234,7 +244,7 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         // List layout separates tags with a "·"; show the CC separator only
         // when a quality/duration tag precedes it. Grid has no separator view.
         if (holder.tagCcSeparator != null
-                && (holder.tagQuality.getVisibility() == View.VISIBLE
+                && ((holder.tagQuality != null && holder.tagQuality.getVisibility() == View.VISIBLE)
                     || holder.tagDuration.getVisibility() == View.VISIBLE)) {
             holder.tagCcSeparator.setVisibility(View.VISIBLE);
         }
@@ -257,14 +267,17 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
                 break;
 
             case FFmpegTagEntity.TYPE_ADAPTIVE:
-                // Locale-dependent label — resolved at render time, not stored
-                holder.tagQuality.setText(context.getString(R.string.download_adaptative));
-                holder.tagQuality.setVisibility(View.VISIBLE);
+                // Locale-dependent label — resolved at render time, not stored.
+                // Quality slot is absent in the grid tile; skip silently there.
+                if (holder.tagQuality != null) {
+                    holder.tagQuality.setText(context.getString(R.string.download_adaptative));
+                    holder.tagQuality.setVisibility(View.VISIBLE);
+                }
                 break;
 
             case FFmpegTagEntity.TYPE_QUALITY:
             case FFmpegTagEntity.TYPE_RESOLUTION:
-                if (!TextUtils.isEmpty(tag.getText())) {
+                if (holder.tagQuality != null && !TextUtils.isEmpty(tag.getText())) {
                     holder.tagQuality.setText(tag.getText());
                     holder.tagQuality.setVisibility(View.VISIBLE);
                 }
@@ -275,7 +288,8 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
                 // Graceful fallback: render in the quality slot if still empty.
                 // Iteration order matters — a TYPE_UNKNOWN tag processed before
                 // a TYPE_QUALITY tag will be overwritten by it (desired).
-                if (!TextUtils.isEmpty(tag.getText())
+                if (holder.tagQuality != null
+                        && !TextUtils.isEmpty(tag.getText())
                         && holder.tagQuality.getVisibility() == View.GONE) {
                     holder.tagQuality.setText(tag.getText());
                     holder.tagQuality.setVisibility(View.VISIBLE);

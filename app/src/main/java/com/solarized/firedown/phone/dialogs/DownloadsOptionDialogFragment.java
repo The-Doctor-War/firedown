@@ -72,6 +72,15 @@ public class DownloadsOptionDialogFragment extends BaseBottomSheetDialogFragment
 
         RecyclerView mRecyclerView = mView.findViewById(R.id.recycler_view);
 
+        // Hug content: the shared layout pins both root and list to
+        // match_parent, which makes the bottom sheet stretch to full
+        // height regardless of how many options it actually has.
+        // For the downloads option sheet (typically 4–7 rows) that
+        // leaves a large empty gap; collapse to wrap_content so the
+        // sheet opens at the natural row-stack height.
+        mView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        mRecyclerView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+
         List<OptionItem> optionItemList = buildOptionItems();
 
         OptionsAdapter optionsAdapter = new OptionsAdapter(optionItemList, this);

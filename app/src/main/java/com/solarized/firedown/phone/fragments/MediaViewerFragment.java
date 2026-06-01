@@ -404,32 +404,32 @@ public class MediaViewerFragment extends Fragment {
         mExoPlayer.setPlayWhenReady(true);
 
         if(!mAvoidTransition){
-            if (FileUriHelper.isAudio(mimeType)) {
-                Glide.with(App.getAppContext()).load(mFallbackDrawable)
-                        .dontTransform()
-                        .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .listener(mRequestListener)
-                        .into(mPhotoView);
-            } else {
-                long interval = mDownloadEntity.getThumbnailDuration();
-                String url = mDownloadEntity.getFileUrl();
-                RequestOptions options =
-                        new RequestOptions().frame(interval)
-                                .set(GlideRequestOptions.MIMETYPE, mDownloadEntity.getFileMimeType())
-                                .set(GlideRequestOptions.FILEPATH, mDownloadEntity.getFilePath())
-                                .set(GlideRequestOptions.LENGTH, mDownloadEntity.getFileSize())
-                                .set(GlideRequestOptions.FRAME, mDownloadEntity.getThumbnailDuration());
+            long interval = mDownloadEntity.getThumbnailDuration();
+            String url = mDownloadEntity.getFileUrl();
+            RequestOptions options =
+                    new RequestOptions().frame(interval)
+                            .set(GlideRequestOptions.MIMETYPE, mDownloadEntity.getFileMimeType())
+                            .set(GlideRequestOptions.FILEPATH, mDownloadEntity.getFilePath())
+                            .set(GlideRequestOptions.LENGTH, mDownloadEntity.getFileSize())
+                            .set(GlideRequestOptions.FRAME, mDownloadEntity.getThumbnailDuration());
 
-                Glide.with(App.getAppContext()).load(mDownloadEntity)
-                        .dontTransform()
-                        .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .signature(new ObjectKey(interval + url.hashCode()))
-                        .listener(mRequestListener)
-                        .apply(options)
-                        .into(mPhotoView);
-            }
+            // Same model + options the downloads list uses, so the
+            // shared-element transition lands on the same picture the
+            // list cell showed. For audio the FFmpeg decoder pulls
+            // embedded album art (ID3 APIC, M4A covr, FLAC PICTURE);
+            // .error() falls back to the mime-tinted music-note when
+            // the file has no embedded art so we don't end up with
+            // mPhotoView stretched-orange behind PlayerView's
+            // letterboxed real cover.
+            Glide.with(App.getAppContext()).load(mDownloadEntity)
+                    .dontTransform()
+                    .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .signature(new ObjectKey(interval + url.hashCode()))
+                    .error(FileUriHelper.isAudio(mimeType) ? mFallbackDrawable : null)
+                    .listener(mRequestListener)
+                    .apply(options)
+                    .into(mPhotoView);
         }else{
             if (FileUriHelper.isAudio(mimeType)) {
                 setErrorRes(R.drawable.ill_small_audio);

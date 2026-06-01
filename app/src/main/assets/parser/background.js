@@ -1109,7 +1109,8 @@ const TWITTER_TIMELINE_QUERIES = [
     "HomeTimeline", "HomeLatestTimeline",
     "UserTweets", "UserTweetsAndReplies", "UserMedia",
     "SearchTimeline", "ListLatestTweetsTimeline",
-    "Bookmarks", "Likes", "TweetActivity", "CommunityTweetsTimeline"
+    "Bookmarks", "Likes", "TweetActivity", "CommunityTweetsTimeline",
+    "ImmersiveMedia"
 ];
 
 function twitterQueryKind(url) {

@@ -1607,19 +1607,31 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 ? rawBaseUrl
                 : `https://m.youtube.com${rawBaseUrl.startsWith("/") ? "" : "/"}${rawBaseUrl}`;
 
-            // TimedTextStrategy expects json3 (events/segs schema); the
-            // default fmt is srv3 (XML) which we don't parse. Force json3
-            // even if the URL already has a fmt= — &fmt=json3 wins because
-            // it appears later in the query string.
-            //
-            // We DO NOT hand-craft &pot= / &potc= / &c=MWEB / &cver= here.
-            // The PoToken is the thing YouTube actually validates and
-            // we have proven infrastructure for minting one (SABR uses
-            // PoTokenGenerator.generate(videoId, visitorData) on the
-            // Kotlin side). TimedTextStrategy mints + appends the token
-            // before its fetch — we just plumb videoId + visitorData
-            // through on the message so it can.
-            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "fmt=json3";
+            // Build the full client-param tail the real MWEB player appends
+            // to its caption requests. The working HAR capture proves these
+            // ride alongside &pot= — both are required; a PoToken alone with
+            // a bare baseUrl still gets the empty-body silent reject. None of
+            // these are in the signed `sparams` set, so appending them does
+            // not invalidate the signature. fmt=json3 forces the events/segs
+            // schema TimedTextStrategy parses (default srv3 is XML).
+            // &potc=1&pot=<token> is appended later, on the Kotlin side, by
+            // TimedTextStrategy after it mints via PoTokenGenerator.
+            const extra = new URLSearchParams();
+            extra.set("fmt", "json3");
+            extra.set("xorb", "2");
+            extra.set("xobt", "3");
+            extra.set("xovt", "3");
+            extra.set("cbrand", "mozilla");
+            extra.set("cbr", "Firefox");
+            extra.set("cbrver", "151.0");
+            extra.set("c", "MWEB");
+            if (clientVersion) extra.set("cver", clientVersion);
+            extra.set("cplayer", "UNIPLAYER");
+            extra.set("cmodel", "firefox for android");
+            extra.set("cos", "Android");
+            extra.set("cosver", "12");
+            extra.set("cplatform", "MOBILE");
+            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + extra.toString();
 
             const langBase = t.languageCode || "und";
             const language = t.kind === "asr" ? `${langBase}-auto` : langBase;

@@ -102,12 +102,21 @@ public class MimeTypeThumbnail {
         @Override
         public void draw(@NonNull Canvas canvas) {
             Rect b = getBounds();
-            canvas.drawRect(b, mBgPaint);
-            if (mIcon == null || b.isEmpty()) return;
-            int iconSize = (int) (Math.min(b.width(), b.height()) * 0.5f);
-            int left = b.left + (b.width() - iconSize) / 2;
-            int top = b.top + (b.height() - iconSize) / 2;
-            mIcon.setBounds(left, top, left + iconSize, top + iconSize);
+            if (b.isEmpty()) return;
+            // Paint a centred square (the artwork "card"), not the full
+            // viewport, so the fallback letterboxes the same way real
+            // album art does under PlayerView's resize_mode="fit".
+            int side = Math.min(b.width(), b.height());
+            int cardLeft = b.left + (b.width() - side) / 2;
+            int cardTop = b.top + (b.height() - side) / 2;
+            int cardRight = cardLeft + side;
+            int cardBottom = cardTop + side;
+            canvas.drawRect(cardLeft, cardTop, cardRight, cardBottom, mBgPaint);
+            if (mIcon == null) return;
+            int iconSize = (int) (side * 0.5f);
+            int iconLeft = cardLeft + (side - iconSize) / 2;
+            int iconTop = cardTop + (side - iconSize) / 2;
+            mIcon.setBounds(iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize);
             mIcon.draw(canvas);
         }
 

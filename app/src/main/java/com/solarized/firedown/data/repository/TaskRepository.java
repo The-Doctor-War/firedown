@@ -7,6 +7,7 @@ import android.os.Message;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.solarized.firedown.data.SingleLiveEvent;
 import com.solarized.firedown.data.TaskEvent;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.manager.RunnableManager;
@@ -36,7 +37,16 @@ public class TaskRepository {
      *  incognito-mode {@code BrowserFragment}. */
     private final MutableLiveData<Integer> mSafeCount = new MutableLiveData<>(0);
 
-    private final MutableLiveData<TaskEvent> mObservableEvent = new MutableLiveData<>();
+    /**
+     * One-shot task events (Started / Progress / Finished / Deleted / Error
+     * / Cancelled). A {@link SingleLiveEvent} rather than a plain
+     * MutableLiveData so the value is consumed once and NOT replayed to a
+     * re-subscribing observer — otherwise navigating away from the downloads
+     * list and back (e.g. opening the frame grabber / GIF maker, or a
+     * rotation) would re-deliver the last event and, say, re-show the
+     * "files deleted" snackbar.
+     */
+    private final SingleLiveEvent<TaskEvent> mObservableEvent = new SingleLiveEvent<>();
 
     @Inject
     public TaskRepository() {}

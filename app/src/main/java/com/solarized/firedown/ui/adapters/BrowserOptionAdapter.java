@@ -30,8 +30,10 @@ import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.Utils;
 import com.solarized.firedown.utils.WebUtils;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 
 public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEntity, BrowserOptionAdapter.ViewHolder> {
@@ -46,6 +48,11 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
     private boolean mActionMode;
 
+    /** origin → number of subtitle tracks captured for that video. Supplied by
+     *  the fragment from the unfiltered repository so the CC badge is correct
+     *  regardless of the active chip filter. Empty until set. */
+    private Map<String, Integer> mSubtitleCounts = Collections.emptyMap();
+
 
     public BrowserOptionAdapter(Context context, @NonNull DiffUtil.ItemCallback<BrowserDownloadEntity> diffCallback,
                                 OnItemClickListener onItemClickListener, boolean list) {
@@ -57,6 +64,15 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         mRequestOptions = new RequestOptions().apply(RequestOptions.bitmapTransform(roundedCorners));
     }
 
+
+    /**
+     * Supply the origin → subtitle-count map. Call before/alongside
+     * {@link #submitList} so the CC badge binds with fresh counts. A null
+     * argument clears the map.
+     */
+    public void setSubtitleCounts(@Nullable Map<String, Integer> counts) {
+        mSubtitleCounts = counts != null ? counts : Collections.emptyMap();
+    }
 
     @Override
     public void onViewRecycled(@NonNull ViewHolder holder) {
@@ -170,19 +186,57 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         if (holder.tagSeparator != null) {
             holder.tagSeparator.setVisibility(View.GONE);
         }
-
-        List<FFmpegTagEntity> tags = entity.getTags();
-        if (tags == null || tags.isEmpty()) return;
-
-        for (FFmpegTagEntity tag : tags) {
-            bindSingleTag(context, holder, tag);
+        if (holder.tagCc != null) {
+            holder.tagCc.setVisibility(View.GONE);
+        }
+        if (holder.tagCcSeparator != null) {
+            holder.tagCcSeparator.setVisibility(View.GONE);
         }
 
-        // Show separator only when both slots are visible
-        if (holder.tagSeparator != null
-                && holder.tagQuality.getVisibility() == View.VISIBLE
-                && holder.tagDuration.getVisibility() == View.VISIBLE) {
-            holder.tagSeparator.setVisibility(View.VISIBLE);
+        List<FFmpegTagEntity> tags = entity.getTags();
+        if (tags != null && !tags.isEmpty()) {
+            for (FFmpegTagEntity tag : tags) {
+                bindSingleTag(context, holder, tag);
+            }
+
+            // Show separator only when both slots are visible
+            if (holder.tagSeparator != null
+                    && holder.tagQuality.getVisibility() == View.VISIBLE
+                    && holder.tagDuration.getVisibility() == View.VISIBLE) {
+                holder.tagSeparator.setVisibility(View.VISIBLE);
+            }
+        }
+
+        bindCaptionBadge(context, holder, entity);
+    }
+
+    /**
+     * Shows a "CC N" badge on a video row when the parser captured subtitle
+     * tracks for that video. Count comes from {@link #mSubtitleCounts} (built
+     * from the unfiltered repository), keyed by origin. The entity itself must
+     * not be a subtitle — we badge the parent video, not the caption rows.
+     */
+    private void bindCaptionBadge(@NonNull Context context,
+                                  @NonNull ViewHolder holder,
+                                  @NonNull BrowserDownloadEntity entity) {
+        if (holder.tagCc == null) return;
+        if (FileUriHelper.isSubtitle(entity.getMimeType())) return;
+
+        String origin = entity.getFileOrigin();
+        if (TextUtils.isEmpty(origin)) return;
+
+        Integer count = mSubtitleCounts.get(origin);
+        if (count == null || count <= 0) return;
+
+        holder.tagCc.setText(context.getString(R.string.caption_count_badge, count));
+        holder.tagCc.setVisibility(View.VISIBLE);
+
+        // List layout separates tags with a "·"; show the CC separator only
+        // when a quality/duration tag precedes it. Grid has no separator view.
+        if (holder.tagCcSeparator != null
+                && (holder.tagQuality.getVisibility() == View.VISIBLE
+                    || holder.tagDuration.getVisibility() == View.VISIBLE)) {
+            holder.tagCcSeparator.setVisibility(View.VISIBLE);
         }
     }
 
@@ -309,6 +363,8 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         final TextView tagQuality;
         final TextView tagDuration;
         final View tagSeparator;
+        @Nullable final TextView tagCc;
+        @Nullable final View tagCcSeparator;
 
         // List-only views (null in grid mode)
         @Nullable final TextView fileName;
@@ -332,6 +388,8 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
             tagQuality = view.findViewById(R.id.tag_quality);
             tagDuration = view.findViewById(R.id.tag_duration);
             tagSeparator = view.findViewById(R.id.tag_separator);
+            tagCc = view.findViewById(R.id.tag_cc);
+            tagCcSeparator = view.findViewById(R.id.tag_cc_separator);
 
             // List-only
             fileName = view.findViewById(R.id.file_name);

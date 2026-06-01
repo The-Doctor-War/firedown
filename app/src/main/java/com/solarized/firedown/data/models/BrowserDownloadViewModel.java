@@ -10,9 +10,12 @@ import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.repository.BrowserDownloadRepository;
 import com.solarized.firedown.geckoview.GeckoRuntimeHelper;
 import com.solarized.firedown.utils.BuildUtils;
+import com.solarized.firedown.utils.FileUriHelper;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -69,6 +72,29 @@ public class BrowserDownloadViewModel extends ViewModel {
         } else {
             return stream.collect(Collectors.toList());
         }
+    }
+
+    /**
+     * Count of subtitle entities per video origin, computed from the FULL
+     * (unfiltered) repository list — not the chip-filtered adapter list, so
+     * the CC badge on a video row stays correct even when the Subtitle chip
+     * has filtered the caption siblings out of view. Keyed by origin; only
+     * origins with at least one subtitle appear. Restricted to the current
+     * tab to match the list the adapter shows.
+     */
+    public Map<String, Integer> subtitleCountsByOrigin() {
+        List<BrowserDownloadEntity> entities = mBrowserDownloadRepository.getData().getValue();
+        if (entities == null) return Collections.emptyMap();
+        int currentTabId = mGeckoRuntimeHelper.getTabId();
+        Map<String, Integer> counts = new HashMap<>();
+        for (BrowserDownloadEntity e : entities) {
+            if (e == null || e.getTabId() != currentTabId) continue;
+            if (!FileUriHelper.isSubtitle(e.getMimeType())) continue;
+            String origin = e.getFileOrigin();
+            if (origin == null || origin.isEmpty()) continue;
+            counts.merge(origin, 1, Integer::sum);
+        }
+        return counts;
     }
 
     public int getCurrentSortBrowserId(){

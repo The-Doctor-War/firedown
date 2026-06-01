@@ -307,6 +307,10 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                 mLCEERecyclerView.hideAll();
             }
 
+            // Refresh the origin → caption-count map (from the unfiltered
+            // repository) before submitting so the CC badge binds correctly
+            // even when the active chip has filtered the subtitle siblings out.
+            mAdapter.setSubtitleCounts(mBrowserDownloadViewModel.subtitleCountsByOrigin());
             mAdapter.submitList(downloads);
         });
 

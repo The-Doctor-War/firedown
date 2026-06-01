@@ -84,6 +84,22 @@
                 tools:text="Uyarlanabilir"
                 tools:visibility="visible" />
 
+            <!-- Caption count pill — shown on a video tile when the parser
+                 captured subtitle tracks for it. Reuses the filled-primary
+                 mime-pill style so it sits in the corner shade like the
+                 other tags. No text separator in grid (these are pills). -->
+            <TextView
+                android:id="@+id/tag_cc"
+                style="@style/MimePrimary"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:paddingLeft="4dp"
+                android:paddingRight="4dp"
+                android:visibility="gone"
+                tools:text="CC 52"
+                tools:visibility="visible" />
+
         </LinearLayout>
 
         <!-- Variant / more button -->

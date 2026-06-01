@@ -64,7 +64,6 @@
     <string name="details_size">আকার</string>
     <string name="details_url">URL</string>
     <string name="download">ডাউনলোড করুন</string>
-    <string name="download_adaptative">অভিযোজিত</string>
     <string name="download_file">একটি ফাইল ডাউনলোড করার জন্য প্রস্তুত:</string>
     <string name="download_finished">ডাউনলোড শেষ</string>
     <string name="download_ongoing_notification">ফায়ারডাউন</string>

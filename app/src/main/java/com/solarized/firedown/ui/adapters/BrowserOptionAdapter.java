@@ -140,8 +140,8 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
         // ── Common bindings ──────────────────────────────────────────────
         // List mode renders mime as a text label that prefixes the
-        // domain ('VÍDEO · m.youtube.com'); grid keeps the filled chip
-        // pinned to the thumbnail corner. Hide the view entirely if the
+        // domain ('VÍDEO · m.youtube.com'); grid renders it as a filled
+        // chip in the bottom metadata row. Hide the view entirely if the
         // mime resolves to empty so the row doesn't render a stray ' · '.
         String mimeLabel = FileUriHelper.getLongMimeText(context, entity.getMimeType());
         if (mSuppressMime || TextUtils.isEmpty(mimeLabel)) {
@@ -164,16 +164,14 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         bindTags(context, holder, entity);
 
         // Title is shown in both layouts — list as the primary row text, grid
-        // as a 2-line overlay in the bottom scrim. fileUrl/domain stays
-        // list-only (no room on the tile). In grid, suppress URL-derived junk
-        // names (image CDN filenames like "mqdefault.jpg", base64 hashes) that
-        // just clutter the art — the mime + dimensions chips already identify
-        // those. List keeps the name regardless as its primary identifier.
-        String title = entity.getFileName();
-        if (!holder.isList && WebUtils.isUrlDerivedName(title)) {
-            title = null;
-        }
-        holder.setTextOrHide(holder.fileName, title);
+        // as a one-line overlay in the bottom scrim. fileUrl/domain stays
+        // list-only (no room on the tile). We always show whatever name we
+        // have, even a URL-derived one: the only test for "junk name" we had
+        // was "contains no spaces", which misclassifies legitimate titles in
+        // space-less scripts (Japanese, Chinese, Thai). Hiding a real title is
+        // silent, locale-specific information loss; showing a dumb slug is just
+        // cosmetic — so we fail toward showing.
+        holder.setTextOrHide(holder.fileName, entity.getFileName());
 
         // ── Layout-specific bindings ─────────────────────────────────────
         if (holder.isList) {
@@ -195,12 +193,8 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
     /**
      * Routes each typed tag to the correct static TextView. Both layouts expose
-     * the same tag_quality / tag_duration IDs.
-     *
-     * <p>Label resolution happens here rather than at inspect time so that
-     * locale-dependent labels (currently only {@link FFmpegTagEntity#TYPE_ADAPTIVE})
-     * pick up the current configuration instead of whatever was active when
-     * the tag was first persisted.
+     * the same tag_quality / tag_duration IDs. All tag labels are the tag's
+     * pre-resolved persisted text.
      */
     private void bindTags(@NonNull Context context,
                           @NonNull ViewHolder holder,
@@ -275,8 +269,7 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
 
     /**
      * Renders a single tag into the appropriate view slot based on its type.
-     * TYPE_ADAPTIVE resolves its label from resources; all other types use the
-     * tag's persisted text.
+     * All types use the tag's persisted text.
      */
     private void bindSingleTag(@NonNull Context context,
                                @NonNull ViewHolder holder,
@@ -289,19 +282,9 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
                 }
                 break;
 
-            case FFmpegTagEntity.TYPE_ADAPTIVE:
-                // Video "Adaptive" label. Shown in list only — on the grid
-                // tile it overflows the narrow cell and adds little, so it's
-                // suppressed there (quality lives in the download sheet).
-                if (holder.tagQuality != null && holder.isList) {
-                    holder.tagQuality.setText(context.getString(R.string.download_adaptative));
-                    holder.tagQuality.setVisibility(View.VISIBLE);
-                }
-                break;
-
             case FFmpegTagEntity.TYPE_QUALITY:
-                // Video quality (e.g. "1080p") — list only, same overflow
-                // reasoning as Adaptive above.
+                // Video quality (e.g. "1080p") — list only; it overflows the
+                // narrow grid cell and quality lives in the download sheet.
                 if (holder.tagQuality != null && holder.isList && !TextUtils.isEmpty(tag.getText())) {
                     holder.tagQuality.setText(tag.getText());
                     holder.tagQuality.setVisibility(View.VISIBLE);

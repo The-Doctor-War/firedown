@@ -56,7 +56,6 @@
     <string name="details_size">Ölçü</string>
     <string name="details_url">URL</string>
     <string name="download">Yüklə</string>
-    <string name="download_adaptative">Adaptiv</string>
     <string name="download_file">Fayl endirməyə hazırdır:</string>
     <string name="download_finished">Yükləmə tamamlandı</string>
     <string name="download_ongoing_notification">Yanğın söndürülməsi</string>

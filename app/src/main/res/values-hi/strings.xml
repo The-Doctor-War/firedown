@@ -44,7 +44,6 @@
     <string name="details_size">साइज़</string>
     <string name="details_url">यूआरएल</string>
     <string name="download">डाउनलोड करें</string>
-    <string name="download_adaptative">अनुकूल</string>
     <string name="download_file">फ़ाइल डाउनलोड होने के लिए तैयार है:</string>
     <string name="download_finished">डाउनलोड समाप्त</string>
     <string name="download_ongoing_notification">Firedown</string>

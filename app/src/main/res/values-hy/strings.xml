@@ -44,7 +44,6 @@
     <string name="details_size">Չափը</string>
     <string name="details_url">URL</string>
     <string name="download">Բեռնել</string>
-    <string name="download_adaptative">Հարմարվողական</string>
     <string name="download_file">Ֆայլը պատրաստ է ներբեռնման.</string>
     <string name="download_finished">Ներբեռնումն ավարտված է</string>
     <string name="download_ongoing_notification">Հրդեհաշիջում</string>

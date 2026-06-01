@@ -15,9 +15,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  * <p>Tags represent metadata shown in the browser options UI — quality labels,
  * durations, resolutions. The {@link #type} determines how the adapter renders
- * the tag; {@link #text} is the pre-resolved display value, except for
- * {@link #TYPE_ADAPTIVE}, whose label is resolved at render time to respect
- * the current locale.
+ * the tag; {@link #text} is the pre-resolved display value.
  */
 public class FFmpegTagEntity implements Parcelable {
 
@@ -27,9 +25,8 @@ public class FFmpegTagEntity implements Parcelable {
     public static final int TYPE_DURATION   = 1;  // e.g. "03:45"
     public static final int TYPE_QUALITY    = 2;  // e.g. "1080p", "720p"
     public static final int TYPE_RESOLUTION = 3;  // e.g. "1920x1080" (images)
-    public static final int TYPE_ADAPTIVE   = 4;  // resolved to localized label at render time
 
-    @IntDef({TYPE_UNKNOWN, TYPE_DURATION, TYPE_QUALITY, TYPE_RESOLUTION, TYPE_ADAPTIVE})
+    @IntDef({TYPE_UNKNOWN, TYPE_DURATION, TYPE_QUALITY, TYPE_RESOLUTION})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TagType {}
 
@@ -47,7 +44,7 @@ public class FFmpegTagEntity implements Parcelable {
 
     /**
      * @deprecated Use {@link #FFmpegTagEntity(int, String, int)} with an explicit
-     * {@link TagType}, or one of the static factories ({@link #adaptive(int)}).
+     * {@link TagType}.
      */
     @Deprecated
     public FFmpegTagEntity(int uid, @Nullable String text) {
@@ -65,17 +62,6 @@ public class FFmpegTagEntity implements Parcelable {
         text = in.readString();
         //noinspection WrongConstant — int was written from a @TagType value
         type = in.readInt();
-    }
-
-    // ── Factories ────────────────────────────────────────────────────────
-
-    /**
-     * Creates an adaptive-quality tag. The display label is resolved by the
-     * adapter at render time so it follows the current locale.
-     */
-    @NonNull
-    public static FFmpegTagEntity adaptive(int uid) {
-        return new FFmpegTagEntity(uid, null, TYPE_ADAPTIVE);
     }
 
     // ── Parcelable.Creator ───────────────────────────────────────────────

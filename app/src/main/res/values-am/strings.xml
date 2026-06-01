@@ -72,7 +72,6 @@
     <string name="details_size">መጠን</string>
     <string name="details_url">URL</string>
     <string name="download">አውርድ</string>
-    <string name="download_adaptative">የሚለምደዉ</string>
     <string name="download_file">አንድ ፋይል ለመውረድ ዝግጁ ነው፡-</string>
     <string name="download_finished">ማውረዱ አልቋል</string>
     <string name="download_ongoing_notification">Firedown</string>

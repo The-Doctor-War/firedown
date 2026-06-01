@@ -55,7 +55,6 @@
     <string name="details_size">ಗಾತ್ರ</string>
     <string name="details_url">URL</string>
     <string name="download">ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ</string>
-    <string name="download_adaptative">ಹೊಂದಿಕೊಳ್ಳುವ</string>
     <string name="download_file">ಫೈಲ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಸಿದ್ಧವಾಗಿದೆ:</string>
     <string name="download_finished">ಡೌನ್‌ಲೋಡ್ ಮುಗಿದಿದೆ</string>
     <string name="download_ongoing_notification">ಫೈರ್ಡೌನ್</string>

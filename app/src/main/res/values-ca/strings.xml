@@ -73,7 +73,6 @@
     <string name="details_size">Mida</string>
     <string name="details_url">URL</string>
     <string name="download">Descarregar</string>
-    <string name="download_adaptative">Adaptatiu</string>
     <string name="download_file">Hi ha un fitxer a punt per baixar:</string>
     <string name="download_finished">Descàrrega acabada</string>
     <string name="download_ongoing_notification">Firedown</string>

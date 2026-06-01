@@ -71,7 +71,6 @@
     <string name="details_size">Stærð</string>
     <string name="details_url">URL</string>
     <string name="download">Sækja</string>
-    <string name="download_adaptative">Aðlögunarhæfur</string>
     <string name="download_file">Skrá er tilbúin til niðurhals:</string>
     <string name="download_finished">Niðurhali lokið</string>
     <string name="download_ongoing_notification">Firedown</string>

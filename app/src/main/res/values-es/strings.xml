@@ -132,7 +132,6 @@
     <string name="donate_subtitle">Firedown es gratuito. Si te ahorró tiempo o problemas, devuelve lo que valió la pena de cualquiera de estas formas.</string>
     <string name="donate_title">Valor por valor</string>
     <string name="download">Descargar</string>
-    <string name="download_adaptative">Adaptado</string>
     <string name="download_file">Un archivo está listo para ser descargado:</string>
     <string name="download_finished">Descarga terminada</string>
     <string name="download_ongoing_notification">Firedown</string>

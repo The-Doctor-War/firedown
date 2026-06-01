@@ -73,7 +73,6 @@
     <string name="details_size">Kích cỡ</string>
     <string name="details_url">URL</string>
     <string name="download">Tải xuống</string>
-    <string name="download_adaptative">Thích ứng</string>
     <string name="download_file">Một tập tin đã sẵn sàng để tải xuống:</string>
     <string name="download_finished">Tải xuống đã hoàn tất</string>
     <string name="download_ongoing_notification">Firedown</string>

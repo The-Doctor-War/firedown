@@ -311,11 +311,9 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
             // repository) before submitting so the CC badge binds correctly
             // even when the active chip has filtered the subtitle siblings out.
             mAdapter.setSubtitleCounts(mBrowserDownloadViewModel.subtitleCountsByOrigin());
-            // Hide the mime chip when a single-type filter is active — an
-            // empty chip selection (View.NO_ID) is the "All" view, where the
-            // chip still earns its place. Re-runs here on every chip change
-            // because sortBrowserDownloads re-emits the list.
-            mAdapter.setMimeSuppressed(mChipGroup.getCheckedChipId() != android.view.View.NO_ID);
+            // Keep the mime tag on every tile regardless of the active chip —
+            // selecting a type chip no longer blanks it out.
+            mAdapter.setMimeSuppressed(false);
             mAdapter.submitList(downloads);
         });
 

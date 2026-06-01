@@ -64,7 +64,6 @@
     <string name="details_size">Suurus</string>
     <string name="details_url">URL</string>
     <string name="download">Lae alla</string>
-    <string name="download_adaptative">Kohanduv</string>
     <string name="download_file">Fail on allalaadimiseks valmis:</string>
     <string name="download_finished">Allalaadimine on lõppenud</string>
     <string name="download_ongoing_notification">Tulekahju</string>

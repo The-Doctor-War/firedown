@@ -69,7 +69,6 @@
     <string name="details_size">Hajmi</string>
     <string name="details_url">URL</string>
     <string name="download">Yuklab olish</string>
-    <string name="download_adaptative">Moslashuvchan</string>
     <string name="download_file">Fayl yuklab olishga tayyor:</string>
     <string name="download_finished">Yuklab olish tugallandi</string>
     <string name="download_ongoing_notification">Yong\'in o\'chirildi</string>

@@ -172,6 +172,40 @@ public class GeckoStateDataRepository {
         }
     }
 
+    /**
+     * Navigation-visit id of the tab that owns a capture, used to stamp
+     * captures so the session-aware Captured view can group by page visit.
+     * Prefers the active GeckoState (the one receiving onLocationChange) when
+     * it owns {@code tabId}; otherwise the first non-home state with that tabId
+     * that has actually navigated; otherwise the current tab's id, then 0.
+     * tabId is unique per tab, but several GeckoState objects can share one
+     * (duplicate/stale states for the same tab from navigation/restore churn),
+     * so a naive first-match scan can return a stale state.
+     */
+    public int visitIdForTab(int tabId) {
+        // The active tab is the common case and the one whose visit id we can
+        // trust: it's the GeckoState that actually receives onLocationChange.
+        // Prefer it directly — several GeckoState objects can carry the same
+        // tabId (stale duplicates for one tab), so a plain "first state whose
+        // tabId matches" scan can return a stale state (visit id 0) instead of
+        // the page you're looking at.
+        GeckoState current = peekCurrentGeckoState();
+        if (current != null && !current.isHome() && current.getTabId() == tabId) {
+            return current.getVisitId();
+        }
+        synchronized (mGeckoStates) {
+            for (GeckoState state : mGeckoStates) {
+                if (!state.isHome() && state.getTabId() == tabId && state.getVisitId() > 0) {
+                    return state.getVisitId();
+                }
+            }
+        }
+        // No state owns this tabId — do NOT borrow the active tab's id, or a
+        // background-tab capture would be stamped as "current page" and wrongly
+        // float. 0 means "no anchor" → the list falls back to recency.
+        return 0;
+    }
+
     public GeckoState getGeckoState(int sessionId) {
         synchronized (mGeckoStates) {
             for (GeckoState state : mGeckoStates) {

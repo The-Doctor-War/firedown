@@ -71,7 +71,6 @@
     <string name="details_size">Өлшем</string>
     <string name="details_url">URL</string>
     <string name="download">Жүктеп алу</string>
-    <string name="download_adaptative">Бейімделу</string>
     <string name="download_file">Файл жүктеп алуға дайын:</string>
     <string name="download_finished">Жүктеп алу аяқталды</string>
     <string name="download_ongoing_notification">Өрт сөндіру</string>

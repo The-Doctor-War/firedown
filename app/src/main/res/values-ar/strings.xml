@@ -66,7 +66,6 @@
     <string name="details_size">مقاس</string>
     <string name="details_url">عنوان URL</string>
     <string name="download">تحميل</string>
-    <string name="download_adaptative">التكيف</string>
     <string name="download_file">الملف جاهز للتحميل:</string>
     <string name="download_finished">انتهى التنزيل</string>
     <string name="download_ongoing_notification">النار أسفل</string>

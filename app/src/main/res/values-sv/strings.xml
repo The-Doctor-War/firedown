@@ -45,7 +45,6 @@
     <string name="details_size">Storlek</string>
     <string name="details_url">URL</string>
     <string name="download">Ladda ner</string>
-    <string name="download_adaptative">Adaptiv</string>
     <string name="download_file">En fil är redo att laddas ner:</string>
     <string name="download_finished">Nedladdningen är klar</string>
     <string name="download_ongoing_notification">Firedown</string>

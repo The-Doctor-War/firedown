@@ -9,11 +9,14 @@ import androidx.lifecycle.ViewModel;
 import com.solarized.firedown.Sorting;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.repository.BrowserDownloadRepository;
+import com.solarized.firedown.data.repository.GeckoStateDataRepository;
 import com.solarized.firedown.geckoview.GeckoRuntimeHelper;
+import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.utils.BuildUtils;
 import com.solarized.firedown.utils.FileUriHelper;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +31,7 @@ public class BrowserDownloadViewModel extends ViewModel {
 
     private final BrowserDownloadRepository mBrowserDownloadRepository;
     private final GeckoRuntimeHelper mGeckoRuntimeHelper;
+    private final GeckoStateDataRepository mGeckoStateDataRepository;
     private final Sorting mSorting;
     private final LiveData<List<BrowserDownloadEntity>> mObservableBrowser;
     private final MutableLiveData<Integer> mObservableBrowserType = new MutableLiveData<>();
@@ -36,10 +40,12 @@ public class BrowserDownloadViewModel extends ViewModel {
     public BrowserDownloadViewModel(
             BrowserDownloadRepository repository,
             GeckoRuntimeHelper geckoRuntimeHelper,
+            GeckoStateDataRepository geckoStateDataRepository,
             Sorting sorting) {
 
         this.mBrowserDownloadRepository = repository;
         this.mGeckoRuntimeHelper = geckoRuntimeHelper;
+        this.mGeckoStateDataRepository = geckoStateDataRepository;
         this.mSorting = sorting;
 
         // Use Transformations.switchMap to react to limit changes
@@ -60,12 +66,36 @@ public class BrowserDownloadViewModel extends ViewModel {
 
         // Note: Using the injected mGeckoRuntimeHelper instead of static call
         int currentTabId = mGeckoRuntimeHelper.getTabId();
+        final int currentVisitId = currentVisitId();
+
+        // Sort BEFORE limiting so the current page's media always floats to
+        // the top (and never gets truncated by the limit). Order:
+        //   1. captures from the page-visit you're on now, first
+        //   2. within that group, by type: video, audio, subtitle, then rest
+        //   3. then most-recent first (descending creationTime)
+        // Step 1 is the session anchor. Within one tab the repo accumulates
+        // captures across navigations; each is stamped with the navigation
+        // visit id that was active when it was captured (GeckoState#getVisitId),
+        // so "this page" is identified by a browser navigation boundary rather
+        // than by matching origin URL strings — which different extensions
+        // spell inconsistently (m./www., feed vs deep-link).
+        // Step 2 surfaces the actual video + captions above the page's
+        // thumbnails (which are captured later, so recency alone would bury the
+        // video). It applies ONLY inside the current-page group; everything
+        // below keeps pure recency.
+        Comparator<BrowserDownloadEntity> order = Comparator
+                .comparingInt((BrowserDownloadEntity e) ->
+                        isCurrentPage(e, currentVisitId) ? 0 : 1)
+                .thenComparingInt((BrowserDownloadEntity e) ->
+                        isCurrentPage(e, currentVisitId) ? typeRank(e) : 0)
+                .thenComparing(Comparator.reverseOrder());
 
         var stream = entities.stream()
-                .filter(entity -> mSorting.getPredicateBrowser(entity) && entity.getTabId() == currentTabId);
+                .filter(entity -> mSorting.getPredicateBrowser(entity) && entity.getTabId() == currentTabId)
+                .sorted(order);
 
         if (limit > 0) {
-            stream = stream.limit(limit).sorted(Collections.reverseOrder());
+            stream = stream.limit(limit);
         }
 
         if (BuildUtils.hasAndroid14()) {
@@ -73,6 +103,34 @@ public class BrowserDownloadViewModel extends ViewModel {
         } else {
             return stream.collect(Collectors.toList());
         }
+    }
+
+    /** True when {@code e} belongs to the page currently shown in the active
+     *  tab. {@code currentVisitId == 0} means no anchor (home / unavailable),
+     *  in which case nothing is "this page" and the list is pure recency. */
+    private static boolean isCurrentPage(BrowserDownloadEntity e, int currentVisitId) {
+        return currentVisitId > 0 && e.getVisitId() == currentVisitId;
+    }
+
+    /** Ordering rank by media kind, used only within the current-page group:
+     *  the downloadable video first, then audio, then subtitles/CC, then
+     *  everything else (thumbnails, etc.). Mirrors the grid's mime-based
+     *  VIDEO/AUDIO/SUBTITLE labelling so the badge and the order agree. */
+    private static int typeRank(BrowserDownloadEntity e) {
+        String mime = e.getMimeType();
+        if (FileUriHelper.isVideo(mime)) return 0;
+        if (e.isAudio() || FileUriHelper.isAudio(mime)) return 1;
+        if (FileUriHelper.isSubtitle(mime)) return 2;
+        return 3;
+    }
+
+    /** Navigation-visit id of the page currently shown in the active tab, or
+     *  0 when there's no active page (home / state unavailable). The session
+     *  anchor: entities stamped with this id are "this page". */
+    private int currentVisitId() {
+        GeckoState state = mGeckoStateDataRepository.peekCurrentGeckoState();
+        if (state == null || state.isHome()) return 0;
+        return state.getVisitId();
     }
 
     /**

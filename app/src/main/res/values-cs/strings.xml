@@ -73,7 +73,6 @@
     <string name="details_size">Velikost</string>
     <string name="details_url">URL</string>
     <string name="download">Stažení</string>
-    <string name="download_adaptative">Adaptivní</string>
     <string name="download_file">Soubor je připraven ke stažení:</string>
     <string name="download_finished">Stahování dokončeno</string>
     <string name="download_ongoing_notification">Firedown</string>

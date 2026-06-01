@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — grid tile chip hierarchy</title>
+<style>
+  :root{
+    --bg:#0d0d0f;--surface:#1b1b1e;--surface2:#232327;--surface3:#2c2c31;
+    --on:#e9e9ec;--on-var:#b4b4bb;--on-dim:#83838b;
+    --primary:#F66A66;--on-primary:#2a0303;
+    --primary-container:#5a1d1b;--on-primary-container:#ffd7d5;
+    --secondary-container:#3a3a40;--on-secondary-container:#dadadf;
+    --hair:rgba(255,255,255,.07);--ok:#8ad9ad;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI Variable",system-ui,sans-serif;margin:0;padding:32px;background:var(--bg);color:var(--on);line-height:1.5;}
+  h1{font-size:23px;margin:0 0 4px;font-weight:600;}
+  .sub{color:#9aa0a6;font-size:14px;margin:0 0 22px;max-width:880px;}
+  h2{font-size:15px;margin:30px 0 12px;color:#c9c9cf;font-weight:600;}
+  code.k{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-size:12px;color:#e0e0e6;}
+
+  .stage{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;margin-top:8px;}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#80848a;font-weight:600;margin-bottom:8px;max-width:320px;}
+  .recommend{color:var(--primary);}
+
+  .phone{width:320px;border-radius:22px;overflow:hidden;background:var(--bg);box-shadow:0 10px 36px rgba(0,0,0,.45),inset 0 0 0 1px #2a2a2d;}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 6px;}
+  .appbar .t{font-size:17px;font-weight:600;}
+  .appbar .icons{color:var(--on-var);font-size:14px;}
+  .chiprail{display:flex;gap:6px;padding:6px 14px 12px;overflow-x:auto;}
+  .chiprail .c{flex:0 0 auto;font-size:12.5px;padding:6px 12px;border-radius:14px;border:1px solid var(--hair);color:var(--on);background:transparent;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 14px 18px;}
+  .tile{position:relative;border-radius:8px;overflow:hidden;background:#1a1a1d;aspect-ratio:16/10;}
+  .tile .ph{position:absolute;inset:0;background-size:cover;background-position:center;}
+  .tile .scrim{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 7px;background:linear-gradient(to top,rgba(0,0,0,.86),rgba(0,0,0,0));}
+  .tile .title{font-size:11.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.55);line-height:1.25;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .tile .meta{display:flex;align-items:center;gap:4px;margin-top:5px;}
+
+  /* CHIPS */
+  .chip{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;}
+  .chip.primary{background:var(--primary-container);color:var(--on-primary-container);}
+  .chip.secondary{background:var(--secondary-container);color:var(--on-secondary-container);text-transform:none;letter-spacing:0;}
+  .chip.cc{background:var(--primary-container);color:var(--on-primary-container);}
+
+  /* SUBTLE TEXT */
+  .txt{font-size:10.5px;color:rgba(255,255,255,.88);font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.55);white-space:nowrap;}
+  .txt.dim{color:rgba(255,255,255,.72);font-weight:500;}
+  .txt.cc{color:#ffb3b1;font-weight:700;}
+  .sep{color:rgba(255,255,255,.45);font-size:10.5px;}
+
+  /* shared canned thumbs */
+  .ph-v1{background:linear-gradient(135deg,#5b4a31 0%,#9c7a4d 38%,#312217 100%);}
+  .ph-v2{background:linear-gradient(135deg,#4a5a6a 0%,#7a90a4 38%,#2a3540 100%);}
+  .ph-img1{background:linear-gradient(135deg,#3a5a3a,#1f3a1f 60%,#0d1a0d);}
+  .ph-img2{background:linear-gradient(135deg,#86452a,#3d1d12 60%,#180a05);}
+
+  /* table */
+  .compare{margin-top:22px;border-collapse:collapse;width:100%;max-width:900px;font-size:13px;}
+  .compare th,.compare td{padding:9px 12px;border:1px solid var(--hair);text-align:left;vertical-align:top;}
+  .compare th{background:var(--surface);color:#cdcdd3;font-weight:600;}
+  .compare td.A{background:rgba(255,107,103,.05);}
+  .compare td.B{background:rgba(138,217,173,.05);}
+
+  .why{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0 0;}
+  .why .card{flex:1;min-width:240px;background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:14px 16px;}
+  .why h4{margin:0 0 6px;font-size:13px;color:#cdcdd3;}
+  .why p{margin:0;font-size:12.5px;color:#9aa0a6;}
+
+  .verdict{margin-top:22px;padding:14px 16px;border-left:3px solid var(--primary);background:rgba(246,106,102,.06);border-radius:6px;max-width:900px;}
+  .verdict b{color:var(--primary);}
+</style>
+</head>
+<body>
+
+<h1>Grid tile — chip hierarchy</h1>
+<p class="sub">
+  Same six tiles, three treatments. The question: should secondary facts
+  (duration, dimensions, CC) carry a filled background like the mime tag,
+  or recede into subtle text on the scrim? The list view has already made
+  this call — mime is the only element with a background; everything else
+  is plain text with separators. The grid should pick a hierarchy and stick
+  to it for the same reason.
+</p>
+
+<div class="stage">
+
+  <!-- ============================== A — all chipped ============================== -->
+  <div>
+    <div class="label">A · today — every fact is a chip</div>
+    <div class="phone">
+      <div class="appbar"><span class="t">Captured Content</span><span class="icons">▦ ⋮</span></div>
+      <div class="chiprail">
+        <span class="c">Video</span><span class="c">Audio</span><span class="c">Subtitle</span><span class="c">Images</span>
+      </div>
+      <div class="grid">
+        <div class="tile"><div class="ph ph-v1"></div><div class="scrim">
+          <div class="title">Latorre, sobre Zapatero: "Todo era una fantasía…"</div>
+          <div class="meta"><span class="chip primary">VIDEO</span><span class="chip secondary">19:34</span><span class="chip cc">CC 2</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-v2"></div><div class="scrim">
+          <div class="title">Ketty Garat y el "emisario" de su investigación…</div>
+          <div class="meta"><span class="chip primary">VIDEO</span><span class="chip secondary">50:30</span><span class="chip cc">CC 1</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-img1"></div><div class="scrim">
+          <div class="title">&nbsp;</div>
+          <div class="meta"><span class="chip primary">IMAGE</span><span class="chip secondary">640×480</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-img2"></div><div class="scrim">
+          <div class="title">&nbsp;</div>
+          <div class="meta"><span class="chip primary">IMAGE</span><span class="chip secondary">48×48</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="label" style="margin-top:10px;max-width:320px;color:#9aa0a6;font-weight:400;text-transform:none;letter-spacing:0;font-size:12.5px;">
+      Three equally-weighted chips read like three categories. The viewer has to slow down to notice <i>video</i> matters more than <i>19:34</i>.
+    </div>
+  </div>
+
+  <!-- ============================== B — mime chip, rest subtle ============================== -->
+  <div>
+    <div class="label recommend">B · recommended — mime chipped, rest subtle</div>
+    <div class="phone">
+      <div class="appbar"><span class="t">Captured Content</span><span class="icons">▦ ⋮</span></div>
+      <div class="chiprail">
+        <span class="c">Video</span><span class="c">Audio</span><span class="c">Subtitle</span><span class="c">Images</span>
+      </div>
+      <div class="grid">
+        <div class="tile"><div class="ph ph-v1"></div><div class="scrim">
+          <div class="title">Latorre, sobre Zapatero: "Todo era una fantasía…"</div>
+          <div class="meta"><span class="chip primary">VIDEO</span><span class="txt dim">19:34</span><span class="sep">·</span><span class="txt cc">CC 2</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-v2"></div><div class="scrim">
+          <div class="title">Ketty Garat y el "emisario" de su investigación…</div>
+          <div class="meta"><span class="chip primary">VIDEO</span><span class="txt dim">50:30</span><span class="sep">·</span><span class="txt cc">CC 1</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-img1"></div><div class="scrim">
+          <div class="title">&nbsp;</div>
+          <div class="meta"><span class="chip primary">IMAGE</span><span class="txt dim">640×480</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-img2"></div><div class="scrim">
+          <div class="title">&nbsp;</div>
+          <div class="meta"><span class="chip primary">IMAGE</span><span class="txt dim">48×48</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="label" style="margin-top:10px;max-width:320px;color:#9aa0a6;font-weight:400;text-transform:none;letter-spacing:0;font-size:12.5px;">
+      Mime is the identity; duration/dimensions are attributes of that identity. The eye lands on the kind first, the size after. Same rule as the list.
+    </div>
+  </div>
+
+  <!-- ============================== C — mime + CC chipped ============================== -->
+  <div>
+    <div class="label">C · alt — mime + CC chipped (CC as affordance)</div>
+    <div class="phone">
+      <div class="appbar"><span class="t">Captured Content</span><span class="icons">▦ ⋮</span></div>
+      <div class="chiprail">
+        <span class="c">Video</span><span class="c">Audio</span><span class="c">Subtitle</span><span class="c">Images</span>
+      </div>
+      <div class="grid">
+        <div class="tile"><div class="ph ph-v1"></div><div class="scrim">
+          <div class="title">Latorre, sobre Zapatero: "Todo era una fantasía…"</div>
+          <div class="meta"><span class="chip primary">VIDEO</span><span class="txt dim">19:34</span><span class="chip cc">CC 2</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-v2"></div><div class="scrim">
+          <div class="title">Ketty Garat y el "emisario" de su investigación…</div>
+          <div class="meta"><span class="chip primary">VIDEO</span><span class="txt dim">50:30</span><span class="chip cc">CC 1</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-img1"></div><div class="scrim">
+          <div class="title">&nbsp;</div>
+          <div class="meta"><span class="chip primary">IMAGE</span><span class="txt dim">640×480</span></div>
+        </div></div>
+        <div class="tile"><div class="ph ph-img2"></div><div class="scrim">
+          <div class="title">&nbsp;</div>
+          <div class="meta"><span class="chip primary">IMAGE</span><span class="txt dim">48×48</span></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="label" style="margin-top:10px;max-width:320px;color:#9aa0a6;font-weight:400;text-transform:none;letter-spacing:0;font-size:12.5px;">
+      CC keeps its background because it's an affordance ("captions available"), not a measurement. Honest middle ground.
+    </div>
+  </div>
+</div>
+
+<h2>Why B (and a fair case for C)</h2>
+
+<table class="compare">
+  <thead><tr>
+    <th>Consideration</th><th>A · all chipped</th><th>B · mime only</th><th>C · mime + CC</th>
+  </tr></thead>
+  <tbody>
+    <tr>
+      <td><b>Information hierarchy</b><div style="font-size:11.5px;color:var(--on-dim);">does the visual weight match what matters?</div></td>
+      <td class="A">Flat. Three chips read as three peers, when only "what is this?" is identity.</td>
+      <td class="B">Mime carries weight; <code class="k">19:34</code>, <code class="k">640×480</code> recede as the attributes they are.</td>
+      <td>Same as B for video; CC is intentionally promoted because it gates a download choice.</td>
+    </tr>
+    <tr>
+      <td><b>Consistency with list view</b><div style="font-size:11.5px;color:var(--on-dim);">same data, same hierarchy across layouts</div></td>
+      <td class="A">Diverges. List shows <code class="k">VIDEO · m.youtube.com · 1080p · 00:53:25</code> — only mime is decorated.</td>
+      <td class="B">Mirrors the list rule exactly. Toggling layouts feels like the same screen.</td>
+      <td>Mostly mirrors; the CC chip is the deliberate exception (list keeps CC as primary-tinted text — same idea).</td>
+    </tr>
+    <tr>
+      <td><b>Photo competition</b><div style="font-size:11.5px;color:var(--on-dim);">how much do chips fight the thumbnail?</div></td>
+      <td class="A">Heaviest. Coloured rectangles stack across the bottom edge of every tile.</td>
+      <td class="B">Lightest. One small chip + airy text; the photo leads, which is the point of grid view.</td>
+      <td>Two chips + text. Still cleaner than A, slightly busier than B.</td>
+    </tr>
+    <tr>
+      <td><b>Legibility on busy art</b><div style="font-size:11.5px;color:var(--on-dim);">does subtle text actually read?</div></td>
+      <td class="A">Strongest — guaranteed contrast.</td>
+      <td class="B">Fine — the scrim is already there for the title; reuses that work. White text with shadow + 86% gradient is standard YouTube/Photos treatment.</td>
+      <td>Fine, same as B.</td>
+    </tr>
+    <tr>
+      <td><b>Maintenance</b><div style="font-size:11.5px;color:var(--on-dim);">how many places encode the rule?</div></td>
+      <td class="A">Grid has its own rule; list has another. Two visual languages.</td>
+      <td class="B">One rule — "mime is the chip" — applied to both layouts.</td>
+      <td>One-and-a-half rules; still simpler than A.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="why">
+  <div class="card">
+    <h4>The hierarchy argument</h4>
+    <p>Mime answers <i>what is this?</i> — it's identity, mapped to the filter chip rail at the top, and the basis of every decision the user makes on the screen. Duration and dimensions answer <i>how big?</i> — they're attributes of an item the viewer already classified. Equal visual weight tells the eye to compare them as peers, which is the wrong story.</p>
+  </div>
+  <div class="card">
+    <h4>The list-mode precedent</h4>
+    <p>The list already commits to "only mime gets a background." Quality, duration, CC are plain text with " · " separators. If we keep grid's all-chips treatment, we have two visual languages for the same data — every change to one will require remembering to mirror it in the other.</p>
+  </div>
+  <div class="card">
+    <h4>What the scrim is for</h4>
+    <p>The dark bottom gradient already exists to make the white title readable on any photo. Plain text picks up that contrast for free; backgrounded chips duplicate the work and visually fight the title above them. Reuse the substrate.</p>
+  </div>
+  <div class="card">
+    <h4>Why CC might be the one exception</h4>
+    <p>Unlike duration or dimensions, CC <i>changes what you can download</i> (it adds a captions sibling). Treating it as an affordance — a chip — communicates "this is a thing you can act on," not just a fact about the file. If you want to make that distinction obvious at grid scale, C is honest. Otherwise B's coloured text is enough — the list does it that way.</p>
+  </div>
+</div>
+
+<div class="verdict">
+  <b>Recommendation: B.</b> Mime is the chip. Duration / dimensions are subtle white text with a separator. CC stays primary-tinted text (matches list). Reasoning: it picks one hierarchy — <i>identity is decorated, attributes are not</i> — and applies it to both layouts, so the grid and list aren't two different design systems. If the CC chip's affordance feels too quiet in testing, promote it to chip and live on C. Either way, the duration / dimensions chips should go.
+</div>
+
+</body>
+</html>

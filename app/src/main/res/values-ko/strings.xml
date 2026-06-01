@@ -76,7 +76,6 @@
     <string name="details_size">크기</string>
     <string name="details_url">URL</string>
     <string name="download">다운로드</string>
-    <string name="download_adaptative">적응형</string>
     <string name="download_file">파일을 다운로드할 준비가 되었습니다:</string>
     <string name="download_finished">다운로드 완료</string>
     <string name="download_ongoing_notification">Firedown</string>

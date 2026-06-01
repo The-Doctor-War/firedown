@@ -71,7 +71,6 @@
     <string name="details_size">Ზომა</string>
     <string name="details_url">URL</string>
     <string name="download">Ჩამოტვირთვა</string>
-    <string name="download_adaptative">Ადაპტაციური</string>
     <string name="download_file">Ფაილი მზად არის ჩამოსატვირთად:</string>
     <string name="download_finished">Ჩამოტვირთვა დასრულდა</string>
     <string name="download_ongoing_notification">Firedown</string>

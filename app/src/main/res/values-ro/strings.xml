@@ -67,7 +67,6 @@
     <string name="details_size">Mărime</string>
     <string name="details_url">URL</string>
     <string name="download">Descarcă</string>
-    <string name="download_adaptative">Adaptiv</string>
     <string name="download_file">Un fișier este gata pentru a fi descărcat:</string>
     <string name="download_finished">Descărcarea s-a terminat</string>
     <string name="download_ongoing_notification">Firedown</string>

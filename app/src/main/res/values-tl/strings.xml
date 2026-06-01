@@ -70,7 +70,6 @@
     <string name="details_size">Sukat</string>
     <string name="details_url">URL</string>
     <string name="download">I-download</string>
-    <string name="download_adaptative">Adaptive</string>
     <string name="download_file">Handa nang i-download ang isang file:</string>
     <string name="download_finished">Tapos na ang pag-download</string>
     <string name="download_ongoing_notification">Firedown</string>

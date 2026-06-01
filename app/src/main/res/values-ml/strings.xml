@@ -65,7 +65,6 @@
     <string name="details_size">വലിപ്പം</string>
     <string name="details_url">URL</string>
     <string name="download">ഡൗൺലോഡ്</string>
-    <string name="download_adaptative">അഡാപ്റ്റീവ്</string>
     <string name="download_file">ഒരു ഫയൽ ഡൗൺലോഡ് ചെയ്യാൻ തയ്യാറാണ്:</string>
     <string name="download_finished">ഡൗൺലോഡ് പൂർത്തിയായി</string>
     <string name="download_ongoing_notification">ഫയർഡൗൺ</string>

@@ -13,6 +13,10 @@ public class GeckoInspectEntity {
     private String requestId;
     private JSONObject message;
     private int tabId;
+    // Navigation-visit id at capture time (GeckoState#getVisitId), stamped by
+    // GeckoRuntimeHelper before the task runs and copied onto the persisted
+    // BrowserDownloadEntity. Drives the session-aware "this page" grouping.
+    private int visitId;
     private Map<String, String> requestHeaders;
     private ArrayList<FFmpegEntity> variants;
     // SABR shared data (same for all variants of a video)
@@ -32,6 +36,12 @@ public class GeckoInspectEntity {
     }
     public int getTabId() {
         return tabId;
+    }
+    public int getVisitId() {
+        return visitId;
+    }
+    public void setVisitId(int visitId) {
+        this.visitId = visitId;
     }
     public Map<String, String> getRequestHeaders() {
         return requestHeaders;

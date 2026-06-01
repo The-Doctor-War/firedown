@@ -73,7 +73,6 @@
     <string name="details_size">Méret</string>
     <string name="details_url">URL</string>
     <string name="download">Letöltés</string>
-    <string name="download_adaptative">Adaptív</string>
     <string name="download_file">Egy fájl letöltésre készen áll:</string>
     <string name="download_finished">Letöltés kész</string>
     <string name="download_ongoing_notification">Firedown</string>

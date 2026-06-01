@@ -561,7 +561,14 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 ? (isGrid ? mSelectedGridBg : mSelectedListBg)
                 : (isGrid ? mDefaultGridBg  : mDefaultListBg));
 
-        if (holder.fileName != null) holder.fileName.setText(entity.getFileName());
+        if (holder.fileName != null) {
+            // Always show the name, even a URL-derived one — see the matching
+            // note in BrowserOptionAdapter. The "no spaces = junk" test hides
+            // real titles in space-less scripts, so we don't gate on it.
+            String name = entity.getFileName();
+            holder.fileName.setText(name);
+            setVisible(holder.fileName, !TextUtils.isEmpty(name));
+        }
         if (holder.fileUrl != null) holder.fileUrl.setText(domain);
 
 
@@ -580,6 +587,9 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         setVisible(holder.imageProgress, false);
         setVisible(holder.topScrim, false);
         setVisible(holder.mimeDuration, false);
+        // Grid info block is shown by default; PROGRESS hides it so the
+        // progress overlay owns the whole tile.
+        setVisible(holder.bottomBlock, true);
 
         // ── Status-specific binding ─────────────────────────────────
         switch (status) {
@@ -601,7 +611,9 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         boolean retrieving = entity.getFileIsLive();
 
         if(isGrid){
-            // No thumbnail — overlay is the entire visual
+            // No thumbnail — the progress overlay is the entire visual, so
+            // suppress the title/mime block for a clean downloading state.
+            setVisible(holder.bottomBlock, false);
             if (holder.imageProgress != null) {
                 holder.imageProgress.setVisibility(View.VISIBLE);
                 holder.imageProgress.setIndeterminate(retrieving);
@@ -746,6 +758,8 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     }
 
     private void bindQueuedInner(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
+        // Grid QUEUED leans on the title + mime chip in the bottom block; no
+        // dedicated grid status label yet.
         if (!isGrid && holder.statusText != null) {
             holder.statusText.setTextColor(MaterialColors.getColor(
                     holder.statusText,
@@ -827,6 +841,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         final @Nullable TextView statusText;
         final @Nullable TextView mimeDuration;
         final @Nullable View topScrim;
+        final @Nullable View bottomBlock;
 
         // Cache for the FINISHED row's "<size> - <date>" label. Built
         // from Utils.getFileSize + DateUtils.getFileDate, both of
@@ -873,6 +888,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             statusText = view.findViewById(R.id.status_text);
             mimeDuration = view.findViewById(R.id.mime_duration);
             topScrim = view.findViewById(R.id.top_scrim);
+            bottomBlock = view.findViewById(R.id.bottom_block);
 
             image.setClipToOutline(true);
 

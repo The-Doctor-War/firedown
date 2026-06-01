@@ -144,10 +144,12 @@ public class FFmpegStreamInfo {
     }
 
     public boolean isImage(){
+        if (mCodecName == null) return false;
         return mCodecName.equals("png") ||
+                mCodecName.equals("apng") ||
                 mCodecName.equals("jpeg") ||
                 mCodecName.equals("gif") ||
-                mCodecName.equals("webp") ||
+                mCodecName.startsWith("webp") ||   // webp, webp_anim (animated)
                 mCodecName.equals("mjpeg") ||
                 mCodecName.equals("av1") ||
                 mCodecName.equals("bmp");

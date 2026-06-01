@@ -76,7 +76,6 @@
     <string name="details_size">Rozmiar</string>
     <string name="details_url">Adres URL</string>
     <string name="download">Pobierać</string>
-    <string name="download_adaptative">Adaptacyjne</string>
     <string name="download_file">Plik jest gotowy do pobrania:</string>
     <string name="download_finished">Pobieranie zakończone</string>
     <string name="download_ongoing_notification">Wystrzał</string>

@@ -271,6 +271,12 @@ public class FFmpegMetaDataReader {
         mFFmpegMetaData.setDuration(duration);
     }
 
+    /** Content-dedup perceptual hash of the image's first frame (0 = none).
+     *  Called from native code after metadata is reported. */
+    private void setPerceptualHash(long pHash) {
+        mFFmpegMetaData.setPHash(pHash);
+    }
+
     private void bitmapRender() {
         mFFmpegMetaData.bitmapRender();
     }
@@ -493,7 +499,7 @@ public class FFmpegMetaDataReader {
                     FFmpegEntity.setCodecType(FFmpegStreamInfo.CodecType.VIDEO.getValue());
                     if (info.getHeight() != 0 && info.getWidth() != 0) {
                         if (mFFmpegMetaData.isImage()) {
-                            if (info.getCodecName().contains("svg")) {
+                            if (info.getCodecName() != null && info.getCodecName().contains("svg")) {
                                 FFmpegEntity.setInfo(String.format(Locale.getDefault(), "%dx%d", info.getEncodedWidth(), info.getEncodedHeight()));
                             } else {
                                 FFmpegEntity.setInfo(String.format(Locale.getDefault(), "%dx%d", info.getWidth(), info.getHeight()));

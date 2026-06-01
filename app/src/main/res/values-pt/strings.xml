@@ -58,7 +58,6 @@
     <string name="details_size">Tamanho</string>
     <string name="details_url">URL</string>
     <string name="download">Download</string>
-    <string name="download_adaptative">Adaptativo</string>
     <string name="download_file">Um arquivo está pronto para ser baixado:</string>
     <string name="download_finished">Download concluído</string>
     <string name="download_ongoing_notification">Incêndio</string>

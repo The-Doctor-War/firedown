@@ -64,7 +64,6 @@
     <string name="details_size">အရွယ်အစား</string>
     <string name="details_url">URL</string>
     <string name="download">ဒေါင်းလုဒ်လုပ်ပါ။</string>
-    <string name="download_adaptative">အလိုက်သင့်</string>
     <string name="download_file">ဖိုင်တစ်ခုကို ဒေါင်းလုဒ်လုပ်ရန် အသင့်ဖြစ်နေပါပြီ-</string>
     <string name="download_finished">ဒေါင်းလုဒ် ပြီးပါပြီ။</string>
     <string name="download_ongoing_notification">မီးပျက်</string>

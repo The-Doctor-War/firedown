@@ -3,9 +3,7 @@ package com.solarized.firedown.geckoview;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.solarized.firedown.App;
 import com.solarized.firedown.BuildConfig;
-import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.entity.FFmpegTagEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
@@ -151,11 +149,7 @@ public class VariantProcessor {
         if (!TextUtils.isEmpty(duration)) {
             tags.add(new FFmpegTagEntity(uid, duration, FFmpegTagEntity.TYPE_DURATION));
         }
-        if (variants.size() > 1) {
-            tags.add(new FFmpegTagEntity(uid,
-                    App.getAppContext().getString(R.string.download_adaptative),
-                    FFmpegTagEntity.TYPE_QUALITY));
-        } else if (!variants.isEmpty()) {
+        if (variants.size() == 1) {
             String info = variants.get(0).getInfo();
             if (!TextUtils.isEmpty(info)) {
                 tags.add(new FFmpegTagEntity(uid, info, FFmpegTagEntity.TYPE_QUALITY));

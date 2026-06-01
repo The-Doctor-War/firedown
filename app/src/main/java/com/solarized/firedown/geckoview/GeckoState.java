@@ -17,10 +17,16 @@ import org.mozilla.geckoview.GeckoSession;
 import org.mozilla.geckoview.GeckoSessionSettings;
 import org.mozilla.geckoview.WebResponse;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 public class GeckoState {
 
@@ -53,6 +59,53 @@ public class GeckoState {
      * link after spending time on it. 0 until the first onLocationChange.
      */
     private long mLastNavigationTime;
+
+    /**
+     * Visit id of the page currently shown in this tab. Captures are stamped
+     * with this value at capture time, so "the page you're on now" is the set
+     * of captures whose visit id equals this. It is NOT a raw onLocationChange
+     * counter — see {@link #updateVisit}: it only moves when the page
+     * <em>identity</em> ({@link #pageKeyTail}) actually changes, and it is
+     * <em>restored</em> (not re-allocated) when you navigate back to a page you
+     * already visited in this tab, so that page's earlier captures float again
+     * without needing to be re-captured. Starts at 0 (no page / home).
+     */
+    private int mVisitId;
+
+    /**
+     * High-water mark for visit-id allocation in this tab. A genuinely new page
+     * gets {@code ++mMaxVisitId}; a revisit reuses the id stored in
+     * {@link #mVisitIdByKey}. Never decreases.
+     */
+    private int mMaxVisitId;
+
+    /**
+     * Page identity of the page {@link #mVisitId} currently points at — the
+     * value last written to {@link #mCurrentPageKey}. Used to recognise that a
+     * stream of onLocationChange callbacks (SPA pushState, tracking-param
+     * mutations like YouTube's {@code &pp=…}) are all the same logical page so
+     * they don't each allocate a new id. null until the first navigation.
+     */
+    private String mCurrentPageKey;
+
+    /**
+     * Per-tab memo of pageKey → the visit id that page was first given, so
+     * navigating back/forward (or re-clicking a link) to a previously seen page
+     * re-anchors to its original id instead of stranding its captures under a
+     * stale id. Lives for the life of the tab.
+     */
+    private final Map<String, Integer> mVisitIdByKey = new HashMap<>();
+
+    /**
+     * Query parameters that carry no page identity — pure tracking / UI / SPA
+     * noise. Dropped from {@link #pageKeyTail} so adding them (e.g. YouTube
+     * appending {@code &pp=…} after load) doesn't read as a new page. Matched
+     * case-insensitively; {@code utm_*} is handled by prefix.
+     */
+    private static final Set<String> NOISE_PARAMS = new HashSet<>(Arrays.asList(
+            "pp", "feature", "si", "t", "ab_channel", "fbclid", "gclid",
+            "ref", "ref_src", "ref_url", "ref_source", "spm", "cmpid",
+            "igshid", "gi", "context", "app", "embeds_referring_euri"));
 
     /**
      * Original index in {@link GeckoStateDataRepository#mGeckoStates}
@@ -412,6 +465,95 @@ public class GeckoState {
         if(URLUtil.isValidUrl(uri) && !URLUtil.isAboutUrl(uri))
             mGeckoStateEntity.setUri(uri);
         mLastNavigationTime = System.currentTimeMillis();
+        updateVisit(uri);
+    }
+
+    /**
+     * Move {@link #mVisitId} to track the page now loading, but only when the
+     * page <em>identity</em> ({@link #pageKeyTail}) changed — not on every
+     * onLocationChange. SPA churn (pushState, {@code &pp=…} tracking-param
+     * mutations) keeps the same pageKey and is ignored, so one logical page
+     * keeps one id no matter how many location callbacks it fires.
+     *
+     * <p>The pageKey change is the only signal we gate on. We deliberately do
+     * NOT also require a user gesture: a gesture filters the churn no better
+     * than the pageKey check already does, and it would skip back/forward
+     * history navigations (the back button fires onLocationChange with
+     * gesture=false), which is exactly the "watch A → watch B → back to A"
+     * case we need to re-anchor.
+     *
+     * <p>Re-anchoring: a page seen before in this tab restores its original id
+     * (via {@link #mVisitIdByKey}) instead of allocating a new one — this is
+     * what makes back-to-A float A's earlier captures again without
+     * re-capturing them.
+     */
+    private void updateVisit(String uri) {
+        String host = normalizedHost(uri);
+        if (host == null) return;                       // unparseable / opaque → keep anchor
+
+        String key = host + pageKeyTail(uri);
+        if (key.equals(mCurrentPageKey)) return;        // same logical page → churn, ignore
+
+        mCurrentPageKey = key;
+
+        Integer known = mVisitIdByKey.get(key);
+        if (known != null) {
+            mVisitId = known;                           // revisit → re-anchor to original id
+        } else {
+            mVisitId = ++mMaxVisitId;                   // genuinely new page
+            mVisitIdByKey.put(key, mVisitId);
+        }
+    }
+
+    /** Lower-cased host with a leading {@code www.} or {@code m.} stripped, so
+     *  the mobile and desktop spellings of the same site compare equal. null
+     *  for opaque/relative/non-hierarchical URIs. */
+    private static String normalizedHost(String url) {
+        try {
+            String h = Uri.parse(url).getHost();
+            if (h == null) return null;
+            h = h.toLowerCase(Locale.ROOT);
+            if (h.startsWith("www.")) return h.substring(4);
+            if (h.startsWith("m.")) return h.substring(2);
+            return h;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** Path + identity-bearing query (noise params dropped, remainder sorted
+     *  for stability) — everything after the host that distinguishes one page
+     *  from another. The fragment is ignored entirely. */
+    private static String pageKeyTail(String url) {
+        try {
+            Uri u = Uri.parse(url);
+            StringBuilder sb = new StringBuilder();
+            String path = u.getPath();
+            if (path != null) sb.append(path);
+
+            TreeMap<String, String> keep = new TreeMap<>();
+            for (String name : u.getQueryParameterNames()) {
+                if (name == null || name.isEmpty()) continue;
+                String lower = name.toLowerCase(Locale.ROOT);
+                if (lower.startsWith("utm_") || NOISE_PARAMS.contains(lower)) continue;
+                keep.put(name, u.getQueryParameter(name));
+            }
+            if (!keep.isEmpty()) {
+                char sep = '?';
+                for (Map.Entry<String, String> e : keep.entrySet()) {
+                    sb.append(sep).append(e.getKey()).append('=').append(e.getValue());
+                    sep = '&';
+                }
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /** Current navigation-visit id for this tab. See {@link #mVisitId}. */
+    public int getVisitId() {
+        return mVisitId;
     }
 
     /** Wall-clock time of the most recent onLocationChange. See

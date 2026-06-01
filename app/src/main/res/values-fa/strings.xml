@@ -72,7 +72,6 @@
     <string name="details_size">اندازه</string>
     <string name="details_url">URL</string>
     <string name="download">دانلود</string>
-    <string name="download_adaptative">قابل تطبیق</string>
     <string name="download_file">یک فایل آماده دانلود است:</string>
     <string name="download_finished">دانلود تمام شد</string>
     <string name="download_ongoing_notification">آتش سوزی</string>

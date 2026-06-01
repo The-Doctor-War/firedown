@@ -73,7 +73,6 @@
     <string name="details_size">Størrelse</string>
     <string name="details_url">URL</string>
     <string name="download">Download</string>
-    <string name="download_adaptative">Fleksibel</string>
     <string name="download_file">En fil er klar til at blive downloadet:</string>
     <string name="download_finished">Download er afsluttet</string>
     <string name="download_ongoing_notification">Firedown</string>

@@ -23,6 +23,12 @@ public class BrowserDownloadRepository {
     private static final String TAG = BrowserDownloadRepository.class.getSimpleName();
     private static final int INTERCEPT_SIZE = 1024;
 
+    /** Max Hamming distance (out of 64 bits) between two image perceptual
+     *  hashes for them to count as the same picture. Small enough to avoid
+     *  folding distinct images, loose enough to absorb scaling artefacts
+     *  between sizes of the same image. */
+    private static final int PHASH_MAX_DISTANCE = 8;
+
     private final Queue<BrowserDownloadEntity> mInterceptedList;
     private final MutableLiveData<List<BrowserDownloadEntity>> mMediatorData;
 
@@ -56,21 +62,17 @@ public class BrowserDownloadRepository {
         String oldMimeType = oldEntity.getMimeType();
         String newMimeType = newEntity.getMimeType();
 
-        if(FileUriHelper.isImage(oldMimeType) && FileUriHelper.isImage(newMimeType)){
-            // Canonical CDN-aware key (strips tokens, format, resize/crop dirs)
-            String oldCanonical = canonicalKey(oldUrl);
-            String newCanonical = canonicalKey(newUrl);
-            if (!oldCanonical.isEmpty() && oldCanonical.equals(newCanonical)) return true;
-
-            // Last-segment-stem fallback: same host + same filename without extension.
-            // Catches CDNs that don't match canonicalKey's pattern set, but only
-            // when the stem looks like a hash-derived identifier — generic names
-            // like "hqdefault" or "thumbnail" repeat across distinct assets where
-            // the unique id lives in a parent path segment.
-            String oldStem = lastSegmentStem(oldUrl);
-            String newStem = lastSegmentStem(newUrl);
-            if (oldStem != null && oldStem.equals(newStem) && isLikelyHashStem(oldStem)) {
-                return sameHost(oldUrl, newUrl);
+        if (FileUriHelper.isImage(oldMimeType) && FileUriHelper.isImage(newMimeType)) {
+            // Content-based de-dup. The native metadata reader stamps each image
+            // with a perceptual hash (dHash) of its pixels; two URLs are the
+            // same picture when those hashes are within a small Hamming distance
+            // — independent of size, host or CDN, and with no URL-pattern rules.
+            // 0 means "not hashed" (flat image / decode skipped), in which case
+            // we rely on the exact-URL checks already done above.
+            long a = oldEntity.getPHash();
+            long b = newEntity.getPHash();
+            if (a != 0 && b != 0 && Long.bitCount(a ^ b) <= PHASH_MAX_DISTANCE) {
+                return true;
             }
         }
 
@@ -153,53 +155,4 @@ public class BrowserDownloadRepository {
         return url;
     }
 
-    private static boolean sameHost(String a, String b) {
-        try {
-            return new java.net.URL(a).getHost().equalsIgnoreCase(new java.net.URL(b).getHost());
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private static boolean isLikelyHashStem(String s) {
-        // Treat a stem as hash-like only if it's long, alphanumeric, and mixes
-        // digits with letters. Reject dictionary-style names ("hqdefault",
-        // "maxresdefault", "thumbnail") that recur across unrelated assets.
-        if (s == null || s.length() < 16) return false;
-        boolean hasDigit = false, hasLetter = false;
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c >= '0' && c <= '9') hasDigit = true;
-            else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) hasLetter = true;
-            else if (c != '-' && c != '_') return false;
-        }
-        return hasDigit && hasLetter;
-    }
-
-    private static String lastSegmentStem(String url) {
-        try {
-            String path = new java.net.URL(url).getPath();
-            int slash = path.lastIndexOf('/');
-            String last = slash >= 0 ? path.substring(slash + 1) : path;
-            // Drop query already gone; drop extension
-            return last.replaceFirst("\\.(?:jpe?g|webp|avif|png|gif|heic|heif|bmp|tiff?|mp4|webm|m3u8|mpd)$", "");
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private static String canonicalKey(String url) {
-        if (url == null) return "";
-        try {
-            java.net.URL u = new java.net.URL(url);
-            String path = u.getPath();
-            path = path.replaceFirst("^/[a-f0-9]{16,64}(?=/)", "");
-            path = path.replaceAll("/(?:resize|crop|scale|fit|c)(?:/[0-9x.]+)+", "");
-            path = path.replaceAll("/(?:f|format)/(?:jpe?g|webp|avif|png|gif)\\b", "");
-            path = path.replaceFirst("\\.(?:jpe?g|webp|avif|png|gif|heic|heif|bmp|tiff?)$", "");
-            return u.getHost() + path;
-        } catch (Exception e) {
-            return "";
-        }
-    }
 }

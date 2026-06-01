@@ -44,7 +44,6 @@
     <string name="details_size">尺寸</string>
     <string name="details_url">網址</string>
     <string name="download">下載</string>
-    <string name="download_adaptative">自適應</string>
     <string name="download_file">文件已準備好下載：</string>
     <string name="download_finished">下載完成</string>
     <string name="download_ongoing_notification">火降</string>

@@ -72,7 +72,6 @@
     <string name="details_size">גודל</string>
     <string name="details_url">כתובת אתר</string>
     <string name="download">הורד</string>
-    <string name="download_adaptative">הסתגלות</string>
     <string name="download_file">קובץ מוכן להורדה:</string>
     <string name="download_finished">ההורדה הסתיימה</string>
     <string name="download_ongoing_notification">Firedown</string>

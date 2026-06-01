@@ -150,7 +150,6 @@
          %1$s is the plural (home_downloads_file_count), %2$s is the
          size string (Utils.readableFileSize). -->
     <string name="home_downloads_subtitle_with_size">%1$s · %2$s</string>
-    <string name="download_adaptative">Adaptive</string>
     <string name="download_file">A file is ready to be downloaded:</string>
     <string name="download_finished">Download finished</string>
     <string name="download_ongoing_notification">Firedown</string>

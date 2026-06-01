@@ -71,7 +71,6 @@
     <string name="details_size">ຂະໜາດ</string>
     <string name="details_url">URL</string>
     <string name="download">ດາວໂຫຼດ</string>
-    <string name="download_adaptative">ການປັບຕົວ</string>
     <string name="download_file">ໄຟລ໌ພ້ອມໃຫ້ດາວໂຫຼດແລ້ວ:</string>
     <string name="download_finished">ດາວໂຫຼດແລ້ວໆ</string>
     <string name="download_ongoing_notification">ໄຟໄໝ້</string>

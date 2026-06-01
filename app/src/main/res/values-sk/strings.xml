@@ -72,7 +72,6 @@
     <string name="details_size">Veľkosť</string>
     <string name="details_url">URL</string>
     <string name="download">Stiahnuť ▼</string>
-    <string name="download_adaptative">Adaptívny</string>
     <string name="download_file">Súbor je pripravený na stiahnutie:</string>
     <string name="download_finished">Sťahovanie dokončené</string>
     <string name="download_ongoing_notification">Firedown</string>

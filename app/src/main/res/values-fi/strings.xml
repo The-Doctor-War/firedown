@@ -73,7 +73,6 @@
     <string name="details_size">Koko</string>
     <string name="details_url">URL-osoite</string>
     <string name="download">Ladata</string>
-    <string name="download_adaptative">Mukautuva</string>
     <string name="download_file">Tiedosto on valmis ladattavaksi:</string>
     <string name="download_finished">Lataus valmis</string>
     <string name="download_ongoing_notification">Firedown</string>

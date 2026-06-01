@@ -66,6 +66,7 @@ public class GeckoInspectTask implements Runnable {
     private final String mImg;
     private final String mRequestId;
     private final int mTabId;
+    private final int mVisitId;
     private final Map<String, String> mRequestHeaders;
     private final ArrayList<FFmpegEntity> mVariants;
     private final String mSabrUrl;
@@ -92,6 +93,7 @@ public class GeckoInspectTask implements Runnable {
         mRequestId = geckoInspectEntity.getRequestId();
         mRequestHeaders = safeHeaders(geckoInspectEntity.getRequestHeaders());
         mTabId = geckoInspectEntity.getTabId();
+        mVisitId = geckoInspectEntity.getVisitId();
         mName = geckoInspectEntity.getName();
         mImg = geckoInspectEntity.getImg();
         mVariants = geckoInspectEntity.getVariants();
@@ -154,6 +156,7 @@ public class GeckoInspectTask implements Runnable {
         entity.setHeaders(mRequestHeaders);
         entity.setUpdateTime(System.currentTimeMillis());
         entity.setTabId(mTabId);
+        entity.setVisitId(mVisitId);
         entity.setRequestId(mRequestId);
         entity.setFileDescription(mDescription);
         entity.setIncognito(mIncognito);
@@ -252,6 +255,7 @@ public class GeckoInspectTask implements Runnable {
         entity.setHasVariants(streams.size() > 1);
         entity.setMimeType(mime);
         entity.setFileDuration(metadata.getDuration());
+        entity.setPHash(metadata.getPHash());
 
         parseTags(entity, streams, mime);
     }
@@ -314,8 +318,6 @@ public class GeckoInspectTask implements Runnable {
             }
             if (streams.size() == 1) {
                 tags.add(new FFmpegTagEntity(uid, streams.get(0).getInfo(), FFmpegTagEntity.TYPE_QUALITY));
-            } else if (streams.size() > 1) {
-                tags.add(FFmpegTagEntity.adaptive(uid));
             }
         } else if (FileUriHelper.isImage(mime) || FileUriHelper.isSVG(mime)) {
             if (!streams.isEmpty()) {

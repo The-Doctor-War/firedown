@@ -46,6 +46,7 @@ static JavaMethod stream_seek_input = {"seekInputStream", "(IJI)J"};
 
 static char *metadatareader_runnable_class_path_name = "com/solarized/firedown/ffmpegutils/FFmpegMetaDataReader";
 static JavaMethod metadatareader_set_duration = {"setDuration", "(J)V"};
+static JavaMethod metadatareader_set_perceptual_hash = {"setPerceptualHash", "(J)V"};
 static JavaMethod metadatareader_set_meta_data = {"setMetaData", "(Ljava/util/Map;)V"};
 static JavaMethod metadatareader_set_streams_info = {"setStreamsInfo", "([Lcom/solarized/firedown/ffmpegutils/FFmpegStreamInfo;)V"};
 static JavaMethod metadatareader_set_input_format_name = {"setInputFormatName", "(Ljava/lang/String;)V"};

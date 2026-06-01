@@ -70,7 +70,6 @@
     <string name="details_size">ප්රමාණය</string>
     <string name="details_url">URL</string>
     <string name="download">බාගත</string>
-    <string name="download_adaptative">අනුවර්තනය</string>
     <string name="download_file">ගොනුවක් බාගත කිරීමට සූදානම්:</string>
     <string name="download_finished">බාගැනීම අවසන්</string>
     <string name="download_ongoing_notification">වෙඩි තැබීම</string>

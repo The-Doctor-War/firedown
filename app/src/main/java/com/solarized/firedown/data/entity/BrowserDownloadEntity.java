@@ -34,6 +34,13 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
 
     int tabId;
 
+    /** Navigation-visit id at capture time, assigned by the browser's own
+     *  onLocationChange (see GeckoState#getVisitId). Identifies which page
+     *  visit within a tab this capture belongs to, independent of how any
+     *  extension spelled the origin URL — the unified anchor for the
+     *  session-aware Captured view. 0 = unknown/never stamped. */
+    int visitId;
+
     int fileType;
 
     int videoNumber;
@@ -88,6 +95,11 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
 
     boolean isAudio;
 
+    /** Perceptual (dHash) signature of the image content, 0 when unknown.
+     *  Drives content-based de-duplication of images (see
+     *  {@code BrowserDownloadRepository#isPresent}). */
+    long pHash;
+
     // Transient — not parcelled. Set right before download starts.
     int selectedStreamIndex = -1;
 
@@ -130,6 +142,7 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         uid = in.readInt();
         sessionId = in.readInt();
         tabId = in.readInt();
+        visitId = in.readInt();
         fileType = in.readInt();
         videoNumber = in.readInt();
         audioNumber = in.readInt();
@@ -160,6 +173,7 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         sabrVideoId = in.readString();
         sabrVisitorData = in.readString();
         incognito = in.readByte() != 0;
+        pHash = in.readLong();
     }
 
     public static final Creator<BrowserDownloadEntity> CREATOR = new Creator<>() {
@@ -387,6 +401,10 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
 
     public void setMimeType(String mimeType) { this.mimeType = mimeType; }
 
+    public long getPHash() { return pHash; }
+
+    public void setPHash(long pHash) { this.pHash = pHash; }
+
     public void setFileLength(long length){
         this.fileLength = length;
     }
@@ -413,6 +431,14 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
 
     public int getTabId() {
         return tabId;
+    }
+
+    public void setVisitId(int visitId) {
+        this.visitId = visitId;
+    }
+
+    public int getVisitId() {
+        return visitId;
     }
 
     // SABR getters/setters
@@ -488,6 +514,7 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         this.videoNumber = entity.getVideoNumber();
         this.hasVariants = entity.getHasVariants();
         this.tabId = entity.getTabId();
+        this.visitId = entity.getVisitId();
         this.requestId = entity.getRequestId();
         this.updateTime = entity.getUpdateTime();
         this.creationTime = entity.getCreationTime();
@@ -504,6 +531,7 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         this.sabrVideoId = entity.getSabrVideoId();
         this.sabrVisitorData = entity.getSabrVisitorData();
         this.incognito = entity.isIncognito();
+        this.pHash = entity.getPHash();
     }
 
 
@@ -522,6 +550,7 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         dest.writeInt(uid);
         dest.writeInt(sessionId);
         dest.writeInt(tabId);
+        dest.writeInt(visitId);
         dest.writeInt(fileType);
         dest.writeInt(videoNumber);
         dest.writeInt(audioNumber);
@@ -552,6 +581,7 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         dest.writeString(sabrVideoId);
         dest.writeString(sabrVisitorData);
         dest.writeByte((byte) (incognito ? 1 : 0));
+        dest.writeLong(pHash);
     }
 
     public static boolean isEqual(BrowserDownloadEntity oldItem, BrowserDownloadEntity newItem){

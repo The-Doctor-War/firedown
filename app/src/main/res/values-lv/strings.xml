@@ -44,7 +44,6 @@
     <string name="details_size">Izmērs</string>
     <string name="details_url">Vietrādis URL</string>
     <string name="download">Lejupielādēt</string>
-    <string name="download_adaptative">Adaptīvs</string>
     <string name="download_file">Fails ir gatavs lejupielādei:</string>
     <string name="download_finished">Lejupielāde ir pabeigta</string>
     <string name="download_ongoing_notification">Firedown</string>

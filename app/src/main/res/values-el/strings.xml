@@ -73,7 +73,6 @@
     <string name="details_size">Μέγεθος</string>
     <string name="details_url">Διεύθυνση URL</string>
     <string name="download">Λήψη</string>
-    <string name="download_adaptative">Προσαρμοστικό</string>
     <string name="download_file">Ένα αρχείο είναι έτοιμο για λήψη:</string>
     <string name="download_finished">Η λήψη ολοκληρώθηκε</string>
     <string name="download_ongoing_notification">Firedown</string>

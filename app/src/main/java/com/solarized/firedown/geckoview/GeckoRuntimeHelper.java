@@ -570,6 +570,13 @@ public class GeckoRuntimeHelper {
                 String url = entity.getUrl();
                 String geckoType = entity.getGeckoType();
 
+                // Stamp the navigation-visit id of the owning tab at capture
+                // time. This is the unified anchor for the session-aware
+                // Captured view — it groups by which page visit a capture
+                // belongs to, independent of how the extension spelled the
+                // origin URL (m./www., feed vs deep-link).
+                entity.setVisitId(mGeckoStateDataRepository.visitIdForTab(entity.getTabId()));
+
                 // 2. Determine the URL Type based on the extension that sent it
                 UrlType urlType = UrlParser.getUrlGeckoType(url, geckoType);
 

@@ -76,7 +76,6 @@
     <string name="details_size">Maat</string>
     <string name="details_url">URL</string>
     <string name="download">Downloaden</string>
-    <string name="download_adaptative">Adaptief</string>
     <string name="download_file">Er is een bestand klaar om te downloaden:</string>
     <string name="download_finished">Downloaden voltooid</string>
     <string name="download_ongoing_notification">Firedown</string>

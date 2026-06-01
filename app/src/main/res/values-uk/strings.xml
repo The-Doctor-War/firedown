@@ -73,7 +73,6 @@
     <string name="details_size">Розмір</string>
     <string name="details_url">URL-адреса</string>
     <string name="download">Завантажити</string>
-    <string name="download_adaptative">Адаптивний</string>
     <string name="download_file">Файл готовий до завантаження:</string>
     <string name="download_finished">Завантаження завершено</string>
     <string name="download_ongoing_notification">Firedown</string>

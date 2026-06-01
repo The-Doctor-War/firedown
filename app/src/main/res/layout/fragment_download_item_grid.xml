@@ -56,60 +56,91 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Mime badge row -->
+            <!-- Bottom info block: a gradient scrim carrying the title + a
+                 metadata row + status, mirroring the Captured grid. The scrim
+                 is the block's background (always present); the adapter toggles
+                 the individual children per download state. Left-aligned and
+                 full-width like Captured. -->
             <LinearLayout
-                android:id="@+id/row_mime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/list_item_margin"
-                android:orientation="horizontal"
-                app:layout_constraintBottom_toBottomOf="@id/image"
-                app:layout_constraintEnd_toEndOf="@id/image">
-
-                <TextView
-                    android:id="@+id/mime_text"
-                    style="@style/MimePrimary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="4dp"
-                    tools:text="mp3" />
-
-                <TextView
-                    android:id="@+id/mime_duration"
-                    style="@style/MimeTertiary"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="4dp"
-                    android:visibility="gone"
-                    tools:text="00:10" />
-
-            </LinearLayout>
-
-            <!-- Bottom status: unified ERROR / QUEUED row. List layout
-                 also shares this id; the adapter sets text + color per
-                 state. FINISHED has no status string in grid mode
-                 (covered by the top scrim + mime duration badge), and
-                 QUEUED currently has no grid-mode treatment in the
-                 adapter — keeping the view here means a future
-                 'Pending…' label can be wired in without re-touching
-                 the layout. -->
-            <TextView
-                android:id="@+id/status_text"
-                style="@style/TextAppearance.Material3.BodySmall"
+                android:id="@+id/bottom_block"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/list_item_margin"
-                android:gravity="center_vertical"
-                android:singleLine="true"
-                android:textColor="?attr/colorPrimaryContainer"
-                android:visibility="gone"
+                android:background="@drawable/bottom_scrim"
+                android:orientation="vertical"
+                android:paddingHorizontal="8dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="7dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@id/row_mime"
                 app:layout_constraintStart_toStartOf="parent"
-                tools:text="@string/error_check_internet_connection" />
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:id="@+id/file_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    tools:text="Latorre, sobre Zapatero: Todo era una fantasía…" />
+
+                <!-- Metadata row: a decorated mime CHIP (identity) followed by
+                     subtle scrim TEXT for the duration — only mime carries a
+                     background, matching the Captured grid. -->
+                <LinearLayout
+                    android:id="@+id/row_mime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/mime_text"
+                        style="@style/MimePrimary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="4dp"
+                        android:paddingRight="4dp"
+                        tools:text="mp4" />
+
+                    <TextView
+                        android:id="@+id/mime_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:singleLine="true"
+                        android:textSize="11.5sp"
+                        android:textColor="#E0FFFFFF"
+                        android:shadowColor="#80000000"
+                        android:shadowDx="0"
+                        android:shadowDy="1"
+                        android:shadowRadius="2"
+                        android:visibility="gone"
+                        tools:text="00:10" />
+
+                </LinearLayout>
+
+                <!-- ERROR / QUEUED status. FINISHED's "size · date" label is
+                     list-only; the grid leans on title + mime instead. -->
+                <TextView
+                    android:id="@+id/status_text"
+                    style="@style/TextAppearance.Material3.BodySmall"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="?attr/colorPrimaryContainer"
+                    android:visibility="gone"
+                    tools:text="@string/error_check_internet_connection" />
+
+            </LinearLayout>
 
             <!-- Action button -->
             <com.google.android.material.button.MaterialButton

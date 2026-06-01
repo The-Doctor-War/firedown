@@ -8,6 +8,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <pthread.h>
 
 #include <android/log.h>
@@ -77,6 +78,8 @@ struct MetadataReader{
     jmethodID error_bitmap_method;
 
     jmethodID set_duration_method;
+
+    jmethodID set_perceptual_hash_method;
 
     jmethodID set_stream_info_method;
 
@@ -439,6 +442,11 @@ int jni_init_metadatareader(JNIEnv *env, jobject thiz) {
         goto free_metadata;
 
     }
+
+    // Optional — content-dedup perceptual hash. Absence is non-fatal so older
+    // builds without the Java setter still load.
+    metadata->set_perceptual_hash_method = java_get_method(env, metadata_runnable_class,
+                                                           metadatareader_set_perceptual_hash);
 
     metadata->init_bitmap_method = java_get_method(env, metadata_runnable_class,
                                                    metadatareader_bitmap_init);
@@ -1082,6 +1090,128 @@ int metadata_report_info(JNIEnv *env, jobject thiz, struct MetadataReader *metad
  * Extract bitmap thumbnail from the first input that has a video stream.
  * input_index specifies which format_ctx to use.
  */
+/* ----------------------------------------------------------------------------
+ * Perceptual hash (dHash) for content-based image de-duplication.
+ *
+ * Decodes a single still frame, scales it to 9x8 greyscale and builds a 64-bit
+ * difference hash: for each of 8 rows, each of the 8 horizontal pixel pairs
+ * contributes one bit (left brighter than right). Two URLs of the SAME picture
+ * — any size, any host, any CDN — yield near-identical hashes; unrelated
+ * pictures do not. This is the universal replacement for per-site URL rules.
+ * ------------------------------------------------------------------------- */
+
+/* Restrict the (cheap) decode to still-image inputs, so a network video probe
+ * never pays a forced frame decode. FFmpeg routes single images through the
+ * image2 demuxer or a "<codec>_pipe" demuxer; gif/webp/jpeg have own names. */
+static int metadata_input_is_image(AVFormatContext *fmt_ctx) {
+    if (fmt_ctx == NULL || fmt_ctx->iformat == NULL || fmt_ctx->iformat->name == NULL)
+        return 0;
+    const char *n = fmt_ctx->iformat->name;
+    if (strstr(n, "image2") != NULL) return 1;   /* image2, image2pipe          */
+    if (strstr(n, "_pipe")  != NULL) return 1;   /* png_/webp_/jpeg_/bmp_/tiff_  */
+    if (strcmp(n, "gif")  == 0) return 1;
+    if (strcmp(n, "webp") == 0) return 1;
+    if (strcmp(n, "jpeg") == 0 || strcmp(n, "mjpeg") == 0) return 1;
+    return 0;
+}
+
+static int64_t metadata_compute_dhash_from(struct MetadataReader *metadataReader, int input_index) {
+    AVFormatContext *fmt_ctx = metadataReader->format_ctx[input_index];
+    if (!metadata_input_is_image(fmt_ctx)) return 0;
+
+    int video_stream_index = av_find_best_stream(fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
+    if (video_stream_index < 0) return 0;
+
+    AVPacket *packet = NULL;
+    AVFrame *frame = NULL;
+    AVCodecContext *codec_ctx = NULL;
+    struct SwsContext *sws = NULL;
+    AVDictionary *opts = NULL;
+    uint8_t *dst_data[4] = {0};
+    int dst_linesize[4] = {0};
+    int64_t hash = 0;
+    int got_frame = 0;
+
+    const int HW = 9, HH = 8;   /* 9x8 grey -> 8x8 = 64 difference bits */
+
+    AVStream *stream = fmt_ctx->streams[video_stream_index];
+
+    packet = av_packet_alloc();
+    frame  = av_frame_alloc();
+    if (packet == NULL || frame == NULL) goto done;
+
+    codec_ctx = avcodec_alloc_context3(NULL);
+    if (codec_ctx == NULL) goto done;
+    if (avcodec_parameters_to_context(codec_ctx, stream->codecpar) < 0) goto done;
+    codec_ctx->pkt_timebase = stream->time_base;
+    av_opt_set_int(codec_ctx, "refcounted_frames", 0, 0);
+
+    const AVCodec *codec = avcodec_find_decoder(codec_ctx->codec_id);
+    if (codec == NULL) goto done;
+    if (avcodec_open2(codec_ctx, codec, &opts) < 0) goto done;
+
+    if (fmt_ctx->pb) fmt_ctx->pb->eof_reached = 0;
+
+    while (av_read_frame(fmt_ctx, packet) >= 0) {
+        if (packet->stream_index == video_stream_index) {
+            utils_decode_frame(codec_ctx, frame, &got_frame, packet);
+            if (got_frame) { av_packet_unref(packet); break; }
+        }
+        av_packet_unref(packet);
+    }
+    if (!got_frame) goto done;
+
+    // Degenerate frame (unset dimensions / pixel format) would make
+    // sws_getContext/sws_scale read garbage or fail — bail to hash 0,
+    // which falls back to exact-URL dedup on the Java side.
+    if (frame->width <= 0 || frame->height <= 0 || frame->format < 0) goto done;
+
+    if (av_image_alloc(dst_data, dst_linesize, HW, HH, AV_PIX_FMT_GRAY8, 1) < 0) {
+        dst_data[0] = NULL;
+        goto done;
+    }
+
+    sws = sws_getContext(frame->width, frame->height, (enum AVPixelFormat) frame->format,
+                         HW, HH, AV_PIX_FMT_GRAY8, SWS_AREA, NULL, NULL, NULL);
+    if (sws == NULL) goto done;
+
+    sws_scale(sws, (const uint8_t * const *) frame->data, frame->linesize,
+              0, frame->height, dst_data, dst_linesize);
+
+    /* dHash: bit set when the left pixel is brighter than its right neighbour. */
+    {
+        int bit = 0;
+        for (int y = 0; y < HH; y++) {
+            const uint8_t *row = dst_data[0] + (size_t) y * dst_linesize[0];
+            for (int x = 0; x < HH; x++) {           /* 8 comparisons / 9 samples */
+                if (row[x] > row[x + 1]) hash |= ((int64_t) 1) << bit;
+                bit++;
+            }
+        }
+    }
+
+done:
+    if (codec_ctx != NULL) {
+        if (frame != NULL) utils_decode_frame(codec_ctx, frame, &got_frame, NULL);
+        avcodec_free_context(&codec_ctx);
+    }
+    if (dst_data[0] != NULL) av_freep(&dst_data[0]);
+    if (sws != NULL) sws_freeContext(sws);
+    if (frame != NULL) av_frame_free(&frame);
+    if (packet != NULL) av_packet_free(&packet);
+    av_dict_free(&opts);
+    return hash;
+}
+
+/* First image input's dHash, or 0 when there's no image (audio/video probe). */
+static int64_t metadata_compute_dhash(struct MetadataReader *metadataReader) {
+    for (int i = 0; i < metadataReader->nb_inputs; i++) {
+        int64_t h = metadata_compute_dhash_from(metadataReader, i);
+        if (h != 0) return h;
+    }
+    return 0;
+}
+
 int metadata_extract_bitmap_from(JNIEnv *env, jobject thiz, struct MetadataReader *metadataReader, int input_index) {
 
     AVPacket *packet = NULL;
@@ -1390,6 +1520,11 @@ int jni_extract_metadata(JNIEnv *env, jobject thiz, jobjectArray jurls, jobjectA
                                duration != AV_NOPTS_VALUE ? duration : (int64_t)0);
     }
 
+    if (metadataReader->set_perceptual_hash_method != NULL) {
+        (*env)->CallVoidMethod(env, thiz, metadataReader->set_perceptual_hash_method,
+                               metadata_compute_dhash(metadataReader));
+    }
+
     end:
 
 
@@ -1578,6 +1713,11 @@ int jni_extract_metadata_inputstream(JNIEnv *env, jobject thiz, jobjectArray ist
     if (metadataReader->set_duration_method != NULL) {
         (*env)->CallVoidMethod(env, thiz, metadataReader->set_duration_method,
                                duration != AV_NOPTS_VALUE ? duration : (int64_t)0);
+    }
+
+    if (metadataReader->set_perceptual_hash_method != NULL) {
+        (*env)->CallVoidMethod(env, thiz, metadataReader->set_perceptual_hash_method,
+                               metadata_compute_dhash(metadataReader));
     }
 
     end:

@@ -17,6 +17,9 @@ public class FFmpegMetaData {
 
     private long mDuration;
 
+    /** Perceptual (dHash) signature of the image's first frame; 0 = unset. */
+    private long mPHash;
+
     private Bitmap mBitmap;
 
     private ByteBuffer mByteBuffer;
@@ -27,6 +30,14 @@ public class FFmpegMetaData {
 
     public void setStreamsInfo(FFmpegStreamInfo[] streamsInfo){
         mFFmpegStreamInfo = streamsInfo;
+    }
+
+    public void setPHash(long pHash){
+        mPHash = pHash;
+    }
+
+    public long getPHash(){
+        return mPHash;
     }
 
     public void setMetaData(Map<String, String> data){
@@ -269,7 +280,8 @@ public class FFmpegMetaData {
             }
         }
 
-        return (mFormatName.equals("webp")
+        return (mFormatName.contains("webp")    // webp, webp_pipe, animated webp
+                || mFormatName.contains("gif")  // gif, gif_pipe (incl. animated)
                 || mFormatName.contains("jpeg")
                 || mFormatName.equals("png")
                 || mFormatName.equals("image")

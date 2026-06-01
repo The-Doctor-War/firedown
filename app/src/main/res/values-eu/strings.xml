@@ -72,7 +72,6 @@
     <string name="details_size">Tamaina</string>
     <string name="details_url">URLa</string>
     <string name="download">Deskargatu</string>
-    <string name="download_adaptative">Egokigarria</string>
     <string name="download_file">Fitxategi bat deskargatzeko prest dago:</string>
     <string name="download_finished">Deskarga amaitu da</string>
     <string name="download_ongoing_notification">Firedown</string>

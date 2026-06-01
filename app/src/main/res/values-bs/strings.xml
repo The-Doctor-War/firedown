@@ -72,7 +72,6 @@
     <string name="details_size">Veličina</string>
     <string name="details_url">URL</string>
     <string name="download">Skinuti</string>
-    <string name="download_adaptative">Adaptive</string>
     <string name="download_file">Fajl je spreman za preuzimanje:</string>
     <string name="download_finished">Preuzimanje je završeno</string>
     <string name="download_ongoing_notification">Firedown</string>

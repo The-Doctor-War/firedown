@@ -43,7 +43,6 @@
     <string name="details_size">ਆਕਾਰ</string>
     <string name="details_url">URL</string>
     <string name="download">ਡਾਊਨਲੋਡ ਕਰੋ</string>
-    <string name="download_adaptative">ਅਨੁਕੂਲ</string>
     <string name="download_file">ਇੱਕ ਫਾਈਲ ਡਾਊਨਲੋਡ ਕਰਨ ਲਈ ਤਿਆਰ ਹੈ:</string>
     <string name="download_finished">ਡਾਊਨਲੋਡ ਪੂਰਾ ਹੋਇਆ</string>
     <string name="download_ongoing_notification">ਫਾਇਰਡਾਊਨ</string>

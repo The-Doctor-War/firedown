@@ -1564,14 +1564,19 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
         // and YouTube's timedtext endpoint silently returns an empty body
         // (HTTP 200, zero bytes) when those signals don't match. Symptom
         // was JsonToSrtConverter throwing "End of input at character 0".
-        // A minimal request with Referer + Origin behaves like an in-page
-        // caption fetch and returns the json3 payload.
+        // Even with Referer + Origin, YouTube still gates the response on
+        // session cookies (VISITOR_INFO1_LIVE etc) when the signed URL
+        // was minted with ip=0.0.0.0 — without the visitor cookie the
+        // body stays empty. Include the captured cookie when available,
+        // fall back to a minimal PREF/SOCS pair otherwise.
+        const cookieHeader = youtubeCookie || "PREF=hl=en&tz=UTC; SOCS=CAI";
         const headers = [
             { name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" },
             { name: "Accept", value: "*/*" },
             { name: "Accept-Language", value: "en-US,en;q=0.5" },
             { name: "Referer", value: "https://www.youtube.com/" },
-            { name: "Origin", value: "https://www.youtube.com" }
+            { name: "Origin", value: "https://www.youtube.com" },
+            { name: "Cookie", value: cookieHeader }
         ];
 
         let emitted = 0;

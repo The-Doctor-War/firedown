@@ -78,6 +78,9 @@ public class SaveFrameTask extends TaskRunnable {
 
             Bitmap frame = grabFrame(filePath, posMs);
             if (frame == null || isStopped() || Thread.interrupted()) {
+                // Cancelled after a successful decode: recycle here, since the
+                // compress block below (which normally recycles) is skipped.
+                if (frame != null) frame.recycle();
                 return;
             }
 

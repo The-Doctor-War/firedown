@@ -6,6 +6,7 @@ import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,6 +49,8 @@ import java.util.Locale;
 import java.util.Map;
 
 public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.ViewHolder> {
+
+    private static final String TAG = "DownloadItemAdapter";
 
     private final Context mContext;
     private final OnItemClickListener mOnItemClickListener;
@@ -500,6 +503,7 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         boolean contains = mSelected.contains(entity.getId());
 
         String mimeType = entity.getFileMimeType();
+        Log.d(TAG, "bind name=" + entity.getFileName() + " mime=" + mimeType);
         // Domain parse is URI + getHost + regex per call. Cache per
         // holder so repeated re-binds of the same row (selection
         // payload, action-mode toggles that miss the partial-bind path,

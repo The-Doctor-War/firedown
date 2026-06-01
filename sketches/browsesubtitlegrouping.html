@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — Browse subtitle grouping</title>
+<style>
+  :root {
+    --bg-light:#FBF9FB; --bg-dark:#131315;
+    --on-bg-light:#1B1B1E; --on-bg-dark:#E4E2E5;
+    --on-var-light:#44474C; --on-var-dark:#C5C6CD;
+    --surface-h-light:#E9E7EA; --surface-h-dark:#292A2C;
+    --primary-container-l:#FF857F; --primary-container-d:#F66A66;
+    --on-primary-container-l:#460005; --on-primary-container-d:#0F0000;
+    --hairline-d: rgba(255,255,255,0.06);
+    --hairline-l: rgba(0,0,0,0.06);
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI Variable", system-ui, sans-serif;
+    margin: 0; padding: 32px;
+    background: #131316; color: #e8e8ea;
+    line-height: 1.5;
+  }
+  h1 { font-size: 22px; margin: 0 0 4px; font-weight: 600; }
+  .subtitle { color: #9aa0a6; font-size: 14px; margin: 0 0 28px; max-width: 880px; }
+  h2 { font-size: 16px; margin: 36px 0 4px; color: #c9c9cf; font-weight: 600; letter-spacing: -0.01em; }
+  .h2-note { color: #80848a; font-size: 13px; margin: 0 0 14px; max-width: 780px; }
+
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 920px) { .compare { grid-template-columns: 1fr; } }
+
+  .col-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #80848a;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .col-label .pro    { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: #1f3a2b; color: #8ad9ad; text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .col-label .con    { font-size: 10px; padding: 2px 8px; border-radius: 999px; background: #3a1f2a; color: #f0a7c5; text-transform: none; letter-spacing: 0; font-weight: 500; }
+
+  .stack { display: grid; gap: 10px; }
+
+  .phone {
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35), inset 0 0 0 1px #2a2a2d;
+    font-size: 13px;
+  }
+  .phone.dark  { background: var(--bg-dark);  color: var(--on-bg-dark);  }
+
+  .phone-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    text-align: center;
+    color: #80848a;
+    padding: 6px 0;
+    background: rgba(255,255,255,0.02);
+    border-bottom: 1px solid var(--hairline-d);
+  }
+
+  /* App-bar mock so the chip rail feels grounded. */
+  .topbar {
+    padding: 12px 14px 6px;
+    border-bottom: 1px solid var(--hairline-d);
+  }
+  .topbar-title {
+    font-size: 16px; font-weight: 600; color: var(--on-bg-dark);
+  }
+  .chip-rail {
+    padding: 8px 10px 10px;
+    display: flex; gap: 6px; overflow-x: auto;
+    border-bottom: 1px solid var(--hairline-d);
+  }
+  .chip {
+    font-size: 11.5px;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    color: var(--on-var-dark);
+    white-space: nowrap;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .chip.on {
+    background: var(--primary-container-d);
+    color: var(--on-primary-container-d);
+    border-color: transparent;
+    font-weight: 600;
+  }
+
+  .list { padding: 8px 8px 12px; display: flex; flex-direction: column; gap: 2px; }
+  .row {
+    display: flex; align-items: stretch; gap: 12px;
+    padding: 10px;
+    border-radius: 10px;
+    min-height: 76px;
+    position: relative;
+  }
+  .row.empty { min-height: 0; padding: 16px 10px; opacity: 0.6; }
+
+  .thumb {
+    width: 78px; height: 64px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    background-size: cover; background-position: center;
+    overflow: hidden;
+    background: var(--surface-h-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px;
+    color: var(--on-var-dark);
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+  .thumb svg { width: 28px; height: 28px; opacity: 0.55; }
+
+  .body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+  .top { display: flex; align-items: center; gap: 7px; min-width: 0; }
+  .file-name {
+    font-size: 13.5px; font-weight: 500;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    flex: 1; min-width: 0;
+  }
+  .meta-line {
+    font-size: 11.5px;
+    display: flex; align-items: center; gap: 5px;
+    color: var(--on-var-dark);
+  }
+  .meta-sep { opacity: 0.5; }
+  .mime-text {
+    font-weight: 700; letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    color: var(--primary-container-d);
+  }
+
+  .trail { width: 28px; padding: 6px 0 0 4px; opacity: 0.45; display:flex; justify-content:center; }
+  .trail svg { width: 22px; height: 22px; }
+
+  /* === Variant A: inline expandable === */
+  .cc-badge {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.04em;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(255,255,255,0.06);
+    color: var(--on-var-dark);
+    flex-shrink: 0;
+  }
+  .cc-badge.on { background: var(--primary-container-d); color: var(--on-primary-container-d); }
+  .row.expanded { background: rgba(255,255,255,0.02); }
+  .sub-children {
+    display: flex; flex-direction: column;
+    padding: 2px 10px 6px 100px;
+    border-left: 1px solid rgba(255,255,255,0.04);
+    margin-left: 22px;
+  }
+  .sub-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 6px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+  .sub-row:hover { background: rgba(255,255,255,0.03); }
+  .lang-tag {
+    font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 2px 6px; border-radius: 4px;
+    background: rgba(255,255,255,0.07);
+    color: #d4d4da; min-width: 30px; text-align: center;
+  }
+  .lang-tag.auto { background: rgba(244,140,140,0.12); color: #f8a5a5; }
+  .sub-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b8b8c0; }
+  .sub-size { font-size: 11px; color: #80848a; }
+  .show-all {
+    padding: 7px 6px 4px;
+    font-size: 11.5px; color: #f0a7c5; cursor: pointer;
+  }
+
+  /* === Variant B: badge + bottom sheet === */
+  .cc-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600;
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(244,106,102,0.14);
+    color: #f6a6a4;
+  }
+  .cc-pill svg { width: 12px; height: 12px; }
+
+  .sheet {
+    margin-top: 14px;
+    background: #1d1d20;
+    border-radius: 18px 18px 0 0;
+    padding: 14px 18px 22px;
+    border: 1px solid var(--hairline-d);
+    border-bottom: none;
+  }
+  .sheet-grab { width: 36px; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.18); margin: -4px auto 12px; }
+  .sheet-title { font-size: 14.5px; font-weight: 600; margin: 0 0 2px; }
+  .sheet-sub { font-size: 12px; color: var(--on-var-dark); margin: 0 0 12px; }
+  .sheet-search {
+    width: 100%; padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--hairline-d);
+    color: var(--on-bg-dark);
+    font: inherit; font-size: 12.5px;
+    margin-bottom: 8px;
+  }
+  .sheet-section-label {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: #80848a; margin: 10px 0 4px 4px;
+  }
+  .sheet-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 6px;
+    border-radius: 8px;
+  }
+  .sheet-row .check {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid rgba(255,255,255,0.25);
+    flex-shrink: 0;
+  }
+  .sheet-row.checked .check {
+    background: var(--primary-container-d);
+    border-color: var(--primary-container-d);
+    color: var(--on-primary-container-d);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sheet-row.checked .check::after {
+    content: ""; width: 5px; height: 9px;
+    border: solid var(--on-primary-container-d);
+    border-width: 0 1.5px 1.5px 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  .sheet-row .name { flex: 1; }
+  .sheet-row .size { font-size: 11px; color: #80848a; }
+  .sheet-cta {
+    margin-top: 14px;
+    background: var(--primary-container-d);
+    color: var(--on-primary-container-d);
+    padding: 10px 14px;
+    border-radius: 999px;
+    text-align: center;
+    font-weight: 600; font-size: 13px;
+  }
+
+  /* === Variant C: always-visible language strip === */
+  .lang-strip {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-top: 4px;
+  }
+  .lang-strip .lang-tag { font-size: 10px; padding: 1.5px 5px; }
+  .lang-strip .more { font-size: 10.5px; color: #80848a; padding: 1.5px 4px; }
+
+  /* === Variant D: subtitle chip view, grouped headers === */
+  .group-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 10px 6px;
+    border-bottom: 1px solid var(--hairline-d);
+  }
+  .group-thumb {
+    width: 44px; height: 36px; border-radius: 6px;
+    background: var(--surface-h-dark);
+    background-size: cover; background-position: center;
+    flex-shrink: 0;
+  }
+  .group-title-block { flex: 1; min-width: 0; }
+  .group-title { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .group-sub { font-size: 11px; color: var(--on-var-dark); }
+  .group-chip-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 10.5px; font-weight: 600;
+    padding: 2px 8px; border-radius: 999px;
+    background: rgba(255,255,255,0.06);
+    color: var(--on-var-dark);
+  }
+  .group-rows { padding: 4px 8px 6px; }
+  .group-rows .sub-row { padding-left: 50px; }
+
+  .legend {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin: 8px 0 28px;
+    font-size: 12px; color: #9aa0a6;
+  }
+  .legend code {
+    font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, monospace;
+    background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 4px;
+    color: #e0e0e6;
+  }
+
+  .filename-comparison {
+    margin: 32px 0 0;
+    padding: 18px 20px;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--hairline-d);
+    border-radius: 14px;
+  }
+  .fname-row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; font-size: 12.5px; }
+  .fname-row + .fname-row { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--hairline-d); }
+  .fname-row .label { color: #80848a; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
+  .fname-row code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #e0e0e6; }
+  .fname-row .bad code { color: #f6a6a4; }
+  .fname-row .good code { color: #8ad9ad; }
+</style>
+</head>
+<body>
+
+<h1>Browse — grouping subtitle tracks under their parent video</h1>
+<p class="subtitle">
+  YouTube hands us 50+ caption tracks per video (manual + ASR + auto-translated). Flat emit
+  buries the list under language soup. Four grouping treatments below, all using the same
+  three videos: one with many captions, one with two, one with none. Subtitle chip view at
+  the bottom shows what each treatment looks like when the user is filtering.
+</p>
+
+<div class="legend">
+  <span><code>EN</code> manual track</span>
+  <span><code>EN</code> with red tint = auto-generated (ASR)</span>
+  <span>Captions counted include manual + ASR + auto-translated</span>
+</div>
+
+<!-- =================================================================== -->
+<h2>Variant A — inline expandable</h2>
+<p class="h2-note">
+  Parent video row carries a <code style="font-family:ui-monospace;background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:3px;color:#e0e0e6">CC&nbsp;52</code>
+  badge. Tap the row to expand inline; indented sub-rows appear below. Default reveals the
+  top few (system locale, English, original) with a "show all" tail.
+</p>
+
+<div class="compare">
+
+  <div>
+    <div class="col-label">A · collapsed default <span class="pro">scans cleanly</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · All</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="list">
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">HUB</div>
+          <div class="body">
+            <div class="top">
+              <span class="file-name">How to Build a Habit — Andrew Huberman</span>
+            </div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1080p · 42:18</span><span class="meta-sep">·</span><span class="cc-badge on">CC 52</span></div>
+          </div>
+          <div class="trail">▾</div>
+        </div>
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">MRB</div>
+          <div class="body">
+            <div class="top">
+              <span class="file-name">I Survived 100 Days in the Arctic</span>
+            </div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>2160p · 24:02</span><span class="meta-sep">·</span><span class="cc-badge">CC 2</span></div>
+          </div>
+          <div class="trail">▾</div>
+        </div>
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#2a1f3a,#7b4a8a)">LOF</div>
+          <div class="body">
+            <div class="top">
+              <span class="file-name">lofi hip hop radio — beats to relax/study to</span>
+            </div>
+            <div class="meta-line"><span class="mime-text">M3U8</span><span class="meta-sep">·</span><span>live</span></div>
+          </div>
+          <div class="trail">▾</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">A · expanded on Huberman <span class="con">deep scroll possible</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · row tapped</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="list">
+        <div class="row expanded">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">HUB</div>
+          <div class="body">
+            <div class="top">
+              <span class="file-name">How to Build a Habit — Andrew Huberman</span>
+            </div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1080p · 42:18</span><span class="meta-sep">·</span><span class="cc-badge on">CC 52</span></div>
+          </div>
+          <div class="trail">▴</div>
+        </div>
+        <div class="sub-children">
+          <div class="sub-row"><span class="lang-tag">EN</span><span class="sub-name">English</span><span class="sub-size">88 KB</span></div>
+          <div class="sub-row"><span class="lang-tag">ES</span><span class="sub-name">Spanish</span><span class="sub-size">91 KB</span></div>
+          <div class="sub-row"><span class="lang-tag">FR</span><span class="sub-name">French</span><span class="sub-size">94 KB</span></div>
+          <div class="sub-row"><span class="lang-tag auto">EN</span><span class="sub-name">English (auto-generated)</span><span class="sub-size">72 KB</span></div>
+          <div class="show-all">Show all 52 languages ›</div>
+        </div>
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">MRB</div>
+          <div class="body">
+            <div class="top">
+              <span class="file-name">I Survived 100 Days in the Arctic</span>
+            </div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>2160p · 24:02</span><span class="meta-sep">·</span><span class="cc-badge">CC 2</span></div>
+          </div>
+          <div class="trail">▾</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =================================================================== -->
+<h2>Variant B — pill on parent, bottom sheet to pick</h2>
+<p class="h2-note">
+  Parent row carries a compact <code style="font-family:ui-monospace;background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:3px;color:#e0e0e6">CC 52</code>
+  pill. Tap opens a bottom sheet listing every language with checkboxes, system locale and English pre-checked.
+  Captions are not entities in the Browse list at all — they ride as a property of the parent until the user picks.
+</p>
+
+<div class="compare">
+
+  <div>
+    <div class="col-label">B · parent shows pill <span class="pro">zero list bloat</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · All</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="list">
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">HUB</div>
+          <div class="body">
+            <div class="top">
+              <span class="file-name">How to Build a Habit — Andrew Huberman</span>
+            </div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1080p · 42:18</span></div>
+            <div style="margin-top:4px;"><span class="cc-pill"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm0-3H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 3H10a.5.5 0 010-1h7.5a.5.5 0 010 1zm0-3H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>52 captions</span></div>
+          </div>
+          <div class="trail">⋯</div>
+        </div>
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">MRB</div>
+          <div class="body">
+            <div class="top"><span class="file-name">I Survived 100 Days in the Arctic</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>2160p · 24:02</span></div>
+            <div style="margin-top:4px;"><span class="cc-pill"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm0-3H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 3H10a.5.5 0 010-1h7.5a.5.5 0 010 1zm0-3H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>2 captions</span></div>
+          </div>
+          <div class="trail">⋯</div>
+        </div>
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#2a1f3a,#7b4a8a)">LOF</div>
+          <div class="body">
+            <div class="top"><span class="file-name">lofi hip hop radio — beats to relax/study to</span></div>
+            <div class="meta-line"><span class="mime-text">M3U8</span><span class="meta-sep">·</span><span>live</span></div>
+          </div>
+          <div class="trail">⋯</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">B · sheet after tapping pill <span class="con">modal · pre-pick required</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Bottom sheet · Captions</div>
+      <div class="topbar"><div class="topbar-title" style="opacity:0.4">Captured</div></div>
+      <div class="sheet">
+        <div class="sheet-grab"></div>
+        <div class="sheet-title">Captions · 52 available</div>
+        <div class="sheet-sub">How to Build a Habit — Andrew Huberman</div>
+        <input class="sheet-search" placeholder="Search language…">
+        <div class="sheet-section-label">Suggested</div>
+        <div class="sheet-row checked"><span class="check"></span><span class="lang-tag">EN</span><span class="name">English</span><span class="size">88 KB</span></div>
+        <div class="sheet-row checked"><span class="check"></span><span class="lang-tag">ES</span><span class="name">Spanish</span><span class="size">91 KB</span></div>
+        <div class="sheet-section-label">All languages</div>
+        <div class="sheet-row"><span class="check"></span><span class="lang-tag">FR</span><span class="name">French</span><span class="size">94 KB</span></div>
+        <div class="sheet-row"><span class="check"></span><span class="lang-tag">DE</span><span class="name">German</span><span class="size">92 KB</span></div>
+        <div class="sheet-row"><span class="check"></span><span class="lang-tag auto">EN</span><span class="name">English (auto-generated)</span><span class="size">72 KB</span></div>
+        <div class="sheet-cta">Download 2 selected</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =================================================================== -->
+<h2>Variant C — always-visible language strip</h2>
+<p class="h2-note">
+  Parent row gains a small wrapping strip of language pills under the metadata line. No expansion
+  required; the first ~6 fit, the rest collapse behind a <code style="font-family:ui-monospace;background:rgba(255,255,255,0.05);padding:1px 5px;border-radius:3px;color:#e0e0e6">+46</code> chip
+  that opens the same sheet as B. Cheapest discovery — costs vertical space on every row.
+</p>
+
+<div class="compare">
+
+  <div>
+    <div class="col-label">C · all rows show strip <span class="pro">no taps needed</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · All</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="list">
+        <div class="row" style="min-height:96px;">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">HUB</div>
+          <div class="body">
+            <div class="top"><span class="file-name">How to Build a Habit — Andrew Huberman</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1080p · 42:18</span></div>
+            <div class="lang-strip">
+              <span class="lang-tag">EN</span><span class="lang-tag">ES</span><span class="lang-tag">FR</span><span class="lang-tag">DE</span><span class="lang-tag">PT</span><span class="lang-tag">JA</span><span class="more">+46</span>
+            </div>
+          </div>
+          <div class="trail">⋯</div>
+        </div>
+        <div class="row" style="min-height:96px;">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">MRB</div>
+          <div class="body">
+            <div class="top"><span class="file-name">I Survived 100 Days in the Arctic</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>2160p · 24:02</span></div>
+            <div class="lang-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span></div>
+          </div>
+          <div class="trail">⋯</div>
+        </div>
+        <div class="row">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#2a1f3a,#7b4a8a)">LOF</div>
+          <div class="body">
+            <div class="top"><span class="file-name">lofi hip hop radio — beats to relax/study to</span></div>
+            <div class="meta-line"><span class="mime-text">M3U8</span><span class="meta-sep">·</span><span>live</span></div>
+          </div>
+          <div class="trail">⋯</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">C · row taller · 3 videos = denser scroll <span class="con">vertical cost</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · 6 videos visible</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="list">
+        <div class="row" style="min-height:96px;">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">HUB</div>
+          <div class="body">
+            <div class="top"><span class="file-name">How to Build a Habit — Andrew Huberman</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1080p · 42:18</span></div>
+            <div class="lang-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span><span class="lang-tag">FR</span><span class="lang-tag">DE</span><span class="lang-tag">PT</span><span class="lang-tag">JA</span><span class="more">+46</span></div>
+          </div>
+        </div>
+        <div class="row" style="min-height:96px;">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#1a2a3a,#3a5a7b)">CRO</div>
+          <div class="body">
+            <div class="top"><span class="file-name">How to make perfect croissants — Bon Appétit</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1440p · 18:44</span></div>
+            <div class="lang-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span><span class="lang-tag">FR</span><span class="lang-tag">IT</span><span class="lang-tag">PT</span></div>
+          </div>
+        </div>
+        <div class="row" style="min-height:96px;">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">MRB</div>
+          <div class="body">
+            <div class="top"><span class="file-name">I Survived 100 Days in the Arctic</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>2160p · 24:02</span></div>
+            <div class="lang-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span></div>
+          </div>
+        </div>
+        <div class="row" style="min-height:96px;">
+          <div class="thumb" style="background-image:linear-gradient(135deg,#3a1f2f,#7b3a5a)">ASMR</div>
+          <div class="body">
+            <div class="top"><span class="file-name">ASMR Hair Brushing — 2 hours</span></div>
+            <div class="meta-line"><span class="mime-text">MP4</span><span class="meta-sep">·</span><span>1080p · 2:04:11</span></div>
+            <div class="lang-strip"><span class="lang-tag auto">EN</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =================================================================== -->
+<h2>Variant D — Subtitle chip view (the same content under the filter)</h2>
+<p class="h2-note">
+  This is the crucial test: when the user taps the Subtitle chip, do they see 56 flat rows
+  (current behaviour with auto-emit), or are subtitles grouped under their video? Variants A/B/C
+  all imply a grouped Subtitle view — sketched here. Same three videos. Lofi has no captions
+  so it doesn't appear at all.
+</p>
+
+<div class="compare">
+
+  <div>
+    <div class="col-label">D · grouped headers under Subtitle chip <span class="pro">videos discoverable</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · Subtitle</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip on">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div>
+        <div class="group-header">
+          <div class="group-thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)"></div>
+          <div class="group-title-block">
+            <div class="group-title">How to Build a Habit — Andrew Huberman</div>
+            <div class="group-sub">52 caption tracks · 4.6 MB total</div>
+          </div>
+          <span class="group-chip-pill">▾ 4 / 52</span>
+        </div>
+        <div class="group-rows">
+          <div class="sub-row"><span class="lang-tag">EN</span><span class="sub-name">English</span><span class="sub-size">88 KB</span></div>
+          <div class="sub-row"><span class="lang-tag">ES</span><span class="sub-name">Spanish</span><span class="sub-size">91 KB</span></div>
+          <div class="sub-row"><span class="lang-tag">FR</span><span class="sub-name">French</span><span class="sub-size">94 KB</span></div>
+          <div class="sub-row"><span class="lang-tag auto">EN</span><span class="sub-name">English (auto-generated)</span><span class="sub-size">72 KB</span></div>
+          <div class="show-all">Show all 52 ›</div>
+        </div>
+        <div class="group-header">
+          <div class="group-thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)"></div>
+          <div class="group-title-block">
+            <div class="group-title">I Survived 100 Days in the Arctic</div>
+            <div class="group-sub">2 caption tracks · 172 KB total</div>
+          </div>
+          <span class="group-chip-pill">2 / 2</span>
+        </div>
+        <div class="group-rows">
+          <div class="sub-row"><span class="lang-tag">EN</span><span class="sub-name">English</span><span class="sub-size">84 KB</span></div>
+          <div class="sub-row"><span class="lang-tag">ES</span><span class="sub-name">Spanish</span><span class="sub-size">88 KB</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">D′ · flat fallback (today, no grouping) <span class="con">unreadable at scale</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · Subtitle · flat</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip on">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="list">
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [en].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>88 KB</span></div></div></div>
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [es].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>91 KB</span></div></div></div>
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [fr].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>94 KB</span></div></div></div>
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [de].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>92 KB</span></div></div></div>
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [pt].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>87 KB</span></div></div></div>
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [ja].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>96 KB</span></div></div></div>
+        <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">…48 more for this video, then 2 for Arctic, then…</span></div><div class="meta-line"><span>scroll forever</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =================================================================== -->
+<div class="filename-comparison">
+  <h2 style="margin-top:0">After download — filename in the user's vault</h2>
+  <p class="h2-note">Whatever grouping wins, the downloaded artefact needs to survive without it. The parent's video title has to ride along into the subtitle filename.</p>
+
+  <div class="fname-row">
+    <div class="bad">
+      <div class="label">today · url-derived</div>
+      <code>timedtext [en].srt</code>
+    </div>
+    <div class="good">
+      <div class="label">with parent title plumbed through</div>
+      <code>How to Build a Habit [en].srt</code>
+    </div>
+  </div>
+
+  <div class="fname-row">
+    <div class="bad">
+      <div class="label">today · ASR indistinguishable</div>
+      <code>timedtext [en].srt</code>
+    </div>
+    <div class="good">
+      <div class="label">with ASR marker</div>
+      <code>How to Build a Habit [en] (auto).srt</code>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

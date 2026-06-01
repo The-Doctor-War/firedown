@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- One quality variant row. Mirrors the captions row rhythm (left control +
+     stacked title/meta) so the two picker sections read as one. Title = the
+     resolution description; meta = "<stream type> · <codec>". The loud filled
+     "video+audio" chip that used to sit here was dropped — it repeated the
+     same words on every row and fought the radio for attention. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -9,7 +14,7 @@
     android:gravity="center_vertical"
     android:background="?attr/selectableItemBackground"
     android:paddingHorizontal="16dp"
-    android:paddingVertical="12dp">
+    android:paddingVertical="11dp">
 
     <com.google.android.material.radiobutton.MaterialRadioButton
         android:id="@+id/radio_button"
@@ -37,42 +42,20 @@
             android:textStyle="bold"
             android:ellipsize="end"
             android:maxLines="1"
-            tools:text="1920 x 1080" />
+            tools:text="1080p (1920 x 1080)" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <!-- Single meta line: "<stream type> · <codec>". Either part may be
+             empty; the adapter joins with " · " only when both are present. -->
+        <TextView
+            android:id="@+id/stream_info"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="4dp">
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/stream_type_chip"
-                style="@style/Widget.Material3.Chip.Assist"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="11sp"
-                android:clickable="false"
-                android:focusable="false"
-                android:checkable="false"
-                app:chipMinHeight="24dp"
-                app:chipMinTouchTargetSize="0dp"
-                app:chipStartPadding="8dp"
-                app:chipEndPadding="8dp"
-                tools:text="video + audio" />
-
-            <TextView
-                android:id="@+id/stream_info"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:textSize="12sp"
-                android:textColor="?attr/colorOnSurfaceVariant"
-                android:ellipsize="end"
-                android:maxLines="1"
-                tools:text="H.264 / AAC" />
-
-        </LinearLayout>
+            android:layout_marginTop="2dp"
+            android:textSize="12sp"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:ellipsize="end"
+            android:maxLines="1"
+            tools:text="video + audio · av01 + mp4a" />
 
     </LinearLayout>
 

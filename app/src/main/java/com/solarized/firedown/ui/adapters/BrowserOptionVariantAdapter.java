@@ -1,7 +1,6 @@
 package com.solarized.firedown.ui.adapters;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,11 +8,8 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.graphics.ColorUtils;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.chip.Chip;
-import com.google.android.material.color.MaterialColors;
 import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.solarized.firedown.R;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
@@ -59,8 +55,7 @@ public class BrowserOptionVariantAdapter extends RecyclerView.Adapter<BrowserOpt
         boolean selected = mSelectedPosition == position;
 
         holder.bindTitle(entity);
-        holder.bindStreamType(entity);
-        holder.bindInfo(entity);
+        holder.bindMeta(entity);
         holder.bindSelection(selected);
     }
 
@@ -106,7 +101,6 @@ public class BrowserOptionVariantAdapter extends RecyclerView.Adapter<BrowserOpt
         private final OnItemClickListener mOnItemClickListener;
         private final MaterialRadioButton radioButton;
         private final TextView streamTitle;
-        private final Chip streamTypeChip;
         private final TextView streamInfo;
 
         VariantHolder(View view, OnItemClickListener onItemClickListener) {
@@ -115,7 +109,6 @@ public class BrowserOptionVariantAdapter extends RecyclerView.Adapter<BrowserOpt
             View item = view.findViewById(R.id.file_variants_item);
             radioButton = view.findViewById(R.id.radio_button);
             streamTitle = view.findViewById(R.id.stream_title);
-            streamTypeChip = view.findViewById(R.id.stream_type_chip);
             streamInfo = view.findViewById(R.id.stream_info);
             item.setOnClickListener(this);
         }
@@ -127,71 +120,32 @@ public class BrowserOptionVariantAdapter extends RecyclerView.Adapter<BrowserOpt
         }
 
 
-        void bindStreamType(FFmpegEntity entity) {
+        /**
+         * Single meta line: "&lt;stream type&gt; · &lt;codec&gt;". Replaces the
+         * old loud filled chip + separate codec text — the stream type now
+         * reads as quiet metadata, consistent with the captions rows below.
+         * Joins with " · " only when both parts are present.
+         */
+        void bindMeta(FFmpegEntity entity) {
             Context context = itemView.getContext();
-            boolean audioOnly = entity.isAudioOnly();
-            boolean videoOnly = entity.isVideoOnly();
+            int typeRes = entity.isAudioOnly()
+                    ? R.string.stream_type_audio
+                    : entity.isVideoOnly()
+                        ? R.string.stream_type_video
+                        : R.string.stream_type_muxed;
+            String type = context.getString(typeRes);
+            String codec = entity.getCodecLabel();
 
-            if (audioOnly) {
-                int bgColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorTertiaryContainer, 0);
-                int onColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnTertiaryContainer, 0);
-                streamTypeChip.setText(context.getString(R.string.stream_type_audio));
-                applyChipColor(streamTypeChip,
-                        bgColor,
-                        onColor);
-                streamTypeChip.setChipStrokeColor(ColorStateList.valueOf(
-                        ColorUtils.setAlphaComponent(MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer, 0), 80)));
-                streamTypeChip.setChipStrokeWidth(1f);
-            } else if (videoOnly) {
-                int bgColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorSecondaryContainer, 0);
-                int onColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnSecondaryContainer, 0);
-                streamTypeChip.setText(context.getString(R.string.stream_type_video));
-                applyChipColor(streamTypeChip,
-                        bgColor,
-                        onColor);
-                streamTypeChip.setChipStrokeColor(ColorStateList.valueOf(
-                        ColorUtils.setAlphaComponent(onColor, 80)));
-                streamTypeChip.setChipStrokeWidth(1f);
-            } else {
-                int bgColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryContainer, 0);
-                int onColor = MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer, 0);
-                streamTypeChip.setText(context.getString(R.string.stream_type_muxed));
-                applyChipColor(streamTypeChip,
-                        bgColor,
-                        onColor);
-                streamTypeChip.setChipStrokeColor(ColorStateList.valueOf(
-                        ColorUtils.setAlphaComponent(onColor, 80)));
-                streamTypeChip.setChipStrokeWidth(1f);
-            }
-
-            applyChipColor(streamTypeChip,
-                    MaterialColors.getColor(context, com.google.android.material.R.attr.colorPrimaryContainer, 0),
-                    MaterialColors.getColor(context, com.google.android.material.R.attr.colorOnPrimaryContainer, 0));
-
-
-        }
-
-
-        void bindInfo(FFmpegEntity entity) {
-            String info = entity.getCodecLabel();
-            if (info != null && !info.isEmpty()) {
-                streamInfo.setVisibility(View.VISIBLE);
-                streamInfo.setText(info);
-            } else {
-                streamInfo.setVisibility(View.GONE);
-            }
+            String meta = (codec != null && !codec.isEmpty())
+                    ? type + " · " + codec
+                    : type;
+            streamInfo.setText(meta);
         }
 
 
         void bindSelection(boolean selected) {
             radioButton.setChecked(selected);
             itemView.setActivated(selected);
-        }
-
-
-        private void applyChipColor(Chip chip, int bgColor, int textColor) {
-            chip.setChipBackgroundColor(ColorStateList.valueOf(bgColor));
-            chip.setTextColor(textColor);
         }
 
 

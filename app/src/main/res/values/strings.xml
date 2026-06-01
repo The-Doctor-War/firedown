@@ -351,7 +351,8 @@
     <string name="separator">-</string>
     <!-- Caption-count badge on a video row, e.g. "CC 52". %1$d = track count. -->
     <string name="caption_count_badge">CC %1$d</string>
-    <!-- Section header above the captions multi-select list in the variant picker. -->
+    <!-- Section headers in the variant/download picker sheet. -->
+    <string name="quality_section_title">Quality</string>
     <string name="captions_section_title">Captions</string>
     <!-- Inline marker on an auto-generated caption row in the picker. -->
     <string name="caption_auto_label">auto-generated</string>

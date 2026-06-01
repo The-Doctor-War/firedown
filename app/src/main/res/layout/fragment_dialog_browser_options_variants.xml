@@ -31,6 +31,16 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <TextView
+                style="@style/TextAppearance.Material3.LabelLarge"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="20dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="2dp"
+                android:text="@string/quality_section_title"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_view"
                 android:layout_width="match_parent"

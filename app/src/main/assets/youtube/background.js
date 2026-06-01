@@ -1558,25 +1558,23 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 incognito = tab?.incognito || false;
             } catch (e) {}
         }
-        // Dedicated header set for timedtext requests. We do NOT reuse
-        // getBrowserHeaders() because the captured XHR headers from the
-        // YouTube tab include Sec-Fetch-Site: same-origin with no Referer,
-        // and YouTube's timedtext endpoint silently returns an empty body
-        // (HTTP 200, zero bytes) when those signals don't match. Symptom
-        // was JsonToSrtConverter throwing "End of input at character 0".
-        // Even with Referer + Origin, YouTube still gates the response on
-        // session cookies (VISITOR_INFO1_LIVE etc) when the signed URL
-        // was minted with ip=0.0.0.0 — without the visitor cookie the
-        // body stays empty. Include the captured cookie when available,
-        // fall back to a minimal PREF/SOCS pair otherwise.
-        const cookieHeader = youtubeCookie || "PREF=hl=en&tz=UTC; SOCS=CAI";
+        // Mirror the header set SabrDownloader uses for MWEB streaming —
+        // that combination is proven to be accepted by YouTube's signed
+        // endpoints (verified against SABR downloads). Earlier attempts
+        // with desktop UA + www.youtube.com Referer + Cookie produced
+        // HTTP 200 with zero bytes; timedtext URLs minted by the MWEB
+        // client expect the same MWEB-style request envelope as SABR.
+        // See SabrDownloader.java:467 for the canonical list.
         const headers = [
-            { name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" },
+            { name: "User-Agent", value: "Mozilla/5.0 (Android 16; Mobile; rv:149.0) Gecko/149.0 Firefox/149.0" },
             { name: "Accept", value: "*/*" },
-            { name: "Accept-Language", value: "en-US,en;q=0.5" },
-            { name: "Referer", value: "https://www.youtube.com/" },
-            { name: "Origin", value: "https://www.youtube.com" },
-            { name: "Cookie", value: cookieHeader }
+            { name: "Accept-Language", value: "en-US" },
+            { name: "Accept-Encoding", value: "identity" },
+            { name: "Origin", value: "https://m.youtube.com" },
+            { name: "Referer", value: "https://m.youtube.com/" },
+            { name: "Sec-Fetch-Dest", value: "empty" },
+            { name: "Sec-Fetch-Mode", value: "cors" },
+            { name: "Sec-Fetch-Site", value: "cross-site" }
         ];
 
         let emitted = 0;

@@ -49,6 +49,14 @@ public class GeckoInspectTask implements Runnable {
             BrowserHeaders.RANGES
     );
 
+    // Hop-by-hop / context-bound headers we always strip, regardless of
+    // origin. Range is in here for the reason above; the rest would either
+    // confuse okhttp (Host is set per URL) or break the connection (a stale
+    // Connection: keep-alive value from an intercepted request).
+    private static final Set<String> ALWAYS_BLOCKED_HEADERS = Set.of(
+            BrowserHeaders.HOST, BrowserHeaders.CONNECTION, BrowserHeaders.RANGES
+    );
+
     private final BrowserDownloadRepository mBrowserDownloadRepository;
     private final UrlType mUrlType;
     private final String mUrl;
@@ -378,8 +386,19 @@ public class GeckoInspectTask implements Runnable {
 
     private Map<String, String> safeHeaders(Map<String, String> headers) {
         if (headers == null) return new HashMap<>();
+        // For TIMEDTEXT and SUBTITLE the YouTube/parser extension sets the
+        // exact header set deliberately (mirroring SabrDownloader's
+        // proven-working MWEB envelope). Stripping Accept / Accept-Encoding
+        // / Accept-Language here breaks the response: YouTube's timedtext
+        // endpoint returns HTTP 200 with an empty body when those signals
+        // are missing or default. Pass them through verbatim — only the
+        // hop-by-hop / context-bound headers (Host, Connection, Range) are
+        // always unsafe to forward.
+        Set<String> blocked = (mUrlType == UrlType.TIMEDTEXT || mUrlType == UrlType.SUBTITLE)
+                ? ALWAYS_BLOCKED_HEADERS
+                : BLOCKED_HEADERS;
         return headers.entrySet().stream()
-                .filter(e -> !BLOCKED_HEADERS.contains(e.getKey()))
+                .filter(e -> !blocked.contains(e.getKey()))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().replace("\n", "")

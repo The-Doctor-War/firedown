@@ -43,7 +43,7 @@ public interface WebHistoryDao {
     /**
      * Optimized Auto-complete queries.
      */
-    @Query("SELECT * FROM webhistory WHERE file_url LIKE :search OR file_title LIKE :search ORDER BY file_date DESC LIMIT 6")
+    @Query("SELECT * FROM webhistory WHERE file_url LIKE :search OR file_title LIKE :search ORDER BY file_date DESC LIMIT 3")
     List<WebHistoryEntity> getAutoCompleteSearch(String search);
 
     @Query("SELECT * FROM webhistory ORDER BY file_date DESC LIMIT 20")

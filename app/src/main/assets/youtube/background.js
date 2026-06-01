@@ -1562,8 +1562,18 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
 
         let emitted = 0;
         for (const t of tracks) {
-            const baseUrl = t.baseUrl || t.baseURL;
-            if (!baseUrl) continue;
+            const rawBaseUrl = t.baseUrl || t.baseURL;
+            if (!rawBaseUrl) continue;
+
+            // YouTube ships captionTracks[].baseUrl as either absolute
+            // (https://www.youtube.com/api/timedtext?...) or relative
+            // (/api/timedtext?...) depending on which client served the
+            // playerResponse. The Kotlin side's GeckoInspectTask.run()
+            // rejects non-http URLs via UrlStringUtils.isURLLike and
+            // silently aborts, so we need an absolute URL here.
+            const baseUrl = /^https?:\/\//i.test(rawBaseUrl)
+                ? rawBaseUrl
+                : `https://www.youtube.com${rawBaseUrl.startsWith("/") ? "" : "/"}${rawBaseUrl}`;
 
             // TimedTextStrategy expects json3 (events/segs schema); the
             // default fmt is srv3 (XML) which we don't parse. Force json3

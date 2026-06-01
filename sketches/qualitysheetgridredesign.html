@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — Quality sheet + grid item redesign</title>
+<style>
+  :root{
+    --bg:#131316; --surface:#1c1c1f; --surface2:#26262a;
+    --on:#e8e8ea; --on-var:#b6b6bd; --on-dim:#85858d;
+    --primary:#F66A66; --on-primary:#2a0303;
+    --primary-container:#5a2522; --on-primary-container:#ffd9d6;
+    --hair:rgba(255,255,255,0.07);
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI Variable",system-ui,sans-serif;margin:0;padding:32px;background:#0e0e10;color:var(--on);line-height:1.5;}
+  h1{font-size:22px;margin:0 0 4px;font-weight:600;}
+  .sub{color:#9aa0a6;font-size:14px;margin:0 0 26px;max-width:880px;}
+  h2{font-size:16px;margin:34px 0 4px;font-weight:600;color:#cdcdd3;}
+  .note{color:#85858d;font-size:13px;margin:0 0 14px;max-width:820px;}
+  code.k{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,0.06);padding:1px 5px;border-radius:3px;font-size:12px;color:#e0e0e6;}
+
+  .row{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;}
+  .col-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#80848a;font-weight:600;margin-bottom:8px;display:flex;gap:8px;align-items:center;}
+  .col-label .now{background:#3a1f2a;color:#f0a7c5;border-radius:999px;padding:2px 8px;font-size:10px;text-transform:none;letter-spacing:0;font-weight:500;}
+  .col-label .new{background:#1f3a2b;color:#8ad9ad;border-radius:999px;padding:2px 8px;font-size:10px;text-transform:none;letter-spacing:0;font-weight:500;}
+
+  .phone{width:300px;border-radius:20px;overflow:hidden;background:var(--bg);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 0 0 1px #2a2a2d;}
+  .statusbar{height:22px;}
+
+  /* ---- sheet ---- */
+  .sheet-head{display:flex;align-items:center;gap:14px;padding:14px 16px 6px;}
+  .sheet-head .back{font-size:18px;color:var(--on-var);}
+  .sheet-head .title{font-size:18px;font-weight:600;}
+  .grab{width:34px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:8px auto 0;}
+
+  .section-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--on-dim);font-weight:700;padding:14px 18px 6px;display:flex;justify-content:space-between;align-items:baseline;}
+  .section-label .hint{font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--on-dim);}
+
+  .opt{display:flex;align-items:center;gap:12px;padding:11px 18px;}
+  .opt .ctrl{width:20px;height:20px;flex-shrink:0;border-radius:999px;border:2px solid rgba(255,255,255,.28);position:relative;}
+  .opt.checked .ctrl{border-color:var(--primary);}
+  .opt.checked .ctrl::after{content:"";position:absolute;inset:3px;border-radius:999px;background:var(--primary);}
+  .opt .ctrl.box{border-radius:5px;}
+  .opt.checked .ctrl.box{background:var(--primary);border-color:var(--primary);}
+  .opt.checked .ctrl.box::after{content:"";position:absolute;left:6px;top:2px;width:5px;height:10px;border:solid var(--on-primary);border-width:0 2px 2px 0;transform:rotate(45deg);border-radius:0;background:none;inset:auto;}
+  .opt .body{flex:1;min-width:0;}
+  .opt .line1{font-size:14.5px;font-weight:600;display:flex;align-items:center;gap:8px;}
+  .opt .line2{font-size:11.5px;color:var(--on-dim);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .opt.active{background:rgba(246,106,102,0.06);}
+
+  /* lang chip — consistent token used in captions rows */
+  .lang{font-size:10px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:999px;background:var(--surface2);color:var(--on-var);min-width:30px;text-align:center;}
+  .lang.auto{background:rgba(246,106,102,.14);color:#f6a6a4;}
+  .q-tag{font-size:10px;font-weight:700;letter-spacing:.03em;padding:2px 7px;border-radius:999px;background:var(--surface2);color:var(--on-var);}
+  .codec{font-size:11px;color:var(--on-dim);}
+
+  .divider{height:1px;background:var(--hair);margin:8px 16px;}
+
+  .cta-row{display:flex;gap:10px;padding:12px 16px 16px;align-items:center;}
+  .btn-text{flex:0 0 auto;padding:11px 16px;color:var(--primary);font-weight:600;font-size:14px;}
+  .btn-fill{flex:1;padding:12px;border-radius:999px;background:var(--primary);color:var(--on-primary);font-weight:700;font-size:14px;text-align:center;display:flex;flex-direction:column;gap:1px;}
+  .btn-fill .total{font-weight:500;font-size:10.5px;opacity:.8;}
+
+  .show-all{padding:9px 18px;font-size:12.5px;color:#f0a7c5;}
+
+  /* ---- grid tile ---- */
+  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:300px;}
+  .tile{position:relative;aspect-ratio:16/11;border-radius:12px;overflow:hidden;background:#333;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;}
+  .tile .more{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:999px;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;}
+  .shade{padding:18px 8px 7px;background:linear-gradient(to top,rgba(0,0,0,.82),rgba(0,0,0,0));}
+  .tile .ttl{font-size:11px;font-weight:600;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:5px;line-height:1.25;}
+  .metarow{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+  .m-chip{font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 6px;border-radius:5px;line-height:1.3;}
+  .m-mime{background:var(--primary);color:var(--on-primary);}
+  .m-dim{background:rgba(255,255,255,.16);color:#fff;}
+  .m-cc{background:rgba(255,255,255,.16);color:#fff;display:inline-flex;align-items:center;gap:3px;}
+  .m-cc svg{width:10px;height:10px;}
+  /* corner CC variant */
+  .cc-corner{position:absolute;top:6px;left:6px;font-size:9px;font-weight:700;padding:3px 7px;border-radius:999px;background:var(--primary);color:var(--on-primary);display:inline-flex;align-items:center;gap:3px;}
+  .cc-corner svg{width:10px;height:10px;}
+
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#9aa0a6;margin:10px 0 0;}
+</style>
+</head>
+<body>
+
+<h1>Quality sheet + grid item — consistency redesign</h1>
+<p class="sub">
+  Two problems in the current build: (1) the Download-quality sheet mixes big filled
+  <code class="k">video+audio</code> pills + radios with a bolted-on captions block in a
+  different visual language; (2) the grid tile scatters a CC chip top-left and a
+  mime/duration/quality cluster bottom, in two different chip styles. Proposals below
+  unify each into one coherent token system.
+</p>
+
+<!-- ============================================================ -->
+<h2>1 · Download sheet — one picker, two sections, one token language</h2>
+<p class="note">
+  Kill the loud filled <code class="k">video+audio</code> pill on every row — it repeats
+  the same word six times and competes with the selection control. Replace with a quiet
+  resolution-led row: <b>title line</b> = resolution + a small quality tag, <b>meta line</b>
+  = size · codec. Captions reuse the exact same row rhythm (checkbox instead of radio, a
+  <code class="k">lang</code> chip instead of a quality tag). Shared uppercase section
+  headers tie them together. CTA tallies the combined selection.
+</p>
+
+<div class="row">
+
+  <div>
+    <div class="col-label">Current <span class="now">inconsistent</span></div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="sheet-head"><span class="back">←</span><span class="title">Download quality</span></div>
+      <div style="padding:6px 0;">
+        <div class="opt checked"><span class="ctrl"></span><div class="body">
+          <div class="line1">1080p (1920 x 1080)</div>
+          <div class="line2"><span style="background:var(--primary);color:var(--on-primary);font-weight:700;font-size:10px;padding:2px 7px;border-radius:999px;">video+audio</span> &nbsp;av01.0.08M.08 / mp4a.40.2</div>
+        </div></div>
+        <div class="opt"><span class="ctrl"></span><div class="body">
+          <div class="line1">720p (1280 x 720)</div>
+          <div class="line2"><span style="background:var(--primary);color:var(--on-primary);font-weight:700;font-size:10px;padding:2px 7px;border-radius:999px;">video+audio</span> &nbsp;av01.0.05M.08 / mp4a.40.2</div>
+        </div></div>
+        <div class="opt"><span class="ctrl"></span><div class="body">
+          <div class="line1">480p (854 x 480)</div>
+          <div class="line2"><span style="background:var(--primary);color:var(--on-primary);font-weight:700;font-size:10px;padding:2px 7px;border-radius:999px;">video+audio</span> &nbsp;av01.0.04M.08 / mp4a.40.2</div>
+        </div></div>
+      </div>
+      <div class="divider"></div>
+      <div class="section-label" style="font-weight:400;text-transform:none;letter-spacing:0;font-size:14px;color:var(--on);padding-bottom:2px;">Captions</div>
+      <div class="opt"><span class="ctrl box"></span><div class="body">
+        <div class="line1" style="font-weight:400;">Spanish</div>
+        <div class="line2">es · auto-generated</div>
+      </div></div>
+      <div class="cta-row"><div class="btn-text">Cancel</div><div class="btn-fill">Download</div></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">Proposed <span class="new">unified tokens</span></div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="grab"></div>
+      <div class="sheet-head"><span class="back">←</span><span class="title">How to Build a Habit</span></div>
+
+      <div class="section-label"><span>Quality</span><span class="hint">choose one</span></div>
+      <div class="opt active checked"><span class="ctrl"></span><div class="body">
+        <div class="line1">1080p <span class="q-tag">MP4</span></div>
+        <div class="line2">148 MB · av01 + mp4a</div>
+      </div></div>
+      <div class="opt"><span class="ctrl"></span><div class="body">
+        <div class="line1">720p <span class="q-tag">MP4</span></div>
+        <div class="line2">86 MB · av01 + mp4a</div>
+      </div></div>
+      <div class="opt"><span class="ctrl"></span><div class="body">
+        <div class="line1">360p <span class="q-tag">MP4</span></div>
+        <div class="line2">28 MB · av01 + mp4a</div>
+      </div></div>
+      <div class="opt"><span class="ctrl"></span><div class="body">
+        <div class="line1">Audio only <span class="q-tag">M4A</span></div>
+        <div class="line2">12 MB · mp4a 128k</div>
+      </div></div>
+
+      <div class="divider"></div>
+      <div class="section-label"><span>Captions</span><span class="hint">optional · pick any</span></div>
+      <div class="opt checked"><span class="ctrl box"></span><div class="body">
+        <div class="line1" style="font-weight:500;"><span class="lang">ES</span> Spanish</div>
+        <div class="line2">auto-generated</div>
+      </div></div>
+      <div class="opt"><span class="ctrl box"></span><div class="body">
+        <div class="line1" style="font-weight:500;"><span class="lang">EN</span> English</div>
+        <div class="line2">88 KB</div>
+      </div></div>
+
+      <div class="divider"></div>
+      <div class="cta-row">
+        <div class="btn-text">Cancel</div>
+        <div class="btn-fill"><span>Download</span><span class="total">1 video + 1 caption · 148.1 MB</span></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="note" style="margin-top:18px;">
+  Same sheet when the video has 50+ tracks: captions list caps at the locale + English
+  pre-checks, then a <code class="k">Show all 52 ›</code> tail expands the rest — so the
+  sheet never becomes an endless scroll on a Huberman video.
+</p>
+<div class="phone" style="margin-top:6px;">
+  <div class="statusbar"></div>
+  <div class="section-label"><span>Captions</span><span class="hint">52 available</span></div>
+  <div class="opt checked"><span class="ctrl box"></span><div class="body"><div class="line1" style="font-weight:500;"><span class="lang">EN</span> English</div><div class="line2">88 KB</div></div></div>
+  <div class="opt"><span class="ctrl box"></span><div class="body"><div class="line1" style="font-weight:500;"><span class="lang">ES</span> Spanish</div><div class="line2">91 KB</div></div></div>
+  <div class="opt"><span class="ctrl box"></span><div class="body"><div class="line1" style="font-weight:500;"><span class="lang auto">EN</span> English</div><div class="line2">auto-generated · 72 KB</div></div></div>
+  <div class="show-all">Show all 52 ›</div>
+</div>
+
+<!-- ============================================================ -->
+<h2>2 · Grid tile — stop scattering chips across two corners</h2>
+<p class="note">
+  Today: a pink CC pill floats top-left in one style, while mime/duration/quality sit
+  bottom in another. Two corners, two chip languages, no relationship. Three proposals,
+  all consolidating metadata into the bottom gradient shade so the thumbnail reads clean
+  and the more-button owns the top-right alone.
+</p>
+
+<div class="row">
+
+  <div>
+    <div class="col-label">Current <span class="now">2 corners</span></div>
+    <div class="tiles" style="grid-template-columns:1fr;">
+      <div class="tile" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a);">
+        <div class="cc-corner" style="border-radius:5px;">CC 1</div>
+        <div class="more">⋮</div>
+        <div class="shade">
+          <div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div>
+          <div class="metarow"><span class="m-chip m-mime">VIDEO</span><span class="m-chip m-dim">00:53:25</span><span class="m-chip m-dim">Adaptive</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">A — all in bottom row <span class="new">one cluster</span></div>
+    <div class="tiles" style="grid-template-columns:1fr;">
+      <div class="tile" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a);">
+        <div class="more">⋮</div>
+        <div class="shade">
+          <div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div>
+          <div class="metarow">
+            <span class="m-chip m-mime">MP4</span>
+            <span class="m-chip m-dim">53:25</span>
+            <span class="m-chip m-dim">Adaptive</span>
+            <span class="m-chip m-cc"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 0H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="legend"><span>CC joins the same chip row, same chip shape, just an icon to read at a glance.</span></div>
+  </div>
+
+</div>
+
+<div class="row" style="margin-top:16px;">
+  <div>
+    <div class="col-label">B — CC as leading accent in bottom row <span class="new">recommend</span></div>
+    <div class="tiles" style="grid-template-columns:1fr;">
+      <div class="tile" style="background-image:linear-gradient(135deg,#2a1f3a,#6a4a8a);">
+        <div class="more">⋮</div>
+        <div class="shade">
+          <div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div>
+          <div class="metarow">
+            <span class="m-chip m-mime">MP4</span>
+            <span class="m-chip m-dim">53:25</span>
+            <span class="m-chip m-dim">Adaptive</span>
+            <span style="flex:1;"></span>
+            <span class="m-chip" style="background:rgba(246,106,102,.92);color:var(--on-primary);display:inline-flex;align-items:center;gap:3px;"><svg viewBox="0 0 24 24" style="width:10px;height:10px;"><path fill="currentColor" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 0H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="legend"><span>CC pushed to the row's end + primary-tinted so it pops as the "extra" without a second corner. Reads: format/length on the left, captions affordance on the right.</span></div>
+  </div>
+
+  <div>
+    <div class="col-label">C — no CC chip, count on the more affordance</div>
+    <div class="tiles" style="grid-template-columns:1fr;">
+      <div class="tile" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b5a);">
+        <div class="more" style="width:auto;padding:0 8px;gap:3px;border-radius:999px;font-size:11px;"><svg viewBox="0 0 24 24" style="width:12px;height:12px;"><circle cx="12" cy="5" r="2" fill="currentColor"/><circle cx="12" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="19" r="2" fill="currentColor"/></svg></div>
+        <div class="shade">
+          <div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div>
+          <div class="metarow"><span class="m-chip m-mime">MP4</span><span class="m-chip m-dim">53:25</span><span class="m-chip m-dim">Adaptive</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="legend"><span>Cleanest tile, but hides caption availability until you open the sheet — loses the at-a-glance signal. Listed for completeness; weaker than B.</span></div>
+  </div>
+
+</div>
+
+<p class="note" style="margin-top:24px;">
+  <b>Recommendation:</b> sheet redesign as shown (resolution-led rows, shared section tokens,
+  tallying CTA); grid <b>option B</b> (CC as a trailing primary chip in the single bottom
+  metadata row). Both collapse two visual languages into one and free the top-right corner
+  for the more button alone.
+</p>
+
+</body>
+</html>

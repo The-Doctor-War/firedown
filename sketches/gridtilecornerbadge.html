@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — grid tile: corner badge vs current vs caption strip</title>
+<style>
+  :root{
+    --bg:#0d0d0f;--surface:#1b1b1e;--surface2:#232327;--surface3:#2c2c31;
+    --on:#e9e9ec;--on-var:#b4b4bb;--on-dim:#83838b;
+    --primary:#F66A66;--on-primary:#2a0303;
+    --primary-container:#5a1d1b;--on-primary-container:#ffd7d5;
+    --secondary-container:#3a3a40;--on-secondary-container:#dadadf;
+    --hair:rgba(255,255,255,.07);--ok:#8ad9ad;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI Variable",system-ui,sans-serif;margin:0;padding:32px;background:var(--bg);color:var(--on);line-height:1.5;}
+  h1{font-size:23px;margin:0 0 4px;font-weight:600;}
+  .sub{color:#9aa0a6;font-size:14px;margin:0 0 8px;max-width:900px;}
+  h2{font-size:15px;margin:26px 0 4px;color:#c9c9cf;font-weight:600;}
+  .cap{color:#85858d;font-size:12.5px;margin:0 0 12px;max-width:330px;}
+  code.k{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-size:12px;color:#e0e0e6;}
+
+  .stage{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start;}
+  .col{width:330px;}
+  .colhead{font-size:13px;font-weight:700;margin-bottom:2px;}
+  .colhead.rec{color:var(--primary);}
+  .colhead.bad{color:#e0a85a;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:#0f0f12;padding:10px;border-radius:14px;}
+
+  .tile{position:relative;border-radius:8px;overflow:hidden;background:#1a1a1d;aspect-ratio:16/10;}
+  .tile .ph{position:absolute;inset:0;background-size:cover;background-position:center;}
+  .more{position:absolute;top:4px;right:6px;color:#fff;opacity:.92;font-size:15px;text-shadow:0 1px 3px #000;z-index:3;}
+
+  /* chips / text */
+  .chip{font-size:9.5px;font-weight:700;line-height:1;padding:3px 5px;border-radius:4px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;display:inline-block;}
+  .chip.mime{background:var(--primary-container);color:var(--on-primary-container);}
+  .fact{font-size:10px;color:rgba(255,255,255,.88);font-weight:600;text-shadow:0 1px 2px #000;white-space:nowrap;}
+
+  /* ===== A: current — title (1 line) + metadata row, in scrim ===== */
+  .a-scrim{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 7px;
+    background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,0));}
+  .a-title{font-size:11.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .a-meta{display:flex;align-items:center;gap:5px;margin-top:5px;}
+
+  /* ===== B: corner badge + 2-line title ===== */
+  .b-badge{position:absolute;right:6px;bottom:6px;z-index:2;display:flex;align-items:center;gap:5px;
+    background:rgba(0,0,0,.66);border-radius:6px;padding:3px 6px;backdrop-filter:blur(2px);}
+  .b-badge .chip.mime{background:transparent;color:#ffd7d5;padding:0;font-size:9.5px;}
+  .b-badge .fact{text-shadow:none;}
+  .b-scrim{position:absolute;left:0;right:0;bottom:0;padding:18px 8px 7px;
+    background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,0));}
+  /* leave room so the 2nd line never slides under the badge */
+  .b-title{font-size:11.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);line-height:1.25;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .b-title.clip{padding-right:74px;}  /* reserve the badge's column on the title block */
+
+  /* ===== C: caption strip below image ===== */
+  .c-card{background:#1a1a1d;border-radius:8px;overflow:hidden;}
+  .c-imgwrap{position:relative;aspect-ratio:16/10;}
+  .c-imgwrap .ph{position:absolute;inset:0;background-size:cover;background-position:center;}
+  .c-badge{position:absolute;right:6px;bottom:6px;display:flex;gap:5px;align-items:center;
+    background:rgba(0,0,0,.66);border-radius:6px;padding:3px 6px;}
+  .c-badge .chip.mime{background:transparent;color:#ffd7d5;padding:0;}
+  .c-badge .fact{text-shadow:none;}
+  .c-text{padding:6px 8px 8px;}
+  .c-title{font-size:11.5px;font-weight:700;color:var(--on);line-height:1.25;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .c-grid .tilewrap{}
+
+  /* example thumbnails */
+  .ph-mtn{background:linear-gradient(160deg,#43586b 0%,#9fb0c0 42%,#243140 100%);}
+  .ph-owl{background:radial-gradient(circle at 50% 38%,#cfcfcf,#2a2a2a 70%);}
+  .ph-alch{background:linear-gradient(160deg,#7a5a2a,#b89a5a 45%,#2a1d0d);}
+  .ph-goog{background:linear-gradient(120deg,#1a1a1d 0%,#3a6ea5 50%,#1a1a1d 100%);}
+
+  table.cmp{margin-top:24px;border-collapse:collapse;width:100%;max-width:1000px;font-size:13px;}
+  table.cmp th,table.cmp td{padding:9px 12px;border:1px solid var(--hair);text-align:left;vertical-align:top;}
+  table.cmp th{background:var(--surface);color:#cdcdd3;}
+  td.good{background:rgba(138,217,173,.07);} td.bad{background:rgba(224,168,90,.08);}
+  .verdict{margin-top:20px;padding:14px 16px;border-left:3px solid var(--primary);background:rgba(246,106,102,.06);border-radius:6px;max-width:1000px;}
+  .verdict b{color:var(--primary);}
+</style>
+</head>
+<body>
+
+<h1>Grid tile — corner badge & roomier title</h1>
+<p class="sub">Same six items in all three. The question: should the mime+fact move off the title's line so the title can breathe? A = today (title 1 line, metadata row under it). B = corner badge overlay + 2-line title. C = caption strip below the image (title on solid ground).</p>
+
+<div class="stage">
+
+  <!-- ============ A: CURRENT ============ -->
+  <div class="col">
+    <div class="colhead">A · current — title (1 line) + metadata row</div>
+    <p class="cap">Title gets the full width but only one line; the chip+fact sit on their own line below.</p>
+    <div class="grid">
+      <div class="tile"><div class="ph ph-mtn"></div><span class="more">⋮</span>
+        <div class="a-scrim"><div class="a-title">Fantasy Music for Study &amp; Relaxation</div>
+          <div class="a-meta"><span class="chip mime">Video</span><span class="fact">02:22:22</span></div></div></div>
+      <div class="tile"><div class="ph ph-owl"></div><span class="more">⋮</span>
+        <div class="a-scrim"><div class="a-title">Qsdr8cUcVhwKZbo7IhbMD…</div>
+          <div class="a-meta"><span class="chip mime">Image</span><span class="fact">48×48</span></div></div></div>
+      <div class="tile"><div class="ph ph-alch"></div><span class="more">⋮</span>
+        <div class="a-scrim"><div class="a-title">The Alchemist of Avalon</div>
+          <div class="a-meta"><span class="chip mime">Image</span><span class="fact">686×386</span></div></div></div>
+      <div class="tile"><div class="ph ph-goog"></div><span class="more">⋮</span>
+        <div class="a-scrim"><div class="a-title">googlelogo_color_150x54dp…</div>
+          <div class="a-meta"><span class="chip mime">Image</span><span class="fact">300×108</span></div></div></div>
+    </div>
+  </div>
+
+  <!-- ============ B: CORNER BADGE ============ -->
+  <div class="col">
+    <div class="colhead rec">B · corner badge + 2-line title (recommended of the three)</div>
+    <p class="cap">mime+fact become a translucent bottom-right badge on the image; the title takes the scrim with up to 2 lines.</p>
+    <div class="grid">
+      <div class="tile"><div class="ph ph-mtn"></div><span class="more">⋮</span>
+        <div class="b-badge"><span class="chip mime">Video</span><span class="fact">02:22:22</span></div>
+        <div class="b-scrim"><div class="b-title clip">Fantasy Music for Study &amp; Relaxation — 3 Hours</div></div></div>
+      <div class="tile"><div class="ph ph-owl"></div><span class="more">⋮</span>
+        <div class="b-badge"><span class="chip mime">Image</span><span class="fact">48×48</span></div>
+        <div class="b-scrim"><div class="b-title clip">Qsdr8cUcVhwKZbo7IhbMDk2p9</div></div></div>
+      <div class="tile"><div class="ph ph-alch"></div><span class="more">⋮</span>
+        <div class="b-badge"><span class="chip mime">Image</span><span class="fact">686×386</span></div>
+        <div class="b-scrim"><div class="b-title clip">The Alchemist of Avalon</div></div></div>
+      <div class="tile"><div class="ph ph-goog"></div><span class="more">⋮</span>
+        <div class="b-badge"><span class="chip mime">Image</span><span class="fact">300×108</span></div>
+        <div class="b-scrim"><div class="b-title clip">googlelogo_color_150x54dp.png</div></div></div>
+    </div>
+  </div>
+
+  <!-- ============ C: CAPTION STRIP ============ -->
+  <div class="col">
+    <div class="colhead">C · caption strip below (most legible, least dense)</div>
+    <p class="cap">Image keeps a corner badge; the title moves onto a solid strip below — fully readable, 2 lines, no scrim fighting the photo. Tiles get taller → fewer per screen.</p>
+    <div class="grid">
+      <div class="c-card"><div class="c-imgwrap"><div class="ph ph-mtn"></div><span class="more">⋮</span>
+        <div class="c-badge"><span class="chip mime">Video</span><span class="fact">02:22:22</span></div></div>
+        <div class="c-text"><div class="c-title">Fantasy Music for Study &amp; Relaxation — 3 Hours</div></div></div>
+      <div class="c-card"><div class="c-imgwrap"><div class="ph ph-owl"></div><span class="more">⋮</span>
+        <div class="c-badge"><span class="chip mime">Image</span><span class="fact">48×48</span></div></div>
+        <div class="c-text"><div class="c-title">Qsdr8cUcVhwKZbo7IhbMDk2p9</div></div></div>
+      <div class="c-card"><div class="c-imgwrap"><div class="ph ph-alch"></div><span class="more">⋮</span>
+        <div class="c-badge"><span class="chip mime">Image</span><span class="fact">686×386</span></div></div>
+        <div class="c-text"><div class="c-title">The Alchemist of Avalon</div></div></div>
+      <div class="c-card"><div class="c-imgwrap"><div class="ph ph-goog"></div><span class="more">⋮</span>
+        <div class="c-badge"><span class="chip mime">Image</span><span class="fact">300×108</span></div></div>
+        <div class="c-text"><div class="c-title">googlelogo_color_150x54dp.png</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<table class="cmp">
+  <thead><tr><th>Dimension</th><th>A · current</th><th>B · corner badge</th><th>C · caption strip</th></tr></thead>
+  <tbody>
+    <tr><td><b>Title legibility</b></td>
+      <td>1 line, full width (~22 ch)</td>
+      <td class="good">2 lines (~40 ch) — best of the overlay options</td>
+      <td class="good">2 lines on solid bg — most legible</td></tr>
+    <tr><td><b>Image visible</b></td>
+      <td class="good">Full card, short scrim</td>
+      <td>Full card, taller scrim for 2 lines</td>
+      <td class="bad">Image shorter (strip steals height)</td></tr>
+    <tr><td><b>Density (tiles/screen)</b></td>
+      <td class="good">Highest</td>
+      <td class="good">Same (overlay, card height unchanged)</td>
+      <td class="bad">Lower — taller tiles</td></tr>
+    <tr><td><b>Fact legibility (duration/dims)</b></td>
+      <td>Plain text on gradient</td>
+      <td class="good">Own pill, guaranteed contrast</td>
+      <td class="good">Own pill on image</td></tr>
+    <tr><td><b>Scan-ability (clean left edge)</b></td>
+      <td class="good">Title + metadata both left-aligned</td>
+      <td class="good">Title left-aligned; badge parked in corner</td>
+      <td class="good">Title left-aligned on strip</td></tr>
+    <tr><td><b>Badge ↔ title collision risk</b></td>
+      <td class="good">None (separate rows)</td>
+      <td class="bad">2nd title line must reserve the badge's column (right pad)</td>
+      <td class="good">None (badge on image, title below)</td></tr>
+    <tr><td><b>Implementation cost</b></td>
+      <td class="good">Shipped</td>
+      <td>Moderate — reposition chip→corner pill, 2-line title, right-pad</td>
+      <td class="bad">Higher — card gains a text region; grid metrics change</td></tr>
+  </tbody>
+</table>
+
+<div class="verdict">
+  <b>Read:</b> B buys the title a second line (≈22→≈40 chars) without losing any tiles-per-screen, by parking mime+fact in a corner pill that has its own contrast. Its one wrinkle is the bottom-right corner: the title's 2nd line has to reserve that column (a right-pad) so text never slides under the badge — manageable, but it means the 2nd line is a bit narrower than the first. <b>C</b> is strictly more legible (title on solid ground, no scrim) but it's a different grid — taller tiles, fewer per screen, less "wall of images." If the grid's job is browsing media at a glance, B keeps the density and still doubles the title; if reading titles is the priority over seeing images, C wins. <b>A</b> stays the safe, shipped baseline. My lean: <b>B</b> — unless you find the corner pill fighting the art on busy thumbnails, in which case C.
+</div>
+
+</body>
+</html>

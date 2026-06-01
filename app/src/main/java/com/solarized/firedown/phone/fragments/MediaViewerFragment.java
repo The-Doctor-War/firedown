@@ -22,7 +22,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -430,10 +429,6 @@ public class MediaViewerFragment extends Fragment {
                     .listener(mRequestListener)
                     .apply(options)
                     .into(mPhotoView);
-        }else{
-            if (FileUriHelper.isAudio(mimeType)) {
-                setErrorRes(R.drawable.ill_small_audio);
-            }
         }
 
         // Start fully immersive. The controller is already hidden
@@ -736,8 +731,7 @@ public class MediaViewerFragment extends Fragment {
 
 
     @OptIn(markerClass = UnstableApi.class)
-    private void setErrorRes(int res){
-        Drawable drawable = ContextCompat.getDrawable(mActivity, res);
+    private void setErrorRes(Drawable drawable){
         mPlayerView.setDefaultArtwork(drawable);
     }
 
@@ -795,9 +789,7 @@ public class MediaViewerFragment extends Fragment {
             if(mActivity == null)
                 return false;
             startPostponedEnterTransition();
-            setErrorRes(R.drawable.ill_small_audio);
-            Snackbar snackbar = Snackbar.make(mActivity.getWindow().getDecorView(), R.string.error_file, Snackbar.LENGTH_LONG);
-            snackbar.show();
+            setErrorRes(mFallbackDrawable);
             return false;
         }
 

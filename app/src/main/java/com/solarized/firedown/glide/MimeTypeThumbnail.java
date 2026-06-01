@@ -99,23 +99,32 @@ public class MimeTypeThumbnail {
             mIcon = icon;
         }
 
+        /** 16:10, matching DownloadFragment's grid cell card. */
+        private static final float CARD_ASPECT = 16f / 10f;
+
         @Override
         public void draw(@NonNull Canvas canvas) {
             Rect b = getBounds();
             if (b.isEmpty()) return;
-            // Paint a centred square (the artwork "card"), not the full
-            // viewport, so the fallback letterboxes the same way real
-            // album art does under PlayerView's resize_mode="fit".
-            int side = Math.min(b.width(), b.height());
-            int cardLeft = b.left + (b.width() - side) / 2;
-            int cardTop = b.top + (b.height() - side) / 2;
-            int cardRight = cardLeft + side;
-            int cardBottom = cardTop + side;
-            canvas.drawRect(cardLeft, cardTop, cardRight, cardBottom, mBgPaint);
+            // Paint a centred 16:10 card (matching the downloads grid
+            // cell aspect), not the full viewport, so the fallback
+            // letterboxes the same way real artwork does under
+            // PlayerView's resize_mode="fit".
+            int cardWidth, cardHeight;
+            if (b.width() / (float) b.height() > CARD_ASPECT) {
+                cardHeight = b.height();
+                cardWidth = Math.round(cardHeight * CARD_ASPECT);
+            } else {
+                cardWidth = b.width();
+                cardHeight = Math.round(cardWidth / CARD_ASPECT);
+            }
+            int cardLeft = b.left + (b.width() - cardWidth) / 2;
+            int cardTop = b.top + (b.height() - cardHeight) / 2;
+            canvas.drawRect(cardLeft, cardTop, cardLeft + cardWidth, cardTop + cardHeight, mBgPaint);
             if (mIcon == null) return;
-            int iconSize = (int) (side * 0.5f);
-            int iconLeft = cardLeft + (side - iconSize) / 2;
-            int iconTop = cardTop + (side - iconSize) / 2;
+            int iconSize = (int) (Math.min(cardWidth, cardHeight) * 0.5f);
+            int iconLeft = cardLeft + (cardWidth - iconSize) / 2;
+            int iconTop = cardTop + (cardHeight - iconSize) / 2;
             mIcon.setBounds(iconLeft, iconTop, iconLeft + iconSize, iconTop + iconSize);
             mIcon.draw(canvas);
         }

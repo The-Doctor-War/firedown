@@ -562,12 +562,20 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                 : (isGrid ? mDefaultGridBg  : mDefaultListBg));
 
         if (holder.fileName != null) {
-            // Always show the name, even a URL-derived one — see the matching
-            // note in BrowserOptionAdapter. The "no spaces = junk" test hides
-            // real titles in space-less scripts, so we don't gate on it.
-            String name = entity.getFileName();
-            holder.fileName.setText(name);
-            setVisible(holder.fileName, !TextUtils.isEmpty(name));
+            // Downloads is a file-manager view. In the GRID, the thumbnail
+            // already identifies an image, so its (usually slug) filename is
+            // noise — hide it for image types. Keep it for audio/video/docs/
+            // subtitles, where the name is how you find the file (audio has no
+            // real thumbnail). The list always shows the name. (Captured is a
+            // preview/decision surface and keeps the title always — handled in
+            // BrowserOptionAdapter, unchanged.)
+            if (isGrid && FileUriHelper.isImage(mimeType)) {
+                setVisible(holder.fileName, false);
+            } else {
+                String name = entity.getFileName();
+                holder.fileName.setText(name);
+                setVisible(holder.fileName, !TextUtils.isEmpty(name));
+            }
         }
         if (holder.fileUrl != null) holder.fileUrl.setText(domain);
 

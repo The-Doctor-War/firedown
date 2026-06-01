@@ -593,7 +593,11 @@ public class FileUriHelper {
             } else if (extension.contains("rar")) {
                 mimeType = MIMETYPE_RAR;
             } else if (extension.contains("zip")) {
-                mimeType = MIMETYPE_ZIP;
+                // IANA canonical — matches what CompressTask stamps so
+                // every producer emits the same zip mime string. The
+                // x-zip / x-zip-compressed variants stay around in
+                // isZip() to recognise external sources that send them.
+                mimeType = MIMETYPE_ZIP_2;
             } else if (extension.contains("mpd")) {
                 mimeType = MIMETYPE_MPD;
             } else if (extension.contains("apk")) {

@@ -132,20 +132,9 @@ public class RenameFileDialog extends BaseDialogFragment implements TextWatcher 
                     filename =  FileUriHelper.sanitizeFileName(filename);
                     File fileDest = new File(StoragePaths.getDownloadPath(mActivity), filename);
                     if (file.renameTo(fileDest)) {
-                        // Only re-derive the mime when the extension
-                        // actually changed. Same-extension renames
-                        // (archive.zip → archive2.zip) used to flip
-                        // application/zip ↔ application/x-zip-compressed
-                        // because getMimeTypeFromFile resolves .zip to a
-                        // different zip variant than the producers stamp
-                        // (CompressTask uses MIMETYPE_ZIP_2). Extension
-                        // stripped → keep the original mime: the bytes
-                        // on disk haven't changed.
-                        String oldExt = FilenameUtils.getExtension(file.getName());
-                        String newExt = FilenameUtils.getExtension(fileDest.getName());
-                        if (!TextUtils.isEmpty(newExt) && !newExt.equalsIgnoreCase(oldExt)) {
+                        String ext = FilenameUtils.getExtension(fileDest.getName());
+                        if(!TextUtils.isEmpty(ext))
                             mDownloadEntity.setFileMimeType(FileUriHelper.getMimeTypeFromFile(fileDest.getName()));
-                        }
                         mDownloadEntity.setFilePath(fileDest.getPath());
                         mDownloadEntity.setFileName(fileDest.getName());
                         mDownloadsViewModel.addDownload(mDownloadEntity);

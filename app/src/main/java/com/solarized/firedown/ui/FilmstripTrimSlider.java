@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.color.MaterialColors;
@@ -213,7 +214,7 @@ public class FilmstripTrimSlider extends View {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         int w = getWidth();
@@ -365,8 +366,7 @@ public class FilmstripTrimSlider extends View {
 
     private static long clamp(long v, long min, long max) {
         if (v < min) return min;
-        if (v > max) return max;
-        return v;
+        return Math.min(v, max);
     }
 
     private void notifyTrimChanged(boolean fromUser) {

@@ -1558,24 +1558,20 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 incognito = tab?.incognito || false;
             } catch (e) {}
         }
-        // Header set tuned for the timedtext endpoint. The previous attempt
-        // mirrored SabrDownloader's MWEB envelope (Origin m.youtube.com,
-        // Sec-Fetch-Site cross-site) but YouTube returned status=200
-        // ct=text/html bytes=0 — the anti-scraping silent-empty path. The
-        // timedtext URL lives on www.youtube.com, so the player itself
-        // requests it as a same-origin fetch from www.youtube.com, not a
-        // cross-site one. Mirror that, plus include X-YouTube-Client-Name
-        // and X-YouTube-Client-Version so the request looks like a real
-        // in-page caption load. Client name 2 = MWEB (the client that
-        // minted the URL), version is what cachedClientVersion captured
-        // from the page HTML.
+        // Header set modelled on the HAR capture of a successful caption
+        // fetch from m.youtube.com (the host that owns MWEB-minted URLs).
+        // Origin / Referer / Sec-Fetch-Site all reference m.youtube.com
+        // so the request reads as a same-origin in-page caption load.
+        // X-YouTube-Client-Name=2 = MWEB; X-YouTube-Client-Version is
+        // pulled out of playerResponse.responseContext below. Accept-
+        // Encoding stays identity because okhttp can't decode brotli.
         const headers = [
-            { name: "User-Agent", value: "Mozilla/5.0 (Android 16; Mobile; rv:149.0) Gecko/149.0 Firefox/149.0" },
+            { name: "User-Agent", value: "Mozilla/5.0 (Android 12; Mobile; rv:151.0) Gecko/151.0 Firefox/151.0" },
             { name: "Accept", value: "*/*" },
             { name: "Accept-Language", value: "en-US,en;q=0.5" },
             { name: "Accept-Encoding", value: "identity" },
-            { name: "Origin", value: "https://www.youtube.com" },
-            { name: "Referer", value: "https://www.youtube.com/" },
+            { name: "Origin", value: "https://m.youtube.com" },
+            { name: "Referer", value: "https://m.youtube.com/" },
             { name: "Sec-Fetch-Dest", value: "empty" },
             { name: "Sec-Fetch-Mode", value: "cors" },
             { name: "Sec-Fetch-Site", value: "same-origin" },
@@ -1601,15 +1597,42 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
             // playerResponse. The Kotlin side's GeckoInspectTask.run()
             // rejects non-http URLs via UrlStringUtils.isURLLike and
             // silently aborts, so we need an absolute URL here.
+            //
+            // Host choice matters: MWEB-minted URLs are owned by
+            // m.youtube.com — the HAR capture of a successful caption
+            // fetch confirms it. Pointing at www.youtube.com sends the
+            // request to the wrong vhost and YouTube replies HTTP 200
+            // with an empty text/html body (silent rejection).
             const baseUrl = /^https?:\/\//i.test(rawBaseUrl)
                 ? rawBaseUrl
-                : `https://www.youtube.com${rawBaseUrl.startsWith("/") ? "" : "/"}${rawBaseUrl}`;
+                : `https://m.youtube.com${rawBaseUrl.startsWith("/") ? "" : "/"}${rawBaseUrl}`;
 
-            // TimedTextStrategy expects json3 (events/segs schema); the
-            // default fmt is srv3 (XML) which we don't parse. Force json3
-            // even if the URL already has a fmt= — &fmt=json3 wins because
-            // it appears later in the query string.
-            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "fmt=json3";
+            // Append the URL params YouTube's real MWEB player attaches
+            // to its caption requests. These aren't part of the signed
+            // sparams set so they don't invalidate the signature, but
+            // they ARE part of YouTube's anti-scraping validation —
+            // requests missing them get the empty-body silent reject.
+            //
+            // pot= (PoToken) and potc=1 are also part of a real request
+            // but minting one requires running BotGuard via the content
+            // script. Trying without first — if YouTube accepts the
+            // client identification params alone for ASR/manual tracks
+            // we save the round-trip. If not, the next step is to route
+            // the fetch through content.js where BotGuard already runs.
+            const extraParams = new URLSearchParams();
+            extraParams.set("fmt", "json3");
+            extraParams.set("c", "MWEB");
+            if (clientVersion) extraParams.set("cver", clientVersion);
+            extraParams.set("cplayer", "UNIPLAYER");
+            extraParams.set("cmodel", "firefox for android");
+            extraParams.set("cos", "Android");
+            extraParams.set("cosver", "12");
+            extraParams.set("cplatform", "MOBILE");
+            extraParams.set("cbrand", "mozilla");
+            extraParams.set("cbr", "Firefox");
+            extraParams.set("cbrver", "149.0");
+            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + extraParams.toString();
+
             const langBase = t.languageCode || "und";
             const language = t.kind === "asr" ? `${langBase}-auto` : langBase;
 

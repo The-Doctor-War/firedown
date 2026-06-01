@@ -5,6 +5,7 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.data.Download;
 import com.solarized.firedown.geckoview.PoTokenGenerator;
 import com.solarized.firedown.utils.FileUriHelper;
@@ -105,12 +106,14 @@ public class TimedTextStrategy implements DownloadStrategy {
 
             // Read the JSON response and convert to SRT
             String inputTimeJson = body.string();
-            Log.d(TAG, "fetched timedtext: status=" + status
-                    + " bytes=" + (inputTimeJson != null ? inputTimeJson.length() : -1)
-                    + " ct=" + httpResponse.header("Content-Type")
-                    + " preview=" + (inputTimeJson != null
-                        ? inputTimeJson.substring(0, Math.min(200, inputTimeJson.length()))
-                        : "null"));
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "fetched timedtext: status=" + status
+                        + " bytes=" + (inputTimeJson != null ? inputTimeJson.length() : -1)
+                        + " ct=" + httpResponse.header("Content-Type")
+                        + " preview=" + (inputTimeJson != null
+                            ? inputTimeJson.substring(0, Math.min(200, inputTimeJson.length()))
+                            : "null"));
+            }
             String srtContent = JsonToSrtConverter.convert(inputTimeJson);
             input = new ByteArrayInputStream(srtContent.getBytes());
 

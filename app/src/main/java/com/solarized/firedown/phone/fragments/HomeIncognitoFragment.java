@@ -87,6 +87,7 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
     private GeckoToolbar mGeckoToolbar;
     private BottomNavigationBar mBottomNavigationBar;
     private View mNewTabView;
+    private View mHomeScroll;
 
 
     @Override
@@ -136,6 +137,7 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
 
         mNewTabView = v.findViewById(R.id.bottom_new_tab);
 
+        mHomeScroll = v.findViewById(R.id.home_scroll);
 
         mAutoCompleteView = v.findViewById(R.id.auto_complete_view);
         mBottomNavigationBar = v.findViewById(R.id.bottom_app_bar);
@@ -219,6 +221,18 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
             }
         });
 
+        ViewCompat.setOnApplyWindowInsetsListener(mHomeScroll, (v, windowInsets) -> {
+            Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.displayCutout());
+            // Apply the insets as padding to the view. Here, set all the dimensions
+            // as appropriate to your layout. You can also update the view's margin if
+            // more appropriate.
+            v.setPadding(insets.left, 0, insets.right, insets.bottom);
+
+            // Return CONSUMED if you don't want the window insets to keep passing down
+            // to descendant views.
+            return WindowInsetsCompat.CONSUMED;
+        });
+
         // Window insets for toolbar
         ViewCompat.setOnApplyWindowInsetsListener(mGeckoToolbar, (v, windowInsets) -> {
             Insets insets = windowInsets.getInsets(
@@ -291,6 +305,7 @@ public class HomeIncognitoFragment extends BaseBrowserFragment implements
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mHomeScroll = null;
         mNewTabView = null;
         mAutoCompleteView = null;
         mGeckoToolbar = null;

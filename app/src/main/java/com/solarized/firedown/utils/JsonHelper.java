@@ -70,6 +70,11 @@ public class JsonHelper {
                 entity.setDuration(duration);
             }
 
+            String language = json.optString("language", null);
+            if (language != null && !language.isEmpty() && !"null".equals(language)) {
+                entity.setLanguage(language);
+            }
+
             return entity;
         } catch (Exception e) {
             Log.e(TAG, "parse", e);

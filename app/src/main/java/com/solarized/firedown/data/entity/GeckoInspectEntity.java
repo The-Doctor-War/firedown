@@ -24,6 +24,8 @@ public class GeckoInspectEntity {
     private String sabrVisitorData;
     // Duration in milliseconds from innertube (lengthSeconds * 1000)
     private long duration;
+    // BCP-47 language tag for subtitle messages (e.g. "en", "es-MX"). Optional.
+    private String language;
     private boolean incognito;
     public String getRequestId() {
         return requestId;
@@ -132,6 +134,12 @@ public class GeckoInspectEntity {
     }
     public void setDuration(long duration) {
         this.duration = duration;
+    }
+    public String getLanguage() {
+        return language;
+    }
+    public void setLanguage(String language) {
+        this.language = language;
     }
     public boolean isIncognito() {
         return incognito;

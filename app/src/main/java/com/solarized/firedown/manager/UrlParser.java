@@ -76,6 +76,8 @@ public class UrlParser {
             returnType = UrlType.FILE;
         } else if(type.contains("svg")){
             returnType = UrlType.SVG;
+        } else if(type.contains("subtitle")){
+            returnType = UrlType.SUBTITLE;
         } else if(type.contains("timedtext")){
             returnType = UrlType.TIMEDTEXT;
         } else if(type.contains("ts")){

@@ -67,6 +67,7 @@ public class GeckoInspectTask implements Runnable {
     private final String mSabrVideoId;
     private final String mSabrVisitorData;
     private final long mDuration;
+    private final String mLanguage;
     private final boolean mIncognito;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
 
@@ -93,6 +94,7 @@ public class GeckoInspectTask implements Runnable {
         mSabrVideoId = geckoInspectEntity.getSabrVideoId();
         mSabrVisitorData = geckoInspectEntity.getSabrVisitorData();
         mDuration = geckoInspectEntity.getDuration();
+        mLanguage = geckoInspectEntity.getLanguage();
         mIncognito = geckoInspectEntity.isIncognito();
 
         Log.d(TAG, "Task Created for URL: " + mUrl + " img: " + mImg
@@ -188,6 +190,10 @@ public class GeckoInspectTask implements Runnable {
             entity.setType(UrlType.TIMEDTEXT.getValue());
             return true;
 
+        } else if (mUrlType == UrlType.SUBTITLE) {
+            processSubtitle(entity);
+            return true;
+
         } else if (mUrlType == UrlType.SVG) {
             processSvg(entity);
             return true;
@@ -231,6 +237,24 @@ public class GeckoInspectTask implements Runnable {
         entity.setFileDuration(metadata.getDuration());
 
         parseTags(entity, streams, mime);
+    }
+
+    // ========================================================================
+    // Subtitle
+    // ========================================================================
+
+    private void processSubtitle(BrowserDownloadEntity entity) {
+        String lower = mUrl.toLowerCase(Locale.US);
+        String mime = lower.contains(".srt") ? FileUriHelper.MIMETYPE_SRT : FileUriHelper.MIMETYPE_VTT;
+        entity.setMimeType(mime);
+        entity.setType(UrlType.SUBTITLE.getValue());
+
+        if (!TextUtils.isEmpty(mLanguage)) {
+            String existing = entity.getFileName();
+            if (!TextUtils.isEmpty(existing)) {
+                entity.setFileName(existing + " [" + mLanguage + "]");
+            }
+        }
     }
 
     // ========================================================================
@@ -291,6 +315,11 @@ public class GeckoInspectTask implements Runnable {
     // ========================================================================
 
     private void applyDisplayName(BrowserDownloadEntity entity) {
+        // Subtitles already had their filename built in processSubtitle (with
+        // optional [lang] suffix). Don't let the variant/page-title rename
+        // logic overwrite them.
+        if (mUrlType == UrlType.SUBTITLE) return;
+
         String current = entity.getFileName();
         if (!TextUtils.isEmpty(current) && !WebUtils.isUrlDerivedName(current)) return;
 

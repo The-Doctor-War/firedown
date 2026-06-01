@@ -174,6 +174,45 @@ async function sendVariants(details, { variants, origin, description, img, name,
     sendNative(message);
 }
 
+/**
+ * Emits one native message per subtitle track. Each becomes its own
+ * BrowserDownloadEntity on the Kotlin side (mime text/vtt or text/srt)
+ * and surfaces under the Subtitle filter chip. Sharing `origin` with the
+ * parent video keeps them grouped wherever the UI clusters by origin.
+ *
+ * subtitles: [{ url, language?, label?, format? }]
+ */
+async function sendSubtitles(details, { subtitles, origin, requestHeaders }) {
+    if (!Array.isArray(subtitles) || subtitles.length === 0) return;
+
+    const tabId = await resolveTabId(details);
+    let incognito = false;
+    if (tabId >= 0) {
+        try {
+            const tab = await browser.tabs.get(tabId);
+            incognito = tab?.incognito || false;
+        } catch (e) {}
+    }
+
+    for (const sub of subtitles) {
+        if (!sub || !sub.url) continue;
+        const message = {
+            url: sub.url,
+            type: "subtitle",
+            origin,
+            tabId,
+            request: details.requestId,
+            incognito
+        };
+        if (sub.language) message.language = sub.language;
+        if (sub.label) message.name = sub.label;
+        if (Array.isArray(requestHeaders) && requestHeaders.length > 0) {
+            message.requestHeaders = requestHeaders;
+        }
+        sendNative(message);
+    }
+}
+
 // ============================================================================
 // Response filter (for intercepting Instagram API responses)
 // ============================================================================
@@ -1154,6 +1193,38 @@ function extractTwitterFocalResult(parsed, details) {
     return withVideo || candidates[0];
 }
 
+// Scan a Twitter media object for subtitle / closed-caption track URLs.
+// Twitter doesn't expose these consistently — modern uploaded videos often
+// burn captions into the pixels, and auto-generated captions load via a
+// separate player request that the generic webrequest interceptor catches
+// passively when the user plays the video. This scanner picks up the cases
+// where the GraphQL response DOES include track metadata, so the captions
+// are discoverable even if the user never hits play.
+//
+// Known/observed locations (defensive — none are guaranteed):
+//   m.video_info.subtitles[]
+//   m.closed_captions[]
+//   m.additional_media_info.subtitles[]
+// Entry shape is normalised to { url, language, label }.
+function extractTwitterSubtitles(m) {
+    const candidates = [];
+    const push = (arr) => { if (Array.isArray(arr)) candidates.push(...arr); };
+    push(m?.video_info?.subtitles);
+    push(m?.closed_captions);
+    push(m?.additional_media_info?.subtitles);
+
+    const out = [];
+    for (const c of candidates) {
+        if (!c) continue;
+        const url = c.url || c.uri || c.src || c.captions_url;
+        if (!url || !/^https?:/i.test(url)) continue;
+        const language = c.language || c.lang || c.locale || c.bcp47 || null;
+        const label = c.display_name || c.label || c.name || null;
+        out.push({ url, language, label });
+    }
+    return out;
+}
+
 // Turn one tweet_results.result into download variants and send them.
 // Returns true if at least one video was emitted.
 function emitTwitterTweetVideos(details, result) {
@@ -1211,6 +1282,12 @@ function emitTwitterTweetVideos(details, result) {
             name: screenName,
             duration: m.video_info.duration_millis || 0
         });
+
+        const subtitles = extractTwitterSubtitles(m);
+        if (subtitles.length > 0) {
+            log("TWITTER", `found ${subtitles.length} subtitle track(s)`, { origin: originUrl });
+            sendSubtitles(details, { subtitles, origin: originUrl });
+        }
     }
     return emitted;
 }

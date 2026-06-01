@@ -146,13 +146,15 @@ public class TimedTextStrategy implements DownloadStrategy {
     }
 
     /**
-     * Mint a PoToken using the same path SabrStrategy uses. The token
-     * is bound to (videoId, visitorData); both are plumbed on the
-     * request via the existing SABR schema (background.js sets a
-     * minimal {videoId, visitorData} sabr block on timedtext messages).
-     * Returns null on any failure — caller falls back to fetching
-     * without a token, which YouTube will likely refuse with an empty
-     * body but no point throwing here.
+     * Obtain a PoToken via the same {@link PoTokenGenerator} SabrStrategy
+     * uses. The generator caches the token by videoId for the life of its
+     * BotGuard session, so a subtitle download for a video the user already
+     * grabbed reuses the token the SABR download minted (and vice versa) —
+     * no extra page round-trip. videoId + visitorData are plumbed on the
+     * request via the existing SABR schema (background.js sets a minimal
+     * {videoId, visitorData} sabr block on timedtext messages). Returns
+     * null on any failure — caller falls back to fetching without a token,
+     * which YouTube will refuse with an empty body, but no point throwing.
      */
     @Nullable
     private String mintPoToken(DownloadRequest request, DownloadContext context) {

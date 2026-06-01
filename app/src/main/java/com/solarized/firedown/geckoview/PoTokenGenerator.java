@@ -2,6 +2,7 @@ package com.solarized.firedown.geckoview;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.GuardedBy;
@@ -154,6 +155,16 @@ public class PoTokenGenerator {
      *  on the future from arbitrary caller threads. */
     private final Map<String, CompletableFuture<String>> pending = new HashMap<>();
 
+    /** videoId → minted token, shared across callers (SABR + timedtext) for the
+     *  same video. A PoToken's contentBinding is the videoId, so a token minted
+     *  for video X is valid for any download of video X — letting a subtitle
+     *  download reuse the token the video download already minted (and vice
+     *  versa), saving a ~100ms page round-trip. Keyed by videoId so we never
+     *  reintroduce the old JS bug of serving a videoA token to a videoB
+     *  download. Cleared in {@link #closeSessionLocked} so a cached token can
+     *  never outlive the BotGuard session that backs its validity. */
+    @GuardedBy("lock") private final Map<String, String> tokenCache = new HashMap<>();
+
     public PoTokenGenerator(@NonNull GeckoRuntime runtime,
                             @NonNull Consumer<GeckoSession> sessionRegistrar) {
         this.runtime = runtime;
@@ -195,10 +206,29 @@ public class PoTokenGenerator {
             return null;
         }
 
-        // Step 2: send mint request, wait for reply. Both can happen
+        // Step 2: serve a cached token if we already minted one for this
+        // video within the current session. Checked AFTER ensureReady so a
+        // recycled session (which clears the cache in closeSessionLocked)
+        // can't hand back a token whose backing BotGuard session is gone.
+        if (!TextUtils.isEmpty(videoId)) {
+            synchronized (lock) {
+                String cached = tokenCache.get(videoId);
+                if (!TextUtils.isEmpty(cached)) {
+                    Log.i(TAG, "generate: cache hit for " + videoId + " (" + cached.length() + " chars)");
+                    return cached;
+                }
+            }
+        }
+
+        // Step 3: send mint request, wait for reply. Both can happen
         // concurrently across callers because the port can multiplex via
         // per-request ids.
         String token = mint(videoId, visitorData);
+        if (!TextUtils.isEmpty(token) && !TextUtils.isEmpty(videoId)) {
+            synchronized (lock) {
+                tokenCache.put(videoId, token);
+            }
+        }
         Log.i(TAG, "generate: result=" + (token != null ? token.length() + " chars" : "null"));
         return token;
     }
@@ -505,6 +535,10 @@ public class PoTokenGenerator {
         }
         sessionCreatedAt = 0L;
         port = null;
+        // Token validity is backed by the BotGuard session/integrity token;
+        // once the session is gone the cached tokens are dead. Drop them so
+        // the next generate() mints fresh against the rebuilt session.
+        tokenCache.clear();
         if (readyFuture != null && !readyFuture.isDone()) {
             readyFuture.completeExceptionally(new IllegalStateException("session closing"));
         }

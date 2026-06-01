@@ -26,7 +26,6 @@
     <string name="capture_empty_images_message">පින්තූර නොමැත.</string>
     <string name="capture_empty_message">බාගත කිරීම සඳහා මාධ්‍ය නොමැත.</string>
     <string name="capture_empty_subtext">වෙබ් අඩවිය නැවත පූරණය කරන්න සහ Firedown පවතින මාධ්‍ය හඳුනා ගනී.</string>
-    <string name="capture_empty_svgs_message">SVG නොමැත.</string>
     <string name="capture_empty_video_message">වීඩියෝ නොමැත.</string>
     <string name="clipboard">පසුරු පුවරුවට පිටපත් කර ඇත</string>
     <string name="close_tab">පටිත්ත වසන්න</string>

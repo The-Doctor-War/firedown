@@ -17,7 +17,6 @@
     <string name="capture_empty_images_message">ਕੋਈ ਚਿੱਤਰ ਉਪਲਬਧ ਨਹੀਂ ਹਨ।</string>
     <string name="capture_empty_message">ਡਾਊਨਲੋਡ ਕਰਨ ਲਈ ਕੋਈ ਮੀਡੀਆ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।</string>
     <string name="capture_empty_subtext">ਵੈੱਬਸਾਈਟ ਨੂੰ ਰੀਲੋਡ ਕਰੋ ਅਤੇ ਫਾਇਰਡਾਊਨ ਉਪਲਬਧ ਮੀਡੀਆ ਦਾ ਪਤਾ ਲਗਾ ਲਵੇਗਾ।</string>
-    <string name="capture_empty_svgs_message">ਕੋਈ SVG ਉਪਲਬਧ ਨਹੀਂ ਹਨ।</string>
     <string name="capture_empty_video_message">ਕੋਈ ਵੀਡੀਓ ਉਪਲਬਧ ਨਹੀਂ ਹਨ।</string>
     <string name="clipboard">ਕਲਿੱਪਬੋਰਡ \'ਤੇ ਕਾਪੀ ਕੀਤਾ ਗਿਆ</string>
 <string name="connection_secure">ਕਨੈਕਸ਼ਨ ਸੁਰੱਖਿਅਤ ਹੈ</string>

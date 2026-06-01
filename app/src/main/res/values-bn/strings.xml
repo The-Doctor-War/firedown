@@ -26,7 +26,6 @@
     <string name="capture_empty_images_message">কোন ছবি উপলব্ধ.</string>
     <string name="capture_empty_message">ডাউনলোড করার জন্য কোন মিডিয়া উপলব্ধ.</string>
     <string name="capture_empty_subtext">ওয়েবসাইট পুনরায় লোড করুন এবং ফায়ারডাউন উপলব্ধ মিডিয়া সনাক্ত করবে।</string>
-    <string name="capture_empty_svgs_message">কোনো SVG উপলব্ধ নেই৷</string>
     <string name="capture_empty_video_message">কোনো ভিডিও উপলব্ধ নেই৷</string>
     <string name="clipboard">ক্লিপবোর্ডে কপি করা হয়েছে</string>
     <string name="close_tab">ট্যাব বন্ধ করুন</string>

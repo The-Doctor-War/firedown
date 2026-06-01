@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Nu există imagini disponibile.</string>
     <string name="capture_empty_message">Nu există conținut media disponibil pentru descărcare.</string>
     <string name="capture_empty_subtext">Reîncărcați site-ul și Firedown va detecta conținutul media disponibil.</string>
-    <string name="capture_empty_svgs_message">Nu există SVG-uri disponibile.</string>
     <string name="capture_empty_video_message">Nu există videoclipuri disponibile.</string>
     <string name="clipboard">Copiat în clipboard</string>
     <string name="clipboard_from">Din clipboard</string>

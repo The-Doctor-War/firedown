@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">Engar myndir tiltækar.</string>
     <string name="capture_empty_message">Enginn miðill tiltækur til niðurhals.</string>
     <string name="capture_empty_subtext">Endurhlaðið vefsíðuna og Firedown finnur tiltæka miðla.</string>
-    <string name="capture_empty_svgs_message">Engin SVG í boði.</string>
     <string name="capture_empty_video_message">Engin myndskeið í boði.</string>
     <string name="clipboard">Afritað á klippiborð</string>
     <string name="close_tab">Loka flipa</string>

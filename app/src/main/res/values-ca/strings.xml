@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">No hi ha imatges disponibles.</string>
     <string name="capture_empty_message">No hi ha cap mitjà disponible per fer la baixada.</string>
     <string name="capture_empty_subtext">Torneu a carregar el lloc web i Firedown detectarà els mitjans disponibles.</string>
-    <string name="capture_empty_svgs_message">No hi ha SVG disponibles.</string>
     <string name="capture_empty_video_message">No hi ha vídeos disponibles.</string>
     <string name="clipboard">S\'ha copiat al porta-retalls</string>
     <string name="clipboard_from">Del porta-retalls</string>

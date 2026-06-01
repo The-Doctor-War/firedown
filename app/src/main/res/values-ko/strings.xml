@@ -31,7 +31,6 @@
     <string name="capture_empty_images_message">사용 가능한 이미지가 없습니다.</string>
     <string name="capture_empty_message">다운로드에 사용할 수 있는 미디어가 없습니다.</string>
     <string name="capture_empty_subtext">웹사이트를 다시 로드하면 Firedown이 사용 가능한 미디어를 감지합니다.</string>
-    <string name="capture_empty_svgs_message">사용 가능한 SVG가 없습니다.</string>
     <string name="capture_empty_video_message">사용 가능한 동영상이 없습니다.</string>
     <string name="clipboard">클립보드에 복사됨</string>
     <string name="clipboard_from">클립보드에서</string>

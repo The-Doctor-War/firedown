@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">沒有可用的圖像。</string>
     <string name="capture_empty_message">沒有可供下載的媒體。</string>
     <string name="capture_empty_subtext">重新載入網站，Firedown 將偵測可用媒體。</string>
-    <string name="capture_empty_svgs_message">沒有可用的 SVG。</string>
     <string name="capture_empty_video_message">沒有可用的影片。</string>
     <string name="clipboard">已複製到剪貼簿</string>
 <string name="connection_secure">連線安全</string>

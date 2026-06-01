@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">Სურათები არ არის ხელმისაწვდომი.</string>
     <string name="capture_empty_message">Არ არის ხელმისაწვდომი მედია ჩამოსატვირთად.</string>
     <string name="capture_empty_subtext">Გადატვირთეთ ვებგვერდი და Firedown აღმოაჩენს ხელმისაწვდომ მედიას.</string>
-    <string name="capture_empty_svgs_message">SVG არ არის ხელმისაწვდომი.</string>
     <string name="capture_empty_video_message">Ვიდეოები ხელმისაწვდომი არ არის.</string>
     <string name="clipboard">Კოპირებულია ბუფერში</string>
     <string name="close_tab">ჩანართის დახურვა</string>

@@ -26,7 +26,6 @@
     <string name="capture_empty_images_message">Walang available na mga Larawan.</string>
     <string name="capture_empty_message">Walang magagamit na media para sa pag-download.</string>
     <string name="capture_empty_subtext">I-reload ang website at makikita ng Firedown ang available na media.</string>
-    <string name="capture_empty_svgs_message">Walang available na SVG.</string>
     <string name="capture_empty_video_message">Walang available na video.</string>
     <string name="clipboard">Kinopya sa clipboard</string>
     <string name="close_tab">Isara ang tab</string>

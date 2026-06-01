@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Δεν υπάρχουν διαθέσιμες εικόνες.</string>
     <string name="capture_empty_message">Δεν υπάρχουν διαθέσιμα μέσα για λήψη.</string>
     <string name="capture_empty_subtext">Επαναλάβετε τη φόρτωση του ιστότοπου και το Firedown θα εντοπίσει τα διαθέσιμα μέσα.</string>
-    <string name="capture_empty_svgs_message">Δεν υπάρχουν διαθέσιμα SVG.</string>
     <string name="capture_empty_video_message">Δεν υπάρχουν διαθέσιμα βίντεο.</string>
     <string name="clipboard">Αντιγράφηκε στο πρόχειρο</string>
     <string name="clipboard_from">Από το πρόχειρο</string>

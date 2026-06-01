@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">Inga bilder tillgängliga.</string>
     <string name="capture_empty_message">Ingen media tillgänglig för nedladdning.</string>
     <string name="capture_empty_subtext">Ladda om webbplatsen och Firedown kommer att upptäcka tillgänglig media.</string>
-    <string name="capture_empty_svgs_message">Inga SVG:er tillgängliga.</string>
     <string name="capture_empty_video_message">Inga videor tillgängliga.</string>
     <string name="clipboard">Kopierade till urklipp</string>
     <string name="clipboard_from">Från urklipp</string>

@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">Tiada Imej tersedia.</string>
     <string name="capture_empty_message">Tiada media tersedia untuk dimuat turun.</string>
     <string name="capture_empty_subtext">Muat semula tapak web dan Firedown akan mengesan media yang tersedia.</string>
-    <string name="capture_empty_svgs_message">Tiada SVG tersedia.</string>
     <string name="capture_empty_video_message">Tiada video tersedia.</string>
     <string name="clipboard">Disalin ke papan keratan</string>
 <string name="connection_secure">Sambungan selamat</string>

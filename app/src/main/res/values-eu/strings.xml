@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Ez dago irudirik eskuragarri.</string>
     <string name="capture_empty_message">Ez dago euskarririk deskargatzeko.</string>
     <string name="capture_empty_subtext">Berriz kargatu webgunea eta Firedown-ek eskuragarri dauden euskarriak detektatuko ditu.</string>
-    <string name="capture_empty_svgs_message">Ez dago SVGrik erabilgarri.</string>
     <string name="capture_empty_video_message">Ez dago bideorik eskuragarri.</string>
     <string name="clipboard">Arbelean kopiatu da</string>
     <string name="close_tab">Itxi fitxa</string>

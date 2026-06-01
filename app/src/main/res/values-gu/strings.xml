@@ -17,7 +17,6 @@
     <string name="capture_empty_images_message">કોઈ છબીઓ ઉપલબ્ધ નથી.</string>
     <string name="capture_empty_message">ડાઉનલોડ કરવા માટે કોઈ મીડિયા ઉપલબ્ધ નથી.</string>
     <string name="capture_empty_subtext">વેબસાઇટ ફરીથી લોડ કરો અને ફાયરડાઉન ઉપલબ્ધ મીડિયાને શોધી કાઢશે.</string>
-    <string name="capture_empty_svgs_message">કોઈ SVG ઉપલબ્ધ નથી.</string>
     <string name="capture_empty_video_message">કોઈ વીડિયો ઉપલબ્ધ નથી.</string>
     <string name="clipboard">ક્લિપબોર્ડ પર કૉપિ કરી</string>
 <string name="connection_secure">કનેક્શન સુરક્ષિત છે</string>

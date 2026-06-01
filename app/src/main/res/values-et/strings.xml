@@ -26,7 +26,6 @@
     <string name="capture_empty_images_message">Pildid pole saadaval.</string>
     <string name="capture_empty_message">Allalaadimiseks pole meediume saadaval.</string>
     <string name="capture_empty_subtext">Laadige veebisait uuesti ja Firedown tuvastab saadaoleva meedia.</string>
-    <string name="capture_empty_svgs_message">SVG-sid pole saadaval.</string>
     <string name="capture_empty_video_message">Saadaval pole ühtegi videot.</string>
     <string name="clipboard">Kopeeriti lõikelauale</string>
     <string name="close_tab">Sulge kaart</string>

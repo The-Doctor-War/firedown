@@ -31,7 +31,6 @@
     <string name="capture_empty_images_message">Nessuna immagine disponibile.</string>
     <string name="capture_empty_message">Nessun supporto disponibile per il download.</string>
     <string name="capture_empty_subtext">Ricarica il sito Web e Firedown rileverà i media disponibili.</string>
-    <string name="capture_empty_svgs_message">Nessun SVG disponibile.</string>
     <string name="capture_empty_video_message">Nessun video disponibile.</string>
     <string name="clipboard">Copiato negli appunti</string>
     <string name="clipboard_from">Dagli appunti</string>

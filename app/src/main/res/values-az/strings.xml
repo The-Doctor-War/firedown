@@ -26,7 +26,6 @@
     <string name="capture_empty_images_message">Şəkillər yoxdur.</string>
     <string name="capture_empty_message">Yükləmək üçün heç bir media yoxdur.</string>
     <string name="capture_empty_subtext">Veb saytı yenidən yükləyin və Firedown mövcud medianı aşkar edəcək.</string>
-    <string name="capture_empty_svgs_message">SVG yoxdur.</string>
     <string name="capture_empty_video_message">Video yoxdur.</string>
     <string name="clipboard">Buferə kopyalandı</string>
     <string name="close_tab">Vərəqi qapat</string>

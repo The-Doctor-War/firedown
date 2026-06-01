@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">Պատկերներ չկան:</string>
     <string name="capture_empty_message">Ներբեռնման համար հասանելի մեդիա չկա:</string>
     <string name="capture_empty_subtext">Վերբեռնեք կայքը և Firedown-ը կհայտնաբերի հասանելի լրատվամիջոցները:</string>
-    <string name="capture_empty_svgs_message">SVG-ներ չկան:</string>
     <string name="capture_empty_video_message">Տեսանյութեր չկան։</string>
     <string name="clipboard">Պատճենվել է սեղմատախտակում</string>
 <string name="connection_secure">Միացումն ապահով է</string>

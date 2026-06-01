@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Ni slik na voljo.</string>
     <string name="capture_empty_message">Noben medij ni na voljo za prenos.</string>
     <string name="capture_empty_subtext">Ponovno naložite spletno mesto in Firedown bo zaznal razpoložljive medije.</string>
-    <string name="capture_empty_svgs_message">SVG ni na voljo.</string>
     <string name="capture_empty_video_message">Videoposnetki niso na voljo.</string>
     <string name="clipboard">Kopirano v odložišče</string>
     <string name="close_tab">Zapri zavihek</string>

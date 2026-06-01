@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">कोई इमेज उपलब्ध नहीं.</string>
     <string name="capture_empty_message">डाउनलोड करने के लिए कोई मीडिया उपलब्ध नहीं है.</string>
     <string name="capture_empty_subtext">वेबसाइट को पुनः लोड करें और Firedown उपलब्ध मीडिया का पता लगाएगा.</string>
-    <string name="capture_empty_svgs_message">कोई SVG उपलब्ध नहीं है.</string>
     <string name="capture_empty_video_message">कोई वीडियो उपलब्ध नहीं है.</string>
     <string name="clipboard">क्लिपबोर्ड पर कॉपी किया गया</string>
 <string name="connection_secure">कनेक्शन सुरक्षित है</string>

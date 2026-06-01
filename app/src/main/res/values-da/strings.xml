@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Ingen tilgængelige billeder.</string>
     <string name="capture_empty_message">Ingen medier tilgængelige til download.</string>
     <string name="capture_empty_subtext">Genindlæs webstedet, og Firedown vil opdage tilgængelige medier.</string>
-    <string name="capture_empty_svgs_message">Ingen tilgængelige SVG\'er.</string>
     <string name="capture_empty_video_message">Ingen tilgængelige videoer.</string>
     <string name="clipboard">Kopieret til udklipsholder</string>
     <string name="clipboard_from">Fra udklipsholder</string>

@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">אין תמונות זמינות.</string>
     <string name="capture_empty_message">אין מדיה זמינה להורדה.</string>
     <string name="capture_empty_subtext">טען מחדש את האתר ו-Firedown יזהה מדיה זמינה.</string>
-    <string name="capture_empty_svgs_message">אין קובצי SVG זמינים.</string>
     <string name="capture_empty_video_message">אין סרטונים זמינים.</string>
     <string name="clipboard">הועתק ללוח</string>
     <string name="close_tab">סגירת לשונית</string>

@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">ምንም ምስሎች አይገኙም።</string>
     <string name="capture_empty_message">ለማውረድ ምንም ሚዲያ የለም።</string>
     <string name="capture_empty_subtext">ድርጣቢያውን እንደገና ይጫኑ እና Firedown ያለውን ሚዲያ ያገኛል።</string>
-    <string name="capture_empty_svgs_message">ምንም SVGs አይገኙም።</string>
     <string name="capture_empty_video_message">ምንም ቪዲዮዎች አይገኙም።</string>
     <string name="clipboard">ወደ ቅንጥብ ሰሌዳ ተቀድቷል</string>
     <string name="close_tab">ትርን ዝጋ</string>

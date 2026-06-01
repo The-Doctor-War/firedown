@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Nuk ka imazhe të disponueshme.</string>
     <string name="capture_empty_message">Nuk ka media të disponueshme për shkarkim.</string>
     <string name="capture_empty_subtext">Rifresko faqen e internetit dhe Firedown do të zbulojë mediat e disponueshme.</string>
-    <string name="capture_empty_svgs_message">Nuk ka SVG të disponueshme.</string>
     <string name="capture_empty_video_message">Nuk ka video të disponueshme.</string>
     <string name="clipboard">Kopjuar në kujtesën e fragmenteve</string>
     <string name="close_tab">Mbylle skedën</string>

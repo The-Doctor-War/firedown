@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">ບໍ່ມີຮູບພາບ.</string>
     <string name="capture_empty_message">ບໍ່ມີສື່ໃຫ້ດາວໂຫຼດ.</string>
     <string name="capture_empty_subtext">ໂຫຼດເວັບໄຊທ໌ຄືນໃໝ່ ແລະ Firedown ຈະກວດພົບສື່ທີ່ມີຢູ່.</string>
-    <string name="capture_empty_svgs_message">ບໍ່ມີ SVGs ທີ່ມີຢູ່.</string>
     <string name="capture_empty_video_message">ບໍ່ມີວິດີໂອ.</string>
     <string name="clipboard">ສຳເນົາໃສ່ຄລິບບອດແລ້ວ</string>
     <string name="close_tab">ປິດແທັບ</string>

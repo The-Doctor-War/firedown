@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Няма налични изображения.</string>
     <string name="capture_empty_message">Няма налични медии за изтегляне.</string>
     <string name="capture_empty_subtext">Презаредете уебсайта и Firedown ще открие наличните медии.</string>
-    <string name="capture_empty_svgs_message">Няма налични SVG.</string>
     <string name="capture_empty_video_message">Няма налични видеоклипове.</string>
     <string name="clipboard">Копирано в клипборда</string>
     <string name="close_tab">Затваряне на раздел</string>

@@ -25,7 +25,6 @@
     <string name="capture_empty_images_message">ಯಾವುದೇ ಚಿತ್ರಗಳು ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="capture_empty_message">ಡೌನ್‌ಲೋಡ್ ಮಾಡಲು ಯಾವುದೇ ಮಾಧ್ಯಮ ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="capture_empty_subtext">ವೆಬ್‌ಸೈಟ್ ಅನ್ನು ಮರುಲೋಡ್ ಮಾಡಿ ಮತ್ತು ಫೈರ್‌ಡೌನ್ ಲಭ್ಯವಿರುವ ಮಾಧ್ಯಮವನ್ನು ಪತ್ತೆ ಮಾಡುತ್ತದೆ.</string>
-    <string name="capture_empty_svgs_message">ಯಾವುದೇ SVG ಗಳು ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="capture_empty_video_message">ಯಾವುದೇ ವೀಡಿಯೊಗಳು ಲಭ್ಯವಿಲ್ಲ.</string>
     <string name="clipboard">ಕ್ಲಿಪ್‌ಬೋರ್ಡ್‌ಗೆ ನಕಲಿಸಲಾಗಿದೆ</string>
     <string name="close_tab">ಹಾಳೆಯನ್ನು ಮುಚ್ಚು</string>

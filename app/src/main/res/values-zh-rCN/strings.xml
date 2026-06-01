@@ -32,7 +32,6 @@
     <string name="capture_empty_message">没有可供下载的媒体。</string>
     <string name="capture_empty_subtext">重新加载网站，Firedown 将检测可用媒体。</string>
     <string name="capture_empty_subtitles_message">没有可用的字幕。</string>
-    <string name="capture_empty_svgs_message">没有可用的 SVG。</string>
     <string name="capture_empty_video_message">没有可用的视频。</string>
     <string name="cert_connection_exception">安全例外</string>
     <string name="cert_connection_insecure">连接不安全</string>

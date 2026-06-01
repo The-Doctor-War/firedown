@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Nie sú k dispozícii žiadne obrázky.</string>
     <string name="capture_empty_message">Nie sú dostupné žiadne médiá na stiahnutie.</string>
     <string name="capture_empty_subtext">Znova načítajte webovú stránku a Firedown zistí dostupné médiá.</string>
-    <string name="capture_empty_svgs_message">Nie sú k dispozícii žiadne súbory SVG.</string>
     <string name="capture_empty_video_message">Nie sú k dispozícii žiadne videá.</string>
     <string name="clipboard">Skopírované do schránky</string>
     <string name="close_tab">Zavrieť kartu</string>

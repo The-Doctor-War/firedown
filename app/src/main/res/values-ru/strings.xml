@@ -31,7 +31,6 @@
     <string name="capture_empty_images_message">Нет доступных изображений.</string>
     <string name="capture_empty_message">Нет доступных для скачивания медиафайлов.</string>
     <string name="capture_empty_subtext">Перезагрузите веб-сайт, и Firedown обнаружит доступные медиафайлы.</string>
-    <string name="capture_empty_svgs_message">Нет доступных файлов SVG.</string>
     <string name="capture_empty_video_message">Нет доступных видео.</string>
     <string name="clipboard">Скопировано в буфер обмена</string>
     <string name="clipboard_from">Из буфера обмена</string>

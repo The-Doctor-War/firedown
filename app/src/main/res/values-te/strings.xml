@@ -25,7 +25,6 @@
     <string name="capture_empty_images_message">చిత్రాలు ఏవీ అందుబాటులో లేవు.</string>
     <string name="capture_empty_message">డౌన్‌లోడ్ చేయడానికి మీడియా అందుబాటులో లేదు.</string>
     <string name="capture_empty_subtext">వెబ్‌సైట్‌ను మళ్లీ లోడ్ చేయండి మరియు ఫైర్‌డౌన్ అందుబాటులో ఉన్న మీడియాను గుర్తిస్తుంది.</string>
-    <string name="capture_empty_svgs_message">SVGలు ఏవీ అందుబాటులో లేవు.</string>
     <string name="capture_empty_video_message">వీడియోలు ఏవీ అందుబాటులో లేవు.</string>
     <string name="clipboard">క్లిప్‌బోర్డ్‌కి కాపీ చేయబడింది</string>
     <string name="close_tab">ట్యాబును మూసివేయి</string>

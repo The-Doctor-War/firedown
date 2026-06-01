@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">هیچ تصویری در دسترس نیست</string>
     <string name="capture_empty_message">هیچ رسانه ای برای دانلود در دسترس نیست.</string>
     <string name="capture_empty_subtext">وب سایت را دوباره بارگیری کنید و Firedown رسانه های موجود را شناسایی می کند.</string>
-    <string name="capture_empty_svgs_message">SVG موجود نیست.</string>
     <string name="capture_empty_video_message">هیچ ویدیویی در دسترس نیست.</string>
     <string name="clipboard">در کلیپ بورد کپی شد</string>
     <string name="close_tab">بستن زبانه</string>

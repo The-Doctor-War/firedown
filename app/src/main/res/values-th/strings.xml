@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">ไม่มีรูปภาพที่ใช้ได้</string>
     <string name="capture_empty_message">ไม่มีสื่อให้ดาวน์โหลด</string>
     <string name="capture_empty_subtext">โหลดเว็บไซต์ซ้ำแล้ว Firedown จะตรวจจับสื่อที่มีอยู่</string>
-    <string name="capture_empty_svgs_message">ไม่มี SVG</string>
     <string name="capture_empty_video_message">ไม่มีวิดีโอที่ใช้ได้</string>
     <string name="clipboard">คัดลอกไปยังคลิปบอร์ดแล้ว</string>
     <string name="close_tab">ปิดแท็บ</string>

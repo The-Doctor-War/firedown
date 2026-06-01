@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Ei kuvia saatavilla.</string>
     <string name="capture_empty_message">Mediaa ei ole ladattavissa.</string>
     <string name="capture_empty_subtext">Lataa verkkosivusto uudelleen, niin Firedown havaitsee käytettävissä olevan median.</string>
-    <string name="capture_empty_svgs_message">SVG-tiedostoja ei ole saatavilla.</string>
     <string name="capture_empty_video_message">Ei videoita saatavilla.</string>
     <string name="clipboard">Kopioitu leikepöydälle</string>
     <string name="clipboard_from">Leikepöydältä</string>

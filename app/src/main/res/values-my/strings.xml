@@ -26,7 +26,6 @@
     <string name="capture_empty_images_message">ပုံများမရရှိနိုင်ပါ။</string>
     <string name="capture_empty_message">ဒေါင်းလုဒ်လုပ်ရန် မီဒီယာမရှိပါ။</string>
     <string name="capture_empty_subtext">ဝဘ်ဆိုက်ကို ပြန်လည်စတင်ပြီး Firedown သည် ရရှိနိုင်သောမီဒီယာကို ရှာဖွေတွေ့ရှိမည်ဖြစ်သည်။</string>
-    <string name="capture_empty_svgs_message">SVG မရနိုင်ပါ။</string>
     <string name="capture_empty_video_message">ဗီဒီယိုများ မရရှိနိုင်ပါ။</string>
     <string name="clipboard">ကလစ်ဘုတ်သို့ ကူးယူထားသည်။</string>
     <string name="close_tab">တပ်ဗ်ကို ပိတ်ရန်</string>

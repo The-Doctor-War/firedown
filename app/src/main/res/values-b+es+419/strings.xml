@@ -18,7 +18,6 @@
   <string name="capture_empty_images_message">No hay imágenes disponibles.</string>
   <string name="capture_empty_message">No hay medios disponibles para descargar.</string>
   <string name="capture_empty_subtext">Vuelve a cargar el sitio web y Firedown detectará los medios disponibles.</string>
-  <string name="capture_empty_svgs_message">No hay SVG disponibles.</string>
   <string name="capture_empty_video_message">No hay vídeos disponibles.</string>
     <string name="clipboard">Copiado al portapapeles</string>
 <string name="connection_secure">La conexión es segura</string>

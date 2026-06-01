@@ -25,7 +25,6 @@
     <string name="capture_empty_images_message">کوئی تصاویر دستیاب نہیں ہیں۔</string>
     <string name="capture_empty_message">ڈاؤن لوڈ کرنے کے لیے کوئی میڈیا دستیاب نہیں ہے۔</string>
     <string name="capture_empty_subtext">ویب سائٹ کو دوبارہ لوڈ کریں اور فائر ڈاؤن دستیاب میڈیا کا پتہ لگائے گا۔</string>
-    <string name="capture_empty_svgs_message">کوئی SVG دستیاب نہیں۔</string>
     <string name="capture_empty_video_message">کوئی ویڈیوز دستیاب نہیں ہیں۔</string>
     <string name="clipboard">کلپ بورڈ پر کاپی ہو گیا۔</string>
     <string name="close_tab">ٹیب بند کریں</string>

@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">Нема доступних слика.</string>
     <string name="capture_empty_message">Нема доступних медија за преузимање.</string>
     <string name="capture_empty_subtext">Поново учитајте веб локацију и Firedown ће открити доступне медије.</string>
-    <string name="capture_empty_svgs_message">Нема доступних SVG датотека.</string>
     <string name="capture_empty_video_message">Нема доступних видео снимака.</string>
     <string name="clipboard">Копирано у међуспремник</string>
     <string name="close_tab">Затвори језичак</string>

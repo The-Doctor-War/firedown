@@ -25,7 +25,6 @@
     <string name="capture_empty_images_message">படங்கள் எதுவும் கிடைக்கவில்லை.</string>
     <string name="capture_empty_message">பதிவிறக்குவதற்கு எந்த மீடியாவும் இல்லை.</string>
     <string name="capture_empty_subtext">இணையதளத்தை மீண்டும் ஏற்றவும், கிடைக்கக்கூடிய மீடியாவை Firedown கண்டறியும்.</string>
-    <string name="capture_empty_svgs_message">SVGகள் இல்லை.</string>
     <string name="capture_empty_video_message">வீடியோக்கள் இல்லை.</string>
     <string name="clipboard">கிளிப்போர்டுக்கு நகலெடுக்கப்பட்டது</string>
     <string name="close_tab">கீற்றை மூடு</string>

@@ -31,7 +31,6 @@
     <string name="capture_empty_images_message">Resim mevcut değil.</string>
     <string name="capture_empty_message">İndirilebilecek medya yok.</string>
     <string name="capture_empty_subtext">Web sitesini yeniden yüklediğinizde Firedown mevcut medyayı algılayacaktır.</string>
-    <string name="capture_empty_svgs_message">SVG mevcut değil.</string>
     <string name="capture_empty_video_message">Hiçbir video mevcut değil.</string>
     <string name="clipboard">Panoya kopyalandı</string>
     <string name="clipboard_from">Panodan</string>

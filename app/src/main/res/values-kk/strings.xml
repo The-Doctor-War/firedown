@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">Суреттер жоқ.</string>
     <string name="capture_empty_message">Жүктеп алуға болатын медиа жоқ.</string>
     <string name="capture_empty_subtext">Веб-сайтты қайта жүктеңіз және Firedown қол жетімді медианы анықтайды.</string>
-    <string name="capture_empty_svgs_message">SVG қол жетімді емес.</string>
     <string name="capture_empty_video_message">Бейнелер жоқ.</string>
     <string name="clipboard">Буферге көшірілді</string>
     <string name="close_tab">Бетті жабу</string>

@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Không có sẵn hình ảnh nào.</string>
     <string name="capture_empty_message">Không có sẵn phương tiện để tải xuống.</string>
     <string name="capture_empty_subtext">Tải lại trang web và Firedown sẽ phát hiện phương tiện có sẵn.</string>
-    <string name="capture_empty_svgs_message">Không có sẵn SVG.</string>
     <string name="capture_empty_video_message">Không có video nào.</string>
     <string name="clipboard">Sao chép vào clipboard</string>
     <string name="clipboard_from">Từ bộ nhớ tạm</string>

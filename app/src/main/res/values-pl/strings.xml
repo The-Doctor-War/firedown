@@ -31,7 +31,6 @@
     <string name="capture_empty_images_message">Brak dostępnych obrazów.</string>
     <string name="capture_empty_message">Brak multimediów do pobrania.</string>
     <string name="capture_empty_subtext">Załaduj ponownie witrynę, a Firedown wykryje dostępne multimedia.</string>
-    <string name="capture_empty_svgs_message">Brak dostępnych plików SVG.</string>
     <string name="capture_empty_video_message">Brak dostępnych filmów.</string>
     <string name="clipboard">Skopiowane do schowka</string>
     <string name="clipboard_from">Ze schowka</string>

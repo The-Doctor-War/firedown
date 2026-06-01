@@ -31,7 +31,6 @@
     <string name="capture_empty_images_message">Geen afbeeldingen beschikbaar.</string>
     <string name="capture_empty_message">Er zijn geen media beschikbaar om te downloaden.</string>
     <string name="capture_empty_subtext">Laad de website opnieuw en Firedown zal de beschikbare media detecteren.</string>
-    <string name="capture_empty_svgs_message">Geen SVG\'s beschikbaar.</string>
     <string name="capture_empty_video_message">Geen video\'s beschikbaar.</string>
     <string name="clipboard">Gekopieerd naar het klembord</string>
     <string name="clipboard_from">Van klembord</string>

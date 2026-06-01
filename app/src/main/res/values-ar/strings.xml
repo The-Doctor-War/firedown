@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">لا توجد صور متاحة.</string>
     <string name="capture_empty_message">لا توجد وسائط متاحة للتنزيل.</string>
     <string name="capture_empty_subtext">أعد تحميل موقع الويب وسيكتشف Firedown الوسائط المتاحة.</string>
-    <string name="capture_empty_svgs_message">لا توجد ملفات SVG متاحة.</string>
     <string name="capture_empty_video_message">لا توجد مقاطع فيديو متاحة.</string>
     <string name="clipboard">نسخ إلى الحافظة</string>
     <string name="clipboard_from">من الحافظة</string>

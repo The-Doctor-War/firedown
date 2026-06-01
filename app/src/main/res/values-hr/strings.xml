@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Nema dostupnih slika.</string>
     <string name="capture_empty_message">Nema medija dostupnih za preuzimanje.</string>
     <string name="capture_empty_subtext">Ponovno učitajte web mjesto i Firedown će otkriti dostupne medije.</string>
-    <string name="capture_empty_svgs_message">Nema dostupnih SVG-ova.</string>
     <string name="capture_empty_video_message">Nema dostupnih videozapisa.</string>
     <string name="clipboard">Kopirano u međuspremnik</string>
     <string name="close_tab">Zatvori karticu</string>

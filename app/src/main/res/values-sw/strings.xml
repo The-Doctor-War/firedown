@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">Hakuna Picha zinazopatikana.</string>
     <string name="capture_empty_message">Hakuna midia inayopatikana ya kupakua.</string>
     <string name="capture_empty_subtext">Pakia upya tovuti na Firedown itatambua maudhui yanayopatikana.</string>
-    <string name="capture_empty_svgs_message">Hakuna SVG zinazopatikana.</string>
     <string name="capture_empty_video_message">Hakuna video zinazopatikana.</string>
     <string name="clipboard">Imenakiliwa kwenye ubao wa kunakili</string>
 <string name="connection_secure">Muunganisho ni salama</string>

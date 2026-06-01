@@ -25,7 +25,6 @@
     <string name="capture_empty_images_message">Tasvirlar mavjud emas.</string>
     <string name="capture_empty_message">Yuklab olish uchun hech qanday media mavjud emas.</string>
     <string name="capture_empty_subtext">Veb-saytni qayta yuklang va Firedown mavjud mediani aniqlaydi.</string>
-    <string name="capture_empty_svgs_message">SVG mavjud emas.</string>
     <string name="capture_empty_video_message">Hech qanday video mavjud emas.</string>
     <string name="clipboard">Buferga nusxalandi</string>
     <string name="close_tab">Varaqni yopish</string>

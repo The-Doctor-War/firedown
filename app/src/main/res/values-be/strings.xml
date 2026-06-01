@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">Выяў няма.</string>
     <string name="capture_empty_message">Няма даступных мультымедыя для спампоўкі.</string>
     <string name="capture_empty_subtext">Перазагрузіце вэб-сайт, і Firedown выявіць даступны носьбіт.</string>
-    <string name="capture_empty_svgs_message">Няма даступных файлаў SVG.</string>
     <string name="capture_empty_video_message">Няма даступных відэа.</string>
     <string name="clipboard">Скапіравана ў буфер абмену</string>
     <string name="close_tab">Закрыць картку</string>

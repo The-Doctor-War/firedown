@@ -18,7 +18,6 @@
     <string name="capture_empty_images_message">Nav pieejami attēli.</string>
     <string name="capture_empty_message">Lejupielādei nav pieejams neviens plašsaziņas līdzeklis.</string>
     <string name="capture_empty_subtext">Atkārtoti ielādējiet tīmekļa vietni, un Firedown noteiks pieejamos plašsaziņas līdzekļus.</string>
-    <string name="capture_empty_svgs_message">Nav pieejams neviens SVG.</string>
     <string name="capture_empty_video_message">Nav pieejams neviens video.</string>
     <string name="clipboard">Kopēts starpliktuvē</string>
 <string name="connection_secure">Savienojums ir drošs</string>

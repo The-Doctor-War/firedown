@@ -28,7 +28,6 @@
     <string name="capture_empty_images_message">Nincsenek elérhető képek.</string>
     <string name="capture_empty_message">Nincs letölthető média.</string>
     <string name="capture_empty_subtext">Töltse be újra a webhelyet, és a Firedown észleli az elérhető médiát.</string>
-    <string name="capture_empty_svgs_message">Nem állnak rendelkezésre SVG-k.</string>
     <string name="capture_empty_video_message">Nincsenek elérhető videók.</string>
     <string name="clipboard">Vágólapra másolva</string>
     <string name="clipboard_from">A vágólapról</string>

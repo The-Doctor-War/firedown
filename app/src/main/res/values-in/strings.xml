@@ -27,7 +27,6 @@
     <string name="capture_empty_images_message">Tidak ada Gambar yang tersedia.</string>
     <string name="capture_empty_message">Tidak ada media yang tersedia untuk diunduh.</string>
     <string name="capture_empty_subtext">Muat ulang situs web dan Firedown akan mendeteksi media yang tersedia.</string>
-    <string name="capture_empty_svgs_message">Tidak ada SVG yang tersedia.</string>
     <string name="capture_empty_video_message">Tidak ada video yang tersedia.</string>
     <string name="clipboard">Disalin ke papan klip</string>
     <string name="clipboard_from">Dari papan klip</string>

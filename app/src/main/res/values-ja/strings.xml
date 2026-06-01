@@ -32,7 +32,6 @@
     <string name="capture_empty_message">ダウンロードできるメディアがありません。</string>
     <string name="capture_empty_subtext">Web サイトをリロードすると、Firedown が利用可能なメディアを検出します。</string>
     <string name="capture_empty_subtitles_message">字幕はありません。</string>
-    <string name="capture_empty_svgs_message">利用可能な SVG はありません。</string>
     <string name="capture_empty_video_message">利用できるビデオはありません。</string>
     <string name="cert_connection_exception">セキュリティ例外</string>
     <string name="cert_connection_insecure">接続は安全ではありません</string>

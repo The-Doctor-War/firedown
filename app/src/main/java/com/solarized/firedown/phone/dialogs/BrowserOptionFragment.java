@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.Toolbar;
@@ -76,6 +77,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     private boolean mEnableGrid;
     private boolean mIsIncognito;
     private int mScrollLimit;
+    private OnBackPressedCallback mClearFilterOnBack;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -318,6 +320,22 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         });
 
         mBrowserDownloadViewModel.update();
+
+        /* Back deselects an active filter chip (reverts to the unfiltered
+         * list) instead of leaving the screen — mirrors DownloadFragment so
+         * "Back unwinds my last narrowing step" is consistent across the
+         * two list surfaces. The callback enables/disables itself in
+         * onCheckedChanged so it only intercepts Back while a chip is
+         * actually checked; otherwise Back behaves normally. */
+        mClearFilterOnBack = new OnBackPressedCallback(false) {
+            @Override
+            public void handleOnBackPressed() {
+                if (mChipGroup != null && mChipGroup.getCheckedChipId() != View.NO_ID) {
+                    mChipGroup.clearCheck();
+                }
+            }
+        };
+        mActivity.getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), mClearFilterOnBack);
     }
 
 
@@ -503,6 +521,9 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         int selectedId = checkedIds.isEmpty() ? android.view.View.NO_ID : checkedIds.get(0);
         String type = mBrowserDownloadViewModel.getCurrentSortForIds(selectedId);
         mBrowserDownloadViewModel.sortBrowserDownloads(type);
+        // Only intercept Back while a chip is actually checked — otherwise
+        // Back must behave normally (close the screen).
+        if (mClearFilterOnBack != null) mClearFilterOnBack.setEnabled(!checkedIds.isEmpty());
     }
 
 

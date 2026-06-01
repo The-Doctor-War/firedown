@@ -56,7 +56,7 @@ The combined APK is effectively GPL-3.0 due to bundled uBlock Origin. See [NOTIC
 Firedown is free and has no ads, accounts, or telemetry. If you'd like to support development:
 
 - ☕ **[Buy Me a Coffee](https://buymeacoffee.com/solarized)**
-- ⚡ Lightning at [firedown.app](https://firedown.app)
+- ⚡ Lightning at [firedown.app/donate](https://firedown.app/donate)
 
 ---
 

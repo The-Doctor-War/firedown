@@ -3,8 +3,12 @@ package com.solarized.firedown.glide;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.graphics.drawable.Drawable;
 import androidx.core.content.ContextCompat;
 
@@ -56,9 +60,74 @@ public class MimeTypeThumbnail {
         return bitmap;
     }
 
+    /**
+     * Resolution-independent variant of {@link #generate}. Returns a
+     * Drawable that paints the tinted background + centred icon into
+     * whatever bounds the host gives it, so callers like the player
+     * (where the artwork slot's pixel size isn't known until after
+     * layout) don't end up baking a 256×180 raster that fitCenters to
+     * a thin band in the middle of a portrait viewport. Used as
+     * PlayerView's defaultArtwork and as Glide's .error() fallback,
+     * both of which size the drawable from view bounds.
+     */
+    @NonNull
+    public static Drawable generateDrawable(@NonNull Context context, @NonNull String mimeType) {
+        int color = getColorForMimeType(mimeType);
+        Drawable icon = ContextCompat.getDrawable(context, FileUriHelper.getMimeTypeIcon(mimeType));
+        if (icon != null) {
+            icon = icon.mutate();
+            icon.setTint(color);
+        }
+        return new MimeTypeFallbackDrawable(color, icon);
+    }
+
     private static int getColorForMimeType(@NonNull String mimeType) {
         if (FileUriHelper.isVideo(mimeType))                return COLOR_BRAND_ORANGE;
         if (FileUriHelper.isAudio(mimeType))                return COLOR_BRAND_YELLOW;
         return COLOR_BRAND_ORANGE;
+    }
+
+    private static final class MimeTypeFallbackDrawable extends Drawable {
+
+        private final Paint mBgPaint;
+        private final Drawable mIcon;
+
+        MimeTypeFallbackDrawable(int color, @Nullable Drawable icon) {
+            mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            mBgPaint.setColor(color);
+            mBgPaint.setAlpha(30);
+            mIcon = icon;
+        }
+
+        @Override
+        public void draw(@NonNull Canvas canvas) {
+            Rect b = getBounds();
+            canvas.drawRect(b, mBgPaint);
+            if (mIcon == null || b.isEmpty()) return;
+            int iconSize = (int) (Math.min(b.width(), b.height()) * 0.5f);
+            int left = b.left + (b.width() - iconSize) / 2;
+            int top = b.top + (b.height() - iconSize) / 2;
+            mIcon.setBounds(left, top, left + iconSize, top + iconSize);
+            mIcon.draw(canvas);
+        }
+
+        @Override
+        public void setAlpha(int alpha) {
+            mBgPaint.setAlpha(alpha);
+            if (mIcon != null) mIcon.setAlpha(alpha);
+            invalidateSelf();
+        }
+
+        @Override
+        public void setColorFilter(@Nullable ColorFilter colorFilter) {
+            mBgPaint.setColorFilter(colorFilter);
+            if (mIcon != null) mIcon.setColorFilter(colorFilter);
+            invalidateSelf();
+        }
+
+        @Override
+        public int getOpacity() {
+            return PixelFormat.TRANSLUCENT;
+        }
     }
 }

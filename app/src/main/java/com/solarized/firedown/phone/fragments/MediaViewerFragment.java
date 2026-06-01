@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
@@ -183,13 +182,12 @@ public class MediaViewerFragment extends Fragment {
 
         String fileMime = mDownloadEntity.getFileMimeType();
 
-        int width = mPlayerView.getWidth();
-        int height = mPlayerView.getHeight();
-        if (width <= 0) width = (int) (getResources().getDisplayMetrics().density * 256);
-        if (height <= 0) height = (int) (getResources().getDisplayMetrics().density * 180);
-
-        mFallbackDrawable = new BitmapDrawable(getResources(),
-                MimeTypeThumbnail.generate(mActivity, fileMime, width, height));
+        // Resolution-independent fallback: paints to whatever bounds
+        // the host (PlayerView artwork slot / mPhotoView) gives it,
+        // so we don't bake a fixed raster that fitCenters to a thin
+        // band when the player view's pixel size isn't known yet at
+        // onCreateView time (getWidth/getHeight are still 0 here).
+        mFallbackDrawable = MimeTypeThumbnail.generateDrawable(mActivity, fileMime);
 
         if (FileUriHelper.isAudio(fileMime)) {
             mPlayerView.setDefaultArtwork(mFallbackDrawable);

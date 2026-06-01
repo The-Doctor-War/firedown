@@ -227,7 +227,9 @@
 
 
             <!-- Bookmark page — drawableStart + label flip in
-                 applyBookmarkState; dispatched id flips in bindRows. -->
+                 applyBookmarkState; dispatched id flips in bindRows.
+                 Trailing × is only visible when the page is already
+                 bookmarked; tap removes the bookmark in place. -->
             <LinearLayout
                 android:id="@+id/popup_bookmark_page"
                 android:layout_width="match_parent"
@@ -242,8 +244,9 @@
                 <TextView
                     android:id="@+id/popup_bookmark_page_text"
                     style="@style/TextAppearance.Material3.TitleMedium"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:drawablePadding="16dp"
                     android:ellipsize="end"
                     android:maxLines="1"
@@ -252,6 +255,17 @@
                     android:textSize="15sp"
                     app:drawableStartCompat="@drawable/ic_bookmark_border_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/popup_bookmark_remove"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="8dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@string/bookmark_delete_action"
+                    android:src="@drawable/ic_baseline_close_24"
+                    android:visibility="gone"
+                    app:tint="?attr/colorOnSurfaceVariant" />
 
             </LinearLayout>
 

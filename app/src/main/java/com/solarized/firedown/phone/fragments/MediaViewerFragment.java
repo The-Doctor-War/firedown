@@ -9,22 +9,18 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
 import android.transition.Transition;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
@@ -58,6 +54,7 @@ import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.GlideRequestOptions;
 import com.solarized.firedown.glide.MimeTypeThumbnail;
 import com.solarized.firedown.phone.PlayerActivity;
+import com.solarized.firedown.ui.AspectRatioImageView;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.utils.FileUriHelper;
@@ -75,7 +72,7 @@ public class MediaViewerFragment extends Fragment {
 
     private ExoPlayer mExoPlayer;
 
-    private AppCompatImageView mPhotoView;
+    private AspectRatioImageView mPhotoView;
 
     private Drawable mFallbackDrawable;
 
@@ -211,7 +208,7 @@ public class MediaViewerFragment extends Fragment {
             // Transform produces when source (centerCrop in 16:10)
             // and destination (fitCenter, full screen) disagree.
             mPhotoView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            constrainPhotoViewTo16x10();
+            mPhotoView.setAspectRatio(16f / 10f);
         }
 
         // PlayerView / controller behaviour. autoShow is deliberately
@@ -726,40 +723,6 @@ public class MediaViewerFragment extends Fragment {
         mExoPlayer = null;
         mPlayerView = null;
         mWindowInsetsController = null;
-    }
-
-
-    /**
-     * Centred 16:10 card matching the downloads grid cell aspect.
-     * Sized off DisplayMetrics rather than the parent's measured
-     * width because this runs in onCreateView before layout, and the
-     * shared element transition needs the destination bounds set
-     * before it starts capturing.
-     */
-    private void constrainPhotoViewTo16x10() {
-        if (mPhotoView == null) return;
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-        int sw = dm.widthPixels;
-        int sh = dm.heightPixels;
-        int cardW, cardH;
-        if (sw * 10 <= sh * 16) {
-            cardW = sw;
-            cardH = sw * 10 / 16;
-        } else {
-            cardH = sh;
-            cardW = sh * 16 / 10;
-        }
-        ViewGroup.LayoutParams lp = mPhotoView.getLayoutParams();
-        if (lp instanceof FrameLayout.LayoutParams flp) {
-            flp.width = cardW;
-            flp.height = cardH;
-            flp.gravity = Gravity.CENTER;
-            mPhotoView.setLayoutParams(flp);
-        } else if (lp != null) {
-            lp.width = cardW;
-            lp.height = cardH;
-            mPhotoView.setLayoutParams(lp);
-        }
     }
 
 

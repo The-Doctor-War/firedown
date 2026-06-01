@@ -7,7 +7,7 @@
     }
   },
   "name": "Video parser",
-  "description": "Parses media URLs from Vimeo, Twitter/X, Instagram, Kick, Twitch, Dailymotion, Apple Podcasts, and TikTok",
+  "description": "Parses media URLs from Vimeo, Twitter/X, Instagram, Facebook, Kick, Twitch, Dailymotion, Apple Podcasts, and TikTok",
   "background": {
     "scripts": [
       "background.js"
@@ -40,6 +40,9 @@
     "webRequestBlocking",
     "webNavigation",
     "*://*.instagram.com/*",
+    "*://*.facebook.com/*",
+    "*://*.fbcdn.net/*",
+    "*://fb.watch/*",
     "*://*.x.com/*",
     "*://*.twitter.com/*",
     "*://*.vimeo.com/*",

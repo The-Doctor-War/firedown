@@ -1558,7 +1558,21 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 incognito = tab?.incognito || false;
             } catch (e) {}
         }
-        const headers = getBrowserHeaders();
+        // Dedicated header set for timedtext requests. We do NOT reuse
+        // getBrowserHeaders() because the captured XHR headers from the
+        // YouTube tab include Sec-Fetch-Site: same-origin with no Referer,
+        // and YouTube's timedtext endpoint silently returns an empty body
+        // (HTTP 200, zero bytes) when those signals don't match. Symptom
+        // was JsonToSrtConverter throwing "End of input at character 0".
+        // A minimal request with Referer + Origin behaves like an in-page
+        // caption fetch and returns the json3 payload.
+        const headers = [
+            { name: "User-Agent", value: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36" },
+            { name: "Accept", value: "*/*" },
+            { name: "Accept-Language", value: "en-US,en;q=0.5" },
+            { name: "Referer", value: "https://www.youtube.com/" },
+            { name: "Origin", value: "https://www.youtube.com" }
+        ];
 
         let emitted = 0;
         for (const t of tracks) {

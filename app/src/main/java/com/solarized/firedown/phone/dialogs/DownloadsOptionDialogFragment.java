@@ -46,6 +46,11 @@ public class DownloadsOptionDialogFragment extends BaseBottomSheetDialogFragment
         // Null on restore is handled by onCreateDialog / onCreateView.
     }
 
+    @Override
+    protected boolean isMaxHeightCapped() {
+        return false;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {

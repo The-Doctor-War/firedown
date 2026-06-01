@@ -400,6 +400,26 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
     private static final long TRANSITION_RELEASE_TIMEOUT_MS = 350L;
 
 
+    /**
+     * Shows a "View" button on the completion bar that opens the just-created
+     * file, when the Finished event carried the produced {@link DownloadEntity}.
+     * A task's output is often a different type than the active filter chip
+     * (save-frame → image under a video filter, extract-audio → audio, etc.),
+     * so the new item can be hidden in the list; {@code openItem} opens it
+     * directly and sidesteps the filter. Hides the button when there's no
+     * single artifact to show (e.g. multi-file extract passes a count).
+     */
+    private void offerViewAction(Object obj) {
+        DownloadEntity entity = obj instanceof DownloadEntity ? (DownloadEntity) obj : null;
+        if (entity != null) {
+            mBottomProgressView.setActionButtonVisibility(View.VISIBLE);
+            mBottomProgressView.setActionButtonText(R.string.file_view);
+            mBottomProgressView.setActionButtonListener(v -> openItem(entity, null));
+        } else {
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        }
+    }
+
     protected void handleTaskFinish(ServiceActions action, Object obj) {
         mOperationActive = false;
         stopActionMode();
@@ -407,7 +427,10 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         if (action == ServiceActions.AUDIO_ENCODE) {
             mBottomProgressView.setProgress(100);
             mBottomProgressView.setTitle(R.string.task_audio_finished);
-            mBottomProgressView.setActionButtonVisibility(View.GONE);
+            /* The extracted audio is a different type than a video filter,
+             * so it may be hidden in the list. Offer a View that opens it
+             * directly, sidestepping the active filter. */
+            offerViewAction(obj);
         } else if (action == ServiceActions.MAKE_GIF) {
             mBottomProgressView.setProgress(100);
             mBottomProgressView.setTitle(R.string.task_gif_finished);
@@ -415,14 +438,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
              * Finished event so we can offer a one-tap View action that
              * launches PlayerActivity directly — same shape as the
              * Vault encryption/decryption finish UIs. */
-            DownloadEntity gifEntity = obj instanceof DownloadEntity ? (DownloadEntity) obj : null;
-            if (gifEntity != null) {
-                mBottomProgressView.setActionButtonVisibility(View.VISIBLE);
-                mBottomProgressView.setActionButtonText(R.string.file_view);
-                mBottomProgressView.setActionButtonListener(v -> startPlayerActivity(gifEntity));
-            } else {
-                mBottomProgressView.setActionButtonVisibility(View.GONE);
-            }
+            offerViewAction(obj);
         } else if (action == ServiceActions.ERROR_AUDIO_ENCODE) {
             /* Native encoder rejected the input (jni_encoder_start
              * prepare error) — most commonly because the source has no
@@ -451,17 +467,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         } else if (action == ServiceActions.COMPRESS) {
             mBottomProgressView.setProgress(100);
             mBottomProgressView.setTitle(R.string.task_compress_finished);
-            /* CompressTask passes the just-created archive entity through
-             * the Finished event so we can offer a one-tap View that opens
-             * the zip with an external handler — same shape as MAKE_GIF. */
-            DownloadEntity zipEntity = obj instanceof DownloadEntity ? (DownloadEntity) obj : null;
-            if (zipEntity != null) {
-                mBottomProgressView.setActionButtonVisibility(View.VISIBLE);
-                mBottomProgressView.setActionButtonText(R.string.file_view);
-                mBottomProgressView.setActionButtonListener(v -> openItemWith(zipEntity));
-            } else {
-                mBottomProgressView.setActionButtonVisibility(View.GONE);
-            }
+            offerViewAction(obj);
         } else if (action == ServiceActions.ERROR_COMPRESS) {
             mBottomProgressView.setTitle(R.string.task_compress_failed);
             mBottomProgressView.setActionButtonVisibility(View.GONE);
@@ -487,7 +493,9 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         } else if (action == ServiceActions.SAVE_FRAME) {
             mBottomProgressView.setProgress(100);
             mBottomProgressView.setTitle(R.string.task_frame_finished);
-            mBottomProgressView.setActionButtonVisibility(View.GONE);
+            /* Saved frame is an image — hidden under a video filter. Offer
+             * a View that opens it directly. */
+            offerViewAction(obj);
         } else if (action == ServiceActions.ERROR_SAVE_FRAME) {
             mBottomProgressView.setTitle(R.string.task_frame_failed);
             mBottomProgressView.setActionButtonVisibility(View.GONE);

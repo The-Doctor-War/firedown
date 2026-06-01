@@ -97,9 +97,12 @@ public class SaveFrameTask extends TaskRunnable {
                 frame.recycle();
             }
 
-            mDownloadRepository.addSync(buildEntity(source, outFile));
+            DownloadEntity out = buildEntity(source, outFile);
+            mDownloadRepository.addSync(out);
             success = true;
-            deliverMessage(new TaskEvent.Finished(ServiceActions.SAVE_FRAME, null));
+            // Pass the saved image through so the UI can offer a "View" that
+            // opens it regardless of the active downloads filter.
+            deliverMessage(new TaskEvent.Finished(ServiceActions.SAVE_FRAME, out));
 
         } catch (IOException e) {
             Log.e(TAG, "saveFrame", e);

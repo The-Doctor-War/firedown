@@ -106,7 +106,9 @@ public class AudioEncodeTask extends TaskRunnable implements FFmpegListener {
 
             mDownloadRepository.addSync(mDownloadEntity);
 
-            deliverMessage(new TaskEvent.Finished(ServiceActions.AUDIO_ENCODE, null));
+            // Pass the extracted audio through so the UI can offer a "View"
+            // that opens it regardless of the active downloads filter.
+            deliverMessage(new TaskEvent.Finished(ServiceActions.AUDIO_ENCODE, mDownloadEntity));
 
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "IOException ", e);

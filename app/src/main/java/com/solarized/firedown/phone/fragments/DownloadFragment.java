@@ -309,6 +309,8 @@ public class DownloadFragment extends BaseDownloadFragment implements
             return R.drawable.ill_small_gif;
         else if (chipId == R.id.chip_apk)
             return R.drawable.ill_small_apk;
+        else if (chipId == R.id.chip_zip)
+            return R.drawable.ill_small_zip;
         else
             return R.drawable.ill_baloons;
     }

@@ -30,6 +30,13 @@
             android:text="@string/sort_by_type_audio"
             android:checkable="true"/>
 
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_subtitle"
+            style="@style/Theme.FireDown.Download.Chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/sort_by_type_subtitle"
+            android:checkable="true"/>
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_image"
@@ -48,11 +55,11 @@
             android:checkable="true"/>
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chip_svg"
+            android:id="@+id/chip_doc"
             style="@style/Theme.FireDown.Download.Chip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/sort_by_type_svg"
+            android:text="@string/sort_by_type_docs"
             android:checkable="true"/>
 
         <com.google.android.material.chip.Chip
@@ -61,14 +68,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sort_by_type_apk"
-            android:checkable="true"/>
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chip_doc"
-            style="@style/Theme.FireDown.Download.Chip"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/sort_by_type_docs"
             android:checkable="true"/>
 
         <com.google.android.material.chip.Chip

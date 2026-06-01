@@ -33,7 +33,6 @@
     <string name="capture_empty_message">No media available for downloading.</string>
     <string name="capture_empty_subtext">Reload the website and Firedown will detect available media.</string>
     <string name="capture_empty_subtitles_message">No Subtitles available.</string>
-    <string name="capture_empty_svgs_message">No SVGs available.</string>
     <string name="capture_empty_video_message">No videos available.</string>
     <string name="cert_connection_exception">Security Exception</string>
     <string name="cert_connection_insecure">Connection is Not Secure</string>
@@ -541,9 +540,8 @@
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Images</string>
     <string name="sort_by_type_subtitle">Subtitle</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Video</string>
-    <string name="sort_by_type_zip">Zip</string>
+    <string name="sort_by_type_zip">Archives</string>
     <string name="spoof_timezone_summary">When enabled, strengthens fingerprinting protection</string>
     <string name="stream_type_audio">audio</string>
     <string name="stream_type_muxed">video+audio</string>

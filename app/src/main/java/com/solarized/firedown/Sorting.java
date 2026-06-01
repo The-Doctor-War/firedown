@@ -26,7 +26,6 @@ public class Sorting {
     public static final String SORT_TYPE_GIF = "gif";
     public static final String SORT_TYPE_ZIP = "zip";
     public static final String SORT_TYPE_SUBTITLE = "subtitle";
-    public static final String SORT_TYPE_SVG = "svg";
 
     private final SharedPreferences mSharedPreferences;
 
@@ -62,7 +61,6 @@ public class Sorting {
         if (SORT_TYPE_GIF.equals(mCurrentSortBrowser)) return R.id.chip_gif;
         if (SORT_TYPE_IMAGES.equals(mCurrentSortBrowser)) return R.id.chip_image;
         if (SORT_TYPE_DOCS.equals(mCurrentSortBrowser)) return R.id.chip_doc;
-        if (SORT_TYPE_SVG.equals(mCurrentSortBrowser)) return R.id.chip_svg;
         if (SORT_TYPE_SUBTITLE.equals(mCurrentSortBrowser)) return R.id.chip_subtitle;
         return R.id.chip_all;
     }
@@ -76,7 +74,6 @@ public class Sorting {
         if (selectedId == R.id.chip_audio) return SORT_TYPE_AUDIO;
         if (selectedId == R.id.chip_image) return SORT_TYPE_IMAGES;
         if (selectedId == R.id.chip_gif) return SORT_TYPE_GIF;
-        if (selectedId == R.id.chip_svg) return SORT_TYPE_SVG;
         if (selectedId == R.id.chip_apk) return SORT_TYPE_APK;
         if (selectedId == R.id.chip_doc) return SORT_TYPE_DOCS;
         if (selectedId == R.id.chip_zip) return SORT_TYPE_ZIP;
@@ -90,9 +87,8 @@ public class Sorting {
         return switch (mCurrentSortBrowser) {
             case SORT_TYPE_VIDEO -> FileUriHelper.isVideo(mimeType);
             case SORT_TYPE_AUDIO -> FileUriHelper.isAudio(mimeType);
-            case SORT_TYPE_IMAGES -> FileUriHelper.isImage(mimeType) && !FileUriHelper.isGIF(mimeType) && !FileUriHelper.isSVG(mimeType);
+            case SORT_TYPE_IMAGES -> FileUriHelper.isImage(mimeType) && !FileUriHelper.isGIF(mimeType);
             case SORT_TYPE_GIF -> FileUriHelper.isGIF(mimeType);
-            case SORT_TYPE_SVG -> FileUriHelper.isSVG(mimeType);
             case SORT_TYPE_SUBTITLE -> FileUriHelper.isSubtitle(mimeType);
             default -> true;
         };
@@ -102,11 +98,10 @@ public class Sorting {
         if (downloadEntity == null) return false;
         String mimeType = downloadEntity.getFileMimeType();
         return switch (mCurrentSortDownloads) {
-            case SORT_TYPE_DOCS -> FileUriHelper.isDoc(mimeType) && !FileUriHelper.isSVG(mimeType);
+            case SORT_TYPE_DOCS -> FileUriHelper.isDoc(mimeType) && !FileUriHelper.isSubtitle(mimeType);
             case SORT_TYPE_AUDIO -> FileUriHelper.isAudio(mimeType);
             case SORT_TYPE_VIDEO -> FileUriHelper.isVideo(mimeType);
-            case SORT_TYPE_IMAGES -> FileUriHelper.isImage(mimeType) && !FileUriHelper.isSVG(mimeType) && !FileUriHelper.isGIF(mimeType);
-            case SORT_TYPE_SVG -> FileUriHelper.isSVG(mimeType);
+            case SORT_TYPE_IMAGES -> FileUriHelper.isImage(mimeType) && !FileUriHelper.isGIF(mimeType);
             case SORT_TYPE_GIF -> FileUriHelper.isGIF(mimeType);
             case SORT_TYPE_ZIP -> FileUriHelper.isCompressed(mimeType);
             case SORT_TYPE_SUBTITLE -> FileUriHelper.isSubtitle(mimeType);
@@ -139,15 +134,13 @@ public class Sorting {
         else if (chipId == R.id.chip_audio)
             return FileUriHelper.isAudio(mimeType);
         else if (chipId == R.id.chip_image)
-            return FileUriHelper.isImage(mimeType);
-        else if (chipId == R.id.chip_svg)
-            return FileUriHelper.isSVG(mimeType);
+            return FileUriHelper.isImage(mimeType) && !FileUriHelper.isGIF(mimeType);
         else if (chipId == R.id.chip_gif)
             return FileUriHelper.isGIF(mimeType);
         else if (chipId == R.id.chip_zip)
             return FileUriHelper.isCompressed(mimeType);
         else if (chipId == R.id.chip_doc)
-            return FileUriHelper.isDoc(mimeType) && !FileUriHelper.isSVG(mimeType);
+            return FileUriHelper.isDoc(mimeType) && !FileUriHelper.isSubtitle(mimeType);
         else if (chipId == R.id.chip_subtitle)
             return FileUriHelper.isSubtitle(mimeType);
         else if (chipId == R.id.chip_apk)

@@ -306,6 +306,116 @@
   .fname-row code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: #e0e0e6; }
   .fname-row .bad code { color: #f6a6a4; }
   .fname-row .good code { color: #8ad9ad; }
+
+  /* =================================================================
+     Grid view
+     ================================================================= */
+  .grid {
+    padding: 10px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
+  .tile {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface-h-dark);
+    aspect-ratio: 16 / 11;
+    background-size: cover; background-position: center;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .tile-shade {
+    padding: 8px 8px 6px;
+    background: linear-gradient(to top, rgba(0,0,0,0.78), rgba(0,0,0,0));
+    color: #fff;
+  }
+  .tile-title {
+    font-size: 11.5px; font-weight: 600;
+    line-height: 1.25;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tile-meta {
+    font-size: 10px; opacity: 0.85; margin-top: 2px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .tile-corner {
+    position: absolute;
+    top: 6px; right: 6px;
+    display: flex; gap: 4px;
+  }
+  .corner-pill {
+    background: rgba(0,0,0,0.62);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+    padding: 3px 7px; border-radius: 999px;
+    display: inline-flex; align-items: center; gap: 3px;
+  }
+  .corner-pill svg { width: 11px; height: 11px; }
+  .corner-pill.on { background: var(--primary-container-d); color: var(--on-primary-container-d); }
+  .duration-pill {
+    background: rgba(0,0,0,0.62);
+    color: #fff; font-size: 10px;
+    padding: 2px 6px; border-radius: 4px;
+    align-self: flex-start;
+    margin: 0 0 4px;
+  }
+
+  /* Grid: language strip overflowing the tile */
+  .tile-strip {
+    display: flex; flex-wrap: wrap; gap: 3px;
+    margin-top: 4px;
+  }
+  .tile-strip .lang-tag {
+    font-size: 9px; padding: 1px 4px;
+    background: rgba(255,255,255,0.18);
+    color: #fff; min-width: 0;
+  }
+
+  /* Grid: a tile that "expands" — shows the failure */
+  .tile-expanded {
+    grid-column: 1 / -1;
+    background: rgba(255,255,255,0.03);
+    border-radius: 10px;
+    border: 1px dashed rgba(255,255,255,0.10);
+    padding: 8px;
+    display: flex; gap: 10px;
+  }
+  .tile-expanded .mini-thumb {
+    width: 92px; aspect-ratio: 16/11; border-radius: 6px;
+    background-size: cover; background-position: center;
+    flex-shrink: 0;
+  }
+  .tile-expanded .sub-children { padding: 0; margin: 0; border-left: none; }
+  .tile-expanded .col-block { flex: 1; min-width: 0; }
+  .tile-expanded .e-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
+
+  /* Subtitle chip grouped grid */
+  .group-grid-header {
+    grid-column: 1 / -1;
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 4px 6px;
+    border-bottom: 1px solid var(--hairline-d);
+    font-size: 12px;
+  }
+  .group-grid-header .group-thumb { width: 36px; height: 28px; }
+  .group-grid-header .group-title { font-size: 12.5px; }
+  .group-grid-header .group-sub { font-size: 10.5px; }
+  .sub-tile {
+    aspect-ratio: 16 / 11;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--hairline-d);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+    padding: 6px;
+  }
+  .sub-tile .lang-tag { font-size: 14px; padding: 4px 10px; min-width: 0; letter-spacing: 0.04em; }
+  .sub-tile .name { font-size: 10.5px; color: var(--on-var-dark); text-align: center; }
+  .sub-tile .size { font-size: 9.5px; color: #80848a; }
 </style>
 </head>
 <body>
@@ -659,6 +769,204 @@
         <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [pt].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>87 KB</span></div></div></div>
         <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">How to Build a Habit [ja].srt</span></div><div class="meta-line"><span class="mime-text">SRT</span><span class="meta-sep">·</span><span>96 KB</span></div></div></div>
         <div class="row" style="min-height:60px"><div class="thumb" style="font-size:22px">⋯</div><div class="body"><div class="top"><span class="file-name">…48 more for this video, then 2 for Arctic, then…</span></div><div class="meta-line"><span>scroll forever</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- =================================================================== -->
+<h2>Same four treatments in grid view</h2>
+<p class="h2-note">
+  Browse has a list / grid toggle. Subtitle grouping behaves very differently in grid: the
+  variants that depended on row layout (A inline expand, C language strip) fight the grid
+  rhythm. B (corner pill → sheet) survives the swap with no changes. This is the cleanest
+  signal in the whole sketch for which variant to pick.
+</p>
+
+<div class="compare">
+
+  <div>
+    <div class="col-label">A · grid · inline expand <span class="con">breaks the grid</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · grid · row tapped</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="grid">
+        <div class="tile" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">
+          <div class="tile-corner"><span class="corner-pill on">CC 52</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">42:18</span>
+            <div class="tile-title">How to Build a Habit — Andrew Huberman</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">
+          <div class="tile-corner"><span class="corner-pill">CC 2</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">24:02</span>
+            <div class="tile-title">I Survived 100 Days in the Arctic</div>
+          </div>
+        </div>
+        <div class="tile-expanded">
+          <div class="mini-thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)"></div>
+          <div class="col-block">
+            <div class="e-title">How to Build a Habit — captions</div>
+            <div class="sub-children" style="padding:0;margin:0;border:none;">
+              <div class="sub-row"><span class="lang-tag">EN</span><span class="sub-name">English</span><span class="sub-size">88 KB</span></div>
+              <div class="sub-row"><span class="lang-tag">ES</span><span class="sub-name">Spanish</span><span class="sub-size">91 KB</span></div>
+              <div class="show-all">Show all 52 ›</div>
+            </div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#2a1f3a,#7b4a8a)">
+          <div class="tile-shade">
+            <span class="duration-pill">live</span>
+            <div class="tile-title">lofi hip hop radio</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#1a2a3a,#3a5a7b)">
+          <div class="tile-corner"><span class="corner-pill">CC 5</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">18:44</span>
+            <div class="tile-title">How to make perfect croissants — Bon Appétit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">B · grid · corner pill → sheet <span class="pro">no layout disruption</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · grid · default</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="grid">
+        <div class="tile" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">
+          <div class="tile-corner"><span class="corner-pill on">CC 52</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">42:18</span>
+            <div class="tile-title">How to Build a Habit — Andrew Huberman</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">
+          <div class="tile-corner"><span class="corner-pill">CC 2</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">24:02</span>
+            <div class="tile-title">I Survived 100 Days in the Arctic</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#2a1f3a,#7b4a8a)">
+          <div class="tile-shade">
+            <span class="duration-pill">live</span>
+            <div class="tile-title">lofi hip hop radio</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#1a2a3a,#3a5a7b)">
+          <div class="tile-corner"><span class="corner-pill">CC 5</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">18:44</span>
+            <div class="tile-title">How to make perfect croissants — Bon Appétit</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#3a1f2f,#7b3a5a)">
+          <div class="tile-corner"><span class="corner-pill">CC 1</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">2:04:11</span>
+            <div class="tile-title">ASMR Hair Brushing — 2 hours</div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#2f3a1f,#5a7b3a)">
+          <div class="tile-corner"><span class="corner-pill">CC 8</span></div>
+          <div class="tile-shade">
+            <span class="duration-pill">7:21</span>
+            <div class="tile-title">Why this volcano keeps erupting</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="compare">
+
+  <div>
+    <div class="col-label">C · grid · language strip in shade <span class="con">crushed at 16:11</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · grid · strip variant</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="grid">
+        <div class="tile" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)">
+          <div class="tile-shade">
+            <div class="tile-title">How to Build a Habit — Andrew Huberman</div>
+            <div class="tile-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span><span class="lang-tag">FR</span><span class="more" style="font-size:9px;color:#fff;opacity:0.85">+49</span></div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)">
+          <div class="tile-shade">
+            <div class="tile-title">I Survived 100 Days in the Arctic</div>
+            <div class="tile-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span></div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#1a2a3a,#3a5a7b)">
+          <div class="tile-shade">
+            <div class="tile-title">How to make perfect croissants — Bon Appétit</div>
+            <div class="tile-strip"><span class="lang-tag">EN</span><span class="lang-tag">ES</span><span class="lang-tag">FR</span><span class="lang-tag">IT</span><span class="lang-tag">PT</span></div>
+          </div>
+        </div>
+        <div class="tile" style="background-image:linear-gradient(135deg,#2a1f3a,#7b4a8a)">
+          <div class="tile-shade">
+            <div class="tile-title">lofi hip hop radio</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">D · grid · Subtitle chip view <span class="pro">grouped sections + sub-tiles</span></div>
+    <div class="phone dark">
+      <div class="phone-label">Browse · grid · Subtitle</div>
+      <div class="topbar"><div class="topbar-title">Captured</div></div>
+      <div class="chip-rail">
+        <span class="chip">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip on">Subtitle</span><span class="chip">Images</span><span class="chip">GIF</span>
+      </div>
+      <div class="grid cols3">
+        <div class="group-grid-header">
+          <div class="group-thumb" style="background-image:linear-gradient(135deg,#3a2a1f,#7b4a2a)"></div>
+          <div class="group-title-block">
+            <div class="group-title">How to Build a Habit — Huberman</div>
+            <div class="group-sub">52 tracks · 4.6 MB</div>
+          </div>
+          <span class="group-chip-pill">▾ 6 / 52</span>
+        </div>
+        <div class="sub-tile"><span class="lang-tag">EN</span><div class="name">English</div><div class="size">88 KB</div></div>
+        <div class="sub-tile"><span class="lang-tag">ES</span><div class="name">Spanish</div><div class="size">91 KB</div></div>
+        <div class="sub-tile"><span class="lang-tag">FR</span><div class="name">French</div><div class="size">94 KB</div></div>
+        <div class="sub-tile"><span class="lang-tag">DE</span><div class="name">German</div><div class="size">92 KB</div></div>
+        <div class="sub-tile"><span class="lang-tag">PT</span><div class="name">Portuguese</div><div class="size">87 KB</div></div>
+        <div class="sub-tile" style="background:rgba(244,106,102,0.10); border-color:rgba(244,106,102,0.18)">
+          <div style="font-size:18px; color:#f6a6a4">+46</div>
+          <div class="name" style="color:#f6a6a4">Show all</div>
+        </div>
+        <div class="group-grid-header">
+          <div class="group-thumb" style="background-image:linear-gradient(135deg,#1f3a2b,#3a7b4a)"></div>
+          <div class="group-title-block">
+            <div class="group-title">I Survived 100 Days in the Arctic</div>
+            <div class="group-sub">2 tracks · 172 KB</div>
+          </div>
+          <span class="group-chip-pill">2 / 2</span>
+        </div>
+        <div class="sub-tile"><span class="lang-tag">EN</span><div class="name">English</div><div class="size">84 KB</div></div>
+        <div class="sub-tile"><span class="lang-tag">ES</span><div class="name">Spanish</div><div class="size">88 KB</div></div>
       </div>
     </div>
   </div>

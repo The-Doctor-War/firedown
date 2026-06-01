@@ -14,6 +14,12 @@
         app:iconTint="?attr/colorOnSurface"
         android:title="@string/share"/>
     <item
+        android:id="@+id/action_compress"
+        android:icon="@drawable/ic_baseline_archive_24"
+        app:iconTint="?attr/colorOnSurface"
+        app:showAsAction="ifRoom"
+        android:title="@string/compress"/>
+    <item
         android:id="@+id/action_cipher"
         android:icon="@drawable/ic_lock_24"
         app:iconTint="?attr/colorOnSurface"

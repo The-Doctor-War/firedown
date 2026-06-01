@@ -342,4 +342,9 @@
     <string name="trackers_info_section_top_trackers">Vanligste sporere</string>
     <string name="trackers_info_stat_blocked">Blokkert</string>
     <string name="trackers_info_stat_saved">Spart data</string>
+    <string name="compress">Komprimer</string>
+    <string name="download_saving_compress">Komprimerer, vent litt…</string>
+    <string name="task_compress_finished">Arkiv opprettet</string>
+    <string name="task_compress_failed">Kunne ikke opprette arkiv</string>
+    <string name="task_compress_cancelled">Komprimering avbrutt</string>
 </resources>

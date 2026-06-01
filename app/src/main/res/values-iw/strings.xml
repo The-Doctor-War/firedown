@@ -338,4 +338,9 @@
     <string name="blocked_ads_detail_title">פרסומות חסומות</string>
     <string name="security_block_ads">חסום פרסומות</string>
     <string name="security_tracking_protection">הגנת מעקב</string>
+    <string name="compress">דחיסה</string>
+    <string name="download_saving_compress">מתבצעת דחיסה, נא להמתין…</string>
+    <string name="task_compress_finished">הארכיון נוצר</string>
+    <string name="task_compress_failed">לא ניתן ליצור את הארכיון</string>
+    <string name="task_compress_cancelled">הדחיסה בוטלה</string>
 </resources>

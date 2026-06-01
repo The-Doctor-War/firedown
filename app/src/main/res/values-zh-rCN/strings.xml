@@ -547,4 +547,9 @@
     <string name="security_block_ads">拦截广告</string>
     <string name="security_tracking_protection">跟踪保护</string>
     <string name="security_stat_blocked_scope">已在此页面拦截</string>
+    <string name="compress">压缩</string>
+    <string name="download_saving_compress">正在压缩，请稍候…</string>
+    <string name="task_compress_finished">已创建压缩包</string>
+    <string name="task_compress_failed">无法创建压缩包</string>
+    <string name="task_compress_cancelled">已取消压缩</string>
 </resources>

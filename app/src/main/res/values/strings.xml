@@ -76,6 +76,7 @@
     <string name="close_tabs_after_one_week_summary">Close after one week</string>
     <string name="close_tabs_manually">Never</string>
     <string name="close_tabs_manually_summary">Close manually</string>
+    <string name="compress">Compress</string>
 <string name="connection_secure">Connection is secure</string>
     <string name="delete">Delete</string>
     <string name="delete_all_bookmarks">This will delete all your bookmarks data.</string>
@@ -158,6 +159,7 @@
     <string name="download_rename_error">The file name is already in use.</string>
     <string name="download_saved_to_vault">Saved to Vault</string>
     <string name="download_saving_audio">Extracting Audio, please wait…</string>
+    <string name="download_saving_compress">Compressing, please wait…</string>
     <string name="download_saving_gif">Creating GIF, please wait…</string>
     <string name="downloading">Downloading…</string>
     <!-- Section header on the downloads list pinned at the top whenever
@@ -559,6 +561,9 @@
     <string name="task_audio_failed">Could not extract audio</string>
     <string name="task_audio_finished">Audio extracted</string>
     <string name="task_audio_cancelled">Audio extraction cancelled</string>
+    <string name="task_compress_finished">Archive created</string>
+    <string name="task_compress_failed">Could not create archive</string>
+    <string name="task_compress_cancelled">Compression cancelled</string>
     <string name="task_cancel_operation">Do you want to stop the current operation?</string>
     <string name="task_decryption_finished">Decryption finished</string>
     <string name="task_dismiss">Dismiss</string>

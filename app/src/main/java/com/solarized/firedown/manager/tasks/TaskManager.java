@@ -70,6 +70,9 @@ public class TaskManager extends Service {
             }else if(IntentActions.START_DECRYPTION.equals(action)){
                 mCurrentRunnable = new OutSafeTask(TaskManager.this, mDownloadRepository);
                 post(mCurrentRunnable);
+            }else if(IntentActions.DOWNLOAD_START_COMPRESS.equals(action)){
+                mCurrentRunnable = new CompressTask(TaskManager.this, mDownloadRepository);
+                post(mCurrentRunnable);
             }
             Log.d(TAG, "handleMessage End");
         }
@@ -133,12 +136,14 @@ public class TaskManager extends Service {
 
         switch (mAction) {
             case IntentActions.DOWNLOAD_START_AUDIO_ENCODE, IntentActions.DOWNLOAD_START_MAKE_GIF,
-                 IntentActions.START_DECRYPTION, IntentActions.START_ENCRYPTION -> {
+                 IntentActions.START_DECRYPTION, IntentActions.START_ENCRYPTION,
+                 IntentActions.DOWNLOAD_START_COMPRESS -> {
                 msg.obj = mAction;
                 serviceHandler.sendMessage(msg);
             }
             case IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, IntentActions.DOWNLOAD_CANCEL_MAKE_GIF,
-                 IntentActions.CANCEL_DECRYPTION, IntentActions.CANCEL_ENCRYPTION -> {
+                 IntentActions.CANCEL_DECRYPTION, IntentActions.CANCEL_ENCRYPTION,
+                 IntentActions.DOWNLOAD_CANCEL_COMPRESS -> {
                 if(mCurrentRunnable != null){
                     mCurrentRunnable.stop();
                 }

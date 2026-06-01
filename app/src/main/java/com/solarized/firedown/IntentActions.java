@@ -37,6 +37,10 @@ public class IntentActions {
 
     public static final String DOWNLOAD_CANCEL_MAKE_GIF = "com.solarized.firedown.DOWNLOAD_CANCEL_MAKE_GIF";
 
+    public static final String DOWNLOAD_START_COMPRESS = "com.solarized.firedown.DOWNLOAD_START_COMPRESS";
+
+    public static final String DOWNLOAD_CANCEL_COMPRESS = "com.solarized.firedown.DOWNLOAD_CANCEL_COMPRESS";
+
     public static final String LOCK_FOR_ENCRYPTION = "com.solarized.firedown.LOCK_FOR_ENCRYPTION";
 
     public static final String START_ENCRYPTION = "com.solarized.firedown.START_ENCRYPTION";

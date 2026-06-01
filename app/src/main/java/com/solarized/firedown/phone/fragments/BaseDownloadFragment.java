@@ -152,6 +152,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
     protected void handleTaskCancellation() {
         if (mNotificationAction == ServiceActions.AUDIO_ENCODE.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, null);
         else if (mNotificationAction == ServiceActions.MAKE_GIF.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_MAKE_GIF, null);
+        else if (mNotificationAction == ServiceActions.COMPRESS.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_COMPRESS, null);
         else if (mNotificationAction == ServiceActions.ENCRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_ENCRYPTION, null);
         else if (mNotificationAction == ServiceActions.DECRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_DECRYPTION, null);
     }
@@ -259,6 +260,10 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             handleItemAction(IntentActions.START_DECRYPTION, entity);
             mOperationActive = true;
             startActionMode(option.getPosition());
+        } else if (iconId == R.drawable.ic_baseline_archive_24) {
+            handleItemAction(IntentActions.DOWNLOAD_START_COMPRESS, entity);
+            mOperationActive = true;
+            startActionMode(option.getPosition());
         }else if (iconId == R.drawable.ic_travel_explore_24) {
             openSourceUrl(entity);
         } else if (iconId == R.drawable.ic_info_24) {
@@ -299,6 +304,10 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             handleListItemsAction(IntentActions.START_DECRYPTION, list);
             mOperationActive = true;
             return true;
+        } else if (id == R.id.action_compress) {
+            ArrayList<DownloadEntity> list = getSelectedItems();
+            handleListItemsAction(IntentActions.DOWNLOAD_START_COMPRESS, list);
+            mOperationActive = true;
         }else if (id == R.id.action_share) {
             ArrayList<String> paths = new ArrayList<>();
             for (DownloadEntity entity : mAdapter.getSelectedEntities()) {
@@ -417,6 +426,27 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             mBottomProgressView.setActionButtonVisibility(View.GONE);
         } else if (action == ServiceActions.CANCEL_MAKE_GIF) {
             mBottomProgressView.setTitle(R.string.task_gif_cancelled);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.COMPRESS) {
+            mBottomProgressView.setProgress(100);
+            mBottomProgressView.setTitle(R.string.task_compress_finished);
+            /* CompressTask passes the just-created archive entity through
+             * the Finished event so we can offer a one-tap View that opens
+             * the zip with an external handler — same shape as MAKE_GIF. */
+            DownloadEntity zipEntity = obj instanceof DownloadEntity ? (DownloadEntity) obj : null;
+            if (zipEntity != null) {
+                mBottomProgressView.setActionButtonVisibility(View.VISIBLE);
+                mBottomProgressView.setActionButtonText(R.string.file_view);
+                mBottomProgressView.setActionButtonListener(v -> openItemWith(zipEntity));
+            } else {
+                mBottomProgressView.setActionButtonVisibility(View.GONE);
+            }
+        } else if (action == ServiceActions.ERROR_COMPRESS) {
+            mBottomProgressView.setTitle(R.string.task_compress_failed);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+            showErrorSnackbar(R.string.task_compress_failed);
+        } else if (action == ServiceActions.CANCEL_COMPRESS) {
+            mBottomProgressView.setTitle(R.string.task_compress_cancelled);
             mBottomProgressView.setActionButtonVisibility(View.GONE);
         } else if (action == ServiceActions.ENCRYPTION) {
             setupEncryptionFinishUI((int) obj);
@@ -652,6 +682,9 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         }else if(action == ServiceActions.MAKE_GIF){
             mBottomProgressView.setTitle(R.string.download_saving_gif);
             mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_MAKE_GIF, null));
+        }else if(action == ServiceActions.COMPRESS){
+            mBottomProgressView.setTitle(R.string.download_saving_compress);
+            mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_COMPRESS, null));
         }
     }
 

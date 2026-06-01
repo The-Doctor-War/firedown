@@ -359,4 +359,9 @@
     <string name="security_tracking_protection">حماية التتبع</string>
     <string name="security_stat_blocked_scope">محظور في هذه الصفحة</string>
     <string name="tabs_incognito_empty">لا توجد علامات تبويب خاصة</string>
+    <string name="compress">ضغط</string>
+    <string name="download_saving_compress">جارٍ الضغط، يرجى الانتظار…</string>
+    <string name="task_compress_finished">تم إنشاء الأرشيف</string>
+    <string name="task_compress_failed">تعذّر إنشاء الأرشيف</string>
+    <string name="task_compress_cancelled">تم إلغاء الضغط</string>
 </resources>

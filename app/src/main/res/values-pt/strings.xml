@@ -410,4 +410,9 @@
     <string name="trackers_info_section_top_trackers">Principais rastreadores</string>
     <string name="trackers_info_stat_blocked">Bloqueados</string>
     <string name="trackers_info_stat_saved">Dados economizados</string>
+    <string name="compress">Comprimir</string>
+    <string name="download_saving_compress">A comprimir, aguarde…</string>
+    <string name="task_compress_finished">Arquivo criado</string>
+    <string name="task_compress_failed">Não foi possível criar o arquivo</string>
+    <string name="task_compress_cancelled">Compressão cancelada</string>
 </resources>

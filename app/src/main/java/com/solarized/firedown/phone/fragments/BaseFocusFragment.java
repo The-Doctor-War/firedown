@@ -585,6 +585,7 @@ public class BaseFocusFragment extends Fragment {
                 mStartForResult.launch(intent);
                 break;
             case IntentActions.START_DECRYPTION:
+            case IntentActions.DOWNLOAD_START_COMPRESS:
                 intent = new Intent(mActivity, TaskManager.class);
                 intent.putExtra(Keys.ITEM_LIST_ID, mDownloadEntities);
                 intent.setAction(action);
@@ -617,6 +618,7 @@ public class BaseFocusFragment extends Fragment {
                 break;
             case IntentActions.DOWNLOAD_START_AUDIO_ENCODE:
             case IntentActions.DOWNLOAD_START_MAKE_GIF:
+            case IntentActions.DOWNLOAD_START_COMPRESS:
             case IntentActions.START_DECRYPTION:
                 intent = new Intent(mActivity, TaskManager.class);
                 mDownloadEntities = new ArrayList<>();
@@ -627,6 +629,7 @@ public class BaseFocusFragment extends Fragment {
                 break;
             case IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE:
             case IntentActions.DOWNLOAD_CANCEL_MAKE_GIF:
+            case IntentActions.DOWNLOAD_CANCEL_COMPRESS:
             case IntentActions.CANCEL_ENCRYPTION:
             case IntentActions.CANCEL_DECRYPTION:
                 intent = new Intent(mActivity, TaskManager.class);

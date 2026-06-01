@@ -410,4 +410,9 @@
     <string name="security_tracking_protection">Защита от отслеживания</string>
     <string name="security_stat_blocked_scope">заблокировано на этой странице</string>
     <string name="tabs_incognito_empty">Нет приватных вкладок</string>
+    <string name="compress">Сжать</string>
+    <string name="download_saving_compress">Сжатие, подождите…</string>
+    <string name="task_compress_finished">Архив создан</string>
+    <string name="task_compress_failed">Не удалось создать архив</string>
+    <string name="task_compress_cancelled">Сжатие отменено</string>
 </resources>

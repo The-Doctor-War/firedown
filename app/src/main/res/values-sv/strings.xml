@@ -345,4 +345,9 @@
     <string name="trackers_info_section_top_trackers">Vanligaste spårarna</string>
     <string name="trackers_info_stat_blocked">Blockerade</string>
     <string name="trackers_info_stat_saved">Sparad data</string>
+    <string name="compress">Komprimera</string>
+    <string name="download_saving_compress">Komprimerar, vänta…</string>
+    <string name="task_compress_finished">Arkiv skapat</string>
+    <string name="task_compress_failed">Kunde inte skapa arkiv</string>
+    <string name="task_compress_cancelled">Komprimering avbruten</string>
 </resources>

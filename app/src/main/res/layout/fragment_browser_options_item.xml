@@ -100,29 +100,36 @@
                     tools:text="53:25"
                     tools:visibility="visible" />
 
-                <!-- Quality slot. The adapter only populates this in grid for
-                     image RESOLUTION (e.g. 320x180); video quality/Adaptive
-                     labels are suppressed on the tile to avoid overflow in the
-                     narrow 2-column cell. -->
+                <!-- Weighted spacer pushes the trailing element (image
+                     dimensions, or the CC chip on videos) to the row end. -->
+                <Space
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_weight="1" />
+
+                <!-- Image dimensions slot — quiet light-on-scrim TEXT, not a
+                     chip. Dimensions are a reference fact, not an action, so
+                     they read softly while the photo leads. The adapter only
+                     populates this (TYPE_RESOLUTION) for images in grid;
+                     videos use duration + CC instead, so this and tag_cc
+                     never both show. -->
                 <TextView
                     android:id="@+id/tag_quality"
-                    style="@style/MimeTertiary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
                     android:ellipsize="end"
                     android:maxLines="1"
-                    android:paddingLeft="4dp"
-                    android:paddingRight="4dp"
+                    android:textSize="10sp"
+                    android:textColor="#D8FFFFFF"
+                    android:textStyle="bold"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
                     android:visibility="gone"
-                    tools:text="320x180"
+                    tools:text="320 × 180"
                     tools:visibility="visible" />
-
-                <!-- Weighted spacer pushes the CC chip to the trailing edge. -->
-                <Space
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:layout_weight="1" />
 
                 <TextView
                     android:id="@+id/tag_cc"

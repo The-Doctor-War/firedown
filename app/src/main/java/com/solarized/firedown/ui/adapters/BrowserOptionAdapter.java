@@ -53,6 +53,11 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
      *  regardless of the active chip filter. Empty until set. */
     private Map<String, Integer> mSubtitleCounts = Collections.emptyMap();
 
+    /** When true, the mime chip is hidden — set while a single-type filter
+     *  chip is active (e.g. the Images view), where stamping "IMAGE" on every
+     *  tile is pure redundancy with the chip rail. */
+    private boolean mSuppressMime;
+
 
     public BrowserOptionAdapter(Context context, @NonNull DiffUtil.ItemCallback<BrowserDownloadEntity> diffCallback,
                                 OnItemClickListener onItemClickListener, boolean list) {
@@ -72,6 +77,15 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
      */
     public void setSubtitleCounts(@Nullable Map<String, Integer> counts) {
         mSubtitleCounts = counts != null ? counts : Collections.emptyMap();
+    }
+
+    /**
+     * Hide the mime chip on every tile — used when the chip rail is filtered
+     * to a single type, so the chip ("IMAGE", "VIDEO") doesn't redundantly
+     * repeat what the active filter already states. Call before submitList.
+     */
+    public void setMimeSuppressed(boolean suppressed) {
+        mSuppressMime = suppressed;
     }
 
     @Override
@@ -130,7 +144,9 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         // pinned to the thumbnail corner. Hide the view entirely if the
         // mime resolves to empty so the row doesn't render a stray ' · '.
         String mimeLabel = FileUriHelper.getLongMimeText(context, entity.getMimeType());
-        if (TextUtils.isEmpty(mimeLabel)) {
+        if (mSuppressMime || TextUtils.isEmpty(mimeLabel)) {
+            // Suppressed while a single-type filter is active (chip rail
+            // already states the type), or when the mime resolves to empty.
             holder.mimeText.setVisibility(View.GONE);
         } else {
             holder.mimeText.setVisibility(View.VISIBLE);

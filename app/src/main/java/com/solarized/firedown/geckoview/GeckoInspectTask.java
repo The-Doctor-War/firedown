@@ -158,6 +158,20 @@ public class GeckoInspectTask implements Runnable {
         entity.setFileDescription(mDescription);
         entity.setIncognito(mIncognito);
 
+        // videoId + visitorData identify the video for PoToken minting and
+        // are needed by BOTH the SABR stream path and the timedtext caption
+        // path. They must be copied unconditionally — gating them behind the
+        // sabrUrl/sabrConfig presence (as before) dropped them for timedtext
+        // entities, which carry videoId/visitorData but no SABR stream URL.
+        // Symptom was TimedTextStrategy logging
+        // "mintPoToken: skipping (videoId=false visitorData=false)".
+        if (!TextUtils.isEmpty(mSabrVideoId)) {
+            entity.setSabrVideoId(mSabrVideoId);
+        }
+        if (!TextUtils.isEmpty(mSabrVisitorData)) {
+            entity.setSabrVisitorData(mSabrVisitorData);
+        }
+
         // SABR shared data (same for all variants of this video)
         if (!TextUtils.isEmpty(mSabrUrl) && !TextUtils.isEmpty(mSabrConfig)) {
             entity.setSabrUrl(mSabrUrl);
@@ -167,12 +181,6 @@ public class GeckoInspectTask implements Runnable {
             }
             if (!TextUtils.isEmpty(mSabrPoToken)) {
                 entity.setSabrPoToken(mSabrPoToken);
-            }
-            if (!TextUtils.isEmpty(mSabrVideoId)) {
-                entity.setSabrVideoId(mSabrVideoId);
-            }
-            if (!TextUtils.isEmpty(mSabrVisitorData)) {
-                entity.setSabrVisitorData(mSabrVisitorData);
             }
         }
 

@@ -154,6 +154,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         else if (mNotificationAction == ServiceActions.MAKE_GIF.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_MAKE_GIF, null);
         else if (mNotificationAction == ServiceActions.COMPRESS.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_COMPRESS, null);
         else if (mNotificationAction == ServiceActions.EXTRACT.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_EXTRACT, null);
+        else if (mNotificationAction == ServiceActions.SAVE_FRAME.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_SAVE_FRAME, null);
         else if (mNotificationAction == ServiceActions.ENCRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_ENCRYPTION, null);
         else if (mNotificationAction == ServiceActions.DECRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_DECRYPTION, null);
     }
@@ -222,6 +223,19 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
                         mActivity.startService(gifIntent);
                         mOperationActive = true;
                     }
+                } else if (handle.contains(IntentActions.DOWNLOAD_START_SAVE_FRAME)) {
+                    // FrameGrabberFragment hands its params back here, same
+                    // as the GIF flow above, so the bottom progress bar
+                    // shows for the resulting task.
+                    Bundle frameArgs = handle.get(IntentActions.DOWNLOAD_START_SAVE_FRAME);
+                    handle.remove(IntentActions.DOWNLOAD_START_SAVE_FRAME);
+                    if (frameArgs != null && mActivity != null) {
+                        Intent frameIntent = new Intent(mActivity, TaskManager.class);
+                        frameIntent.setAction(IntentActions.DOWNLOAD_START_SAVE_FRAME);
+                        frameIntent.putExtras(frameArgs);
+                        mActivity.startService(frameIntent);
+                        mOperationActive = true;
+                    }
                 }
             }
         };
@@ -253,6 +267,8 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             startActionMode(option.getPosition());
         } else if (iconId == R.drawable.ic_gif_box_24) {
             NavigationUtils.navigateSafe(mNavController, R.id.gif_maker, bundle);
+        } else if (iconId == R.drawable.ic_photo_camera_24) {
+            NavigationUtils.navigateSafe(mNavController, R.id.frame_grabber, bundle);
         } else if (iconId == R.drawable.ic_lock_24) {
             handleItemAction(IntentActions.LOCK_FOR_ENCRYPTION, entity);
             mOperationActive = true;
@@ -467,6 +483,17 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             showErrorSnackbar(R.string.task_extract_failed);
         } else if (action == ServiceActions.CANCEL_EXTRACT) {
             mBottomProgressView.setTitle(R.string.task_extract_cancelled);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.SAVE_FRAME) {
+            mBottomProgressView.setProgress(100);
+            mBottomProgressView.setTitle(R.string.task_frame_finished);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.ERROR_SAVE_FRAME) {
+            mBottomProgressView.setTitle(R.string.task_frame_failed);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+            showErrorSnackbar(R.string.task_frame_failed);
+        } else if (action == ServiceActions.CANCEL_SAVE_FRAME) {
+            mBottomProgressView.setTitle(R.string.task_frame_cancelled);
             mBottomProgressView.setActionButtonVisibility(View.GONE);
         } else if (action == ServiceActions.ENCRYPTION) {
             setupEncryptionFinishUI((int) obj);
@@ -708,6 +735,9 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         }else if(action == ServiceActions.EXTRACT){
             mBottomProgressView.setTitle(R.string.download_saving_extract);
             mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_EXTRACT, null));
+        }else if(action == ServiceActions.SAVE_FRAME){
+            mBottomProgressView.setTitle(R.string.download_saving_frame);
+            mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_SAVE_FRAME, null));
         }
     }
 

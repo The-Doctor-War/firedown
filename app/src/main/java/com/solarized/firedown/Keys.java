@@ -30,4 +30,6 @@ public class Keys {
     public static final String GIF_FPS = "com.solarized.firedown.GIF_FPS";
     public static final String GIF_WIDTH = "com.solarized.firedown.GIF_WIDTH";
 
+    public static final String FRAME_POSITION_MS = "com.solarized.firedown.FRAME_POSITION_MS";
+
 }

@@ -348,4 +348,9 @@
     <string name="task_extract_finished">הארכיון חולץ</string>
     <string name="task_extract_failed">לא ניתן לחלץ את הארכיון</string>
     <string name="task_extract_cancelled">החילוץ בוטל</string>
+    <string name="save_frame">שמירת פריים</string>
+    <string name="download_saving_frame">הפריים נשמר, נא להמתין…</string>
+    <string name="task_frame_finished">הפריים נשמר</string>
+    <string name="task_frame_failed">לא ניתן לשמור את הפריים</string>
+    <string name="task_frame_cancelled">שמירת הפריים בוטלה</string>
 </resources>

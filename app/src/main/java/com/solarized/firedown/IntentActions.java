@@ -45,6 +45,10 @@ public class IntentActions {
 
     public static final String DOWNLOAD_CANCEL_EXTRACT = "com.solarized.firedown.DOWNLOAD_CANCEL_EXTRACT";
 
+    public static final String DOWNLOAD_START_SAVE_FRAME = "com.solarized.firedown.DOWNLOAD_START_SAVE_FRAME";
+
+    public static final String DOWNLOAD_CANCEL_SAVE_FRAME = "com.solarized.firedown.DOWNLOAD_CANCEL_SAVE_FRAME";
+
     public static final String LOCK_FOR_ENCRYPTION = "com.solarized.firedown.LOCK_FOR_ENCRYPTION";
 
     public static final String START_ENCRYPTION = "com.solarized.firedown.START_ENCRYPTION";

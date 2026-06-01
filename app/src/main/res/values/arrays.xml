@@ -186,6 +186,7 @@
         <item>@string/open_origin</item>
         <item>@string/extract_audio</item>
         <item>@string/make_gif</item>
+        <item>@string/save_frame</item>
         <item>@string/share</item>
         <item>@string/compress</item>
         <item>@string/popular_list_thumbnail</item>
@@ -201,6 +202,7 @@
         <item>@drawable/ic_travel_explore_24</item>
         <item>@drawable/ic_headphones_24</item>
         <item>@drawable/ic_gif_box_24</item>
+        <item>@drawable/ic_photo_camera_24</item>
         <item>@drawable/ic_share_24</item>
         <item>@drawable/ic_baseline_archive_24</item>
         <item>@drawable/ic_baseline_image_24</item>

@@ -420,4 +420,9 @@
     <string name="task_extract_finished">Архив извлечён</string>
     <string name="task_extract_failed">Не удалось извлечь архив</string>
     <string name="task_extract_cancelled">Извлечение отменено</string>
+    <string name="save_frame">Сохранить кадр</string>
+    <string name="download_saving_frame">Сохранение кадра, подождите…</string>
+    <string name="task_frame_finished">Кадр сохранён</string>
+    <string name="task_frame_failed">Не удалось сохранить кадр</string>
+    <string name="task_frame_cancelled">Сохранение кадра отменено</string>
 </resources>

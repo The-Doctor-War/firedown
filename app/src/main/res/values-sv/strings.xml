@@ -355,4 +355,9 @@
     <string name="task_extract_finished">Arkiv extraherat</string>
     <string name="task_extract_failed">Kunde inte extrahera arkiv</string>
     <string name="task_extract_cancelled">Extrahering avbruten</string>
+    <string name="save_frame">Spara bildruta</string>
+    <string name="download_saving_frame">Sparar bildruta, vänta…</string>
+    <string name="task_frame_finished">Bildruta sparad</string>
+    <string name="task_frame_failed">Kunde inte spara bildruta</string>
+    <string name="task_frame_cancelled">Sparande av bildruta avbröts</string>
 </resources>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/frame_grabber_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appbar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.FireDown.Toolbar"
+            app:title="@string/save_frame"
+            app:navigationIcon="@drawable/ic_arrow_back_24"
+            app:navigationIconTint="?attr/colorOnSurface" />
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+
+        <!-- Player fills the space above the scrubber. The minimal
+             controller keeps it to play/pause; the frame is picked with
+             the slider below, and we capture whatever frame is on screen. -->
+        <androidx.media3.ui.PlayerView
+            android:id="@+id/player_view"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@android:color/black"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/position_label"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:resize_mode="fit"
+            app:show_subtitle_button="false"
+            app:show_shuffle_button="false"
+            app:show_buffering="never"
+            app:controller_layout_id="@layout/exo_player_control_view_minimal"
+            app:surface_type="texture_view" />
+
+        <TextView
+            android:id="@+id/position_label"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:paddingTop="12dp"
+            android:textAppearance="?attr/textAppearanceTitleSmall"
+            android:textColor="?attr/colorOnSurface"
+            app:layout_constraintBottom_toTopOf="@id/scrub_slider"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="00:12 / 00:30" />
+
+        <!-- Continuous scrubber over the clip duration. Dragging seeks the
+             player; the captured frame is the one currently displayed. -->
+        <com.google.android.material.slider.Slider
+            android:id="@+id/scrub_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="16dp"
+            android:valueFrom="0"
+            android:valueTo="1"
+            android:value="0"
+            app:layout_constraintBottom_toTopOf="@id/save_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/save_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/save_frame"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <View
+        android:id="@+id/navigation_scrim"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_gravity="bottom"
+        android:background="?android:attr/colorBackground" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

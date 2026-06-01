@@ -147,7 +147,7 @@ public class DecompressTask extends TaskRunnable {
         entity.setFileMimeType(FileUriHelper.getMimeTypeFromFile(outFile.getName()));
         entity.setFileSize(outFile.length());
         entity.setFileDate(System.currentTimeMillis());
-        entity.setFileOriginUrl(source.getFileOriginUrl());
+        entity.setFileOriginUrl(source.getOriginUrl());
         entity.setFileStatus(Download.FINISHED);
         entity.setFileThumbnailUnavailable(false);
         return entity;

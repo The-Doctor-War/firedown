@@ -161,6 +161,7 @@
     <string name="download_saving_audio">Extracting Audio, please wait…</string>
     <string name="download_saving_compress">Compressing, please wait…</string>
     <string name="download_saving_extract">Extracting, please wait…</string>
+    <string name="download_saving_frame">Saving frame, please wait…</string>
     <string name="download_saving_gif">Creating GIF, please wait…</string>
     <string name="downloading">Downloading…</string>
     <!-- Section header on the downloads list pinned at the top whenever
@@ -206,6 +207,7 @@
     <string name="exit_fullscreen_with_back_button_short">Drag from top &amp; press back to exit</string>
     <string name="extract">Extract</string>
     <string name="extract_audio">Extract Audio</string>
+    <string name="save_frame">Save frame</string>
     <string name="file_view">View</string>
     <string name="fingerprint_protection">Enable Fingerprint Protection</string>
     <string name="finish_origin">Finish</string>
@@ -569,6 +571,9 @@
     <string name="task_extract_finished">Archive extracted</string>
     <string name="task_extract_failed">Could not extract archive</string>
     <string name="task_extract_cancelled">Extraction cancelled</string>
+    <string name="task_frame_finished">Frame saved</string>
+    <string name="task_frame_failed">Could not save frame</string>
+    <string name="task_frame_cancelled">Frame saving cancelled</string>
     <string name="task_cancel_operation">Do you want to stop the current operation?</string>
     <string name="task_decryption_finished">Decryption finished</string>
     <string name="task_dismiss">Dismiss</string>

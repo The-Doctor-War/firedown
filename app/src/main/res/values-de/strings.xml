@@ -559,4 +559,9 @@
     <string name="task_extract_finished">Archiv entpackt</string>
     <string name="task_extract_failed">Archiv konnte nicht entpackt werden</string>
     <string name="task_extract_cancelled">Entpacken abgebrochen</string>
+    <string name="save_frame">Bild speichern</string>
+    <string name="download_saving_frame">Bild wird gespeichert, bitte warten…</string>
+    <string name="task_frame_finished">Bild gespeichert</string>
+    <string name="task_frame_failed">Bild konnte nicht gespeichert werden</string>
+    <string name="task_frame_cancelled">Speichern abgebrochen</string>
 </resources>

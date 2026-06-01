@@ -355,4 +355,9 @@
     <string name="task_extract_finished">Arkiv udpakket</string>
     <string name="task_extract_failed">Kunne ikke udpakke arkiv</string>
     <string name="task_extract_cancelled">Udpakning annulleret</string>
+    <string name="save_frame">Gem billede</string>
+    <string name="download_saving_frame">Gemmer billede, vent venligst…</string>
+    <string name="task_frame_finished">Billede gemt</string>
+    <string name="task_frame_failed">Kunne ikke gemme billede</string>
+    <string name="task_frame_cancelled">Lagring af billede annulleret</string>
 </resources>

@@ -398,4 +398,9 @@
     <string name="task_extract_finished">압축 해제됨</string>
     <string name="task_extract_failed">압축을 풀 수 없습니다</string>
     <string name="task_extract_cancelled">압축 풀기가 취소됨</string>
+    <string name="save_frame">프레임 저장</string>
+    <string name="download_saving_frame">프레임을 저장하는 중입니다. 잠시 기다려 주세요…</string>
+    <string name="task_frame_finished">프레임 저장됨</string>
+    <string name="task_frame_failed">프레임을 저장할 수 없습니다</string>
+    <string name="task_frame_cancelled">프레임 저장이 취소됨</string>
 </resources>

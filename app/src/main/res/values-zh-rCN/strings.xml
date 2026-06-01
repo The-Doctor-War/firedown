@@ -557,4 +557,9 @@
     <string name="task_extract_finished">已解压压缩包</string>
     <string name="task_extract_failed">无法解压压缩包</string>
     <string name="task_extract_cancelled">已取消解压</string>
+    <string name="save_frame">保存帧</string>
+    <string name="download_saving_frame">正在保存帧，请稍候…</string>
+    <string name="task_frame_finished">已保存帧</string>
+    <string name="task_frame_failed">无法保存帧</string>
+    <string name="task_frame_cancelled">已取消保存帧</string>
 </resources>

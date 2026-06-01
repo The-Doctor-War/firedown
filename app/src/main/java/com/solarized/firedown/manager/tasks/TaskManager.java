@@ -41,6 +41,8 @@ public class TaskManager extends Service {
 
     private GifMakerArgs mGifMakerArgs;
 
+    private long mFramePosMs;
+
     @Inject
     DownloadDataRepository mDownloadRepository; // Injected by Hilt
     @Inject
@@ -75,6 +77,9 @@ public class TaskManager extends Service {
                 post(mCurrentRunnable);
             }else if(IntentActions.DOWNLOAD_START_EXTRACT.equals(action)){
                 mCurrentRunnable = new DecompressTask(TaskManager.this, mDownloadRepository);
+                post(mCurrentRunnable);
+            }else if(IntentActions.DOWNLOAD_START_SAVE_FRAME.equals(action)){
+                mCurrentRunnable = new SaveFrameTask(TaskManager.this, mDownloadRepository);
                 post(mCurrentRunnable);
             }
             Log.d(TAG, "handleMessage End");
@@ -135,18 +140,24 @@ public class TaskManager extends Service {
                     intent.getIntExtra(Keys.GIF_WIDTH, 0));
         }
 
+        if (IntentActions.DOWNLOAD_START_SAVE_FRAME.equals(mAction)) {
+            mFramePosMs = intent.getLongExtra(Keys.FRAME_POSITION_MS, 0L);
+        }
+
         Log.d(TAG, "onStartCommand: " + mAction);
 
         switch (mAction) {
             case IntentActions.DOWNLOAD_START_AUDIO_ENCODE, IntentActions.DOWNLOAD_START_MAKE_GIF,
                  IntentActions.START_DECRYPTION, IntentActions.START_ENCRYPTION,
-                 IntentActions.DOWNLOAD_START_COMPRESS, IntentActions.DOWNLOAD_START_EXTRACT -> {
+                 IntentActions.DOWNLOAD_START_COMPRESS, IntentActions.DOWNLOAD_START_EXTRACT,
+                 IntentActions.DOWNLOAD_START_SAVE_FRAME -> {
                 msg.obj = mAction;
                 serviceHandler.sendMessage(msg);
             }
             case IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, IntentActions.DOWNLOAD_CANCEL_MAKE_GIF,
                  IntentActions.CANCEL_DECRYPTION, IntentActions.CANCEL_ENCRYPTION,
-                 IntentActions.DOWNLOAD_CANCEL_COMPRESS, IntentActions.DOWNLOAD_CANCEL_EXTRACT -> {
+                 IntentActions.DOWNLOAD_CANCEL_COMPRESS, IntentActions.DOWNLOAD_CANCEL_EXTRACT,
+                 IntentActions.DOWNLOAD_CANCEL_SAVE_FRAME -> {
                 if(mCurrentRunnable != null){
                     mCurrentRunnable.stop();
                 }
@@ -170,6 +181,10 @@ public class TaskManager extends Service {
 
     public GifMakerArgs getGifMakerArgs() {
         return mGifMakerArgs;
+    }
+
+    public long getFramePosMs() {
+        return mFramePosMs;
     }
 
 }

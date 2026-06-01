@@ -401,4 +401,9 @@
     <string name="task_extract_finished">Archivio estratto</string>
     <string name="task_extract_failed">Impossibile estrarre l\'archivio</string>
     <string name="task_extract_cancelled">Estrazione annullata</string>
+    <string name="save_frame">Salva fotogramma</string>
+    <string name="download_saving_frame">Salvataggio del fotogramma, attendere…</string>
+    <string name="task_frame_finished">Fotogramma salvato</string>
+    <string name="task_frame_failed">Impossibile salvare il fotogramma</string>
+    <string name="task_frame_cancelled">Salvataggio annullato</string>
 </resources>

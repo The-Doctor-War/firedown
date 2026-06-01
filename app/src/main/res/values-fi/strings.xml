@@ -359,4 +359,9 @@
     <string name="task_extract_finished">Arkisto purettu</string>
     <string name="task_extract_failed">Arkiston purku epäonnistui</string>
     <string name="task_extract_cancelled">Purku peruutettu</string>
+    <string name="save_frame">Tallenna kuva</string>
+    <string name="download_saving_frame">Tallennetaan kuvaa, odota…</string>
+    <string name="task_frame_finished">Kuva tallennettu</string>
+    <string name="task_frame_failed">Kuvan tallennus epäonnistui</string>
+    <string name="task_frame_cancelled">Kuvan tallennus peruutettu</string>
 </resources>

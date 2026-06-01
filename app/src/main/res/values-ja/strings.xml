@@ -557,4 +557,9 @@
     <string name="task_extract_finished">アーカイブを展開しました</string>
     <string name="task_extract_failed">アーカイブを展開できませんでした</string>
     <string name="task_extract_cancelled">展開をキャンセルしました</string>
+    <string name="save_frame">フレームを保存</string>
+    <string name="download_saving_frame">フレームを保存しています。お待ちください…</string>
+    <string name="task_frame_finished">フレームを保存しました</string>
+    <string name="task_frame_failed">フレームを保存できませんでした</string>
+    <string name="task_frame_cancelled">フレームの保存をキャンセルしました</string>
 </resources>

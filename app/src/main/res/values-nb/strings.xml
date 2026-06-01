@@ -352,4 +352,9 @@
     <string name="task_extract_finished">Arkiv pakket ut</string>
     <string name="task_extract_failed">Kunne ikke pakke ut arkiv</string>
     <string name="task_extract_cancelled">Utpakking avbrutt</string>
+    <string name="save_frame">Lagre bilde</string>
+    <string name="download_saving_frame">Lagrer bilde, vent litt…</string>
+    <string name="task_frame_finished">Bilde lagret</string>
+    <string name="task_frame_failed">Kunne ikke lagre bilde</string>
+    <string name="task_frame_cancelled">Lagring av bilde avbrutt</string>
 </resources>

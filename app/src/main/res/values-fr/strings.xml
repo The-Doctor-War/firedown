@@ -559,4 +559,9 @@
     <string name="task_extract_finished">Archive extraite</string>
     <string name="task_extract_failed">Impossible d\'extraire l\'archive</string>
     <string name="task_extract_cancelled">Extraction annulée</string>
+    <string name="save_frame">Enregistrer l\'image</string>
+    <string name="download_saving_frame">Enregistrement de l\'image, veuillez patienter…</string>
+    <string name="task_frame_finished">Image enregistrée</string>
+    <string name="task_frame_failed">Impossible d\'enregistrer l\'image</string>
+    <string name="task_frame_cancelled">Enregistrement annulé</string>
 </resources>

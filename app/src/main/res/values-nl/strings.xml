@@ -420,4 +420,9 @@
     <string name="task_extract_finished">Archief uitgepakt</string>
     <string name="task_extract_failed">Kan archief niet uitpakken</string>
     <string name="task_extract_cancelled">Uitpakken geannuleerd</string>
+    <string name="save_frame">Frame opslaan</string>
+    <string name="download_saving_frame">Bezig met opslaan van frame, even geduld…</string>
+    <string name="task_frame_finished">Frame opgeslagen</string>
+    <string name="task_frame_failed">Kan frame niet opslaan</string>
+    <string name="task_frame_cancelled">Opslaan van frame geannuleerd</string>
 </resources>

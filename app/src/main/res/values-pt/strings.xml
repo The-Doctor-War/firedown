@@ -420,4 +420,9 @@
     <string name="task_extract_finished">Arquivo extraído</string>
     <string name="task_extract_failed">Não foi possível extrair o arquivo</string>
     <string name="task_extract_cancelled">Extração cancelada</string>
+    <string name="save_frame">Guardar fotograma</string>
+    <string name="download_saving_frame">A guardar o fotograma, aguarde…</string>
+    <string name="task_frame_finished">Fotograma guardado</string>
+    <string name="task_frame_failed">Não foi possível guardar o fotograma</string>
+    <string name="task_frame_cancelled">Gravação do fotograma cancelada</string>
 </resources>

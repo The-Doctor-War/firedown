@@ -419,4 +419,9 @@
     <string name="task_extract_finished">Arşiv çıkartıldı</string>
     <string name="task_extract_failed">Arşiv çıkartılamadı</string>
     <string name="task_extract_cancelled">Çıkartma iptal edildi</string>
+    <string name="save_frame">Kareyi kaydet</string>
+    <string name="download_saving_frame">Kare kaydediliyor, lütfen bekleyin…</string>
+    <string name="task_frame_finished">Kare kaydedildi</string>
+    <string name="task_frame_failed">Kare kaydedilemedi</string>
+    <string name="task_frame_cancelled">Kare kaydetme iptal edildi</string>
 </resources>

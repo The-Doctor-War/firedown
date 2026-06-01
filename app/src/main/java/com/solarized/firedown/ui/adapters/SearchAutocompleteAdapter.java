@@ -46,6 +46,8 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
 
     private final Drawable tabDrawable;
 
+    private final Drawable bookmarkDrawable;
+
     private final String mSearchFor;
 
     private final String mSwitchTab;
@@ -73,6 +75,11 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
         if (tabDrawable != null) {
             int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22, context.getResources().getDisplayMetrics());
             tabDrawable.setBounds(0, 0, size, size);
+        }
+        bookmarkDrawable = ContextCompat.getDrawable(context, R.drawable.ic_bookmark_24);
+        if (bookmarkDrawable != null) {
+            int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 22, context.getResources().getDisplayMetrics());
+            bookmarkDrawable.setBounds(0, 0, size, size);
         }
         int mRoundedPixels = context.getResources().getDimensionPixelOffset(R.dimen.icon_rounded);
         RoundedCorners mRoundedCorners = new RoundedCorners(mRoundedPixels);
@@ -112,6 +119,7 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
         int type = getItem(position).getType();
         if (type == AutoCompleteEntity.HISTORY) return 1;
         if (type == AutoCompleteEntity.TAB) return 2;
+        if (type == AutoCompleteEntity.BOOKMARK) return 3;
         return 0; // SEARCH + RESULTS
     }
 
@@ -170,6 +178,12 @@ public class SearchAutocompleteAdapter extends ListAdapter<AutoCompleteEntity, R
                 case AutoCompleteEntity.TAB:
                     searchViewHolderPhone.subTextView.setText(mSwitchTab);
                     searchViewHolderPhone.buttonTextView.setImageDrawable(tabDrawable);
+                    searchViewHolderPhone.textView.setText(searchEntity.getTitle());
+                    GlideHelper.load(searchEntity.getIcon(), searchEntity.getSubText(), searchViewHolderPhone.buttonSearchView, mRequestOptions);
+                    break;
+                case AutoCompleteEntity.BOOKMARK:
+                    searchViewHolderPhone.subTextView.setText(searchEntity.getSubText());
+                    searchViewHolderPhone.buttonTextView.setImageDrawable(bookmarkDrawable);
                     searchViewHolderPhone.textView.setText(searchEntity.getTitle());
                     GlideHelper.load(searchEntity.getIcon(), searchEntity.getSubText(), searchViewHolderPhone.buttonSearchView, mRequestOptions);
                     break;

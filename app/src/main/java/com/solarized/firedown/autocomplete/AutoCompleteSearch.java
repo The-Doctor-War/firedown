@@ -9,10 +9,12 @@ import android.webkit.URLUtil;
 
 import com.solarized.firedown.data.entity.GeckoStateEntity;
 import com.solarized.firedown.data.entity.AutoCompleteEntity;
+import com.solarized.firedown.data.entity.WebBookmarkEntity;
 import com.solarized.firedown.data.entity.WebHistoryEntity;
 import com.solarized.firedown.data.repository.GeckoStateDataRepository;
 import com.solarized.firedown.data.repository.IncognitoStateRepository;
 import com.solarized.firedown.data.repository.SearchRepository;
+import com.solarized.firedown.data.repository.WebBookmarkDataRepository;
 import com.solarized.firedown.data.repository.WebHistoryDataRepository;
 import com.solarized.firedown.geckoview.GeckoState;
 import com.solarized.firedown.utils.BrowserHeaders;
@@ -49,6 +51,7 @@ public class AutoCompleteSearch {
     private static final int MAX_RESULTS = 3;
     private final SearchRepository mSearchRepository;
     private final WebHistoryDataRepository mWebHistoryDataRepository;
+    private final WebBookmarkDataRepository mWebBookmarkDataRepository;
     private final GeckoStateDataRepository mGeckoStateDataRepository;
     private final IncognitoStateRepository mIncognitoStateDataRepository;
     private final OkHttpClient mHttpClient;
@@ -59,6 +62,7 @@ public class AutoCompleteSearch {
     public AutoCompleteSearch(
             SearchRepository searchRepository,
             WebHistoryDataRepository webHistoryRepository,
+            WebBookmarkDataRepository webBookmarkRepository,
             GeckoStateDataRepository geckoStateDataRepository,
             IncognitoStateRepository incognitoStateRepository,
             OkHttpClient httpClient) {
@@ -66,6 +70,7 @@ public class AutoCompleteSearch {
         this.mIncognitoStateDataRepository = incognitoStateRepository;
         this.mGeckoStateDataRepository = geckoStateDataRepository;
         this.mWebHistoryDataRepository = webHistoryRepository;
+        this.mWebBookmarkDataRepository = webBookmarkRepository;
         this.mHttpClient = httpClient;
     }
 
@@ -100,6 +105,7 @@ public class AutoCompleteSearch {
             addHistory(result, searchTerm);
             // Add matching open tabs first (before network call, so they appear quickly in order)
             addOpenTabs(result, searchTerm, mIncognito);
+            addBookmarks(result, searchTerm);
         }
         return result;
     }
@@ -213,6 +219,26 @@ public class AutoCompleteSearch {
 
         // De-duplicate history against network results based on URL
         result.addAll(historyItems.stream().collect(collectingAndThen(
+                toCollection(() -> new TreeSet<>(Comparator.comparing(AutoCompleteEntity::getSubText))),
+                ArrayList::new)));
+    }
+
+    private void addBookmarks(List<AutoCompleteEntity> result, String input) {
+        List<WebBookmarkEntity> bookmarks = mWebBookmarkDataRepository.getAutoCompleteSearch(input);
+        if (bookmarks == null || bookmarks.isEmpty()) return;
+
+        List<AutoCompleteEntity> bookmarkItems = new ArrayList<>();
+        for (WebBookmarkEntity entity : bookmarks) {
+            AutoCompleteEntity s = new AutoCompleteEntity();
+            s.setType(AutoCompleteEntity.BOOKMARK);
+            s.setTitle(entity.getTitle());
+            s.setIcon(entity.getIcon());
+            s.setSubText(entity.getUrl());
+            s.setUid(entity.getId());
+            bookmarkItems.add(s);
+        }
+
+        result.addAll(bookmarkItems.stream().collect(collectingAndThen(
                 toCollection(() -> new TreeSet<>(Comparator.comparing(AutoCompleteEntity::getSubText))),
                 ArrayList::new)));
     }

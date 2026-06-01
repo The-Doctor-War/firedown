@@ -33,6 +33,9 @@ public interface WebBookmarkDao {
     @Query("SELECT * FROM webbookmark WHERE file_url LIKE :search or file_title LIKE :search ORDER BY file_date DESC")
     PagingSource<Integer, WebBookmarkEntity> search(String search);
 
+    @Query("SELECT * FROM webbookmark WHERE file_url LIKE :search OR file_title LIKE :search ORDER BY file_date DESC LIMIT 6")
+    List<WebBookmarkEntity> getAutoCompleteSearch(String search);
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     Long insert(WebBookmarkEntity web);
 

@@ -11,6 +11,8 @@ public class AutoCompleteEntity {
 
     public static final int TAB = 3;
 
+    public static final int BOOKMARK = 4;
+
     public int uid;
 
     public int sessionId;

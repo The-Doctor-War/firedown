@@ -123,6 +123,10 @@ public class WebBookmarkDataRepository {
         return mWebBookmarkDao.search(search);
     }
 
+    public List<WebBookmarkEntity> getAutoCompleteSearch(String input) {
+        return mWebBookmarkDao.getAutoCompleteSearch("%" + input + "%");
+    }
+
     public void add(GeckoState geckoState) {
         if (geckoState == null) return;
         String uri = geckoState.getEntityUri();

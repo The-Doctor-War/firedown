@@ -189,7 +189,16 @@ public class MediaViewerFragment extends Fragment {
         mFallbackDrawable = MimeTypeThumbnail.generateDrawable(mActivity, fileMime);
 
         if (FileUriHelper.isAudio(fileMime)) {
-            mPlayerView.setDefaultArtwork(mFallbackDrawable);
+            // Single artwork layer: mPhotoView owns the visible album
+            // art for audio (steady state, not just transition). Turn
+            // off PlayerView's own artwork slot so the metadata-driven
+            // cover doesn't paint on top of ours. The fallback is
+            // installed immediately so the transition has something to
+            // land on; Glide's load below replaces it with the
+            // embedded cover when present, .error() restores it if
+            // extraction fails.
+            mPlayerView.setUseArtwork(false);
+            mPhotoView.setImageDrawable(mFallbackDrawable);
         }
 
         // PlayerView / controller behaviour. autoShow is deliberately
@@ -339,27 +348,14 @@ public class MediaViewerFragment extends Fragment {
             }
 
             /**
-             * Hide the transition placeholder once playback has
-             * something opaque to paint:
-             *   • video → first rendered frame on the TextureView
-             *   • audio → STATE_READY (handled below); PlayerView
-             *     then owns the visible artwork slot, painting either
-             *     the embedded cover from MediaMetadata or its
-             *     defaultArtwork fallback. Either way mPhotoView's
-             *     job is done.
+             * Video only: hide the first-frame poster once the
+             * TextureView has something opaque to draw. For audio
+             * mPhotoView is the steady-state artwork renderer (see
+             * onCreateView), not a placeholder — it never hides.
              */
             @Override
             public void onRenderedFirstFrame() {
                 if (mPhotoView != null) mPhotoView.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onPlaybackStateChanged(int playbackState) {
-                if (playbackState != Player.STATE_READY) return;
-                if (mPhotoView == null || mDownloadEntity == null) return;
-                if (FileUriHelper.isAudio(mDownloadEntity.getFileMimeType())) {
-                    mPhotoView.setVisibility(View.GONE);
-                }
             }
         });
 
@@ -415,7 +411,7 @@ public class MediaViewerFragment extends Fragment {
                     .override(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .signature(new ObjectKey(interval + url.hashCode()))
-                    .error(FileUriHelper.isAudio(mimeType) ? mFallbackDrawable : null)
+                    .error(mFallbackDrawable)
                     .listener(mRequestListener)
                     .apply(options)
                     .into(mPhotoView);
@@ -720,11 +716,6 @@ public class MediaViewerFragment extends Fragment {
     }
 
 
-    @OptIn(markerClass = UnstableApi.class)
-    private void setErrorRes(Drawable drawable){
-        mPlayerView.setDefaultArtwork(drawable);
-    }
-
     /**
      * Reach into PlayerView, find its inner exo_content_frame
      * (an AspectRatioFrameLayout), and set the aspect ratio
@@ -779,7 +770,6 @@ public class MediaViewerFragment extends Fragment {
             if(mActivity == null)
                 return false;
             startPostponedEnterTransition();
-            setErrorRes(mFallbackDrawable);
             return false;
         }
 

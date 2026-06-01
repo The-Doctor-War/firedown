@@ -147,10 +147,17 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         // ── Tags ─────────────────────────────────────────────────────────
         bindTags(context, holder, entity);
 
-        // Title is now shown in both layouts — list as the primary row text,
-        // grid as a 2-line overlay in the bottom scrim. fileUrl/domain stays
-        // list-only (no room on the tile).
-        holder.setTextOrHide(holder.fileName, entity.getFileName());
+        // Title is shown in both layouts — list as the primary row text, grid
+        // as a 2-line overlay in the bottom scrim. fileUrl/domain stays
+        // list-only (no room on the tile). In grid, suppress URL-derived junk
+        // names (image CDN filenames like "mqdefault.jpg", base64 hashes) that
+        // just clutter the art — the mime + dimensions chips already identify
+        // those. List keeps the name regardless as its primary identifier.
+        String title = entity.getFileName();
+        if (!holder.isList && WebUtils.isUrlDerivedName(title)) {
+            title = null;
+        }
+        holder.setTextOrHide(holder.fileName, title);
 
         // ── Layout-specific bindings ─────────────────────────────────────
         if (holder.isList) {
@@ -267,16 +274,27 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
                 break;
 
             case FFmpegTagEntity.TYPE_ADAPTIVE:
-                // Locale-dependent label — resolved at render time, not stored.
-                // Quality slot is absent in the grid tile; skip silently there.
-                if (holder.tagQuality != null) {
+                // Video "Adaptive" label. Shown in list only — on the grid
+                // tile it overflows the narrow cell and adds little, so it's
+                // suppressed there (quality lives in the download sheet).
+                if (holder.tagQuality != null && holder.isList) {
                     holder.tagQuality.setText(context.getString(R.string.download_adaptative));
                     holder.tagQuality.setVisibility(View.VISIBLE);
                 }
                 break;
 
             case FFmpegTagEntity.TYPE_QUALITY:
+                // Video quality (e.g. "1080p") — list only, same overflow
+                // reasoning as Adaptive above.
+                if (holder.tagQuality != null && holder.isList && !TextUtils.isEmpty(tag.getText())) {
+                    holder.tagQuality.setText(tag.getText());
+                    holder.tagQuality.setVisibility(View.VISIBLE);
+                }
+                break;
+
             case FFmpegTagEntity.TYPE_RESOLUTION:
+                // Image dimensions (e.g. "320x180") — useful at a glance and
+                // compact, so shown in both layouts.
                 if (holder.tagQuality != null && !TextUtils.isEmpty(tag.getText())) {
                     holder.tagQuality.setText(tag.getText());
                     holder.tagQuality.setVisibility(View.VISIBLE);

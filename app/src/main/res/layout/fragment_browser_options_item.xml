@@ -100,6 +100,24 @@
                     tools:text="53:25"
                     tools:visibility="visible" />
 
+                <!-- Quality slot. The adapter only populates this in grid for
+                     image RESOLUTION (e.g. 320x180); video quality/Adaptive
+                     labels are suppressed on the tile to avoid overflow in the
+                     narrow 2-column cell. -->
+                <TextView
+                    android:id="@+id/tag_quality"
+                    style="@style/MimeTertiary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:visibility="gone"
+                    tools:text="320x180"
+                    tools:visibility="visible" />
+
                 <!-- Weighted spacer pushes the CC chip to the trailing edge. -->
                 <Space
                     android:layout_width="0dp"

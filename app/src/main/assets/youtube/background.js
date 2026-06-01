@@ -1558,24 +1558,37 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 incognito = tab?.incognito || false;
             } catch (e) {}
         }
-        // Mirror the header set SabrDownloader uses for MWEB streaming —
-        // that combination is proven to be accepted by YouTube's signed
-        // endpoints (verified against SABR downloads). Earlier attempts
-        // with desktop UA + www.youtube.com Referer + Cookie produced
-        // HTTP 200 with zero bytes; timedtext URLs minted by the MWEB
-        // client expect the same MWEB-style request envelope as SABR.
-        // See SabrDownloader.java:467 for the canonical list.
+        // Header set tuned for the timedtext endpoint. The previous attempt
+        // mirrored SabrDownloader's MWEB envelope (Origin m.youtube.com,
+        // Sec-Fetch-Site cross-site) but YouTube returned status=200
+        // ct=text/html bytes=0 — the anti-scraping silent-empty path. The
+        // timedtext URL lives on www.youtube.com, so the player itself
+        // requests it as a same-origin fetch from www.youtube.com, not a
+        // cross-site one. Mirror that, plus include X-YouTube-Client-Name
+        // and X-YouTube-Client-Version so the request looks like a real
+        // in-page caption load. Client name 2 = MWEB (the client that
+        // minted the URL), version is what cachedClientVersion captured
+        // from the page HTML.
         const headers = [
             { name: "User-Agent", value: "Mozilla/5.0 (Android 16; Mobile; rv:149.0) Gecko/149.0 Firefox/149.0" },
             { name: "Accept", value: "*/*" },
-            { name: "Accept-Language", value: "en-US" },
+            { name: "Accept-Language", value: "en-US,en;q=0.5" },
             { name: "Accept-Encoding", value: "identity" },
-            { name: "Origin", value: "https://m.youtube.com" },
-            { name: "Referer", value: "https://m.youtube.com/" },
+            { name: "Origin", value: "https://www.youtube.com" },
+            { name: "Referer", value: "https://www.youtube.com/" },
             { name: "Sec-Fetch-Dest", value: "empty" },
             { name: "Sec-Fetch-Mode", value: "cors" },
-            { name: "Sec-Fetch-Site", value: "cross-site" }
+            { name: "Sec-Fetch-Site", value: "same-origin" },
+            { name: "X-YouTube-Client-Name", value: "2" }
         ];
+        const clientVersion = playerResponse?.responseContext?.serviceTrackingParams
+            ?.flatMap(p => p.params || [])
+            ?.find(p => p.key === "cver")?.value
+            || playerResponse?.responseContext?.mainAppWebResponseContext?.clientVersion
+            || null;
+        if (clientVersion) {
+            headers.push({ name: "X-YouTube-Client-Version", value: clientVersion });
+        }
 
         let emitted = 0;
         for (const t of tracks) {

@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — session-aware captured content</title>
+<style>
+  :root{
+    --bg:#131316;--surface:#1b1b1e;--surface2:#232327;--surface3:#2c2c31;
+    --on:#e9e9ec;--on-var:#b4b4bb;--on-dim:#83838b;
+    --primary:#F66A66;--on-primary:#2a0303;
+    --hair:rgba(255,255,255,.07);--ok:#8ad9ad;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI Variable",system-ui,sans-serif;margin:0;padding:32px;background:#0d0d0f;color:var(--on);line-height:1.5;}
+  h1{font-size:23px;margin:0 0 4px;font-weight:600;}
+  .sub{color:#9aa0a6;font-size:14px;margin:0 0 22px;max-width:900px;}
+  h2{font-size:15px;margin:30px 0 12px;color:#c9c9cf;font-weight:600;}
+  .note{color:#85858d;font-size:13px;margin:0 0 14px;max-width:880px;}
+  code.k{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-size:12px;color:#e0e0e6;}
+
+  /* journey strip */
+  .journey{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 22px;font-size:12.5px;}
+  .journey .step{background:var(--surface2);border:1px solid var(--hair);border-radius:8px;padding:5px 10px;color:var(--on-var);}
+  .journey .step.cur{background:var(--primary);color:var(--on-primary);border-color:transparent;font-weight:600;}
+  .journey .arr{color:var(--on-dim);}
+
+  .stage{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#80848a;font-weight:600;margin-bottom:10px;max-width:320px;}
+
+  .phone{width:320px;border-radius:22px;overflow:hidden;background:var(--bg);box-shadow:0 10px 36px rgba(0,0,0,.45),inset 0 0 0 1px #2a2a2d;}
+  .statusbar{height:20px;}
+  .addr{margin:8px 12px 4px;background:var(--surface2);border-radius:999px;padding:7px 12px;font-size:11.5px;color:var(--on-var);display:flex;align-items:center;gap:8px;}
+  .addr .lock{opacity:.6;}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:8px 16px 6px;}
+  .appbar .t{font-size:17px;font-weight:600;}
+  .appbar .icons{display:flex;gap:14px;color:var(--on-var);font-size:14px;}
+  .scroll{padding:0 14px 16px;}
+
+  .section{margin-top:14px;}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;}
+  .sec-title{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--on-dim);display:flex;align-items:center;gap:8px;}
+  .sec-title.focus{color:var(--primary);}
+  .sec-count{background:var(--surface3);color:var(--on-var);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;}
+
+  /* hero */
+  .hero{border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid var(--hair);}
+  .hero-thumb{position:relative;aspect-ratio:16/9;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;}
+  .hero-thumb .play{width:48px;height:48px;border-radius:999px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;}
+  .hero-thumb .play svg{width:20px;height:20px;fill:#fff;margin-left:3px;}
+  .hero-thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;}
+  .hero-body{padding:10px 12px 12px;}
+  .hero-title{font-size:13.5px;font-weight:600;line-height:1.3;margin-bottom:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .hero-meta{font-size:11.5px;color:var(--on-dim);margin-bottom:10px;}
+  .hero-actions{display:flex;gap:8px;}
+  .btn{flex:1;padding:9px;border-radius:10px;font-weight:600;font-size:13px;text-align:center;}
+  .btn-fill{background:var(--primary);color:var(--on-primary);}
+  .btn-soft{flex:0 0 auto;padding:9px 13px;border-radius:10px;background:var(--surface3);color:var(--on);font-weight:600;font-size:13px;}
+
+  /* image grid (focus) */
+  .imgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;}
+  .imgrid .ic{aspect-ratio:1;border-radius:8px;background-size:cover;background-position:center;position:relative;}
+  .imgrid .ic .dim{position:absolute;left:4px;bottom:4px;font-size:8px;color:rgba(255,255,255,.85);font-weight:600;text-shadow:0 1px 2px #000;}
+
+  /* earlier-session page card */
+  .earlier-head{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--on-dim);margin:20px 2px 8px;}
+  .pcard{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:10px 12px;margin-bottom:8px;}
+  .pcard .stack{display:flex;flex-shrink:0;}
+  .pcard .stack .mini{width:38px;height:38px;border-radius:8px;background-size:cover;background-position:center;margin-left:-12px;border:2px solid var(--surface);display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .pcard .stack .mini:first-child{margin-left:0;}
+  .pcard .ptext{flex:1;min-width:0;}
+  .pcard .p1{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pcard .p2{font-size:11.5px;color:var(--on-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .pcard .pdom{font-size:10.5px;color:var(--on-dim);display:flex;align-items:center;gap:5px;margin-bottom:1px;}
+  .pcard .fav{width:12px;height:12px;border-radius:3px;}
+  .pcard .pgo{color:var(--on-dim);font-size:17px;flex-shrink:0;}
+
+  .legend{font-size:12px;color:#9aa0a6;margin:10px 0 0;max-width:320px;}
+  .legend b{color:#cdcdd3;}
+
+  .why{display:flex;gap:18px;flex-wrap:wrap;margin:14px 0 0;}
+  .why .card{flex:1;min-width:220px;background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:14px 16px;}
+  .why h4{margin:0 0 6px;font-size:13px;color:#cdcdd3;}
+  .why p{margin:0;font-size:12.5px;color:#9aa0a6;}
+</style>
+</head>
+<body>
+
+<h1>Session-aware captured content</h1>
+<p class="sub">
+  One tab, four pages: <b>YouTube A → YouTube B → x.com → newspaper</b>. Captures accumulate
+  (they already carry an <code class="k">origin</code> = the page URL). The fix isn't a smarter
+  type filter — it's <b>anchoring to the page you're on now</b> and grouping the rest by page.
+</p>
+
+<div class="journey">
+  <span class="step">YouTube A</span><span class="arr">→</span>
+  <span class="step">YouTube B</span><span class="arr">→</span>
+  <span class="step">x.com</span><span class="arr">→</span>
+  <span class="step cur">newspaper ● you are here</span>
+</div>
+
+<h2>Same sheet, as you move through the session</h2>
+
+<div class="stage">
+
+  <!-- ===== ON NEWSPAPER (current) ===== -->
+  <div>
+    <div class="label">On the newspaper — current page focused, history below</div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="addr"><span class="lock">🔒</span> elpais.com/articulo/elecciones…</div>
+      <div class="appbar"><span class="t">Captured</span><span class="icons">▦ &nbsp; ⋮</span></div>
+      <div class="scroll">
+
+        <!-- focus = current page -->
+        <div class="section">
+          <div class="sec-head"><span class="sec-title focus">This page · Images <span class="sec-count">148</span></span></div>
+          <div class="imgrid">
+            <div class="ic" style="background:linear-gradient(135deg,#6a7a4a,#3a4a2a);"><span class="dim">414×233</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#8a3a4a,#c08a9a);"><span class="dim">414×311</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#c0a060,#6a4a2a);"><span class="dim">414×233</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#3a4a5a,#1a2a3a);"><span class="dim">414×311</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#7a9ab0,#3a5a7a);"><span class="dim">414×281</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#5a3a6a,#2a1a3a);"><span class="dim">414×311</span></div>
+          </div>
+        </div>
+
+        <!-- earlier this session -->
+        <div class="earlier-head">Earlier this session</div>
+
+        <div class="pcard">
+          <div class="stack">
+            <div class="mini" style="background:linear-gradient(135deg,#2a3a4a,#4a6a7a);"></div>
+            <div class="mini" style="background:linear-gradient(135deg,#3a3a2a,#6a6a4a);"></div>
+            <div class="mini" style="background:linear-gradient(135deg,#3a2a3a,#6a4a6a);"></div>
+          </div>
+          <div class="ptext">
+            <div class="pdom"><span class="fav" style="background:#1d9bf0;"></span>x.com</div>
+            <div class="p1">Home feed</div>
+            <div class="p2">5 videos · 2 images · 3 SVGs</div>
+          </div>
+          <div class="pgo">›</div>
+        </div>
+
+        <div class="pcard">
+          <div class="stack">
+            <div class="mini" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"></div>
+          </div>
+          <div class="ptext">
+            <div class="pdom"><span class="fav" style="background:#f00;"></span>youtube.com</div>
+            <div class="p1">I Survived 100 Days in the Arctic</div>
+            <div class="p2">1 video · 2 captions</div>
+          </div>
+          <div class="pgo">›</div>
+        </div>
+
+        <div class="pcard">
+          <div class="stack">
+            <div class="mini" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"></div>
+          </div>
+          <div class="ptext">
+            <div class="pdom"><span class="fav" style="background:#f00;"></span>youtube.com</div>
+            <div class="p1">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div>
+            <div class="p2">1 video · 1 caption</div>
+          </div>
+          <div class="pgo">›</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="legend"><b>Anchor =</b> the address-bar URL matched against <code class="k">entity.origin</code>. The newspaper is focused; the three pages you passed through collapse into one card each, newest first, labelled by site + their primary item.</div>
+  </div>
+
+  <!-- ===== AFTER GOING BACK TO YOUTUBE B ===== -->
+  <div>
+    <div class="label">Tap back to YouTube B — it re-focuses (origin re-matches)</div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="addr"><span class="lock">🔒</span> m.youtube.com/watch?v=…arctic</div>
+      <div class="appbar"><span class="t">Captured</span><span class="icons">▦ &nbsp; ⋮</span></div>
+      <div class="scroll">
+
+        <div class="section">
+          <div class="sec-head"><span class="sec-title focus">This page · Video</span></div>
+          <div class="hero">
+            <div class="hero-thumb" style="background:linear-gradient(135deg,#1f3a2b,#3a7b4a);">
+              <div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+              <span class="dur">24:02</span>
+            </div>
+            <div class="hero-body">
+              <div class="hero-title">I Survived 100 Days in the Arctic</div>
+              <div class="hero-meta">YouTube · up to 2160p · 2 captions</div>
+              <div class="hero-actions"><div class="btn btn-fill">Download</div><div class="btn-soft">Options ▾</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="earlier-head">Earlier this session</div>
+
+        <div class="pcard">
+          <div class="stack"><div class="mini" style="background:linear-gradient(135deg,#6a7a4a,#3a4a2a);"></div><div class="mini" style="background:linear-gradient(135deg,#8a3a4a,#c08a9a);"></div><div class="mini" style="background:linear-gradient(135deg,#c0a060,#6a4a2a);"></div></div>
+          <div class="ptext"><div class="pdom"><span class="fav" style="background:#c00;"></span>elpais.com</div><div class="p1">Elecciones o 2027?</div><div class="p2">148 images</div></div>
+          <div class="pgo">›</div>
+        </div>
+
+        <div class="pcard">
+          <div class="stack"><div class="mini" style="background:#2a3a4a;"></div><div class="mini" style="background:#3a3a2a;"></div><div class="mini" style="background:#3a2a3a;"></div></div>
+          <div class="ptext"><div class="pdom"><span class="fav" style="background:#1d9bf0;"></span>x.com</div><div class="p1">Home feed</div><div class="p2">5 videos · 2 images · 3 SVGs</div></div>
+          <div class="pgo">›</div>
+        </div>
+
+        <div class="pcard">
+          <div class="stack"><div class="mini" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"></div></div>
+          <div class="ptext"><div class="pdom"><span class="fav" style="background:#f00;"></span>youtube.com</div><div class="p1">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div><div class="p2">1 video · 1 caption</div></div>
+          <div class="pgo">›</div>
+        </div>
+
+      </div>
+    </div>
+    <div class="legend"><b>No duplication:</b> B was already captured, so going back just re-anchors to its origin. The newspaper now sits in Earlier. State is the same FIFO of entities — only the focus changes.</div>
+  </div>
+
+</div>
+
+<h2>How the funnel supports it</h2>
+<div class="why">
+  <div class="card"><h4>Already there</h4><p>Every entity has <code class="k">origin</code> (page URL) + <code class="k">tabId</code>. The repo is a per-tab FIFO. No new capture work.</p></div>
+  <div class="card"><h4>Add: current-origin signal</h4><p>The browser fragment already knows the active URL. Feed it to the view model so it can split entities into "origin == current" vs "everything else".</p></div>
+  <div class="card"><h4>Add: group + order</h4><p>Bucket the rest by origin, order by most-recent capture time, label each with domain + the group's primary item. One collapsible page card per origin.</p></div>
+</div>
+
+<p class="note" style="margin-top:14px;">
+  <b>Edge cases this handles cleanly:</b> two YouTube videos = two origins = two page cards
+  (never merged). Re-visiting a page re-focuses it, no dupes. A page with a primary video shows
+  a hero; a page that's just images degrades to the grid — same rule, per page. The "All / type"
+  chips still exist for when you want the old flat cross-session filter (e.g. "every subtitle
+  from this whole session").
+</p>
+
+</body>
+</html>

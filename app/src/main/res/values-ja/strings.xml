@@ -552,4 +552,9 @@
     <string name="task_compress_finished">アーカイブを作成しました</string>
     <string name="task_compress_failed">アーカイブを作成できませんでした</string>
     <string name="task_compress_cancelled">圧縮をキャンセルしました</string>
+    <string name="extract">展開</string>
+    <string name="download_saving_extract">展開しています。お待ちください…</string>
+    <string name="task_extract_finished">アーカイブを展開しました</string>
+    <string name="task_extract_failed">アーカイブを展開できませんでした</string>
+    <string name="task_extract_cancelled">展開をキャンセルしました</string>
 </resources>

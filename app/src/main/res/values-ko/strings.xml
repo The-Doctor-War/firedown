@@ -393,4 +393,9 @@
     <string name="task_compress_finished">압축 파일 생성됨</string>
     <string name="task_compress_failed">압축 파일을 만들 수 없습니다</string>
     <string name="task_compress_cancelled">압축이 취소됨</string>
+    <string name="extract">압축 풀기</string>
+    <string name="download_saving_extract">압축을 푸는 중입니다. 잠시 기다려 주세요…</string>
+    <string name="task_extract_finished">압축 해제됨</string>
+    <string name="task_extract_failed">압축을 풀 수 없습니다</string>
+    <string name="task_extract_cancelled">압축 풀기가 취소됨</string>
 </resources>

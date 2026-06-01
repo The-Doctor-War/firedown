@@ -350,4 +350,9 @@
     <string name="task_compress_finished">Arkiv oprettet</string>
     <string name="task_compress_failed">Kunne ikke oprette arkiv</string>
     <string name="task_compress_cancelled">Komprimering annulleret</string>
+    <string name="extract">Udpak</string>
+    <string name="download_saving_extract">Udpakker, vent venligst…</string>
+    <string name="task_extract_finished">Arkiv udpakket</string>
+    <string name="task_extract_failed">Kunne ikke udpakke arkiv</string>
+    <string name="task_extract_cancelled">Udpakning annulleret</string>
 </resources>

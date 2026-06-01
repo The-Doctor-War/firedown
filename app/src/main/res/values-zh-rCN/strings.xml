@@ -552,4 +552,9 @@
     <string name="task_compress_finished">已创建压缩包</string>
     <string name="task_compress_failed">无法创建压缩包</string>
     <string name="task_compress_cancelled">已取消压缩</string>
+    <string name="extract">解压</string>
+    <string name="download_saving_extract">正在解压，请稍候…</string>
+    <string name="task_extract_finished">已解压压缩包</string>
+    <string name="task_extract_failed">无法解压压缩包</string>
+    <string name="task_extract_cancelled">已取消解压</string>
 </resources>

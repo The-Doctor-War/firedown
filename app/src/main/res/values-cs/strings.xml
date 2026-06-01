@@ -368,4 +368,9 @@
     <string name="task_compress_finished">Archiv vytvořen</string>
     <string name="task_compress_failed">Nepodařilo se vytvořit archiv</string>
     <string name="task_compress_cancelled">Komprese zrušena</string>
+    <string name="extract">Rozbalit</string>
+    <string name="download_saving_extract">Probíhá rozbalování, čekejte prosím…</string>
+    <string name="task_extract_finished">Archiv rozbalen</string>
+    <string name="task_extract_failed">Nepodařilo se rozbalit archiv</string>
+    <string name="task_extract_cancelled">Rozbalování zrušeno</string>
 </resources>

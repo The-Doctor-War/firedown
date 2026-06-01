@@ -153,6 +153,7 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         if (mNotificationAction == ServiceActions.AUDIO_ENCODE.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_AUDIO_ENCODE, null);
         else if (mNotificationAction == ServiceActions.MAKE_GIF.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_MAKE_GIF, null);
         else if (mNotificationAction == ServiceActions.COMPRESS.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_COMPRESS, null);
+        else if (mNotificationAction == ServiceActions.EXTRACT.getValue()) handleItemAction(IntentActions.DOWNLOAD_CANCEL_EXTRACT, null);
         else if (mNotificationAction == ServiceActions.ENCRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_ENCRYPTION, null);
         else if (mNotificationAction == ServiceActions.DECRYPTION.getValue()) handleItemAction(IntentActions.CANCEL_DECRYPTION, null);
     }
@@ -262,6 +263,10 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             startActionMode(option.getPosition());
         } else if (iconId == R.drawable.ic_baseline_archive_24) {
             handleItemAction(IntentActions.DOWNLOAD_START_COMPRESS, entity);
+            mOperationActive = true;
+            startActionMode(option.getPosition());
+        } else if (iconId == R.drawable.ic_baseline_unarchive_24) {
+            handleItemAction(IntentActions.DOWNLOAD_START_EXTRACT, entity);
             mOperationActive = true;
             startActionMode(option.getPosition());
         }else if (iconId == R.drawable.ic_travel_explore_24) {
@@ -447,6 +452,21 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
             showErrorSnackbar(R.string.task_compress_failed);
         } else if (action == ServiceActions.CANCEL_COMPRESS) {
             mBottomProgressView.setTitle(R.string.task_compress_cancelled);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.EXTRACT) {
+            /* Extracted files land in this very list (the repository feeds
+             * it), so there's nothing to "View" — just report how many came
+             * out and let the slide-down hide the bar. */
+            int count = obj instanceof Integer ? (Integer) obj : 0;
+            mBottomProgressView.setProgress(100);
+            mBottomProgressView.setTitle(String.format("%s (%d)", getString(R.string.task_extract_finished), count));
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+        } else if (action == ServiceActions.ERROR_EXTRACT) {
+            mBottomProgressView.setTitle(R.string.task_extract_failed);
+            mBottomProgressView.setActionButtonVisibility(View.GONE);
+            showErrorSnackbar(R.string.task_extract_failed);
+        } else if (action == ServiceActions.CANCEL_EXTRACT) {
+            mBottomProgressView.setTitle(R.string.task_extract_cancelled);
             mBottomProgressView.setActionButtonVisibility(View.GONE);
         } else if (action == ServiceActions.ENCRYPTION) {
             setupEncryptionFinishUI((int) obj);
@@ -685,6 +705,9 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
         }else if(action == ServiceActions.COMPRESS){
             mBottomProgressView.setTitle(R.string.download_saving_compress);
             mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_COMPRESS, null));
+        }else if(action == ServiceActions.EXTRACT){
+            mBottomProgressView.setTitle(R.string.download_saving_extract);
+            mBottomProgressView.setActionButtonListener(v -> handleItemAction(IntentActions.DOWNLOAD_CANCEL_EXTRACT, null));
         }
     }
 

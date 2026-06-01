@@ -415,4 +415,9 @@
     <string name="task_compress_finished">Archief aangemaakt</string>
     <string name="task_compress_failed">Kan archief niet aanmaken</string>
     <string name="task_compress_cancelled">Compressie geannuleerd</string>
+    <string name="extract">Uitpakken</string>
+    <string name="download_saving_extract">Bezig met uitpakken, even geduld…</string>
+    <string name="task_extract_finished">Archief uitgepakt</string>
+    <string name="task_extract_failed">Kan archief niet uitpakken</string>
+    <string name="task_extract_cancelled">Uitpakken geannuleerd</string>
 </resources>

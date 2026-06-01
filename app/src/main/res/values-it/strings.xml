@@ -396,4 +396,9 @@
     <string name="task_compress_finished">Archivio creato</string>
     <string name="task_compress_failed">Impossibile creare l\'archivio</string>
     <string name="task_compress_cancelled">Compressione annullata</string>
+    <string name="extract">Estrai</string>
+    <string name="download_saving_extract">Estrazione in corso, attendere…</string>
+    <string name="task_extract_finished">Archivio estratto</string>
+    <string name="task_extract_failed">Impossibile estrarre l\'archivio</string>
+    <string name="task_extract_cancelled">Estrazione annullata</string>
 </resources>

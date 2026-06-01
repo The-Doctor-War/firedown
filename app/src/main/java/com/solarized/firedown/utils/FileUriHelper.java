@@ -448,6 +448,19 @@ public class FileUriHelper {
     }
 
     /**
+     * True for the zip mime variants we can extract natively (java.util.zip).
+     * Deliberately narrow — rar/7z are not extractable without native libs,
+     * so the Extract action is only offered for genuine zips.
+     */
+    public static boolean isZip(String mimetype) {
+        if (mimetype == null)
+            return false;
+        return mimetype.contains(MIMETYPE_ZIP)
+                || mimetype.contains(MIMETYPE_ZIP_2)
+                || mimetype.contains(MIMETYPE_ZIP_3);
+    }
+
+    /**
      * Returns false for audio mime types that cannot carry embedded cover art —
      * raw ADTS (audio/aac) and MIDI. Callers can use this to short-circuit
      * FFmpeg's attached-picture extraction, which would always fail for these

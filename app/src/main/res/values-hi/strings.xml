@@ -314,4 +314,9 @@
     <string name="task_compress_finished">संग्रह बन गया</string>
     <string name="task_compress_failed">संग्रह नहीं बना सके</string>
     <string name="task_compress_cancelled">संपीड़न रद्द किया गया</string>
+    <string name="extract">निकालें</string>
+    <string name="download_saving_extract">निकाला जा रहा है, कृपया प्रतीक्षा करें…</string>
+    <string name="task_extract_finished">संग्रह निकाला गया</string>
+    <string name="task_extract_failed">संग्रह नहीं निकाल सके</string>
+    <string name="task_extract_cancelled">निष्कर्षण रद्द किया गया</string>
 </resources>

@@ -354,4 +354,9 @@
     <string name="task_compress_finished">Arkisto luotu</string>
     <string name="task_compress_failed">Arkiston luonti epäonnistui</string>
     <string name="task_compress_cancelled">Pakkaus peruutettu</string>
+    <string name="extract">Pura</string>
+    <string name="download_saving_extract">Puretaan, odota…</string>
+    <string name="task_extract_finished">Arkisto purettu</string>
+    <string name="task_extract_failed">Arkiston purku epäonnistui</string>
+    <string name="task_extract_cancelled">Purku peruutettu</string>
 </resources>

@@ -343,4 +343,9 @@
     <string name="task_compress_finished">הארכיון נוצר</string>
     <string name="task_compress_failed">לא ניתן ליצור את הארכיון</string>
     <string name="task_compress_cancelled">הדחיסה בוטלה</string>
+    <string name="extract">חילוץ</string>
+    <string name="download_saving_extract">מתבצע חילוץ, נא להמתין…</string>
+    <string name="task_extract_finished">הארכיון חולץ</string>
+    <string name="task_extract_failed">לא ניתן לחלץ את הארכיון</string>
+    <string name="task_extract_cancelled">החילוץ בוטל</string>
 </resources>

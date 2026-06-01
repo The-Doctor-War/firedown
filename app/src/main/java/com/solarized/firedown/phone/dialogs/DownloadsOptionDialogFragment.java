@@ -101,6 +101,9 @@ public class DownloadsOptionDialogFragment extends BaseBottomSheetDialogFragment
         if (mDownloadEntity.isFileSafe()) {
             return new int[]{R.array.download_options_encrypted_type, R.array.download_options_encrypted_icon};
         }
+        if (FileUriHelper.isZip(mDownloadEntity.getFileMimeType())) {
+            return new int[]{R.array.download_options_archive_type, R.array.download_options_archive_icon};
+        }
         if (!FileUriHelper.isVideo(mDownloadEntity.getFileMimeType())) {
             return new int[]{R.array.download_options_no_thumb_type, R.array.download_options_no_thumb_icon};
         }

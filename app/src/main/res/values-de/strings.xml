@@ -554,4 +554,9 @@
     <string name="task_compress_finished">Archiv erstellt</string>
     <string name="task_compress_failed">Archiv konnte nicht erstellt werden</string>
     <string name="task_compress_cancelled">Komprimierung abgebrochen</string>
+    <string name="extract">Entpacken</string>
+    <string name="download_saving_extract">Wird entpackt, bitte warten…</string>
+    <string name="task_extract_finished">Archiv entpackt</string>
+    <string name="task_extract_failed">Archiv konnte nicht entpackt werden</string>
+    <string name="task_extract_cancelled">Entpacken abgebrochen</string>
 </resources>

@@ -234,6 +234,29 @@
         <item>@drawable/ic_baseline_delete_24</item>
     </integer-array>
 
+    <!-- Finished archive (zip): offers Extract in place of Compress. -->
+    <integer-array name="download_options_archive_type">
+        <item>@string/open_with</item>
+        <item>@string/open_origin</item>
+        <item>@string/share</item>
+        <item>@string/extract</item>
+        <item>@string/rename</item>
+        <item>@string/lock_cipher</item>
+        <item>@string/details</item>
+        <item>@string/delete</item>
+    </integer-array>
+
+    <integer-array name="download_options_archive_icon">
+        <item>@drawable/ic_web_24</item>
+        <item>@drawable/ic_travel_explore_24</item>
+        <item>@drawable/ic_share_24</item>
+        <item>@drawable/ic_baseline_unarchive_24</item>
+        <item>@drawable/ic_edit_24</item>
+        <item>@drawable/ic_lock_24</item>
+        <item>@drawable/ic_info_24</item>
+        <item>@drawable/ic_baseline_delete_24</item>
+    </integer-array>
+
     <integer-array name="download_options_encrypted_type">
         <item>@string/rename</item>
         <item>@string/lock_decipher</item>

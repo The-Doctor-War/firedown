@@ -364,4 +364,9 @@
     <string name="task_compress_finished">تم إنشاء الأرشيف</string>
     <string name="task_compress_failed">تعذّر إنشاء الأرشيف</string>
     <string name="task_compress_cancelled">تم إلغاء الضغط</string>
+    <string name="extract">استخراج</string>
+    <string name="download_saving_extract">جارٍ الاستخراج، يرجى الانتظار…</string>
+    <string name="task_extract_finished">تم استخراج الأرشيف</string>
+    <string name="task_extract_failed">تعذّر استخراج الأرشيف</string>
+    <string name="task_extract_cancelled">تم إلغاء الاستخراج</string>
 </resources>

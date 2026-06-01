@@ -412,4 +412,9 @@
     <string name="task_compress_finished">Utworzono archiwum</string>
     <string name="task_compress_failed">Nie udało się utworzyć archiwum</string>
     <string name="task_compress_cancelled">Anulowano kompresję</string>
+    <string name="extract">Wypakuj</string>
+    <string name="download_saving_extract">Wypakowywanie, proszę czekać…</string>
+    <string name="task_extract_finished">Rozpakowano archiwum</string>
+    <string name="task_extract_failed">Nie udało się rozpakować archiwum</string>
+    <string name="task_extract_cancelled">Anulowano wypakowywanie</string>
 </resources>

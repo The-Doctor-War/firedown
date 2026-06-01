@@ -160,6 +160,7 @@
     <string name="download_saved_to_vault">Saved to Vault</string>
     <string name="download_saving_audio">Extracting Audio, please wait…</string>
     <string name="download_saving_compress">Compressing, please wait…</string>
+    <string name="download_saving_extract">Extracting, please wait…</string>
     <string name="download_saving_gif">Creating GIF, please wait…</string>
     <string name="downloading">Downloading…</string>
     <!-- Section header on the downloads list pinned at the top whenever
@@ -203,6 +204,7 @@
     <string name="error_security_io_exception">No matching key found for the ciphertext in the stream</string>
     <string name="error_unknown">Unknown error occurred</string>
     <string name="exit_fullscreen_with_back_button_short">Drag from top &amp; press back to exit</string>
+    <string name="extract">Extract</string>
     <string name="extract_audio">Extract Audio</string>
     <string name="file_view">View</string>
     <string name="fingerprint_protection">Enable Fingerprint Protection</string>
@@ -564,6 +566,9 @@
     <string name="task_compress_finished">Archive created</string>
     <string name="task_compress_failed">Could not create archive</string>
     <string name="task_compress_cancelled">Compression cancelled</string>
+    <string name="task_extract_finished">Archive extracted</string>
+    <string name="task_extract_failed">Could not extract archive</string>
+    <string name="task_extract_cancelled">Extraction cancelled</string>
     <string name="task_cancel_operation">Do you want to stop the current operation?</string>
     <string name="task_decryption_finished">Decryption finished</string>
     <string name="task_dismiss">Dismiss</string>

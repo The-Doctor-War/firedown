@@ -30,6 +30,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.fragment.app.Fragment;
 import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.Player;
 import androidx.media3.common.VideoSize;
 import androidx.media3.common.util.UnstableApi;
@@ -350,6 +351,26 @@ public class MediaViewerFragment extends Fragment {
             @Override
             public void onRenderedFirstFrame() {
                 if (mPhotoView != null) mPhotoView.setVisibility(View.GONE);
+            }
+
+            /**
+             * Audio counterpart to onRenderedFirstFrame: when the
+             * file carries embedded artwork (ID3 album art, etc.),
+             * ExoPlayer surfaces it through MediaMetadata and the
+             * PlayerView paints it letterboxed (resize_mode="fit").
+             * The mPhotoView below is stretched match_parent with
+             * the orange mime fallback, so it bleeds through the
+             * letterbox bars around the real artwork. Hide it once
+             * artwork is confirmed so only the real cover shows.
+             * Files without artwork keep the orange fallback — that
+             * branch leaves mPhotoView visible on purpose.
+             */
+            @Override
+            public void onMediaMetadataChanged(@NonNull MediaMetadata mediaMetadata) {
+                if (mPhotoView == null) return;
+                if (mediaMetadata.artworkData != null || mediaMetadata.artworkUri != null) {
+                    mPhotoView.setVisibility(View.GONE);
+                }
             }
         });
 

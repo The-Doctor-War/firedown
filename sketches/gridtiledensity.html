@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — grid tile density cleanup</title>
+<style>
+  :root{
+    --bg:#131316;--surface:#1c1c1f;--surfaceHi:#26262a;
+    --on:#e8e8ea;--on-var:#b6b6bd;--on-dim:#86868d;
+    --primary:#F66A66;--on-primary:#2a0303;
+    --hair:rgba(255,255,255,.07);
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI Variable",system-ui,sans-serif;margin:0;padding:32px;background:#0e0e10;color:var(--on);line-height:1.5;}
+  h1{font-size:22px;margin:0 0 4px;font-weight:600;}
+  .sub{color:#9aa0a6;font-size:14px;margin:0 0 24px;max-width:880px;}
+  h2{font-size:16px;margin:32px 0 4px;font-weight:600;color:#cdcdd3;}
+  .note{color:#85858d;font-size:13px;margin:0 0 14px;max-width:840px;}
+  code.k{font-family:ui-monospace,Menlo,monospace;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:3px;font-size:12px;color:#e0e0e6;}
+
+  .cols{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;}
+  .col-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#80848a;font-weight:600;margin-bottom:10px;display:flex;gap:8px;align-items:center;}
+  .now{background:#3a1f2a;color:#f0a7c5;border-radius:999px;padding:2px 8px;font-size:10px;text-transform:none;letter-spacing:0;font-weight:500;}
+  .new{background:#1f3a2b;color:#8ad9ad;border-radius:999px;padding:2px 8px;font-size:10px;text-transform:none;letter-spacing:0;font-weight:500;}
+
+  .phone{width:300px;border-radius:20px;overflow:hidden;background:var(--bg);box-shadow:0 8px 30px rgba(0,0,0,.4),inset 0 0 0 1px #2a2a2d;}
+  .statusbar{height:20px;}
+  .head{padding:10px 14px 4px;font-size:17px;font-weight:600;}
+  .rail{display:flex;gap:6px;padding:8px 12px 12px;overflow:hidden;}
+  .chip{font-size:11.5px;padding:5px 12px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--on-var);white-space:nowrap;border:1px solid rgba(255,255,255,.05);}
+  .chip.on{background:var(--primary);color:var(--on-primary);border-color:transparent;font-weight:600;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 10px 12px;}
+  .tile{position:relative;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:#333;background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:flex-end;}
+  .more{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:999px;background:rgba(0,0,0,.45);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;}
+  .scrim{padding:16px 8px 7px;background:linear-gradient(to top,rgba(0,0,0,.92),rgba(0,0,0,.4) 55%,transparent);}
+  .ttl{font-size:11px;font-weight:700;color:#fff;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;text-shadow:0 1px 2px rgba(0,0,0,.6);margin-bottom:5px;}
+  .metarow{display:flex;align-items:center;gap:5px;}
+  .m{font-size:9px;font-weight:700;letter-spacing:.03em;padding:2px 6px;border-radius:5px;line-height:1.35;}
+  .m-mime{background:var(--primary);color:var(--on-primary);}
+  .m-dim{background:rgba(255,255,255,.18);color:#fff;}
+  .m-cc{background:var(--primary);color:var(--on-primary);display:inline-flex;align-items:center;gap:3px;}
+  .m-cc svg{width:10px;height:10px;}
+  /* quiet dimension text (proposed) */
+  .dim-text{font-size:10px;color:rgba(255,255,255,.82);font-weight:600;text-shadow:0 1px 2px rgba(0,0,0,.7);}
+  .spacer{flex:1;}
+
+  .legend{font-size:12px;color:#9aa0a6;margin:10px 0 0;max-width:300px;}
+  .legend b{color:#cdcdd3;}
+
+  /* image generators */
+</style>
+</head>
+<body>
+
+<h1>Grid tile — density cleanup (option B)</h1>
+<p class="sub">
+  Not a relayout. The tile design is fine; the noise is repetition. Three surgical changes:
+  <b>(1)</b> drop the <code class="k">IMAGE</code> mime chip when the chip rail is already
+  filtered to a single type, <b>(2)</b> demote the <code class="k">414x311</code> dimensions
+  from a filled chip to quiet text, <b>(3)</b> keep video titles, scrim and the CC chip
+  untouched. Big thumbnails stay big.
+</p>
+
+<!-- ============ IMAGE WALL ============ -->
+<h2>The image wall (elpais.com) — where it reads as "meh"</h2>
+<p class="note">
+  Twelve identical filled <code class="k">IMAGE</code> chips + twelve filled dimension chips =
+  24 loud stamps over the photos. The rail already says <b>Images</b>, so the mime chip is
+  pure redundancy here.
+</p>
+
+<div class="cols">
+
+  <div>
+    <div class="col-label">Current <span class="now">24 loud chips</span></div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="head">Captured Content</div>
+      <div class="rail"><span class="chip">Video</span><span class="chip">Audio</span><span class="chip on">Images</span><span class="chip">GIF</span></div>
+      <div class="grid">
+        <div class="tile" style="background:linear-gradient(135deg,#6a7a4a,#3a4a2a);"><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">414x233</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#3a4a5a,#1a2a3a);"><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">414x311</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#fff,#2a6ad0);"><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">414x311</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#8a3a4a,#c08a9a);"><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">414x233</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#c0a060,#6a4a2a);"><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">414x233</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#7a9ab0,#3a5a7a);"><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">414x281</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">Proposed <span class="new">quiet · thumbnails breathe</span></div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="head">Captured Content</div>
+      <div class="rail"><span class="chip">Video</span><span class="chip">Audio</span><span class="chip on">Images</span><span class="chip">GIF</span></div>
+      <div class="grid">
+        <div class="tile" style="background:linear-gradient(135deg,#6a7a4a,#3a4a2a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="dim-text">414 × 233</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#3a4a5a,#1a2a3a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="dim-text">414 × 311</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#fff,#2a6ad0);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="dim-text">414 × 311</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#8a3a4a,#c08a9a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="dim-text">414 × 233</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#c0a060,#6a4a2a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="dim-text">414 × 233</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#7a9ab0,#3a5a7a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="dim-text">414 × 281</span></div></div></div>
+      </div>
+    </div>
+    <div class="legend"><b>What changed:</b> mime chip gone (rail says Images), dimensions are now a quiet light-on-scrim label. The photos read first; metadata is reference, not decoration.</div>
+  </div>
+
+</div>
+
+<!-- ============ MIXED / ALL ============ -->
+<h2>The mixed "All" view (m.youtube.com) — keep what works</h2>
+<p class="note">
+  In the unfiltered All view the mime chip earns its place (you can't tell VIDEO from IMAGE
+  from SRT otherwise), so it stays. Video keeps its title + scrim; the only change is the
+  dimension <i>chip</i> → quiet text on image tiles, and CC stays a real chip (it's an action,
+  not reference).
+</p>
+
+<div class="cols">
+
+  <div>
+    <div class="col-label">Current <span class="now"></span></div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="head">Captured Content</div>
+      <div class="rail"><span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span></div>
+      <div class="grid">
+        <div class="tile" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"><div class="more">⋮</div><div class="scrim"><div class="ttl">OTRA TURRA</div><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">320x180</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#5a2a2a,#2a1a1a);"><div class="more">⋮</div><div class="scrim"><div class="ttl" style="opacity:.55;font-weight:600;">hq720.jpg</div><div class="metarow"><span class="m m-mime">IMAGE</span><span class="m m-dim">686x386</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"><div class="more">⋮</div><div class="scrim"><div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ, SUELEN…</div><div class="metarow"><span class="m m-mime">VIDEO</span><span class="m m-dim">00:53:25</span><span class="spacer"></span><span class="m m-cc"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 0H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>1</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#5a1a1a,#2a1010);"><div class="more">⋮</div><div class="scrim"><div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div><div class="metarow"><span class="m m-mime">SRT FILE</span></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="col-label">Proposed <span class="new">mime kept · dims quiet</span></div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="head">Captured Content</div>
+      <div class="rail"><span class="chip on">All</span><span class="chip">Video</span><span class="chip">Audio</span><span class="chip">Subtitle</span></div>
+      <div class="grid">
+        <div class="tile" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="spacer"></span><span class="dim-text">320 × 180</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#5a2a2a,#2a1a1a);"><div class="more">⋮</div><div class="scrim"><div class="metarow"><span class="m m-mime">IMAGE</span><span class="spacer"></span><span class="dim-text">686 × 386</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"><div class="more">⋮</div><div class="scrim"><div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ, SUELEN…</div><div class="metarow"><span class="m m-mime">VIDEO</span><span class="m m-dim">53:25</span><span class="spacer"></span><span class="m m-cc"><svg viewBox="0 0 24 24"><path fill="currentColor" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 0H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>1</span></div></div></div>
+        <div class="tile" style="background:linear-gradient(135deg,#5a1a1a,#2a1010);"><div class="more">⋮</div><div class="scrim"><div class="ttl">Soto Ivars: CUANDO ME RECIBEN ASÍ…</div><div class="metarow"><span class="m m-mime">SRT FILE</span></div></div></div>
+      </div>
+    </div>
+    <div class="legend"><b>What changed:</b> junk image titles (<code class="k">hq720.jpg</code>) already gone; image dimensions move to quiet trailing text; mime chip stays (mixed view needs it); video + SRT tiles untouched.</div>
+  </div>
+
+</div>
+
+<p class="note" style="margin-top:26px;max-width:840px;">
+  <b>The one rule that drives both:</b> a chip is for things you act on or filter by (mime
+  type, caption availability); reference facts (pixel dimensions) are quiet text. Plus: hide
+  the mime chip when the rail already filters to that type. Net effect on the image wall —
+  24 loud chips drop to 0, and you just see photos with a small dimension note.
+</p>
+
+</body>
+</html>

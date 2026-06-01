@@ -41,14 +41,9 @@ Requires JDK 17 and Android SDK 34. Resulting APK in `app/build/outputs/apk/rele
 
 ## Translations
 
-Firedown is translated by the community via [Weblate](https://weblate.org). No
-coding required — pick your language and start translating.
-
-[![Translation status](https://hosted.weblate.org/widget/firedown/app/svg-badge.svg)](https://hosted.weblate.org/engage/firedown/)
-
-[![Translation status by language](https://hosted.weblate.org/widget/firedown/app/multi-auto.svg)](https://hosted.weblate.org/engage/firedown/)
-
-See [TRANSLATING.md](TRANSLATING.md) to get started.
+Firedown is translated by the community via [Weblate](https://hosted.weblate.org/engage/firedown/).
+No coding required — pick your language and start translating. See
+[TRANSLATING.md](TRANSLATING.md) to get started.
 
 ## License
 

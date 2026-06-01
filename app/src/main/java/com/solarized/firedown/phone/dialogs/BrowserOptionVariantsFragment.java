@@ -16,15 +16,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.solarized.firedown.R;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.entity.OptionEntity;
+import com.solarized.firedown.data.models.BrowserDownloadViewModel;
 import com.solarized.firedown.data.models.FragmentsOptionsViewModel;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
 import com.solarized.firedown.manager.DownloadRequest;
 import com.solarized.firedown.phone.fragments.BaseFocusFragment;
+import com.solarized.firedown.ui.adapters.BrowserOptionCaptionAdapter;
 import com.solarized.firedown.ui.adapters.BrowserOptionVariantAdapter;
 import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.IntentActions;
 import com.solarized.firedown.Keys;
 import com.solarized.firedown.utils.FragmentArgs;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 
 public class BrowserOptionVariantsFragment extends BaseFocusFragment implements OnItemClickListener, View.OnClickListener {
@@ -32,6 +39,10 @@ public class BrowserOptionVariantsFragment extends BaseFocusFragment implements 
     private BrowserDownloadEntity mEntity;
 
     private BrowserOptionVariantAdapter mAdapter;
+
+    /** Multi-select adapter for the captions section. Null when the video
+     *  has no captured caption tracks; the section is hidden in that case. */
+    @Nullable private BrowserOptionCaptionAdapter mCaptionAdapter;
 
     private FragmentsOptionsViewModel mFragmentsViewModel;
 
@@ -76,7 +87,48 @@ public class BrowserOptionVariantsFragment extends BaseFocusFragment implements 
         mAdapter = new BrowserOptionVariantAdapter(mEntity.getStreams(), this);
         recyclerView.setAdapter(mAdapter);
 
+        bindCaptionsSection(view);
+
         return view;
+    }
+
+    /**
+     * Populates the captions multi-select section from the in-memory repo
+     * (entities sharing the parent video's origin and matching a subtitle
+     * mime). Hides the whole section when the video has no captured tracks
+     * — most non-YouTube origins, and YouTube videos with captions disabled.
+     *
+     * <p>Pre-checks the row whose language matches the device locale, so
+     * the user's most likely choice is one tap away and a no-op confirms it.
+     * English isn't pre-checked separately to avoid surprising downloads.</p>
+     */
+    private void bindCaptionsSection(View root) {
+        View section = root.findViewById(R.id.captions_section);
+        RecyclerView captionsRecycler = root.findViewById(R.id.captions_recycler);
+
+        BrowserDownloadViewModel browserVm =
+                new ViewModelProvider(mActivity).get(BrowserDownloadViewModel.class);
+        List<BrowserDownloadEntity> captions =
+                browserVm.subtitlesForOrigin(mEntity.getFileOrigin());
+
+        if (captions.isEmpty()) {
+            section.setVisibility(View.GONE);
+            return;
+        }
+        section.setVisibility(View.VISIBLE);
+
+        mCaptionAdapter = new BrowserOptionCaptionAdapter(captions);
+        // Pre-check the device locale's language. YouTube ships languageCode
+        // as either a bare code ("en") or with a region tag ("es-419"); seed
+        // both shapes plus the language root so a Spanish device matches an
+        // "es" track even when the device locale is "es-ES".
+        Locale locale = Locale.getDefault();
+        List<String> preselect = new ArrayList<>(Arrays.asList(
+                locale.toLanguageTag(),
+                locale.getLanguage()
+        ));
+        mCaptionAdapter.preselectLanguages(preselect);
+        captionsRecycler.setAdapter(mCaptionAdapter);
     }
 
 
@@ -125,6 +177,23 @@ public class BrowserOptionVariantsFragment extends BaseFocusFragment implements 
         // pre-filled name without rehydrating from the request alone.
         optionEntity.setBrowserDownloadEntity(mEntity);
         optionEntity.setAction(IntentActions.DOWNLOAD_START);
+
+        // Selected captions ride alongside via the existing downloadRequests
+        // batch field. The holder fragment fires these as a batch after the
+        // video, bypassing the SaveFileDialog filename prompt — captions
+        // already have meaningful "<Title> [lang].srt" names from the parser
+        // and prompting per-track would be hostile UX.
+        if (mCaptionAdapter != null) {
+            List<BrowserDownloadEntity> selectedCaptions = mCaptionAdapter.getSelected();
+            if (!selectedCaptions.isEmpty()) {
+                ArrayList<DownloadRequest> captionRequests = new ArrayList<>(selectedCaptions.size());
+                for (BrowserDownloadEntity caption : selectedCaptions) {
+                    captionRequests.add(DownloadRequest.from(caption));
+                }
+                optionEntity.setDownloadRequests(captionRequests);
+            }
+        }
+
         mFragmentsViewModel.onOptionsSelected(optionEntity);
     }
 }

@@ -235,6 +235,16 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
                         startDownload(request, mAnchorView);
                     }
                 }
+                // Captions the user ticked in the variant picker's captions
+                // section ride on the same OptionEntity via downloadRequests.
+                // Fire them as a batch unconditionally — they bypass the
+                // SaveFileDialog filename prompt because they already carry
+                // meaningful "<Title> [lang].srt" names from the parser, and
+                // prompting per-track would be hostile UX.
+                ArrayList<DownloadRequest> captionRequests = optionEntity.getDownloadRequests();
+                if (captionRequests != null && !captionRequests.isEmpty()) {
+                    startDownloads(captionRequests, mAnchorView);
+                }
 
             } else if (id == R.id.empty_button) {
                 BrowserOptionHelpFragment helpFragment = new BrowserOptionHelpFragment();

@@ -351,6 +351,10 @@
     <string name="separator">-</string>
     <!-- Caption-count badge on a video row, e.g. "CC 52". %1$d = track count. -->
     <string name="caption_count_badge">CC %1$d</string>
+    <!-- Section header above the captions multi-select list in the variant picker. -->
+    <string name="captions_section_title">Captions</string>
+    <!-- Inline marker on an auto-generated caption row in the picker. -->
+    <string name="caption_auto_label">auto-generated</string>
     <string name="settings_about">About</string>
     <string name="settings_autofill_active">System autofill is active. Tap to change.</string>
     <string name="settings_autofill_none_configured">No autofill service configured. Tap to set one up.</string>

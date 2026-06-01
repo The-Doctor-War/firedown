@@ -1,5 +1,6 @@
 package com.solarized.firedown.data.models;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
@@ -95,6 +96,24 @@ public class BrowserDownloadViewModel extends ViewModel {
             counts.merge(origin, 1, Integer::sum);
         }
         return counts;
+    }
+
+    /**
+     * Subtitle entities captured for the given video origin, current tab only.
+     * Used by the variant picker to render its captions multi-select section.
+     * Returns an empty list if the origin is unknown or has no captions.
+     */
+    public List<BrowserDownloadEntity> subtitlesForOrigin(@Nullable String origin) {
+        if (origin == null || origin.isEmpty()) return Collections.emptyList();
+        List<BrowserDownloadEntity> entities = mBrowserDownloadRepository.getData().getValue();
+        if (entities == null) return Collections.emptyList();
+        int currentTabId = mGeckoRuntimeHelper.getTabId();
+        return entities.stream()
+                .filter(e -> e != null
+                        && e.getTabId() == currentTabId
+                        && FileUriHelper.isSubtitle(e.getMimeType())
+                        && origin.equals(e.getFileOrigin()))
+                .collect(Collectors.toList());
     }
 
     public int getCurrentSortBrowserId(){

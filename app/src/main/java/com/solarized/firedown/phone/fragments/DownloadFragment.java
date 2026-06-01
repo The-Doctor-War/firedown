@@ -343,4 +343,19 @@ public class DownloadFragment extends BaseDownloadFragment implements
         int checkedId = checkedIds.get(0);
         mDownloadsViewModel.setFilterChip(checkedId);
     }
+
+    /**
+     * Back deselects an active filter chip (reverting to the unfiltered
+     * list) instead of leaving the screen. With no chip checked there's
+     * nothing to clear, so Back exits as normal. {@code clearCheck()} fires
+     * {@link #onCheckedChanged} with an empty list, which resets the filter.
+     */
+    @Override
+    protected boolean clearFilterOnBack() {
+        if (mChipGroup != null && mChipGroup.getCheckedChipId() != View.NO_ID) {
+            mChipGroup.clearCheck();
+            return true;
+        }
+        return false;
+    }
 }

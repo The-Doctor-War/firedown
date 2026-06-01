@@ -136,12 +136,25 @@ public abstract class BaseDownloadFragment extends BaseFocusFragment implements 
                 if (mActionModeEnabled) stopActionMode();
                 else if (mSearchItem != null && mSearchItem.isActionViewExpanded()) closeSearchView();
                 else if (mOperationActive) navigateToCancelDialog();
+                else if (clearFilterOnBack()) { /* a filter was active; clearing it consumes Back */ }
                 else {
                     setEnabled(false);
                     mActivity.getOnBackPressedDispatcher().onBackPressed();
                 }
             }
         });
+    }
+
+    /**
+     * Hook for unwinding a transient filter on Back before leaving the
+     * screen. Default: nothing to clear. {@code DownloadFragment} overrides
+     * it to deselect an active filter chip (reverting to the unfiltered
+     * list) so Back widens the view back rather than ejecting the user.
+     *
+     * @return true if a filter was active and got cleared (Back consumed).
+     */
+    protected boolean clearFilterOnBack() {
+        return false;
     }
 
 

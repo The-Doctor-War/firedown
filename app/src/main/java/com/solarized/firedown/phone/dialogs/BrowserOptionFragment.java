@@ -322,11 +322,18 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         mBrowserDownloadViewModel.update();
 
         /* Back deselects an active filter chip (reverts to the unfiltered
-         * list) instead of leaving the screen — mirrors DownloadFragment so
-         * "Back unwinds my last narrowing step" is consistent across the
+         * list) instead of dismissing the screen — mirrors DownloadFragment
+         * so "Back unwinds my last narrowing step" is consistent across the
          * two list surfaces. The callback enables/disables itself in
          * onCheckedChanged so it only intercepts Back while a chip is
-         * actually checked; otherwise Back behaves normally. */
+         * actually checked; otherwise Back behaves normally.
+         *
+         * IMPORTANT: this fragment is hosted inside a BottomSheetDialog,
+         * which owns its own Window and intercepts Back BEFORE the Activity's
+         * OnBackPressedDispatcher ever runs. The callback must therefore
+         * register against the DIALOG's dispatcher (ComponentDialog, since
+         * Material 1.6+), not the Activity's — otherwise the dialog
+         * dismisses on Back and the callback never fires. */
         mClearFilterOnBack = new OnBackPressedCallback(false) {
             @Override
             public void handleOnBackPressed() {
@@ -335,7 +342,14 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                 }
             }
         };
-        mActivity.getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), mClearFilterOnBack);
+        androidx.fragment.app.Fragment parent = getParentFragment();
+        if (parent instanceof androidx.fragment.app.DialogFragment) {
+            android.app.Dialog dialog = ((androidx.fragment.app.DialogFragment) parent).getDialog();
+            if (dialog instanceof androidx.activity.ComponentDialog) {
+                ((androidx.activity.ComponentDialog) dialog).getOnBackPressedDispatcher()
+                        .addCallback(getViewLifecycleOwner(), mClearFilterOnBack);
+            }
+        }
     }
 
 

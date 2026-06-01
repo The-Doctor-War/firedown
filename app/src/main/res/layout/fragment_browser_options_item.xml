@@ -84,23 +84,27 @@
                 tools:text="Uyarlanabilir"
                 tools:visibility="visible" />
 
-            <!-- Caption count pill — shown on a video tile when the parser
-                 captured subtitle tracks for it. Reuses the filled-primary
-                 mime-pill style so it sits in the corner shade like the
-                 other tags. No text separator in grid (these are pills). -->
-            <TextView
-                android:id="@+id/tag_cc"
-                style="@style/MimePrimary"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:paddingLeft="4dp"
-                android:paddingRight="4dp"
-                android:visibility="gone"
-                tools:text="CC 52"
-                tools:visibility="visible" />
-
         </LinearLayout>
+
+        <!-- Caption-count pill — floats top-left of the tile when the parser
+             captured subtitle tracks for this video. Lives outside the bottom
+             tag_row because that cluster (mime + duration + quality) already
+             saturates the corner shade in real content and clips a fourth
+             pill. Top-left is the only free corner (top-right is the more
+             button). Primary-tinted to read as a distinct affordance. -->
+        <TextView
+            android:id="@+id/tag_cc"
+            style="@style/MimePrimary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|start"
+            android:layout_margin="6dp"
+            android:paddingLeft="6dp"
+            android:paddingRight="6dp"
+            android:elevation="2dp"
+            android:visibility="gone"
+            tools:text="CC 52"
+            tools:visibility="visible" />
 
         <!-- Variant / more button -->
         <com.google.android.material.button.MaterialButton

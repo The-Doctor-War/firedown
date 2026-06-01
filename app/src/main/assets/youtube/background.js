@@ -1524,6 +1524,75 @@ async function sendYouTubeNative(message) {
     return browser.runtime.sendNativeMessage("youtube", message);
 }
 
+/**
+ * Walk playerResponse.captions for every caption track and emit one native
+ * message per track. Routed via `type: "timedtext"` so the Kotlin side picks
+ * UrlType.TIMEDTEXT → TimedTextStrategy, which converts json3 → SRT and
+ * writes the file out. The video's `title` rides as `name` so the resulting
+ * BrowserDownloadEntity is "Title [en].srt" rather than "timedtext [en].srt"
+ * — the entity-rename short-circuit in GeckoInspectTask keeps that suffix.
+ *
+ * ASR (auto-generated) tracks get "-auto" appended to the language code so
+ * a manual EN and a generated EN don't collide on disk and are visually
+ * distinguishable in the Subtitle chip view.
+ *
+ * No-ops cleanly when:
+ *   - playerResponse has no captions block (rare; private/unlisted videos)
+ *   - the tracks array is empty
+ *   - a track is missing baseUrl (defensive — YouTube has shipped both
+ *     `baseUrl` and `baseURL` in the past depending on client)
+ */
+async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl) {
+    try {
+        const tracks = playerResponse
+            ?.captions
+            ?.playerCaptionsTracklistRenderer
+            ?.captionTracks;
+        if (!Array.isArray(tracks) || tracks.length === 0) return;
+
+        const tabId = details._resolvedTabId ?? details.tabId;
+        let incognito = false;
+        if (tabId >= 0) {
+            try {
+                const tab = await browser.tabs.get(tabId);
+                incognito = tab?.incognito || false;
+            } catch (e) {}
+        }
+        const headers = getBrowserHeaders();
+
+        let emitted = 0;
+        for (const t of tracks) {
+            const baseUrl = t.baseUrl || t.baseURL;
+            if (!baseUrl) continue;
+
+            // TimedTextStrategy expects json3 (events/segs schema); the
+            // default fmt is srv3 (XML) which we don't parse. Force json3
+            // even if the URL already has a fmt= — &fmt=json3 wins because
+            // it appears later in the query string.
+            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "fmt=json3";
+            const langBase = t.languageCode || "und";
+            const language = t.kind === "asr" ? `${langBase}-auto` : langBase;
+
+            const message = {
+                type: "timedtext",
+                url,
+                origin: videoUrl,
+                name: videoTitle,
+                language,
+                headers,
+                tabId,
+                request: details.requestId,
+                incognito
+            };
+            await sendYouTubeNative(message);
+            emitted++;
+        }
+        console.log(`[Captions] Emitted ${emitted}/${tracks.length} caption track(s) for ${videoUrl}`);
+    } catch (e) {
+        console.warn(`[Captions] Failed to emit captions: ${e?.message || e}`);
+    }
+}
+
 async function processVideo(details, videoId) {
     // Universal canary gate. Multiple paths trigger processVideo
     // (tabs.onUpdated, webRequest.onHeadersReceived, intercept, embed,
@@ -1799,6 +1868,7 @@ async function processVideo(details, videoId) {
                 };
                 await sendYouTubeNative(message);
                 console.log(`[Process] Sent HLS to native: ${videoId} [${streamSource}]`);
+                await emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl);
                 return;
             }
 
@@ -1927,6 +1997,7 @@ async function processVideo(details, videoId) {
                 };
                 await sendYouTubeNative(message);
                 console.log(`[Process] Sent ${variants.length} variant(s) to native: ${videoId} [${streamSource}]${sabrData ? ' (SABR)' : ''}`);
+                await emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl);
                 _exitMode = 'sent-variants';
                 return;
             }
@@ -1973,6 +2044,7 @@ async function processVideo(details, videoId) {
                     };
                     await sendYouTubeNative(message);
                     console.log(`[Process] Sent ${sabrVariants.length} SABR variant(s) to native: ${videoId} [${streamSource}] (SABR-only)`);
+                    await emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl);
                     _exitMode = 'sent-sabr-only';
                     return;
                 }
@@ -1993,6 +2065,7 @@ async function processVideo(details, videoId) {
                 };
                 await sendYouTubeNative(message);
                 console.log(`[Process] Sent itag 18 to native: ${videoId} [${streamSource}]`);
+                await emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl);
                 return;
             }
         }

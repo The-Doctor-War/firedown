@@ -188,6 +188,7 @@ public class GeckoInspectTask implements Runnable {
         if (mUrlType == UrlType.TIMEDTEXT) {
             entity.setMimeType(FileUriHelper.MIMETYPE_SRT);
             entity.setType(UrlType.TIMEDTEXT.getValue());
+            appendLanguageTag(entity);
             return true;
 
         } else if (mUrlType == UrlType.SUBTITLE) {
@@ -248,13 +249,14 @@ public class GeckoInspectTask implements Runnable {
         String mime = lower.contains(".srt") ? FileUriHelper.MIMETYPE_SRT : FileUriHelper.MIMETYPE_VTT;
         entity.setMimeType(mime);
         entity.setType(UrlType.SUBTITLE.getValue());
+        appendLanguageTag(entity);
+    }
 
-        if (!TextUtils.isEmpty(mLanguage)) {
-            String existing = entity.getFileName();
-            if (!TextUtils.isEmpty(existing)) {
-                entity.setFileName(existing + " [" + mLanguage + "]");
-            }
-        }
+    private void appendLanguageTag(BrowserDownloadEntity entity) {
+        if (TextUtils.isEmpty(mLanguage)) return;
+        String existing = entity.getFileName();
+        if (TextUtils.isEmpty(existing)) return;
+        entity.setFileName(existing + " [" + mLanguage + "]");
     }
 
     // ========================================================================
@@ -315,10 +317,10 @@ public class GeckoInspectTask implements Runnable {
     // ========================================================================
 
     private void applyDisplayName(BrowserDownloadEntity entity) {
-        // Subtitles already had their filename built in processSubtitle (with
-        // optional [lang] suffix). Don't let the variant/page-title rename
-        // logic overwrite them.
-        if (mUrlType == UrlType.SUBTITLE) return;
+        // Subtitles and YouTube timedtext already had their filename built in
+        // processSubtitle / the TIMEDTEXT branch (with optional [lang] suffix).
+        // Don't let the variant/page-title rename logic overwrite them.
+        if (mUrlType == UrlType.SUBTITLE || mUrlType == UrlType.TIMEDTEXT) return;
 
         String current = entity.getFileName();
         if (!TextUtils.isEmpty(current) && !WebUtils.isUrlDerivedName(current)) return;

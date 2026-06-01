@@ -24,11 +24,16 @@
 
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!-- Scrollable content area -->
+    <!-- Scrollable content area. The bottom margin reserves the bottom-nav's
+         height so the tail (warning / last fact) never hides behind it in
+         landscape, and remains scrollable into view — mirrors HomeFragment. -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/app_bar_size"
+        android:clipToPadding="false"
         android:fillViewport="true"
+        android:overScrollMode="never"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
 
         <LinearLayout
@@ -36,6 +41,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center_horizontal"
+            android:paddingTop="6dp"
             android:paddingStart="24dp"
             android:paddingEnd="24dp">
 
@@ -49,7 +55,6 @@
                 android:id="@+id/incognito_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="40dp"
                 android:text="@string/incognito_home_title"
                 android:textAppearance="?attr/textAppearanceHeadlineSmall"
                 android:textColor="@color/incognito_on_surface" />

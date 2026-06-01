@@ -3,7 +3,10 @@ package com.solarized.firedown.manager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.solarized.firedown.data.Download;
+import com.solarized.firedown.geckoview.PoTokenGenerator;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.JsonToSrtConverter;
 import com.solarized.firedown.utils.MessageHelper;
@@ -51,6 +54,17 @@ public class TimedTextStrategy implements DownloadStrategy {
             if (TextUtils.isEmpty(downloadUrl)) {
                 callback.onError(MessageHelper.IOEXCEPTION);
                 return;
+            }
+
+            // YouTube timedtext is PoToken-gated the same way SABR streams
+            // are: without &pot= the endpoint replies HTTP 200 with an
+            // empty text/html body (silent reject). Mint a token via the
+            // same PoTokenGenerator that SabrStrategy uses, then append
+            // it to the URL. JS-side already plumbs sabrVideoId +
+            // sabrVisitorData on the request under the existing schema.
+            String poToken = mintPoToken(request, context);
+            if (!TextUtils.isEmpty(poToken)) {
+                downloadUrl = appendPoToken(downloadUrl, poToken);
             }
 
             File file = context.getOutputFile();
@@ -129,6 +143,50 @@ public class TimedTextStrategy implements DownloadStrategy {
     @Override
     public void stop() {
         stopped = true;
+    }
+
+    /**
+     * Mint a PoToken using the same path SabrStrategy uses. The token
+     * is bound to (videoId, visitorData); both are plumbed on the
+     * request via the existing SABR schema (background.js sets a
+     * minimal {videoId, visitorData} sabr block on timedtext messages).
+     * Returns null on any failure — caller falls back to fetching
+     * without a token, which YouTube will likely refuse with an empty
+     * body but no point throwing here.
+     */
+    @Nullable
+    private String mintPoToken(DownloadRequest request, DownloadContext context) {
+        PoTokenGenerator gen = context.getPoTokenGenerator();
+        String videoId = request.getSabrVideoId();
+        String visitorData = request.getSabrVisitorData();
+
+        if (gen == null || TextUtils.isEmpty(videoId) || TextUtils.isEmpty(visitorData)) {
+            Log.d(TAG, "mintPoToken: skipping (gen=" + (gen != null)
+                    + " videoId=" + !TextUtils.isEmpty(videoId)
+                    + " visitorData=" + !TextUtils.isEmpty(visitorData) + ")");
+            return null;
+        }
+
+        long t0 = System.currentTimeMillis();
+        try {
+            String token = gen.generate(videoId, visitorData);
+            long dt = System.currentTimeMillis() - t0;
+            if (!TextUtils.isEmpty(token)) {
+                Log.d(TAG, "minted PoToken: " + token.length() + " chars (" + dt + "ms)");
+                return token;
+            }
+            Log.w(TAG, "PoToken mint returned empty after " + dt + "ms");
+        } catch (Exception e) {
+            Log.w(TAG, "PoToken mint failed: " + e.getMessage());
+        }
+        return null;
+    }
+
+    private static String appendPoToken(String url, String token) {
+        String sep = url.contains("?") ? "&" : "?";
+        // potc=1 signals "this URL carries a PoToken"; without it the
+        // server can route to a no-pot path that ignores the token.
+        return url + sep + "potc=1&pot=" + token;
     }
 
     private void reportProgress(DownloadCallback callback, long downloaded, long total) {

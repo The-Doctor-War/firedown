@@ -1607,34 +1607,30 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 ? rawBaseUrl
                 : `https://m.youtube.com${rawBaseUrl.startsWith("/") ? "" : "/"}${rawBaseUrl}`;
 
-            // Append the URL params YouTube's real MWEB player attaches
-            // to its caption requests. These aren't part of the signed
-            // sparams set so they don't invalidate the signature, but
-            // they ARE part of YouTube's anti-scraping validation —
-            // requests missing them get the empty-body silent reject.
+            // TimedTextStrategy expects json3 (events/segs schema); the
+            // default fmt is srv3 (XML) which we don't parse. Force json3
+            // even if the URL already has a fmt= — &fmt=json3 wins because
+            // it appears later in the query string.
             //
-            // pot= (PoToken) and potc=1 are also part of a real request
-            // but minting one requires running BotGuard via the content
-            // script. Trying without first — if YouTube accepts the
-            // client identification params alone for ASR/manual tracks
-            // we save the round-trip. If not, the next step is to route
-            // the fetch through content.js where BotGuard already runs.
-            const extraParams = new URLSearchParams();
-            extraParams.set("fmt", "json3");
-            extraParams.set("c", "MWEB");
-            if (clientVersion) extraParams.set("cver", clientVersion);
-            extraParams.set("cplayer", "UNIPLAYER");
-            extraParams.set("cmodel", "firefox for android");
-            extraParams.set("cos", "Android");
-            extraParams.set("cosver", "12");
-            extraParams.set("cplatform", "MOBILE");
-            extraParams.set("cbrand", "mozilla");
-            extraParams.set("cbr", "Firefox");
-            extraParams.set("cbrver", "149.0");
-            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + extraParams.toString();
+            // We DO NOT hand-craft &pot= / &potc= / &c=MWEB / &cver= here.
+            // The PoToken is the thing YouTube actually validates and
+            // we have proven infrastructure for minting one (SABR uses
+            // PoTokenGenerator.generate(videoId, visitorData) on the
+            // Kotlin side). TimedTextStrategy mints + appends the token
+            // before its fetch — we just plumb videoId + visitorData
+            // through on the message so it can.
+            const url = baseUrl + (baseUrl.includes("?") ? "&" : "?") + "fmt=json3";
 
             const langBase = t.languageCode || "und";
             const language = t.kind === "asr" ? `${langBase}-auto` : langBase;
+
+            // Plumb videoId + visitorData under a minimal `sabr` block
+            // so JsonHelper.parse picks them up the same way it does for
+            // SABR variants — no schema changes. TimedTextStrategy uses
+            // them to mint a PoToken via PoTokenGenerator.generate(...).
+            const videoIdForPot = playerResponse?.videoDetails?.videoId;
+            const visitorDataForPot = playerResponse?.responseContext?.visitorData
+                || (typeof cachedVisitorData === "string" ? cachedVisitorData : null);
 
             const message = {
                 type: "timedtext",
@@ -1647,6 +1643,12 @@ async function emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl
                 request: details.requestId,
                 incognito
             };
+            if (videoIdForPot && visitorDataForPot) {
+                message.sabr = {
+                    videoId: videoIdForPot,
+                    visitorData: visitorDataForPot
+                };
+            }
             await sendYouTubeNative(message);
             emitted++;
         }

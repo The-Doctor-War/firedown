@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Firedown — Captured Content, rethought</title>
+<style>
+  :root{
+    --bg:#131316;--surface:#1b1b1e;--surface2:#232327;--surface3:#2c2c31;
+    --on:#e9e9ec;--on-var:#b4b4bb;--on-dim:#83838b;
+    --primary:#F66A66;--on-primary:#2a0303;--primary-soft:rgba(246,106,102,.14);
+    --hair:rgba(255,255,255,.07);
+    --ok:#8ad9ad;
+  }
+  *{box-sizing:border-box;}
+  body{font-family:-apple-system,"Segoe UI Variable",system-ui,sans-serif;margin:0;padding:32px;background:#0d0d0f;color:var(--on);line-height:1.5;}
+  h1{font-size:23px;margin:0 0 4px;font-weight:600;}
+  .sub{color:#9aa0a6;font-size:14px;margin:0 0 8px;max-width:900px;}
+  .why{display:flex;gap:18px;flex-wrap:wrap;margin:18px 0 28px;}
+  .why .card{flex:1;min-width:220px;background:var(--surface);border:1px solid var(--hair);border-radius:14px;padding:14px 16px;}
+  .why h4{margin:0 0 6px;font-size:13px;color:#cdcdd3;}
+  .why p{margin:0;font-size:12.5px;color:#9aa0a6;}
+  .why .bad{color:#f0a7c5;}
+  .why .good{color:var(--ok);}
+  h2{font-size:15px;margin:30px 0 12px;color:#c9c9cf;font-weight:600;}
+
+  .stage{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;}
+  .label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#80848a;font-weight:600;margin-bottom:10px;}
+
+  .phone{width:312px;border-radius:22px;overflow:hidden;background:var(--bg);box-shadow:0 10px 36px rgba(0,0,0,.45),inset 0 0 0 1px #2a2a2d;}
+  .statusbar{height:20px;}
+  .appbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 6px;}
+  .appbar .t{font-size:18px;font-weight:600;}
+  .appbar .icons{display:flex;gap:14px;color:var(--on-var);font-size:15px;}
+
+  /* slim facet rail — secondary now, not the primary nav */
+  .facets{display:flex;gap:7px;padding:6px 14px 12px;overflow:hidden;}
+  .facet{font-size:11.5px;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--on-var);white-space:nowrap;border:1px solid rgba(255,255,255,.05);}
+  .facet.on{background:var(--surface3);color:var(--on);border-color:var(--hair);font-weight:600;}
+
+  .scroll{padding:0 14px 16px;}
+
+  /* ---- section ---- */
+  .section{margin-top:14px;}
+  .sec-head{display:flex;align-items:center;justify-content:space-between;padding:6px 2px;}
+  .sec-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--on-dim);display:flex;align-items:center;gap:8px;}
+  .sec-count{background:var(--surface3);color:var(--on-var);border-radius:999px;padding:1px 8px;font-size:11px;font-weight:600;letter-spacing:0;text-transform:none;}
+  .sec-chev{color:var(--on-dim);font-size:13px;}
+
+  /* ---- hero card ---- */
+  .hero{border-radius:16px;overflow:hidden;background:var(--surface);border:1px solid var(--hair);}
+  .hero-thumb{position:relative;aspect-ratio:16/9;background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;}
+  .hero-thumb .play{width:52px;height:52px;border-radius:999px;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;}
+  .hero-thumb .play svg{width:22px;height:22px;fill:#fff;margin-left:3px;}
+  .hero-thumb .dur{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:11px;font-weight:600;padding:2px 7px;border-radius:5px;}
+  .hero-thumb .cc{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.72);color:#fff;font-size:10.5px;font-weight:700;padding:3px 7px;border-radius:5px;display:inline-flex;align-items:center;gap:4px;}
+  .hero-thumb .cc svg{width:11px;height:11px;}
+  .hero-body{padding:11px 13px 13px;}
+  .hero-title{font-size:14px;font-weight:600;line-height:1.3;margin-bottom:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .hero-meta{font-size:12px;color:var(--on-dim);margin-bottom:11px;}
+  .hero-actions{display:flex;gap:8px;}
+  .btn{flex:1;padding:10px;border-radius:10px;font-weight:600;font-size:13px;text-align:center;}
+  .btn-fill{background:var(--primary);color:var(--on-primary);}
+  .btn-soft{flex:0 0 auto;padding:10px 14px;border-radius:10px;background:var(--surface3);color:var(--on);font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px;}
+
+  /* ---- horizontal compact video scroller ---- */
+  .hrow{display:flex;gap:9px;overflow-x:auto;padding-bottom:2px;}
+  .hcard{flex:0 0 132px;}
+  .hcard .ht{aspect-ratio:16/9;border-radius:10px;background-size:cover;background-position:center;position:relative;}
+  .hcard .ht .d{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.72);color:#fff;font-size:9.5px;padding:1px 5px;border-radius:4px;font-weight:600;}
+  .hcard .hl{font-size:11px;color:var(--on-var);margin-top:5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  /* ---- collapsed media row ---- */
+  .collapsed{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--hair);border-radius:12px;padding:11px 13px;}
+  .collapsed .stack{display:flex;}
+  .collapsed .stack .mini{width:34px;height:34px;border-radius:7px;background-size:cover;background-position:center;margin-left:-10px;border:2px solid var(--surface);}
+  .collapsed .stack .mini:first-child{margin-left:0;}
+  .collapsed .ctext{flex:1;min-width:0;}
+  .collapsed .ctext .l1{font-size:13px;font-weight:600;}
+  .collapsed .ctext .l2{font-size:11.5px;color:var(--on-dim);}
+  .collapsed .cgo{color:var(--on-dim);font-size:16px;}
+
+  /* ---- expanded image grid (when user opens it) ---- */
+  .imgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin-top:8px;}
+  .imgrid .ic{aspect-ratio:1;border-radius:8px;background-size:cover;background-position:center;position:relative;}
+  .imgrid .ic .dim{position:absolute;left:4px;bottom:4px;font-size:8.5px;color:rgba(255,255,255,.85);font-weight:600;text-shadow:0 1px 2px #000;}
+
+  .note{color:#85858d;font-size:13px;margin:0 0 14px;max-width:860px;}
+  .legend{font-size:12px;color:#9aa0a6;margin:10px 0 0;max-width:312px;}
+  .legend b{color:#cdcdd3;}
+</style>
+</head>
+<body>
+
+<h1>Captured Content — start fresh</h1>
+<p class="sub">
+  The current screen treats every captured asset as a peer in a flat, chip-filtered grid. The
+  result is a firehose: the one video you came for sits beside the page's avatars, emoji-SVGs,
+  and four sizes of the same thumbnail. New model: <b>prioritise, group, and collapse the
+  noise</b> instead of restyling it.
+</p>
+
+<div class="why">
+  <div class="card"><h4>Today</h4><p class="bad">Flat list · chips filter by type · every &lt;img&gt; the page touched is a peer row. You scroll a wall to find one video.</p></div>
+  <div class="card"><h4>The funnel reality</h4><p>Interceptor grabs all media URLs → one flat entity list → chip predicate → grid. Nothing ranks or de-dupes.</p></div>
+  <div class="card"><h4>Proposed</h4><p class="good">A prioritised feed: <b>Primary</b> (what you came for) → <b>More on this page</b> → noise <b>collapsed behind a count</b>, opened on demand &amp; de-duped.</p></div>
+</div>
+
+<h2>Three real pages, one adaptive layout</h2>
+
+<div class="stage">
+
+  <!-- ============ YOUTUBE ============ -->
+  <div>
+    <div class="label">m.youtube.com/watch — a clear primary</div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="appbar"><span class="t">Captured</span><span class="icons">▦ &nbsp; ⋮</span></div>
+      <div class="facets"><span class="facet on">Smart</span><span class="facet">Video</span><span class="facet">Images</span><span class="facet">Subtitle</span><span class="facet">All</span></div>
+
+      <div class="scroll">
+
+        <!-- PRIMARY -->
+        <div class="section">
+          <div class="sec-head"><span class="sec-title">Primary</span></div>
+          <div class="hero">
+            <div class="hero-thumb" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);">
+              <div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+              <span class="dur">53:25</span>
+              <span class="cc"><svg viewBox="0 0 24 24"><path fill="#fff" d="M21 6H3a2 2 0 00-2 2v8a2 2 0 002 2h18a2 2 0 002-2V8a2 2 0 00-2-2zM8 13.5H6.5a.5.5 0 010-1H8a.5.5 0 010 1zm9.5 0H10a.5.5 0 010-1h7.5a.5.5 0 010 1z"/></svg>1 caption</span>
+            </div>
+            <div class="hero-body">
+              <div class="hero-title">Soto Ivars: CUANDO ME RECIBEN ASÍ, SUELEN SALIR BUENAS CHARLAS</div>
+              <div class="hero-meta">YouTube · up to 1080p · av01</div>
+              <div class="hero-actions">
+                <div class="btn btn-fill">Download</div>
+                <div class="btn-soft">Options ▾</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- collapsed noise -->
+        <div class="section">
+          <div class="sec-head"><span class="sec-title">Images <span class="sec-count">6</span></span><span class="sec-chev">▾</span></div>
+          <div class="collapsed">
+            <div class="stack">
+              <div class="mini" style="background:linear-gradient(135deg,#3a2a1f,#7b4a2a);"></div>
+              <div class="mini" style="background:linear-gradient(135deg,#1a2a3a,#3a5a7b);"></div>
+              <div class="mini" style="background:linear-gradient(135deg,#3a1f2f,#7b3a5a);"></div>
+            </div>
+            <div class="ctext"><div class="l1">6 images</div><div class="l2">thumbnails &amp; avatar · tap to expand</div></div>
+            <div class="cgo">›</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="legend"><b>The win:</b> the watched video is the whole screen. Its captions ride <i>on</i> the card (the CC badge + Options sheet), not as 1 orphan row elsewhere. The 6 CDN thumbnails YouTube preloaded collapse into one tappable strip.</div>
+  </div>
+
+  <!-- ============ X.COM ============ -->
+  <div>
+    <div class="label">x.com/home — several videos, lots of junk</div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="appbar"><span class="t">Captured</span><span class="icons">▦ &nbsp; ⋮</span></div>
+      <div class="facets"><span class="facet on">Smart</span><span class="facet">Video</span><span class="facet">Images</span><span class="facet">All</span></div>
+
+      <div class="scroll">
+
+        <div class="section">
+          <div class="sec-head"><span class="sec-title">Videos <span class="sec-count">5</span></span></div>
+          <div class="hero">
+            <div class="hero-thumb" style="background:linear-gradient(135deg,#2a3a4a,#4a6a7a);">
+              <div class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+              <span class="dur">0:55</span>
+            </div>
+            <div class="hero-body">
+              <div class="hero-title">Osint613 — Fireworks factory explosion in Malta.</div>
+              <div class="hero-meta">x.com · 720p</div>
+              <div class="hero-actions"><div class="btn btn-fill">Download</div><div class="btn-soft">Options ▾</div></div>
+            </div>
+          </div>
+          <div class="hrow" style="margin-top:9px;">
+            <div class="hcard"><div class="ht" style="background:linear-gradient(135deg,#3a3a2a,#6a6a4a);"><span class="d">0:15</span></div><div class="hl">india76IQ — That's not how you ladder</div></div>
+            <div class="hcard"><div class="ht" style="background:linear-gradient(135deg,#2a2a3a,#4a4a6a);"><span class="d">1:58</span></div><div class="hl">GeeklikOtesine — NVIDIA ARM tabanlı…</div></div>
+            <div class="hcard"><div class="ht" style="background:linear-gradient(135deg,#3a2a3a,#6a4a6a);"><span class="d">0:57</span></div><div class="hl">devfun — Introducing Poker Arena</div></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head"><span class="sec-title">Images <span class="sec-count">2</span></span><span class="sec-chev">▾</span></div>
+          <div class="collapsed">
+            <div class="stack"><div class="mini" style="background:#3a4a5a;"></div><div class="mini" style="background:#5a4a3a;"></div></div>
+            <div class="ctext"><div class="l1">2 images</div><div class="l2">73×73 · 400×400</div></div>
+            <div class="cgo">›</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="sec-head"><span class="sec-title">SVG <span class="sec-count">3</span></span><span class="sec-chev">▾</span></div>
+          <div class="collapsed">
+            <div class="stack"><div class="mini" style="background:#3a3a1a;display:flex;align-items:center;justify-content:center;font-size:16px;">🤔</div><div class="mini" style="background:#1a1a2a;display:flex;align-items:center;justify-content:center;font-size:16px;">👀</div><div class="mini" style="background:#3a1a1a;display:flex;align-items:center;justify-content:center;font-size:14px;">⚠️</div></div>
+            <div class="ctext"><div class="l1">3 SVGs</div><div class="l2">emoji &amp; icons · rarely useful</div></div>
+            <div class="cgo">›</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="legend"><b>The win:</b> one big "what's happening" video + a swipe of the rest. The emoji-SVGs and avatars are honestly labelled as noise and folded away — still there if you want them, never in your face.</div>
+  </div>
+
+  <!-- ============ ELPAIS ============ -->
+  <div>
+    <div class="label">elpais.com — no video, an image wall (today's worst case)</div>
+    <div class="phone">
+      <div class="statusbar"></div>
+      <div class="appbar"><span class="t">Captured</span><span class="icons">▦ &nbsp; ⋮</span></div>
+      <div class="facets"><span class="facet on">Smart</span><span class="facet">Images</span><span class="facet">All</span></div>
+
+      <div class="scroll">
+
+        <div class="section">
+          <div class="sec-head"><span class="sec-title">Images <span class="sec-count">148</span></span><span class="sec-chev">▴</span></div>
+          <p class="legend" style="margin:2px 0 6px;">No primary video on this page — images are the content, so this section opens by default. Near-duplicate sizes of the same asset are folded.</p>
+          <div class="imgrid">
+            <div class="ic" style="background:linear-gradient(135deg,#6a7a4a,#3a4a2a);"><span class="dim">414×233</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#8a3a4a,#c08a9a);"><span class="dim">414×311</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#c0a060,#6a4a2a);"><span class="dim">414×233</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#3a4a5a,#1a2a3a);"><span class="dim">414×311</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#7a9ab0,#3a5a7a);"><span class="dim">414×281</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#5a3a6a,#2a1a3a);"><span class="dim">414×311</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#6a5a2a,#3a2a1a);"><span class="dim">414×233</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#2a5a4a,#1a3a2a);"><span class="dim">414×311</span></div>
+            <div class="ic" style="background:linear-gradient(135deg,#5a2a2a,#3a1a1a);"><span class="dim">414×311</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="legend"><b>The win:</b> when there's genuinely no primary, the grid is still the answer — but it's <i>one</i> clean section (no per-tile chip stamps), de-duped, and the count is honest. Same layout, gracefully degrades to "just the wall" when that's all there is.</div>
+  </div>
+
+</div>
+
+<h2>What this changes in the funnel</h2>
+<p class="note">
+  Same interceptor, same entities — the new work is a <b>ranking + grouping pass</b> between
+  the repo and the view, plus collapsible sections instead of one flat adapter:
+</p>
+<div class="why">
+  <div class="card"><h4>1 · Rank</h4><p>Pick the Primary: the video whose id matches the page URL, else the longest video. Cheap, deterministic.</p></div>
+  <div class="card"><h4>2 · De-dupe</h4><p>Fold image variants sharing an origin + path stem (mqdefault/sddefault/hq720 → one). Already have the canonical-key helper from the repo.</p></div>
+  <div class="card"><h4>3 · Group + collapse</h4><p>Bucket the rest by type with counts; collapse buckets that aren't the focus. The "Smart" facet is this view; the type facets still give the old flat filter when wanted.</p></div>
+</div>
+
+<p class="note" style="margin-top:6px;">
+  Nothing is hidden permanently — every asset is one tap away. We just stop making you wade
+  through avatars to reach the video. The chip rail keeps its old job as a manual facet; the
+  default just gets smart.
+</p>
+
+</body>
+</html>

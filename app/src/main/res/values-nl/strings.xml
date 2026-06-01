@@ -309,7 +309,6 @@
     <string name="sort_by_type_docs">Documenten</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Afbeeldingen</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Ritssluiting</string>
     <string name="spoof_timezone_summary">Dit verbetert de fingerprintingbescherming</string>

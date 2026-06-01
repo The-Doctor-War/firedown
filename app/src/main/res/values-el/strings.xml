@@ -258,7 +258,6 @@
     <string name="sort_by_type_docs">Εγγραφα</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Εικόνες</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Βίντεο</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Εναλλαγή σε καρτέλα</string>

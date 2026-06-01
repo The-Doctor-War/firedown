@@ -447,7 +447,6 @@
     <string name="sort_by_type_gif">动图</string>
     <string name="sort_by_type_images">图片</string>
     <string name="sort_by_type_subtitle">字幕</string>
-    <string name="sort_by_type_svg">可缩放矢量图</string>
     <string name="sort_by_type_video">视频</string>
     <string name="sort_by_type_zip">压缩</string>
     <string name="spoof_timezone_summary">启用后会增强指纹保护</string>

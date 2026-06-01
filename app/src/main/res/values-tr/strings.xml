@@ -309,7 +309,6 @@
     <string name="sort_by_type_docs">Belgeler</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Görüntüler</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Posta Kodu</string>
     <string name="spoof_timezone_summary">Etkinleştirildiğinde parmak izi korumasını güçlendirir</string>

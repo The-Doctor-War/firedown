@@ -233,7 +233,6 @@
     <string name="sort_by_type_docs">စာရွက်စာတမ်းများ</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">ပုံများ</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">ဗီဒီယို</string>
     <string name="sort_by_type_zip">ဇစ်</string>
     <string name="switch_to_tab_description">မျက်နှာစာ ပြောင်းကြည့်ပါ</string>

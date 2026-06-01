@@ -275,7 +275,6 @@
     <string name="sort_by_type_docs">Dokumenty</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">snímky</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">zip</string>
     <string name="spoof_timezone_summary">Pokud je povoleno, zvýší ochranu proti vytváření otisku prohlížeče</string>

@@ -296,7 +296,6 @@
     <string name="sort_by_type_docs">문서</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">이미지</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">동영상</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">탭 전환</string>

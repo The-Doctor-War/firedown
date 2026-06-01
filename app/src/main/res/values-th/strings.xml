@@ -257,7 +257,6 @@
     <string name="sort_by_type_docs">เอกสาร</string>
     <string name="sort_by_type_gif">กิฟ</string>
     <string name="sort_by_type_images">รูปภาพ</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">วีดีโอ</string>
     <string name="sort_by_type_zip">ซิป</string>
     <string name="switch_to_tab_description">สลับไปยังแท็บ</string>

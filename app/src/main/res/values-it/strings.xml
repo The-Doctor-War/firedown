@@ -297,7 +297,6 @@
     <string name="sort_by_type_docs">Documenti</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Immagini</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="switch_to_tab_description">Passa alla scheda</string>

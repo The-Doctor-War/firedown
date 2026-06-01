@@ -201,7 +201,6 @@
     <string name="sort_by_type_docs">文件</string>
     <string name="sort_by_type_gif">動圖</string>
     <string name="sort_by_type_images">圖片</string>
-    <string name="sort_by_type_svg">靜止無功發生器</string>
     <string name="sort_by_type_video">影片</string>
     <string name="sort_by_type_zip">壓縮</string>
     <string name="task_decryption_finished">解密完成</string>

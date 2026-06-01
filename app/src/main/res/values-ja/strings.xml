@@ -447,7 +447,6 @@
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">画像</string>
     <string name="sort_by_type_subtitle">字幕</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">ビデオ</string>
     <string name="sort_by_type_zip">ジップ</string>
     <string name="spoof_timezone_summary">有効にすると、フィンガープリント保護が強化されます</string>

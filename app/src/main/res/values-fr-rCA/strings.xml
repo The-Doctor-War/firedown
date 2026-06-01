@@ -198,7 +198,6 @@
     <string name="sort_by_type_docs">Documents</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Images</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Vidéo</string>
     <string name="sort_by_type_zip">Fermeture éclair</string>
     <string name="task_decryption_finished">Décryptage terminé</string>

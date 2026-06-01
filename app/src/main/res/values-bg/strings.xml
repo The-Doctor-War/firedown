@@ -262,7 +262,6 @@
     <string name="sort_by_type_docs">Документи</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Изображения</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Видео</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="spoof_timezone_summary">Когато е активирано, засилва защитата от пръстови отпечатъци</string>

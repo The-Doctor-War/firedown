@@ -263,7 +263,6 @@
     <string name="sort_by_type_docs">Документи</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Зображення</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Відео</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="spoof_timezone_summary">Коли ввімкнено, посилює захист відбитків пальців</string>

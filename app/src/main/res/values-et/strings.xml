@@ -246,7 +246,6 @@
     <string name="sort_by_type_docs">Dokumendid</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Pildid</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Video</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="spoof_timezone_summary">Kui see valik on kasutusel, siis parandab see kaitset sinu täpsema tuvastamise vastu</string>

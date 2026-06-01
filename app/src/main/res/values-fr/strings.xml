@@ -449,7 +449,6 @@
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Images</string>
     <string name="sort_by_type_subtitle">Sous-titre</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Vidéo</string>
     <string name="sort_by_type_zip">Fermeture éclair</string>
     <string name="spoof_timezone_summary">Lorsqu’il est activé, renforce la protection des empreintes digitales</string>

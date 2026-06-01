@@ -311,7 +311,6 @@
     <string name="sort_by_type_docs">Документы</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">Изображения</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">Видео</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="spoof_timezone_summary">При включении усиливает защиту от фингерпринтинга</string>

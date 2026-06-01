@@ -192,7 +192,6 @@
     <string name="sort_by_type_docs">कागजातहरू</string>
     <string name="sort_by_type_gif">GIF</string>
     <string name="sort_by_type_images">छविहरू</string>
-    <string name="sort_by_type_svg">SVG</string>
     <string name="sort_by_type_video">भिडियो</string>
     <string name="sort_by_type_zip">Zip</string>
     <string name="task_decryption_finished">डिक्रिप्शन समाप्त भयो</string>

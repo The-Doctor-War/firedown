@@ -261,7 +261,6 @@
     <string name="sort_by_type_docs">文件</string>
     <string name="sort_by_type_gif">動圖</string>
     <string name="sort_by_type_images">圖片</string>
-    <string name="sort_by_type_svg">可縮放向量圖形</string>
     <string name="sort_by_type_video">影片</string>
     <string name="sort_by_type_zip">壓縮</string>
     <string name="switch_to_tab_description">切換至該分頁</string>

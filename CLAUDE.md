@@ -151,6 +151,43 @@ flag. No unconditional logging ships.**
 - Rationale: this is a privacy/no-telemetry app — logs can contain URLs, titles,
   cookies-adjacent data. Release builds must be silent.
 
+## Tabs, sessions & delegate callbacks (foreground-only UI)
+
+A tab is a `GeckoState` (+ its `GeckoSession`), **not** a separate fragment.
+There is normally **one** `BrowserFragment` (plus an incognito one) driving
+every tab. Gecko delegates (`NavigationDelegate`, `PromptDelegate`,
+`ContentDelegate`, …) are attached to **every** session in
+`connectSession` — so a **background tab keeps firing callbacks** (page loads,
+deeplinks, JS `alert`, `beforeunload`, …).
+
+`GeckoComponents`'s delegates fan those out to observers via
+`mGeckoObserverRegistry.notifyObservers(...)`, and the registry calls **every**
+registered `BrowserFragment` with no tab filter. So anything that shows UI from
+a callback must first confirm the event came from the **foreground** tab,
+otherwise a background tab's dialog/prompt pops over whichever tab is visible.
+
+**The mechanism already exists: `isCurrentGeckoState(geckoState)` in
+`GeckoComponents` (compares to the active tab id).** Gate UI-raising
+notifications with it — as `START`, `STOP`, `PROGRESS`, `SECURITY`,
+`THUMBNAIL`, `MEDIA_*` already do, and now `LOAD_REQUEST` (the "open in app"
+deeplink), `PLAYSTORE_REDIRECT`, and the `PROMPT_*` prompts.
+
+- For navigation callbacks that return allow/deny (`onLoadRequest`,
+  Play-Store redirect): still `return GeckoResult.deny()` for a background tab
+  — just skip the `notifyObservers` so no dialog shows.
+- For prompts that owe Gecko a `GeckoResult` (`onButtonPrompt`,
+  `onBeforeUnloadPrompt`, `onRepostConfirmPrompt`, `onFilePrompt`, …): a
+  background tab must **dismiss** (`return GeckoResult.fromValue(prompt.dismiss())`)
+  rather than skip — skipping leaves Gecko waiting forever. Extend the existing
+  `if (geckoState == null)` dismiss path to
+  `if (geckoState == null || !isCurrentGeckoState(geckoState))`.
+- `onContext` (long-press menu) is inherently foreground — only the visible
+  session is in the `GeckoView` to receive the touch — so it needs no guard.
+
+Symptom this prevents: the "open in app" dialog (or an alert/file picker) from
+a *previous* tab appearing after you switch tabs (repro: open bilibili.com,
+switch tab mid-load; it fires a `bilibili://` deeplink from the background).
+
 ## Conventions
 
 - Match the surrounding comment density — the parsers are heavily commented

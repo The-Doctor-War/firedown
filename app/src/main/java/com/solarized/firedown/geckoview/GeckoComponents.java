@@ -230,7 +230,9 @@ public class GeckoComponents {
 
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            // Dismiss for a background tab (see onButtonPrompt). A beforeunload
+            // from a non-current tab must not block / pop over the visible one.
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -268,7 +270,8 @@ public class GeckoComponents {
 
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            // Dismiss for a background tab (see onButtonPrompt).
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -324,7 +327,11 @@ public class GeckoComponents {
             Log.d(TAG, "onButtonPrompt: " + prompt.title + " , " + prompt.message);
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            // Dismiss prompts from a background tab instead of popping them
+            // over the foreground tab (same isCurrentGeckoState guard the
+            // START/STOP/PROGRESS notifications use). A non-current tab's
+            // alert/confirm shouldn't interrupt the visible page.
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -378,7 +385,9 @@ public class GeckoComponents {
         @Override
         public GeckoResult<GeckoSession.PromptDelegate.PromptResponse> onFilePrompt(@NonNull GeckoSession session, @NonNull GeckoSession.PromptDelegate.FilePrompt prompt) {
             final GeckoState geckoState = findGeckoState(session);
-            if (geckoState == null) {
+            // Dismiss for a background tab (see onButtonPrompt) — a non-current
+            // tab must not raise the system file picker over the visible page.
+            if (geckoState == null || !isCurrentGeckoState(geckoState)) {
                 return GeckoResult.fromValue(prompt.dismiss());
             }
 
@@ -1466,9 +1475,16 @@ public class GeckoComponents {
                 boolean wasRedirector = geckoState.getLastNavigationTime() > 0
                         && ageMs < REDIRECTOR_WINDOW_MS
                         && geckoState.canGoBackward();
-                mGeckoObserverRegistry.notifyObservers(
-                        GeckoObserverInvoker.PLAYSTORE_REDIRECT,
-                        geckoState, request.uri, packageId, wasRedirector);
+                // Only surface the redirect UI for the foreground tab. A
+                // background tab that bounces to Play Store while the user has
+                // switched away must still be denied, but its snackbar/dialog
+                // would otherwise pop over the now-visible tab. Same guard the
+                // START/STOP/PROGRESS notifications already use.
+                if (isCurrentGeckoState(geckoState)) {
+                    mGeckoObserverRegistry.notifyObservers(
+                            GeckoObserverInvoker.PLAYSTORE_REDIRECT,
+                            geckoState, request.uri, packageId, wasRedirector);
+                }
                 return GeckoResult.deny();
             }
 
@@ -1485,8 +1501,16 @@ public class GeckoComponents {
                 // the deny branch and the bogus "open in app" dialog.
                 return GeckoResult.allow();
             }else{
-                mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST, geckoState, request.uri);
-
+                // External-app / unsupported-scheme link (bilibili://, market://,
+                // etc.). Always deny the navigation, but only raise the
+                // "open in app" dialog for the foreground tab — a deeplink fired
+                // by a background tab (e.g. bilibili.com after the user switched
+                // away mid-load) must not pop a dialog over the visible tab.
+                // Same isCurrentGeckoState guard the START/STOP/PROGRESS
+                // notifications use.
+                if (isCurrentGeckoState(geckoState)) {
+                    mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST, geckoState, request.uri);
+                }
                 return GeckoResult.deny();
             }
 

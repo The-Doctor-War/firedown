@@ -37,7 +37,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.solarized.firedown.App;
-import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.R;
 import com.solarized.firedown.autocomplete.AutoCompleteView;
 import com.solarized.firedown.data.entity.CertificateInfoEntity;
@@ -1493,20 +1492,7 @@ public class BrowserFragment extends BaseBrowserFragment
 
     @Override
     public void onLoadRequest(GeckoState geckoState, String uri) {
-        if (BuildConfig.DEBUG) Log.d(TAG, "onLoadRequest: " + uri);
-        // The GeckoComponents delegate fans this out to every registered
-        // BrowserFragment, so a deeplink fired by a background tab (e.g.
-        // bilibili.com triggering an "open in app" prompt while loading after
-        // the user switched away) would otherwise pop the app-chooser dialog
-        // over whichever tab is now in front. Only the foreground tab should
-        // surface the prompt — drop the callback otherwise.
-        GeckoState current = peekCurrentGeckoState();
-        if (current == null || current.getEntityId() != geckoState.getEntityId()) {
-            if (BuildConfig.DEBUG) Log.d(TAG, "onLoadRequest: ignoring deeplink from non-foreground tab "
-                    + geckoState.getEntityId() + " (current="
-                    + (current != null ? current.getEntityId() : "null") + ")");
-            return;
-        }
+        Log.d(TAG, "onLoadRequest: " + uri);
         Intent browsableIntent = AppLinkUseCases.createBrowsableIntent(uri);
         if (browsableIntent == null
                 || UrlStringUtils.isHttpOrHttps(uri)

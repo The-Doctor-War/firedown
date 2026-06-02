@@ -188,6 +188,33 @@ Symptom this prevents: the "open in app" dialog (or an alert/file picker) from
 a *previous* tab appearing after you switch tabs (repro: open bilibili.com,
 switch tab mid-load; it fires a `bilibili://` deeplink from the background).
 
+## Downloading & networking
+
+Two download paths, one shared OkHttp client (`NetworkModule`, with
+`OriginInterceptor` — it derives **Origin from an existing Referer**, it does
+not invent a Referer; Referer must come from the capture/emit layer).
+
+- **Progressive HTTP — `HttpDownloadStrategy`.** Default request sends **no
+  Range** (some servers require a range, others reject one). It **reacts to
+  partial content**: if the body ends short of `Content-Length` — thrown
+  "unexpected end of stream" *or* a clean early EOF — it re-requests
+  `Range: bytes=<have>-` and appends until complete (bails on no-progress / a
+  resume cap). One mechanism for CDN anti-leech truncation (e.g. Bilibili
+  `upos/bilivideo` caps a plain 200 at ~1 MiB but serves 206 in full), chunked
+  short reads, and mid-stream disconnects. Don't reintroduce an unconditional
+  Range default — it's site-specific thinking and breaks range-hostile servers.
+- **Streams (HLS/DASH/segments) — ffmpeg via `FFmpegOkhttp`.** ffmpeg's HTTP is
+  **not** native `http.c`; it's bridged to our OkHttp client by `FFmpegOkhttp`
+  (a custom AVIO handler). It already does Range/206 properly: accepts 206 as
+  success, parses `Content-Range`, range-**chunks** large files, honours
+  ffmpeg `offset`/`end_offset`, and falls back on 416. So the stream path was
+  never affected by the progressive-download truncation bug — only
+  `HttpDownloadStrategy` was.
+
+Headers (incl. any backfilled `Referer`) flow from the capture layer
+(`webrequests/requests.js` for the generic catcher, or a parser's
+`requestHeaders`) into both paths via `context.getHeaders()`.
+
 ## Conventions
 
 - Match the surrounding comment density — the parsers are heavily commented

@@ -34,6 +34,14 @@ public class FFmpegConstants {
 
     public static final int FFMPEG_AVERROR_SERVER_ERROR = -10;
 
+    /**
+     * User-initiated cancel (Stop/Delete). Mapped to AVERROR_EXIT in http.c's
+     * okhttp_open / okhttp_read / okhttp_seek so FFmpeg's HLS reload loop
+     * unwinds immediately instead of retrying the segment forever (the
+     * fate of every retryable code: EOF, EAGAIN, EIO, …).
+     */
+    public static final int FFMPEG_AVERROR_INTERRUPTED = -11;
+
 
     public static final int AVSEEK_SIZE = 0x10000;
 

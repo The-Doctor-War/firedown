@@ -3,6 +3,7 @@ package com.solarized.firedown.ffmpegutils;
 import static com.solarized.firedown.ffmpegutils.FFmpegConstants.FFMPEG_AVERROR_EINVAL;
 import static com.solarized.firedown.ffmpegutils.FFmpegConstants.FFMPEG_AVERROR_ENOSYS;
 import static com.solarized.firedown.ffmpegutils.FFmpegConstants.FFMPEG_AVERROR_EOF;
+import static com.solarized.firedown.ffmpegutils.FFmpegConstants.FFMPEG_AVERROR_INTERRUPTED;
 import static com.solarized.firedown.ffmpegutils.FFmpegConstants.FFMPEG_AVERROR_OK;
 
 import android.util.Log;
@@ -15,6 +16,7 @@ import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.FileUriHelper;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
@@ -172,15 +174,37 @@ public class FFmpegOkhttp {
         }
     }
 
+    /**
+     * Return value for user-initiated cancel (Stop/Delete). Restores the
+     * interrupt flag so any Java-side cleanup further up the stack still sees
+     * the request, then returns FFMPEG_AVERROR_INTERRUPTED — the native
+     * wrapper (http.c okhttp_open / okhttp_read / okhttp_seek) maps that to
+     * AVERROR_EXIT, the one code FFmpeg's HLS reload loop will NOT retry.
+     *
+     * Why this matters: every other negative we return collapses to AVERROR_EOF
+     * or AVERROR(EIO) in http.c, and hls.c treats those as transient → it
+     * re-opens the same segment forever. Each retry opens a fresh okhttp
+     * connection that succeeds, reads EOF, retries again, and the worker
+     * thread never exits — that is the "Stop/Delete spins on segment N" hang.
+     *
+     * This MUST be paired with a libavformat.so containing the matching
+     * OKHTTP_AVERROR_INTERRUPTED → AVERROR_EXIT case in http.c — without it,
+     * the wrapper falls into `default: ret = AVERROR(EIO)` and the HLS loop
+     * still spins.
+     */
+    private static int interruptedReturn() {
+        Thread.currentThread().interrupt();
+        return FFMPEG_AVERROR_INTERRUPTED;
+    }
+
     @Keep
     private int okhttpOpen(Map<String, String> options) {
         try {
-            /* Fail fast if the thread was interrupted (user stop/delete).
-             * Without this, FFmpeg's HLS demuxer retries segment fetches
-             * indefinitely — each retry opens a new connection that succeeds,
-             * then reads EOF, then retries again. */
+            /* Fail fast if the thread was interrupted (user Stop/Delete).
+             * Returning FFMPEG_AVERROR_INTERRUPTED routes to AVERROR_EXIT in
+             * http.c — see interruptedReturn(). */
             if (Thread.currentThread().isInterrupted()) {
-                return FFMPEG_AVERROR_EOF;
+                return interruptedReturn();
             }
 
             if (BuildConfig.DEBUG) Log.d(TAG, "okhttpOpen : " + mUrl);
@@ -341,6 +365,12 @@ public class FFmpegOkhttp {
         } catch (IOException e) {
             Log.e(TAG, "okhttpOpen failed: " + mUrl, e);
             okhttpClose();
+            /* okhttp surfaces a mid-flight cancel as InterruptedIOException (an
+             * IOException subtype). Route it to AVERROR_EXIT via the
+             * INTERRUPTED code, not the retryable EOF the catch used to return. */
+            if (e instanceof InterruptedIOException || Thread.currentThread().isInterrupted()) {
+                return interruptedReturn();
+            }
             return FFMPEG_AVERROR_EOF;
         } catch (Throwable t) {
             // okhttp's blocking call paths (e.g.
@@ -375,11 +405,13 @@ public class FFmpegOkhttp {
             // Restore the interrupt status so any Java-side cleanup
             // code that polls Thread.interrupted() further up still
             // sees the request.
-            if (t instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
-            }
             Log.e(TAG, "okhttpOpen aborted: " + mUrl, t);
             okhttpClose();
+            if (t instanceof InterruptedException || Thread.currentThread().isInterrupted()) {
+                /* Cancel mid-open: route to AVERROR_EXIT via the INTERRUPTED
+                 * code, not the retryable EOF the catch used to return. */
+                return interruptedReturn();
+            }
             return FFMPEG_AVERROR_EOF;
         }
     }
@@ -423,9 +455,11 @@ public class FFmpegOkhttp {
             if (inputStream == null)
                 return FFMPEG_AVERROR_ENOSYS;
 
-            /* Fail fast if the thread was interrupted. */
+            /* Fail fast on user Stop/Delete — INTERRUPTED → AVERROR_EXIT in
+             * http.c, so FFmpeg's HLS loop unwinds instead of retrying the
+             * segment forever (see interruptedReturn()). */
             if (Thread.currentThread().isInterrupted()) {
-                return FFMPEG_AVERROR_EOF;
+                return interruptedReturn();
             }
 
             /* NewDirectByteBuffer on the C side was called with exactly `size`
@@ -518,6 +552,9 @@ public class FFmpegOkhttp {
             }
 
         } catch (IOException e) {
+            if (e instanceof InterruptedIOException || Thread.currentThread().isInterrupted()) {
+                return interruptedReturn();
+            }
             return FFMPEG_AVERROR_EOF;
         } catch (Throwable t) {
             // Same trap as okhttpOpen — see the comment there. The read
@@ -525,8 +562,10 @@ public class FFmpegOkhttp {
             // (range-chunking re-opens, server-side EOF reconnects), so
             // an interrupt mid-read manifests with the same
             // InterruptedException-leaks-to-JNI shape.
-            if (t instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
+            if (t instanceof InterruptedException || Thread.currentThread().isInterrupted()) {
+                // Cancel mid-read: INTERRUPTED → AVERROR_EXIT, not the
+                // retryable EOF that keeps the HLS loop spinning.
+                return interruptedReturn();
             }
             return FFMPEG_AVERROR_EOF;
         }

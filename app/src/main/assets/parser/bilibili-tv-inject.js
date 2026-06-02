@@ -56,13 +56,41 @@
         return Array.isArray(b) && b.length ? b[0] : null;
     }
 
-    // Title: bilibili.tv document.title is reliable ("<ep> - <season> - …");
-    // strip the trailing site suffix. Fall back to a state field if present.
-    function resolveTitle(root) {
-        let t = (document.title || '').split(/\s[-|]\s/)[0].trim();
-        if (t && !/^bilibili/i.test(t)) return t;
-        const ogv = root?.ogv || root?.epView || root?.view || {};
-        return ogv.title || ogv.long_title || root?.season?.title || t || 'bilibili.tv';
+    // Locate the currently-playing episode via ogv.epId, matched against
+    // ogv.sectionsList[].episodes[].episode_id. Gives us the exact per-episode
+    // cover + a precise title; falls back to season-level data.
+    function findCurrentEpisode(ogv) {
+        const epId = ogv?.epId != null ? String(ogv.epId) : null;
+        const sections = Array.isArray(ogv?.sectionsList) ? ogv.sectionsList : [];
+        for (const sec of sections) {
+            const eps = Array.isArray(sec?.episodes) ? sec.episodes : [];
+            for (const ep of eps) {
+                if (epId && String(ep.episode_id) === epId) return ep;
+            }
+        }
+        return null;
+    }
+
+    // Title: prefer the episode's display title within the season; else the
+    // season title; else document.title with the site suffix stripped.
+    function resolveMeta(root) {
+        const ogv = root?.ogv || {};
+        const season = ogv.season || {};
+        const ep = findCurrentEpisode(ogv);
+
+        let title = null;
+        if (ep) {
+            const epPart = ep.title_display || ep.long_title_display || ep.short_title_display;
+            title = season.title && epPart ? `${season.title} ${epPart}` : (epPart || season.title);
+        }
+        if (!title) title = season.title;
+        if (!title) {
+            const t = (document.title || '').split(/\s[-|]\s/)[0].trim();
+            title = (t && !/^bilibili/i.test(t)) ? t : 'bilibili.tv';
+        }
+
+        const img = (ep && ep.cover) || season.horizontal_cover || season.vertical_cover || undefined;
+        return { title, img };
     }
 
     function extractAndPost() {
@@ -103,10 +131,12 @@
         if (!variants.length) { log('no usable variants'); return false; }
 
         const durationSec = Number(dash.duration) || 0;
+        const meta = resolveMeta(state);
         const payload = {
             variants,
             origin: location.href,
-            title: resolveTitle(state),
+            title: meta.title,
+            img: meta.img,
             durationMs: durationSec > 0 ? Math.round(durationSec * 1000) : 0
         };
         log('posting', variants.length, 'variant(s), audio', audioUrl.slice(0, 60));

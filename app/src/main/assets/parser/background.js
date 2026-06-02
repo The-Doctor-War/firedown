@@ -3584,6 +3584,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
         origin: p.origin,
         description: p.title,
         name: p.title,
+        img: p.img,
         duration: p.durationMs > 0 ? p.durationMs : 0,
         requestHeaders
     });

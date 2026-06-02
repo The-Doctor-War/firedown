@@ -255,9 +255,18 @@ public class HttpDownloadStrategy implements DownloadStrategy {
         // tiny slice the player was streaming and report success at EOF —
         // exactly the "first bytes only" truncation we were chasing.
         perCallHeaders.remove(BrowserHeaders.RANGES);
-        if (isResume) {
-            perCallHeaders.put(BrowserHeaders.RANGES, "bytes=" + downloadedLength + "-");
-        }
+        // Always issue a ranged request — "bytes=<downloadedLength>-", which is
+        // "bytes=0-" for a fresh download. Rationale: some CDNs cap a plain
+        // full-file GET (200) as anti-leech but serve a Range request (206) in
+        // full. Bilibili's upos/bilivideo is the case that surfaced this — a
+        // 200 truncates at exactly 1 MiB with "unexpected end of stream", while
+        // the browser's own player always fetches via Range and gets 206 + the
+        // full body. A server that doesn't support ranges just returns 200 and
+        // we read from byte 0 exactly as before, so this is safe universally
+        // (and it makes resume work everywhere, not only on explicit resume).
+        // The inherited player Range was already stripped above so we never
+        // download just the slice the <video> element happened to be streaming.
+        perCallHeaders.put(BrowserHeaders.RANGES, "bytes=" + downloadedLength + "-");
 
         Request request = new Request.Builder()
                 .url(url)

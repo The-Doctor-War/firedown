@@ -3374,10 +3374,11 @@ async function emitRumbleVideo(details, parsed) {
 
 function listenerRumbleEmbed(details) {
     if (isOwnRequest(details.url)) return {};
+    // TEMP diagnostic (Rumble shorts): log every embedJS hit so we can see
+    // whether shorts fire request=video like watch pages or use another kind.
+    log("RUMBLE", "embedJS hit", { url: details.url.slice(0, 130), tabId: details.tabId });
     // Only the video request carries player data; embedJS serves other kinds.
     if (!details.url.includes("request=video")) return {};
-
-    log("RUMBLE", "embedJS request intercepted", { url: details.url.slice(0, 100), tabId: details.tabId });
 
     let filter;
     try {

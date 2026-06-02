@@ -39,13 +39,26 @@ generic catcher.** The two are mutually exclusive *by design*:
 
 Consequences when working on a parser:
 
+- **MANDATORY: every new or changed parser MUST add a matching block rule to
+  `app/src/main/assets/webrequests/js/regex.js` for the media URL(s) it emits.**
+  Without it, the generic catcher *also* captures the same media and you get a
+  duplicate download entry (one rich from the parser, one bare from the
+  catcher). Adding a parser is not done until its block rule exists. Examples:
+  - Instagram/Threads → `instagram.*\.mp4`
+  - Twitter/X → `video\.twimg\.com.*\.(mp4|m4s|m3u8)`
+  - Rumble → `rumble\.com\/hls-vod\/.*\.m3u8` (the HLS master the parser emits)
+  Pick the pattern that matches exactly what the parser emits (and the segments
+  the player fetches for it), but is narrow enough not to swallow unrelated media.
 - **Do not** "fix" a missing capture by removing/bypassing the regex block so
   the generic catcher grabs it. That reintroduces the duplicate and drops
   metadata. Fix the **parser** instead.
 - That regex list is **remote-managed** (fetched from
   `firedown-webrequests/main/regex-patterns.txt` every 6h); `DEFAULT_PATTERNS`
   in `regex.js` is only the bundled fallback. Logic changes in `requests.js`
-  ship in the APK; pattern changes generally belong in the remote list.
+  ship in the APK; pattern changes generally belong in the remote list — so add
+  the rule to **both** the bundled `DEFAULT_PATTERNS` (covers fresh installs /
+  remote-fetch failures) **and** the remote `regex-patterns.txt` (governs
+  production once fetched).
 
 ## Debugging "video not captured" — do this, in order
 
@@ -113,6 +126,9 @@ all*.
 - `node --check` the JS file(s) you touched.
 - Re-run your HAR simulation with the **final** code (caps included) and confirm
   it finds the expected item(s) with `user`, `caption`, and `video_versions`.
+- **Confirm the `regex.js` block rule exists** for the media this parser emits
+  (see the cardinal rule above) — this is the #1 thing that gets forgotten and
+  causes duplicate entries.
 - Prefer one capture mechanism per site. Multiple (doc filter + API filter +
   content script) can all fire and, if origins differ, produce duplicate
   entries; origin-dedup (`sendVariants` `alreadySent`) only collapses identical

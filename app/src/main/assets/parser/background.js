@@ -3317,6 +3317,100 @@ browser.runtime.onMessage.addListener((message, sender) => {
 });
 
 // ============================================================================
+// Rumble
+// ----------------------------------------------------------------------------
+// A Rumble watch page loads its player data from an embedJS endpoint:
+//   rumble.com/embedJS/u3/?request=video&ver=2&v=<id>…  → JSON
+// That JSON carries everything we need: title, author.name, duration (seconds),
+// thumbnail (`i`), the watch permalink (`l`), and — crucially — a clean HLS
+// master playlist at `ua.hls.auto.url` (== `u.hls.url`),
+// e.g. https://rumble.com/hls-vod/<id>/playlist.m3u8. We emit that master as a
+// single `media` URL (like the Twitch path); VariantProcessor/ffmpeg expands it
+// into selectable qualities. The per-quality `ua.tar` entries are Rumble's
+// video-only tarred HLS chunklists (separate `ua.audio`) accessed by byte
+// range — not muxed, awkward to download standalone — so we don't use them.
+//
+// The matching `rumble.com/hls-vod/.*\.m3u8` block in webrequests/regex.js
+// keeps the generic catcher from also grabbing that master (no duplicate).
+// ============================================================================
+
+const RUMBLE_EMBED_PATTERNS = [
+    "*://rumble.com/embedJS/*",
+    "*://*.rumble.com/embedJS/*"
+];
+
+async function emitRumbleVideo(details, parsed) {
+    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
+    if (!hls) { log("RUMBLE", "embedJS had no HLS url"); return; }
+
+    const origin = parsed.l ? `https://rumble.com${parsed.l}`
+        : (details.documentUrl || details.originUrl || details.url);
+    if (alreadySent(origin)) { log("RUMBLE", "already sent", { origin }); return; }
+    markSent(origin);
+
+    const tabId = await resolveTabId(details);
+    let incognito = false;
+    if (tabId >= 0) {
+        try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
+    }
+
+    const img = parsed.i || (Array.isArray(parsed.t) && parsed.t[0]?.i) || undefined;
+    const message = {
+        url: hls,
+        type: "media",
+        origin,
+        tabId,
+        request: details.requestId,
+        incognito
+    };
+    if (parsed.title) message.description = parsed.title;
+    if (parsed.author?.name) message.name = parsed.author.name;
+    if (img) message.img = img;
+    if (parsed.duration > 0) message.duration = Math.round(parsed.duration * 1000);
+
+    log("RUMBLE", "emitting HLS master", { origin, title: parsed.title, hls: hls.slice(0, 80) });
+    sendNative(message);
+}
+
+function listenerRumbleEmbed(details) {
+    if (isOwnRequest(details.url)) return {};
+    // Only the video request carries player data; embedJS serves other kinds.
+    if (!details.url.includes("request=video")) return {};
+
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log("RUMBLE", "filter create failed", { error: e.message });
+        return {};
+    }
+    const chunks = [];
+    filter.ondata = (event) => {
+        chunks.push(new Uint8Array(event.data));
+        filter.write(event.data); // pass through unmodified
+    };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) { log("RUMBLE", "0 bytes"); return; }
+        const combined = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
+        const parsed = tryParseJson(new TextDecoder("utf-8").decode(combined));
+        if (!parsed) { log("RUMBLE", "response not JSON", { bytes: total }); return; }
+        Promise.resolve().then(() => emitRumbleVideo(details, parsed));
+    };
+    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+    return {};
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerRumbleEmbed,
+    { urls: RUMBLE_EMBED_PATTERNS, types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+// ============================================================================
 // Facebook
 // ----------------------------------------------------------------------------
 // Mirrors the Instagram pattern: filter the GraphQL response inline with

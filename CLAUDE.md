@@ -175,12 +175,13 @@ deeplink), `PLAYSTORE_REDIRECT`, and the `PROMPT_*` prompts.
 - For navigation callbacks that return allow/deny (`onLoadRequest`,
   Play-Store redirect): still `return GeckoResult.deny()` for a background tab
   — just skip the `notifyObservers` so no dialog shows.
-- For prompts that owe Gecko a `GeckoResult` (`onButtonPrompt`,
-  `onBeforeUnloadPrompt`, `onRepostConfirmPrompt`, `onFilePrompt`, …): a
+- For prompts that owe Gecko a `GeckoResult` (every `PromptDelegate` method —
+  alert/button/text/choice/color/date/auth/file/beforeunload/repost): a
   background tab must **dismiss** (`return GeckoResult.fromValue(prompt.dismiss())`)
-  rather than skip — skipping leaves Gecko waiting forever. Extend the existing
-  `if (geckoState == null)` dismiss path to
-  `if (geckoState == null || !isCurrentGeckoState(geckoState))`.
+  rather than skip — skipping leaves Gecko waiting forever. The pattern is to
+  extend the existing `if (geckoState == null)` dismiss path to
+  `if (geckoState == null || !isCurrentGeckoState(geckoState))`. All current
+  prompts already do this.
 - `onContext` (long-press menu) is inherently foreground — only the visible
   session is in the `GeckoView` to receive the touch — so it needs no guard.
 

@@ -211,7 +211,7 @@ public class GeckoComponents {
                 @NonNull final GeckoSession session, @NonNull final DateTimePrompt prompt) {
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -252,7 +252,7 @@ public class GeckoComponents {
 
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -290,7 +290,7 @@ public class GeckoComponents {
 
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -308,7 +308,7 @@ public class GeckoComponents {
             Log.d(TAG, "onTextPrompt: " + prompt.title + " , " + prompt.message);
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();
@@ -348,7 +348,7 @@ public class GeckoComponents {
             Log.d(TAG, "onColorPrompt: " + prompt.title);
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null) {
+            if (geckoState == null || !isCurrentGeckoState(geckoState)) {
                 return GeckoResult.fromValue(prompt.dismiss());
             }
 
@@ -368,7 +368,7 @@ public class GeckoComponents {
             Log.d(TAG, "onAlertPrompt: " + prompt.title + " , " + prompt.message);
             final GeckoState geckoState = findGeckoState(session);
 
-            if (geckoState == null)
+            if (geckoState == null || !isCurrentGeckoState(geckoState))
                 return GeckoResult.fromValue(prompt.dismiss());
 
             final GeckoResult<PromptResponse> res = new GeckoResult<>();

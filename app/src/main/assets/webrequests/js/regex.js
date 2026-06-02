@@ -74,9 +74,12 @@ const DEFAULT_PATTERNS = [
   // doesn't follow that convention.
   '\\/init\\.(mp4|m4s)(?:[?#]|$)',
 
-  // Rumble — the parser emits the HLS master (with metadata) from embedJS;
-  // block the generic catcher from also grabbing it so we don't double-add.
+  // Rumble — the parser emits videos (with metadata) from embedJS (watch
+  // pages, HLS master) and service.php?name=shorts.feed (shorts, MP4 variants
+  // on the rumble.cloud CDN). Block both so the generic catcher doesn't also
+  // grab them and double-add / mislabel with the page title.
   'rumble\\.com\\/hls-vod\\/.*\\.m3u8',
+  'rumble\\.cloud\\/.*\\.mp4',
 
   // Other
   'startpage\\.com\\/sp\\/cl',

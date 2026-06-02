@@ -3421,10 +3421,47 @@ function listenerRumbleEmbed(details) {
 // title ("all shorts share one title"). We iterate the top-level feed list
 // only and do NOT recurse into an item's related_video sub-list (the request
 // asks for options=video.full,video.related_video).
-function rumbleFeedItemHls(item) {
-    const vids = Array.isArray(item?.videos) ? item.videos : [];
-    const hls = vids.find(v => v && typeof v.url === "string" && /\.m3u8(?:[?#]|$)/.test(v.url));
-    return hls?.url || null;
+// Emit one shorts.feed item. Shorts carry direct MP4 variants in `videos[]`
+// (type "mp4" with a `res`/`resolution` height) rather than an HLS master, so
+// we send them as quality variants. (We still accept an HLS entry as a
+// fallback for any item that ships one.)
+function emitRumbleFeedItem(details, item) {
+    if (!item || !item.title) return false;
+    const origin = item.url
+        || (item.relative_url ? `https://rumble.com${item.relative_url}` : null);
+    if (!origin) return false;
+
+    const vids = Array.isArray(item.videos) ? item.videos : [];
+    const mp4s = [];
+    let hls = null;
+    for (const v of vids) {
+        if (!v || typeof v.url !== "string") continue;
+        if (v.type === "hls" || /\.m3u8(?:[?#]|$)/.test(v.url)) {
+            hls = hls || v.url;
+        } else if (v.type === "mp4" || /\.mp4(?:[?#]|$)/.test(v.url)) {
+            mp4s.push({ url: v.url, height: v.res || v.resolution || 0 });
+        }
+    }
+
+    if (mp4s.length > 0) {
+        sendVariants(details, {
+            variants: mp4s,
+            origin,
+            description: item.title,
+            img: item.thumb,
+            name: item.by?.name,
+            duration: (item.duration || 0) * 1000
+        });
+        return true;
+    }
+    if (hls) {
+        emitRumbleHls(details, {
+            hls, origin, title: item.title, author: item.by?.name,
+            thumb: item.thumb, durationSec: item.duration
+        });
+        return true;
+    }
+    return false;
 }
 
 function emitRumbleShortsFeed(details, parsed) {
@@ -3432,30 +3469,9 @@ function emitRumbleShortsFeed(details, parsed) {
     // feed used data.videos[]. Accept either.
     const list = Array.isArray(parsed?.data?.items) ? parsed.data.items
         : (Array.isArray(parsed?.data?.videos) ? parsed.data.videos : []);
-
-    // TEMP diagnostic: confirm the per-item metadata fields (title etc.) are
-    // where we expect before trusting the emit.
-    if (list[0] && typeof list[0] === "object") {
-        const it = list[0];
-        log("RUMBLE", "shorts.feed item0", {
-            title: it.title, by: it.by?.name, dur: it.duration,
-            videos: JSON.stringify(it.videos)?.slice(0, 400),
-            hls: rumbleFeedItemHls(it)?.slice(0, 70)
-        });
-    }
-
     let emitted = 0;
     for (const item of list) {
-        const hls = rumbleFeedItemHls(item);
-        if (!hls || !item.title) continue;
-        const origin = item.url
-            || (item.relative_url ? `https://rumble.com${item.relative_url}` : null);
-        if (!origin) continue;
-        emitRumbleHls(details, {
-            hls, origin, title: item.title, author: item.by?.name,
-            thumb: item.thumb, durationSec: item.duration
-        });
-        emitted++;
+        if (emitRumbleFeedItem(details, item)) emitted++;
     }
     log("RUMBLE", `shorts.feed: ${emitted}/${list.length} item(s) emitted`);
 }

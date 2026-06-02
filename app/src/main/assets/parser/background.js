@@ -3637,14 +3637,17 @@ function nicoFilterJson(details, label, onParsed) {
     filter.onstop = () => {
         filter.close();
         const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) return;
+        if (total === 0) { log("NICO", `${label}: 0 bytes`); return; }
         const buf = new Uint8Array(total);
         let offset = 0;
         for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
-        const parsed = tryParseJson(new TextDecoder("utf-8").decode(buf));
-        if (parsed) Promise.resolve().then(() => onParsed(parsed));
+        const text = new TextDecoder("utf-8").decode(buf);
+        const parsed = tryParseJson(text);
+        if (!parsed) { log("NICO", `${label}: not JSON`, { bytes: total, head: text.slice(0, 100) }); return; }
+        log("NICO", `${label}: parsed ${total} bytes`);
+        Promise.resolve().then(() => onParsed(parsed));
     };
-    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+    filter.onerror = () => { log("NICO", `${label}: filter error`); try { filter.close(); } catch (_) {} };
 }
 
 function nicoIdFromWatchApi(url) {
@@ -3659,6 +3662,7 @@ function nicoIdFromAccess(url) {
 function listenerNicoWatchApi(details) {
     if (isOwnRequest(details.url)) return {};
     const id = nicoIdFromWatchApi(details.url);
+    log("NICO", "watch-api hit", { url: details.url.slice(0, 120), id, type: details.type });
     if (!id) return {};
     nicoFilterJson(details, "watch-api", (parsed) => {
         const v = parsed?.data?.video || {};
@@ -3698,9 +3702,17 @@ async function emitNicoStream(details, id, contentUrl) {
 function listenerNicoAccessHls(details) {
     if (isOwnRequest(details.url)) return {};
     const id = nicoIdFromAccess(details.url);
+    log("NICO", "access-hls hit", { url: details.url.slice(0, 120), id, method: details.method, type: details.type });
     nicoFilterJson(details, "access-hls", (parsed) => {
         const contentUrl = parsed?.data?.contentUrl;
-        if (!contentUrl) return; // retries / error envelopes carry no contentUrl
+        if (!contentUrl) {
+            // retries / error envelopes carry no contentUrl — show what we got
+            log("NICO", "access-hls: no contentUrl", {
+                status: parsed?.meta?.status,
+                dataKeys: parsed?.data ? Object.keys(parsed.data) : null
+            });
+            return;
+        }
         emitNicoStream(details, id, contentUrl);
     });
     return {};

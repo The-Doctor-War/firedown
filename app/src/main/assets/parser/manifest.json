@@ -24,6 +24,17 @@
       ],
       "run_at": "document_start",
       "all_frames": false
+    },
+    {
+      "matches": [
+        "*://www.threads.com/*",
+        "*://www.threads.net/*"
+      ],
+      "js": [
+        "threads-content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": false
     }
   ],
   "web_accessible_resources": [

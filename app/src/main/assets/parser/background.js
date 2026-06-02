@@ -3086,40 +3086,50 @@ browser.cookies.onChanged.addListener(async (changeInfo) => {
 // Threads
 // ----------------------------------------------------------------------------
 // Same backend as Instagram, same item shape (video_versions, image_versions2,
-// carousel_media, user.username, code, media_type, caption). Difference is
-// that a Threads post page ships its data inline in the SSR HTML inside
-// <script data-sjs> blobs (RelayPrefetchedStreamCache / "__bbox" pattern)
-// rather than via a separate JSON API.
+// carousel_media, user.username, code, media_type, caption). We always want
+// the video to come from HERE (the parser), not the generic webrequest
+// catcher — the catcher would emit a bare .mp4 with no title/author/thumbnail,
+// and 'instagram.*\.mp4' is block-listed in webrequests/regex.js precisely so
+// the two don't both fire. So the parser is the single source of Threads
+// videos, and it must carry the metadata.
 //
-// Primary path: filterResponseData on the main_frame document. This taps the
-// raw network response as it streams from the server — the true server-render
-// (Sec-Fetch-Dest: document), with the video payload intact in the data-sjs
-// blobs. It is immune to the two failure modes that defeated everything else:
-//   - The page's bootstrap (ServerJSPayloadListener.process) consumes the
-//     inline data-sjs scripts the instant they parse, so reading the DOM from
-//     a content script — even at document_start with a MutationObserver — loses
-//     the race for the big (~200 KB) media blob: by our microtask its body is
-//     already a consumed, media-less JSON. The network filter never touches the
-//     DOM, so consumption is irrelevant.
-//   - A content-script fetch() of the URL can't set Sec-Fetch-Dest: document
-//     (forbidden header), so the server returns an emptied shell. The filter
-//     reads the genuine navigation response, so this doesn't arise.
-// (An earlier main_frame-filter attempt looked dead, but it had shipped without
-// a manifest version bump, so ensureBuiltIn never re-registered it — it was
-// never actually exercised.)
+// The post JSON shows up in one of two places depending on session state:
 //
-// Fallback path: the content-script message handler below. Kept for SPA
-// navigation, where Threads swaps posts client-side with no new main_frame
-// load for the filter to tap.
+//   1. Logged-in: Threads server-renders the post data inline in the page
+//      HTML, inside <script data-sjs> Relay-prefetch blobs. We read it with
+//      filterResponseData on the main_frame — the raw network response, immune
+//      to the page bootstrap (ServerJSPayloadListener) that consumes those
+//      scripts out of the DOM the instant they parse (which is why reading the
+//      DOM from a content script, even at document_start, loses the race for
+//      the ~200 KB media blob; and why a content-script fetch() can't help —
+//      it can't set Sec-Fetch-Dest: document, so the server returns an emptied
+//      shell).
 //
-// Both paths hand items to sendInstagramItem with a threads.com origin
-// override so the download UI groups under the right post URL; origin dedup
-// (sendVariants' alreadySent) collapses any overlap between the two.
+//   2. Logged-out (the in-app browser's usual state): the document comes back
+//      media-less and Threads fetches the post via a GraphQL/API XHR after
+//      load. We filter those responses the same way the Instagram and Facebook
+//      paths do and run the same media-item walk.
+//
+// Both paths funnel through emitThreadsItems → sendInstagramItem with a
+// threads.com origin override (so the UI groups under the post URL and dedup
+// collapses any logged-in overlap between the doc and a follow-up XHR).
 // ============================================================================
 
 const THREADS_PAGE_PATTERNS = [
     "*://www.threads.com/@*/post/*",
     "*://www.threads.net/@*/post/*"
+];
+
+// Threads (Barcelona) shares Instagram's GraphQL/REST surface. Match the
+// GraphQL endpoints plus the v1 REST media/feed routes; the media-item walk
+// ignores anything without a video, so over-matching is cheap.
+const THREADS_API_PATTERNS = [
+    "*://www.threads.com/api/graphql*",
+    "*://www.threads.net/api/graphql*",
+    "*://www.threads.com/graphql/*",
+    "*://www.threads.net/graphql/*",
+    "*://www.threads.com/api/v1/*",
+    "*://www.threads.net/api/v1/*"
 ];
 
 function extractThreadsUsernameFromUrl(url) {
@@ -3163,48 +3173,41 @@ function threadsItemRichness(item) {
     return score;
 }
 
-// Parse all <script data-sjs> blobs out of a raw HTML string and emit the
-// richest media item per post code. Attribute order varies, so match any
-// data-sjs script and skip non-JSON bodies.
-function processThreadsHtml(details, html, pageUrl) {
-    const sjsRegex = /<script[^>]*\bdata-sjs\b[^>]*>([\s\S]*?)<\/script>/g;
-    const fallbackUser = extractThreadsUsernameFromUrl(pageUrl);
-    const bestByCode = new Map();
-    let scriptCount = 0;
-    let match;
-    while ((match = sjsRegex.exec(html)) !== null) {
-        scriptCount++;
-        const parsed = tryParseJson(match[1]);
-        if (!parsed) continue;
-        walkThreadsMediaItems(parsed, (item) => {
-            const code = item.code;
-            if (!code) return;
-            const prev = bestByCode.get(code);
-            if (!prev || threadsItemRichness(item) > threadsItemRichness(prev)) {
-                bestByCode.set(code, item);
-            }
-        }, 0, new WeakSet(), { visited: 0 });
-    }
-    log("THREADS", `doc filter: ${html.length} bytes, ${scriptCount} data-sjs script(s), ${bestByCode.size} item(s)`,
-        { url: pageUrl.slice(0, 120) });
+// Walk one parsed JSON value, folding every video item into bestByCode keyed
+// on post code, keeping the richest record per code.
+function collectThreadsItems(parsed, bestByCode) {
+    walkThreadsMediaItems(parsed, (item) => {
+        const code = item.code;
+        if (!code) return;
+        const prev = bestByCode.get(code);
+        if (!prev || threadsItemRichness(item) > threadsItemRichness(prev)) {
+            bestByCode.set(code, item);
+        }
+    }, 0, new WeakSet(), { visited: 0 });
+}
+
+// Emit every collected item with full metadata via the shared Instagram
+// emitter, under a canonical threads.com post origin.
+function emitThreadsItems(details, bestByCode, pageUrl, label) {
+    const fallbackUser = extractThreadsUsernameFromUrl(pageUrl || details.url || "");
+    log("THREADS", `${label}: ${bestByCode.size} item(s)`, { url: (pageUrl || "").slice(0, 120) });
     for (const [code, item] of bestByCode) {
         const username = item.user?.username || fallbackUser || "unknown";
         sendInstagramItem(details, item, `https://www.threads.com/@${username}/post/${code}`);
     }
 }
 
-function listenerThreadsPage(details) {
-    if (details.type !== "main_frame") return;
-    if (details.tabId >= 0) cacheTabUrl(details.url, details.tabId);
-
+// Generic streaming-response reader: buffer the body, decode, hand the raw
+// string to onBody. Shared by the doc (main_frame HTML) and API (XHR JSON)
+// listeners.
+function filterThreadsResponse(details, label, onBody) {
     let filter;
     try {
         filter = browser.webRequest.filterResponseData(details.requestId);
     } catch (e) {
-        log("THREADS", "doc filter create failed", { error: e.message });
+        log("THREADS", `${label}: filter create failed`, { error: e.message });
         return;
     }
-
     const chunks = [];
     filter.ondata = (event) => {
         chunks.push(new Uint8Array(event.data));
@@ -3213,16 +3216,58 @@ function listenerThreadsPage(details) {
     filter.onstop = () => {
         filter.close();
         const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) { log("THREADS", "doc filter: 0 bytes"); return; }
+        if (total === 0) { log("THREADS", `${label}: 0 bytes`); return; }
         const combined = new Uint8Array(total);
         let offset = 0;
         for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
-        const html = new TextDecoder("utf-8").decode(combined);
-        Promise.resolve().then(() => processThreadsHtml(details, html, details.url));
+        const str = new TextDecoder("utf-8").decode(combined);
+        Promise.resolve().then(() => onBody(str, total));
     };
-    filter.onerror = () => {
-        try { filter.close(); } catch (_) {}
-    };
+    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+}
+
+// (1) Logged-in: read the post JSON inlined in the page HTML's data-sjs blobs.
+function listenerThreadsPage(details) {
+    if (details.type !== "main_frame") return;
+    if (details.tabId >= 0) cacheTabUrl(details.url, details.tabId);
+    filterThreadsResponse(details, "doc filter", (html, bytes) => {
+        const sjsRegex = /<script[^>]*\bdata-sjs\b[^>]*>([\s\S]*?)<\/script>/g;
+        const bestByCode = new Map();
+        let scriptCount = 0, m;
+        while ((m = sjsRegex.exec(html)) !== null) {
+            scriptCount++;
+            const parsed = tryParseJson(m[1]);
+            if (parsed) collectThreadsItems(parsed, bestByCode);
+        }
+        log("THREADS", `doc filter: ${bytes} bytes, ${scriptCount} data-sjs script(s)`);
+        emitThreadsItems(details, bestByCode, details.url, "doc");
+    });
+}
+
+// (2) Logged-out: read the post JSON from the GraphQL/API XHR Threads fires
+// after the (media-less) document loads.
+function listenerThreadsApi(details) {
+    if (isOwnRequest(details.url)) return {};
+    filterThreadsResponse(details, "api filter", (body, bytes) => {
+        let str = body;
+        if (str.startsWith("for (;;);")) str = str.slice(9); // anti-hijacking prefix
+        const bestByCode = new Map();
+        // Threads streams some GraphQL as newline-delimited JSON objects, like
+        // Facebook — try whole-body first, then fall back to per-line.
+        const whole = tryParseJson(str);
+        if (whole) {
+            collectThreadsItems(whole, bestByCode);
+        } else {
+            for (const line of str.split("\n")) {
+                const obj = tryParseJson(line);
+                if (obj) collectThreadsItems(obj, bestByCode);
+            }
+        }
+        log("THREADS", `api filter: ${bytes} bytes`, { url: details.url.slice(0, 100) });
+        const pageUrl = details.documentUrl || details.originUrl || details.url;
+        emitThreadsItems(details, bestByCode, pageUrl, "api");
+    });
+    return {};
 }
 
 browser.webRequest.onBeforeRequest.addListener(
@@ -3231,7 +3276,13 @@ browser.webRequest.onBeforeRequest.addListener(
     ["blocking"]
 );
 
-// Fallback: content-script-delivered items (SPA navigation, see header).
+browser.webRequest.onBeforeRequest.addListener(
+    listenerThreadsApi,
+    { urls: THREADS_API_PATTERNS, types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+// SPA-navigation fallback: items the content script scrapes from the DOM.
 browser.runtime.onMessage.addListener((message, sender) => {
     if (message?.type !== "threads_intercept") return;
 

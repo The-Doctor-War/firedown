@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 
+import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.StoragePaths;
 import com.solarized.firedown.data.Download;
 import com.solarized.firedown.utils.BrowserHeaders;
@@ -212,7 +213,12 @@ public class HttpDownloadStrategy implements DownloadStrategy {
             callback.onStatusChanged(Download.FINISHED);
 
         } catch (IOException e) {
-            Log.e(TAG, "execute: IOException at downloadedLength=" + downloadedLength, e);
+            // Include the URL alongside the failure: "unexpected end of stream
+            // at downloadedLength=1048576" with a *.bilivideo.com URL is the
+            // Bilibili CDN truncating because Referer is missing/wrong (see
+            // the makeRequest header log above).
+            Log.e(TAG, "execute: IOException at downloadedLength=" + downloadedLength
+                    + " url=" + (request != null ? request.getUrl() : null), e);
             throw e;
         } finally {
             closeQuietly(input, output, body, httpResponse);
@@ -257,10 +263,41 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                 .url(url)
                 .headers(SafeHeaders.of(perCallHeaders))
                 .build();
-        Log.d(TAG, "makeRequest: url=" + url
-                + " isResume=" + isResume
-                + " range=" + perCallHeaders.get(BrowserHeaders.RANGES));
+        if (BuildConfig.DEBUG) {
+            // Log every request-header name + value (cookies/authorization
+            // redacted to a length count). Bilibili / fbcdn / many CDNs cut
+            // the stream short when Referer is missing — a missing or empty
+            // Referer/Origin here is the smoking gun for the "1 MiB then EOF"
+            // truncation symptom.
+            StringBuilder hdrs = new StringBuilder();
+            for (java.util.Map.Entry<String, String> e : perCallHeaders.entrySet()) {
+                String k = e.getKey(), v = e.getValue();
+                String klc = k.toLowerCase(Locale.ROOT);
+                hdrs.append(k).append('=');
+                if (klc.equals("cookie") || klc.equals("authorization")) {
+                    hdrs.append('<').append(v != null ? v.length() : 0).append(" chars>");
+                } else {
+                    hdrs.append(v);
+                }
+                hdrs.append("; ");
+            }
+            Log.d(TAG, "makeRequest: url=" + url
+                    + " isResume=" + isResume
+                    + " range=" + perCallHeaders.get(BrowserHeaders.RANGES)
+                    + " referer=" + perCallHeaders.get("Referer")
+                    + " origin=" + perCallHeaders.get("Origin")
+                    + " ua=" + perCallHeaders.get("User-Agent")
+                    + " allHeaders=[" + hdrs + "]");
+        }
         Response response = client.newCall(request).execute();
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "makeRequest: response code=" + response.code()
+                    + " contentLength=" + response.header("Content-Length")
+                    + " contentRange=" + response.header("Content-Range")
+                    + " contentType=" + response.header("Content-Type")
+                    + " server=" + response.header("Server")
+                    + " url=" + url);
+        }
 
         if (response.code() == 416) {
             Log.w(TAG, "makeRequest: 416 Range Not Satisfiable, retrying without Range"

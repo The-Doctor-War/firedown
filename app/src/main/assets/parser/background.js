@@ -3554,28 +3554,54 @@ browser.webRequest.onBeforeRequest.addListener(
 // the parser is written.
 // ============================================================================
 
-const BILIBILI_DIAG_PATTERNS = [
-    "*://api.bilibili.com/*playurl*",
-    "*://api.bilibili.com/x/web-interface/view*",
-    "*://api.bilibili.com/pgc/view/*"
+// Wide net: log every XHR/fetch on any Bilibili-family host, log every doc
+// load, and dump the playurl JSON shape when one fires. We didn't see any
+// [BILIBILI] logs on the mobile site with the narrow patterns, so we need to
+// learn what hosts/paths the device actually hits before we can build a parser.
+const BILIBILI_API_PATTERNS = [
+    "*://*.bilibili.com/*",
+    "*://*.biliapi.net/*",
+    "*://*.biliapi.com/*"
 ];
+
+const BILIBILI_PAGE_PATTERNS = [
+    "*://www.bilibili.com/video/*",
+    "*://m.bilibili.com/video/*",
+    "*://www.bilibili.com/bangumi/play/*",
+    "*://m.bilibili.com/bangumi/play/*"
+];
+
+// Anything that looks like a playurl across the variants we've seen in the
+// wild: x/player/playurl, x/player/wbi/playurl, pgc/player/web/playurl,
+// pgc/player/api/playurl, intl-gateway/web/playurl, etc.
+const BILIBILI_PLAYURL_RE = /\/playurl(?:[?/]|$)/i;
 
 function listenerBilibiliDiag(details) {
     if (isOwnRequest(details.url)) return {};
-    log("BILIBILI", "api hit", { url: details.url.slice(0, 170), type: details.type });
-    if (!details.url.includes("playurl")) return {};
+    // Quiet the noise: only log XHR/fetch (skip script/css/image/font), and
+    // only log a small set per page.
+    const t = details.type;
+    if (t !== "xmlhttprequest") return {};
+    log("BILIBILI", "api hit", {
+        url: details.url.slice(0, 200),
+        host: (() => { try { return new URL(details.url).host; } catch { return null; } })(),
+        tabId: details.tabId,
+        doc: (details.documentUrl || "").slice(0, 80)
+    });
+
+    if (!BILIBILI_PLAYURL_RE.test(details.url)) return {};
 
     filterRumbleText(details, "BILIBILI playurl", (text) => {
         const parsed = tryParseJson(text);
         if (!parsed) { log("BILIBILI", "playurl not JSON", { bytes: text.length, head: text.slice(0, 80) }); return; }
-        // Mainline uses data{}; bangumi/pgc uses result{}.
         const d = parsed.data || parsed.result || {};
         const dash = d.dash;
         const firstV = dash && Array.isArray(dash.video) ? dash.video[0] : null;
         const firstA = dash && Array.isArray(dash.audio) ? dash.audio[0] : null;
-        const baseUrlHost = (u) => { try { return new URL(u).host; } catch { return null; } };
+        const host = (u) => { try { return new URL(u).host; } catch { return null; } };
         log("BILIBILI", "playurl shape", {
             code: parsed.code,
+            message: parsed.message,
             dataKeys: Object.keys(d).slice(0, 20),
             hasDash: !!dash,
             videoStreams: dash && Array.isArray(dash.video) ? dash.video.length : 0,
@@ -3586,19 +3612,56 @@ function listenerBilibiliDiag(details) {
             firstVideo: firstV ? {
                 id: firstV.id, codecs: firstV.codecs,
                 w: firstV.width, h: firstV.height,
-                host: baseUrlHost(firstV.baseUrl || firstV.base_url),
+                host: host(firstV.baseUrl || firstV.base_url),
                 hasBackup: Array.isArray(firstV.backupUrl || firstV.backup_url)
             } : null,
-            firstAudio: firstA ? { id: firstA.id, host: baseUrlHost(firstA.baseUrl || firstA.base_url) } : null,
-            firstDurl: Array.isArray(d.durl) && d.durl[0] ? { host: baseUrlHost(d.durl[0].url), size: d.durl[0].size } : null
+            firstAudio: firstA ? { id: firstA.id, host: host(firstA.baseUrl || firstA.base_url) } : null,
+            firstDurl: Array.isArray(d.durl) && d.durl[0] ? { host: host(d.durl[0].url), size: d.durl[0].size } : null
         });
     });
     return {};
 }
 
+// Also tap the main_frame document: many Bilibili players inline the streams
+// into a window.__playinfo__ blob in the page HTML (no playurl XHR fires).
+// This log tells us whether to extract from the doc or wait for an XHR.
+function listenerBilibiliPage(details) {
+    if (details.type !== "main_frame") return;
+    log("BILIBILI", "page intercepted", { url: details.url.slice(0, 100), tabId: details.tabId });
+    filterRumbleText(details, "BILIBILI page", (html) => {
+        const m = html.match(/window\.__playinfo__\s*=\s*(\{[\s\S]*?\})\s*<\/script>/);
+        log("BILIBILI", "page scan", {
+            bytes: html.length,
+            hasPlayinfo: !!m,
+            playinfoBytes: m ? m[1].length : 0,
+            hasInitialState: /window\.__INITIAL_STATE__/.test(html),
+            biliVideoUrls: (html.match(/https?:\/\/[^"'\\ ]*bilivideo\.(?:com|cn)[^"'\\ ]*/g) || []).length
+        });
+        if (m) {
+            const parsed = tryParseJson(m[1]);
+            if (parsed) {
+                const d = parsed.data || parsed;
+                log("BILIBILI", "playinfo shape", {
+                    code: parsed.code, hasDash: !!d.dash,
+                    videoStreams: d.dash?.video?.length || 0,
+                    audioStreams: d.dash?.audio?.length || 0,
+                    acceptQuality: d.accept_quality,
+                    firstVideoHost: d.dash?.video?.[0] ? (() => { try { return new URL(d.dash.video[0].baseUrl || d.dash.video[0].base_url).host; } catch { return null; } })() : null
+                });
+            }
+        }
+    });
+}
+
 browser.webRequest.onBeforeRequest.addListener(
     listenerBilibiliDiag,
-    { urls: BILIBILI_DIAG_PATTERNS, types: ["xmlhttprequest"] },
+    { urls: BILIBILI_API_PATTERNS, types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerBilibiliPage,
+    { urls: BILIBILI_PAGE_PATTERNS, types: ["main_frame"] },
     ["blocking"]
 );
 

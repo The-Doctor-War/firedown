@@ -3363,9 +3363,9 @@ async function emitRumbleHls(details, { hls, origin, title, author, thumb, durat
     sendNative(message);
 }
 
-// Buffer a Rumble JSON response, parse it, hand it to onParsed. Shared by the
-// embedJS (watch page) and service.php (shorts feed) listeners.
-function filterRumbleJson(details, label, onParsed) {
+// Buffer a Rumble response body and hand the decoded text to onText. Shared by
+// the JSON listeners (embedJS, service.php) and the shorts-page HTML reader.
+function filterRumbleText(details, label, onText) {
     let filter;
     try {
         filter = browser.webRequest.filterResponseData(details.requestId);
@@ -3385,11 +3385,18 @@ function filterRumbleJson(details, label, onParsed) {
         const buf = new Uint8Array(total);
         let offset = 0;
         for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
-        const parsed = tryParseJson(new TextDecoder("utf-8").decode(buf));
-        if (!parsed) { log("RUMBLE", `${label} not JSON`, { bytes: total }); return; }
-        Promise.resolve().then(() => onParsed(parsed));
+        Promise.resolve().then(() => onText(new TextDecoder("utf-8").decode(buf)));
     };
     filter.onerror = () => { try { filter.close(); } catch (_) {} };
+}
+
+// Parse a Rumble JSON response and hand it to onParsed.
+function filterRumbleJson(details, label, onParsed) {
+    filterRumbleText(details, label, (text) => {
+        const parsed = tryParseJson(text);
+        if (!parsed) { log("RUMBLE", `${label} not JSON`, { bytes: text.length }); return; }
+        onParsed(parsed);
+    });
 }
 
 // Watch page: embedJS request=video carries one focal video.
@@ -3464,16 +3471,25 @@ function emitRumbleFeedItem(details, item) {
     return false;
 }
 
-function emitRumbleShortsFeed(details, parsed) {
-    // shorts.feed nests the list under data.items[]; the watch-page video.full
-    // feed used data.videos[]. Accept either.
-    const list = Array.isArray(parsed?.data?.items) ? parsed.data.items
-        : (Array.isArray(parsed?.data?.videos) ? parsed.data.videos : []);
+// Locate the feed list across the shapes we've seen:
+//   service.php?name=shorts.feed → data.items[]
+//   shorts page inline <rum-shorts> blob → items[] (top level)
+//   watch-page video.full feed → data.videos[]
+function rumbleFeedList(parsed) {
+    if (Array.isArray(parsed?.data?.items)) return parsed.data.items;
+    if (Array.isArray(parsed?.items)) return parsed.items;
+    if (Array.isArray(parsed?.data?.videos)) return parsed.data.videos;
+    return [];
+}
+
+function emitRumbleShortsFeed(details, parsed, label) {
+    const list = rumbleFeedList(parsed);
+    if (list.length === 0) return;
     let emitted = 0;
     for (const item of list) {
         if (emitRumbleFeedItem(details, item)) emitted++;
     }
-    log("RUMBLE", `shorts.feed: ${emitted}/${list.length} item(s) emitted`);
+    log("RUMBLE", `${label}: ${emitted}/${list.length} item(s) emitted`);
 }
 
 function listenerRumbleService(details) {
@@ -3483,8 +3499,30 @@ function listenerRumbleService(details) {
     // a page's whole up-next lineup.
     if (!details.url.includes("name=shorts.feed")) return {};
     log("RUMBLE", "shorts.feed intercepted", { url: details.url.slice(0, 120), tabId: details.tabId });
-    filterRumbleJson(details, "shorts.feed", (parsed) => emitRumbleShortsFeed(details, parsed));
+    filterRumbleJson(details, "shorts.feed", (parsed) => emitRumbleShortsFeed(details, parsed, "shorts.feed"));
     return {};
+}
+
+// First short on a /shorts/ landing isn't fetched via service.php (the feed
+// starts at offset>0) — it's embedded in the page HTML inside a <rum-shorts>
+// element's <script type="application/json"> island ({items:[…]}, same item
+// shape). Read it from the main_frame response (network-level, like Threads).
+const RUMBLE_JSON_SCRIPT_RE = /<script\b[^>]*type="application\/json"[^>]*>([\s\S]*?)<\/script>/g;
+
+function listenerRumbleShortsPage(details) {
+    if (details.type !== "main_frame") return;
+    if (details.tabId >= 0) cacheTabUrl(details.url, details.tabId);
+    log("RUMBLE", "shorts page intercepted", { url: details.url.slice(0, 100), tabId: details.tabId });
+    filterRumbleText(details, "shorts page", (html) => {
+        let m;
+        RUMBLE_JSON_SCRIPT_RE.lastIndex = 0;
+        while ((m = RUMBLE_JSON_SCRIPT_RE.exec(html)) !== null) {
+            const parsed = tryParseJson(m[1]);
+            if (parsed && rumbleFeedList(parsed).length > 0) {
+                emitRumbleShortsFeed(details, parsed, "shorts page");
+            }
+        }
+    });
 }
 
 browser.webRequest.onBeforeRequest.addListener(
@@ -3496,6 +3534,12 @@ browser.webRequest.onBeforeRequest.addListener(
 browser.webRequest.onBeforeRequest.addListener(
     listenerRumbleService,
     { urls: ["*://rumble.com/service.php*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerRumbleShortsPage,
+    { urls: ["*://rumble.com/shorts/*"], types: ["main_frame"] },
     ["blocking"]
 );
 

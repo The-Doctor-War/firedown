@@ -3544,6 +3544,65 @@ browser.webRequest.onBeforeRequest.addListener(
 );
 
 // ============================================================================
+// Bilibili — DIAGNOSTIC ONLY (no emit yet)
+// ----------------------------------------------------------------------------
+// We have the metadata call (x/web-interface/view) but never the playurl
+// response that carries the streams. This temporary listener logs every
+// Bilibili API hit and dumps the playurl response shape (dash vs durl, stream
+// counts, quality list, the CDN host) so we can build the real parser against
+// the actual bytes the device receives (mobile site, logged-out). Remove once
+// the parser is written.
+// ============================================================================
+
+const BILIBILI_DIAG_PATTERNS = [
+    "*://api.bilibili.com/*playurl*",
+    "*://api.bilibili.com/x/web-interface/view*",
+    "*://api.bilibili.com/pgc/view/*"
+];
+
+function listenerBilibiliDiag(details) {
+    if (isOwnRequest(details.url)) return {};
+    log("BILIBILI", "api hit", { url: details.url.slice(0, 170), type: details.type });
+    if (!details.url.includes("playurl")) return {};
+
+    filterRumbleText(details, "BILIBILI playurl", (text) => {
+        const parsed = tryParseJson(text);
+        if (!parsed) { log("BILIBILI", "playurl not JSON", { bytes: text.length, head: text.slice(0, 80) }); return; }
+        // Mainline uses data{}; bangumi/pgc uses result{}.
+        const d = parsed.data || parsed.result || {};
+        const dash = d.dash;
+        const firstV = dash && Array.isArray(dash.video) ? dash.video[0] : null;
+        const firstA = dash && Array.isArray(dash.audio) ? dash.audio[0] : null;
+        const baseUrlHost = (u) => { try { return new URL(u).host; } catch { return null; } };
+        log("BILIBILI", "playurl shape", {
+            code: parsed.code,
+            dataKeys: Object.keys(d).slice(0, 20),
+            hasDash: !!dash,
+            videoStreams: dash && Array.isArray(dash.video) ? dash.video.length : 0,
+            audioStreams: dash && Array.isArray(dash.audio) ? dash.audio.length : 0,
+            durlSegments: Array.isArray(d.durl) ? d.durl.length : 0,
+            acceptQuality: d.accept_quality,
+            acceptDescription: d.accept_description,
+            firstVideo: firstV ? {
+                id: firstV.id, codecs: firstV.codecs,
+                w: firstV.width, h: firstV.height,
+                host: baseUrlHost(firstV.baseUrl || firstV.base_url),
+                hasBackup: Array.isArray(firstV.backupUrl || firstV.backup_url)
+            } : null,
+            firstAudio: firstA ? { id: firstA.id, host: baseUrlHost(firstA.baseUrl || firstA.base_url) } : null,
+            firstDurl: Array.isArray(d.durl) && d.durl[0] ? { host: baseUrlHost(d.durl[0].url), size: d.durl[0].size } : null
+        });
+    });
+    return {};
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerBilibiliDiag,
+    { urls: BILIBILI_DIAG_PATTERNS, types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+// ============================================================================
 // Facebook
 // ----------------------------------------------------------------------------
 // Mirrors the Instagram pattern: filter the GraphQL response inline with

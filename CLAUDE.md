@@ -14,7 +14,7 @@ bundled as assets and loaded via `GeckoRuntimeHelper.registerBuiltIn(...)`
 
 | dir           | id                       | role |
 |---------------|--------------------------|------|
-| `parser/`     | `parser@solarized.dev`   | Per-site parsers (Twitter/X, Instagram, Threads, Facebook, Vimeo, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok). Emits download entries **with metadata** (title, author, thumbnail, duration, multiple quality variants). |
+| `parser/`     | `parser@solarized.dev`   | Per-site parsers (Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok). Emits download entries **with metadata** (title, author, thumbnail, duration, multiple quality variants). |
 | `webrequests/`| `downloader@solarized.dev` | **Generic** catch-all. Captures any media URL (`.mp4`, `.m3u8`, `.mpd`, …) seen on the wire. Has **no rich metadata** — just the URL + whatever `og:`/JSON-LD the content script scrapes. |
 | `youtube/`    | `youtube@solarized.dev`  | YouTube (separate; uses `PoTokenGenerator` on the Java side). |
 | `ublock/`     | uBlock Origin            | Ad blocking. |
@@ -47,8 +47,18 @@ Consequences when working on a parser:
   - Instagram/Threads → `instagram.*\.mp4`
   - Twitter/X → `video\.twimg\.com.*\.(mp4|m4s|m3u8)`
   - Rumble → `rumble\.com\/hls-vod\/.*\.m3u8` (the HLS master the parser emits)
+  - Bilibili.tv → `upos-.*(bilivideo\.com|akamaized\.net)\/iupxcodeboss\/.*\.m4s`
   Pick the pattern that matches exactly what the parser emits (and the segments
   the player fetches for it), but is narrow enough not to swallow unrelated media.
+
+Some parsers read the page's own JS state instead of a network response —
+**Bilibili.tv** is the example: the play page SSR-inlines the playurl into
+`window.__initialState` (a devalue IIFE) and fires no playurl XHR, so a
+page-world inject (`bilibili-tv-inject.js`, loaded as a moz-extension WAR to
+bypass CSP — the TikTok pattern) reads `player.playUrl.dash.{video,audio}` and
+emits the two whole-track `.m4s` baseUrls (DASH SegmentBase — each baseUrl is
+one complete track byte-range-fetched, *not* a segment list) as video+audio
+variants, which `FFmpegMergeStrategy` muxes natively (no ffmpeg.wasm).
 - **Do not** "fix" a missing capture by removing/bypassing the regex block so
   the generic catcher grabs it. That reintroduces the duplicate and drops
   metadata. Fix the **parser** instead.

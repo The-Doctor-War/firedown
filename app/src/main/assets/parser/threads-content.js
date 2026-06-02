@@ -47,8 +47,10 @@
     }
 
     function walkMediaItems(node, onItem, depth, seen, counter) {
-        if (!node || typeof node !== "object" || depth > 14) return;
-        if (counter.visited++ > 5000) return;
+        // Threads Relay payloads put video_versions at depth ~16-22; a cap of
+        // 14 returned before reaching it. See background.js walkThreadsMediaItems.
+        if (!node || typeof node !== "object" || depth > 40) return;
+        if (counter.visited++ > 50000) return;
         if (seen.has(node)) return;
         seen.add(node);
         if (isMediaItem(node)) onItem(node);

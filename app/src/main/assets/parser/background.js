@@ -3148,8 +3148,12 @@ function isThreadsMediaItem(obj) {
 }
 
 function walkThreadsMediaItems(node, onItem, depth, seen, counter) {
-    if (!node || typeof node !== "object" || depth > 14) return;
-    if (counter.visited++ > 5000) return;
+    // Threads Relay payloads nest the media item deep: require[..].__bbox
+    // .require[..].__bbox.result.data… puts video_versions at depth ~16-22 in
+    // a single-post page. A depth cap of 14 (and a 5000-node budget) returned
+    // before reaching it — the doc had the video but the walk never saw it.
+    if (!node || typeof node !== "object" || depth > 40) return;
+    if (counter.visited++ > 50000) return;
     if (seen.has(node)) return;
     seen.add(node);
     if (isThreadsMediaItem(node)) onItem(node);

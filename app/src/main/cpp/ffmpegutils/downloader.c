@@ -1675,6 +1675,27 @@ int jni_downloader_start(JNIEnv *env, jobject thiz, jobjectArray jurls, jobjectA
         goto end;
     }
 
+    /* Stop arrived during set_data_source — bail BEFORE setting
+     * read_thread_created. set_data_source's interrupt-bail path goes to its
+     * `error:` label without assigning `err`, so it returns 0; the `ret < 0`
+     * check above misses it. If we then mark the read thread alive and skip
+     * downloader_read (the original `interrupt || downloader_read(...)`
+     * short-circuit), nothing clears read_thread_created → jni_downloader_dealloc's
+     * threads_free waits on cond_queue forever for a thread that never ran.
+     * That's the Stop/Delete hang on HLS downloads.
+     *
+     * The race the read_thread_created=TRUE-under-mutex_operation guard was
+     * written to close (dealloc seeing FALSE between unlock and downloader_read
+     * entry, then freeing state out from under us) is still closed: we only
+     * unlock mutex_operation in this bail branch, and we don't touch any of
+     * the state dealloc would race to free. */
+    if (downloader->interrupt) {
+        LOGE(2, "jni_downloader_start interrupted before read");
+        pthread_mutex_unlock(&downloader->mutex_operation);
+        ret = -ERROR_COULD_NOT_READ;
+        goto end;
+    }
+
     /* [BUG FIX] Mark the read thread alive BEFORE releasing
      * mutex_operation, mirroring how muxing_thread_created is set
      * before pthread_create.
@@ -1698,7 +1719,10 @@ int jni_downloader_start(JNIEnv *env, jobject thiz, jobjectArray jurls, jobjectA
 
     pthread_mutex_unlock(&downloader->mutex_operation);
 
-    if (downloader->interrupt || downloader_read(downloader) < 0) {
+    /* downloader_read clears read_thread_created on exit (under mutex,
+     * with a cond_broadcast), so dealloc's wait will wake. If an interrupt
+     * is already set on entry it goes straight to its exit path. */
+    if (downloader_read(downloader) < 0) {
         LOGE(2, "jni_downloader_start read error");
         ret = -ERROR_COULD_NOT_READ;
         goto end;

@@ -3083,6 +3083,145 @@ browser.cookies.onChanged.addListener(async (changeInfo) => {
 });
 
 // ============================================================================
+// Threads
+// ----------------------------------------------------------------------------
+// Same backend as Instagram, same item shape (video_versions, image_versions2,
+// carousel_media, user.username, code, media_type, caption). Difference is
+// that a Threads post page ships its data inline in the SSR HTML inside
+// <script data-sjs> blobs (RelayPrefetchedStreamCache / "__bbox" pattern)
+// rather than via a separate JSON API we can filter. So we intercept the
+// document response, parse each data-sjs script, walk it for IG-shaped media
+// items, and hand them to sendInstagramItem with a threads.com origin
+// override so the download UI groups under the right post URL.
+// ============================================================================
+
+const THREADS_PAGE_PATTERNS = [
+    "*://www.threads.com/@*/post/*",
+    "*://www.threads.net/@*/post/*"
+];
+
+function extractThreadsUsernameFromUrl(url) {
+    const m = url.match(/threads\.(?:com|net)\/@([A-Za-z0-9._]+)\/post\//);
+    return m?.[1] || null;
+}
+
+// Heuristic: is this object an IG-shaped media item with playable video?
+// Either a single video (video_versions present) or a carousel containing at
+// least one video slide. Image-only carousels return false so we don't waste
+// a sendInstagramItem call on them.
+function isThreadsMediaItem(obj) {
+    if (!obj || typeof obj !== "object") return false;
+    if (Array.isArray(obj.video_versions) && obj.video_versions.length > 0) return true;
+    if (Array.isArray(obj.carousel_media)
+        && obj.carousel_media.some(m => Array.isArray(m?.video_versions) && m.video_versions.length > 0)) {
+        return true;
+    }
+    return false;
+}
+
+// Depth-capped recursive walk over a parsed data-sjs JSON blob. The Relay
+// payloads on Threads can be deeply nested (BBox wrappers, edges, fragments),
+// so we cap depth and node count the same way collectFacebookVideos does.
+function walkThreadsMediaItems(node, onItem, depth, seen, counter) {
+    if (!node || typeof node !== "object" || depth > 14) return;
+    if (counter.visited++ > 5000) return;
+    if (seen.has(node)) return;
+    seen.add(node);
+    if (isThreadsMediaItem(node)) onItem(node);
+    if (Array.isArray(node)) {
+        for (const v of node) walkThreadsMediaItems(v, onItem, depth + 1, seen, counter);
+    } else {
+        for (const k in node) walkThreadsMediaItems(node[k], onItem, depth + 1, seen, counter);
+    }
+}
+
+// The same media item is inlined multiple times in the SSR payload — once as
+// a canonical record (with user + caption + duration + thumbnails) and once
+// or more as lean Relay fragments that carry only video_versions. A naive
+// first-write-wins dedup picks the lean fragment and we lose the metadata.
+// Score by populated fields and keep the richest candidate per code.
+function threadsItemRichness(item) {
+    let score = 0;
+    if (item?.user?.username) score += 2;
+    if (item?.caption?.text) score += 1;
+    if (item?.video_duration) score += 1;
+    if (item?.image_versions2?.candidates?.length) score += 1;
+    if (Array.isArray(item?.carousel_media) && item.carousel_media.length) score += 1;
+    return score;
+}
+
+function processThreadsHtml(details, html, pageUrl) {
+    const sjsRegex = /<script[^>]*data-sjs[^>]*>([\s\S]*?)<\/script>/g;
+    const fallbackUser = extractThreadsUsernameFromUrl(pageUrl);
+    // We don't filter by the URL's post code: a Threads post that quotes or
+    // reposts another user's video shows that other post's media inline, so
+    // the focal code in the URL (the wrapper post) won't match the code of
+    // the embedded media item. Collect every video item we find, keep the
+    // richest record per code, then emit.
+    const bestByCode = new Map();
+    let scriptCount = 0;
+    let match;
+    while ((match = sjsRegex.exec(html)) !== null) {
+        scriptCount++;
+        const parsed = tryParseJson(match[1]);
+        if (!parsed) continue;
+        walkThreadsMediaItems(parsed, (item) => {
+            const code = item.code;
+            if (!code) return;
+            const prev = bestByCode.get(code);
+            if (!prev || threadsItemRichness(item) > threadsItemRichness(prev)) {
+                bestByCode.set(code, item);
+            }
+        }, 0, new WeakSet(), { visited: 0 });
+    }
+    for (const [code, item] of bestByCode) {
+        const username = item.user?.username || fallbackUser || "unknown";
+        const origin = `https://www.threads.com/@${username}/post/${code}`;
+        sendInstagramItem(details, item, origin);
+    }
+    log("THREADS", `scanned ${scriptCount} data-sjs script(s), emitted ${bestByCode.size} item(s)`,
+        { url: pageUrl.slice(0, 120) });
+}
+
+function listenerThreadsPage(details) {
+    if (details.type !== "main_frame") return;
+    if (details.tabId >= 0) cacheTabUrl(details.url, details.tabId);
+
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log("THREADS", "filter create failed", { error: e.message });
+        return;
+    }
+
+    const chunks = [];
+    filter.ondata = (event) => {
+        chunks.push(new Uint8Array(event.data));
+        filter.write(event.data); // pass through unmodified
+    };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) return;
+        const combined = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
+        const html = new TextDecoder("utf-8").decode(combined);
+        Promise.resolve().then(() => processThreadsHtml(details, html, details.url));
+    };
+    filter.onerror = () => {
+        try { filter.close(); } catch (_) {}
+    };
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerThreadsPage,
+    { urls: THREADS_PAGE_PATTERNS, types: ["main_frame"] },
+    ["blocking"]
+);
+
+// ============================================================================
 // Facebook
 // ----------------------------------------------------------------------------
 // Mirrors the Instagram pattern: filter the GraphQL response inline with

@@ -3,16 +3,20 @@
 // Threads runs on Instagram's backend and embeds the same media item shape
 // (video_versions / image_versions2 / carousel_media / user.username / code /
 // caption) directly in the post page's SSR HTML, inside <script data-sjs>
-// Relay-prefetch blobs. We read those blobs from the DOM here rather than
-// filtering the main_frame response in the background: GeckoView does not
-// reliably hand back a response filter for the top-level document, and the
-// rest of this extension reads page *content* from a content script (the same
-// way TikTok does) while background webRequest listeners only ever touch URLs.
+// Relay-prefetch blobs.
 //
-// A content script runs in an isolated world but has full read access to the
-// page DOM and is unaffected by the page's CSP, so we can read the inline
-// scripts without any page-world injection (unlike TikTok, which needs the
-// moz-extension inject to observe the page's own fetch traffic).
+// We re-fetch the post HTML rather than reading the DOM. By the time a content
+// script runs, Meta's bootstrap (ServerJSPayloadListener.process) has already
+// consumed the data-sjs scripts: the <script> tags stay in the DOM but their
+// text content is emptied, so a DOM read finds the tags and zero payload. A
+// same-origin fetch of the post URL returns a fresh server-rendered response
+// with the blobs intact. (We can't use filterResponseData on the main_frame
+// either — GeckoView doesn't deliver a filter for the top-level document, the
+// reason this lives in a content script at all.)
+//
+// A content script is the right home for the fetch: it carries the page's
+// cookies/credentials, is same-origin so no CORS, and is unaffected by the
+// page CSP.
 (() => {
     'use strict';
 
@@ -21,14 +25,11 @@
     browser.runtime.sendNativeMessage("parser", { kind: "get-debug-flag" })
         .then(r => { DEBUG = r === true; }, () => {});
 
-    function tryParseJson(str) {
-        try { return JSON.parse(str); } catch { return null; }
-    }
+    const POST_URL_RE = /threads\.(?:com|net)\/@([A-Za-z0-9._]+)\/post\/([A-Za-z0-9_-]+)/;
+    function isPostUrl(url) { return POST_URL_RE.test(url || ""); }
+    function usernameFromUrl(url) { const m = (url || "").match(POST_URL_RE); return m?.[1] || null; }
 
-    function usernameFromUrl(url) {
-        const m = (url || "").match(/threads\.(?:com|net)\/@([A-Za-z0-9._]+)\/post\//);
-        return m?.[1] || null;
-    }
+    function tryParseJson(str) { try { return JSON.parse(str); } catch { return null; } }
 
     // Is this object an IG-shaped media item with a playable video? Either a
     // single video (video_versions present) or a carousel with >=1 video slide.
@@ -71,15 +72,22 @@
         return score;
     }
 
-    function extractItems() {
-        const fallbackUser = usernameFromUrl(location.href);
-        const scripts = document.querySelectorAll('script[type="application/json"][data-sjs]');
+    // Match any <script data-sjs> regardless of attribute order; non-JSON
+    // blobs just fail the parse and are skipped.
+    const SJS_RE = /<script[^>]*\bdata-sjs\b[^>]*>([\s\S]*?)<\/script>/g;
+
+    function extractFromHtml(html, pageUrl) {
+        const fallbackUser = usernameFromUrl(pageUrl);
         // We do NOT filter by the URL's post code: a Threads post that quotes
         // or reposts another user's video shows that other post's media inline,
         // so the wrapper code in the URL won't match the embedded media's code.
         const bestByCode = new Map();
-        for (const s of scripts) {
-            const parsed = tryParseJson(s.textContent);
+        let scriptCount = 0;
+        let m;
+        SJS_RE.lastIndex = 0;
+        while ((m = SJS_RE.exec(html)) !== null) {
+            scriptCount++;
+            const parsed = tryParseJson(m[1]);
             if (!parsed) continue;
             walkMediaItems(parsed, (item) => {
                 const code = item.code;
@@ -94,42 +102,51 @@
             const username = item.user?.username || fallbackUser || "unknown";
             out.push({ item, origin: `https://www.threads.com/@${username}/post/${code}` });
         }
-        log(`scanned ${scripts.length} data-sjs script(s), found ${out.length} item(s)`);
+        log(`scanned ${scriptCount} data-sjs script(s), found ${out.length} item(s)`);
         return out;
     }
 
-    function scanAndSend() {
-        const items = extractItems();
-        if (items.length === 0) return false;
+    const fetchedUrls = new Set();
+
+    async function scanUrl(url) {
+        if (!isPostUrl(url) || fetchedUrls.has(url)) return;
+        fetchedUrls.add(url);
+        let html;
+        try {
+            // credentials:include so the SSR response matches the user's
+            // logged-in state; Accept:text/html so the server renders the
+            // full page rather than a partial/JSON variant.
+            const res = await fetch(url, {
+                credentials: "include",
+                headers: { "Accept": "text/html" }
+            });
+            html = await res.text();
+        } catch (e) {
+            fetchedUrls.delete(url); // allow a retry on the next mutation tick
+            log("fetch failed", e.message);
+            return;
+        }
+        const items = extractFromHtml(html, url);
+        if (items.length === 0) return;
         browser.runtime.sendMessage({
             type: "threads_intercept",
-            payload: { items, url: location.href }
+            payload: { items, url }
         }).catch(() => {});
-        return true;
     }
 
-    // The blobs are in the initial SSR HTML, so a single pass at idle catches
-    // direct loads. Threads is also an SPA: client-side navigation swaps the
-    // post without a fresh document load and injects new data-sjs scripts, so
-    // re-scan on URL changes and on DOM growth (debounced), deduped in the
-    // background by origin (sendVariants' alreadySent layer).
+    // Direct load: scan the current URL. Threads is also an SPA — client-side
+    // navigation swaps the post without a document load — so watch for URL
+    // changes (debounced) and scan each new post URL once.
     function start() {
-        scanAndSend();
+        scanUrl(location.href);
 
         let lastUrl = location.href;
         let debounce = null;
-        const rescan = () => {
-            clearTimeout(debounce);
-            debounce = setTimeout(scanAndSend, 400);
-        };
-
         const mo = new MutationObserver(() => {
-            if (location.href !== lastUrl) {
-                lastUrl = location.href;
-                rescan();
-            } else {
-                rescan();
-            }
+            if (location.href === lastUrl) return;
+            lastUrl = location.href;
+            clearTimeout(debounce);
+            debounce = setTimeout(() => scanUrl(location.href), 300);
         });
         mo.observe(document.documentElement, { childList: true, subtree: true });
     }

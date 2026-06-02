@@ -3438,8 +3438,8 @@ function emitRumbleShortsFeed(details, parsed) {
     if (list[0] && typeof list[0] === "object") {
         const it = list[0];
         log("RUMBLE", "shorts.feed item0", {
-            keys: Object.keys(it).slice(0, 40),
             title: it.title, by: it.by?.name, dur: it.duration,
+            videos: JSON.stringify(it.videos)?.slice(0, 400),
             hls: rumbleFeedItemHls(it)?.slice(0, 70)
         });
     }

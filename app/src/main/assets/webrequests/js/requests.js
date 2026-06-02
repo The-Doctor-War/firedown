@@ -342,10 +342,12 @@ function validateAndClassify(data) {
   const interesting = isInteresting(url, type);
 
   // TEMP diagnostic (Rumble shorts "same title" investigation): show every
-  // rumble.com request the generic catcher sees, its type, whether the regex
-  // block catches it, and the page it came from. If blocked=false on a media
-  // URL, the generic catcher will grab it and label it with the page title.
-  if (DEBUG && url.includes('rumble.com')) {
+  // Rumble-family request the generic catcher sees (rumble.com AND the CDN
+  // hosts rumble.cloud / rmbl.ws where shorts media actually streams), its
+  // type, whether the regex block catches it, and the page it came from. If
+  // blocked=false on a media URL, the generic catcher grabs it and labels it
+  // with the page title.
+  if (DEBUG && /rumble\.(com|cloud)|rmbl\.ws/.test(url)) {
     console.log('[req] RUMBLE-DIAG classify', url.slice(0, 130),
       'type=', type, 'blocked=', RegexMap.matchInRegex(url), 'doc=', data.documentUrl);
   }
@@ -611,9 +613,9 @@ async function processResponse(data, listenerName) {
   }
 
   // TEMP diagnostic (Rumble shorts): what the generic catcher forwards for a
-  // rumble.com URL and the name/title it attached from page metadata — a stale
-  // page title here is the "all shorts share one title" symptom.
-  if (DEBUG && data.url.includes('rumble.com')) {
+  // Rumble-family URL and the name/title it attached from page metadata — a
+  // stale page title here is the "all shorts share one title" symptom.
+  if (DEBUG && /rumble\.(com|cloud)|rmbl\.ws/.test(data.url)) {
     console.log('[req] RUMBLE-DIAG forward', data.url.slice(0, 130),
       'name=', message.name, 'desc=', (message.description || '').slice(0, 60));
   }

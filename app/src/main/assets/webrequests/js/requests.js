@@ -601,6 +601,24 @@ async function processResponse(data, listenerName) {
     }
   }
 
+  // Backfill a Referer for media downloads that lack one. Some CDNs —
+  // notably Bilibili's upos/bilivideo (incl. its akamaized.net mirrors) —
+  // serve exactly the first ~1 MiB then cut the connection ("unexpected end
+  // of stream") when the request has no Referer. The cross-site <video> fetch
+  // we captured usually had its Referer stripped by the page's referrer-policy,
+  // so the captured headers carry Origin but no Referer. Use the page URL as
+  // Referer — the same value sanitizeHeadersForPage injects for cached headers.
+  // Only added when absent, so sites that supplied their own Referer are
+  // untouched.
+  if ((data.type === 'media' || data.type === 'object') && Array.isArray(message.requestHeaders)) {
+    const pageUrl = data.documentUrl || data.originUrl;
+    const hasReferer = message.requestHeaders.some((h) => h.name.toLowerCase() === 'referer');
+    if (pageUrl && !hasReferer) {
+      message.requestHeaders = message.requestHeaders.concat([{ name: 'Referer', value: pageUrl }]);
+      dlog('referer-backfill', data.url, `referer=${pageUrl}`);
+    }
+  }
+
   if (interesting) {
     const hdrCount = (message.requestHeaders || []).length;
     dlog('forward', data.url, `tabId=${tabId} type=${data.type} headers=${hdrCount} listener=${listenerName}`);

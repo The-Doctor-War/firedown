@@ -3428,28 +3428,19 @@ function rumbleFeedItemHls(item) {
 }
 
 function emitRumbleShortsFeed(details, parsed) {
-    const list = Array.isArray(parsed?.data?.videos) ? parsed.data.videos : [];
+    // shorts.feed nests the list under data.items[]; the watch-page video.full
+    // feed used data.videos[]. Accept either.
+    const list = Array.isArray(parsed?.data?.items) ? parsed.data.items
+        : (Array.isArray(parsed?.data?.videos) ? parsed.data.videos : []);
 
-    // TEMP diagnostic: shorts.feed envelope differs from the watch-page
-    // video.full feed (data.videos[] was empty). Dump the structure so we can
-    // see where the list actually lives — top keys, data keys, and any
-    // array-valued path under data with its length + first element's keys.
-    if (list.length === 0) {
-        const dataKeys = (parsed?.data && typeof parsed.data === "object") ? Object.keys(parsed.data) : null;
-        const arrays = [];
-        const data = parsed?.data;
-        if (data && typeof data === "object") {
-            for (const k of Object.keys(data)) {
-                const v = data[k];
-                if (Array.isArray(v)) {
-                    arrays.push(`data.${k}[${v.length}]${v[0] && typeof v[0] === "object" ? " keys=" + Object.keys(v[0]).slice(0, 12).join(",") : ""}`);
-                }
-            }
-        }
-        log("RUMBLE", "shorts.feed shape", {
-            topKeys: Object.keys(parsed || {}),
-            dataKeys,
-            dataArrays: arrays
+    // TEMP diagnostic: confirm the per-item metadata fields (title etc.) are
+    // where we expect before trusting the emit.
+    if (list[0] && typeof list[0] === "object") {
+        const it = list[0];
+        log("RUMBLE", "shorts.feed item0", {
+            keys: Object.keys(it).slice(0, 40),
+            title: it.title, by: it.by?.name, dur: it.duration,
+            hls: rumbleFeedItemHls(it)?.slice(0, 70)
         });
     }
 

@@ -3690,7 +3690,28 @@ async function emitNicoStream(details, id, contentUrl) {
         try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
 
-    const message = { url: contentUrl, type: "media", origin, tabId, request: details.requestId, incognito };
+    // delivery.domand validates Origin and a domand cookie on EVERY fetch
+    // (master / media playlist / segment / AES key). ffmpeg (FFmpegOkhttp)
+    // sends neither by default, so the streams 403 even though the URL is
+    // CloudFront-signed. Attach the page Origin/Referer and the cookies scoped
+    // to the content host so ffmpeg's per-request headers carry them.
+    let pageOrigin = "https://www.nicovideo.jp";
+    try { pageOrigin = new URL(origin).origin; } catch (e) {}
+    const requestHeaders = [
+        { name: "Origin", value: pageOrigin },
+        { name: "Referer", value: pageOrigin + "/" }
+    ];
+    try {
+        const cookies = await browser.cookies.getAll({ url: contentUrl });
+        if (cookies && cookies.length) {
+            requestHeaders.push({ name: "Cookie", value: cookies.map(c => `${c.name}=${c.value}`).join("; ") });
+            log("NICO", `attached ${cookies.length} domand cookie(s)`);
+        } else {
+            log("NICO", "no domand cookies found for content host");
+        }
+    } catch (e) { log("NICO", "cookie read failed", { error: e.message }); }
+
+    const message = { url: contentUrl, type: "media", origin, tabId, request: details.requestId, incognito, requestHeaders };
     if (meta.title) { message.description = meta.title; message.name = meta.title; }
     if (meta.img) message.img = meta.img;
     if (meta.durationMs > 0) message.duration = meta.durationMs;

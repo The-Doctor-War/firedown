@@ -44,6 +44,12 @@ const DEFAULT_PATTERNS = [
   'instagram.*\\.mp4',
   'instagram\\.com\\/(accounts\\/login|ajax)',
 
+  // Bilibili.tv — DASH .m4s tracks the parser emits (video+audio baseUrls on
+  // the upos/bilivideo bstar CDN). The generic catcher already drops bare .m4s,
+  // but block the iupxcodeboss path explicitly so the emitted baseUrls are
+  // never double-captured.
+  'upos-.*(bilivideo\\.com|akamaized\\.net)\\/iupxcodeboss\\/.*\\.m4s',
+
   // Dailymotion
   'dmcdn\\.net.*init\\.mp4',
   'dmcdn\\.net.*manifest\\.m3u8',

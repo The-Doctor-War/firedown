@@ -3544,6 +3544,52 @@ browser.webRequest.onBeforeRequest.addListener(
 );
 
 // ============================================================================
+// Bilibili.tv (international / bstation)
+// ----------------------------------------------------------------------------
+// The play page SSR-inlines the playurl into window.__initialState (a devalue
+// IIFE the page evaluates), and fires no separate playurl XHR — so a page-world
+// content script (bilibili-tv-content.js + bilibili-tv-inject.js) reads
+// player.playUrl.dash.{video[],audio[]} directly and posts the video+audio DASH
+// baseUrls here. Each rep's baseUrl is ONE complete .m4s track (DASH
+// SegmentBase, byte-range accessed) — not a segment list — so emitting
+// {url: video, audioUrl: audio} routes to FFmpegMergeStrategy, which muxes the
+// two whole-track files natively (FFmpegOkhttp does the range fetches). No
+// ffmpeg.wasm. Referer https://www.bilibili.tv/ is required by the upos/
+// bilivideo CDN; segments are .m4s which the generic catcher already drops, and
+// the regex.js block reinforces it for the emitted baseUrls.
+// ============================================================================
+
+browser.runtime.onMessage.addListener((message, sender) => {
+    if (message?.kind !== "bilibili-tv-streams") return;
+    const p = message.payload;
+    if (!p || !Array.isArray(p.variants) || p.variants.length === 0) return;
+
+    const tabId = sender.tab?.id ?? -1;
+    const details = {
+        tabId,
+        _resolvedTabId: tabId >= 0 ? tabId : undefined,
+        url: p.origin || sender.tab?.url || "",
+        requestId: `bilibili-tv-${Date.now()}`
+    };
+
+    // The upos/bilivideo CDN truncates without a Referer; attach the site one.
+    const requestHeaders = [{ name: "Referer", value: "https://www.bilibili.tv/" }];
+
+    log("BILIBILI-TV", `received ${p.variants.length} variant(s)`, {
+        title: p.title, origin: (p.origin || "").slice(0, 80), tabId
+    });
+
+    sendVariants(details, {
+        variants: p.variants,
+        origin: p.origin,
+        description: p.title,
+        name: p.title,
+        duration: p.durationMs > 0 ? p.durationMs : 0,
+        requestHeaders
+    });
+});
+
+// ============================================================================
 // Facebook
 // ----------------------------------------------------------------------------
 // Mirrors the Instagram pattern: filter the GraphQL response inline with

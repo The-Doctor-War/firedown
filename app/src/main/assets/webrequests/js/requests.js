@@ -609,7 +609,7 @@ async function processResponse(data, listenerName) {
   try {
     browser.runtime.sendNativeMessage('browser', message);
   } catch (e) {
-    console.warn('[req] sendNativeMessage failed:', e?.message);
+    if (DEBUG) console.warn('[req] sendNativeMessage failed:', e?.message);
   }
 }
 
@@ -688,7 +688,7 @@ browser.runtime.onMessage.addListener(async (msg, sender) => {
         detail: msg.detail || '',
       });
     } catch (e) {
-      console.warn('[req] wasm-unavailable forward failed:', e?.message);
+      if (DEBUG) console.warn('[req] wasm-unavailable forward failed:', e?.message);
     }
     return;
   }

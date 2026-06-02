@@ -1,3 +1,5 @@
+import { DEBUG } from './debug.js';
+
 /**
  * Handle cookie requests from the native app.
  * Returns the cookie header string via native messaging.
@@ -16,7 +18,7 @@ export async function handleCookieRequest(msg) {
             cookieHeader: cookieHeader
         };
     } catch (e) {
-        console.error("Cookie fetch failed:", e);
+        if (DEBUG) console.error("Cookie fetch failed:", e);
         return null;
     }
 }

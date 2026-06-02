@@ -6,7 +6,16 @@
 // (page title + meta description). Lives in the page context so it sees
 // JS-rendered titles that a server-side fetch wouldn't.
 
-console.log('[cs] loaded', location.href);
+// Debug flag, resolved from BuildConfig.DEBUG via the native bridge — every
+// log goes through clog() so release builds stay silent (CLAUDE.md "Logging
+// discipline"). A handful of boot-time logs land before the async reply, which
+// is fine: those simply don't print.
+let DEBUG = false;
+browser.runtime.sendNativeMessage('browser', { kind: 'get-debug-flag' })
+    .then(r => { DEBUG = (r === true); }, () => {});
+const clog = (...args) => { if (DEBUG) console.log(...args); };
+
+clog('[cs] loaded', location.href);
 
 // ---------------------------------------------------------------------------
 // WebAssembly unavailability detector
@@ -44,7 +53,7 @@ console.log('[cs] loaded', location.href);
       url: location.href,
       detail: String(detail).slice(0, 200),
     };
-    console.log('[cs] wasm-unavailable reporting', location.href, detail);
+    clog('[cs] wasm-unavailable reporting', location.href, detail);
     try {
       const r = browser.runtime.sendNativeMessage('browser', payload);
       if (r && r.catch) r.catch(() => fallback(payload));
@@ -132,20 +141,20 @@ console.log('[cs] loaded', location.href);
       s.onload = () => s.remove();
       (document.documentElement || document.head || document.body).appendChild(s);
     } catch (e) {
-      console.log('[cs] wasm probe injection failed:', e && e.message);
+      clog('[cs] wasm probe injection failed:', e && e.message);
     }
 
     // CSP-block detector: if the probe never signals within 1.5s, even the
     // external moz-extension script was refused — we'd need a deeper hook.
     setTimeout(() => {
       if (!probeRan) {
-        console.log('[cs] WASM-DEBUG: page-world probe DID NOT RUN within 1.5s on '
+        clog('[cs] WASM-DEBUG: page-world probe DID NOT RUN within 1.5s on '
           + location.href + ' — even the external web_accessible_resource script '
           + 'was blocked. Page CSP is rejecting moz-extension: scripts too.');
       }
     }, 1500);
   } else {
-    console.log('[cs] wasm enabled — skipping probe injection on', location.href);
+    clog('[cs] wasm enabled — skipping probe injection on', location.href);
   }
 })();
 
@@ -293,12 +302,12 @@ if (window === window.top) {
     if (pending.length === 0) return;
     const batch = pending;
     pending = [];
-    console.log('[cs] sending batch of', batch.length);
+    clog('[cs] sending batch of', batch.length);
     try {
       const p = browser.runtime.sendMessage({ kind: 'images-detected', urls: batch });
-      if (p && p.catch) p.catch((e) => console.log('[cs] send rejected:', e?.message));
+      if (p && p.catch) p.catch((e) => clog('[cs] send rejected:', e?.message));
     } catch (e) {
-      console.log('[cs] send threw:', e?.message);
+      clog('[cs] send threw:', e?.message);
     }
   }
 
@@ -379,5 +388,5 @@ if (window === window.top) {
     if (e.target && e.target.tagName === 'IMG') reportImg(e.target);
   }, true);
 
-  console.log('[cs] setup complete');
+  clog('[cs] setup complete');
 })();

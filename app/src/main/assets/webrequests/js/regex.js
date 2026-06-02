@@ -1,3 +1,5 @@
+import { DEBUG } from './debug.js';
+
 // Remote regex pattern list URL
 const REGEX_URL = 'https://raw.githubusercontent.com/solarizeddev/firedown-webrequests/main/regex-patterns.txt';
 const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // Refresh every 6 hours
@@ -106,7 +108,7 @@ async function refreshPatterns() {
   try {
     const res = await fetch(REGEX_URL, { cache: 'no-cache' });
     if (!res.ok) {
-      console.warn(`[regex] Remote fetch failed: ${res.status}`);
+      if (DEBUG) console.warn(`[regex] Remote fetch failed: ${res.status}`);
       return;
     }
     const text = await res.text();
@@ -114,10 +116,10 @@ async function refreshPatterns() {
     const newRegex = buildRegex(lines);
     if (newRegex) {
       combinedRegex = newRegex;
-      console.log(`[regex] Updated ${lines.filter(l => l.trim() && !l.trim().startsWith('#')).length} patterns from remote`);
+      if (DEBUG) console.log(`[regex] Updated ${lines.filter(l => l.trim() && !l.trim().startsWith('#')).length} patterns from remote`);
     }
   } catch (e) {
-    console.warn('[regex] Remote fetch error:', e.message);
+    if (DEBUG) console.warn('[regex] Remote fetch error:', e.message);
   }
 }
 

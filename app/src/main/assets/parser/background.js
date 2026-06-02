@@ -3089,19 +3089,149 @@ browser.cookies.onChanged.addListener(async (changeInfo) => {
 // carousel_media, user.username, code, media_type, caption). Difference is
 // that a Threads post page ships its data inline in the SSR HTML inside
 // <script data-sjs> blobs (RelayPrefetchedStreamCache / "__bbox" pattern)
-// rather than via a separate JSON API we can filter.
+// rather than via a separate JSON API.
 //
-// We read those blobs from a content script (threads-content.js), NOT via
-// filterResponseData on the main_frame: GeckoView does not reliably deliver
-// a response filter for the top-level document, and the rest of this
-// extension follows the same rule (every main_frame webRequest listener here
-// only reads the URL; page *content* is read by a content script, as TikTok
-// does). The content script walks the data-sjs JSON, picks the richest record
-// per post code, and sends each resolved item here. We hand them to
-// sendInstagramItem with a threads.com origin override so the download UI
-// groups under the right post URL.
+// Primary path: filterResponseData on the main_frame document. This taps the
+// raw network response as it streams from the server — the true server-render
+// (Sec-Fetch-Dest: document), with the video payload intact in the data-sjs
+// blobs. It is immune to the two failure modes that defeated everything else:
+//   - The page's bootstrap (ServerJSPayloadListener.process) consumes the
+//     inline data-sjs scripts the instant they parse, so reading the DOM from
+//     a content script — even at document_start with a MutationObserver — loses
+//     the race for the big (~200 KB) media blob: by our microtask its body is
+//     already a consumed, media-less JSON. The network filter never touches the
+//     DOM, so consumption is irrelevant.
+//   - A content-script fetch() of the URL can't set Sec-Fetch-Dest: document
+//     (forbidden header), so the server returns an emptied shell. The filter
+//     reads the genuine navigation response, so this doesn't arise.
+// (An earlier main_frame-filter attempt looked dead, but it had shipped without
+// a manifest version bump, so ensureBuiltIn never re-registered it — it was
+// never actually exercised.)
+//
+// Fallback path: the content-script message handler below. Kept for SPA
+// navigation, where Threads swaps posts client-side with no new main_frame
+// load for the filter to tap.
+//
+// Both paths hand items to sendInstagramItem with a threads.com origin
+// override so the download UI groups under the right post URL; origin dedup
+// (sendVariants' alreadySent) collapses any overlap between the two.
 // ============================================================================
 
+const THREADS_PAGE_PATTERNS = [
+    "*://www.threads.com/@*/post/*",
+    "*://www.threads.net/@*/post/*"
+];
+
+function extractThreadsUsernameFromUrl(url) {
+    const m = (url || "").match(/threads\.(?:com|net)\/@([A-Za-z0-9._]+)\/post\//);
+    return m?.[1] || null;
+}
+
+function isThreadsMediaItem(obj) {
+    if (!obj || typeof obj !== "object") return false;
+    if (Array.isArray(obj.video_versions) && obj.video_versions.length > 0) return true;
+    if (Array.isArray(obj.carousel_media)
+        && obj.carousel_media.some(m => Array.isArray(m?.video_versions) && m.video_versions.length > 0)) {
+        return true;
+    }
+    return false;
+}
+
+function walkThreadsMediaItems(node, onItem, depth, seen, counter) {
+    if (!node || typeof node !== "object" || depth > 14) return;
+    if (counter.visited++ > 5000) return;
+    if (seen.has(node)) return;
+    seen.add(node);
+    if (isThreadsMediaItem(node)) onItem(node);
+    if (Array.isArray(node)) {
+        for (const v of node) walkThreadsMediaItems(v, onItem, depth + 1, seen, counter);
+    } else {
+        for (const k in node) walkThreadsMediaItems(node[k], onItem, depth + 1, seen, counter);
+    }
+}
+
+// The same item is inlined several times — a canonical record (user + caption +
+// duration + thumbnails) and lean Relay fragments carrying only video_versions.
+// Keep the richest candidate per code so metadata isn't lost to a lean copy.
+function threadsItemRichness(item) {
+    let score = 0;
+    if (item?.user?.username) score += 2;
+    if (item?.caption?.text) score += 1;
+    if (item?.video_duration) score += 1;
+    if (item?.image_versions2?.candidates?.length) score += 1;
+    if (Array.isArray(item?.carousel_media) && item.carousel_media.length) score += 1;
+    return score;
+}
+
+// Parse all <script data-sjs> blobs out of a raw HTML string and emit the
+// richest media item per post code. Attribute order varies, so match any
+// data-sjs script and skip non-JSON bodies.
+function processThreadsHtml(details, html, pageUrl) {
+    const sjsRegex = /<script[^>]*\bdata-sjs\b[^>]*>([\s\S]*?)<\/script>/g;
+    const fallbackUser = extractThreadsUsernameFromUrl(pageUrl);
+    const bestByCode = new Map();
+    let scriptCount = 0;
+    let match;
+    while ((match = sjsRegex.exec(html)) !== null) {
+        scriptCount++;
+        const parsed = tryParseJson(match[1]);
+        if (!parsed) continue;
+        walkThreadsMediaItems(parsed, (item) => {
+            const code = item.code;
+            if (!code) return;
+            const prev = bestByCode.get(code);
+            if (!prev || threadsItemRichness(item) > threadsItemRichness(prev)) {
+                bestByCode.set(code, item);
+            }
+        }, 0, new WeakSet(), { visited: 0 });
+    }
+    log("THREADS", `doc filter: ${html.length} bytes, ${scriptCount} data-sjs script(s), ${bestByCode.size} item(s)`,
+        { url: pageUrl.slice(0, 120) });
+    for (const [code, item] of bestByCode) {
+        const username = item.user?.username || fallbackUser || "unknown";
+        sendInstagramItem(details, item, `https://www.threads.com/@${username}/post/${code}`);
+    }
+}
+
+function listenerThreadsPage(details) {
+    if (details.type !== "main_frame") return;
+    if (details.tabId >= 0) cacheTabUrl(details.url, details.tabId);
+
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log("THREADS", "doc filter create failed", { error: e.message });
+        return;
+    }
+
+    const chunks = [];
+    filter.ondata = (event) => {
+        chunks.push(new Uint8Array(event.data));
+        filter.write(event.data); // pass through unmodified
+    };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) { log("THREADS", "doc filter: 0 bytes"); return; }
+        const combined = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
+        const html = new TextDecoder("utf-8").decode(combined);
+        Promise.resolve().then(() => processThreadsHtml(details, html, details.url));
+    };
+    filter.onerror = () => {
+        try { filter.close(); } catch (_) {}
+    };
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerThreadsPage,
+    { urls: THREADS_PAGE_PATTERNS, types: ["main_frame"] },
+    ["blocking"]
+);
+
+// Fallback: content-script-delivered items (SPA navigation, see header).
 browser.runtime.onMessage.addListener((message, sender) => {
     if (message?.type !== "threads_intercept") return;
 

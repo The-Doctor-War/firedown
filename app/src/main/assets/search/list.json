@@ -1,5 +1,12 @@
 [
   {
+    "name": "Ecosia",
+    "url": "https://www.ecosia.org",
+    "suggestion": "https://ac.ecosia.org/?q=%s&type=list",
+    "method": "GET",
+    "search": "https://www.ecosia.org/search?q=%s"
+  },
+  {
     "name": "StartPage",
     "url": "https://startpage.com",
     "suggestion": "https://www.startpage.com/osuggestions?q=%s",

@@ -314,11 +314,11 @@ public class Preferences {
     public static final String SETTINGS_BLOCK_COOKIE_NOTICES = "com.solarized.firedown.preferences.ublock.block.cookie.notices";
     public static final boolean DEFAULT_BLOCK_COOKIE_NOTICES = false;
 
-    public static final String DEFAULT_SEARCH_ENGINE = "StartPage";
+    public static final String DEFAULT_SEARCH_ENGINE = "Ecosia";
 
-    public static final String DEFAULT_SEARCH_AUTOCOMPLETE = "https://www.startpage.com/suggestions?q=%s&format=opensearch&segment=startpage.defaultffx";
+    public static final String DEFAULT_SEARCH_AUTOCOMPLETE = "https://ac.ecosia.org/?q=%s&type=list";
 
-    public static final String DEFAULT_SEARCH_FORMAT = "https://www.startpage.com/do/dsearch?q=%s&cat=we";
+    public static final String DEFAULT_SEARCH_FORMAT = "https://www.ecosia.org/search?q=%s";
 
     public static final int DEFAULT_DOWNLOADS = 0;
 

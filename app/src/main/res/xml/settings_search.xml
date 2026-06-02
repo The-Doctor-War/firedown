@@ -2,6 +2,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.solarized.firedown.settings.ui.RadioButtonPreference
+        android:key="com.solarized.firedown.preferences.search.engine.ecosia"
+        android:title="Ecosia"
+        android:icon="@drawable/ic_ecosia_icon">
+    </com.solarized.firedown.settings.ui.RadioButtonPreference>
+
+
+    <com.solarized.firedown.settings.ui.RadioButtonPreference
         android:key="com.solarized.firedown.preferences.search.engine.duck"
         android:title="DuckDuckGo"
         android:icon="@drawable/ic_duckduckgo_icon">

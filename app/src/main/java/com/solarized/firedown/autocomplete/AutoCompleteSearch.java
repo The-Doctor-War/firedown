@@ -162,7 +162,7 @@ public class AutoCompleteSearch {
 
         // Optimized Switch using Java 17 syntax for readability
         switch (engine) {
-            case "Google", "StartPage", "Brave", "Bing", "Yandex" -> {
+            case "Google", "StartPage", "Brave", "Bing", "Yandex", "Ecosia" -> {
                 jsonArray = new JSONArray(response).optJSONArray(1);
                 processJsonArray(result, jsonArray, engine, format);
             }

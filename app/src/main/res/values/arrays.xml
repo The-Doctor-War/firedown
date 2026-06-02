@@ -99,6 +99,7 @@
     </string-array>
 
     <string-array name="settings_host">
+        <item>www.ecosia.org</item>
         <item>www.startpage.com</item>
         <item>www.dudckduckgo.com</item>
         <item>search.brave.com</item>
@@ -111,6 +112,7 @@
 
 
     <string-array name="settings_search">
+        <item>Ecosia</item>
         <item>StartPage</item>
         <item>DuckDuckGo</item>
         <item>Brave</item>
@@ -123,6 +125,7 @@
 
 
     <string-array name="settings_search_icon">
+        <item>@drawable/ic_ecosia_icon</item>
         <item>@drawable/ic_startpage_icon</item>
         <item>@drawable/ic_duckduckgo_icon</item>
         <item>@drawable/ic_brave_icon</item>
@@ -135,6 +138,7 @@
 
 
     <string-array name="settings_search_preference">
+        <item>com.solarized.firedown.preferences.search.engine.ecosia</item>
         <item>com.solarized.firedown.preferences.search.engine.startpage</item>
         <item>com.solarized.firedown.preferences.search.engine.duck</item>
         <item>com.solarized.firedown.preferences.search.engine.brave</item>

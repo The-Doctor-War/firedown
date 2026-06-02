@@ -3705,11 +3705,16 @@ function listenerNicoAccessHls(details) {
     log("NICO", "access-hls hit", { url: details.url.slice(0, 120), id, method: details.method, type: details.type });
     nicoFilterJson(details, "access-hls", (parsed) => {
         const contentUrl = parsed?.data?.contentUrl;
-        if (!contentUrl) {
-            // retries / error envelopes carry no contentUrl — show what we got
-            log("NICO", "access-hls: no contentUrl", {
+        // The endpoint is hit twice: the &__retry=0 POST returns a 238-byte
+        // "accept" envelope whose contentUrl is a bare query string
+        // ("?accepted=true&data=…") — NOT a playable URL — while the real POST
+        // (201) returns the absolute https://delivery.domand…m3u8 master.
+        // Require an absolute http(s) URL so we ignore the accept envelope and
+        // don't mark-sent on it (which would dedup-block the real one).
+        if (!contentUrl || !/^https?:\/\//i.test(contentUrl)) {
+            log("NICO", "access-hls: no usable contentUrl", {
                 status: parsed?.meta?.status,
-                dataKeys: parsed?.data ? Object.keys(parsed.data) : null
+                contentUrl: contentUrl ? String(contentUrl).slice(0, 40) : null
             });
             return;
         }

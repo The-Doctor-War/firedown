@@ -58,8 +58,6 @@
     "*://fb.watch/*",
     "*://rumble.com/*",
     "*://*.rumble.com/*",
-    "*://*.bilibili.com/*",
-    "*://api.bilibili.com/*",
     "*://*.x.com/*",
     "*://*.twitter.com/*",
     "*://*.vimeo.com/*",

@@ -3591,6 +3591,134 @@ browser.runtime.onMessage.addListener((message, sender) => {
 });
 
 // ============================================================================
+// Niconico (nicovideo.jp)
+// ----------------------------------------------------------------------------
+// Two passive response filters, no request replay / signing on our side:
+//   1. www.nicovideo.jp/api/watch/v3_guest/<id> (or /v3/) — the watch metadata.
+//      Cache title / duration / thumbnail keyed by video id.
+//   2. nvapi.nicovideo.jp/v1/watch/<id>/access-rights/hls (POST, 201) — the
+//      player mints the playable stream here; the response carries
+//      data.contentUrl: a CloudFront-signed (self-authorizing) AES-128 HLS
+//      master on delivery.domand. Emit it as a single `media` URL →
+//      FFmpegMuxStrategy, which (via FFmpegOkhttp) fetches the signed media
+//      playlists, encrypted .cmfv/.cmfa segments and AES .key and muxes. No
+//      Referer needed — the URL signature is the auth.
+// The regex.js block on delivery.domand .m3u8 keeps the generic catcher from
+// also grabbing the bare master.
+// ============================================================================
+
+const NICO_META_TTL = 5 * 60 * 1000;
+const nicoMeta = new Map(); // videoId -> { title, durationMs, img, ts }
+
+function nicoCacheMeta(id, meta) {
+    nicoMeta.set(id, { ...meta, ts: Date.now() });
+    if (nicoMeta.size > 50) {
+        const now = Date.now();
+        for (const [k, v] of nicoMeta) { if (now - v.ts > NICO_META_TTL) nicoMeta.delete(k); }
+    }
+}
+function nicoGetMeta(id) {
+    const m = id && nicoMeta.get(id);
+    if (!m) return null;
+    if (Date.now() - m.ts > NICO_META_TTL) { nicoMeta.delete(id); return null; }
+    return m;
+}
+
+function nicoFilterJson(details, label, onParsed) {
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log("NICO", `${label} filter create failed`, { error: e.message });
+        return;
+    }
+    const chunks = [];
+    filter.ondata = (event) => { chunks.push(new Uint8Array(event.data)); filter.write(event.data); };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) return;
+        const buf = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
+        const parsed = tryParseJson(new TextDecoder("utf-8").decode(buf));
+        if (parsed) Promise.resolve().then(() => onParsed(parsed));
+    };
+    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+}
+
+function nicoIdFromWatchApi(url) {
+    const m = url.match(/\/api\/watch\/v3(?:_guest)?\/([A-Za-z0-9]+)/);
+    return m ? m[1] : null;
+}
+function nicoIdFromAccess(url) {
+    const m = url.match(/\/v1\/watch\/([A-Za-z0-9]+)\/access-rights/);
+    return m ? m[1] : null;
+}
+
+function listenerNicoWatchApi(details) {
+    if (isOwnRequest(details.url)) return {};
+    const id = nicoIdFromWatchApi(details.url);
+    if (!id) return {};
+    nicoFilterJson(details, "watch-api", (parsed) => {
+        const v = parsed?.data?.video || {};
+        const thumb = v.thumbnail || {};
+        nicoCacheMeta(id, {
+            title: v.title || null,
+            durationMs: typeof v.duration === "number" ? v.duration * 1000 : 0,
+            img: thumb.largeUrl || thumb.url || thumb.middleUrl || undefined
+        });
+        log("NICO", "cached metadata", { id, title: v.title });
+    });
+    return {};
+}
+
+async function emitNicoStream(details, id, contentUrl) {
+    const origin = details.documentUrl || details.originUrl
+        || (id ? `https://www.nicovideo.jp/watch/${id}` : details.url);
+    if (alreadySent(origin)) { log("NICO", "already sent", { origin }); return; }
+    markSent(origin);
+
+    const meta = nicoGetMeta(id) || {};
+    const tabId = await resolveTabId(details);
+    let incognito = false;
+    if (tabId >= 0) {
+        try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
+    }
+
+    const message = { url: contentUrl, type: "media", origin, tabId, request: details.requestId, incognito };
+    if (meta.title) { message.description = meta.title; message.name = meta.title; }
+    if (meta.img) message.img = meta.img;
+    if (meta.durationMs > 0) message.duration = meta.durationMs;
+
+    log("NICO", "emitting HLS master", { origin, title: meta.title, hls: contentUrl.slice(0, 80) });
+    sendNative(message);
+}
+
+function listenerNicoAccessHls(details) {
+    if (isOwnRequest(details.url)) return {};
+    const id = nicoIdFromAccess(details.url);
+    nicoFilterJson(details, "access-hls", (parsed) => {
+        const contentUrl = parsed?.data?.contentUrl;
+        if (!contentUrl) return; // retries / error envelopes carry no contentUrl
+        emitNicoStream(details, id, contentUrl);
+    });
+    return {};
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerNicoWatchApi,
+    { urls: ["*://www.nicovideo.jp/api/watch/v3_guest/*", "*://www.nicovideo.jp/api/watch/v3/*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerNicoAccessHls,
+    { urls: ["*://nvapi.nicovideo.jp/v1/watch/*/access-rights/hls*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+// ============================================================================
 // Facebook
 // ----------------------------------------------------------------------------
 // Mirrors the Instagram pattern: filter the GraphQL response inline with

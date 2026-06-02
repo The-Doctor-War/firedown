@@ -50,6 +50,11 @@ const DEFAULT_PATTERNS = [
   // never double-captured.
   'upos-.*(bilivideo\\.com|akamaized\\.net)\\/iupxcodeboss\\/.*\\.m4s',
 
+  // Niconico — the parser emits the signed HLS master from access-rights/hls;
+  // block the delivery.domand playlists so the generic catcher doesn't also
+  // grab the bare master/media m3u8.
+  'delivery\\.domand\\.nicovideo\\.jp\\/.*\\.m3u8',
+
   // Dailymotion
   'dmcdn\\.net.*init\\.mp4',
   'dmcdn\\.net.*manifest\\.m3u8',

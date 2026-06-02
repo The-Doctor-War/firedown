@@ -3339,12 +3339,11 @@ const RUMBLE_EMBED_PATTERNS = [
     "*://*.rumble.com/embedJS/*"
 ];
 
-async function emitRumbleVideo(details, parsed) {
-    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
-    if (!hls) { log("RUMBLE", "embedJS had no HLS url"); return; }
-
-    const origin = parsed.l ? `https://rumble.com${parsed.l}`
-        : (details.documentUrl || details.originUrl || details.url);
+// Shared emit: one Rumble HLS master + metadata as a `media` download. ffmpeg
+// expands the master into selectable qualities. Deduped on origin (the watch
+// permalink), so repeated feed pages / re-fetches don't double-add.
+async function emitRumbleHls(details, { hls, origin, title, author, thumb, durationSec }) {
+    if (!hls || !origin) return;
     if (alreadySent(origin)) { log("RUMBLE", "already sent", { origin }); return; }
     markSent(origin);
 
@@ -3354,38 +3353,25 @@ async function emitRumbleVideo(details, parsed) {
         try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
 
-    const img = parsed.i || (Array.isArray(parsed.t) && parsed.t[0]?.i) || undefined;
-    const message = {
-        url: hls,
-        type: "media",
-        origin,
-        tabId,
-        request: details.requestId,
-        incognito
-    };
-    if (parsed.title) message.description = parsed.title;
-    if (parsed.author?.name) message.name = parsed.author.name;
-    if (img) message.img = img;
-    if (parsed.duration > 0) message.duration = Math.round(parsed.duration * 1000);
+    const message = { url: hls, type: "media", origin, tabId, request: details.requestId, incognito };
+    if (title) message.description = title;
+    if (author) message.name = author;
+    if (thumb) message.img = thumb;
+    if (durationSec > 0) message.duration = Math.round(durationSec * 1000);
 
-    log("RUMBLE", "emitting HLS master", { origin, title: parsed.title, hls: hls.slice(0, 80) });
+    log("RUMBLE", "emitting HLS", { origin, title, hls: hls.slice(0, 80) });
     sendNative(message);
 }
 
-function listenerRumbleEmbed(details) {
-    if (isOwnRequest(details.url)) return {};
-    // TEMP diagnostic (Rumble shorts): log every embedJS hit so we can see
-    // whether shorts fire request=video like watch pages or use another kind.
-    log("RUMBLE", "embedJS hit", { url: details.url.slice(0, 130), tabId: details.tabId });
-    // Only the video request carries player data; embedJS serves other kinds.
-    if (!details.url.includes("request=video")) return {};
-
+// Buffer a Rumble JSON response, parse it, hand it to onParsed. Shared by the
+// embedJS (watch page) and service.php (shorts feed) listeners.
+function filterRumbleJson(details, label, onParsed) {
     let filter;
     try {
         filter = browser.webRequest.filterResponseData(details.requestId);
     } catch (e) {
-        log("RUMBLE", "filter create failed", { error: e.message });
-        return {};
+        log("RUMBLE", `${label} filter create failed`, { error: e.message });
+        return;
     }
     const chunks = [];
     filter.ondata = (event) => {
@@ -3395,21 +3381,90 @@ function listenerRumbleEmbed(details) {
     filter.onstop = () => {
         filter.close();
         const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) { log("RUMBLE", "0 bytes"); return; }
-        const combined = new Uint8Array(total);
+        if (total === 0) { log("RUMBLE", `${label} 0 bytes`); return; }
+        const buf = new Uint8Array(total);
         let offset = 0;
-        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
-        const parsed = tryParseJson(new TextDecoder("utf-8").decode(combined));
-        if (!parsed) { log("RUMBLE", "response not JSON", { bytes: total }); return; }
-        Promise.resolve().then(() => emitRumbleVideo(details, parsed));
+        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
+        const parsed = tryParseJson(new TextDecoder("utf-8").decode(buf));
+        if (!parsed) { log("RUMBLE", `${label} not JSON`, { bytes: total }); return; }
+        Promise.resolve().then(() => onParsed(parsed));
     };
     filter.onerror = () => { try { filter.close(); } catch (_) {} };
+}
+
+// Watch page: embedJS request=video carries one focal video.
+function emitRumbleVideo(details, parsed) {
+    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
+    if (!hls) { log("RUMBLE", "embedJS had no HLS url"); return; }
+    const origin = parsed.l ? `https://rumble.com${parsed.l}`
+        : (details.documentUrl || details.originUrl || details.url);
+    const thumb = parsed.i || (Array.isArray(parsed.t) && parsed.t[0]?.i) || undefined;
+    emitRumbleHls(details, {
+        hls, origin, title: parsed.title, author: parsed.author?.name,
+        thumb, durationSec: parsed.duration
+    });
+}
+
+function listenerRumbleEmbed(details) {
+    if (isOwnRequest(details.url)) return {};
+    if (!details.url.includes("request=video")) return {};
+    log("RUMBLE", "embedJS request intercepted", { url: details.url.slice(0, 100), tabId: details.tabId });
+    filterRumbleJson(details, "embedJS", (parsed) => emitRumbleVideo(details, parsed));
+    return {};
+}
+
+// Shorts feed: rumble.com/service.php?name=shorts.feed&offset=&limit=… returns
+// a paginated list of shorts (video.full shape) as you scroll. Each item has
+// its OWN title / by.name / thumb / duration and an HLS playlist under
+// `videos[]`, so emitting per item gives correct per-short metadata — the
+// generic catcher would otherwise tag every short with the stale SPA page
+// title ("all shorts share one title"). We iterate the top-level feed list
+// only and do NOT recurse into an item's related_video sub-list (the request
+// asks for options=video.full,video.related_video).
+function rumbleFeedItemHls(item) {
+    const vids = Array.isArray(item?.videos) ? item.videos : [];
+    const hls = vids.find(v => v && typeof v.url === "string" && /\.m3u8(?:[?#]|$)/.test(v.url));
+    return hls?.url || null;
+}
+
+function emitRumbleShortsFeed(details, parsed) {
+    const list = Array.isArray(parsed?.data?.videos) ? parsed.data.videos : [];
+    let emitted = 0;
+    for (const item of list) {
+        const hls = rumbleFeedItemHls(item);
+        if (!hls || !item.title) continue;
+        const origin = item.url
+            || (item.relative_url ? `https://rumble.com${item.relative_url}` : null);
+        if (!origin) continue;
+        emitRumbleHls(details, {
+            hls, origin, title: item.title, author: item.by?.name,
+            thumb: item.thumb, durationSec: item.duration
+        });
+        emitted++;
+    }
+    log("RUMBLE", `shorts.feed: ${emitted}/${list.length} item(s) emitted`);
+}
+
+function listenerRumbleService(details) {
+    if (isOwnRequest(details.url)) return {};
+    // Only the shorts feed. The watch-page autoplay/related list uses the same
+    // service.php endpoint; scoping to name=shorts.feed keeps us from emitting
+    // a page's whole up-next lineup.
+    if (!details.url.includes("name=shorts.feed")) return {};
+    log("RUMBLE", "shorts.feed intercepted", { url: details.url.slice(0, 120), tabId: details.tabId });
+    filterRumbleJson(details, "shorts.feed", (parsed) => emitRumbleShortsFeed(details, parsed));
     return {};
 }
 
 browser.webRequest.onBeforeRequest.addListener(
     listenerRumbleEmbed,
     { urls: RUMBLE_EMBED_PATTERNS, types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerRumbleService,
+    { urls: ["*://rumble.com/service.php*"], types: ["xmlhttprequest"] },
     ["blocking"]
 );
 

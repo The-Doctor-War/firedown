@@ -3377,6 +3377,8 @@ function listenerRumbleEmbed(details) {
     // Only the video request carries player data; embedJS serves other kinds.
     if (!details.url.includes("request=video")) return {};
 
+    log("RUMBLE", "embedJS request intercepted", { url: details.url.slice(0, 100), tabId: details.tabId });
+
     let filter;
     try {
         filter = browser.webRequest.filterResponseData(details.requestId);

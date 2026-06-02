@@ -72,10 +72,10 @@ This section exists because a Threads bug took ~8 rounds that should have taken
    `GeckoRuntimeHelper` ~line 322). Release builds log nothing.
 
 2. **Read the logs by category.** `adb logcat -s GeckoConsole:*` then grep the
-   prefix: `TWITTER`, `INSTAGRAM`, `THREADS`, `FB-*`, `IG-*`, `TWITCH`, `KICK`,
-   `VIMEO`, `DAILYMOTION`, `TIKTOK`, `VARIANTS`, `DEDUP`, `NATIVE`. The generic
-   catcher logs under `[req]` (gated on its own `DEBUG`). Java-side variant
-   probing is `VariantProcessor`.
+   prefix: `TWITTER`, `INSTAGRAM`, `THREADS`, `THREADS-CS`, `FB-*`, `IG-*`,
+   `RUMBLE`, `TWITCH`, `KICK`, `VIMEO`, `DAILYMOTION`, `TIKTOK`, `VARIANTS`,
+   `DEDUP`, `NATIVE`. The generic catcher logs under `[req]` (gated on its own
+   `DEBUG`). Java-side variant probing is `VariantProcessor`.
 
 3. **Get a HAR of the failing case** (the user can export one). Find the
    request that actually carries the video/metadata — search response bodies
@@ -133,6 +133,23 @@ all*.
   content script) can all fire and, if origins differ, produce duplicate
   entries; origin-dedup (`sendVariants` `alreadySent`) only collapses identical
   origins.
+
+## Logging discipline
+
+**Every log statement — Java and JavaScript — must be gated behind the debug
+flag. No unconditional logging ships.**
+
+- **JavaScript (extensions):** never call `console.log`/`console.warn` directly.
+  Use the extension's `log(...)` helper, which early-returns unless `DEBUG` is
+  true. `DEBUG` is resolved at boot from the native `get-debug-flag` message,
+  which returns `BuildConfig.DEBUG` (`GeckoRuntimeHelper`). So a release build
+  logs nothing even though the JS contains `log(...)` calls. New parsers must
+  route all logging through `log(category, message, data?)` with a short
+  uppercase category (e.g. `RUMBLE`).
+- **Java:** wrap log calls in `if (BuildConfig.DEBUG) { … }` (or an equivalent
+  guarded helper). Do not leave bare `Log.d/​i/​w/​e` on hot paths in release.
+- Rationale: this is a privacy/no-telemetry app — logs can contain URLs, titles,
+  cookies-adjacent data. Release builds must be silent.
 
 ## Conventions
 

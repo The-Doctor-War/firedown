@@ -5,18 +5,24 @@
 // caption) directly in the post page's SSR HTML, inside <script data-sjs>
 // Relay-prefetch blobs.
 //
-// We re-fetch the post HTML rather than reading the DOM. By the time a content
-// script runs, Meta's bootstrap (ServerJSPayloadListener.process) has already
-// consumed the data-sjs scripts: the <script> tags stay in the DOM but their
-// text content is emptied, so a DOM read finds the tags and zero payload. A
-// same-origin fetch of the post URL returns a fresh server-rendered response
-// with the blobs intact. (We can't use filterResponseData on the main_frame
-// either — GeckoView doesn't deliver a filter for the top-level document, the
-// reason this lives in a content script at all.)
+// Two earlier approaches failed:
+//   1. filterResponseData on the main_frame — GeckoView doesn't deliver a
+//      response filter for the top-level document, listener never fired.
+//   2. Reading the DOM at document_idle — Meta's bootstrap
+//      (ServerJSPayloadListener.process) consumes the data-sjs scripts as soon
+//      as they're parsed: the <script> tags remain but their text content is
+//      emptied. By document_idle, all 49 scripts had empty bodies.
+//      Re-fetching the URL didn't help either: a JS fetch() can't set
+//      Sec-Fetch-Dest: document (the headers are forbidden), so the server
+//      treated it as a non-navigation request — same emptied shell back.
 //
-// A content script is the right home for the fetch: it carries the page's
-// cookies/credentials, is same-origin so no CORS, and is unaffected by the
-// page CSP.
+// This approach captures the script bodies during HTML parsing itself.
+// run_at: document_start lets us install a MutationObserver before any of the
+// page's own scripts run. As the HTML parser inserts each <script data-sjs>,
+// the observer's microtask fires (microtasks drain after each parser-step
+// "task", so between the data-sjs insertion and the bootstrap <script>
+// running). We snapshot textContent at that microtask — by the time bootstrap
+// scans for data-sjs scripts to consume, we already have our copy.
 (() => {
     'use strict';
 
@@ -26,13 +32,10 @@
         .then(r => { DEBUG = r === true; }, () => {});
 
     const POST_URL_RE = /threads\.(?:com|net)\/@([A-Za-z0-9._]+)\/post\/([A-Za-z0-9_-]+)/;
-    function isPostUrl(url) { return POST_URL_RE.test(url || ""); }
     function usernameFromUrl(url) { const m = (url || "").match(POST_URL_RE); return m?.[1] || null; }
 
     function tryParseJson(str) { try { return JSON.parse(str); } catch { return null; } }
 
-    // Is this object an IG-shaped media item with a playable video? Either a
-    // single video (video_versions present) or a carousel with >=1 video slide.
     function isMediaItem(obj) {
         if (!obj || typeof obj !== "object") return false;
         if (Array.isArray(obj.video_versions) && obj.video_versions.length > 0) return true;
@@ -43,8 +46,6 @@
         return false;
     }
 
-    // Depth/-node-capped recursive walk over a parsed data-sjs blob. The Relay
-    // payloads nest deeply (BBox wrappers, edges, fragments), so bound the work.
     function walkMediaItems(node, onItem, depth, seen, counter) {
         if (!node || typeof node !== "object" || depth > 14) return;
         if (counter.visited++ > 5000) return;
@@ -58,10 +59,6 @@
         }
     }
 
-    // The same media item is inlined several times — once as a canonical
-    // record (user + caption + duration + thumbnails) and once or more as lean
-    // Relay fragments carrying only video_versions. Score by populated fields
-    // and keep the richest candidate per code so we don't lose metadata.
     function richness(item) {
         let score = 0;
         if (item?.user?.username) score += 2;
@@ -72,29 +69,30 @@
         return score;
     }
 
-    // Match any <script data-sjs> regardless of attribute order; non-JSON
-    // blobs just fail the parse and are skipped.
-    const SJS_RE = /<script[^>]*\bdata-sjs\b[^>]*>([\s\S]*?)<\/script>/g;
-
-    function extractFromHtml(html, pageUrl) {
+    // Diagnostics so the next failure mode is visible without another round:
+    //   - capturedScripts: how many data-sjs script bodies we snapshotted
+    //   - emptyBodies: of those, how many were empty (bootstrap-clearing
+    //     happens before our snapshot)
+    //   - parsedOk: of non-empty, how many parsed as JSON
+    //   - withMedia: of parsed, how many contained a media item
+    function processCapturedBodies(bodies, pageUrl) {
+        let emptyBodies = 0, parsedOk = 0, withMedia = 0;
         const fallbackUser = usernameFromUrl(pageUrl);
-        // We do NOT filter by the URL's post code: a Threads post that quotes
-        // or reposts another user's video shows that other post's media inline,
-        // so the wrapper code in the URL won't match the embedded media's code.
         const bestByCode = new Map();
-        let scriptCount = 0;
-        let m;
-        SJS_RE.lastIndex = 0;
-        while ((m = SJS_RE.exec(html)) !== null) {
-            scriptCount++;
-            const parsed = tryParseJson(m[1]);
+        for (const text of bodies) {
+            if (!text) { emptyBodies++; continue; }
+            const parsed = tryParseJson(text);
             if (!parsed) continue;
+            parsedOk++;
+            let foundOne = false;
             walkMediaItems(parsed, (item) => {
+                foundOne = true;
                 const code = item.code;
                 if (!code) return;
                 const prev = bestByCode.get(code);
                 if (!prev || richness(item) > richness(prev)) bestByCode.set(code, item);
             }, 0, new WeakSet(), { visited: 0 });
+            if (foundOne) withMedia++;
         }
 
         const out = [];
@@ -102,58 +100,76 @@
             const username = item.user?.username || fallbackUser || "unknown";
             out.push({ item, origin: `https://www.threads.com/@${username}/post/${code}` });
         }
-        log(`scanned ${scriptCount} data-sjs script(s), found ${out.length} item(s)`);
+        log(`captured ${bodies.length} script(s), empty=${emptyBodies} parsed=${parsedOk} withMedia=${withMedia} items=${out.length}`);
         return out;
     }
 
-    const fetchedUrls = new Set();
+    // Per-page capture buffer. Reset on SPA navigation so a new post starts
+    // with a fresh observer pass.
+    let captured = [];
+    let observer = null;
 
-    async function scanUrl(url) {
-        if (!isPostUrl(url) || fetchedUrls.has(url)) return;
-        fetchedUrls.add(url);
-        let html;
-        try {
-            // credentials:include so the SSR response matches the user's
-            // logged-in state; Accept:text/html so the server renders the
-            // full page rather than a partial/JSON variant.
-            const res = await fetch(url, {
-                credentials: "include",
-                headers: { "Accept": "text/html" }
-            });
-            html = await res.text();
-        } catch (e) {
-            fetchedUrls.delete(url); // allow a retry on the next mutation tick
-            log("fetch failed", e.message);
-            return;
-        }
-        const items = extractFromHtml(html, url);
+    function startCapture() {
+        captured = [];
+        if (observer) observer.disconnect();
+        // documentElement exists at document_start (the html element is
+        // created before any of its children are parsed).
+        const root = document.documentElement || document;
+        observer = new MutationObserver((records) => {
+            for (const rec of records) {
+                for (const node of rec.addedNodes) {
+                    if (node.nodeName !== "SCRIPT") continue;
+                    // hasAttribute is safe on Element; nodeName SCRIPT
+                    // guarantees we're on HTMLScriptElement.
+                    if (!node.hasAttribute || !node.hasAttribute("data-sjs")) continue;
+                    // Snapshot the body NOW. Bootstrap may later clear it.
+                    const text = node.textContent;
+                    if (text) captured.push(text);
+                }
+            }
+        });
+        observer.observe(root, { childList: true, subtree: true });
+    }
+
+    function finishAndSend(pageUrl) {
+        if (observer) { observer.disconnect(); observer = null; }
+        const items = processCapturedBodies(captured, pageUrl);
         if (items.length === 0) return;
         browser.runtime.sendMessage({
             type: "threads_intercept",
-            payload: { items, url }
+            payload: { items, url: pageUrl }
         }).catch(() => {});
     }
 
-    // Direct load: scan the current URL. Threads is also an SPA — client-side
-    // navigation swaps the post without a document load — so watch for URL
-    // changes (debounced) and scan each new post URL once.
-    function start() {
-        scanUrl(location.href);
+    // Start capturing immediately at document_start.
+    startCapture();
 
-        let lastUrl = location.href;
-        let debounce = null;
-        const mo = new MutationObserver(() => {
-            if (location.href === lastUrl) return;
-            lastUrl = location.href;
-            clearTimeout(debounce);
-            debounce = setTimeout(() => scanUrl(location.href), 300);
-        });
-        mo.observe(document.documentElement, { childList: true, subtree: true });
-    }
-
+    // Process when the document is fully parsed. DOMContentLoaded fires after
+    // all inline scripts (including the bootstrap) have run — we don't care,
+    // our snapshots happened during parse.
+    let lastUrl = location.href;
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", start, { once: true });
+        document.addEventListener("DOMContentLoaded", () => finishAndSend(lastUrl), { once: true });
     } else {
-        start();
+        // Script injected late (post document_start). Do what we can with the
+        // current DOM: bodies are likely empty, but diagnostics will say so.
+        Promise.resolve().then(() => finishAndSend(lastUrl));
     }
+
+    // SPA navigation: Threads swaps posts client-side without a new document
+    // load, so we won't see fresh data-sjs scripts for the new post (the
+    // Relay client fetches via its own GraphQL). For those cases there's
+    // nothing more we can capture here — listenerInstagramApiFilter in the
+    // background already handles the Instagram-shape XHR responses Threads
+    // emits during SPA nav, since they hit the same /api/v1/feed/ paths.
+    // We still watch the URL to log so debugging is clear.
+    let debounce = null;
+    new MutationObserver(() => {
+        if (location.href === lastUrl) return;
+        lastUrl = location.href;
+        clearTimeout(debounce);
+        debounce = setTimeout(() => {
+            log("SPA nav detected (no new SSR blobs to capture)", lastUrl);
+        }, 300);
+    }).observe(document.documentElement, { childList: true, subtree: true });
 })();

@@ -3690,27 +3690,20 @@ async function emitNicoStream(details, id, contentUrl) {
         try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
 
-    // delivery.domand validates the request on EVERY fetch (master / media
-    // playlist / segment / AES key) — and the AES-key endpoint is the strict
-    // one. Verified by replaying the live key URL under different header sets
-    // (decrypting the first segment with each returned key):
-    //   * X-Frontend-Id: 6   present + NO Range  -> real key (styp/moof/mdat)
-    //   * X-Frontend-Id missing (any Range)       -> WRONG 16-byte key
-    //   * X-Frontend-Id present BUT with a Range  -> WRONG 16-byte key
-    // It returns a bogus key (HTTP 200, 16 bytes — NOT a 403), so ffmpeg
-    // decrypts every segment to garbage, the mov demuxer never finds a
-    // moof/mdat, and find_stream_info walks the entire track to EOF: the
-    // "endless probing / hangs on the bigger renditions" symptom. FFmpegOkhttp
-    // fetches the 16-byte key from offset 0 and so sends no Range, which means
-    // simply adding the X-Frontend-Id headers below is enough to get the real
-    // key. Origin/Referer + the domand cookies remain required for the CDN.
+    // delivery.domand validates Origin + a domand cookie on every fetch, so we
+    // attach the page Origin/Referer and the content-host cookies. X-Frontend-Id
+    // /X-Frontend-Version mirror what the web player sends (header parity) — keep
+    // them, but NOTE: they do NOT fix the "endless probing / 720p hangs" bug.
+    // That hang is the domand AES key being SINGLE-USE per session: the key is
+    // fetched twice (metadatareader probe, then downloader), and the second fetch
+    // returns a garbage decoy → garbage decryption → mov walks the track. The real
+    // fix lives in the probe/download path (fetch the key once), not here. See the
+    // "Niconico domand AES key" section in CLAUDE.md.
     let pageOrigin = "https://www.nicovideo.jp";
     try { pageOrigin = new URL(origin).origin; } catch (e) {}
     const requestHeaders = [
         { name: "Origin", value: pageOrigin },
         { name: "Referer", value: pageOrigin + "/" },
-        // nvapi frontend id: delivery.domand's key endpoint hands back a wrong
-        // key without it. The web player sends 6 (X-Frontend-Version 0).
         { name: "X-Frontend-Id", value: "6" },
         { name: "X-Frontend-Version", value: "0" }
     ];

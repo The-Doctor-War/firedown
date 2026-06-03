@@ -242,8 +242,29 @@ The bridge also never needs host logic to keep a key fetch clean: it only adds a
 so a 16-byte, offset-0 AES key is never ranged for **any** site.
 
 #### Niconico domand AES key — the "endless probing / 720p hangs" bug
+**ROOT CAUSE (confirmed): the domand AES key is SINGLE-USE per session.** The
+key endpoint (`…/keys/<rendition>.key`, `Cache-Control: private, no-cache`)
+returns the real 16-byte key **only on the first fetch** after an
+`access-rights/hls` session is minted; every later fetch returns a *different
+garbage decoy* (verified: fetch the same key URL 3× in one session → #1 decrypts
+to `styp+moof+mdat`, #2/#3 are garbage and differ). The app fetches the key
+**twice** — `metadatareader` probes the stream first (consumes the real key),
+then the `downloader` opens it again and gets a decoy → garbage decryption → the
+`mov` demuxer finds no `moof`/`mdat` → `find_stream_info` walks every `.cmfa` to
+EOF. That is the hang. Fix direction: fetch the key exactly **once** for the
+actual download — don't pre-probe the encrypted stream in `metadatareader` (use
+the parser's already-known title/duration), or mint a fresh session right before
+the download, or share one ffmpeg context between probe and download.
+
+DISPROVEN earlier theory (do not repeat): "the key needs `X-Frontend-Id: 6` and
+no `Range`." That was a **confound** — in the header experiment, the only
+variant that worked was simply the *first* key fetch; the header was irrelevant.
+Any test that fetches/decrypts the key before the real consumer will poison the
+run (the consumer then gets a decoy). The earlier observations below are kept
+only as the symptom description:
+
 `delivery.domand`'s key endpoint returns a **wrong 16-byte key** (HTTP 200, not
-403) unless the request carries **`X-Frontend-Id: 6`** *and* has **no `Range`**.
+403) on any fetch after the first.
 A wrong key → every fMP4 segment decrypts to garbage. Nothing errors: AES-CBC
 has no integrity check (wrong key = silent garbage), and `mov` reads the garbage
 as an MP4 box header with a bogus, usually multi-hundred-MB size and an unknown

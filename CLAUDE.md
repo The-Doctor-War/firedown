@@ -421,6 +421,23 @@ Don'ts (each cost rounds here):
   rotating-DRM or scope problem; the live web flow (`X-Frontend-Id`, full
   `outputs`, no `Range`) returns the one real key.
 
+## UI conventions (Material 3)
+
+- **Menu rows are M3 one-line list items: 56dp tall, 16sp text
+  (`TitleMedium`), 16dp horizontal padding, `onSurfaceVariant`.** Applies to
+  every menu surface — Browser/Home popups (hand-built `LinearLayout` rows),
+  the `OptionsAdapter` sheets (New tab / Web options / Downloads option, via
+  the `Firedown.Widget.DialogOption` style → `minHeight=56dp` so a rare wrapped
+  label can grow), and the search-engine list. Two-line rows (e.g. Download
+  info) stay at 72dp. Keep these in lockstep; don't reintroduce a denser 48dp
+  or a 15sp override for one sheet.
+- **The generated mime fallback thumbnail (`MimeTypeThumbnail`) has two modes.**
+  List/grid rows pass `fillBounds=true` so the tint fills the whole
+  rounded-clipped slot (the list slot is ~1:1, 78×64dp). The **media viewer
+  keeps the default 16:10 letterbox** (`fillBounds=false`) to match
+  `PlayerView`'s `resize_mode="fit"` — don't make the fill unconditional, it
+  would paint the player background edge-to-edge.
+
 ## Conventions
 
 - Match the surrounding comment density — the parsers are heavily commented

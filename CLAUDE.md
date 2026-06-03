@@ -247,14 +247,45 @@ key endpoint (`…/keys/<rendition>.key`, `Cache-Control: private, no-cache`)
 returns the real 16-byte key **only on the first fetch** after an
 `access-rights/hls` session is minted; every later fetch returns a *different
 garbage decoy* (verified: fetch the same key URL 3× in one session → #1 decrypts
-to `styp+moof+mdat`, #2/#3 are garbage and differ). The app fetches the key
-**twice** — `metadatareader` probes the stream first (consumes the real key),
-then the `downloader` opens it again and gets a decoy → garbage decryption → the
-`mov` demuxer finds no `moof`/`mdat` → `find_stream_info` walks every `.cmfa` to
-EOF. That is the hang. Fix direction: fetch the key exactly **once** for the
-actual download — don't pre-probe the encrypted stream in `metadatareader` (use
-the parser's already-known title/duration), or mint a fresh session right before
-the download, or share one ffmpeg context between probe and download.
+to `styp+moof+mdat`, #2/#3 are garbage and differ). The key is
+fetched **twice** — `metadatareader` probes the stream first (consumes the real
+key), then the `downloader` opens it again and gets a decoy → garbage decryption
+→ the `mov` demuxer finds no `moof`/`mdat` → `find_stream_info` walks every
+`.cmfa` to EOF. That is the hang.
+
+Note the boundary (from hls.c): within a **single** `avformat_open_input`,
+`open_input`→`read_key` fetches the key **once** and caches it by URL
+(`strcmp(seg->key, pls->key_url)`), and a media playlist carries **one**
+`#EXT-X-KEY` for all segments. So the duplication is **across the two separate
+libavformat opens** (probe context + download context), each a fresh sign-in
+that re-fetches and burns another single-use key.
+
+**Fix must be in ffmpeg (the fork), not an app-flow tweak** — a plain
+`ffmpeg`/libavformat user hits the same single-use key whenever it opens the
+stream more than once (probe + read). Strategy: **cache the key and reuse it;
+refresh only on garbage.**
+1. *Cache + reuse* — patch the fork's `libavformat/hls.c` `read_key` with a
+   process-global AES-key cache: on the first successful fetch store the 16
+   bytes; on every later `read_key` copy the cached bytes into `pls->key` and
+   skip the server round-trip. This stops the second/third open from burning a
+   decoy. Belongs with the fork hls.c patch set (`firedown/patches`); needs a
+   `.so` rebuild + `scripts/sync-ffmpeg.sh`.
+2. *Refresh on garbage* — if the cached key produces an undecodable stream (the
+   mov walk / no valid `moof`), invalidate the entry, re-mint a fresh
+   `access-rights/hls` session, and fetch once more.
+
+OPEN QUESTIONS to settle next session (do NOT assume — these decide the cache
+key-scope and whether the cache alone suffices):
+- Is the real content key **static per content** or **per-session**? `nico_keyonce`
+  #1 was `c93a35…` while an older dump's working key was `0d7c50…` (different) —
+  hinting **per-session**. If per-session, cache must be scoped to the session
+  (or keyed by the full signed key URL) and "refresh" means a new session;
+  caching by bare path across sessions would then serve a stale/wrong key.
+- Does a single, **clean** first-consumer `avformat_open_input` on a fresh
+  session converge (proving within-one-context is fine and the cache fully
+  fixes it)? The test must NOT pre-fetch/decrypt the key — any probe that
+  fetches the key first burns fetch #1 and poisons the run (this is exactly the
+  trap my own `nico_probe.py` step [3] fell into).
 
 DISPROVEN earlier theory (do not repeat): "the key needs `X-Frontend-Id: 6` and
 no `Range`." That was a **confound** — in the header experiment, the only

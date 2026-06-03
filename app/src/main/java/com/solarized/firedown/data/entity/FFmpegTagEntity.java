@@ -25,8 +25,9 @@ public class FFmpegTagEntity implements Parcelable {
     public static final int TYPE_DURATION   = 1;  // e.g. "03:45"
     public static final int TYPE_QUALITY    = 2;  // e.g. "1080p", "720p"
     public static final int TYPE_RESOLUTION = 3;  // e.g. "1920x1080" (images)
+    public static final int TYPE_LANGUAGE   = 4;  // e.g. "English", "English (auto)" (subtitles)
 
-    @IntDef({TYPE_UNKNOWN, TYPE_DURATION, TYPE_QUALITY, TYPE_RESOLUTION})
+    @IntDef({TYPE_UNKNOWN, TYPE_DURATION, TYPE_QUALITY, TYPE_RESOLUTION, TYPE_LANGUAGE})
     @Retention(RetentionPolicy.SOURCE)
     public @interface TagType {}
 

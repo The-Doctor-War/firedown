@@ -296,8 +296,40 @@ public class GeckoInspectTask implements Runnable {
     private void appendLanguageTag(BrowserDownloadEntity entity) {
         if (TextUtils.isEmpty(mLanguage)) return;
         String existing = entity.getFileName();
-        if (TextUtils.isEmpty(existing)) return;
-        entity.setFileName(existing + " [" + mLanguage + "]");
+        if (!TextUtils.isEmpty(existing)) {
+            entity.setFileName(existing + " [" + mLanguage + "]");
+        }
+        // Also surface the language as a visible chip in the Capture fragment
+        // (the filename suffix only shows once the row is expanded). Humanised,
+        // e.g. "en" -> "English", "en-auto" -> "English (auto)".
+        String display = localizeLanguage(mLanguage);
+        if (TextUtils.isEmpty(display)) return;
+        ArrayList<FFmpegTagEntity> tags = entity.getTags();
+        if (tags == null) tags = new ArrayList<>();
+        tags.add(new FFmpegTagEntity(entity.getUid(), display, FFmpegTagEntity.TYPE_LANGUAGE));
+        entity.setTags(tags);
+    }
+
+    /**
+     * Humanise a caption language tag: "en" -> "English",
+     * "pt-BR" -> "Portuguese (Brazil)", "en-auto" -> "English (auto)" (the
+     * "-auto" suffix marks YouTube ASR/auto-generated tracks). Falls back to
+     * the raw code if the locale can't be resolved.
+     */
+    private String localizeLanguage(String code) {
+        if (TextUtils.isEmpty(code)) return null;
+        boolean auto = code.endsWith("-auto");
+        String base = auto ? code.substring(0, code.length() - "-auto".length()) : code;
+        String display = base;
+        try {
+            String name = Locale.forLanguageTag(base).getDisplayName();
+            if (!TextUtils.isEmpty(name) && !name.equalsIgnoreCase(base)) {
+                display = name;
+            }
+        } catch (Exception ignored) {
+            // keep the raw code
+        }
+        return auto ? display + " (auto)" : display;
     }
 
     // ========================================================================

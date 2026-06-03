@@ -300,6 +300,16 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
                 }
                 break;
 
+            case FFmpegTagEntity.TYPE_LANGUAGE:
+                // Subtitle language (e.g. "English", "English (auto)"). Subtitle
+                // rows carry no quality/duration, so the quality slot is free;
+                // shown in both layouts so the language is visible at a glance.
+                if (holder.tagQuality != null && !TextUtils.isEmpty(tag.getText())) {
+                    holder.tagQuality.setText(tag.getText());
+                    holder.tagQuality.setVisibility(View.VISIBLE);
+                }
+                break;
+
             case FFmpegTagEntity.TYPE_UNKNOWN:
             default:
                 // Graceful fallback: render in the quality slot if still empty.

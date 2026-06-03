@@ -75,3 +75,7 @@ fabric.properties
 # Prebuilt FFmpeg artifacts (fetched from GitHub Releases at build time)
 /external/ffmpeg/*
 !/external/ffmpeg/.gitkeep
+
+# Python bytecode (from running the scripts/ diagnostics)
+__pycache__/
+*.pyc

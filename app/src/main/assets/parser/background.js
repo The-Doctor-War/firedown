@@ -3690,16 +3690,29 @@ async function emitNicoStream(details, id, contentUrl) {
         try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
 
-    // delivery.domand validates Origin and a domand cookie on EVERY fetch
-    // (master / media playlist / segment / AES key). ffmpeg (FFmpegOkhttp)
-    // sends neither by default, so the streams 403 even though the URL is
-    // CloudFront-signed. Attach the page Origin/Referer and the cookies scoped
-    // to the content host so ffmpeg's per-request headers carry them.
+    // delivery.domand validates the request on EVERY fetch (master / media
+    // playlist / segment / AES key) — and the AES-key endpoint is the strict
+    // one. Verified by replaying the live key URL under different header sets
+    // (decrypting the first segment with each returned key):
+    //   * X-Frontend-Id: 6   present + NO Range  -> real key (styp/moof/mdat)
+    //   * X-Frontend-Id missing (any Range)       -> WRONG 16-byte key
+    //   * X-Frontend-Id present BUT with a Range  -> WRONG 16-byte key
+    // It returns a bogus key (HTTP 200, 16 bytes — NOT a 403), so ffmpeg
+    // decrypts every segment to garbage, the mov demuxer never finds a
+    // moof/mdat, and find_stream_info walks the entire track to EOF: the
+    // "endless probing / hangs on the bigger renditions" symptom. FFmpegOkhttp
+    // fetches the 16-byte key from offset 0 and so sends no Range, which means
+    // simply adding the X-Frontend-Id headers below is enough to get the real
+    // key. Origin/Referer + the domand cookies remain required for the CDN.
     let pageOrigin = "https://www.nicovideo.jp";
     try { pageOrigin = new URL(origin).origin; } catch (e) {}
     const requestHeaders = [
         { name: "Origin", value: pageOrigin },
-        { name: "Referer", value: pageOrigin + "/" }
+        { name: "Referer", value: pageOrigin + "/" },
+        // nvapi frontend id: delivery.domand's key endpoint hands back a wrong
+        // key without it. The web player sends 6 (X-Frontend-Version 0).
+        { name: "X-Frontend-Id", value: "6" },
+        { name: "X-Frontend-Version", value: "0" }
     ];
     try {
         const cookies = await browser.cookies.getAll({ url: contentUrl });

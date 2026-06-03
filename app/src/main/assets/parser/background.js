@@ -229,34 +229,42 @@ function parseHlsMaster(text, baseUrl) {
     }
     if (streams.length === 0) return [];
 
-    // Best audio = the group used by the highest-bandwidth stream (match the
-    // highest audio to the highest video), paired with EVERY video rendition —
-    // best audio is desirable at any video quality for a VOD download, and this
-    // is order-independent. Computed over ALL streams (before dedup) so the
-    // high-bitrate pairing isn't dropped. Falls back to each stream's own group,
-    // and to none for a muxed master (no audio groups).
-    let bestGroup = null;
-    let bestBw = -1;
+    // Rank audio groups by the highest bandwidth of the streams referencing them
+    // (EXT-X-MEDIA carries no bitrate of its own), best-first.
+    const groupMaxBw = {};
     for (const s of streams) {
-        if (s.audioGroup && audios[s.audioGroup] && s.bw > bestBw) {
-            bestBw = s.bw;
-            bestGroup = s.audioGroup;
+        if (s.audioGroup && audios[s.audioGroup]) {
+            if (groupMaxBw[s.audioGroup] === undefined || s.bw > groupMaxBw[s.audioGroup]) {
+                groupMaxBw[s.audioGroup] = s.bw;
+            }
         }
     }
-    const bestAudio = bestGroup ? audios[bestGroup] : null;
+    const audioRanked = Object.keys(groupMaxBw)
+        .sort((a, b) => groupMaxBw[b] - groupMaxBw[a])
+        .map((g) => audios[g]);
 
-    // Dedup by video URL, keeping the highest-bandwidth occurrence.
+    // Dedup videos by URL (keep the highest-bandwidth occurrence), best-first.
     const byUrl = new Map();
     for (const s of streams) {
         const prev = byUrl.get(s.url);
         if (!prev || s.bw > prev.bw) byUrl.set(s.url, s);
     }
+    const vids = Array.from(byUrl.values())
+        .sort((a, b) => (b.height - a.height) || (b.bw - a.bw));
 
+    // Tier proportionally: map each video's rank to an audio rank so a higher
+    // video never gets worse audio than a lower one (monotonic). One audio →
+    // every video gets it; no audio groups (muxed master) → single-URL variants.
+    const A = audioRanked.length;
+    const V = vids.length;
     const variants = [];
-    for (const s of byUrl.values()) {
+    for (let i = 0; i < V; i++) {
+        const s = vids[i];
         const v = { url: s.url, width: s.width, height: s.height };
-        const a = bestAudio || (s.audioGroup ? audios[s.audioGroup] : null);
-        if (a) v.audioUrl = a;
+        if (A > 0) {
+            const idx = Math.min(A - 1, Math.floor((i * A) / V));
+            v.audioUrl = audioRanked[idx];
+        }
         if (/\bavc1/.test(s.codecs)) v.videoCodec = "h264";
         else if (/\bhvc1|\bhev1/.test(s.codecs)) v.videoCodec = "hevc";
         if (/\bmp4a/.test(s.codecs)) v.audioCodec = "aac";

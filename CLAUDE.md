@@ -226,6 +226,56 @@ Headers (incl. any backfilled `Referer`) flow from the capture layer
 (`webrequests/requests.js` for the generic catcher, or a parser's
 `requestHeaders`) into both paths via `context.getHeaders()`.
 
+### Per-site request quirks live in the parser, never the transport
+
+`FFmpegOkhttp` / the fork's `http.c` (the ffmpeg↔OkHttp bridge) is **generic**
+and must carry **no host-specific conditions**. Any header a site needs is
+expressed as *data* in that site's parser `requestHeaders` (the `sendNative`
+emit). ffmpeg then propagates those headers to **every** sub-request of the
+download — master, media playlist, segment, **and the AES key** (hls.c fetches
+the key via `open_url(..., &c->avio_opts, ...)`, and `avio_opts` is copied from
+the master's options). So a header a site needs *only* on its key fetch still
+belongs in the parser emit, not in a transport `if (url.contains(host))`.
+
+The bridge also never needs host logic to keep a key fetch clean: it only adds a
+`Range` for a resume (`pos>0`) or when chunking a confirmed-large file (>2 MB),
+so a 16-byte, offset-0 AES key is never ranged for **any** site.
+
+#### Niconico domand AES key — the "endless probing / 720p hangs" bug
+`delivery.domand`'s key endpoint returns a **wrong 16-byte key** (HTTP 200, not
+403) unless the request carries **`X-Frontend-Id: 6`** *and* has **no `Range`**.
+A wrong key → every fMP4 segment decrypts to garbage. Nothing errors: AES-CBC
+has no integrity check (wrong key = silent garbage), and `mov` reads the garbage
+as an MP4 box header with a bogus, usually multi-hundred-MB size and an unknown
+type, which it **skips** (`avio_skip`) — skipping unknown boxes is normal, not
+an error. Because the HLS demuxer presents all segments as one continuous
+stream, that single phantom box is skipped across **the whole track to EOF**
+(we observed `type:'…' sz: 1030796069`). So it's a silent multi-minute read,
+not a failure — fast enough to tolerate on tiny renditions, a hang on 480p/720p
+(the phantom size exceeds every rendition, so the walk length ≈ total track
+bytes, which is why it scales with quality). A "could not find codec parameters"
+only surfaces much later, after it's read everything. Fix: `background.js` `emitNicoStream` sends
+`X-Frontend-Id`/`X-Frontend-Version`; OkHttp already fetches the key from
+offset 0 so it sends no `Range`. Verified by replaying the live key URL under
+header permutations and decrypting segment 1 with each returned key — only
+`X-Frontend-Id` **and** no-`Range` yields valid `styp/moof/mdat`.
+
+Don'ts (each cost rounds here):
+- The walk is ffmpeg's *reaction* to an undecryptable stream, **not** a demuxer
+  bug. `probesize`/`analyzeduration` do **not** bound it — `read_size` only
+  grows on packets the demuxer actually produces, and garbage produces none, so
+  the probe runs to EOF regardless. Don't chase seekability/`is_streamed` for
+  this; chase the key.
+- Stock `ffmpeg -i <master>` on a PC reproduces the same walk because native
+  `http.c` sends `Range`+`Icy-MetaData` and no `X-Frontend-Id` → also a wrong
+  key. That it reproduces off-device does **not** make it a transport/demuxer
+  bug — it's the same wrong-key cause.
+- The key endpoint hands back a *different* wrong key per request when the
+  binding/headers are off, and a key fetched out of a stale/partial
+  `access-rights/hls` session is garbage too — don't mistake either for a
+  rotating-DRM or scope problem; the live web flow (`X-Frontend-Id`, full
+  `outputs`, no `Range`) returns the one real key.
+
 ## Conventions
 
 - Match the surrounding comment density — the parsers are heavily commented

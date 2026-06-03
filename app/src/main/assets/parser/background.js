@@ -177,6 +177,124 @@ async function sendVariants(details, { variants, origin, description, img, name,
     sendNative(message);
 }
 
+// ---- Shared HLS master enumeration ----------------------------------------
+// Parse a master playlist into quality variants WITHOUT decoding, so a parser
+// can populate the quality picker with no capture-time ffprobe. Handles muxed
+// renditions (one STREAM-INF = full A/V → single-URL variant, e.g. Twitch/Kick)
+// and split audio (EXT-X-MEDIA TYPE=AUDIO referenced via AUDIO="group"),
+// resolves relative URLs, and skips I-frame trick-play streams (their tag is
+// #EXT-X-I-FRAME-STREAM-INF, which our prefix test ignores). Returns [] if the
+// text isn't a master (no STREAM-INF) — callers then fall back to the raw URL.
+function resolveUrl(u, base) {
+    try { return new URL(u, base).href; } catch (e) { return u; }
+}
+
+function parseHlsMaster(text, baseUrl) {
+    if (typeof text !== "string" || !text.includes("#EXT-X-STREAM-INF")) return [];
+    const lines = text.split(/\r?\n/);
+    const audios = {};
+    const variants = [];
+    const seen = new Set();
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith("#EXT-X-MEDIA:") && /TYPE=AUDIO/.test(line)) {
+            const gid = (line.match(/GROUP-ID="([^"]+)"/) || [])[1];
+            const uri = (line.match(/URI="([^"]+)"/) || [])[1];
+            if (gid && uri) audios[gid] = resolveUrl(uri, baseUrl);
+            continue;
+        }
+        if (!line.startsWith("#EXT-X-STREAM-INF:")) continue;
+        const res = line.match(/RESOLUTION=(\d+)x(\d+)/) || [];
+        const audioGroup = (line.match(/AUDIO="([^"]+)"/) || [])[1] || null;
+        const codecs = (line.match(/CODECS="([^"]+)"/) || [])[1] || "";
+        // Variant URL = next non-blank, non-tag line.
+        let url = null;
+        for (let j = i + 1; j < lines.length; j++) {
+            const t = lines[j].trim();
+            if (!t) continue;
+            if (t.startsWith("#")) break;
+            url = t;
+            break;
+        }
+        if (!url) continue;
+        const abs = resolveUrl(url, baseUrl);
+        if (seen.has(abs)) continue;
+        seen.add(abs);
+        const v = {
+            url: abs,
+            width: parseInt(res[1], 10) || 0,
+            height: parseInt(res[2], 10) || 0
+        };
+        if (audioGroup) v._audioGroup = audioGroup;
+        if (/\bavc1/.test(codecs)) v.videoCodec = "h264";
+        else if (/\bhvc1|\bhev1/.test(codecs)) v.videoCodec = "hevc";
+        if (/\bmp4a/.test(codecs)) v.audioCodec = "aac";
+        variants.push(v);
+    }
+    for (const v of variants) {
+        if (v._audioGroup && audios[v._audioGroup]) v.audioUrl = audios[v._audioGroup];
+        delete v._audioGroup;
+    }
+    return variants;
+}
+
+// Passive response-body text capture (filterResponseData). Returns false if a
+// filter couldn't be created. onText receives the body, or null on error.
+function filterResponseText(details, onText) {
+    let filter;
+    try { filter = browser.webRequest.filterResponseData(details.requestId); }
+    catch (e) { return false; }
+    const chunks = [];
+    filter.ondata = (event) => { chunks.push(new Uint8Array(event.data)); filter.write(event.data); };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((a, c) => a + c.byteLength, 0);
+        const buf = new Uint8Array(total);
+        let off = 0;
+        for (const c of chunks) { buf.set(c, off); off += c.byteLength; }
+        Promise.resolve().then(() => onText(new TextDecoder("utf-8").decode(buf)));
+    };
+    filter.onerror = () => { try { filter.close(); } catch (_) {} onText(null); };
+    return true;
+}
+
+// Emit enumerated HLS variants (no ffprobe) or, on ANY failure, the single media
+// URL. For an .m3u8 master we fetch+parse it (unless `body` is supplied). Does
+// its own dedup — callers must NOT pre-markSent the origin.
+async function emitHlsMasterOrSingle(details, { url, origin, tabId, name, title, img, duration, body }) {
+    if (alreadySent(origin)) return;
+    let variants = null;
+    if (/\.m3u8(?:[?#]|$)/.test(url)) {
+        try {
+            let text = body;
+            if (text == null) {
+                const resp = await fetch(url);
+                if (resp.ok) text = await resp.text();
+            }
+            if (text) {
+                const v = parseHlsMaster(text, url);
+                if (v.length > 0) variants = v;
+            }
+        } catch (e) { log("HLS", "master parse failed, single-url fallback", { error: e.message }); }
+    }
+    if (variants) {
+        sendVariants(details, { variants, origin, description: title, name, img, duration, skipProbe: true });
+        return;
+    }
+    markSent(origin);
+    sendNative({
+        url,
+        type: "media",
+        origin,
+        tabId,
+        request: details.requestId,
+        name,
+        description: title,
+        img,
+        ...(duration > 0 ? { duration } : {})
+    });
+}
+
 /**
  * Emits one native message per subtitle track. Each becomes its own
  * BrowserDownloadEntity on the Kotlin side (mime text/vtt or text/srt)
@@ -1485,7 +1603,6 @@ async function fetchKickClip(details, clipId) {
 
         const origin = `https://kick.com/clips/${clipId}`;
         if (alreadySent(origin)) return;
-        markSent(origin);
 
         const tabId = await resolveTabId(details);
         const name = clip.channel?.username || clip.creator?.username || "Kick Clip";
@@ -1493,17 +1610,9 @@ async function fetchKickClip(details, clipId) {
         const img = clip.thumbnail_url || pickKickThumbnail(clip.thumbnail) || null;
         const duration = Math.round((clip.duration || 0) * 1000);
 
-        sendNative({
-            url: videoUrl,
-            type: "media",
-            origin,
-            tabId,
-            request: details.requestId,
-            name,
-            description: title,
-            img,
-            ...(duration > 0 ? { duration } : {})
-        });
+        // Enumerate the HLS master into quality variants (no ffprobe); falls back
+        // to the single URL if it isn't a parseable master.
+        await emitHlsMasterOrSingle(details, { url: videoUrl, origin, tabId, name, title, img, duration });
         log("KICK", `Sent clip`, { clipId, name });
     } catch (e) {
         log("KICK", `Clip error`, e.message);
@@ -1535,7 +1644,6 @@ async function fetchKickVideo(details, videoId) {
 
         const origin = `https://kick.com/video/${videoId}`;
         if (alreadySent(origin)) return;
-        markSent(origin);
 
         const tabId = await resolveTabId(details);
         const name = data.livestream?.channel?.user?.username || "Kick VOD";
@@ -1543,17 +1651,9 @@ async function fetchKickVideo(details, videoId) {
         const img = pickKickThumbnail(data.livestream?.thumbnail) || null;
         const duration = Math.round((data.livestream?.duration || 0));
 
-        sendNative({
-            url: videoUrl,
-            type: "media",
-            origin,
-            tabId,
-            request: details.requestId,
-            name,
-            description: title,
-            img,
-            ...(duration > 0 ? { duration } : {})
-        });
+        // Enumerate the HLS master into quality variants (no ffprobe); falls back
+        // to the single URL if it isn't a parseable master.
+        await emitHlsMasterOrSingle(details, { url: videoUrl, origin, tabId, name, title, img, duration });
         log("KICK", `Sent VOD`, { videoId, name });
     } catch (e) {
         log("KICK", `Video error`, e.message);
@@ -1699,7 +1799,7 @@ function getTwitchRendezvous(key) {
         entry = null;
     }
     if (!entry) {
-        entry = { m3u8Url: null, metadata: null, details: null, timestamp: Date.now() };
+        entry = { m3u8Url: null, metadata: null, details: null, variants: null, bodyPending: false, bodyDone: false, timestamp: Date.now() };
         twitchRendezvous.set(key, entry);
     }
     return entry;
@@ -1708,8 +1808,12 @@ function getTwitchRendezvous(key) {
 function tryCompleteTwitchRendezvous(key) {
     const entry = twitchRendezvous.get(key);
     if (!entry || !entry.m3u8Url || !entry.metadata) return;
+    // Wait for the master body (quality enumeration) before emitting, so we send
+    // a picker rather than the bare master. bodyDone is force-set by a timeout /
+    // filter error / filter absence, so this can't hang (TTL also reaps it).
+    if (entry.bodyPending && !entry.bodyDone) return;
 
-    const { m3u8Url, metadata, details } = entry;
+    const { m3u8Url, metadata, details, variants } = entry;
     twitchRendezvous.delete(key);
 
     const origin = metadata.origin;
@@ -1717,10 +1821,24 @@ function tryCompleteTwitchRendezvous(key) {
         log("TWITCH", `Rendezvous complete but already sent`, { key });
         return;
     }
+
+    if (variants && variants.length > 0) {
+        log("TWITCH", `Rendezvous complete — ${variants.length} variant(s)`, { key });
+        // sendVariants does its own dedup/markSent.
+        sendVariants(details || { tabId: -1, requestId: `twitch-${Date.now()}` }, {
+            variants,
+            origin,
+            description: metadata.description,
+            name: metadata.name,
+            img: metadata.img,
+            duration: metadata.duration,
+            skipProbe: true
+        });
+        return;
+    }
+
     markSent(origin);
-
-    log("TWITCH", `Rendezvous complete — sending`, { key, url: m3u8Url.slice(0, 120) });
-
+    log("TWITCH", `Rendezvous complete — sending master`, { key, url: m3u8Url.slice(0, 120) });
     sendNative({
         url: m3u8Url,
         type: "media",
@@ -1777,38 +1895,46 @@ function resolveVodIdFromTab(tabId) {
  * the request.  The tab URL (twitch.tv/{login} or twitch.tv/videos/{id})
  * is the stable ground truth.
  */
+// Record the master URL and passively capture its body so we can enumerate
+// quality variants (no ffprobe). Any failure (no filter, parse error, timeout)
+// force-sets bodyDone, so the rendezvous falls back to emitting the master URL.
+function captureTwitchMaster(key, details) {
+    const entry = getTwitchRendezvous(key);
+    if (entry.m3u8Url) return; // first .m3u8 only
+    log("TWITCH-CDN", `Captured M3U8 for ${key}`, { tabId: details.tabId, url: details.url.slice(0, 120) });
+    entry.m3u8Url = details.url;
+    if (!entry.details && details.tabId >= 0) {
+        entry.details = { tabId: details.tabId, _resolvedTabId: details.tabId, requestId: `cdn-${Date.now()}` };
+    }
+    entry.bodyPending = true;
+    const created = filterResponseText(details, (text) => {
+        if (text) {
+            try {
+                const v = parseHlsMaster(text, details.url);
+                if (v.length > 0) entry.variants = v;
+            } catch (e) { log("TWITCH-CDN", `master parse failed`, { error: e.message }); }
+        }
+        entry.bodyDone = true;
+        tryCompleteTwitchRendezvous(key);
+    });
+    if (!created) entry.bodyDone = true;
+    setTimeout(() => {
+        if (!entry.bodyDone) {
+            entry.bodyDone = true;
+            tryCompleteTwitchRendezvous(key);
+        }
+    }, 5000);
+    tryCompleteTwitchRendezvous(key);
+}
+
 function listenerTwitchCdnM3u8(details) {
     if (isOwnRequest(details.url)) return;
 
     const tabLogin = resolveLoginFromTab(details.tabId);
+    if (tabLogin) { captureTwitchMaster(tabLogin, details); return; }
+
     const tabVodId = resolveVodIdFromTab(details.tabId);
-
-    if (tabLogin) {
-        const entry = getTwitchRendezvous(tabLogin);
-        if (!entry.m3u8Url) {
-            log("TWITCH-CDN", `Captured M3U8 for ${tabLogin}`, { tabId: details.tabId, url: details.url.slice(0, 120) });
-            entry.m3u8Url = details.url;
-            if (!entry.details && details.tabId >= 0) {
-                entry.details = { tabId: details.tabId, _resolvedTabId: details.tabId, requestId: `cdn-${Date.now()}` };
-            }
-            tryCompleteTwitchRendezvous(tabLogin);
-        }
-        return;
-    }
-
-    if (tabVodId) {
-        const rvKey = `vod-${tabVodId}`;
-        const entry = getTwitchRendezvous(rvKey);
-        if (!entry.m3u8Url) {
-            log("TWITCH-CDN", `Captured M3U8 for VOD ${tabVodId}`, { tabId: details.tabId, url: details.url.slice(0, 120) });
-            entry.m3u8Url = details.url;
-            if (!entry.details && details.tabId >= 0) {
-                entry.details = { tabId: details.tabId, _resolvedTabId: details.tabId, requestId: `cdn-${Date.now()}` };
-            }
-            tryCompleteTwitchRendezvous(rvKey);
-        }
-        return;
-    }
+    if (tabVodId) { captureTwitchMaster(`vod-${tabVodId}`, details); return; }
 
     log("TWITCH-CDN", `M3U8 captured but no tab match`, { tabId: details.tabId, url: details.url.slice(0, 80) });
 }

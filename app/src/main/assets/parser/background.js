@@ -193,8 +193,7 @@ function parseHlsMaster(text, baseUrl) {
     if (typeof text !== "string" || !text.includes("#EXT-X-STREAM-INF")) return [];
     const lines = text.split(/\r?\n/);
     const audios = {};
-    const variants = [];
-    const seen = new Set();
+    const streams = []; // every STREAM-INF, pre-dedup
     for (let i = 0; i < lines.length; i++) {
         const line = lines[i].trim();
         if (line.startsWith("#EXT-X-MEDIA:") && /TYPE=AUDIO/.test(line)) {
@@ -207,6 +206,8 @@ function parseHlsMaster(text, baseUrl) {
         const res = line.match(/RESOLUTION=(\d+)x(\d+)/) || [];
         const audioGroup = (line.match(/AUDIO="([^"]+)"/) || [])[1] || null;
         const codecs = (line.match(/CODECS="([^"]+)"/) || [])[1] || "";
+        // BANDWIDTH only — must not match AVERAGE-BANDWIDTH (preceded by '-').
+        const bw = parseInt((line.match(/[,:]BANDWIDTH=(\d+)/) || [])[1], 10) || 0;
         // Variant URL = next non-blank, non-tag line.
         let url = null;
         for (let j = i + 1; j < lines.length; j++) {
@@ -217,23 +218,49 @@ function parseHlsMaster(text, baseUrl) {
             break;
         }
         if (!url) continue;
-        const abs = resolveUrl(url, baseUrl);
-        if (seen.has(abs)) continue;
-        seen.add(abs);
-        const v = {
-            url: abs,
+        streams.push({
+            url: resolveUrl(url, baseUrl),
             width: parseInt(res[1], 10) || 0,
-            height: parseInt(res[2], 10) || 0
-        };
-        if (audioGroup) v._audioGroup = audioGroup;
-        if (/\bavc1/.test(codecs)) v.videoCodec = "h264";
-        else if (/\bhvc1|\bhev1/.test(codecs)) v.videoCodec = "hevc";
-        if (/\bmp4a/.test(codecs)) v.audioCodec = "aac";
-        variants.push(v);
+            height: parseInt(res[2], 10) || 0,
+            audioGroup,
+            bw,
+            codecs
+        });
     }
-    for (const v of variants) {
-        if (v._audioGroup && audios[v._audioGroup]) v.audioUrl = audios[v._audioGroup];
-        delete v._audioGroup;
+    if (streams.length === 0) return [];
+
+    // Best audio = the group used by the highest-bandwidth stream (match the
+    // highest audio to the highest video), paired with EVERY video rendition —
+    // best audio is desirable at any video quality for a VOD download, and this
+    // is order-independent. Computed over ALL streams (before dedup) so the
+    // high-bitrate pairing isn't dropped. Falls back to each stream's own group,
+    // and to none for a muxed master (no audio groups).
+    let bestGroup = null;
+    let bestBw = -1;
+    for (const s of streams) {
+        if (s.audioGroup && audios[s.audioGroup] && s.bw > bestBw) {
+            bestBw = s.bw;
+            bestGroup = s.audioGroup;
+        }
+    }
+    const bestAudio = bestGroup ? audios[bestGroup] : null;
+
+    // Dedup by video URL, keeping the highest-bandwidth occurrence.
+    const byUrl = new Map();
+    for (const s of streams) {
+        const prev = byUrl.get(s.url);
+        if (!prev || s.bw > prev.bw) byUrl.set(s.url, s);
+    }
+
+    const variants = [];
+    for (const s of byUrl.values()) {
+        const v = { url: s.url, width: s.width, height: s.height };
+        const a = bestAudio || (s.audioGroup ? audios[s.audioGroup] : null);
+        if (a) v.audioUrl = a;
+        if (/\bavc1/.test(s.codecs)) v.videoCodec = "h264";
+        else if (/\bhvc1|\bhev1/.test(s.codecs)) v.videoCodec = "hevc";
+        if (/\bmp4a/.test(s.codecs)) v.audioCodec = "aac";
+        variants.push(v);
     }
     return variants;
 }

@@ -234,3 +234,18 @@ Headers (incl. any backfilled `Referer`) flow from the capture layer
   asked.
 - Commit messages: explain the root cause and how it was verified, not just the
   change.
+- **C style (all native sources under `app/src/main/cpp/`): write standard,
+  explicit, readable C.** This is a general rule for every `.c`/`.h` here, not
+  about any one line. In particular:
+  - One operation per statement: no assignments inside `if`/`while` conditions,
+    no multiple side effects per line.
+  - Don't chain an interrupt/error check, an assignment, and control flow
+    (`goto`/`return`) together on a single line.
+  - Always brace blocks; put the body on its own line(s).
+  - Check return values explicitly: assign to a variable, then test it.
+
+  Parts of the existing code use a terser, condition-with-side-effects form
+  (e.g. `if (x->interrupt || (err = f()) < 0) goto error;`). That is **not** the
+  style to follow — do not propagate it. Write the explicit equivalent
+  (`if (x->interrupt) goto error;` then `err = f(); if (err < 0) goto error;`)
+  for anything you add or modify.

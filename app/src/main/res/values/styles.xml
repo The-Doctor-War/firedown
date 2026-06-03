@@ -394,7 +394,13 @@
     <style name="Firedown.Widget.DialogOption" parent="">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">16dp</item>
+        <!-- 56dp M3 one-line list-item height (minHeight so a rare wrapped
+             label can still grow), shared with the Browser/Home popup rows so
+             every menu surface reads at the same rhythm. Horizontal 16dp
+             padding + vertical centring, instead of the old all-sides 16dp. -->
+        <item name="android:minHeight">56dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingHorizontal">16dp</item>
         <item name="android:background">?attr/selectableItemBackground</item>
         <item name="android:drawablePadding">16dp</item>
         <item name="android:textAllCaps">false</item>

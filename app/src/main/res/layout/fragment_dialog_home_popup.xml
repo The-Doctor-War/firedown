@@ -54,7 +54,7 @@
             android:maxLines="1"
             android:text="@string/navigation_downloads"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp"
+            android:textSize="16sp"
             app:drawableStartCompat="@drawable/download_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -83,7 +83,7 @@
             android:maxLines="1"
             android:text="@string/home_vault_button"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp"
+            android:textSize="16sp"
             app:drawableStartCompat="@drawable/ic_lock_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -114,7 +114,7 @@
             android:maxLines="1"
             android:text="@string/library_history"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp"
+            android:textSize="16sp"
             app:drawableStartCompat="@drawable/ic_history_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -142,7 +142,7 @@
             android:maxLines="1"
             android:text="@string/browser_menu_settings"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="15sp"
+            android:textSize="16sp"
             app:drawableStartCompat="@drawable/ic_settings_24"
             app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -173,7 +173,7 @@
             android:maxLines="1"
             android:text="@string/delete_browsing_data_on_quit_action"
             android:textColor="?attr/colorPrimary"
-            android:textSize="15sp"
+            android:textSize="16sp"
             app:drawableStartCompat="@drawable/ic_logout_24"
             app:drawableTint="?attr/colorPrimary" />
 

@@ -30,10 +30,10 @@
       9. App + exit      — Settings, optional Quit
 
     Row anatomy:
-      • 48dp tall, 16dp horizontal padding — denser than the
-        56dp the sheet used to render at, fits more rows on
-        short screens without the list feeling crowded since
-        each row is still icon + single line
+      • 56dp tall, 16dp horizontal padding — the M3 one-line
+        list-item height, shared with the Home popup and the
+        OptionsAdapter sheets so every menu row in the app reads
+        at the same rhythm; each row is icon + single line
       • TextView with drawableStartCompat icon at 16dp drawablePadding,
         TitleMedium / 16sp text (M3 list-item headline size),
         onSurfaceVariant
@@ -173,7 +173,7 @@
             <LinearLayout
                 android:id="@+id/popup_new_tab"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -203,7 +203,7 @@
             <LinearLayout
                 android:id="@+id/popup_new_incognito_tab"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -232,7 +232,7 @@
             <LinearLayout
                 android:id="@+id/popup_bookmark_page"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -261,7 +261,7 @@
             <LinearLayout
                 android:id="@+id/popup_find"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -291,7 +291,7 @@
             <LinearLayout
                 android:id="@+id/popup_desktop"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -335,7 +335,7 @@
             <LinearLayout
                 android:id="@+id/popup_bookmarks"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -363,7 +363,7 @@
             <LinearLayout
                 android:id="@+id/popup_history"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -392,7 +392,7 @@
             <LinearLayout
                 android:id="@+id/popup_vault"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -427,7 +427,7 @@
             <LinearLayout
                 android:id="@+id/popup_settings"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"
@@ -457,7 +457,7 @@
             <LinearLayout
                 android:id="@+id/popup_quit"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"
+                android:layout_height="56dp"
                 android:background="?attr/selectableItemBackground"
                 android:clickable="true"
                 android:focusable="true"

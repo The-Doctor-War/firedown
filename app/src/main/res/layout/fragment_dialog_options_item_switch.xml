@@ -5,11 +5,11 @@
     android:background="?attr/selectableItemBackground"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="56dp"
+    android:gravity="center_vertical"
     android:clickable="true"
     android:focusable="true"
     android:orientation="horizontal"
-    android:paddingTop="4dp"
-    android:paddingBottom="4dp"
     android:paddingStart="16dp"
     android:paddingEnd="16dp">
 

@@ -127,7 +127,7 @@ async function sendNative(message) {
  * Unified variant sender for Twitter, Instagram, and future parsers.
  * Handles dedup, sorting, and message construction.
  */
-async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders }) {
+async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders, skipProbe }) {
     if (!Array.isArray(variants) || variants.length === 0) return;
 
     // Sort by height descending — best quality first
@@ -170,6 +170,9 @@ async function sendVariants(details, { variants, origin, description, img, name,
     if (Array.isArray(requestHeaders) && requestHeaders.length > 0) {
         message.requestHeaders = requestHeaders;
     }
+    // skipProbe: parser already supplied codecs/duration, so the Java side must
+    // not FFprobe (probing an AES-HLS variant burns a single-use key — niconico).
+    if (skipProbe) message.skipProbe = true;
 
     sendNative(message);
 }
@@ -3723,6 +3726,156 @@ async function emitNicoStream(details, id, contentUrl) {
     sendNative(message);
 }
 
+// ---- Enumerate renditions from the master playlist (no decryption, so no key
+// burned at capture) and emit per-quality video+audio variants. The downloader
+// then becomes the FIRST/only consumer of the single-use AES key, so the
+// "shows in Capture, hangs on download" decoy path never happens.
+//
+// The parser can't fetch the master itself (delivery.domand validates Origin and
+// JS can't set it), so we capture the PLAYER's own master fetch passively via
+// filterResponseData — the same technique used for the watch/access-rights
+// responses. access-rights records the master URL as pending; listenerNicoMaster
+// matches the player's fetch of it and parses the m3u8. If the master is never
+// seen (timeout), we fall back to the single-master emit so capture still works.
+
+const nicoPendingMaster = new Map(); // masterPathNoQuery -> { id, details, contentUrl, ts }
+const NICO_MASTER_TTL = 8000;
+
+// Passive text-body filter (m3u8 isn't JSON, so nicoFilterJson can't be reused).
+function nicoFilterText(details, label, onText) {
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log("NICO", `${label} filter create failed`, { error: e.message });
+        return;
+    }
+    const chunks = [];
+    filter.ondata = (event) => { chunks.push(new Uint8Array(event.data)); filter.write(event.data); };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) { log("NICO", `${label}: 0 bytes`); return; }
+        const buf = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
+        Promise.resolve().then(() => onText(new TextDecoder("utf-8").decode(buf)));
+    };
+    filter.onerror = () => { log("NICO", `${label}: filter error`); try { filter.close(); } catch (_) {} };
+}
+
+// Parse a domand master m3u8 → { audios:{groupId:url}, videos:[{url,width,height,audioGroup}] }.
+function parseNicoMaster(text) {
+    const lines = text.split(/\r?\n/);
+    const audios = {};
+    const videos = [];
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (line.startsWith("#EXT-X-MEDIA:") && /TYPE=AUDIO/.test(line)) {
+            const gid = (line.match(/GROUP-ID="([^"]+)"/) || [])[1];
+            const uri = (line.match(/URI="([^"]+)"/) || [])[1];
+            if (gid && uri) audios[gid] = uri;
+        } else if (line.startsWith("#EXT-X-STREAM-INF:")) {
+            const res = line.match(/RESOLUTION=(\d+)x(\d+)/) || [];
+            const audioGroup = (line.match(/AUDIO="([^"]+)"/) || [])[1] || null;
+            const url = (lines[i + 1] || "").trim();
+            if (url && /^https?:\/\//.test(url)) {
+                videos.push({
+                    url,
+                    width: parseInt(res[1], 10) || 0,
+                    height: parseInt(res[2], 10) || 0,
+                    audioGroup
+                });
+            }
+        }
+    }
+    return { audios, videos };
+}
+
+// Highest-bitrate audio URL from the EXT-X-MEDIA groups (192kbps > 64kbps).
+function bestNicoAudio(audios) {
+    let best = null;
+    let bestKbps = -1;
+    for (const gid of Object.keys(audios)) {
+        const kb = parseInt((gid.match(/(\d+)kbps/) || [])[1] || "0", 10);
+        if (kb > bestKbps) { bestKbps = kb; best = audios[gid]; }
+    }
+    return best;
+}
+
+// Returns true if it emitted variants, false if the master had nothing usable
+// (caller then falls back to the single-master emit).
+async function emitNicoVariants(details, id, masterText) {
+    const origin = details.documentUrl || details.originUrl
+        || (id ? `https://www.nicovideo.jp/watch/${id}` : details.url);
+    if (alreadySent(origin)) { log("NICO", "variants already sent", { origin }); return true; }
+
+    const { audios, videos } = parseNicoMaster(masterText);
+    const audioUrl = bestNicoAudio(audios);
+    if (!videos.length || !audioUrl) {
+        log("NICO", "master parse yielded no variants");
+        return false;
+    }
+
+    // One variant per unique video rendition, paired with the best audio.
+    const seen = new Set();
+    const variants = [];
+    for (const v of videos) {
+        if (seen.has(v.url)) continue;
+        seen.add(v.url);
+        variants.push({
+            url: v.url,
+            audioUrl,
+            width: v.width,
+            height: v.height,
+            videoCodec: "h264",
+            audioCodec: "aac"
+        });
+    }
+
+    let pageOrigin = "https://www.nicovideo.jp";
+    try { pageOrigin = new URL(origin).origin; } catch (e) {}
+    const requestHeaders = [
+        { name: "Origin", value: pageOrigin },
+        { name: "Referer", value: pageOrigin + "/" }
+    ];
+    try {
+        const cookies = await browser.cookies.getAll({ url: variants[0].url });
+        if (cookies && cookies.length) {
+            requestHeaders.push({ name: "Cookie", value: cookies.map(c => `${c.name}=${c.value}`).join("; ") });
+        }
+    } catch (e) { log("NICO", "cookie read failed", { error: e.message }); }
+
+    const meta = nicoGetMeta(id) || {};
+    log("NICO", `emitting ${variants.length} HLS variant(s)`, { origin, title: meta.title });
+    sendVariants(details, {
+        variants,
+        origin,
+        description: meta.title,
+        name: meta.title,
+        img: meta.img,
+        duration: meta.durationMs,
+        requestHeaders,
+        skipProbe: true
+    });
+    return true;
+}
+
+function listenerNicoMaster(details) {
+    if (isOwnRequest(details.url)) return {};
+    const path = details.url.split("?")[0];
+    const pending = nicoPendingMaster.get(path);
+    if (!pending) return {};
+    nicoPendingMaster.delete(path);
+    log("NICO", "master hit", { path: path.slice(0, 90), id: pending.id });
+    nicoFilterText(details, "master", (text) => {
+        emitNicoVariants(pending.details, pending.id, text).then((ok) => {
+            if (ok === false) emitNicoStream(pending.details, pending.id, pending.contentUrl);
+        });
+    });
+    return {};
+}
+
 function listenerNicoAccessHls(details) {
     if (isOwnRequest(details.url)) return {};
     const id = nicoIdFromAccess(details.url);
@@ -3742,7 +3895,20 @@ function listenerNicoAccessHls(details) {
             });
             return;
         }
-        emitNicoStream(details, id, contentUrl);
+        // Don't emit (and probe) the single master. Record it as pending so the
+        // player's own fetch of it is parsed into per-quality variants (no key
+        // burned). Fall back to the single-master emit if the master isn't seen
+        // within NICO_MASTER_TTL (e.g. the player fetches a rendition directly).
+        const masterPath = contentUrl.split("?")[0];
+        nicoPendingMaster.set(masterPath, { id, details, contentUrl, ts: Date.now() });
+        setTimeout(() => {
+            const p = nicoPendingMaster.get(masterPath);
+            if (p) {
+                nicoPendingMaster.delete(masterPath);
+                log("NICO", "master not seen, single-master fallback");
+                emitNicoStream(p.details, p.id, p.contentUrl);
+            }
+        }, NICO_MASTER_TTL);
     });
     return {};
 }
@@ -3756,6 +3922,14 @@ browser.webRequest.onBeforeRequest.addListener(
 browser.webRequest.onBeforeRequest.addListener(
     listenerNicoAccessHls,
     { urls: ["*://nvapi.nicovideo.jp/v1/watch/*/access-rights/hls*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+// The player's fetch of the signed master playlist — captured passively so we
+// can enumerate renditions without the parser making its own (Origin-blocked) fetch.
+browser.webRequest.onBeforeRequest.addListener(
+    listenerNicoMaster,
+    { urls: ["*://delivery.domand.nicovideo.jp/*/playlists/variants/*.m3u8*"], types: ["xmlhttprequest", "media", "other"] },
     ["blocking"]
 );
 

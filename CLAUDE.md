@@ -260,6 +260,17 @@ Note the boundary (from hls.c): within a **single** `avformat_open_input`,
 libavformat opens** (probe context + download context), each a fresh sign-in
 that re-fetches and burns another single-use key.
 
+**Caveat — it can ALSO double-fetch within ONE open.** `A_naive.log` (stock
+ffmpeg, a single invocation) fetched `video-h264-720p.key` *twice*: the second
+right after `update_init_section` re-opened the init segment (`hls_read_seek`
+sets `pls->cur_init_section = NULL`, so a probe that walks re-reads the init
+and re-runs the key gate). But that only fires once the decode is *already*
+walking on a bad key — i.e. it's a **symptom** of an already-spent session
+(in `A_naive` both tracks decrypted to garbage on their *first* fetch, so it
+was a 2nd-consumer run), not the trigger. The URL-keyed cache covers it anyway
+(the init re-open hits the cache). So "one fetch per context" holds only on the
+*happy* path; don't rely on it.
+
 **Fix must be in ffmpeg (the fork), not an app-flow tweak** — a plain
 `ffmpeg`/libavformat user hits the same single-use key whenever it opens the
 stream more than once (probe + read). Strategy: **cache the key and reuse it;
@@ -270,9 +281,15 @@ refresh only on garbage.**
    skip the server round-trip. This stops the second/third open from burning a
    decoy. Belongs with the fork hls.c patch set (`firedown/patches`); needs a
    `.so` rebuild + `scripts/sync-ffmpeg.sh`.
-2. *Refresh on garbage* — if the cached key produces an undecodable stream (the
-   mov walk / no valid `moof`), invalidate the entry, re-mint a fresh
-   `access-rights/hls` session, and fetch once more.
+2. *Refresh on garbage* — if the cached key produced an undecodable stream
+   (the mov walk / no valid `moof`), invalidate the entry and re-fetch.
+   **Caveats (why this is DEFERRED, see below):** hls.c **cannot re-mint** an
+   `access-rights/hls` session — minting is an app-level re-capture (nvapi +
+   cookies + `accessRightKey`), invisible to the demuxer; and a *blind*
+   re-fetch returns a **decoy** for a single-use key, so it would re-break
+   niconico. Any refresh must be guarded (e.g. armed only after a successful
+   decode for that URL, or off for the domand host) and needs a mov→hls
+   feedback channel that doesn't exist yet.
 
 RESOLVED (the two questions that gated the cache design). Neither could be
 settled with a *fresh live test* — there's no logged-in nico session or
@@ -308,10 +325,60 @@ guarded by a static `AVMutex`. Confirmed on device: a nico 720p stream that
 previously hung now downloads and muxes (the probe burns the real key, the
 reader reuses it instead of fetching a decoy). A `.so` rebuild +
 `scripts/sync-ffmpeg.sh` is still needed to ship the rebuilt binaries.
+KEEP IT UNCONDITIONAL — do **not** gate the cache behind a parser/AVOption.
+We considered an opt-in `firedown_key_reuse` bool (set per-site from the parser
+`sendNative`). **Rejected** because of an asymmetric failure mode: the two
+opens are not symmetric toward the key. `metadatareader` (open #1) is **always
+the first consumer**, so it **always gets the real key and always succeeds** —
+the item **always shows in the Capture fragment**, regardless of any option.
+Only `downloader` (open #2) depends on the cache. A gated cache must therefore
+be set on *both* opens (metadatareader to *populate*, downloader to *use*); if
+the parser/app fails to set it on either, you get the worst UX — **"shows in
+Capture, then hangs on download"** — with no warning, because metadatareader
+never needed the option. Forcing the cache on removes that whole class of bug,
+and it's safe: it's keyed by the full key URL (no cross-content collision), and
+for a *normal* stream the cached bytes equal what a re-fetch would return, so
+reuse is transparent. The only case where reuse differs is a **stable-URL,
+rotating-key** stream — which is *live* HLS; Firedown downloads VOD. So the
+theoretical conflict is far less likely than the gating trap, and is outweighed.
+(If a misbehaving site ever appears, prefer an **opt-OUT** — default on,
+`=0` to disable per-site — over opt-in, so the default never strands a
+download.)
+
+ROTATING KEYS — what the cache does and doesn't handle:
+- **Standard rotation (a new key URL per `#EXT-X-KEY`)**: fully handled — each
+  URL is its own cache entry / its own fetch, exactly like stock ffmpeg.
+- **Same-URL rotation (stable URL, bytes change over time)**: NOT handled — the
+  cache serves the stale bytes until process exit / FIFO eviction. No
+  invalidation, no re-fetch, no re-mint. This is the DEFERRED item below. The
+  correct recovery is **app-level** (detect the failed download, re-run the
+  parser to mint a fresh session, retry with the new URLs), not anything inside
+  hls.c.
+
 DEFERRED: *refresh on garbage* (item 2) — not needed for the duplicate-fetch
-hang and it requires undecodable-stream feedback from the mov layer; revisit
-only if a genuinely stale URL is ever reused (the full-URL keying makes that
-unlikely).
+hang and it requires undecodable-stream feedback from the mov layer; and a
+naive version would re-break niconico (re-fetch = decoy). Revisit only if a
+real stable-URL-rotating-key site appears, and make it guarded (see item 2).
+
+DIAGNOSTIC DISCIPLINE (this bug ate ~10 rounds on confounds — don't repeat):
+- **A clean test = a FRESH session where ffmpeg is the FIRST thing to touch the
+  key.** Any run that is the 2nd+ consumer of a key URL gets a decoy and walks —
+  which looks identical to "the bug" but proves nothing.
+- **Known traps in the throwaway scripts** (kept only as cautionary history):
+  `nico_probe.py` step [3] GETs+decrypts the key *before* running ffmpeg →
+  ffmpeg is the 2nd consumer → always walks (self-poison). `nico_keyhdr.py`
+  fetches the key 5× in one session → only fetch #1 (variant A) is real →
+  *falsely* implicated `X-Frontend-Id` (the disproven theory). Reusing a dumped
+  `resolved.json` whose session was already touched, or `A_naive.log`'s spent
+  session, → both tracks garbage on the *first* fetch → always walks.
+  `nico_keyonce.py` is the one clean proof of single-use (same URL ×3 → #1 real,
+  #2/#3 garbage+different); it does **not** involve ffmpeg.
+- **Confounds already tested and discarded — do NOT revisit:** headers
+  (`X-Frontend-Id`), cookies, `Range`, and seekability/`is_streamed`. The
+  `http.c` `is_streamed = (total <= 0)` fix is a **separate** bug (it stops the
+  *read_header* moof/mdat walk for a seekable-unknown-size stream); it makes
+  **no** difference to this key-walk, which happens in `find_stream_info` on a
+  decoy key.
 
 DISPROVEN earlier theory (do not repeat): "the key needs `X-Frontend-Id: 6` and
 no `Range`." That was a **confound** — in the header experiment, the only

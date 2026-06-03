@@ -298,12 +298,16 @@ recorded evidence + upstream `hls.c`, and — more importantly — the cache was
   cache collapses probe+reader back to that single real fetch, so it is the
   full fix for the duplicate-fetch case.
 
-SHIPPED: the *cache + reuse* patch (item 1) — `firedown-ffmpeg` branch
-`dev/animated-webp`, `firedown/patches/0004-hls-c-single-use-key-cache.patch`
+SHIPPED: the *cache + reuse* patch (item 1) — `firedown-ffmpeg` `master` (and
+`dev/animated-webp`), `firedown/patches/0004-hls-c-single-use-key-cache.patch`
 (generator: `firedown/scripts/generate-keycache-patch.sh`; wired into
-`apply-firedown-patches.sh`, gated on a `FIREDOWN-HLS-KEYCACHE` marker). Still
-needs a `.so` rebuild + `scripts/sync-ffmpeg.sh`, then an on-device run on a
-fresh nico session (no pre-fetch) to confirm convergence end-to-end.
+`apply-firedown-patches.sh`, gated on a `FIREDOWN-HLS-KEYCACHE` marker). The
+cache is keyed by the full signed key URL, FIFO-bounded (16 entries),
+first-writer-wins (a racing decoy fetch can't clobber a cached real key), and
+guarded by a static `AVMutex`. Confirmed on device: a nico 720p stream that
+previously hung now downloads and muxes (the probe burns the real key, the
+reader reuses it instead of fetching a decoy). A `.so` rebuild +
+`scripts/sync-ffmpeg.sh` is still needed to ship the rebuilt binaries.
 DEFERRED: *refresh on garbage* (item 2) — not needed for the duplicate-fetch
 hang and it requires undecodable-stream feedback from the mov layer; revisit
 only if a genuinely stale URL is ever reused (the full-URL keying makes that

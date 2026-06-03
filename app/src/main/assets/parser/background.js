@@ -3690,11 +3690,14 @@ async function emitNicoStream(details, id, contentUrl) {
         try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
 
-    // delivery.domand validates Origin and a domand cookie on EVERY fetch
-    // (master / media playlist / segment / AES key). ffmpeg (FFmpegOkhttp)
-    // sends neither by default, so the streams 403 even though the URL is
-    // CloudFront-signed. Attach the page Origin/Referer and the cookies scoped
-    // to the content host so ffmpeg's per-request headers carry them.
+    // delivery.domand validates Origin + a domand cookie on every fetch, so we
+    // attach the page Origin/Referer and the content-host cookies. We emit the
+    // signed master m3u8 as a single `media` entry (no per-quality splitting).
+    // NB: the "endless probing / 720p hangs" bug is NOT a header problem — it's
+    // the domand AES key being SINGLE-USE per session (fetched once by the
+    // metadatareader probe, again by the downloader → the second fetch is a
+    // garbage decoy → mov walks). The fix belongs in ffmpeg (cache/reuse the
+    // key), not here — see the "Niconico domand AES key" section in CLAUDE.md.
     let pageOrigin = "https://www.nicovideo.jp";
     try { pageOrigin = new URL(origin).origin; } catch (e) {}
     const requestHeaders = [

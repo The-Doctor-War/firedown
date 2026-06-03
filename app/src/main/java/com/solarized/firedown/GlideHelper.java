@@ -84,8 +84,11 @@ public class GlideHelper {
         // straight to the host's canvas at its current bounds, so the
         // result is crisp at any view size (grid / list / sw600 / sw720)
         // without per-size raster caches or first-frame blur from a
-        // raster scaled into a larger cell.
-        return MimeTypeThumbnail.generateDrawable(image.getContext(), mimeType);
+        // raster scaled into a larger cell. fillBounds=true so the tint
+        // fills the whole rounded thumbnail slot (the list slot is ~1:1,
+        // 78×64; a centred 16:10 card would float with transparent bands
+        // top/bottom and never reach the rounded corners).
+        return MimeTypeThumbnail.generateDrawable(image.getContext(), mimeType, true);
     }
 
     private static <T> RequestListener<T> fallbackListener(@NonNull String mimeType,

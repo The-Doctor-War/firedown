@@ -20,21 +20,40 @@ public class MimeTypeThumbnail {
     private static final int COLOR_BRAND_ORANGE    = 0xFFf0716c;
 
     /**
-     * Returns a resolution-independent Drawable that paints a tinted
-     * 16:10 card (matching DownloadFragment's grid cell aspect) with
-     * the mime icon centred inside, sized from the host's current
-     * bounds. No intermediate raster — the icon stays crisp at any
-     * view size (grid / list / sw600 / sw720 / player full screen).
+     * Letterboxed fallback — paints a centred 16:10 card with the mime
+     * icon, the same aspect real artwork takes under PlayerView's
+     * {@code resize_mode="fit"}. Used by the media viewer; kept as the
+     * default so existing callers are unchanged.
      */
     @NonNull
     public static Drawable generateDrawable(@NonNull Context context, @NonNull String mimeType) {
+        return generateDrawable(context, mimeType, false);
+    }
+
+    /**
+     * Returns a resolution-independent Drawable that paints a tinted
+     * card with the mime icon centred inside, sized from the host's
+     * current bounds. No intermediate raster — the icon stays crisp at
+     * any view size (grid / list / sw600 / sw720 / player full screen).
+     *
+     * @param fillBounds when {@code true} the tint fills the whole view
+     *   (so it reaches every corner of the rounded-clipped thumbnail
+     *   slot the same way centerCrop artwork does — the list/grid rows);
+     *   when {@code false} it letterboxes to a centred 16:10 card (the
+     *   media viewer, matching {@code resize_mode="fit"}). A square-ish
+     *   list slot (78×64) would otherwise leave the 16:10 card floating
+     *   with transparent bands top/bottom, never reaching the corners.
+     */
+    @NonNull
+    public static Drawable generateDrawable(@NonNull Context context, @NonNull String mimeType,
+                                            boolean fillBounds) {
         int color = getColorForMimeType(mimeType);
         Drawable icon = ContextCompat.getDrawable(context, FileUriHelper.getMimeTypeIcon(mimeType));
         if (icon != null) {
             icon = icon.mutate();
             icon.setTint(color);
         }
-        return new MimeTypeFallbackDrawable(color, icon);
+        return new MimeTypeFallbackDrawable(color, icon, fillBounds);
     }
 
     private static int getColorForMimeType(@NonNull String mimeType) {
@@ -47,12 +66,14 @@ public class MimeTypeThumbnail {
 
         private final Paint mBgPaint;
         private final Drawable mIcon;
+        private final boolean mFillBounds;
 
-        MimeTypeFallbackDrawable(int color, @Nullable Drawable icon) {
+        MimeTypeFallbackDrawable(int color, @Nullable Drawable icon, boolean fillBounds) {
             mBgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             mBgPaint.setColor(color);
             mBgPaint.setAlpha(30);
             mIcon = icon;
+            mFillBounds = fillBounds;
         }
 
         /** 16:10, matching DownloadFragment's grid cell card. */
@@ -62,20 +83,29 @@ public class MimeTypeThumbnail {
         public void draw(@NonNull Canvas canvas) {
             Rect b = getBounds();
             if (b.isEmpty()) return;
-            // Paint a centred 16:10 card (matching the downloads grid
-            // cell aspect), not the full viewport, so the fallback
-            // letterboxes the same way real artwork does under
-            // PlayerView's resize_mode="fit".
-            int cardWidth, cardHeight;
-            if (b.width() / (float) b.height() > CARD_ASPECT) {
-                cardHeight = b.height();
-                cardWidth = Math.round(cardHeight * CARD_ASPECT);
-            } else {
+            int cardWidth, cardHeight, cardLeft, cardTop;
+            if (mFillBounds) {
+                // List / grid thumbnail slot: fill the whole view so the
+                // tint reaches every (rounded-clipped) corner, the same way
+                // centerCrop artwork fills it. No letterbox.
                 cardWidth = b.width();
-                cardHeight = Math.round(cardWidth / CARD_ASPECT);
+                cardHeight = b.height();
+                cardLeft = b.left;
+                cardTop = b.top;
+            } else {
+                // Media viewer: paint a centred 16:10 card, not the full
+                // viewport, so the fallback letterboxes the same way real
+                // artwork does under PlayerView's resize_mode="fit".
+                if (b.width() / (float) b.height() > CARD_ASPECT) {
+                    cardHeight = b.height();
+                    cardWidth = Math.round(cardHeight * CARD_ASPECT);
+                } else {
+                    cardWidth = b.width();
+                    cardHeight = Math.round(cardWidth / CARD_ASPECT);
+                }
+                cardLeft = b.left + (b.width() - cardWidth) / 2;
+                cardTop = b.top + (b.height() - cardHeight) / 2;
             }
-            int cardLeft = b.left + (b.width() - cardWidth) / 2;
-            int cardTop = b.top + (b.height() - cardHeight) / 2;
             canvas.drawRect(cardLeft, cardTop, cardLeft + cardWidth, cardTop + cardHeight, mBgPaint);
             if (mIcon == null) return;
             int iconSize = (int) (Math.min(cardWidth, cardHeight) * 0.5f);

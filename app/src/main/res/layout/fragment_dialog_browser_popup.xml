@@ -35,7 +35,8 @@
         short screens without the list feeling crowded since
         each row is still icon + single line
       • TextView with drawableStartCompat icon at 16dp drawablePadding,
-        TitleMedium / 15sp text, onSurfaceVariant
+        TitleMedium / 16sp text (M3 list-item headline size),
+        onSurfaceVariant
       • Desktop site carries a MaterialSwitch as duplicate-parent-state
         status (whole row is the click target)
       • Everything else has no trailing element — the ripple is enough
@@ -189,7 +190,7 @@
                     android:maxLines="1"
                     android:text="@string/popup_tabs_new"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_tabs_new_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -219,7 +220,7 @@
                     android:maxLines="1"
                     android:text="@string/open_new_private_tab_2"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_incognito_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -249,7 +250,7 @@
                     android:maxLines="1"
                     android:text="@string/browser_menu_bookmark_this_page_2"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_bookmark_border_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -277,7 +278,7 @@
                     android:maxLines="1"
                     android:text="@string/browser_menu_find_in_page"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_search_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -308,7 +309,7 @@
                     android:maxLines="1"
                     android:text="@string/browser_menu_desktop_site"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_computer_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -351,7 +352,7 @@
                     android:maxLines="1"
                     android:text="@string/library_bookmarks"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_bookmarks_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -379,7 +380,7 @@
                     android:maxLines="1"
                     android:text="@string/library_history"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_history_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -409,7 +410,7 @@
                     android:maxLines="1"
                     android:text="@string/navigation_vault"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_lock_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -443,7 +444,7 @@
                     android:maxLines="1"
                     android:text="@string/browser_menu_settings"
                     android:textColor="?attr/colorOnSurfaceVariant"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_settings_24"
                     app:drawableTint="?attr/colorOnSurfaceVariant" />
 
@@ -475,7 +476,7 @@
                     android:maxLines="1"
                     android:text="@string/delete_browsing_data_on_quit_action"
                     android:textColor="?attr/colorPrimary"
-                    android:textSize="15sp"
+                    android:textSize="16sp"
                     app:drawableStartCompat="@drawable/ic_logout_24"
                     app:drawableTint="?attr/colorPrimary" />
 

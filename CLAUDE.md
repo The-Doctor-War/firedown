@@ -274,18 +274,40 @@ refresh only on garbage.**
    mov walk / no valid `moof`), invalidate the entry, re-mint a fresh
    `access-rights/hls` session, and fetch once more.
 
-OPEN QUESTIONS to settle next session (do NOT assume — these decide the cache
-key-scope and whether the cache alone suffices):
-- Is the real content key **static per content** or **per-session**? `nico_keyonce`
-  #1 was `c93a35…` while an older dump's working key was `0d7c50…` (different) —
-  hinting **per-session**. If per-session, cache must be scoped to the session
-  (or keyed by the full signed key URL) and "refresh" means a new session;
-  caching by bare path across sessions would then serve a stale/wrong key.
-- Does a single, **clean** first-consumer `avformat_open_input` on a fresh
-  session converge (proving within-one-context is fine and the cache fully
-  fixes it)? The test must NOT pre-fetch/decrypt the key — any probe that
-  fetches the key first burns fetch #1 and poisons the run (this is exactly the
-  trap my own `nico_probe.py` step [3] fell into).
+RESOLVED (the two questions that gated the cache design). Neither could be
+settled with a *fresh live test* — there's no logged-in nico session or
+on-device build reachable from where this work was done, and (decisively) any
+live probe that fetches the key first burns fetch #1 and poisons the run, which
+the work was forbidden to do. So both were settled by reasoning from the
+recorded evidence + upstream `hls.c`, and — more importantly — the cache was
+**keyed so the answer doesn't gate correctness**:
+- **Static per content vs. per-session → treat as per-session.** Two dumps of
+  the same content yielded different working keys (`c93a35…` vs. `0d7c50…`),
+  and the endpoint is `Cache-Control: private, no-cache` behind a per-session
+  signed URL. So the cache is **keyed by the full signed key URL** (which
+  embeds the session token), never by bare path/rendition. That keying is
+  correct under *either* answer: same session ⇒ same URL ⇒ one real fetch
+  reused across probe+reader; new session ⇒ new URL ⇒ its own fetch #1. We
+  never serve one session's bytes to another, so even if the key were static
+  per content this is still right (just one fetch per session).
+- **Does a single clean first-consumer open converge? → Yes, by
+  construction.** Within one `avformat_open_input`, `open_input` fetches the
+  key exactly once (`strcmp(seg->key, pls->key_url)`) and a media playlist
+  carries one `#EXT-X-KEY`; a clean first open therefore burns only fetch #1
+  (the real key) and decodes. The bug is *exclusively* the second open. The
+  cache collapses probe+reader back to that single real fetch, so it is the
+  full fix for the duplicate-fetch case.
+
+SHIPPED: the *cache + reuse* patch (item 1) — `firedown-ffmpeg` branch
+`dev/animated-webp`, `firedown/patches/0004-hls-c-single-use-key-cache.patch`
+(generator: `firedown/scripts/generate-keycache-patch.sh`; wired into
+`apply-firedown-patches.sh`, gated on a `FIREDOWN-HLS-KEYCACHE` marker). Still
+needs a `.so` rebuild + `scripts/sync-ffmpeg.sh`, then an on-device run on a
+fresh nico session (no pre-fetch) to confirm convergence end-to-end.
+DEFERRED: *refresh on garbage* (item 2) — not needed for the duplicate-fetch
+hang and it requires undecodable-stream feedback from the mov layer; revisit
+only if a genuinely stale URL is ever reused (the full-URL keying makes that
+unlikely).
 
 DISPROVEN earlier theory (do not repeat): "the key needs `X-Frontend-Id: 6` and
 no `Range`." That was a **confound** — in the header experiment, the only

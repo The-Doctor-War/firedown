@@ -3402,13 +3402,59 @@ function filterRumbleJson(details, label, onParsed) {
     });
 }
 
+// Rumble watch embedJS carries progressive MP4 renditions (keyed by height)
+// alongside the HLS auto master. Aggregate the MP4 set into quality variants —
+// same as the shorts feed — so capture needs no ffprobe to enumerate. We leave
+// the HLS master path untouched: it's the fallback for any video with no MP4 set.
+function collectRumbleMp4(group) {
+    const out = [];
+    const mp4 = group && group.mp4;
+    if (!mp4) return out;
+    const entries = Array.isArray(mp4)
+        ? mp4.map((e) => [null, e])
+        : (typeof mp4 === "object" ? Object.entries(mp4) : []);
+    for (const [key, e] of entries) {
+        const url = typeof e === "string" ? e : (e && e.url);
+        if (typeof url !== "string" || !/^https?:\/\//.test(url)) continue;
+        const height = parseInt(key, 10) || e?.meta?.h || e?.h || e?.res || e?.resolution || e?.height || 0;
+        let width = e?.meta?.w || e?.w || e?.width || 0;
+        if (!width && height) width = Math.round(height * 16 / 9); // 16:9 estimate, label only
+        out.push({ url, width, height, videoCodec: "h264" });
+    }
+    return out;
+}
+
 // Watch page: embedJS request=video carries one focal video.
 function emitRumbleVideo(details, parsed) {
-    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
-    if (!hls) { log("RUMBLE", "embedJS had no HLS url"); return; }
     const origin = parsed.l ? `https://rumble.com${parsed.l}`
         : (details.documentUrl || details.originUrl || details.url);
     const thumb = parsed.i || (Array.isArray(parsed.t) && parsed.t[0]?.i) || undefined;
+
+    // Prefer the structured MP4 qualities (no ffprobe needed). Dedup by URL.
+    const seen = new Set();
+    const variants = [];
+    for (const v of [...collectRumbleMp4(parsed.ua), ...collectRumbleMp4(parsed.u)]) {
+        if (seen.has(v.url)) continue;
+        seen.add(v.url);
+        variants.push(v);
+    }
+    if (variants.length > 0) {
+        log("RUMBLE", `emitting ${variants.length} mp4 variant(s)`, { origin, title: parsed.title });
+        sendVariants(details, {
+            variants,
+            origin,
+            description: parsed.title,
+            name: parsed.author?.name,
+            img: thumb,
+            duration: parsed.duration ? parsed.duration * 1000 : 0,
+            skipProbe: true
+        });
+        return;
+    }
+
+    // Fallback: no MP4 set — emit the HLS master (ffmpeg enumerates qualities).
+    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
+    if (!hls) { log("RUMBLE", "embedJS had no MP4 set or HLS url"); return; }
     emitRumbleHls(details, {
         hls, origin, title: parsed.title, author: parsed.author?.name,
         thumb, durationSec: parsed.duration

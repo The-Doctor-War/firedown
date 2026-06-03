@@ -3691,21 +3691,18 @@ async function emitNicoStream(details, id, contentUrl) {
     }
 
     // delivery.domand validates Origin + a domand cookie on every fetch, so we
-    // attach the page Origin/Referer and the content-host cookies. X-Frontend-Id
-    // /X-Frontend-Version mirror what the web player sends (header parity) — keep
-    // them, but NOTE: they do NOT fix the "endless probing / 720p hangs" bug.
-    // That hang is the domand AES key being SINGLE-USE per session: the key is
-    // fetched twice (metadatareader probe, then downloader), and the second fetch
-    // returns a garbage decoy → garbage decryption → mov walks the track. The real
-    // fix lives in the probe/download path (fetch the key once), not here. See the
-    // "Niconico domand AES key" section in CLAUDE.md.
+    // attach the page Origin/Referer and the content-host cookies. We emit the
+    // signed master m3u8 as a single `media` entry (no per-quality splitting).
+    // NB: the "endless probing / 720p hangs" bug is NOT a header problem — it's
+    // the domand AES key being SINGLE-USE per session (fetched once by the
+    // metadatareader probe, again by the downloader → the second fetch is a
+    // garbage decoy → mov walks). The fix belongs in ffmpeg (cache/reuse the
+    // key), not here — see the "Niconico domand AES key" section in CLAUDE.md.
     let pageOrigin = "https://www.nicovideo.jp";
     try { pageOrigin = new URL(origin).origin; } catch (e) {}
     const requestHeaders = [
         { name: "Origin", value: pageOrigin },
-        { name: "Referer", value: pageOrigin + "/" },
-        { name: "X-Frontend-Id", value: "6" },
-        { name: "X-Frontend-Version", value: "0" }
+        { name: "Referer", value: pageOrigin + "/" }
     ];
     try {
         const cookies = await browser.cookies.getAll({ url: contentUrl });

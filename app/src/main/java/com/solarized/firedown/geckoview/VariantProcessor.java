@@ -29,9 +29,15 @@ public class VariantProcessor {
     private static final String TAG = VariantProcessor.class.getSimpleName();
 
     private final Map<String, String> mHeaders;
+    private final boolean mSkipProbe;
 
     public VariantProcessor(Map<String, String> headers) {
+        this(headers, false);
+    }
+
+    public VariantProcessor(Map<String, String> headers, boolean skipProbe) {
         mHeaders = headers;
+        mSkipProbe = skipProbe;
     }
 
     /**
@@ -48,6 +54,23 @@ public class VariantProcessor {
         }
 
         if (variants.isEmpty()) return;
+
+        // Parser-supplied metadata (e.g. niconico enumerates renditions from the
+        // master playlist): do NOT FFprobe. Probing opens+decrypts a segment,
+        // which for a single-use-AES-key HLS (domand) burns the key the
+        // downloader needs (→ "shows in Capture, then hangs on download"). The
+        // download is then the first/only key consumer. Codecs are already set
+        // per variant by JsonHelper.parseVariants; duration comes from the message.
+        if (mSkipProbe) {
+            Log.d(TAG, "skipProbe set, using parser metadata (no FFprobe)");
+            entity.setMimeType(FileUriHelper.MIMETYPE_MP4);
+            entity.setType(UrlType.MEDIA.getValue());
+            entity.setAudio(false);
+            entity.setStreams(variants);
+            entity.setHasVariants(variants.size() > 1);
+            entity.setTags(buildTags(entity, variants));
+            return;
+        }
 
         FFmpegEntity first = variants.get(0);
         String videoUrl = first.getStreamUrl();

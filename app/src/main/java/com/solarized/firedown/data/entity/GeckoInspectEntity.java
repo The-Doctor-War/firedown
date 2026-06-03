@@ -31,6 +31,11 @@ public class GeckoInspectEntity {
     // BCP-47 language tag for subtitle messages (e.g. "en", "es-MX"). Optional.
     private String language;
     private boolean incognito;
+    // When true, the parser already supplied full stream metadata (codecs,
+    // duration), so GeckoInspect/VariantProcessor must NOT FFprobe. Probing an
+    // AES-HLS here decrypts a segment and would burn a single-use key the
+    // downloader needs (niconico domand). See CLAUDE.md "Niconico domand AES key".
+    private boolean skipProbe;
     public String getRequestId() {
         return requestId;
     }
@@ -156,5 +161,11 @@ public class GeckoInspectEntity {
     }
     public void setIncognito(boolean incognito) {
         this.incognito = incognito;
+    }
+    public boolean isSkipProbe() {
+        return skipProbe;
+    }
+    public void setSkipProbe(boolean skipProbe) {
+        this.skipProbe = skipProbe;
     }
 }

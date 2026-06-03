@@ -78,6 +78,7 @@ public class GeckoInspectTask implements Runnable {
     private final long mDuration;
     private final String mLanguage;
     private final boolean mIncognito;
+    private final boolean mSkipProbe;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
 
     public GeckoInspectTask(
@@ -106,6 +107,7 @@ public class GeckoInspectTask implements Runnable {
         mDuration = geckoInspectEntity.getDuration();
         mLanguage = geckoInspectEntity.getLanguage();
         mIncognito = geckoInspectEntity.isIncognito();
+        mSkipProbe = geckoInspectEntity.isSkipProbe();
 
         Log.d(TAG, "Task Created for URL: " + mUrl + " img: " + mImg
                 + " variants: " + (mVariants != null ? mVariants.size() : 0)
@@ -219,7 +221,7 @@ public class GeckoInspectTask implements Runnable {
             return true;
 
         } else if (mVariants != null && !mVariants.isEmpty()) {
-            new VariantProcessor(mRequestHeaders).process(entity, mVariants);
+            new VariantProcessor(mRequestHeaders, mSkipProbe).process(entity, mVariants);
             return true;
 
         } else {

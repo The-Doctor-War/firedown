@@ -33,6 +33,7 @@ public class JsonHelper {
             entity.setOrigin(parseOrigin(json));
             entity.setRequestHeaders(parseHeaders(json));
             entity.setIncognito(json.optBoolean("incognito", false));
+            entity.setSkipProbe(json.optBoolean("skipProbe", false));
 
             // Parse variants with SABR data if available
             JSONObject sabr = json.optJSONObject("sabr");

@@ -424,13 +424,16 @@ Don'ts (each cost rounds here):
 ## UI conventions (Material 3)
 
 - **Menu rows are M3 one-line list items: 56dp tall, 16sp text
-  (`TitleMedium`), 16dp horizontal padding, `onSurfaceVariant`.** Applies to
-  every menu surface — Browser/Home popups (hand-built `LinearLayout` rows),
-  the `OptionsAdapter` sheets (New tab / Web options / Downloads option, via
-  the `Firedown.Widget.DialogOption` style → `minHeight=56dp` so a rare wrapped
-  label can grow), and the search-engine list. Two-line rows (e.g. Download
-  info) stay at 72dp. Keep these in lockstep; don't reintroduce a denser 48dp
-  or a 15sp override for one sheet.
+  (`TitleMedium`), 16dp horizontal gutter, `onSurfaceVariant`.** Applies to
+  every menu/sheet surface — Browser/Home popups (hand-built `LinearLayout`
+  rows), the Security sheet + its blocked-ads/trackers detail dialogs and
+  variant rows, the `OptionsAdapter` sheets (New tab / Web options / Downloads
+  option, via the `Firedown.Widget.DialogOption` style → `minHeight=56dp` so a
+  rare wrapped label can grow), and the search-engine list. The 16dp gutter is
+  shared too — identity headers and sheet content insets all sit at 16dp (not
+  the old 20/24dp). Two-line rows (e.g. Download info) stay at 72dp. Keep these
+  in lockstep; don't reintroduce a denser 48dp, a 15sp override, or a 20/24dp
+  gutter for one sheet.
 - **The generated mime fallback thumbnail (`MimeTypeThumbnail`) has two modes.**
   List/grid rows pass `fillBounds=true` so the tint fills the whole
   rounded-clipped slot (the list slot is ~1:1, 78×64dp). The **media viewer

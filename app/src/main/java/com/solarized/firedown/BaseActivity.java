@@ -13,6 +13,9 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +45,10 @@ import com.solarized.firedown.utils.BuildUtils;
 import com.solarized.firedown.utils.NavigationUtils;
 import com.solarized.firedown.utils.NotificationID;
 import com.solarized.firedown.utils.Utils;
+
+import org.mozilla.geckoview.GeckoResult;
+
+import java.util.ArrayDeque;
 
 import javax.inject.Inject;
 
@@ -90,6 +97,60 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
      * is true, preventing the HomeFragment flash.
      */
     protected boolean mColdStartNavigated;
+
+    // ── WebAuthn / passkeys ──────────────────────────────────────────────────
+    //
+    // GeckoView implements the Web Authentication API (navigator.credentials)
+    // on top of Google Play Services FIDO2 plus — on Android 14+ — the platform
+    // Credential Manager, which is what surfaces passkeys stored in third-party
+    // password managers (1Password, Bitwarden, …) to web pages. GeckoView can't
+    // launch that credential UI itself: for the FIDO2 paths (security keys,
+    // non-discoverable credentials, and the fallback when a passkey isn't
+    // resolved purely through Credential Manager) it builds a PendingIntent and
+    // hands it to GeckoRuntime.startActivityForResult, which forwards it to the
+    // runtime's ActivityDelegate. With no delegate attached that call returns
+    // immediately with IllegalStateException("No delegate attached"), so every
+    // such WebAuthn/passkey login silently fails. Wiring this delegate is the
+    // required app-side integration step (see the geckoview_example app).
+    //
+    // Credential prompts are modal and user-driven (one at a time), so launch
+    // order == completion order; a FIFO queue is enough to pair each Activity
+    // result back with the GeckoResult Gecko is awaiting. (The runtime is an
+    // app-wide singleton but the result is delivered through this activity's
+    // launcher, so the queue lives on the activity instance.)
+    private final ArrayDeque<GeckoResult<Intent>> mWebAuthnPending = new ArrayDeque<>();
+
+    private final ActivityResultLauncher<IntentSenderRequest> mWebAuthnLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartIntentSenderForResult(),
+                    result -> {
+                        GeckoResult<Intent> pending = mWebAuthnPending.poll();
+                        if (pending == null) {
+                            return;
+                        }
+                        if (result.getResultCode() == RESULT_OK) {
+                            pending.complete(result.getData());
+                        } else {
+                            // Gecko's contract: any non-OK result (user cancelled,
+                            // credential UI failed) must complete the GeckoResult
+                            // exceptionally so the page sees a WebAuthn abort/error
+                            // rather than hanging on an unresolved promise.
+                            pending.completeExceptionally(
+                                    new RuntimeException("WebAuthn request was cancelled"));
+                        }
+                    });
+
+    /**
+     * Tracks which activity instance currently owns the runtime's
+     * {@code ActivityDelegate}. The runtime is an app-wide singleton, but the
+     * delegate must launch from — and return its result to — the foreground
+     * activity, so each activity claims ownership in {@link #onResume()} and
+     * only the current owner relinquishes it in {@link #onDestroy()}. Without
+     * the ownership guard a finishing background activity (destroyed after the
+     * next one has already resumed and re-claimed the delegate) would wipe the
+     * foreground activity's delegate.
+     */
+    private static BaseActivity sActivityDelegateOwner;
 
 
     @Override
@@ -193,6 +254,10 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
     protected void onResume(){
         super.onResume();
         Log.d(TAG, "onResume");
+        // Claim the runtime's WebAuthn ActivityDelegate for the foreground
+        // activity so passkey/FIDO credential prompts launch from (and return
+        // to) whichever activity is currently visible.
+        installWebAuthnDelegate();
         handleIntent(getIntent());
         mPaused = false;
         // Crash-report sheet — surfaces here rather than in any single
@@ -227,8 +292,45 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
 
     @Override
     protected void onDestroy(){
+        // Only the current owner clears the delegate. By the time a finishing
+        // activity is destroyed, the next activity has already resumed and
+        // re-claimed ownership, so this no-ops for it and leaves the foreground
+        // delegate intact; it only fires for the genuinely-last activity.
+        if (sActivityDelegateOwner == this) {
+            mGeckoRuntimeHelper.getGeckoRuntime().setActivityDelegate(null);
+            sActivityDelegateOwner = null;
+        }
         mActivityContentFrame = null;
         super.onDestroy();
+    }
+
+    // ── WebAuthn / passkeys ──────────────────────────────────────────────────
+
+    /**
+     * Installs this activity as the runtime's WebAuthn {@code ActivityDelegate}.
+     * Called from {@link #onResume()} so the foreground activity always owns the
+     * delegate. When Gecko needs to show a FIDO2/passkey credential UI it passes
+     * us a {@link android.app.PendingIntent}; we launch it via the IntentSender
+     * result launcher and return a {@link GeckoResult} that the launcher
+     * callback resolves with the credential intent (or an exception on cancel).
+     */
+    private void installWebAuthnDelegate() {
+        sActivityDelegateOwner = this;
+        mGeckoRuntimeHelper.getGeckoRuntime().setActivityDelegate(pendingIntent -> {
+            GeckoResult<Intent> result = new GeckoResult<>();
+            try {
+                mWebAuthnPending.add(result);
+                mWebAuthnLauncher.launch(
+                        new IntentSenderRequest.Builder(pendingIntent.getIntentSender()).build());
+            } catch (Exception e) {
+                // Launcher already unregistered (activity tearing down) or the
+                // IntentSender was rejected — fail this request instead of
+                // leaving Gecko waiting on a promise that never resolves.
+                mWebAuthnPending.remove(result);
+                result.completeExceptionally(e);
+            }
+            return result;
+        });
     }
 
     // ── Intent handling ──────────────────────────────────────────────────────

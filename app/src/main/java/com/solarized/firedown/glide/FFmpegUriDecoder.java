@@ -72,8 +72,12 @@ public class FFmpegUriDecoder implements ResourceDecoder<Uri, Bitmap> {
 
         Map<String, String> mapHeaders = Utils.stringToMap(headers);
 
+        // No explicit position requested: pass -1 so the native thumbnailer
+        // auto-seeks a few seconds in (skipping the usual black opening frame)
+        // and falls back to the head if that fails. A provided LENGTH is
+        // honoured as before.
         if (length == null)
-            length = 0L;
+            length = -1L;
 
         if (downSampleStrategy == null)
             downSampleStrategy = DownsampleStrategy.NONE;

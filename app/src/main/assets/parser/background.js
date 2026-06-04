@@ -130,6 +130,19 @@ async function sendNative(message) {
 async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders, skipProbe }) {
     if (!Array.isArray(variants) || variants.length === 0) return;
 
+    // If the parser already has what the capture-time ffmpeg probe would supply
+    // — a known duration on progressive (single-URL) variants — skip the probe.
+    // Its other outputs are redundant here: the container is mp4, the codecs are
+    // unused downstream, and it doesn't reject bad URLs anyway (it commits the
+    // entity regardless). This is why Instagram/Threads/Facebook/TikTok (which
+    // all carry url + resolution + duration from their APIs) no longer probe.
+    // Variants with a separate audioUrl (e.g. Bilibili DASH) are EXCLUDED — they
+    // mux at download and we don't trust split-track metadata blindly. Callers
+    // that must force it (HLS renditions, niconico) still pass skipProbe = true.
+    if (!skipProbe && duration > 0 && variants.every(v => !v.audioUrl)) {
+        skipProbe = true;
+    }
+
     // Sort by height descending — best quality first
     variants.sort((a, b) => (b.height || 0) - (a.height || 0));
 

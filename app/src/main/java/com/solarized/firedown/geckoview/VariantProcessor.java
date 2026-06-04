@@ -32,15 +32,17 @@ public class VariantProcessor {
     private final Map<String, String> mHeaders;
     private final boolean mSkipProbe;
 
-    // A single progressive container (downloaded as a raw byte stream via
-    // HttpDownloadStrategy), as opposed to an HLS/DASH manifest that ffmpeg must
-    // mux. Matches the extension before any query string — same shape as the
-    // URL patterns in UrlStringUtils.
-    private static final Pattern PROGRESSIVE_URL =
-            Pattern.compile("https?://.*\\.(mp4|m4v|mov|webm)(?:\\?.*|$)", Pattern.CASE_INSENSITIVE);
+    // An HLS/DASH manifest (ffmpeg must mux it) — as opposed to a progressive
+    // container, downloaded raw via HttpDownloadStrategy. Matches the extension
+    // before any query string. We test for a *manifest* rather than for a
+    // progressive extension because progressive CDN URLs are frequently tokenized
+    // with no .mp4 at all (TikTok), whereas HLS/DASH renditions reliably end in
+    // .m3u8/.mpd — so "not a manifest" reliably means progressive.
+    private static final Pattern MANIFEST_URL =
+            Pattern.compile("https?://.*\\.(m3u8|mpd)(?:\\?.*|$)", Pattern.CASE_INSENSITIVE);
 
-    private static boolean isProgressiveFile(String url) {
-        return !TextUtils.isEmpty(url) && PROGRESSIVE_URL.matcher(url).matches();
+    private static boolean isManifestUrl(String url) {
+        return !TextUtils.isEmpty(url) && MANIFEST_URL.matcher(url).matches();
     }
 
     public VariantProcessor(Map<String, String> headers) {
@@ -76,16 +78,17 @@ public class VariantProcessor {
         if (mSkipProbe) {
             // entity type drives strategy selection (DownloadTask.selectStrategy):
             // MEDIA → ffmpeg (FFmpegMux/Merge), FILE → HttpDownloadStrategy (raw,
-            // byte-exact copy with truncation-resume). A single progressive file
-            // (e.g. a Twitter .mp4) must be FILE — forcing MEDIA would reroute it
-            // through an ffmpeg remux and off the progressive path. HLS/DASH
-            // renditions and separate video+audio pairs (niconico, Twitch, Kick)
-            // must stay MEDIA. So default to MEDIA (the original skip-probe
-            // behaviour, correct for those) and only downgrade to FILE when the
-            // URL is positively a progressive container with no separate audio.
+            // byte-exact copy with truncation-resume). Treat the variant as a
+            // progressive file (FILE) UNLESS it's a separate video+audio pair or
+            // an HLS/DASH manifest, which ffmpeg must mux (MEDIA). Defaulting to
+            // progressive is what lets a tokenized, extensionless CDN URL (TikTok)
+            // download raw instead of being needlessly remuxed; HLS renditions
+            // (niconico/Twitch/Kick via processHlsMaster) always carry .m3u8 so
+            // the manifest test routes them to MEDIA, and separate-audio pairs
+            // (niconico variants) are caught by the audioUrl test.
             FFmpegEntity first = variants.get(0);
             boolean progressive = TextUtils.isEmpty(first.getStreamAudioUrl())
-                    && isProgressiveFile(first.getStreamUrl());
+                    && !isManifestUrl(first.getStreamUrl());
             Log.d(TAG, "skipProbe set, using parser metadata (no FFprobe), progressive=" + progressive);
             entity.setMimeType(FileUriHelper.MIMETYPE_MP4);
             entity.setType((progressive ? UrlType.FILE : UrlType.MEDIA).getValue());

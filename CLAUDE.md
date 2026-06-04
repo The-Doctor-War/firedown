@@ -85,6 +85,30 @@ the capture is **deduped on the page origin** (a fresh signed master URL per
 refresh would otherwise create duplicate entries) via `entity.setUid` in
 `GeckoInspectTask`.
 
+### Skip the capture probe when the parser already has the metadata
+
+A parser that supplies url + resolution + duration does **not** need the ffmpeg
+`metadatareader` probe — the only extra it yields is codecs, which are read
+nowhere downstream (`getVideoCodec`/`getAudioCodec` live only inside
+`VariantProcessor`). Don't add a probe just for codecs. How each shape skips:
+
+- **Progressive variants** (Twitter/Instagram/Threads/Facebook/TikTok/Rumble-mp4):
+  `sendVariants` auto-sets `skipProbe` when there's a `duration` and no per-variant
+  `audioUrl`. Separate-audio (Bilibili DASH) is **excluded** — it still probes.
+- **HLS masters** (Vimeo/Dailymotion/niconico/Twitch/Kick/Rumble-HLS): emit via
+  `enumerateMasterNative` (`type:"hls-master"`), **never** `type:"media"` (which
+  probes). The callee owns origin dedup — callers must NOT also `markSent`.
+- **Audio** (Apple Podcasts): `type:"media"` + `skipProbe` (gated on duration) →
+  `GeckoInspectTask.processMediaSkipProbe`; audio-only, falls back to the probe if
+  the URL mime isn't recognisably audio (so an extensionless enclosure can't be
+  misclassified).
+
+`VariantProcessor`'s skipProbe branch sets the entity **type** from the URL:
+default **FILE** (raw byte-exact `HttpDownloadStrategy`), **MEDIA** (ffmpeg) only
+for an `.m3u8`/`.mpd` manifest or a separate-audio pair. Test for a *manifest*,
+not a progressive extension — tokenized progressive URLs (TikTok) carry no `.mp4`
+and must not be needlessly remuxed.
+
 ### YouTube / SABR
 
 YouTube isn't HLS/DASH — it's Google's SABR (itag formats, a
@@ -297,6 +321,12 @@ switch tab mid-load; it fires a `bilibili://` deeplink from the background).
 Two download paths, one shared OkHttp client (`NetworkModule`, with
 `OriginInterceptor` — it derives **Origin from an existing Referer**, it does
 not invent a Referer; Referer must come from the capture/emit layer).
+
+**Filenames can contain periods** (a podcast titled `156. Valero y Juan`).
+`FileUriHelper.checkFileExtension` only treats the tail after the last dot as an
+extension when it actually looks like one (`isPlausibleExtension`: 1–4 chars,
+alphanumeric, no whitespace) — don't revert to a naive `FilenameUtils` split or
+such titles get truncated to their first segment (`156.mp3`).
 
 - **Progressive HTTP — `HttpDownloadStrategy`.** Default request sends **no
   Range** (some servers require a range, others reject one). It **reacts to

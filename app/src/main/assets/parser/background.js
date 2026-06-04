@@ -3613,10 +3613,10 @@ function listenerRumbleEmbed(details) {
 // title ("all shorts share one title"). We iterate the top-level feed list
 // only and do NOT recurse into an item's related_video sub-list (the request
 // asks for options=video.full,video.related_video).
-// Emit one shorts.feed item. Shorts carry direct MP4 variants in `videos[]`
-// (type "mp4" with a `res`/`resolution` height) rather than an HLS master, so
-// we send them as quality variants. (We still accept an HLS entry as a
-// fallback for any item that ships one.)
+// Emit one shorts.feed item. Prefer an HLS playlist (M3U8Parser, no ffprobe);
+// shorts usually ship only direct MP4 variants in `videos[]` (type "mp4" with a
+// `res`/`resolution` height), so those are the fallback — sent skipProbe with a
+// 16:9 width estimate so the quality rows are labelled without a probe.
 function emitRumbleFeedItem(details, item) {
     if (!item || !item.title) return false;
     const origin = item.url
@@ -3631,25 +3631,39 @@ function emitRumbleFeedItem(details, item) {
         if (v.type === "hls" || /\.m3u8(?:[?#]|$)/.test(v.url)) {
             hls = hls || v.url;
         } else if (v.type === "mp4" || /\.mp4(?:[?#]|$)/.test(v.url)) {
-            mp4s.push({ url: v.url, height: v.res || v.resolution || 0 });
+            const height = v.res || v.resolution || 0;
+            // width is label-only; estimate 16:9 when the feed omits it so the
+            // quality row isn't blank (JsonHelper needs both w & h for a label).
+            mp4s.push({
+                url: v.url,
+                height,
+                width: height ? Math.round(height * 16 / 9) : 0,
+                videoCodec: "h264"
+            });
         }
     }
 
+    // Prefer the HLS master (M3U8Parser → resolution-labelled, no ffprobe),
+    // matching the watch page. Only fall back to the direct MP4 set when the
+    // item ships no HLS playlist (common for shorts).
+    if (hls) {
+        emitRumbleHls(details, {
+            hls, origin, title: item.title, author: item.by?.name,
+            thumb: item.thumb, durationSec: item.duration
+        });
+        return true;
+    }
     if (mp4s.length > 0) {
+        // skipProbe: don't metadatareader-probe every feed item (it opened each
+        // rumble.cloud mp4 just to read a resolution we already have from `res`).
         sendVariants(details, {
             variants: mp4s,
             origin,
             description: item.title,
             img: item.thumb,
             name: item.by?.name,
-            duration: (item.duration || 0) * 1000
-        });
-        return true;
-    }
-    if (hls) {
-        emitRumbleHls(details, {
-            hls, origin, title: item.title, author: item.by?.name,
-            thumb: item.thumb, durationSec: item.duration
+            duration: (item.duration || 0) * 1000,
+            skipProbe: true
         });
         return true;
     }

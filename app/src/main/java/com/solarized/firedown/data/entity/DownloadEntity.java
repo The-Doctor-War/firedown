@@ -127,6 +127,11 @@ public class DownloadEntity implements Download, Parcelable {
     @ColumnInfo(name = "file_thumbnail_unavailable", defaultValue = "0")
     public boolean fileThumbnailUnavailable;
 
+    // Humanised subtitle language (e.g. "English", "English (auto)"), carried
+    // from the capture's TYPE_LANGUAGE tag. Null for non-subtitle downloads.
+    @ColumnInfo(name = "file_language")
+    public String fileLanguage;
+
 
     protected DownloadEntity(Parcel in) {
         uid = in.readInt();
@@ -152,6 +157,7 @@ public class DownloadEntity implements Download, Parcelable {
         fileDuration = in.readLong();
         fileDurationFormatted = in.readString();
         fileThumbnailUnavailable = in.readByte() != 0;
+        fileLanguage = in.readString();
     }
 
     public static final Creator<DownloadEntity> CREATOR = new Creator<>() {
@@ -381,6 +387,15 @@ public class DownloadEntity implements Download, Parcelable {
         this.fileDuration = duration;
     }
 
+    @Override
+    public String getFileLanguage() {
+        return fileLanguage;
+    }
+
+    public void setFileLanguage(String language) {
+        this.fileLanguage = language;
+    }
+
     public DownloadEntity(Download download){
         parseDownload(download);
     }
@@ -409,6 +424,7 @@ public class DownloadEntity implements Download, Parcelable {
         this.fileDurationFormatted = download.getDurationFormatted();
         this.fileSafe = download.isFileSafe();
         this.fileThumbnailUnavailable = download.isFileThumbnailUnavailable();
+        this.fileLanguage = download.getFileLanguage();
     }
 
     public DownloadEntity(){
@@ -445,6 +461,7 @@ public class DownloadEntity implements Download, Parcelable {
         parcel.writeLong(fileDuration);
         parcel.writeString(fileDurationFormatted);
         parcel.writeByte((byte) (fileThumbnailUnavailable ? 1 : 0));
+        parcel.writeString(fileLanguage);
     }
 
 

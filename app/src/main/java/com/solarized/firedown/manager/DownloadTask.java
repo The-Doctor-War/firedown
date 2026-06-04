@@ -98,6 +98,7 @@ public class DownloadTask implements DownloadCallback {
             entity.setFileSafe(request.isSaveToVault());
             entity.setFileDuration(request.getDurationTime());
             entity.setFileDurationFormatted(request.getDurationFormatted());
+            entity.setFileLanguage(request.getLanguage());
 
             String actualPath = request.isSaveToVault()
                     ? new File(StoragePaths.getSafePath(runnableManager), FilenameUtils.getName(filePath)).getAbsolutePath()

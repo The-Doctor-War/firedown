@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
+import com.solarized.firedown.data.entity.FFmpegTagEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegUtils;
 import com.solarized.firedown.utils.FileUriHelper;
@@ -25,6 +26,7 @@ public class DownloadRequest implements Parcelable {
     @Nullable private final String audioUrl;
     private final String name;
     private final String description;
+    @Nullable private final String language;
     private final String origin;
     private final String mimeType;
     private final String headers;
@@ -62,6 +64,7 @@ public class DownloadRequest implements Parcelable {
         this.audioUrl = builder.audioUrl;
         this.name = builder.name;
         this.description = builder.description;
+        this.language = builder.language;
         this.origin = builder.origin;
         this.mimeType = builder.mimeType;
         this.headers = builder.headers;
@@ -103,6 +106,7 @@ public class DownloadRequest implements Parcelable {
         Builder builder = new Builder(entity.getFileUrl())
                 .name(entity.getFileName())
                 .description(entity.getFileDescription())
+                .language(languageFromTags(entity))
                 .origin(entity.getFileOrigin())
                 .mimeType(entity.getMimeType())
                 .headers(entity.getFileHeaders())
@@ -154,6 +158,7 @@ public class DownloadRequest implements Parcelable {
         Builder builder = new Builder(entity.getFileUrl())
                 .name(entity.getFileName())
                 .description(entity.getFileDescription())
+                .language(languageFromTags(entity))
                 .origin(entity.getFileOrigin())
                 .mimeType(entity.getMimeType())
                 .headers(entity.getFileHeaders())
@@ -196,6 +201,21 @@ public class DownloadRequest implements Parcelable {
         return builder.build();
     }
 
+    /** The capture's humanised subtitle language (TYPE_LANGUAGE tag), if any. */
+    @Nullable
+    private static String languageFromTags(BrowserDownloadEntity entity) {
+        ArrayList<FFmpegTagEntity> tags = entity.getTags();
+        if (tags == null) {
+            return null;
+        }
+        for (FFmpegTagEntity tag : tags) {
+            if (tag != null && tag.getType() == FFmpegTagEntity.TYPE_LANGUAGE) {
+                return tag.getText();
+            }
+        }
+        return null;
+    }
+
     /** Copy SABR per-variant fields from FFmpegEntity to builder */
     private static void applySabrFields(Builder builder, FFmpegEntity stream) {
         if (stream.hasSabrData()) {
@@ -222,6 +242,7 @@ public class DownloadRequest implements Parcelable {
                 .audioUrl(audioUrl)
                 .name(name)
                 .description(description)
+                .language(language)
                 .origin(origin)
                 .mimeType(mimeType)
                 .headers(headers)
@@ -259,6 +280,7 @@ public class DownloadRequest implements Parcelable {
     @Nullable public String getAudioUrl()   { return audioUrl; }
     public String getName()                 { return name; }
     public String getDescription()          { return description; }
+    @Nullable public String getLanguage()   { return language; }
     public String getOrigin()               { return origin; }
     public String getMimeType()             { return mimeType; }
     public String getHeaders()              { return headers; }
@@ -311,6 +333,7 @@ public class DownloadRequest implements Parcelable {
         private String audioUrl;
         private String name = "";
         private String description = "";
+        private String language;
         private String origin = "";
         private String mimeType = "";
         private String headers = "";
@@ -347,6 +370,7 @@ public class DownloadRequest implements Parcelable {
         public Builder audioUrl(String audioUrl)            { this.audioUrl = audioUrl; return this; }
         public Builder name(String name)                    { this.name = name; return this; }
         public Builder description(String description)      { this.description = description; return this; }
+        public Builder language(String language)            { this.language = language; return this; }
         public Builder origin(String origin)                { this.origin = origin; return this; }
         public Builder mimeType(String mimeType)            { this.mimeType = mimeType; return this; }
         public Builder headers(String headers)              { this.headers = headers; return this; }
@@ -390,6 +414,7 @@ public class DownloadRequest implements Parcelable {
         audioUrl = in.readString();
         name = in.readString();
         description = in.readString();
+        language = in.readString();
         origin = in.readString();
         mimeType = in.readString();
         headers = in.readString();
@@ -425,6 +450,7 @@ public class DownloadRequest implements Parcelable {
         dest.writeString(audioUrl);
         dest.writeString(name);
         dest.writeString(description);
+        dest.writeString(language);
         dest.writeString(origin);
         dest.writeString(mimeType);
         dest.writeString(headers);

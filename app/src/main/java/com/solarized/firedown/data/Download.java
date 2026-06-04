@@ -37,6 +37,7 @@ public interface Download {
     String getFileHeaders();
     String getOriginUrl();
     String getDurationFormatted();
+    String getFileLanguage();
     long getFileDate();
     long getFileSize();
     int getFileProgress();

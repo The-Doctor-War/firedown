@@ -131,7 +131,8 @@ public class DatabaseModule {
                         DownloadDatabase.MIGRATION_7_8,
                         DownloadDatabase.MIGRATION_8_9,
                         DownloadDatabase.MIGRATION_9_10,
-                        DownloadDatabase.MIGRATION_10_11
+                        DownloadDatabase.MIGRATION_10_11,
+                        DownloadDatabase.MIGRATION_11_12
                 )
                 .build();
     }

@@ -558,6 +558,7 @@
     <string name="stream_type_audio">audio</string>
     <string name="stream_type_muxed">video+audio</string>
     <string name="stream_type_video">video</string>
+    <string name="stream_audio_only_title">Audio only</string>
     <string name="switch_to_tab_description">Switch to tab</string>
 <string name="tabs_incognito">Incognito</string>
     <string name="tabs_incognito_empty">No incognito tabs</string>

@@ -102,7 +102,8 @@ public final class M3U8Parser {
 
         String[] lines = text.split("\\r?\\n");
         Map<String, String> audios = new LinkedHashMap<>();  // group-id -> resolved url
-        List<Stream> streams = new ArrayList<>();
+        List<Stream> streams = new ArrayList<>();             // video renditions
+        List<Stream> audioOnly = new ArrayList<>();           // resolution-less (audio-only) renditions
 
         for (int i = 0; i < lines.length; i++) {
             String line = lines[i].trim();
@@ -157,11 +158,11 @@ public final class M3U8Parser {
                 s.bandwidth = parseLongSafe(bw.group(1));
             }
 
-            // Skip resolution-less renditions (no RESOLUTION attribute) — these
-            // are audio-only streams (e.g. Twitch "audio_only"), which would show
-            // as a blank entry in a video quality picker.
+            // A resolution-less rendition (no RESOLUTION) is audio-only (e.g.
+            // Twitch "audio_only"). Keep it aside and offer it as a separate
+            // "Audio only" variant after the video renditions.
             if (s.height <= 0) {
-                log("  skip resolution-less stream (audio-only?) codecs=" + s.codecs);
+                audioOnly.add(s);
                 continue;
             }
             streams.add(s);
@@ -241,6 +242,35 @@ public final class M3U8Parser {
                 // Skip a variant we can't serialise rather than abort the lot.
             }
         }
+
+        // Audio-only renditions last (dedup by URL, best bitrate). Marked
+        // audioOnly so the UI labels them "Audio only" rather than "video+audio".
+        Map<String, Stream> audioByUrl = new LinkedHashMap<>();
+        for (Stream s : audioOnly) {
+            Stream prev = audioByUrl.get(s.url);
+            if (prev == null || s.bandwidth > prev.bandwidth) {
+                audioByUrl.put(s.url, s);
+            }
+        }
+        for (Stream s : audioByUrl.values()) {
+            try {
+                JSONObject v = new JSONObject();
+                v.put("url", s.url);
+                v.put("audioOnly", true);
+                if (s.codecs.contains("mp4a")) {
+                    v.put("audioCodec", "aac");
+                } else if (s.codecs.contains("ac-3") || s.codecs.contains("ec-3")) {
+                    v.put("audioCodec", "ac3");
+                } else if (s.codecs.contains("opus")) {
+                    v.put("audioCodec", "opus");
+                }
+                out.put(v);
+                log("  audio-only variant bw=" + s.bandwidth + " codecs=" + s.codecs);
+            } catch (JSONException ignored) {
+                // skip
+            }
+        }
+
         log("parseMaster -> " + out.length() + " variant(s)");
         return out;
     }

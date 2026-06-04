@@ -116,6 +116,9 @@ public class BrowserOptionVariantAdapter extends RecyclerView.Adapter<BrowserOpt
 
         void bindTitle(FFmpegEntity entity) {
             String description = entity.getStreamDescription();
+            if ((description == null || description.isEmpty()) && entity.isAudioOnly()) {
+                description = itemView.getContext().getString(R.string.stream_audio_only_title);
+            }
             streamTitle.setText(description != null ? description : "");
         }
 

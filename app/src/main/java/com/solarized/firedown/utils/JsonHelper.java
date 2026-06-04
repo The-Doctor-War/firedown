@@ -4,6 +4,7 @@ package com.solarized.firedown.utils;
 import android.util.Log;
 
 import com.solarized.firedown.data.entity.GeckoInspectEntity;
+import com.solarized.firedown.ffmpegutils.FFmpegConstants;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegStreamInfo;
 
@@ -156,7 +157,10 @@ public class JsonHelper {
                 stream.setStreamUrl(v.optString("url", ""));
                 stream.setStreamAudioUrl(v.optString("audioUrl", null));
                 stream.setCodecType(FFmpegStreamInfo.CodecType.VIDEO.getValue());
-                stream.setVideoStreamNumber(0);
+                // Audio-only variant (e.g. Twitch "audio_only"): no video stream,
+                // so isAudioOnly() is true and the UI labels it "audio".
+                boolean audioOnly = v.optBoolean("audioOnly", false);
+                stream.setVideoStreamNumber(audioOnly ? FFmpegConstants.UNKNOWN_STREAM : 0);
                 stream.setAudioStreamNumber(0);
 
                 String videoCodec = v.optString("videoCodec", null);

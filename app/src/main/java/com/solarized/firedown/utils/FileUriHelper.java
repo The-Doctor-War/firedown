@@ -994,16 +994,39 @@ public class FileUriHelper {
     }
 
     public static String checkFileExtension(String fileName, String mimeType){
-        String baseName = FilenameUtils.getBaseName(fileName);
         String extName = FilenameUtils.getExtension(fileName);
         String extensionFromMimeType = FileUriHelper.getFileExtensionFromMimeType(mimeType);
-        if(extName == null){
+        // FilenameUtils splits on the last dot, but a title like "156. Valero y
+        // Juan" (or "Ep. 5") has no real extension — the text after the dot just
+        // happens to follow one. Treating it as an extension truncated the name
+        // to its first segment ("156"). Only honour the tail as an extension when
+        // it actually looks like one (1–4 chars, letters/digits, no spaces);
+        // otherwise keep the whole title as the base and give it the mime-derived
+        // extension.
+        boolean hasRealExt = isPlausibleExtension(extName);
+        String baseName = hasRealExt ? FilenameUtils.getBaseName(fileName) : fileName;
+        if(!extensionFromMimeType.equals("bin")){
+            // Known mime → give the (base or whole) name its proper extension.
             return baseName + "." + extensionFromMimeType;
-        }else if(!extensionFromMimeType.equals("bin")){
-            return baseName + "." + extensionFromMimeType;
-        }else{
+        }else if(hasRealExt){
+            // Unknown mime, but the name already ended in a real extension → keep it.
             return baseName + "." + extName;
+        }else{
+            // Unknown mime and no real extension → leave the name untouched
+            // (don't append a bogus ".bin").
+            return fileName;
         }
+    }
+
+    /**
+     * Whether {@code ext} (the text after the last dot in a filename) plausibly
+     * is a real file extension rather than part of a title that merely contains a
+     * period. Real extensions in this app are short and alphanumeric with no
+     * whitespace (mp3, mp4, m4a, webm, m3u8, jpg, …); a podcast title tail like
+     * " Valero y Juan" is not.
+     */
+    private static boolean isPlausibleExtension(String ext){
+        return ext != null && ext.matches("[A-Za-z0-9]{1,4}");
     }
 
     public static String decodeName(String name) {

@@ -153,7 +153,19 @@ public class GeckoInspectTask implements Runnable {
         BrowserDownloadEntity entity = new BrowserDownloadEntity();
         String mimeType = FileUriHelper.getMimeTypeFromFile(mUrl);
 
-        entity.setUid(mUrl.hashCode());
+        // De-dup identity. Normally the media URL is the stable identity of a
+        // capture, so uid = url.hashCode() and the repository collapses repeats.
+        // But HLS-master sites (niconico / Twitch / Kick) mint a FRESH
+        // session-signed master+rendition URL on every page load, so the same
+        // video refreshed 3× yields 3 different URLs → 3 duplicate entries. For
+        // these, the stable identity is the watch/channel page (the origin), so
+        // key the uid on it: a refresh re-resolves to the same uid and the
+        // contains()/addValue fast-path (uid match) drops it — before we even
+        // re-fetch the master. (The 30s JS-side origin dedup only covers rapid
+        // refreshes; this covers the rest and is per-tab via isPresent's tabId
+        // guard.) Falls back to the URL when origin is missing.
+        boolean originKeyed = mUrlType == UrlType.HLS_MASTER && !TextUtils.isEmpty(mOrigin);
+        entity.setUid(originKeyed ? mOrigin.hashCode() : mUrl.hashCode());
         entity.setFileName(TextUtils.isEmpty(mName) ? WebUtils.getFileNameFromURL(mUrl) : mName);
         entity.setFileUrl(mUrl);
         entity.setFileOrigin(mOrigin);

@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegUtils;
+import com.solarized.firedown.utils.FileUriHelper;
 
 import java.util.ArrayList;
 
@@ -180,6 +181,16 @@ public class DownloadRequest implements Parcelable {
             builder.audioUrl(selectedStream.getStreamAudioUrl())
                     .videoNumber(selectedStream.getVideoStreamNumber())
                     .audioNumber(selectedStream.getAudioStreamNumber());
+
+            // The entity mime is video/mp4 (it represents the whole capture,
+            // dominated by its video renditions). When the *selected* variant
+            // is audio-only (e.g. Twitch "audio_only" — no video stream), the
+            // download is an audio file, so stamp it with an audio mime; the
+            // output container/extension and the library row then read as audio
+            // rather than video.
+            if (selectedStream.isAudioOnly()) {
+                builder.mimeType(FileUriHelper.MIMETYPE_AUDIO_MP4);
+            }
         }
 
         return builder.build();

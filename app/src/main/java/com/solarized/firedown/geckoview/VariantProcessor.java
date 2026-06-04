@@ -15,6 +15,7 @@ import com.solarized.firedown.utils.FileUriHelper;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * Probes pre-parsed stream variants and populates entity metadata.
@@ -30,6 +31,17 @@ public class VariantProcessor {
 
     private final Map<String, String> mHeaders;
     private final boolean mSkipProbe;
+
+    // A single progressive container (downloaded as a raw byte stream via
+    // HttpDownloadStrategy), as opposed to an HLS/DASH manifest that ffmpeg must
+    // mux. Matches the extension before any query string — same shape as the
+    // URL patterns in UrlStringUtils.
+    private static final Pattern PROGRESSIVE_URL =
+            Pattern.compile("https?://.*\\.(mp4|m4v|mov|webm)(?:\\?.*|$)", Pattern.CASE_INSENSITIVE);
+
+    private static boolean isProgressiveFile(String url) {
+        return !TextUtils.isEmpty(url) && PROGRESSIVE_URL.matcher(url).matches();
+    }
 
     public VariantProcessor(Map<String, String> headers) {
         this(headers, false);
@@ -62,9 +74,21 @@ public class VariantProcessor {
         // download is then the first/only key consumer. Codecs are already set
         // per variant by JsonHelper.parseVariants; duration comes from the message.
         if (mSkipProbe) {
-            Log.d(TAG, "skipProbe set, using parser metadata (no FFprobe)");
+            // entity type drives strategy selection (DownloadTask.selectStrategy):
+            // MEDIA → ffmpeg (FFmpegMux/Merge), FILE → HttpDownloadStrategy (raw,
+            // byte-exact copy with truncation-resume). A single progressive file
+            // (e.g. a Twitter .mp4) must be FILE — forcing MEDIA would reroute it
+            // through an ffmpeg remux and off the progressive path. HLS/DASH
+            // renditions and separate video+audio pairs (niconico, Twitch, Kick)
+            // must stay MEDIA. So default to MEDIA (the original skip-probe
+            // behaviour, correct for those) and only downgrade to FILE when the
+            // URL is positively a progressive container with no separate audio.
+            FFmpegEntity first = variants.get(0);
+            boolean progressive = TextUtils.isEmpty(first.getStreamAudioUrl())
+                    && isProgressiveFile(first.getStreamUrl());
+            Log.d(TAG, "skipProbe set, using parser metadata (no FFprobe), progressive=" + progressive);
             entity.setMimeType(FileUriHelper.MIMETYPE_MP4);
-            entity.setType(UrlType.MEDIA.getValue());
+            entity.setType((progressive ? UrlType.FILE : UrlType.MEDIA).getValue());
             entity.setAudio(false);
             entity.setStreams(variants);
             entity.setHasVariants(variants.size() > 1);

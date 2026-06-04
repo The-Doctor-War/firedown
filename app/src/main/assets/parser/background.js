@@ -1443,7 +1443,20 @@ function emitTwitterTweetVideos(details, result) {
             .filter(v => v.content_type === "video/mp4")
             .map(v => {
                 const wh = v.url.match(/\/(\d+)x(\d+)\//);
-                return { url: v.url, width: wh ? parseInt(wh[1]) : 0, height: wh ? parseInt(wh[2]) : 0 };
+                // Twitter progressive mp4s are always H.264/AAC. Supplying the
+                // codecs here (with skipProbe below) lets the Java side trust the
+                // parser metadata and skip the capture-time ffmpeg probe: the
+                // variant already carries url + resolution, and duration comes
+                // from duration_millis. A single progressive .mp4 has no separate
+                // audio, so VariantProcessor keeps it on the byte-exact
+                // HttpDownloadStrategy (type FILE), not an ffmpeg remux.
+                return {
+                    url: v.url,
+                    width: wh ? parseInt(wh[1]) : 0,
+                    height: wh ? parseInt(wh[2]) : 0,
+                    videoCodec: "h264",
+                    audioCodec: "aac"
+                };
             });
         if (variants.length === 0) continue;
         emitted = true;
@@ -1453,7 +1466,8 @@ function emitTwitterTweetVideos(details, result) {
             description: videoText,
             img: imageUrl,
             name: screenName,
-            duration: m.video_info.duration_millis || 0
+            duration: m.video_info.duration_millis || 0,
+            skipProbe: true
         });
 
         const subtitles = extractTwitterSubtitles(m);

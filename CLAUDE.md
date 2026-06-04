@@ -371,7 +371,12 @@ falling back to the head on seek/decode failure.
 The Glide decoders default a missing `GlideRequestOptions.LENGTH` to `-1`
 (auto); an explicit `LENGTH` (Media/Image viewers pass the file size) is passed
 through. **Don't extend the auto offset to `0`** — that breaks the head-frame
-callers.
+callers. For finished downloads the frame comes from Glide's built-in
+MediaMetadataRetriever (the `DownloadEntity→ParcelFileDescriptor` path wins over
+`FFmpegUriDecoder`); `GlideHelper` requests it at a 3s offset
+(`effectiveThumbnailFrame`) with `VideoDecoder.FRAME_OPTION = OPTION_CLOSEST`, so
+it decodes the actual frame — not the default `OPTION_CLOSEST_SYNC` keyframe,
+which on a black intro snaps back to t=0 and looks black.
 
 ## Conventions
 

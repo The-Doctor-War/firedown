@@ -3,6 +3,7 @@ package com.solarized.firedown;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
@@ -20,6 +21,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.bumptech.glide.load.resource.bitmap.VideoDecoder;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.Target;
@@ -326,6 +328,13 @@ public class GlideHelper {
         // mime/filepath/frame leak into every prior in-flight request.
         RequestOptions options = requestOptions.clone()
                 .frame(interval)
+                // Decode the actual frame at `interval`, not the nearest
+                // keyframe. Glide/MediaMetadataRetriever default to
+                // OPTION_CLOSEST_SYNC, which for a black intro with a sparse GOP
+                // snaps back to the t=0 keyframe → a black thumbnail even though
+                // the frame at `interval` is fine. OPTION_CLOSEST decodes to the
+                // exact position (and clamps to the last frame past EOF).
+                .set(VideoDecoder.FRAME_OPTION, MediaMetadataRetriever.OPTION_CLOSEST)
                 .override(THUMB_WIDTH, THUMB_HEIGHT)
                 .set(GlideRequestOptions.FRAME, interval)
                 .set(GlideRequestOptions.MIMETYPE, mimeType)
@@ -419,6 +428,13 @@ public class GlideHelper {
         // mime/filepath/frame leak into every prior in-flight request.
         RequestOptions options = requestOptions.clone()
                 .frame(interval)
+                // Decode the actual frame at `interval`, not the nearest
+                // keyframe. Glide/MediaMetadataRetriever default to
+                // OPTION_CLOSEST_SYNC, which for a black intro with a sparse GOP
+                // snaps back to the t=0 keyframe → a black thumbnail even though
+                // the frame at `interval` is fine. OPTION_CLOSEST decodes to the
+                // exact position (and clamps to the last frame past EOF).
+                .set(VideoDecoder.FRAME_OPTION, MediaMetadataRetriever.OPTION_CLOSEST)
                 .override(THUMB_WIDTH, THUMB_HEIGHT)
                 .set(GlideRequestOptions.FRAME, interval)
                 .set(GlideRequestOptions.MIMETYPE, mimeType)

@@ -2070,7 +2070,13 @@ async function processVideo(details, videoId) {
                     duration, headers: streamHeaders,
                     tabId: details._resolvedTabId ?? details.tabId,
                     request: details.requestId,
-                    variants, sabr: sabrData
+                    variants, sabr: sabrData,
+                    // skipProbe: we already have resolution + codecs + itags per
+                    // variant and duration here, and SABR selection is itag-based
+                    // (unaffected by an ffprobe), so the metadatareader probe is
+                    // redundant — skipping it makes the item appear in the list
+                    // immediately instead of after probing the googlevideo URL.
+                    skipProbe: true
                 };
                 await sendYouTubeNative(message);
                 console.log(`[Process] Sent ${variants.length} variant(s) to native: ${videoId} [${streamSource}]${sabrData ? ' (SABR)' : ''}`);
@@ -2117,7 +2123,8 @@ async function processVideo(details, videoId) {
                         duration, headers: streamHeaders,
                         tabId: details._resolvedTabId ?? details.tabId,
                         request: details.requestId,
-                        variants: sabrVariants, sabr: sabrData
+                        variants: sabrVariants, sabr: sabrData,
+                        skipProbe: true   // itag-based SABR metadata; no probe needed
                     };
                     await sendYouTubeNative(message);
                     console.log(`[Process] Sent ${sabrVariants.length} SABR variant(s) to native: ${videoId} [${streamSource}] (SABR-only)`);

@@ -38,6 +38,18 @@
 #define STREAM_UNKNOWN (-1)
 
 
+/* When the caller gives no thumbnail position (stream_pos < 0), seek this far
+ * into the file before grabbing a frame. Most videos open on a black / blank
+ * frame (fade-in, slate, letterbox), so the head yields a dark thumbnail; a few
+ * seconds in is representative. Clamped to the clip midpoint for short clips,
+ * skipped for sub-second stills, and we fall back to the head if decoding at the
+ * offset fails. Note the contract: stream_pos > 0 is an explicit mid-clip
+ * mandate (honoured exactly, original ANY seek); stream_pos == 0 means the head
+ * frame explicitly (some callers tile the first frame and need it — no seek);
+ * only stream_pos < 0 triggers this auto offset. */
+#define THUMBNAIL_DEFAULT_OFFSET_US (3 * AV_TIME_BASE)
+
+
 /**
  * Perform thumbnailing when the input is a video
  *
@@ -1102,13 +1114,53 @@ int jni_extract_bitmap (JNIEnv * env, jobject thiz, jlong stream_pos){
             goto end;
         }
 
-        if(stream_pos > 0){
+        /* Decide the effective seek position. stream_pos > 0 is an explicit
+         * mid-clip mandate — honour it exactly (original ANY seek). stream_pos
+         * == 0 is an explicit head-frame request — no seek. Only stream_pos < 0
+         * (no mandate) triggers the auto offset, to skip the black/blank
+         * opening frame. */
+        int64_t seek_pos = stream_pos;
+        int auto_offset = 0;
 
-            seek_target = av_rescale_q(stream_pos, AV_TIME_BASE_Q,stream->time_base);
+        if (stream_pos < 0) {
+            int64_t duration_us = thumbnail->format_ctx->duration;
+            int64_t default_off = THUMBNAIL_DEFAULT_OFFSET_US;
+
+            if (duration_us == AV_NOPTS_VALUE) {
+                /* Unknown duration: most likely a normal video. Use the fixed
+                 * offset and rely on the head fallback if it overshoots. */
+                seek_pos = default_off;
+                auto_offset = 1;
+            } else if (duration_us > AV_TIME_BASE) {
+                /* Known duration over a second: clamp the offset to the
+                 * midpoint so we never seek past the end of a short clip. */
+                if (default_off > duration_us / 2) {
+                    default_off = duration_us / 2;
+                }
+                seek_pos = default_off;
+                auto_offset = 1;
+            }
+            /* else: still image / sub-second clip — leave seek_pos < 0 so the
+             * block below is skipped and we decode the head frame. */
+        }
+
+        if (seek_pos > 0) {
+
+            /* The auto offset wants a clean image, so seek to the keyframe at
+             * or before the target (BACKWARD). An explicit mandate keeps the
+             * original ANY behaviour. */
+            if (auto_offset) {
+                flags = AVSEEK_FLAG_BACKWARD;
+            }
+
+            seek_target = av_rescale_q(seek_pos, AV_TIME_BASE_Q, stream->time_base);
 
             LOGI(1, "jni_extract_bitmap seek_target adjusted: %"PRId64, seek_target);
 
-            if (seek_target >= stream->duration){
+            /* Only clamp against a known stream duration. An unknown duration
+             * is AV_NOPTS_VALUE (INT64_MIN), so the bare comparison would
+             * always clamp the target to that bogus negative value. */
+            if (stream->duration > 0 && seek_target >= stream->duration){
                 flags = AVSEEK_FLAG_BACKWARD;
                 seek_target = stream->duration;
             }
@@ -1163,7 +1215,7 @@ int jni_extract_bitmap (JNIEnv * env, jobject thiz, jlong stream_pos){
                  * seek above lands past the available data and av_read_frame
                  * returns EOF before we ever see a packet. Retry once from
                  * the first keyframe before giving up. */
-                if (!retried_from_start && stream_pos > 0) {
+                if (!retried_from_start && seek_pos > 0) {
                     retried_from_start = 1;
                     LOGI(1, "jni_extract_bitmap retrying decode from start (read EOF)");
                     err = av_seek_frame(thumbnail->format_ctx, video_stream_index, 0, AVSEEK_FLAG_BACKWARD);
@@ -1187,7 +1239,7 @@ int jni_extract_bitmap (JNIEnv * env, jobject thiz, jlong stream_pos){
                      * seek into truncated/corrupt data tends to return
                      * AVERROR_INVALIDDATA on the first decoded packet.
                      * Retry once from the first keyframe before giving up. */
-                    if (!retried_from_start && stream_pos > 0) {
+                    if (!retried_from_start && seek_pos > 0) {
                         retried_from_start = 1;
                         LOGI(1, "jni_extract_bitmap retrying decode from start (decode err)");
                         err = av_seek_frame(thumbnail->format_ctx, video_stream_index, 0, AVSEEK_FLAG_BACKWARD);

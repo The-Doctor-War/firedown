@@ -620,40 +620,39 @@ async function listenerVimeo(details) {
         if (!videoUrl) return {};
 
         const jsonLd = extractVimeoJsonLd(str);
-        const tabId = await resolveTabId(details);
 
         const vid = config.video || {};
         const origin = vid.url || details.originUrl || details.url;
 
-        const message = {
-            url: videoUrl,
-            type: "media",
-            origin,
-            tabId,
-            request: details.requestId
-        };
-
-        // JSON-LD (available when response is HTML, e.g. embedded players)
+        // Display metadata: JSON-LD when the response is HTML (embedded players),
+        // else the config.video fields.
+        let name, description, img;
         if (jsonLd[0]) {
-            if (jsonLd[0].name) message.name = jsonLd[0].name;
-            if (jsonLd[0].description) message.description = jsonLd[0].description;
+            if (jsonLd[0].name) name = jsonLd[0].name;
+            if (jsonLd[0].description) description = jsonLd[0].description;
             const thumb = jsonLd[0].thumbnailUrl
                 || (Array.isArray(jsonLd[0].thumbnail) ? jsonLd[0].thumbnail[0]?.url : jsonLd[0].thumbnail?.url);
-            if (thumb) message.img = thumb;
+            if (thumb) img = thumb;
         }
-
-        // config.video fields (always available in JSON config responses)
-        if (!message.name && vid.title) message.name = vid.title;
-        if (!message.description && vid.owner?.name) message.description = vid.owner.name;
-        if (!message.img) {
-            message.img = vid.thumbnail_url
+        if (!name && vid.title) name = vid.title;
+        if (!description && vid.owner?.name) description = vid.owner.name;
+        if (!img) {
+            img = vid.thumbnail_url
                 || vid.thumbs?.base || vid.thumbs?.["1280"] || vid.thumbs?.["640"]
                 || null;
         }
-        if (vid.duration > 0) message.duration = Math.round(vid.duration * 1000);
+        const duration = vid.duration > 0 ? Math.round(vid.duration * 1000) : 0;
 
-        log("VIMEO", `Found video`, { name: message.name, img: message.img, url: videoUrl.slice(0, 80), tabId });
-        sendNative(message);
+        // avc_url is an HLS *master* playlist. Route it through the shared
+        // master-enumeration path (Java OkHttp-fetches it, M3U8Parser enumerates
+        // the renditions, skipProbe) — the same mechanism as niconico/Twitch/Kick
+        // — instead of emitting a single media URL that the metadatareader probe
+        // would open at capture time. No capture-time ffmpeg probe, and the user
+        // gets a quality picker for free. enumerateMasterNative does its own
+        // origin dedup and falls back to a plain media capture if enumeration
+        // fails (which would then probe, as before).
+        log("VIMEO", `Found video`, { name, img, url: videoUrl.slice(0, 80) });
+        enumerateMasterNative(details, { url: videoUrl, origin, name, description, img, duration });
     } catch (e) {
         log("VIMEO", `Error`, e.message);
     }

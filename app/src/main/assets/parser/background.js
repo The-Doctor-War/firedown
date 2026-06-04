@@ -3476,28 +3476,24 @@ const RUMBLE_EMBED_PATTERNS = [
     "*://*.rumble.com/embedJS/*"
 ];
 
-// Shared emit: one Rumble HLS master + metadata as a `media` download. ffmpeg
-// expands the master into selectable qualities. Deduped on origin (the watch
-// permalink), so repeated feed pages / re-fetches don't double-add.
+// Shared emit: hand Rumble's HLS master to the Java M3U8 parser, which
+// enumerates resolution-labelled qualities (text-only, no ffmpeg probe) — the
+// same path as niconico/Twitch/Kick. enumerateMasterNative does its own origin
+// dedup, so don't pre-mark here. Referer is set so the native OkHttp fetch of
+// the master isn't rejected; on any fetch failure processHlsMaster falls back
+// to the ffmpeg probe of the master (the previous behaviour).
 async function emitRumbleHls(details, { hls, origin, title, author, thumb, durationSec }) {
     if (!hls || !origin) return;
-    if (alreadySent(origin)) { log("RUMBLE", "already sent", { origin }); return; }
-    markSent(origin);
-
-    const tabId = await resolveTabId(details);
-    let incognito = false;
-    if (tabId >= 0) {
-        try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
-    }
-
-    const message = { url: hls, type: "media", origin, tabId, request: details.requestId, incognito };
-    if (title) message.description = title;
-    if (author) message.name = author;
-    if (thumb) message.img = thumb;
-    if (durationSec > 0) message.duration = Math.round(durationSec * 1000);
-
-    log("RUMBLE", "emitting HLS", { origin, title, hls: hls.slice(0, 80) });
-    sendNative(message);
+    log("RUMBLE", "emitting HLS master", { origin, title, hls: hls.slice(0, 80) });
+    enumerateMasterNative(details, {
+        url: hls,
+        origin,
+        name: author,
+        description: title,
+        img: thumb,
+        duration: durationSec > 0 ? Math.round(durationSec * 1000) : 0,
+        requestHeaders: [{ name: "Referer", value: "https://rumble.com/" }]
+    });
 }
 
 // Buffer a Rumble response body and hand the decoded text to onText. Shared by
@@ -3537,9 +3533,9 @@ function filterRumbleJson(details, label, onParsed) {
 }
 
 // Rumble watch embedJS carries progressive MP4 renditions (keyed by height)
-// alongside the HLS auto master. Aggregate the MP4 set into quality variants —
-// same as the shorts feed — so capture needs no ffprobe to enumerate. We leave
-// the HLS master path untouched: it's the fallback for any video with no MP4 set.
+// alongside the HLS auto master. The MP4 set is the FALLBACK now (preferred path
+// is the HLS master via M3U8Parser): the MP4 group often omits height, giving
+// unlabelled variants, so we only use it when there's no HLS master.
 function collectRumbleMp4(group) {
     const out = [];
     const mp4 = group && group.mp4;
@@ -3564,7 +3560,20 @@ function emitRumbleVideo(details, parsed) {
         : (details.documentUrl || details.originUrl || details.url);
     const thumb = parsed.i || (Array.isArray(parsed.t) && parsed.t[0]?.i) || undefined;
 
-    // Prefer the structured MP4 qualities (no ffprobe needed). Dedup by URL.
+    // Prefer the HLS master: the Java M3U8 parser enumerates resolution-labelled
+    // qualities, whereas Rumble's progressive MP4 set frequently omits height →
+    // unlabelled ("empty") variant rows.
+    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
+    if (hls) {
+        emitRumbleHls(details, {
+            hls, origin, title: parsed.title, author: parsed.author?.name,
+            thumb, durationSec: parsed.duration
+        });
+        return;
+    }
+
+    // Fallback: no HLS master — use the structured MP4 qualities (no ffprobe).
+    // Dedup by URL.
     const seen = new Set();
     const variants = [];
     for (const v of [...collectRumbleMp4(parsed.ua), ...collectRumbleMp4(parsed.u)]) {
@@ -3573,7 +3582,7 @@ function emitRumbleVideo(details, parsed) {
         variants.push(v);
     }
     if (variants.length > 0) {
-        log("RUMBLE", `emitting ${variants.length} mp4 variant(s)`, { origin, title: parsed.title });
+        log("RUMBLE", `emitting ${variants.length} mp4 variant(s) (no HLS)`, { origin, title: parsed.title });
         sendVariants(details, {
             variants,
             origin,
@@ -3585,14 +3594,7 @@ function emitRumbleVideo(details, parsed) {
         });
         return;
     }
-
-    // Fallback: no MP4 set — emit the HLS master (ffmpeg enumerates qualities).
-    const hls = parsed?.ua?.hls?.auto?.url || parsed?.u?.hls?.url || parsed?.ua?.hls?.url;
-    if (!hls) { log("RUMBLE", "embedJS had no MP4 set or HLS url"); return; }
-    emitRumbleHls(details, {
-        hls, origin, title: parsed.title, author: parsed.author?.name,
-        thumb, durationSec: parsed.duration
-    });
+    log("RUMBLE", "embedJS had no HLS master or MP4 set");
 }
 
 function listenerRumbleEmbed(details) {

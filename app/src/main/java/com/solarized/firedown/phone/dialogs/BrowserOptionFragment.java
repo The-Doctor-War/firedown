@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +35,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.google.android.material.chip.ChipGroup;
+import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.GlideRequestOptions;
 import com.solarized.firedown.Keys;
@@ -79,6 +82,18 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     private int mScrollLimit;
     private OnBackPressedCallback mClearFilterOnBack;
 
+    // "Still scanning" indicator state. mBusyShown is the debounced, displayed
+    // state; mListEmpty mirrors the latest list so a busy/empty change re-renders
+    // the right LCEE state. Debounced so fast/aborting inspect tasks don't flash.
+    private View mCaptureBanner;
+    private boolean mListEmpty = true;
+    private boolean mBusyShown;
+    private static final long BANNER_SHOW_DELAY_MS = 600L;
+    private static final long BANNER_HIDE_DELAY_MS = 300L;
+    private final Handler mBannerHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mShowBusy = () -> { mBusyShown = true; renderListState(); };
+    private final Runnable mHideBusy = () -> { mBusyShown = false; renderListState(); };
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +116,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
         mToolbar = view.findViewById(R.id.toolbar);
         mChipGroup = view.findViewById(R.id.chip_group);
+        mCaptureBanner = view.findViewById(R.id.capture_banner);
         mLCEERecyclerView = view.findViewById(R.id.list_recycler_lcee);
         mLCEERecyclerView.setEmptyButtonVisibility(View.VISIBLE);
 
@@ -302,12 +318,8 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
             if (mActionModeEnabled) return;
 
-            if (downloads == null || downloads.isEmpty()) {
-                configureEmptyState();
-                mLCEERecyclerView.showEmpty();
-            } else {
-                mLCEERecyclerView.hideAll();
-            }
+            mListEmpty = downloads == null || downloads.isEmpty();
+            renderListState();
 
             // Refresh the origin → caption-count map (from the unfiltered
             // repository) before submitting so the CC badge binds correctly
@@ -318,6 +330,9 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
             mAdapter.setMimeSuppressed(false);
             mAdapter.submitList(downloads);
         });
+
+        mBrowserDownloadViewModel.getInflight().observe(getViewLifecycleOwner(),
+                count -> onInflightChanged(count == null ? 0 : count));
 
         mBrowserDownloadViewModel.update();
 
@@ -370,6 +385,52 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
     private int getSpanCount() {
         return getResources().getInteger(mEnableGrid ? R.integer.browser_list_number : R.integer.browser_grid_number);
+    }
+
+    /**
+     * Reacts to the in-flight inspect-task count. Updates a DEBUG-only raw
+     * queue readout immediately, and debounces the user-facing "scanning"
+     * indicator: only show it once work has been pending {@link
+     * #BANNER_SHOW_DELAY_MS} (so fast/aborting tasks never flash it), and clear
+     * it with a short linger to avoid flicker between back-to-back tasks.
+     */
+    private void onInflightChanged(int count) {
+        if (BuildConfig.DEBUG && mToolbar != null) {
+            mToolbar.setSubtitle(count > 0 ? ("queue: " + count) : null);
+        }
+
+        boolean busy = count > 0;
+        mBannerHandler.removeCallbacks(mShowBusy);
+        mBannerHandler.removeCallbacks(mHideBusy);
+        if (busy == mBusyShown) {
+            return; // already in the desired state; nothing pending to flip
+        }
+        mBannerHandler.postDelayed(busy ? mShowBusy : mHideBusy,
+                busy ? BANNER_SHOW_DELAY_MS : BANNER_HIDE_DELAY_MS);
+    }
+
+    /**
+     * Single owner of the LCEE / banner state, driven by both the list and the
+     * busy signal. Empty + busy uses the LCEE loading spinner (the "scanning"
+     * cue, no separate banner); non-empty + busy shows the banner above the
+     * existing rows; otherwise the normal empty / content state.
+     */
+    private void renderListState() {
+        if (mActionModeEnabled) return;
+        if (mListEmpty) {
+            if (mBusyShown) {
+                mLCEERecyclerView.showLoading();
+            } else {
+                configureEmptyState();
+                mLCEERecyclerView.showEmpty();
+            }
+            if (mCaptureBanner != null) mCaptureBanner.setVisibility(View.GONE);
+        } else {
+            mLCEERecyclerView.hideAll();
+            if (mCaptureBanner != null) {
+                mCaptureBanner.setVisibility(mBusyShown ? View.VISIBLE : View.GONE);
+            }
+        }
     }
 
     private void configureEmptyState() {
@@ -551,10 +612,13 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        mBannerHandler.removeCallbacks(mShowBusy);
+        mBannerHandler.removeCallbacks(mHideBusy);
         mChipGroup = null;
         mToolbar = null;
         mAdapter = null;
         mLayoutManager = null;
+        mCaptureBanner = null;
     }
 
     @Override

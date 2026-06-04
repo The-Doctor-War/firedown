@@ -105,6 +105,17 @@ Three layers prevent duplicate entries for one video:
   `url.hashCode()`, except **HLS_MASTER** keys it on the page origin (signed
   master URLs rotate per refresh).
 
+### Capture "scanning" indicator
+
+`PriorityTaskThreadPoolExecutor` exposes an in-flight task count
+(`getInFlight()` — incremented at submit, decremented in the run `finally` so
+aborts count too). `BrowserOptionFragment` observes it via
+`BrowserDownloadViewModel.getInflight()`, **debounced** (~600 ms show / ~300 ms
+hide, so fast/aborting tasks never flash): empty+busy → the LCEE loading
+spinner, content+busy → a top "Checking for media…" banner. The raw count also
+shows in the toolbar subtitle on `BuildConfig.DEBUG`. This fills the gap where a
+slow capture (e.g. an HLS-master fetch) makes the sheet look empty for seconds.
+
 ## Debugging "video not captured" — do this, in order
 
 This section exists because a Threads bug took ~8 rounds that should have taken

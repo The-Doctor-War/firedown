@@ -2,6 +2,9 @@ package com.solarized.firedown.geckoview;
 
 import android.util.Log;
 
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+
 import java.util.Comparator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,6 +36,17 @@ public class PriorityTaskThreadPoolExecutor {
 
     private final AtomicInteger poolSize;
 
+    /**
+     * Count of submitted-but-not-finished inspect tasks (queued + running),
+     * across all tabs. Incremented when a task is offered, decremented in the
+     * run's {@code finally} so aborts/failures count too. Exposed as LiveData so
+     * the capture UI can show a "scanning…" indicator while work is pending
+     * (the gap where a video can take seconds to appear after the sheet opens).
+     */
+    private final AtomicInteger inFlight = new AtomicInteger(0);
+
+    private final MutableLiveData<Integer> inFlightLive = new MutableLiveData<>(0);
+
 
     /**
      * Creates a new {@code TimeoutTaskThreadPoolExecutor} with the
@@ -53,6 +67,7 @@ public class PriorityTaskThreadPoolExecutor {
 
     public void execute(GeckoInspectTask task, int priority, int tabId) {
         Log.d(TAG, "execute: " + awaitingTasks.size());
+        inFlightLive.postValue(inFlight.incrementAndGet());
         awaitingTasks.offer(new Task(task, priority, tabId));
         executeWaitingTask();
     }
@@ -60,6 +75,11 @@ public class PriorityTaskThreadPoolExecutor {
 
     public boolean isTerminated() {
         return executor.isTerminated();
+    }
+
+    /** In-flight inspect tasks (queued + running) across all tabs. */
+    public LiveData<Integer> getInFlight() {
+        return inFlightLive;
     }
 
     private synchronized void executeWaitingTask() {
@@ -78,6 +98,7 @@ public class PriorityTaskThreadPoolExecutor {
                         nextTask.task.run();
                     } finally {
                         Log.w(TAG, "taskHandler Finish");
+                        inFlightLive.postValue(inFlight.decrementAndGet());
                         poolSize.decrementAndGet();
                         executeWaitingTask();
                     }

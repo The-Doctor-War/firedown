@@ -12,6 +12,7 @@ import com.solarized.firedown.data.repository.BrowserDownloadRepository;
 import com.solarized.firedown.data.repository.GeckoStateDataRepository;
 import com.solarized.firedown.geckoview.GeckoRuntimeHelper;
 import com.solarized.firedown.geckoview.GeckoState;
+import com.solarized.firedown.geckoview.PriorityTaskThreadPoolExecutor;
 import com.solarized.firedown.utils.BuildUtils;
 import com.solarized.firedown.utils.FileUriHelper;
 
@@ -33,6 +34,7 @@ public class BrowserDownloadViewModel extends ViewModel {
     private final GeckoRuntimeHelper mGeckoRuntimeHelper;
     private final GeckoStateDataRepository mGeckoStateDataRepository;
     private final Sorting mSorting;
+    private final PriorityTaskThreadPoolExecutor mPriorityExecutor;
     private final LiveData<List<BrowserDownloadEntity>> mObservableBrowser;
     private final MutableLiveData<Integer> mObservableBrowserType = new MutableLiveData<>();
 
@@ -41,11 +43,13 @@ public class BrowserDownloadViewModel extends ViewModel {
             BrowserDownloadRepository repository,
             GeckoRuntimeHelper geckoRuntimeHelper,
             GeckoStateDataRepository geckoStateDataRepository,
+            PriorityTaskThreadPoolExecutor priorityExecutor,
             Sorting sorting) {
 
         this.mBrowserDownloadRepository = repository;
         this.mGeckoRuntimeHelper = geckoRuntimeHelper;
         this.mGeckoStateDataRepository = geckoStateDataRepository;
+        this.mPriorityExecutor = priorityExecutor;
         this.mSorting = sorting;
 
         // Use Transformations.switchMap to react to limit changes
@@ -59,6 +63,15 @@ public class BrowserDownloadViewModel extends ViewModel {
     public LiveData<List<BrowserDownloadEntity>> getBrowserDownloads(int limit) {
         mObservableBrowserType.postValue(limit);
         return mObservableBrowser;
+    }
+
+    /**
+     * In-flight inspect-task count (queued + running). The capture sheet uses
+     * this to show a "scanning…" indicator while a capture is still being
+     * processed (e.g. an HLS-master fetch that takes a few seconds).
+     */
+    public LiveData<Integer> getInflight() {
+        return mPriorityExecutor.getInFlight();
     }
 
     private List<BrowserDownloadEntity> filter(List<BrowserDownloadEntity> entities, int limit) {

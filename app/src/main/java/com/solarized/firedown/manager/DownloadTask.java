@@ -169,6 +169,9 @@ public class DownloadTask implements DownloadCallback {
             // Always write — entity has the correct status (FINISHED from
             // sealWithStatus, or ERROR from onError). For SABR/FFmpeg finish,
             // onFileSizeKnown already updated the size before we get here.
+            if (entity.getFileStatus() == Download.FINISHED) {
+                backfillDurationIfMissing();
+            }
             repository.add(entity);
         }
         if (!terminalMessageSent.getAndSet(true)) {
@@ -337,7 +340,6 @@ public class DownloadTask implements DownloadCallback {
     @Override
     public void onFinished() {
         if (sealed.get()) return;
-        backfillDurationIfMissing();
         repository.add(entity);
         publishToGalleryIfEnabled();
     }

@@ -140,7 +140,7 @@
     <string name="donate_subtitle">Firedown is free. If it saved you time or annoyance, send back what it was worth — in any of these ways.</string>
     <string name="donate_title">Value for Value</string>
     <string name="download">Download</string>
-    <string name="download_finished_meta">%1$s - %2$s</string>
+    <string name="download_finished_meta">%1$s · %2$s</string>
     <!-- Trailing-action label on the home recent-downloads card. Kept
          short so it fits next to the section title on narrow phones
          even in longer Romance / Slavic locales. -->

@@ -896,6 +896,15 @@ void *downloader_mux(void *data) {
             recording_time = d;
     }
 
+    /* HLS/DASH detection is fixed for the whole download (the input format
+     * doesn't change mid-stream), so derive it once here instead of on every
+     * progress tick. It gates the size-based fallback: an HLS/DASH probe's
+     * Content-Length is the playlist byte size, not the media size, so it must
+     * never be used as a progress denominator. */
+    const char *input_format_name = downloader->input_format_ctx[0]->iformat->name;
+    int is_hls = av_strncasecmp(input_format_name, "hls", 3) == 0;
+    int is_dash = av_strncasecmp(input_format_name, "dash", 4) == 0;
+
     av_dict_set(&dict, "movflags", "faststart", 0);
     ret = avformat_write_header(downloader->output_format_ctx, &dict);
     av_dict_free(&dict);
@@ -1029,10 +1038,6 @@ void *downloader_mux(void *data) {
         time_diff = downloader->last_updated_time - current_time;
 
         if (time_diff > UPDATE_TIME_US || time_diff < -UPDATE_TIME_US) {
-            const char *fmt0 = downloader->input_format_ctx[0]->iformat->name;
-            int is_hls = av_strncasecmp(fmt0, "hls", 3) == 0;
-            int is_dash = av_strncasecmp(fmt0, "dash", 4) == 0;
-
             downloader->last_updated_time = current_time;
             /* Report the MINIMUM accumulated time across all muxed streams, not
              * the accumulator of whichever packet just arrived. With split

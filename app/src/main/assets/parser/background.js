@@ -1974,11 +1974,13 @@ function listenerTwitchCdnM3u8(details) {
     log("TWITCH-CDN", `M3U8 captured but no tab match`, { tabId: details.tabId, url: details.url.slice(0, 80) });
 }
 
-// Broad pattern — catches any M3U8 from any ttvnw.net subdomain
+// Broad pattern — catches any M3U8 from any ttvnw.net subdomain.
+// Registered "blocking" because captureTwitchMaster uses filterResponseData
+// (which requires it) to read the master playlist body.
 browser.webRequest.onBeforeRequest.addListener(
     listenerTwitchCdnM3u8,
     { urls: ["*://*.ttvnw.net/*.m3u8*"] },
-    []
+    ["blocking"]
 );
 
 /**

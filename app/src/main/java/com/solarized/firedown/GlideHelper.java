@@ -59,12 +59,15 @@ public class GlideHelper {
     private static final int THUMB_HEIGHT = 320;
 
     /** When a download has no explicitly chosen thumbnail position
-     *  ({@code thumbnailDuration == 0}), sample the frame this far in (µs)
-     *  rather than at t=0 — videos usually open on a black/blank frame, so
-     *  {@code .frame(0)} yields a black thumbnail. Mirrors the native
-     *  thumbnailer's default offset. Applied only to video; audio renders its
-     *  embedded cover art (frame position irrelevant) and images have none. */
-    private static final long DEFAULT_THUMBNAIL_FRAME_US = 3_000_000L;
+     *  ({@code thumbnailDuration == 0}), seek this far in (µs) and take the
+     *  first keyframe at/after it (OPTION_NEXT_SYNC) — videos open on a
+     *  black/blank frame, so {@code .frame(0)} yields a black thumbnail. Small
+     *  on purpose: NEXT_SYNC lands on the first keyframe past this offset, so it
+     *  only needs to clear the opening, and a large offset would clamp the many
+     *  short clips this app captures (Twitch/Kick clips, Rumble shorts) to the
+     *  head. Applied only to video; audio renders embedded cover art (frame
+     *  position irrelevant) and images have none. */
+    private static final long DEFAULT_THUMBNAIL_FRAME_US = 2_000_000L;
 
     private GlideHelper() {}
 
@@ -328,13 +331,13 @@ public class GlideHelper {
         // mime/filepath/frame leak into every prior in-flight request.
         RequestOptions options = requestOptions.clone()
                 .frame(interval)
-                // Decode the actual frame at `interval`, not the nearest
-                // keyframe. Glide/MediaMetadataRetriever default to
-                // OPTION_CLOSEST_SYNC, which for a black intro with a sparse GOP
-                // snaps back to the t=0 keyframe → a black thumbnail even though
-                // the frame at `interval` is fine. OPTION_CLOSEST decodes to the
-                // exact position (and clamps to the last frame past EOF).
-                .set(VideoDecoder.FRAME_OPTION, MediaMetadataRetriever.OPTION_CLOSEST)
+                // Take the first keyframe AT OR AFTER `interval` (NEXT_SYNC).
+                // The default OPTION_CLOSEST_SYNC can snap back to the black t=0
+                // keyframe on a sparse GOP; OPTION_CLOSEST would decode the exact
+                // frame but walks the whole GOP (too heavy for a scrolling list).
+                // NEXT_SYNC is a single-keyframe decode that's always past the
+                // (small) offset — so past the black intro and never t=0.
+                .set(VideoDecoder.FRAME_OPTION, MediaMetadataRetriever.OPTION_NEXT_SYNC)
                 .override(THUMB_WIDTH, THUMB_HEIGHT)
                 .set(GlideRequestOptions.FRAME, interval)
                 .set(GlideRequestOptions.MIMETYPE, mimeType)
@@ -428,13 +431,13 @@ public class GlideHelper {
         // mime/filepath/frame leak into every prior in-flight request.
         RequestOptions options = requestOptions.clone()
                 .frame(interval)
-                // Decode the actual frame at `interval`, not the nearest
-                // keyframe. Glide/MediaMetadataRetriever default to
-                // OPTION_CLOSEST_SYNC, which for a black intro with a sparse GOP
-                // snaps back to the t=0 keyframe → a black thumbnail even though
-                // the frame at `interval` is fine. OPTION_CLOSEST decodes to the
-                // exact position (and clamps to the last frame past EOF).
-                .set(VideoDecoder.FRAME_OPTION, MediaMetadataRetriever.OPTION_CLOSEST)
+                // Take the first keyframe AT OR AFTER `interval` (NEXT_SYNC).
+                // The default OPTION_CLOSEST_SYNC can snap back to the black t=0
+                // keyframe on a sparse GOP; OPTION_CLOSEST would decode the exact
+                // frame but walks the whole GOP (too heavy for a scrolling list).
+                // NEXT_SYNC is a single-keyframe decode that's always past the
+                // (small) offset — so past the black intro and never t=0.
+                .set(VideoDecoder.FRAME_OPTION, MediaMetadataRetriever.OPTION_NEXT_SYNC)
                 .override(THUMB_WIDTH, THUMB_HEIGHT)
                 .set(GlideRequestOptions.FRAME, interval)
                 .set(GlideRequestOptions.MIMETYPE, mimeType)

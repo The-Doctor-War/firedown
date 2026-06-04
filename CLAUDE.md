@@ -384,10 +384,15 @@ The Glide decoders default a missing `GlideRequestOptions.LENGTH` to `-1`
 through. **Don't extend the auto offset to `0`** — that breaks the head-frame
 callers. For finished downloads the frame comes from Glide's built-in
 MediaMetadataRetriever (the `DownloadEntity→ParcelFileDescriptor` path wins over
-`FFmpegUriDecoder`); `GlideHelper` requests it at a 3s offset
-(`effectiveThumbnailFrame`) with `VideoDecoder.FRAME_OPTION = OPTION_CLOSEST`, so
-it decodes the actual frame — not the default `OPTION_CLOSEST_SYNC` keyframe,
-which on a black intro snaps back to t=0 and looks black.
+`FFmpegUriDecoder`); `GlideHelper` requests a small ~2s offset
+(`effectiveThumbnailFrame`) with `VideoDecoder.FRAME_OPTION =
+OPTION_NEXT_SYNC` — the first keyframe at/after the offset. The default
+`OPTION_CLOSEST_SYNC` can snap back to the black t=0 keyframe on a sparse GOP;
+`OPTION_CLOSEST` would decode the exact frame but walks the whole GOP (too heavy
+for a scrolling list). NEXT_SYNC is a single-keyframe decode always past the
+intro. Keep the offset **small** — NEXT_SYNC only needs to clear the opening,
+and a large offset would clamp the many short clips this app captures to the
+head frame.
 
 ## Conventions
 

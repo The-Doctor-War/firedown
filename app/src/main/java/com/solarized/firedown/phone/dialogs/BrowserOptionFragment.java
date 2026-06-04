@@ -89,12 +89,9 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     private MenuItem mProgressMenuItem;
     private boolean mListEmpty = true;
     private boolean mBusyShown;
-    private boolean mShowPending;
-    private static final long BANNER_SHOW_DELAY_MS = 400L;
-    private static final long BANNER_HIDE_DELAY_MS = 700L;
-    private final Handler mBannerHandler = new Handler(Looper.getMainLooper());
-    private final Runnable mShowBusy = () -> { mShowPending = false; mBusyShown = true; renderListState(); };
-    private final Runnable mHideBusy = () -> { mBusyShown = false; renderListState(); };
+    private static final long SPINNER_HIDE_LINGER_MS = 500L;
+    private final Handler mSpinnerHandler = new Handler(Looper.getMainLooper());
+    private final Runnable mHideSpinner = () -> { mBusyShown = false; renderListState(); };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -394,32 +391,24 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     }
 
     /**
-     * Reacts to the in-flight inspect-task count, debouncing the "scanning"
-     * spinner. Show once work has been pending {@link #BANNER_SHOW_DELAY_MS}
-     * (so fast/aborting tasks never flash it); hide with a longer linger so
-     * gaps between bursts don't flicker it off.
-     *
-     * <p>The show timer is armed <b>once</b> and not rescheduled on every count
-     * change — a busy page emits hundreds of rapid increments/decrements, and
-     * re-posting the delayed show on each one perpetually reset the timer so it
-     * never fired (spinner stayed hidden with a full queue).
+     * Reacts to the in-flight inspect-task count. The spinner is small and
+     * unobtrusive, so show it immediately when work starts and hide it after a
+     * short linger once idle — the linger bridges the gaps between bursts so a
+     * busy page (hundreds of rapid increments/decrements) doesn't strobe it.
      */
     private void onInflightChanged(int count) {
         if (BuildConfig.DEBUG && mToolbar != null) {
             mToolbar.setSubtitle(count > 0 ? ("queue: " + count) : null);
         }
         if (count > 0) {
-            mBannerHandler.removeCallbacks(mHideBusy);
-            if (!mBusyShown && !mShowPending) {
-                mShowPending = true;
-                mBannerHandler.postDelayed(mShowBusy, BANNER_SHOW_DELAY_MS);
+            mSpinnerHandler.removeCallbacks(mHideSpinner);
+            if (!mBusyShown) {
+                mBusyShown = true;
+                renderListState();
             }
-        } else {
-            mBannerHandler.removeCallbacks(mShowBusy);
-            mShowPending = false;
-            if (mBusyShown) {
-                mBannerHandler.postDelayed(mHideBusy, BANNER_HIDE_DELAY_MS);
-            }
+        } else if (mBusyShown) {
+            mSpinnerHandler.removeCallbacks(mHideSpinner);
+            mSpinnerHandler.postDelayed(mHideSpinner, SPINNER_HIDE_LINGER_MS);
         }
     }
 
@@ -675,8 +664,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        mBannerHandler.removeCallbacks(mShowBusy);
-        mBannerHandler.removeCallbacks(mHideBusy);
+        mSpinnerHandler.removeCallbacks(mHideSpinner);
         mChipGroup = null;
         mToolbar = null;
         mAdapter = null;

@@ -1781,8 +1781,6 @@ function processKickChannelData(details, data) {
     }
 
     const origin = `https://kick.com/${slug}`;
-    if (alreadySent(origin)) return;
-    markSent(origin);
 
     const title = livestream?.session_title || data.user?.username || slug;
     const img = pickKickThumbnail(livestream?.thumbnail)
@@ -1790,14 +1788,17 @@ function processKickChannelData(details, data) {
     const name = data.user?.username || slug;
     const category = livestream?.categories?.[0]?.name || "";
 
-    sendNative({
+    // The live playback_url is an HLS master — enumerate it via M3U8Parser
+    // (no ffprobe), same as Kick VODs/clips and twitch/niconico. The raw
+    // type:"media" emit used to send it to the metadatareader probe.
+    // emitHlsMasterOrSingle / enumerateMasterNative own the origin dedup, so
+    // don't pre-mark here.
+    emitHlsMasterOrSingle(details, {
         url: playbackUrl,
-        type: "media",
         origin,
         tabId: details.tabId >= 0 ? details.tabId : -1,
-        request: details.requestId || `kick-${Date.now()}`,
         name,
-        description: category ? `${title} — ${category}` : title,
+        title: category ? `${title} — ${category}` : title,
         img
     });
     log("KICK", `Sent live stream`, { slug, name, title: title.slice(0, 50) });

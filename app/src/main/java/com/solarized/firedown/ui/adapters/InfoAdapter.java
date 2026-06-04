@@ -141,6 +141,8 @@ public class InfoAdapter extends ListAdapter<InfoEntity, RecyclerView.ViewHolder
                 holder.textView.setText(TextUtils.isEmpty(duration) ? "00:00" : duration);
             } else if(id == R.id.info_details_url) {
                 holder.textView.setText(mDownloadEntity.getFileUrl());
+            } else if(id == R.id.info_details_language) {
+                holder.textView.setText(mDownloadEntity.getFileLanguage());
             }
 
         }

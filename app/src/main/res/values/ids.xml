@@ -48,6 +48,7 @@
     <item name="info_details_origin" type="id" />
     <item name="info_details_url" type="id" />
     <item name="info_details_path" type="id" />
+    <item name="info_details_language" type="id" />
     <item name="info_details_ok" type="id" />
     <item name="info_details_final" type="id" />
     <item name="info_details_default" type="id" />

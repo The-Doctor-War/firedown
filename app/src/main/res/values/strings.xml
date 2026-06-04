@@ -109,6 +109,7 @@
     <string name="details_path">Path</string>
     <string name="details_size">Size</string>
     <string name="details_url">URL</string>
+    <string name="details_language">Language</string>
     <string name="donate_amt_100k">100k</string>
     <string name="donate_amt_1k">1k</string>
     <string name="donate_amt_21k">21k</string>

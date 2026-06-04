@@ -546,6 +546,13 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         // every bind paid for a resource lookup (theme + LocaleList
         // resolution) plus a String concat on the list-mode path.
         String mimeLabel = mimeLabelFor(mimeType, isGrid);
+        // Surface a subtitle's language inline in the meta line, e.g.
+        // "SRT · English · example.com" (list) / "SRT · English" (grid). List
+        // mimeLabel carries a trailing " · "; grid has none.
+        String language = entity.getFileLanguage();
+        if (!TextUtils.isEmpty(language) && !TextUtils.isEmpty(mimeLabel)) {
+            mimeLabel = isGrid ? (mimeLabel + " · " + language) : (mimeLabel + language + " · ");
+        }
         if (TextUtils.isEmpty(mimeLabel)) {
             holder.mimeText.setVisibility(View.GONE);
         } else {

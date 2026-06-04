@@ -156,6 +156,14 @@ public final class M3U8Parser {
             if (bw.find()) {
                 s.bandwidth = parseLongSafe(bw.group(1));
             }
+
+            // Skip resolution-less renditions (no RESOLUTION attribute) — these
+            // are audio-only streams (e.g. Twitch "audio_only"), which would show
+            // as a blank entry in a video quality picker.
+            if (s.height <= 0) {
+                log("  skip resolution-less stream (audio-only?) codecs=" + s.codecs);
+                continue;
+            }
             streams.add(s);
         }
 

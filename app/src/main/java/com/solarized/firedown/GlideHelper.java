@@ -82,17 +82,13 @@ public class GlideHelper {
             return interval;                 // 0 — audio uses cover art, images have none
         }
         long duration = entity.getDuration();   // µs, 0 when unknown
-        if (duration <= 0) {
-            // Unknown length: assume a normal video and offset a few seconds in.
-            // If it turns out shorter, MediaMetadataRetriever clamps to the last
-            // frame and FFmpegUriDecoder's -1 auto path is the backstop.
-            return DEFAULT_THUMBNAIL_FRAME_US;
-        }
-        if (DEFAULT_THUMBNAIL_FRAME_US > duration / 2) {
-            // Short clip (e.g. 1s): a fixed 3s offset would land past the end —
-            // MMR would clamp to the last frame, or snap back to the single t=0
-            // keyframe (black again). Use the midpoint instead.
-            return duration / 2;
+        // Offset a few seconds in to skip the black opening frame — but only
+        // when the clip is long enough to contain it. A clip shorter than the
+        // offset just decodes the head: frame 0 is fine for a short clip, same
+        // as the decode-error fallback. Unknown duration assumes a normal-length
+        // video (FFmpegUriDecoder's -1 auto path is the backstop if it isn't).
+        if (duration > 0 && duration <= DEFAULT_THUMBNAIL_FRAME_US) {
+            return 0;
         }
         return DEFAULT_THUMBNAIL_FRAME_US;
     }

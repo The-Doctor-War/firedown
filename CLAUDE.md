@@ -449,8 +449,9 @@ three-way contract: **`>0`** seeks to that mid-clip position (explicit mandate,
 first frame exactly — GifMaker tiles it across the filmstrip, SaveFrame
 fallback); **`<0`** means *no mandate*, so the native side auto-seeks
 `THUMBNAIL_DEFAULT_OFFSET_US` (3s) in (`BACKWARD` to the enclosing keyframe) to
-skip the usual black opening frame — clamped to the clip midpoint, skipped for
-stills/sub-second clips, and falling back to the head on seek/decode failure.
+skip the usual black opening frame — applied only when the clip is longer than
+the offset (a shorter clip decodes the head, frame 0 being fine there), and
+falling back to the head on seek/decode failure.
 The Glide decoders default a missing `GlideRequestOptions.LENGTH` to `-1`
 (auto); an explicit `LENGTH` (Media/Image viewers pass the file size) is passed
 through. **Don't extend the auto offset to `0`** — that breaks the head-frame

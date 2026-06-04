@@ -41,9 +41,10 @@
 /* When the caller gives no thumbnail position (stream_pos < 0), seek this far
  * into the file before grabbing a frame. Most videos open on a black / blank
  * frame (fade-in, slate, letterbox), so the head yields a dark thumbnail; a few
- * seconds in is representative. Clamped to the clip midpoint for short clips,
- * skipped for sub-second stills, and we fall back to the head if decoding at the
- * offset fails. Note the contract: stream_pos > 0 is an explicit mid-clip
+ * seconds in is representative. Applied only when the clip is longer than the
+ * offset — a shorter clip just decodes the head (frame 0 is fine there) — and
+ * we also fall back to the head if decoding at the offset fails. Note the
+ * contract: stream_pos > 0 is an explicit mid-clip
  * mandate (honoured exactly, original ANY seek); stream_pos == 0 means the head
  * frame explicitly (some callers tile the first frame and need it — no seek);
  * only stream_pos < 0 triggers this auto offset. */
@@ -1124,24 +1125,17 @@ int jni_extract_bitmap (JNIEnv * env, jobject thiz, jlong stream_pos){
 
         if (stream_pos < 0) {
             int64_t duration_us = thumbnail->format_ctx->duration;
-            int64_t default_off = THUMBNAIL_DEFAULT_OFFSET_US;
 
-            if (duration_us == AV_NOPTS_VALUE) {
-                /* Unknown duration: most likely a normal video. Use the fixed
-                 * offset and rely on the head fallback if it overshoots. */
-                seek_pos = default_off;
-                auto_offset = 1;
-            } else if (duration_us > AV_TIME_BASE) {
-                /* Known duration over a second: clamp the offset to the
-                 * midpoint so we never seek past the end of a short clip. */
-                if (default_off > duration_us / 2) {
-                    default_off = duration_us / 2;
-                }
-                seek_pos = default_off;
+            /* Apply the offset only when the clip is long enough to contain it
+             * (or its duration is unknown — most likely a normal video, with
+             * the head fallback below as backstop). A clip shorter than the
+             * offset leaves seek_pos < 0, so the seek block is skipped and we
+             * decode the head — frame 0 is fine for a short clip, same as the
+             * decode-error fallback. */
+            if (duration_us == AV_NOPTS_VALUE || duration_us > THUMBNAIL_DEFAULT_OFFSET_US) {
+                seek_pos = THUMBNAIL_DEFAULT_OFFSET_US;
                 auto_offset = 1;
             }
-            /* else: still image / sub-second clip — leave seek_pos < 0 so the
-             * block below is skipped and we decode the head frame. */
         }
 
         if (seek_pos > 0) {

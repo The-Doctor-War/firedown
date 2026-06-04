@@ -296,26 +296,41 @@ function filterResponseText(details, onText) {
 // Emit enumerated HLS variants (no ffprobe) or, on ANY failure, the single media
 // URL. For an .m3u8 master we fetch+parse it (unless `body` is supplied). Does
 // its own dedup — callers must NOT pre-markSent the origin.
-async function emitHlsMasterOrSingle(details, { url, origin, tabId, name, title, img, duration, body }) {
-    if (alreadySent(origin)) return;
-    let variants = null;
-    if (/\.m3u8(?:[?#]|$)/.test(url)) {
-        try {
-            let text = body;
-            if (text == null) {
-                const resp = await fetch(url);
-                if (resp.ok) text = await resp.text();
-            }
-            if (text) {
-                const v = parseHlsMaster(text, url);
-                if (v.length > 0) variants = v;
-            }
-        } catch (e) { log("HLS", "master parse failed, single-url fallback", { error: e.message }); }
+// Hand an HLS master URL to native: Java OkHttp-fetches it (any headers — unlike
+// a page fetch() which can't set Origin/Referer) and M3U8Parser enumerates the
+// qualities, re-dispatching as variants+skipProbe (or a plain media capture on
+// failure). Used for master-only / single-use-key sites (niconico, Kick, Twitch)
+// so capture needs no ffmpeg probe and never burns a single-use AES key.
+async function enumerateMasterNative(details, { url, origin, name, description, img, duration, requestHeaders }) {
+    if (!url) return;
+    if (origin && alreadySent(origin)) { log("HLS", "already sent", { origin }); return; }
+    if (origin) markSent(origin);
+
+    const tabId = await resolveTabId(details);
+    let incognito = false;
+    if (tabId >= 0) {
+        try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
-    if (variants) {
-        sendVariants(details, { variants, origin, description: title, name, img, duration, skipProbe: true });
+
+    const message = { type: "hls-master", url, origin, tabId, request: details.requestId, incognito };
+    if (name) message.name = name;
+    if (description) message.description = description;
+    if (img) message.img = img;
+    if (duration > 0) message.duration = duration;
+    if (Array.isArray(requestHeaders) && requestHeaders.length > 0) message.requestHeaders = requestHeaders;
+
+    log("HLS", `enumerate master via native: ${String(url).slice(0, 90)}`);
+    sendNative(message);
+}
+
+// An .m3u8 master is enumerated in native (no ffprobe); anything else (a direct
+// progressive URL) is emitted as a single media capture.
+async function emitHlsMasterOrSingle(details, { url, origin, tabId, name, title, img, duration }) {
+    if (/\.m3u8(?:[?#]|$)/.test(url)) {
+        enumerateMasterNative(details, { url, origin, name, description: title, img, duration });
         return;
     }
+    if (alreadySent(origin)) return;
     markSent(origin);
     sendNative({
         url,
@@ -1843,47 +1858,21 @@ function getTwitchRendezvous(key) {
 function tryCompleteTwitchRendezvous(key) {
     const entry = twitchRendezvous.get(key);
     if (!entry || !entry.m3u8Url || !entry.metadata) return;
-    // Wait for the master body (quality enumeration) before emitting, so we send
-    // a picker rather than the bare master. bodyDone is force-set by a timeout /
-    // filter error / filter absence, so this can't hang (TTL also reaps it).
-    if (entry.bodyPending && !entry.bodyDone) return;
 
-    const { m3u8Url, metadata, details, variants } = entry;
+    const { m3u8Url, metadata, details } = entry;
     twitchRendezvous.delete(key);
 
-    const origin = metadata.origin;
-    if (alreadySent(origin)) {
-        log("TWITCH", `Rendezvous complete but already sent`, { key });
-        return;
-    }
-
-    if (variants && variants.length > 0) {
-        log("TWITCH", `Rendezvous complete — ${variants.length} variant(s)`, { key });
-        // sendVariants does its own dedup/markSent.
-        sendVariants(details || { tabId: -1, requestId: `twitch-${Date.now()}` }, {
-            variants,
-            origin,
-            description: metadata.description,
-            name: metadata.name,
-            img: metadata.img,
-            duration: metadata.duration,
-            skipProbe: true
-        });
-        return;
-    }
-
-    markSent(origin);
-    log("TWITCH", `Rendezvous complete — sending master`, { key, url: m3u8Url.slice(0, 120) });
-    sendNative({
+    // Hand the master to native: Java OkHttp-fetches it and M3U8Parser enumerates
+    // the qualities (no ffprobe), falling back to a media capture on failure.
+    // enumerateMasterNative does its own origin dedup.
+    log("TWITCH", `Rendezvous complete — enumerate master`, { key, url: m3u8Url.slice(0, 120) });
+    enumerateMasterNative(details || { tabId: -1, requestId: `twitch-${Date.now()}` }, {
         url: m3u8Url,
-        type: "media",
-        origin,
-        tabId: details?.tabId >= 0 ? details.tabId : (details?._resolvedTabId ?? -1),
-        request: details?.requestId || `twitch-${Date.now()}`,
+        origin: metadata.origin,
         name: metadata.name,
         description: metadata.description,
         img: metadata.img,
-        ...(metadata.duration > 0 ? { duration: metadata.duration } : {})
+        duration: metadata.duration
     });
 }
 
@@ -1930,9 +1919,9 @@ function resolveVodIdFromTab(tabId) {
  * the request.  The tab URL (twitch.tv/{login} or twitch.tv/videos/{id})
  * is the stable ground truth.
  */
-// Record the master URL and passively capture its body so we can enumerate
-// quality variants (no ffprobe). Any failure (no filter, parse error, timeout)
-// force-sets bodyDone, so the rendezvous falls back to emitting the master URL.
+// Record the master URL + tab context, then complete the rendezvous (which hands
+// the master to native for OkHttp fetch + Java enumeration). No body capture
+// here — Java fetches and parses it.
 function captureTwitchMaster(key, details) {
     const entry = getTwitchRendezvous(key);
     if (entry.m3u8Url) return; // first .m3u8 only
@@ -1941,24 +1930,6 @@ function captureTwitchMaster(key, details) {
     if (!entry.details && details.tabId >= 0) {
         entry.details = { tabId: details.tabId, _resolvedTabId: details.tabId, requestId: `cdn-${Date.now()}` };
     }
-    entry.bodyPending = true;
-    const created = filterResponseText(details, (text) => {
-        if (text) {
-            try {
-                const v = parseHlsMaster(text, details.url);
-                if (v.length > 0) entry.variants = v;
-            } catch (e) { log("TWITCH-CDN", `master parse failed`, { error: e.message }); }
-        }
-        entry.bodyDone = true;
-        tryCompleteTwitchRendezvous(key);
-    });
-    if (!created) entry.bodyDone = true;
-    setTimeout(() => {
-        if (!entry.bodyDone) {
-            entry.bodyDone = true;
-            tryCompleteTwitchRendezvous(key);
-        }
-    }, 5000);
     tryCompleteTwitchRendezvous(key);
 }
 
@@ -3889,6 +3860,35 @@ function listenerNicoWatchApi(details) {
     return {};
 }
 
+// Hand the niconico signed master to native for OkHttp fetch + Java enumeration.
+// Builds the headers domand validates (Origin/Referer + the domand cookie).
+async function emitNicoMaster(details, id, contentUrl) {
+    const origin = details.documentUrl || details.originUrl
+        || (id ? `https://www.nicovideo.jp/watch/${id}` : details.url);
+    let pageOrigin = "https://www.nicovideo.jp";
+    try { pageOrigin = new URL(origin).origin; } catch (e) {}
+    const requestHeaders = [
+        { name: "Origin", value: pageOrigin },
+        { name: "Referer", value: pageOrigin + "/" }
+    ];
+    try {
+        const cookies = await browser.cookies.getAll({ url: contentUrl });
+        if (cookies && cookies.length) {
+            requestHeaders.push({ name: "Cookie", value: cookies.map(c => `${c.name}=${c.value}`).join("; ") });
+        }
+    } catch (e) { log("NICO", "cookie read failed", { error: e.message }); }
+    const meta = nicoGetMeta(id) || {};
+    enumerateMasterNative(details, {
+        url: contentUrl,
+        origin,
+        name: meta.title,
+        description: meta.title,
+        img: meta.img,
+        duration: meta.durationMs,
+        requestHeaders
+    });
+}
+
 async function emitNicoStream(details, id, contentUrl) {
     const origin = details.documentUrl || details.originUrl
         || (id ? `https://www.nicovideo.jp/watch/${id}` : details.url);
@@ -4104,20 +4104,11 @@ function listenerNicoAccessHls(details) {
             });
             return;
         }
-        // Don't emit (and probe) the single master. Record it as pending so the
-        // player's own fetch of it is parsed into per-quality variants (no key
-        // burned). Fall back to the single-master emit if the master isn't seen
-        // within NICO_MASTER_TTL (e.g. the player fetches a rendition directly).
-        const masterPath = contentUrl.split("?")[0];
-        nicoPendingMaster.set(masterPath, { id, details, contentUrl, ts: Date.now() });
-        setTimeout(() => {
-            const p = nicoPendingMaster.get(masterPath);
-            if (p) {
-                nicoPendingMaster.delete(masterPath);
-                log("NICO", "master not seen, single-master fallback");
-                emitNicoStream(p.details, p.id, p.contentUrl);
-            }
-        }, NICO_MASTER_TTL);
+        // Hand the signed master to native: Java OkHttp-fetches it (with the
+        // Origin/Referer/Cookie domand validates) and M3U8Parser enumerates the
+        // per-quality variants — no ffmpeg probe, so the single-use key is never
+        // burned at capture. Java falls back to a media capture if it can't parse.
+        emitNicoMaster(details, id, contentUrl);
     });
     return {};
 }

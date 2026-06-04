@@ -1,5 +1,9 @@
 package com.solarized.firedown.utils;
 
+import android.util.Log;
+
+import com.solarized.firedown.BuildConfig;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,6 +50,23 @@ public final class M3U8Parser {
     private M3U8Parser() {
     }
 
+    private static final String TAG = "M3U8Parser";
+
+    // All logging is gated on the debug build (no logs ship in release).
+    private static void log(String msg) {
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, msg);
+        }
+    }
+
+    private static String head(String s) {
+        if (s == null) {
+            return "null";
+        }
+        String h = s.length() > 120 ? s.substring(0, 120) : s;
+        return h.replace('\n', ' ').replace('\r', ' ');
+    }
+
     private static final Pattern RESOLUTION = Pattern.compile("RESOLUTION=(\\d+)x(\\d+)");
     private static final Pattern AUDIO_ATTR = Pattern.compile("AUDIO=\"([^\"]+)\"");
     private static final Pattern CODECS_ATTR = Pattern.compile("CODECS=\"([^\"]+)\"");
@@ -73,7 +94,9 @@ public final class M3U8Parser {
      */
     public static JSONArray parseMaster(String text, String baseUrl) {
         JSONArray out = new JSONArray();
+        log("parseMaster: " + (text == null ? 0 : text.length()) + "B base=" + head(baseUrl));
         if (text == null || !text.contains("#EXT-X-STREAM-INF")) {
+            log("not a master (no #EXT-X-STREAM-INF); head=" + head(text));
             return out;
         }
 
@@ -136,6 +159,7 @@ public final class M3U8Parser {
             streams.add(s);
         }
 
+        log("parsed streams=" + streams.size() + " audioGroups=" + audios.keySet());
         if (streams.isEmpty()) {
             return out;
         }
@@ -158,6 +182,7 @@ public final class M3U8Parser {
         for (String g : rankedGroups) {
             audioRanked.add(audios.get(g));
         }
+        log("audio groups ranked (best-first)=" + rankedGroups);
 
         // Dedup videos by URL (keep the highest-bandwidth occurrence), best-first.
         Map<String, Stream> byUrl = new LinkedHashMap<>();
@@ -184,6 +209,7 @@ public final class M3U8Parser {
                 v.put("url", s.url);
                 v.put("width", s.width);
                 v.put("height", s.height);
+                String audioGroup = null;
                 if (audioCount > 0) {
                     // Proportional tiering: map video rank -> audio rank.
                     int idx = (int) Math.floor((double) (i * audioCount) / videoCount);
@@ -191,6 +217,7 @@ public final class M3U8Parser {
                         idx = audioCount - 1;
                     }
                     v.put("audioUrl", audioRanked.get(idx));
+                    audioGroup = rankedGroups.get(idx);
                 }
                 String videoCodec = videoCodec(s.codecs);
                 if (videoCodec != null) {
@@ -200,10 +227,13 @@ public final class M3U8Parser {
                     v.put("audioCodec", "aac");
                 }
                 out.put(v);
+                log("  variant " + s.height + "p bw=" + s.bandwidth
+                        + " audio=" + (audioGroup != null ? audioGroup : "muxed/none"));
             } catch (JSONException ignored) {
                 // Skip a variant we can't serialise rather than abort the lot.
             }
         }
+        log("parseMaster -> " + out.length() + " variant(s)");
         return out;
     }
 

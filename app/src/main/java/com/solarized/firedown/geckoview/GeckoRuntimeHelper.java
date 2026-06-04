@@ -23,7 +23,6 @@ import com.solarized.firedown.data.repository.WasmAllowlistRepository;
 import com.solarized.firedown.manager.UrlParser;
 import com.solarized.firedown.manager.UrlType;
 import com.solarized.firedown.utils.JsonHelper;
-import com.solarized.firedown.utils.M3U8Parser;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -564,15 +563,6 @@ public class GeckoRuntimeHelper {
 
             Log.d(TAG, "handleExtractionMessage: " + json);
 
-            // hls-master: fetch the master playlist via OkHttp (full header
-            // control) and enumerate qualities in Java (M3U8Parser) — no ffmpeg
-            // probe, so a single-use AES key (niconico) is never burned at
-            // capture. Re-dispatches as variants+skipProbe (or media on failure).
-            if ("hls-master".equals(json.optString("type", ""))) {
-                handleHlsMaster(json);
-                return;
-            }
-
             // 1. Parse the JSON to our Entity
             GeckoInspectEntity entity = JsonHelper.parse(json);
 
@@ -607,75 +597,6 @@ public class GeckoRuntimeHelper {
                 mPriorityExecutor.execute(task, priority, entity.getTabId());
 
                 Log.d(TAG, "handleExtractionMessage execute: " + json);
-            }
-        }
-
-        /**
-         * Fetch an HLS master playlist with OkHttp (so we can send any header —
-         * Origin/Referer/Cookie — unlike a page fetch()), enumerate its qualities
-         * with {@link M3U8Parser}, and re-dispatch as a variants+skipProbe message
-         * (reusing the whole variant pipeline). Never opens a segment, so it never
-         * decrypts or burns a single-use AES key. Falls back to a plain media
-         * capture (→ metadatareader) if the fetch fails or it isn't a master.
-         */
-        private void handleHlsMaster(JSONObject json) {
-            final String url = json.optString("url", null);
-            if (url == null || url.isEmpty()) {
-                return;
-            }
-            mNetworkExecutor.execute(() -> {
-                try {
-                    Request.Builder reqBuilder = new Request.Builder().url(url);
-                    JSONArray headers = json.optJSONArray("requestHeaders");
-                    if (headers != null) {
-                        for (int i = 0; i < headers.length(); i++) {
-                            JSONObject h = headers.getJSONObject(i);
-                            reqBuilder.addHeader(h.getString("name"), h.getString("value"));
-                        }
-                    }
-
-                    String body = null;
-                    int code;
-                    try (Response response = mOkHttpClient.newCall(reqBuilder.build()).execute()) {
-                        code = response.code();
-                        if (response.body() != null) {
-                            body = response.body().string();
-                        }
-                    }
-
-                    if (body == null || code < 200 || code >= 300) {
-                        Log.w(TAG, "hls-master fetch failed code=" + code + " url=" + url);
-                        redispatchHlsMaster(json, "media");
-                        return;
-                    }
-
-                    JSONArray variants = M3U8Parser.parseMaster(body, url);
-                    if (variants.length() == 0) {
-                        Log.w(TAG, "hls-master: 0 variants, fallback to media");
-                        redispatchHlsMaster(json, "media");
-                        return;
-                    }
-
-                    JSONObject vmsg = new JSONObject(json.toString());
-                    vmsg.put("type", "variants");
-                    vmsg.put("variants", variants);
-                    vmsg.put("skipProbe", true);
-                    vmsg.put("url", variants.getJSONObject(0).optString("url"));
-                    mMainExecutor.execute(() -> handleExtractionMessage(vmsg));
-                } catch (Exception e) {
-                    Log.e(TAG, "handleHlsMaster", e);
-                    redispatchHlsMaster(json, "media");
-                }
-            });
-        }
-
-        private void redispatchHlsMaster(JSONObject json, String type) {
-            try {
-                JSONObject m = new JSONObject(json.toString());
-                m.put("type", type);
-                mMainExecutor.execute(() -> handleExtractionMessage(m));
-            } catch (JSONException e) {
-                Log.e(TAG, "redispatchHlsMaster", e);
             }
         }
 

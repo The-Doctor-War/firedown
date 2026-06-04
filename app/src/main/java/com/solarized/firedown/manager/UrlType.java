@@ -3,7 +3,7 @@ package com.solarized.firedown.manager;
 public enum UrlType {
 
     UNKNOWN(-1), DUMMY(0), FILE(1), GECKO(2),
-    MEDIA(3), IMAGE(4), SVG(5), TIMEDTEXT(6), TS(7), SABR(8), SUBTITLE(9);
+    MEDIA(3), IMAGE(4), SVG(5), TIMEDTEXT(6), TS(7), SABR(8), SUBTITLE(9), HLS_MASTER(10);
 
     private final int value;
 

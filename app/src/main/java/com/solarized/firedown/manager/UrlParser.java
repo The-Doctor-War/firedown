@@ -68,7 +68,9 @@ public class UrlParser {
             return returnType;
         }
 
-        if (type.contains("image")) {
+        if (type.contains("hls-master")) {
+            returnType = UrlType.HLS_MASTER;
+        } else if (type.contains("image")) {
             returnType = UrlType.IMAGE;
         } else if(type.contains("media") || type.contains("youtube") || type.contains("variants")){
             returnType = UrlType.MEDIA;

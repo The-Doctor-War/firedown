@@ -14,8 +14,12 @@ import com.solarized.firedown.ffmpegutils.FFmpegMetaDataReader;
 import com.solarized.firedown.manager.UrlType;
 import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.FileUriHelper;
+import com.solarized.firedown.utils.JsonHelper;
+import com.solarized.firedown.utils.M3U8Parser;
 import com.solarized.firedown.utils.UrlStringUtils;
 import com.solarized.firedown.utils.WebUtils;
+
+import org.json.JSONArray;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -220,6 +224,9 @@ public class GeckoInspectTask implements Runnable {
             processSvg(entity);
             return true;
 
+        } else if (mUrlType == UrlType.HLS_MASTER) {
+            return processHlsMaster(entity);
+
         } else if (mVariants != null && !mVariants.isEmpty()) {
             new VariantProcessor(mRequestHeaders, mSkipProbe).process(entity, mVariants);
             return true;
@@ -279,6 +286,47 @@ public class GeckoInspectTask implements Runnable {
         String existing = entity.getFileName();
         if (TextUtils.isEmpty(existing)) return;
         entity.setFileName(existing + " [" + mLanguage + "]");
+    }
+
+    // ========================================================================
+    // HLS master (niconico / Kick / Twitch)
+    // ========================================================================
+
+    /**
+     * Fetch the HLS master playlist (same fetch-and-parse-in-the-task shape as
+     * {@link #processSvg}) and enumerate its qualities with {@link M3U8Parser} —
+     * text only, never opening a segment, so a single-use AES key is never burned
+     * at capture. The parsed variants run through {@link VariantProcessor} with
+     * {@code skipProbe} (no ffmpeg). On any failure (fetch error / not a master)
+     * we fall back to the ffmpeg probe of the master URL.
+     */
+    private boolean processHlsMaster(BrowserDownloadEntity entity) throws Exception {
+        String master = null;
+        try {
+            master = WebUtils.getString(mUrl, mRequestHeaders);
+        } catch (Exception e) {
+            Log.w(TAG, "HLS master fetch failed, ffmpeg fallback: " + mUrl, e);
+        }
+        if (TextUtils.isEmpty(master)) {
+            return processFFmpeg(entity, mUrl);
+        }
+
+        JSONArray arr = M3U8Parser.parseMaster(master, mUrl);
+        ArrayList<FFmpegEntity> variants = JsonHelper.parseVariants(arr, null);
+        if (variants == null || variants.isEmpty()) {
+            Log.w(TAG, "HLS master had no variants, ffmpeg fallback: " + mUrl);
+            return processFFmpeg(entity, mUrl);
+        }
+
+        // Represent the capture by its first (best) rendition, matching the
+        // variant-message convention (entity url = a playable rendition, not the
+        // master). skipProbe = true: trust the parsed metadata, don't decrypt.
+        String first = variants.get(0).getStreamUrl();
+        if (!TextUtils.isEmpty(first)) {
+            entity.setFileUrl(first);
+        }
+        new VariantProcessor(mRequestHeaders, true).process(entity, variants);
+        return true;
     }
 
     // ========================================================================

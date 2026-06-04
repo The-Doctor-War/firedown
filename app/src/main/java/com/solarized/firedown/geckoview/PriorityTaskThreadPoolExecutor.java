@@ -26,6 +26,23 @@ public class PriorityTaskThreadPoolExecutor {
 
     public static final int PRIORITY_LOW = 100;
 
+    /**
+     * Demotion floor for a task whose tab isn't the foreground one. Strictly
+     * worse (larger) than every base priority — {@link #PRIORITY_HIGH},
+     * {@link #PRIORITY_NORMAL}, {@link #PRIORITY_LOW} — so any foreground task
+     * outranks any background one.
+     *
+     * <p>Why a level <em>below</em> LOW is needed: generic (non-media) captures
+     * carry a base of {@code PRIORITY_LOW}. If background tasks were merely
+     * floored at {@code PRIORITY_LOW} too, a tab you just switched into whose own
+     * captures are also generic would <em>tie</em> with the previous tab's
+     * backlog — switch into a tab behind 200 queued LOW items and your new
+     * captures still wait behind them. Demoting the backlog to a priority no
+     * foreground task can hold guarantees the current tab's work runs first
+     * regardless of its base.</p>
+     */
+    public static final int PRIORITY_BACKGROUND = 1000;
+
     private static final int PRIORITY_CAPACITY = 100;
 
     private final PriorityBlockingQueue<Task> awaitingTasks;
@@ -49,8 +66,8 @@ public class PriorityTaskThreadPoolExecutor {
 
     /**
      * Foreground tab. A queued task keeps its base priority while its tab is
-     * current and is demoted to {@link #PRIORITY_LOW} otherwise, so switching
-     * tabs re-prioritizes the backlog. Volatile: read in {@link
+     * current and is demoted to {@link #PRIORITY_BACKGROUND} otherwise, so
+     * switching tabs re-prioritizes the backlog. Volatile: read in {@link
      * #effectivePriority}, mutated only under {@code this}. {@code -1} = unknown,
      * treat every task as foreground (no wrongful demotion before the first tab
      * is known).
@@ -77,8 +94,9 @@ public class PriorityTaskThreadPoolExecutor {
 
     /**
      * @param basePriority the urlType-derived priority (its value when the tab
-     *                     is in the foreground); the executor demotes it to LOW
-     *                     while {@code tabId} isn't the current tab.
+     *                     is in the foreground); the executor demotes it to
+     *                     {@link #PRIORITY_BACKGROUND} (below every base
+     *                     priority) while {@code tabId} isn't the current tab.
      */
     public void execute(GeckoInspectTask task, int basePriority, int tabId) {
         Log.d(TAG, "execute: " + awaitingTasks.size());
@@ -122,8 +140,10 @@ public class PriorityTaskThreadPoolExecutor {
 
     /**
      * Set the foreground tab and re-prioritize the pending queue: tasks for the
-     * new current tab regain their base priority, all others drop to LOW — so a
-     * tab you switch to jumps ahead of a heavy background tab's backlog.
+     * new current tab regain their base priority, all others drop to
+     * {@link #PRIORITY_BACKGROUND} — a level below every base priority, so even
+     * the current tab's LOW-base (generic) captures outrank a heavy background
+     * tab's backlog instead of tying with it.
      *
      * <p>{@code synchronized} on the same monitor as {@link #cancelTab} and
      * {@link #executeWaitingTask}, which is what makes the "switch then close
@@ -153,10 +173,12 @@ public class PriorityTaskThreadPoolExecutor {
     }
 
     /** Base priority while the task's tab is current (or the tab is still
-     *  unknown); demoted to LOW for any other tab. */
+     *  unknown); demoted to {@link #PRIORITY_BACKGROUND} for any other tab so a
+     *  foreground task always outranks a background one — even when both share
+     *  the same {@link #PRIORITY_LOW} base. */
     private int effectivePriority(Task t) {
         int ct = currentTabId;
-        return (ct == -1 || t.tabId == ct) ? t.basePriority : PRIORITY_LOW;
+        return (ct == -1 || t.tabId == ct) ? t.basePriority : PRIORITY_BACKGROUND;
     }
 
     private synchronized void executeWaitingTask() {

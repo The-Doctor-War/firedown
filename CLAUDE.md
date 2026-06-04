@@ -120,10 +120,18 @@ look empty for seconds.
 ### Inspect task scheduling (`PriorityTaskThreadPoolExecutor`)
 
 Captures run on a small priority pool. Each task carries a **base** priority
-(urlType-derived — HIGH for media/SABR/HLS_MASTER, lower otherwise) plus its
-`tabId`; the executor demotes it to `PRIORITY_LOW` unless its tab is the
-**current** one (`-1`/unknown = treat as foreground). Two mutators keep the
-backlog relevant while browsing:
+(urlType-derived — `HIGH`=1 for media/SABR/HLS_MASTER, `NORMAL`=10 for
+image/SVG, `LOW`=100 for everything generic) plus its `tabId`; the executor
+demotes it to `PRIORITY_BACKGROUND` (1000) unless its tab is the **current** one
+(`-1`/unknown = treat as foreground). The demotion floor is **below every base
+priority on purpose**: generic captures are already `LOW`, so flooring the
+backlog at `LOW` too would let a tab you just switched into (whose own captures
+are also `LOW`) merely *tie* with the previous tab's 200-item backlog — its new
+captures would still wait behind them. `PRIORITY_BACKGROUND` is a level no
+foreground task can hold, so the current tab's work always runs first regardless
+of base. (Background tasks all share that one floor — relative order among them
+is intentionally flat; what matters is foreground-beats-background.) Two mutators
+keep the backlog relevant while browsing:
 
 - **`setCurrentTab(tabId)`** (from `GeckoRuntimeHelper` onActivated/onUpdated)
   re-prioritizes the **whole pending queue** — drain → recompute each task's

@@ -837,6 +837,22 @@ void clean_downloader_field(JNIEnv *env, jobject thiz) {
 }
 
 
+/* Muxed position common to every stream — the minimum of the per-stream
+ * accumulators. With split audio+video the accumulators advance at different
+ * rates; the min is the position every track has reached, so it is monotonic
+ * (the min of non-decreasing series is non-decreasing) and reflects how much
+ * complete output exists. For a single stream it is just that stream's value. */
+static int64_t downloader_muxed_position(const struct Downloader *downloader) {
+    int64_t pos = downloader->current_recording_time[0];
+    for (int s = 1; s < downloader->capture_streams_no; s++) {
+        if (downloader->current_recording_time[s] < pos) {
+            pos = downloader->current_recording_time[s];
+        }
+    }
+    return pos;
+}
+
+
 /* =========================================================================
  * Mux thread
  *
@@ -870,7 +886,6 @@ void *downloader_mux(void *data) {
     int stream_no;
     int interrupt_ret;
     int64_t current_time;
-    int64_t current_recording_time;
     int64_t time_diff;
     int64_t recording_time;
     int err = ERROR_NO_ERROR;
@@ -904,6 +919,28 @@ void *downloader_mux(void *data) {
     const char *input_format_name = downloader->input_format_ctx[0]->iformat->name;
     int is_hls = av_strncasecmp(input_format_name, "hls", 3) == 0;
     int is_dash = av_strncasecmp(input_format_name, "dash", 4) == 0;
+
+    /* Progress mode is fixed for the whole download — duration, input format
+     * and known total size don't change mid-stream — so decide it once here
+     * instead of re-deriving the branch on every tick:
+     *   TIME  report the muxed position vs. duration (HLS/DASH VOD and any
+     *         input that reports a duration — the normal path);
+     *   SIZE  duration unknown but a real Content-Length is known: bytes muxed
+     *         vs. total. Progressive only — an HLS/DASH probe's Content-Length
+     *         is the playlist size, not the media size;
+     *   NONE  neither known: report indeterminate (AV_NOPTS_VALUE). */
+    enum { PROGRESS_TIME, PROGRESS_SIZE, PROGRESS_NONE } progress_mode;
+    int64_t progress_total;
+    if (recording_time > 0) {
+        progress_mode = PROGRESS_TIME;
+        progress_total = recording_time;
+    } else if (downloader->total_size > 0 && !is_hls && !is_dash) {
+        progress_mode = PROGRESS_SIZE;
+        progress_total = downloader->total_size;
+    } else {
+        progress_mode = PROGRESS_NONE;
+        progress_total = AV_NOPTS_VALUE;
+    }
 
     av_dict_set(&dict, "movflags", "faststart", 0);
     ret = avformat_write_header(downloader->output_format_ctx, &dict);
@@ -1038,44 +1075,42 @@ void *downloader_mux(void *data) {
         time_diff = downloader->last_updated_time - current_time;
 
         if (time_diff > UPDATE_TIME_US || time_diff < -UPDATE_TIME_US) {
+            int64_t progress_value;
+
             downloader->last_updated_time = current_time;
-            /* Report the MINIMUM accumulated time across all muxed streams, not
-             * the accumulator of whichever packet just arrived. With split
-             * audio+video the per-stream accumulators advance at different rates
-             * (the reader/queue feeds video ahead of audio), so reporting the
-             * current packet's stream made the bar jump between the leading and
-             * lagging track. The min is the position every track has reached:
-             * monotonic (the min of non-decreasing series is non-decreasing, so
-             * it never steps backward) and honest (that much of the complete A/V
-             * output exists). For a single-stream download it is just that
-             * stream's value, unchanged. */
-            current_recording_time = downloader->current_recording_time[0];
-            for (int s = 1; s < downloader->capture_streams_no; s++) {
-                if (downloader->current_recording_time[s] < current_recording_time) {
-                    current_recording_time = downloader->current_recording_time[s];
-                }
+
+            switch (progress_mode) {
+                case PROGRESS_TIME:
+                    progress_value = downloader_muxed_position(downloader);
+                    break;
+                case PROGRESS_SIZE:
+                    progress_value = downloader->current_size;
+                    break;
+                default:
+                    progress_value = AV_NOPTS_VALUE;
+                    break;
             }
 
-            /* [PROGRESS DEBUG] "cur" below is the reported min; "stream/type" is
-             * the packet that triggered this tick, and the per-stream lines show
-             * each accumulator so the A/V divergence (and that the min tracks the
-             * lagging track) is visible. Level 1: silent at the default
-             * LOG_LEVEL 0; raise LOG_LEVEL to 1 to see it. */
+            /* [PROGRESS DEBUG] "trigger" is the packet that fired this tick; the
+             * per-stream lines show each accumulator so the A/V divergence (and
+             * that the TIME value tracks the lagging track) stays visible. Level
+             * 1: silent at the default LOG_LEVEL 0; raise it to 1 to see it. */
             if (LOG_LEVEL >= 1) {
-                const char *report_tag = "?";
+                const char *mode_tag = progress_mode == PROGRESS_TIME ? "TIME"
+                                     : progress_mode == PROGRESS_SIZE ? "SIZE" : "NONE";
+                const char *trigger_tag = "?";
                 double pct = 0.0;
                 if (codec_type == AVMEDIA_TYPE_VIDEO) {
-                    report_tag = "V";
+                    trigger_tag = "V";
                 } else if (codec_type == AVMEDIA_TYPE_AUDIO) {
-                    report_tag = "A";
+                    trigger_tag = "A";
                 }
-                if (recording_time > 0) {
-                    pct = 100.0 * (double) current_recording_time / (double) recording_time;
+                if (progress_total > 0) {
+                    pct = 100.0 * (double) progress_value / (double) progress_total;
                 }
-                LOGI(1, "downloader_mux progress: report stream=%d type=%s cur=%"PRId64" den=%"PRId64" (%.1f%%) hls=%d dash=%d size=%"PRId64"/%"PRId64,
-                     stream_no, report_tag, current_recording_time, recording_time,
-                     pct, is_hls, is_dash,
-                     downloader->current_size, downloader->total_size);
+                LOGI(1, "downloader_mux progress: mode=%s trigger=%s val=%"PRId64" total=%"PRId64" (%.1f%%) size=%"PRId64,
+                     mode_tag, trigger_tag, progress_value, progress_total, pct,
+                     downloader->current_size);
                 for (int s = 0; s < downloader->capture_streams_no; s++) {
                     enum AVMediaType t = downloader->input_codec_ctxs[s]->codec_type;
                     const char *stream_tag = "?";
@@ -1089,19 +1124,9 @@ void *downloader_mux(void *data) {
                 }
             }
 
-            if (current_recording_time >= 0 && recording_time > 0) {
-                (*env)->CallVoidMethod(env, downloader->thiz,
-                                       downloader->downloader_on_progress_update_method,
-                                       current_recording_time, recording_time);
-            } else if (downloader->total_size > 0 && !is_hls && !is_dash) {
-                (*env)->CallVoidMethod(env, downloader->thiz,
-                                       downloader->downloader_on_progress_update_method,
-                                       downloader->current_size, downloader->total_size);
-            } else {
-                (*env)->CallVoidMethod(env, downloader->thiz,
-                                       downloader->downloader_on_progress_update_method,
-                                       (jlong) AV_NOPTS_VALUE, (jlong) AV_NOPTS_VALUE);
-            }
+            (*env)->CallVoidMethod(env, downloader->thiz,
+                                   downloader->downloader_on_progress_update_method,
+                                   progress_value, progress_total);
 
             /* Java callbacks may throw; clear so subsequent JNI calls don't blow up. */
             if ((*env)->ExceptionCheck(env)) {

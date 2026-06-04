@@ -76,12 +76,25 @@ public class GlideHelper {
     private static long effectiveThumbnailFrame(DownloadEntity entity) {
         long interval = entity.getThumbnailDuration();
         if (interval > 0) {
-            return interval;
+            return interval;                 // user-chosen position (e.g. regenerate)
         }
-        if (FileUriHelper.isVideo(entity.getFileMimeType())) {
+        if (!FileUriHelper.isVideo(entity.getFileMimeType())) {
+            return interval;                 // 0 — audio uses cover art, images have none
+        }
+        long duration = entity.getDuration();   // µs, 0 when unknown
+        if (duration <= 0) {
+            // Unknown length: assume a normal video and offset a few seconds in.
+            // If it turns out shorter, MediaMetadataRetriever clamps to the last
+            // frame and FFmpegUriDecoder's -1 auto path is the backstop.
             return DEFAULT_THUMBNAIL_FRAME_US;
         }
-        return interval;
+        if (DEFAULT_THUMBNAIL_FRAME_US > duration / 2) {
+            // Short clip (e.g. 1s): a fixed 3s offset would land past the end —
+            // MMR would clamp to the last frame, or snap back to the single t=0
+            // keyframe (black again). Use the midpoint instead.
+            return duration / 2;
+        }
+        return DEFAULT_THUMBNAIL_FRAME_US;
     }
 
 

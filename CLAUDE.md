@@ -149,6 +149,20 @@ offer stays lock-free (the queue is thread-safe; a task offered mid-drain just
 coexists with the re-offered ones). Running tasks are never interrupted —
 priority/cancellation only affect the *queued* tasks.
 
+Pool sizing: `NETWORK_CORE_POOL_SIZE = max(1, cores/2)` drives **both** the
+thread pool and the submit gate, and `executeWaitingTask` submits while
+`poolAvailable > 0` — i.e. **every** thread is usable. Don't reintroduce the old
+`> 1` gate (it reserved one thread for a cancellation task that doesn't exist —
+`cancelTab` runs synchronously on the caller): it left a thread permanently idle,
+**halved** throughput on 4-core devices, and on a 2-core device (pool size 1)
+stalled the pool entirely (`poolAvailable` never exceeded 1). The `max(1, …)`
+floor also avoids `newFixedThreadPool(0)` throwing on a single-core device.
+`cancelTab` deliberately does **not** reset `currentTabId` — closing the
+foreground tab leaves it dangling only until the next `onActivated →
+setCurrentTab` (always fired, bar closing the last tab, after which no captures
+flow); resetting to `-1` would treat every task as foreground and surge a
+background tab's backlog back to base priority.
+
 ## Debugging "video not captured" — do this, in order
 
 This section exists because a Threads bug took ~8 rounds that should have taken

@@ -35,6 +35,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.google.android.material.chip.ChipGroup;
+import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.GlideRequestOptions;
 import com.solarized.firedown.Keys;
@@ -88,10 +89,11 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     private MenuItem mProgressMenuItem;
     private boolean mListEmpty = true;
     private boolean mBusyShown;
-    private static final long BANNER_SHOW_DELAY_MS = 600L;
-    private static final long BANNER_HIDE_DELAY_MS = 300L;
+    private boolean mShowPending;
+    private static final long BANNER_SHOW_DELAY_MS = 400L;
+    private static final long BANNER_HIDE_DELAY_MS = 700L;
     private final Handler mBannerHandler = new Handler(Looper.getMainLooper());
-    private final Runnable mShowBusy = () -> { mBusyShown = true; renderListState(); };
+    private final Runnable mShowBusy = () -> { mShowPending = false; mBusyShown = true; renderListState(); };
     private final Runnable mHideBusy = () -> { mBusyShown = false; renderListState(); };
 
     @Override
@@ -393,19 +395,32 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
     /**
      * Reacts to the in-flight inspect-task count, debouncing the "scanning"
-     * indicator: only show it once work has been pending {@link
-     * #BANNER_SHOW_DELAY_MS} (so fast/aborting tasks never flash it), and clear
-     * it with a short linger to avoid flicker between back-to-back tasks.
+     * spinner. Show once work has been pending {@link #BANNER_SHOW_DELAY_MS}
+     * (so fast/aborting tasks never flash it); hide with a longer linger so
+     * gaps between bursts don't flicker it off.
+     *
+     * <p>The show timer is armed <b>once</b> and not rescheduled on every count
+     * change — a busy page emits hundreds of rapid increments/decrements, and
+     * re-posting the delayed show on each one perpetually reset the timer so it
+     * never fired (spinner stayed hidden with a full queue).
      */
     private void onInflightChanged(int count) {
-        boolean busy = count > 0;
-        mBannerHandler.removeCallbacks(mShowBusy);
-        mBannerHandler.removeCallbacks(mHideBusy);
-        if (busy == mBusyShown) {
-            return; // already in the desired state; nothing pending to flip
+        if (BuildConfig.DEBUG && mToolbar != null) {
+            mToolbar.setSubtitle(count > 0 ? ("queue: " + count) : null);
         }
-        mBannerHandler.postDelayed(busy ? mShowBusy : mHideBusy,
-                busy ? BANNER_SHOW_DELAY_MS : BANNER_HIDE_DELAY_MS);
+        if (count > 0) {
+            mBannerHandler.removeCallbacks(mHideBusy);
+            if (!mBusyShown && !mShowPending) {
+                mShowPending = true;
+                mBannerHandler.postDelayed(mShowBusy, BANNER_SHOW_DELAY_MS);
+            }
+        } else {
+            mBannerHandler.removeCallbacks(mShowBusy);
+            mShowPending = false;
+            if (mBusyShown) {
+                mBannerHandler.postDelayed(mHideBusy, BANNER_HIDE_DELAY_MS);
+            }
+        }
     }
 
     /**

@@ -1,6 +1,9 @@
 package com.solarized.firedown.data.repository;
 
 
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -31,6 +34,29 @@ public class BrowserDownloadRepository {
 
     private final Queue<BrowserDownloadEntity> mInterceptedList;
     private final MutableLiveData<List<BrowserDownloadEntity>> mMediatorData;
+
+    /**
+     * Coalesces list emissions. A media-heavy page (twitch/kick) can capture
+     * 200+ items in a burst, and each {@code addValue} would otherwise re-sort
+     * the whole list and dispatch a DiffUtil pass. We emit on the leading edge
+     * (the first capture shows instantly) then throttle the rest to one
+     * emission per {@link #EMIT_THROTTLE_MS} window (a single trailing flush),
+     * collapsing the burst into a handful of updates. The capture sheet's
+     * "scanning" spinner already signals ongoing work, so the small batching
+     * latency is invisible.
+     */
+    private static final long EMIT_THROTTLE_MS = 175L;
+    private final Object mEmitLock = new Object();
+    private final Handler mEmitHandler = new Handler(Looper.getMainLooper());
+    private long mLastEmit;
+    private boolean mEmitScheduled;
+    private final Runnable mEmitRunnable = () -> {
+        synchronized (mEmitLock) {
+            mEmitScheduled = false;
+            mLastEmit = SystemClock.uptimeMillis();
+        }
+        doEmit();
+    };
 
     @Inject
     public BrowserDownloadRepository() {
@@ -105,25 +131,36 @@ public class BrowserDownloadRepository {
             if (!exists) {
                 Log.d(TAG, "addValue: " + browserDownloadEntity.getFileUrl() + " tab: " + browserDownloadEntity.getTabId() + " uid: " + browserDownloadEntity.getUid());
                 mInterceptedList.add(browserDownloadEntity);
-                // Note: We don't call GeckoRuntimeHelper.getTabId() here anymore
-                // to avoid circular dependencies. We trigger updates via postComplete()
-                // or you can pass the current tabId as a parameter if needed.
-                emitData();
+                added = true;
             }
+        }
+        // Throttled emit, outside the list lock (see scheduleEmit / mEmitRunnable).
+        if (added) {
+            scheduleEmit();
         }
     }
 
     public void postComplete() {
-        synchronized (mInterceptedList) {
-            emitData();
+        // Force an immediate emit (e.g. a download finished) and reset the
+        // throttle window so a following capture burst still gets its leading edge.
+        synchronized (mEmitLock) {
+            mEmitHandler.removeCallbacks(mEmitRunnable);
+            mEmitScheduled = false;
+            mLastEmit = SystemClock.uptimeMillis();
         }
+        doEmit();
     }
 
     public void postClear() {
+        synchronized (mEmitLock) {
+            mEmitHandler.removeCallbacks(mEmitRunnable);
+            mEmitScheduled = false;
+            mLastEmit = SystemClock.uptimeMillis();
+        }
         synchronized (mInterceptedList) {
             mInterceptedList.clear();
-            mMediatorData.postValue(null);
         }
+        mMediatorData.postValue(null);
     }
 
     public void trimTabs(int tabId) {
@@ -132,16 +169,44 @@ public class BrowserDownloadRepository {
         }
     }
 
-    private void emitData() {
+    /**
+     * Leading + trailing throttle. The first call after a quiet period emits
+     * immediately; calls within the window schedule a single trailing flush so
+     * a capture burst collapses into one emission per window.
+     */
+    private void scheduleEmit() {
+        synchronized (mEmitLock) {
+            long now = SystemClock.uptimeMillis();
+            long sinceLast = now - mLastEmit;
+            if (sinceLast < EMIT_THROTTLE_MS) {
+                if (!mEmitScheduled) {
+                    mEmitScheduled = true;
+                    mEmitHandler.postDelayed(mEmitRunnable, EMIT_THROTTLE_MS - sinceLast);
+                }
+                return;
+            }
+            mEmitHandler.removeCallbacks(mEmitRunnable);
+            mEmitScheduled = false;
+            mLastEmit = now;
+            // leading edge — emit below, outside the lock
+        }
+        doEmit();
+    }
+
+    private void doEmit() {
         List<BrowserDownloadEntity> sortedList;
-        if (BuildUtils.hasAndroid14()) {
-            sortedList = mInterceptedList.stream()
-                    .sorted(Collections.reverseOrder())
-                    .toList();
-        } else {
-            sortedList = mInterceptedList.stream()
-                    .sorted(Collections.reverseOrder())
-                    .collect(Collectors.toList());
+        // Snapshot+sort under the list lock — the trailing flush runs on the
+        // main thread, so it can't rely on a caller already holding it.
+        synchronized (mInterceptedList) {
+            if (BuildUtils.hasAndroid14()) {
+                sortedList = mInterceptedList.stream()
+                        .sorted(Collections.reverseOrder())
+                        .toList();
+            } else {
+                sortedList = mInterceptedList.stream()
+                        .sorted(Collections.reverseOrder())
+                        .collect(Collectors.toList());
+            }
         }
         mMediatorData.postValue(sortedList);
     }

@@ -82,6 +82,27 @@ public class PriorityTaskThreadPoolExecutor {
         return inFlightLive;
     }
 
+    /**
+     * Drop queued (not-yet-started) inspect tasks for a closed tab, so its
+     * backlog doesn't keep occupying the pool and delay the next tab's captures.
+     * Already-running tasks are left to finish (there are only a few, and they
+     * aren't interruptible). Each removed task is decremented from the in-flight
+     * count — it was counted at execute() and its run-finally will never fire.
+     */
+    public void cancelTab(int tabId) {
+        int removed = 0;
+        for (Task t : awaitingTasks.toArray(new Task[0])) {
+            if (t != null && t.tabId == tabId && awaitingTasks.remove(t)) {
+                removed++;
+            }
+        }
+        if (removed > 0) {
+            Log.d(TAG, "cancelTab " + tabId + " dropped " + removed + " queued task(s)");
+            int n = inFlight.addAndGet(-removed);
+            inFlightLive.postValue(Math.max(0, n));
+        }
+    }
+
     private synchronized void executeWaitingTask() {
         if (executor.isShutdown()) {
             return;

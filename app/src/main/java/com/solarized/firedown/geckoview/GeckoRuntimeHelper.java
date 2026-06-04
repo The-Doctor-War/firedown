@@ -353,6 +353,9 @@ public class GeckoRuntimeHelper {
                 case "onRemoved" -> {
                     int removedTabId = json.getInt("id");
                     mBrowserDownloadRepository.trimTabs(removedTabId);
+                    // Drop the closed tab's queued inspect tasks so its backlog
+                    // doesn't saturate the pool and starve the next tab.
+                    mPriorityExecutor.cancelTab(removedTabId);
                 }
                 case "onHeadersReceived", "onResponseStarted", "contentScript" -> {
                     handleExtractionMessage(json);

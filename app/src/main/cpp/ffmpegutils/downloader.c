@@ -837,6 +837,9 @@ void clean_downloader_field(JNIEnv *env, jobject thiz) {
 }
 
 
+/* Progress reporting mode — fixed for the whole download (see downloader_mux). */
+enum ProgressMode { PROGRESS_TIME, PROGRESS_SIZE, PROGRESS_NONE };
+
 /* Muxed position common to every stream — the minimum of the per-stream
  * accumulators. With split audio+video the accumulators advance at different
  * rates; the min is the position every track has reached, so it is monotonic
@@ -850,6 +853,52 @@ static int64_t downloader_muxed_position(const struct Downloader *downloader) {
         }
     }
     return pos;
+}
+
+/* Per-tick progress diagnostics (gated at level 1; silent at the default
+ * LOG_LEVEL 0). "trigger" is the stream of the packet that fired this tick; the
+ * per-stream lines show each accumulator so the A/V divergence — and that the
+ * TIME value tracks the lagging track — stays visible. */
+static void downloader_log_progress(const struct Downloader *downloader,
+                                     enum ProgressMode progress_mode,
+                                     enum AVMediaType trigger_type,
+                                     int64_t progress_value,
+                                     int64_t progress_total) {
+    const char *mode_tag;
+    const char *trigger_tag;
+    double pct;
+    int s;
+
+    if (LOG_LEVEL < 1) {
+        return;
+    }
+
+    mode_tag = progress_mode == PROGRESS_TIME ? "TIME"
+             : progress_mode == PROGRESS_SIZE ? "SIZE" : "NONE";
+    trigger_tag = "?";
+    if (trigger_type == AVMEDIA_TYPE_VIDEO) {
+        trigger_tag = "V";
+    } else if (trigger_type == AVMEDIA_TYPE_AUDIO) {
+        trigger_tag = "A";
+    }
+    pct = 0.0;
+    if (progress_total > 0) {
+        pct = 100.0 * (double) progress_value / (double) progress_total;
+    }
+    LOGI(1, "downloader_mux progress: mode=%s trigger=%s val=%"PRId64" total=%"PRId64" (%.1f%%) size=%"PRId64,
+         mode_tag, trigger_tag, progress_value, progress_total, pct,
+         downloader->current_size);
+    for (s = 0; s < downloader->capture_streams_no; s++) {
+        enum AVMediaType t = downloader->input_codec_ctxs[s]->codec_type;
+        const char *stream_tag = "?";
+        if (t == AVMEDIA_TYPE_VIDEO) {
+            stream_tag = "V";
+        } else if (t == AVMEDIA_TYPE_AUDIO) {
+            stream_tag = "A";
+        }
+        LOGI(1, "downloader_mux progress:   stream[%d] type=%s acc=%"PRId64,
+             s, stream_tag, downloader->current_recording_time[s]);
+    }
 }
 
 
@@ -888,6 +937,12 @@ void *downloader_mux(void *data) {
     int64_t current_time;
     int64_t time_diff;
     int64_t recording_time;
+    int64_t progress_total;
+    int64_t progress_value;
+    const char *input_format_name;
+    int is_hls;
+    int is_dash;
+    enum ProgressMode progress_mode;
     int err = ERROR_NO_ERROR;
     char thread_title[] = "downloader_mux";
     JavaVMAttachArgs thread_spec = {JNI_VERSION_1_6, thread_title, NULL};
@@ -916,9 +971,9 @@ void *downloader_mux(void *data) {
      * progress tick. It gates the size-based fallback: an HLS/DASH probe's
      * Content-Length is the playlist byte size, not the media size, so it must
      * never be used as a progress denominator. */
-    const char *input_format_name = downloader->input_format_ctx[0]->iformat->name;
-    int is_hls = av_strncasecmp(input_format_name, "hls", 3) == 0;
-    int is_dash = av_strncasecmp(input_format_name, "dash", 4) == 0;
+    input_format_name = downloader->input_format_ctx[0]->iformat->name;
+    is_hls = av_strncasecmp(input_format_name, "hls", 3) == 0;
+    is_dash = av_strncasecmp(input_format_name, "dash", 4) == 0;
 
     /* Progress mode is fixed for the whole download — duration, input format
      * and known total size don't change mid-stream — so decide it once here
@@ -929,8 +984,6 @@ void *downloader_mux(void *data) {
      *         vs. total. Progressive only — an HLS/DASH probe's Content-Length
      *         is the playlist size, not the media size;
      *   NONE  neither known: report indeterminate (AV_NOPTS_VALUE). */
-    enum { PROGRESS_TIME, PROGRESS_SIZE, PROGRESS_NONE } progress_mode;
-    int64_t progress_total;
     if (recording_time > 0) {
         progress_mode = PROGRESS_TIME;
         progress_total = recording_time;
@@ -1075,8 +1128,6 @@ void *downloader_mux(void *data) {
         time_diff = downloader->last_updated_time - current_time;
 
         if (time_diff > UPDATE_TIME_US || time_diff < -UPDATE_TIME_US) {
-            int64_t progress_value;
-
             downloader->last_updated_time = current_time;
 
             switch (progress_mode) {
@@ -1091,38 +1142,8 @@ void *downloader_mux(void *data) {
                     break;
             }
 
-            /* [PROGRESS DEBUG] "trigger" is the packet that fired this tick; the
-             * per-stream lines show each accumulator so the A/V divergence (and
-             * that the TIME value tracks the lagging track) stays visible. Level
-             * 1: silent at the default LOG_LEVEL 0; raise it to 1 to see it. */
-            if (LOG_LEVEL >= 1) {
-                const char *mode_tag = progress_mode == PROGRESS_TIME ? "TIME"
-                                     : progress_mode == PROGRESS_SIZE ? "SIZE" : "NONE";
-                const char *trigger_tag = "?";
-                double pct = 0.0;
-                if (codec_type == AVMEDIA_TYPE_VIDEO) {
-                    trigger_tag = "V";
-                } else if (codec_type == AVMEDIA_TYPE_AUDIO) {
-                    trigger_tag = "A";
-                }
-                if (progress_total > 0) {
-                    pct = 100.0 * (double) progress_value / (double) progress_total;
-                }
-                LOGI(1, "downloader_mux progress: mode=%s trigger=%s val=%"PRId64" total=%"PRId64" (%.1f%%) size=%"PRId64,
-                     mode_tag, trigger_tag, progress_value, progress_total, pct,
-                     downloader->current_size);
-                for (int s = 0; s < downloader->capture_streams_no; s++) {
-                    enum AVMediaType t = downloader->input_codec_ctxs[s]->codec_type;
-                    const char *stream_tag = "?";
-                    if (t == AVMEDIA_TYPE_VIDEO) {
-                        stream_tag = "V";
-                    } else if (t == AVMEDIA_TYPE_AUDIO) {
-                        stream_tag = "A";
-                    }
-                    LOGI(1, "downloader_mux progress:   stream[%d] type=%s acc=%"PRId64,
-                         s, stream_tag, downloader->current_recording_time[s]);
-                }
-            }
+            downloader_log_progress(downloader, progress_mode, codec_type,
+                                    progress_value, progress_total);
 
             (*env)->CallVoidMethod(env, downloader->thiz,
                                    downloader->downloader_on_progress_update_method,

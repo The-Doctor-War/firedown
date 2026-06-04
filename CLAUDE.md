@@ -478,6 +478,13 @@ callers.
     (`goto`/`return`) together on a single line.
   - Always brace blocks; put the body on its own line(s).
   - Check return values explicitly: assign to a variable, then test it.
+  - **Declare a function's working variables in the declaration block at the
+    top of the function** (as the existing sources do — see `downloader_mux`),
+    not interleaved with statements mid-function. A `for (int i = …)` counter
+    or a temporary at the **start of a nested block** is fine; a fresh
+    declaration after executable statements in the function body is not. If a
+    block needs several locals, that's a sign it should be its own helper
+    (e.g. `downloader_log_progress`).
 
   Parts of the existing code use a terser, condition-with-side-effects form
   (e.g. `if (x->interrupt || (err = f()) < 0) goto error;`). That is **not** the

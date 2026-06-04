@@ -47,6 +47,16 @@ public class PriorityTaskThreadPoolExecutor {
 
     private final MutableLiveData<Integer> inFlightLive = new MutableLiveData<>(0);
 
+    /**
+     * Foreground tab. A queued task keeps its base priority while its tab is
+     * current and is demoted to {@link #PRIORITY_LOW} otherwise, so switching
+     * tabs re-prioritizes the backlog. Volatile: read in {@link
+     * #effectivePriority}, mutated only under {@code this}. {@code -1} = unknown,
+     * treat every task as foreground (no wrongful demotion before the first tab
+     * is known).
+     */
+    private volatile int currentTabId = -1;
+
 
     /**
      * Creates a new {@code TimeoutTaskThreadPoolExecutor} with the
@@ -65,10 +75,17 @@ public class PriorityTaskThreadPoolExecutor {
         this.poolSize = new AtomicInteger(0);
     }
 
-    public void execute(GeckoInspectTask task, int priority, int tabId) {
+    /**
+     * @param basePriority the urlType-derived priority (its value when the tab
+     *                     is in the foreground); the executor demotes it to LOW
+     *                     while {@code tabId} isn't the current tab.
+     */
+    public void execute(GeckoInspectTask task, int basePriority, int tabId) {
         Log.d(TAG, "execute: " + awaitingTasks.size());
+        Task t = new Task(task, basePriority, tabId);
+        t.priority = effectivePriority(t);
         inFlightLive.postValue(inFlight.incrementAndGet());
-        awaitingTasks.offer(new Task(task, priority, tabId));
+        awaitingTasks.offer(t);
         executeWaitingTask();
     }
 
@@ -89,7 +106,7 @@ public class PriorityTaskThreadPoolExecutor {
      * aren't interruptible). Each removed task is decremented from the in-flight
      * count — it was counted at execute() and its run-finally will never fire.
      */
-    public void cancelTab(int tabId) {
+    public synchronized void cancelTab(int tabId) {
         int removed = 0;
         for (Task t : awaitingTasks.toArray(new Task[0])) {
             if (t != null && t.tabId == tabId && awaitingTasks.remove(t)) {
@@ -101,6 +118,45 @@ public class PriorityTaskThreadPoolExecutor {
             int n = inFlight.addAndGet(-removed);
             inFlightLive.postValue(Math.max(0, n));
         }
+    }
+
+    /**
+     * Set the foreground tab and re-prioritize the pending queue: tasks for the
+     * new current tab regain their base priority, all others drop to LOW — so a
+     * tab you switch to jumps ahead of a heavy background tab's backlog.
+     *
+     * <p>{@code synchronized} on the same monitor as {@link #cancelTab} and
+     * {@link #executeWaitingTask}, which is what makes the "switch then close
+     * (or close mid-switch)" race safe: the drain/recompute/re-offer here and a
+     * tab-close's remove can't interleave — they run one fully then the other,
+     * in either order, with a consistent result and correct in-flight count.
+     * Holding the monitor across the drain also stops {@code executeWaitingTask}
+     * from polling the transiently-empty queue. ({@code execute}'s offer isn't
+     * on the monitor, but the queue is thread-safe and a task offered during the
+     * window simply coexists with the re-offered ones.)</p>
+     */
+    public synchronized void setCurrentTab(int tabId) {
+        if (tabId == currentTabId) {
+            return;
+        }
+        currentTabId = tabId;
+        if (awaitingTasks.isEmpty()) {
+            return;
+        }
+        java.util.ArrayList<Task> pending = new java.util.ArrayList<>(awaitingTasks.size());
+        awaitingTasks.drainTo(pending);
+        for (Task t : pending) {
+            t.priority = effectivePriority(t);
+        }
+        awaitingTasks.addAll(pending);
+        executeWaitingTask();
+    }
+
+    /** Base priority while the task's tab is current (or the tab is still
+     *  unknown); demoted to LOW for any other tab. */
+    private int effectivePriority(Task t) {
+        int ct = currentTabId;
+        return (ct == -1 || t.tabId == ct) ? t.basePriority : PRIORITY_LOW;
     }
 
     private synchronized void executeWaitingTask() {
@@ -129,14 +185,17 @@ public class PriorityTaskThreadPoolExecutor {
     }
 
     private static class Task {
-        GeckoInspectTask task;
-        int priority;
-        int tabId;
+        final GeckoInspectTask task;
+        final int basePriority;   // urlType-derived priority (its foreground value)
+        final int tabId;
+        int priority;             // effective priority used for queue ordering;
+                                  // recomputed on a tab switch (mutated only off-queue)
 
-        public Task(GeckoInspectTask task, int priority, int tabId) {
+        public Task(GeckoInspectTask task, int basePriority, int tabId) {
             this.task = task;
-            this.priority = priority;
+            this.basePriority = basePriority;
             this.tabId = tabId;
+            this.priority = basePriority;
         }
 
         public int getPriority(){

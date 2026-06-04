@@ -348,6 +348,9 @@ public class GeckoRuntimeHelper {
                 case "onActivated", "onUpdated" -> {
                     mTabId = json.getInt("id");
                     mGeckoStateDataRepository.setCurrentTabId(mTabId);
+                    // Re-prioritize the pending inspect queue for the new
+                    // foreground tab (no-op if unchanged).
+                    mPriorityExecutor.setCurrentTab(mTabId);
                     mBrowserDownloadRepository.postComplete();
                 }
                 case "onRemoved" -> {
@@ -583,21 +586,19 @@ public class GeckoRuntimeHelper {
                 // 2. Determine the URL Type based on the extension that sent it
                 UrlType urlType = UrlParser.getUrlGeckoType(url, geckoType);
 
-                // 3. Determine priority (High for current tab, Low for background)
-                int currentTabId = getTabId();
-                int priority = (entity.getTabId() == currentTabId)
-                        ? getPriority(urlType)
-                        : PriorityTaskThreadPoolExecutor.PRIORITY_LOW;
-
-                // 4. Create the Task, passing the Hilt-injected repository
+                // 3. Create the Task, passing the Hilt-injected repository
                 GeckoInspectTask task = new GeckoInspectTask(
                         mBrowserDownloadRepository, // Passed from outer class injection
                         urlType,
                         entity
                 );
 
-                // 5. Submit to the priority executor
-                mPriorityExecutor.execute(task, priority, entity.getTabId());
+                // 4. Submit with the urlType-derived base priority. The executor
+                // applies the foreground/background adjustment (current tab keeps
+                // the base priority, others drop to LOW) and re-applies it to the
+                // whole pending queue whenever the foreground tab changes
+                // (setCurrentTab below).
+                mPriorityExecutor.execute(task, getPriority(urlType), entity.getTabId());
 
                 Log.d(TAG, "handleExtractionMessage execute: " + json);
             }

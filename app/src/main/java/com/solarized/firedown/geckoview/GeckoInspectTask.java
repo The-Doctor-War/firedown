@@ -243,6 +243,9 @@ public class GeckoInspectTask implements Runnable {
             new VariantProcessor(mRequestHeaders, mSkipProbe).process(entity, mVariants);
             return true;
 
+        } else if (mSkipProbe && processMediaSkipProbe(entity)) {
+            return true;
+
         } else {
             return processFFmpeg(entity, mUrl);
         }
@@ -263,6 +266,36 @@ public class GeckoInspectTask implements Runnable {
         }
 
         parseMetadata(entity, metadata);
+        return true;
+    }
+
+    /**
+     * Single-URL media capture with skipProbe set (Apple Podcasts): the
+     * metadatareader probe's only output we actually need was the duration, and
+     * the parser already supplied it (formatted onto the entity in
+     * prepareEntity). So classify from the URL-derived mime instead of opening
+     * the file.
+     *
+     * <p>Audio only: returns {@code false} for anything we can't positively type
+     * as audio from the URL (e.g. an extensionless tracking enclosure), so
+     * {@link #processTask} falls through to the probe and never misclassifies.
+     * type FILE keeps it on the raw {@code HttpDownloadStrategy} — the same
+     * strategy the probe yields for a progressive audio file. Rebuilds the one
+     * duration tag {@link #parseTags} would have added for the Capture view.</p>
+     */
+    private boolean processMediaSkipProbe(BrowserDownloadEntity entity) {
+        String mime = entity.getMimeType();
+        if (!FileUriHelper.isAudio(mime)) {
+            return false;
+        }
+        entity.setType(UrlType.FILE.getValue());
+        entity.setAudio(true);
+        String duration = entity.getFileDuration();
+        if (!TextUtils.isEmpty(duration)) {
+            ArrayList<FFmpegTagEntity> tags = new ArrayList<>();
+            tags.add(new FFmpegTagEntity(entity.getUid(), duration, FFmpegTagEntity.TYPE_DURATION));
+            entity.setTags(tags);
+        }
         return true;
     }
 

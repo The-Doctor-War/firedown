@@ -813,6 +813,12 @@ async function processApplePodcastEpisode(episodeId, details, originUrl, source)
             source,
             tabId
         });
+        // We already have the duration from the lookup API; for an audio episode
+        // the metadatareader probe added nothing else we need, so skip it. Gate
+        // on duration — if the API gave none, keep probing to obtain it. Native
+        // only honours skipProbe once it confirms the URL is audio, else it still
+        // probes (so an extensionless enclosure can't be misclassified).
+        if (typeof message.duration === "number" && message.duration > 0) message.skipProbe = true;
         sendNative(message);
     } catch (e) {
         log("APPLE_PODCAST", `Error`, e.message);
@@ -965,6 +971,10 @@ function dispatchAppleEpisodes(episodes, showName, originUrl, details, source) {
             url: message.url?.slice(0, 100),
             source
         });
+        // Duration from the amp-api; skip the metadatareader probe for the audio
+        // episode (see the lookup path above). Gated on duration; native still
+        // probes unless it can confirm the URL is audio.
+        if (typeof message.duration === "number" && message.duration > 0) message.skipProbe = true;
         sendNative(message);
     }
 }

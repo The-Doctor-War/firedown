@@ -2460,10 +2460,6 @@ async function fetchDailymotionGeoApi(details, videoId) {
  */
 function processDailymotionData(details, data, videoId) {
     const origin = `https://www.dailymotion.com/video/${videoId}`;
-    if (alreadySent(origin)) {
-        log("DAILYMOTION", `Already sent`, { videoId });
-        return;
-    }
 
     // Extract HLS URL from qualities.auto
     let hlsUrl = null;
@@ -2481,8 +2477,6 @@ function processDailymotionData(details, data, videoId) {
         return;
     }
 
-    markSent(origin);
-
     const title = data.title || "";
     const name = title.length > 40 ? title.slice(0, 40).replace(/\s+\S*$/, "") : title;
     const duration = data.duration ? data.duration * 1000 : 0;
@@ -2496,23 +2490,16 @@ function processDailymotionData(details, data, videoId) {
         }
     }
 
-    const tabId = details.tabId >= 0 ? details.tabId : (details._resolvedTabId ?? -1);
-
-    const message = {
-        url: hlsUrl,
-        type: "media",
-        origin,
-        tabId,
-        request: details.requestId || `dm-${Date.now()}`,
-        name,
-        description: title,
-    };
-
-    if (img) message.img = img;
-    if (duration > 0) message.duration = duration;
-
-    log("DAILYMOTION", `Sending video`, { videoId, name, hasImg: !!img });
-    sendNative(message);
+    // qualities.auto's application/x-mpegURL entry is an HLS master. Enumerate it
+    // in native (M3U8Parser, skipProbe) instead of emitting a single media URL
+    // that the metadatareader probe would open at capture time — same path as
+    // niconico/Twitch/Kick/Vimeo. enumerateMasterNative owns the origin dedup, so
+    // we deliberately no longer alreadySent/markSent here (double-marking would
+    // make the helper see the origin as already-sent and emit nothing). Gives a
+    // per-quality picker and falls back to a single media capture (which then
+    // probes, as before) if enumeration fails.
+    log("DAILYMOTION", `Enumerate HLS master`, { videoId, name, hasImg: !!img });
+    enumerateMasterNative(details, { url: hlsUrl, origin, name, description: title, img, duration });
 }
 
 /**

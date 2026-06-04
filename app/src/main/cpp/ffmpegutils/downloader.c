@@ -1036,6 +1036,42 @@ void *downloader_mux(void *data) {
             downloader->last_updated_time = current_time;
             current_recording_time = downloader->current_recording_time[stream_no];
 
+            /* [PROGRESS DEBUG] The reported position is the accumulator of the
+             * stream the *current* packet belongs to. With split audio+video
+             * tracks the two accumulators advance independently (A and V are
+             * demuxed/queued at different rates), so alternating A/V packets
+             * make the reported value — and the progress bar — jump back and
+             * forth. Log every stream's accumulator next to the one being
+             * reported so the divergence is visible. Level 1: silent at the
+             * default LOG_LEVEL 0; raise LOG_LEVEL to 1 to see it. */
+            if (LOG_LEVEL >= 1) {
+                const char *report_tag = "?";
+                double pct = 0.0;
+                if (codec_type == AVMEDIA_TYPE_VIDEO) {
+                    report_tag = "V";
+                } else if (codec_type == AVMEDIA_TYPE_AUDIO) {
+                    report_tag = "A";
+                }
+                if (recording_time > 0) {
+                    pct = 100.0 * (double) current_recording_time / (double) recording_time;
+                }
+                LOGI(1, "downloader_mux progress: report stream=%d type=%s cur=%"PRId64" den=%"PRId64" (%.1f%%) hls=%d dash=%d size=%"PRId64"/%"PRId64,
+                     stream_no, report_tag, current_recording_time, recording_time,
+                     pct, is_hls, is_dash,
+                     downloader->current_size, downloader->total_size);
+                for (int s = 0; s < downloader->capture_streams_no; s++) {
+                    enum AVMediaType t = downloader->input_codec_ctxs[s]->codec_type;
+                    const char *stream_tag = "?";
+                    if (t == AVMEDIA_TYPE_VIDEO) {
+                        stream_tag = "V";
+                    } else if (t == AVMEDIA_TYPE_AUDIO) {
+                        stream_tag = "A";
+                    }
+                    LOGI(1, "downloader_mux progress:   stream[%d] type=%s acc=%"PRId64,
+                         s, stream_tag, downloader->current_recording_time[s]);
+                }
+            }
+
             if (current_recording_time >= 0 && recording_time > 0) {
                 (*env)->CallVoidMethod(env, downloader->thiz,
                                        downloader->downloader_on_progress_update_method,

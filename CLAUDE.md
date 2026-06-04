@@ -441,12 +441,32 @@ Don'ts (each cost rounds here):
   `PlayerView`'s `resize_mode="fit"` — don't make the fill unconditional, it
   would paint the player background edge-to-edge.
 
+## Thumbnails (native `thumbnailer.c`)
+
+`FFmpegThumbnailer.getBitmap(streamPos)` reads one frame; `streamPos` is a
+three-way contract: **`>0`** seeks to that mid-clip position (explicit mandate,
+`AVSEEK_FLAG_ANY`); **`==0`** decodes the head frame (some callers need the
+first frame exactly — GifMaker tiles it across the filmstrip, SaveFrame
+fallback); **`<0`** means *no mandate*, so the native side auto-seeks
+`THUMBNAIL_DEFAULT_OFFSET_US` (3s) in (`BACKWARD` to the enclosing keyframe) to
+skip the usual black opening frame — clamped to the clip midpoint, skipped for
+stills/sub-second clips, and falling back to the head on seek/decode failure.
+The Glide decoders default a missing `GlideRequestOptions.LENGTH` to `-1`
+(auto); an explicit `LENGTH` (Media/Image viewers pass the file size) is passed
+through. **Don't extend the auto offset to `0`** — that breaks the head-frame
+callers.
+
 ## Conventions
 
 - Match the surrounding comment density — the parsers are heavily commented
   with *why*, including dead-ends not to retry. Keep that.
 - Don't push to `main`; develop on a feature branch and open a PR only when
   asked.
+- **One working branch per session — do NOT cut a new branch for every
+  request.** Keep committing follow-up work to the branch already in play; only
+  branch when starting genuinely unrelated work or when the user asks. If you
+  did split something off, merge it back into the working branch rather than
+  leaving a trail of one-commit branches.
 - Commit messages: explain the root cause and how it was verified, not just the
   change.
 - **C style (all native sources under `app/src/main/cpp/`): write standard,

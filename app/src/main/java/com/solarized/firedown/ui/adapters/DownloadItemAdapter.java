@@ -546,13 +546,6 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         // every bind paid for a resource lookup (theme + LocaleList
         // resolution) plus a String concat on the list-mode path.
         String mimeLabel = mimeLabelFor(mimeType, isGrid);
-        // Append the type's secondary metadatum inline, e.g.
-        // "MP4 · 12:34 · example.com" (list) / "PNG · 1920x1080" (grid). List
-        // mimeLabel carries a trailing " · "; grid has none.
-        String secondary = secondaryMetaLabel(entity, mimeType, isGrid);
-        if (!TextUtils.isEmpty(secondary) && !TextUtils.isEmpty(mimeLabel)) {
-            mimeLabel = isGrid ? (mimeLabel + " · " + secondary) : (mimeLabel + secondary + " · ");
-        }
         if (TextUtils.isEmpty(mimeLabel)) {
             holder.mimeText.setVisibility(View.GONE);
         } else {
@@ -680,15 +673,16 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
 
     private void bindFinishedInner(DownloadViewHolder holder, DownloadEntity entity, boolean isGrid) {
         String mimeType = entity.getFileMimeType();
-        String durationFormat = entity.getDurationFormatted();
-        boolean hasDuration = !TextUtils.isEmpty(durationFormat)
-                && (FileUriHelper.isVideo(mimeType) || FileUriHelper.isAudio(mimeType));
+        // The type's secondary metadatum, shown as a distinct element (the badge
+        // overlay in grid, appended to the finished meta line in list) — never
+        // folded into the mime-type label.
+        String secondary = secondaryMetaLabel(entity, mimeType);
 
         if (isGrid) {
             setVisible(holder.topScrim, true);
-            if (holder.mimeDuration != null && hasDuration) {
+            if (holder.mimeDuration != null && !TextUtils.isEmpty(secondary)) {
                 holder.mimeDuration.setVisibility(View.VISIBLE);
-                holder.mimeDuration.setText(durationFormat);
+                holder.mimeDuration.setText(secondary);
             }
         }
 
@@ -729,6 +723,14 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
                     R.string.download_finished_meta,
                     Utils.getFileSize(size),
                     DateUtils.getFileDate(date));
+            // Append the type's secondary metadatum (duration / resolution /
+            // language) to the "size · date" line — the list equivalent of the
+            // grid badge. Immutable per entity, so the id/size/date cache key
+            // still holds.
+            String secondary = secondaryMetaLabel(entity, entity.getFileMimeType());
+            if (!TextUtils.isEmpty(secondary)) {
+                label = label + " · " + secondary;
+            }
             holder.cachedFinishedKeyId = id;
             holder.cachedFinishedKeySize = size;
             holder.cachedFinishedKeyDate = date;
@@ -820,14 +822,14 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
     }
 
     /**
-     * The single secondary metadatum to show inline on the meta line, chosen by
-     * type: duration (video/audio), resolution (image), or language (subtitle).
-     * Duration is returned only in list mode — the grid already renders it on the
-     * thumbnail (mimeDuration overlay), so adding it here would duplicate it.
+     * The single secondary metadatum for an item, chosen by type: duration
+     * (video/audio), resolution (image), or language (subtitle). Rendered as a
+     * distinct element — the badge overlay in grid, appended to the finished
+     * meta line in list — never folded into the mime-type label.
      */
-    private @Nullable String secondaryMetaLabel(DownloadEntity entity, @Nullable String mimeType, boolean isGrid) {
+    private static @Nullable String secondaryMetaLabel(DownloadEntity entity, @Nullable String mimeType) {
         if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isAudio(mimeType)) {
-            return isGrid ? null : entity.getDurationFormatted();
+            return entity.getDurationFormatted();
         }
         if (FileUriHelper.isImage(mimeType) || FileUriHelper.isSVG(mimeType)) {
             return entity.getFileResolution();

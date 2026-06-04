@@ -35,7 +35,6 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
 import com.google.android.material.chip.ChipGroup;
-import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.GlideHelper;
 import com.solarized.firedown.GlideRequestOptions;
 import com.solarized.firedown.Keys;
@@ -388,17 +387,12 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     }
 
     /**
-     * Reacts to the in-flight inspect-task count. Updates a DEBUG-only raw
-     * queue readout immediately, and debounces the user-facing "scanning"
+     * Reacts to the in-flight inspect-task count, debouncing the "scanning"
      * indicator: only show it once work has been pending {@link
      * #BANNER_SHOW_DELAY_MS} (so fast/aborting tasks never flash it), and clear
      * it with a short linger to avoid flicker between back-to-back tasks.
      */
     private void onInflightChanged(int count) {
-        if (BuildConfig.DEBUG && mToolbar != null) {
-            mToolbar.setSubtitle(count > 0 ? ("queue: " + count) : null);
-        }
-
         boolean busy = count > 0;
         mBannerHandler.removeCallbacks(mShowBusy);
         mBannerHandler.removeCallbacks(mHideBusy);

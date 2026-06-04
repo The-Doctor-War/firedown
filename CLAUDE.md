@@ -112,8 +112,8 @@ Three layers prevent duplicate entries for one video:
 aborts count too). `BrowserOptionFragment` observes it via
 `BrowserDownloadViewModel.getInflight()`, **debounced** (~600 ms show / ~300 ms
 hide, so fast/aborting tasks never flash): empty+busy → the LCEE loading
-spinner, content+busy → a top "Checking for media…" banner. The raw count also
-shows in the toolbar subtitle on `BuildConfig.DEBUG`. This fills the gap where a
+spinner, content+busy → a tonal "Checking for media…" `MaterialCardView` banner
+(matching the tabs-archive / incognito list banners). This fills the gap where a
 slow capture (e.g. an HLS-master fetch) makes the sheet look empty for seconds.
 
 ## Debugging "video not captured" — do this, in order

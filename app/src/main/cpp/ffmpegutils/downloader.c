@@ -1034,16 +1034,28 @@ void *downloader_mux(void *data) {
             int is_dash = av_strncasecmp(fmt0, "dash", 4) == 0;
 
             downloader->last_updated_time = current_time;
-            current_recording_time = downloader->current_recording_time[stream_no];
+            /* Report the MINIMUM accumulated time across all muxed streams, not
+             * the accumulator of whichever packet just arrived. With split
+             * audio+video the per-stream accumulators advance at different rates
+             * (the reader/queue feeds video ahead of audio), so reporting the
+             * current packet's stream made the bar jump between the leading and
+             * lagging track. The min is the position every track has reached:
+             * monotonic (the min of non-decreasing series is non-decreasing, so
+             * it never steps backward) and honest (that much of the complete A/V
+             * output exists). For a single-stream download it is just that
+             * stream's value, unchanged. */
+            current_recording_time = downloader->current_recording_time[0];
+            for (int s = 1; s < downloader->capture_streams_no; s++) {
+                if (downloader->current_recording_time[s] < current_recording_time) {
+                    current_recording_time = downloader->current_recording_time[s];
+                }
+            }
 
-            /* [PROGRESS DEBUG] The reported position is the accumulator of the
-             * stream the *current* packet belongs to. With split audio+video
-             * tracks the two accumulators advance independently (A and V are
-             * demuxed/queued at different rates), so alternating A/V packets
-             * make the reported value — and the progress bar — jump back and
-             * forth. Log every stream's accumulator next to the one being
-             * reported so the divergence is visible. Level 1: silent at the
-             * default LOG_LEVEL 0; raise LOG_LEVEL to 1 to see it. */
+            /* [PROGRESS DEBUG] "cur" below is the reported min; "stream/type" is
+             * the packet that triggered this tick, and the per-stream lines show
+             * each accumulator so the A/V divergence (and that the min tracks the
+             * lagging track) is visible. Level 1: silent at the default
+             * LOG_LEVEL 0; raise LOG_LEVEL to 1 to see it. */
             if (LOG_LEVEL >= 1) {
                 const char *report_tag = "?";
                 double pct = 0.0;

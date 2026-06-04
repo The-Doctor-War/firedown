@@ -120,6 +120,7 @@ public class BrowserDownloadRepository {
     }
 
     public void addValue(BrowserDownloadEntity browserDownloadEntity) {
+        boolean added = false;
         synchronized (mInterceptedList) {
             boolean exists = false;
             for (BrowserDownloadEntity entity : mInterceptedList) {

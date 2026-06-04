@@ -392,6 +392,19 @@ mov→hls feedback channel that doesn't exist yet.
   keeps the default 16:10 letterbox** (`fillBounds=false`) to match
   `PlayerView`'s `resize_mode="fit"` — don't make the fill unconditional, it
   would paint the player background edge-to-edge.
+- **List-row meta line is `MIME · domain` — plain text, no domain icon.** Both
+  list rows that show captured/downloaded media (`fragment_download_item.xml`
+  and `fragment_browser_options_item_list.xml`, `row_meta` →
+  `mime_text` + `file_url`) read `VÍDEO · youtube.com`. The mime label
+  (`MimePrimaryLabel`, adapter appends a trailing `" · "`) doubles as the
+  separator, so `file_url` follows directly with no leading margin. There is
+  deliberately **no globe/favicon `ImageView`** between them — it was removed as
+  decoration (identical on every row, redundant with both the domain text and
+  the `·`). Don't reintroduce a domain icon here; if you ever do want a
+  per-site favicon, that's a different, data-bound feature, not the old static
+  globe. The third line (`size · date · duration/resolution/language`) is the
+  informative density and stays. The two layouts and the grid tile are kept in
+  lockstep — change the meta line in both list rows together.
 
 ## Thumbnails (native `thumbnailer.c`)
 

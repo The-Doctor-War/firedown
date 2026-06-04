@@ -85,6 +85,26 @@ the capture is **deduped on the page origin** (a fresh signed master URL per
 refresh would otherwise create duplicate entries) via `entity.setUid` in
 `GeckoInspectTask`.
 
+### YouTube / SABR
+
+YouTube isn't HLS/DASH — it's Google's SABR (itag formats, a
+`serverAbrStreamingUrl` + ustreamer config, and a PoToken minted by BotGuard via
+`PoTokenGenerator`). The `youtube@` extension emits adaptive video+audio
+itag-pair variants + the shared SABR data; routed via `UrlType.SABR`, downloaded
+by `SabrStrategy`. `VariantProcessor` skips ffprobe for SABR variants (empty
+media URLs) and trusts the JS codec/resolution/duration. Captions use the
+separate `timedtext` path.
+
+### Capture dedup
+
+Three layers prevent duplicate entries for one video:
+- **regex block** (cardinal rule) — keeps the generic catcher off a parser's media;
+- **JS `sentOrigins`** (`background.js`) — per page origin, 30s TTL;
+- **`BrowserDownloadRepository.isPresent`** — per `tabId`, then `uid` /
+  exact-or-trivially-different URL / image perceptual hash. `uid` is
+  `url.hashCode()`, except **HLS_MASTER** keys it on the page origin (signed
+  master URLs rotate per refresh).
+
 ## Debugging "video not captured" — do this, in order
 
 This section exists because a Threads bug took ~8 rounds that should have taken

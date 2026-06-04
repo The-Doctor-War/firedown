@@ -23,52 +23,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- "Still scanning" banner. Shown (debounced) above existing captures
-         while an inspect task is in flight, so a slow capture (e.g. an HLS
-         master fetch) doesn't read as "nothing was captured". Hidden by
-         default; the empty list uses the LCEE loading state instead.
-         Styled to match the tabs-archive / incognito list banners: a tonal
-         MaterialCardView (12dp corners, no elevation/stroke). -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/capture_banner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/list_spacing"
-        android:layout_marginTop="@dimen/list_spacing"
-        android:visibility="gone"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="0dp"
-        app:strokeWidth="0dp"
-        app:cardBackgroundColor="?attr/colorSurfaceContainerHighest">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp">
-
-            <ProgressBar
-                style="?android:attr/progressBarStyleSmall"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:indeterminate="true"
-                android:indeterminateTint="?attr/colorPrimary" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginStart="12dp"
-                android:textAppearance="?attr/textAppearanceTitleSmall"
-                android:textColor="?attr/colorOnSurface"
-                android:text="@string/capture_scanning" />
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
     <com.solarized.firedown.ui.LCEERecyclerView
         android:id="@+id/list_recycler_lcee"
         android:layout_width="match_parent"

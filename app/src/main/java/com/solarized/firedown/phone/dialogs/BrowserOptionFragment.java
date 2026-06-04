@@ -83,8 +83,9 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
     // "Still scanning" indicator state. mBusyShown is the debounced, displayed
     // state; mListEmpty mirrors the latest list so a busy/empty change re-renders
-    // the right LCEE state. Debounced so fast/aborting inspect tasks don't flash.
-    private View mCaptureBanner;
+    // the right state. Debounced so fast/aborting inspect tasks don't flash.
+    // empty+busy → LCEE loading; content+busy → a toolbar spinner (action_progress).
+    private MenuItem mProgressMenuItem;
     private boolean mListEmpty = true;
     private boolean mBusyShown;
     private static final long BANNER_SHOW_DELAY_MS = 600L;
@@ -115,7 +116,6 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
 
         mToolbar = view.findViewById(R.id.toolbar);
         mChipGroup = view.findViewById(R.id.chip_group);
-        mCaptureBanner = view.findViewById(R.id.capture_banner);
         mLCEERecyclerView = view.findViewById(R.id.list_recycler_lcee);
         mLCEERecyclerView.setEmptyButtonVisibility(View.VISIBLE);
 
@@ -259,6 +259,11 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                 if (actionView != null) {
                     actionView.setIcon(mEnableGrid ? R.drawable.ic_grid_view_24 : R.drawable.ic_view_list_24);
                 }
+                // The "scanning" spinner lives next to the grid/list toggle
+                // (absent in the action-mode menu). Re-apply its visibility on
+                // every (re)inflate from the current debounced busy state.
+                mProgressMenuItem = menu.findItem(R.id.action_progress);
+                updateProgressIndicator();
                 if (mIsIncognito) {
                     int onSurface = IncognitoColors.getOnSurface(requireContext(), true);
                     for (int i = 0; i < menu.size(); i++) {
@@ -327,7 +332,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
             // Keep the mime tag on every tile regardless of the active chip —
             // selecting a type chip no longer blanks it out.
             mAdapter.setMimeSuppressed(false);
-            mAdapter.submitList(downloads);
+            submitListPreservingScroll(downloads);
         });
 
         mBrowserDownloadViewModel.getInflight().observe(getViewLifecycleOwner(),
@@ -410,7 +415,10 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
      * existing rows; otherwise the normal empty / content state.
      */
     private void renderListState() {
-        if (mActionModeEnabled) return;
+        if (mActionModeEnabled) {
+            updateProgressIndicator();
+            return;
+        }
         if (mListEmpty) {
             if (mBusyShown) {
                 mLCEERecyclerView.showLoading();
@@ -418,13 +426,59 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                 configureEmptyState();
                 mLCEERecyclerView.showEmpty();
             }
-            if (mCaptureBanner != null) mCaptureBanner.setVisibility(View.GONE);
         } else {
             mLCEERecyclerView.hideAll();
-            if (mCaptureBanner != null) {
-                mCaptureBanner.setVisibility(mBusyShown ? View.VISIBLE : View.GONE);
-            }
         }
+        updateProgressIndicator();
+    }
+
+    /**
+     * Toolbar "scanning" spinner: shown only when busy AND there's already
+     * content (the empty case uses the LCEE loading spinner instead, so the two
+     * never double up). No-op when the menu isn't inflated or is the action-mode
+     * menu (which has no progress item).
+     */
+    private void updateProgressIndicator() {
+        if (mProgressMenuItem != null) {
+            mProgressMenuItem.setVisible(mBusyShown && !mListEmpty && !mActionModeEnabled);
+        }
+    }
+
+    /**
+     * Submit a new capture list while keeping the user's scroll fixed. The list
+     * re-sorts on every emit (current-visit media floats to the top), so as
+     * captures stream in — 200+ while a Twitch/Kick feed loads — items would
+     * otherwise insert/move above the viewport and reflow the grid under the
+     * user's finger. Anchor on the first visible item's uid + its top offset and
+     * restore it after the diff commits: new rows land off-screen above (scroll
+     * up to reveal) instead of yanking the view. When nothing is scrolled past
+     * (first load / at the top) we don't anchor, so fresh captures show normally.
+     */
+    private void submitListPreservingScroll(List<BrowserDownloadEntity> downloads) {
+        if (mAdapter == null) return;
+        if (mLayoutManager == null) {
+            mAdapter.submitList(downloads);
+            return;
+        }
+        int firstPos = mLayoutManager.findFirstVisibleItemPosition();
+        List<BrowserDownloadEntity> current = mAdapter.getCurrentList();
+        if (firstPos <= 0 || firstPos >= current.size()) {
+            // Nothing meaningful to anchor (at the top, or first load).
+            mAdapter.submitList(downloads);
+            return;
+        }
+        final int anchorUid = current.get(firstPos).getUid();
+        final View anchorView = mLayoutManager.findViewByPosition(firstPos);
+        final int anchorOffset = anchorView != null ? anchorView.getTop() : 0;
+        mAdapter.submitList(downloads, () -> {
+            if (mLayoutManager == null || downloads == null) return;
+            for (int i = 0; i < downloads.size(); i++) {
+                if (downloads.get(i).getUid() == anchorUid) {
+                    mLayoutManager.scrollToPositionWithOffset(i, anchorOffset);
+                    return;
+                }
+            }
+        });
     }
 
     private void configureEmptyState() {
@@ -612,7 +666,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         mToolbar = null;
         mAdapter = null;
         mLayoutManager = null;
-        mCaptureBanner = null;
+        mProgressMenuItem = null;
     }
 
     @Override

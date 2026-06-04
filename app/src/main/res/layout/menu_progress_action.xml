@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Action view for the capture toolbar's "scanning" spinner (action_progress).
+     Sized as a standard 48dp toolbar action slot with a 24dp indeterminate
+     spinner, tinted to match the adjacent action icons. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="48dp"
+    android:layout_height="48dp"
+    android:padding="12dp">
+
+    <ProgressBar
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:indeterminate="true"
+        android:indeterminateTint="?attr/colorOnSurfaceVariant" />
+</FrameLayout>

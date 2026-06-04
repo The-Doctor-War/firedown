@@ -18,7 +18,13 @@ public class PriorityTaskThreadPoolExecutor {
 
     private final static int NUMBER_OF_CORES = Runtime.getRuntime().availableProcessors();
 
-    private final static int NETWORK_CORE_POOL_SIZE = NUMBER_OF_CORES / 2;
+    /**
+     * Pool size: half the device cores, but at least one — {@code NUMBER_OF_CORES
+     * / 2} is 0 on a single-core device and {@link Executors#newFixedThreadPool}
+     * throws on 0. All of these threads are usable: {@link #executeWaitingTask}
+     * submits while any slot is free (no thread is reserved/idle).
+     */
+    private final static int NETWORK_CORE_POOL_SIZE = Math.max(1, NUMBER_OF_CORES / 2);
 
     public static final int PRIORITY_HIGH = 1;
 
@@ -76,18 +82,14 @@ public class PriorityTaskThreadPoolExecutor {
 
 
     /**
-     * Creates a new {@code TimeoutTaskThreadPoolExecutor} with the
-     * given core pool size.
-     * The pool should be greater or equals than 2 because one thread is reserved
-     * to schedule cancellation task.
-     *
-     * @param corePoolSize the number of threads to keep in the pool, even
-     *        if they are idle, unless {@code allowCoreThreadTimeOut} is set
-     * @throws IllegalArgumentException if {@code corePoolSize < 0}
+     * Creates the inspect-task pool. Sizes itself to {@link
+     * #NETWORK_CORE_POOL_SIZE} threads (half the device cores, floored at 1) and
+     * uses all of them — {@link #executeWaitingTask} submits while any slot is
+     * free. Takes no arguments; there is no reserved/idle thread.
      */
     public PriorityTaskThreadPoolExecutor() {
         this.awaitingTasks = new PriorityBlockingQueue<>(PRIORITY_CAPACITY, new PriorityFutureComparator());
-        this.executor = Executors.newFixedThreadPool(NUMBER_OF_CORES/2);
+        this.executor = Executors.newFixedThreadPool(NETWORK_CORE_POOL_SIZE);
         this.corePoolSize = NETWORK_CORE_POOL_SIZE;
         this.poolSize = new AtomicInteger(0);
     }
@@ -123,6 +125,14 @@ public class PriorityTaskThreadPoolExecutor {
      * Already-running tasks are left to finish (there are only a few, and they
      * aren't interruptible). Each removed task is decremented from the in-flight
      * count — it was counted at execute() and its run-finally will never fire.
+     *
+     * <p>Deliberately does <b>not</b> touch {@link #currentTabId}: closing the
+     * foreground tab leaves it pointing at the now-dead tab only until the
+     * browser activates the next tab, which always fires onActivated →
+     * {@link #setCurrentTab} (the sole exception is closing the <i>last</i> tab,
+     * after which no captures flow until a new tab opens and activates). Resetting
+     * it to {@code -1} here would be worse — that treats every task as foreground
+     * and would surge a backgrounded tab's backlog back to base priority.</p>
      */
     public synchronized void cancelTab(int tabId) {
         int removed = 0;
@@ -188,7 +198,10 @@ public class PriorityTaskThreadPoolExecutor {
 
         int poolAvailable = corePoolSize-poolSize.get();
         Log.d(TAG, "executeWaitingTask: " + poolAvailable);
-        if (poolAvailable > 1) {
+        // Submit while any slot is free. (>1 left one thread permanently idle —
+        // and on a 2-core device, where corePoolSize is 1, it stalled the pool
+        // entirely since poolAvailable never exceeded 1.)
+        if (poolAvailable > 0) {
             final Task nextTask = awaitingTasks.poll();
             if (nextTask != null) {
                 poolSize.incrementAndGet();
@@ -197,7 +210,13 @@ public class PriorityTaskThreadPoolExecutor {
                         nextTask.task.run();
                     } finally {
                         Log.w(TAG, "taskHandler Finish");
-                        inFlightLive.postValue(inFlight.decrementAndGet());
+                        // Clamp the published value to >= 0, same as cancelTab.
+                        // remove() (cancel) and poll() (run) share this monitor,
+                        // so a task is never both cancelled and run and the count
+                        // shouldn't underflow — the clamp is belt-and-braces so a
+                        // stray negative can't get stuck on the "scanning" UI.
+                        int n = inFlight.decrementAndGet();
+                        inFlightLive.postValue(Math.max(0, n));
                         poolSize.decrementAndGet();
                         executeWaitingTask();
                     }

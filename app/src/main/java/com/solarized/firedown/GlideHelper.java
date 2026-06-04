@@ -56,7 +56,33 @@ public class GlideHelper {
     private static final int THUMB_WIDTH  = 512;
     private static final int THUMB_HEIGHT = 320;
 
+    /** When a download has no explicitly chosen thumbnail position
+     *  ({@code thumbnailDuration == 0}), sample the frame this far in (µs)
+     *  rather than at t=0 — videos usually open on a black/blank frame, so
+     *  {@code .frame(0)} yields a black thumbnail. Mirrors the native
+     *  thumbnailer's default offset. Applied only to video; audio renders its
+     *  embedded cover art (frame position irrelevant) and images have none. */
+    private static final long DEFAULT_THUMBNAIL_FRAME_US = 3_000_000L;
+
     private GlideHelper() {}
+
+    /**
+     * Effective frame position for a download thumbnail: the user-chosen
+     * position when set, otherwise {@link #DEFAULT_THUMBNAIL_FRAME_US} for video
+     * (skip the black opening frame), otherwise 0. Used by both {@link #load}
+     * and {@link #preloadDownload} so the {@code .frame()} value AND the cache
+     * signature stay identical between the two paths.
+     */
+    private static long effectiveThumbnailFrame(DownloadEntity entity) {
+        long interval = entity.getThumbnailDuration();
+        if (interval > 0) {
+            return interval;
+        }
+        if (FileUriHelper.isVideo(entity.getFileMimeType())) {
+            return DEFAULT_THUMBNAIL_FRAME_US;
+        }
+        return interval;
+    }
 
 
     // ── Safe clear for onViewRecycled ────────────────────────────────────
@@ -282,7 +308,7 @@ public class GlideHelper {
                             AppCompatImageView image) {
 
         String mimeType = entity.getFileMimeType();
-        long interval = entity.getThumbnailDuration();
+        long interval = effectiveThumbnailFrame(entity);
 
         // clone() so we don't mutate the caller's shared RequestOptions —
         // .frame()/.override()/.set() return `this` (in-place mutation),
@@ -375,7 +401,7 @@ public class GlideHelper {
                                                     @NonNull RequestOptions requestOptions) {
 
         String mimeType = entity.getFileMimeType();
-        long interval = entity.getThumbnailDuration();
+        long interval = effectiveThumbnailFrame(entity);
 
         // clone() so we don't mutate the caller's shared RequestOptions —
         // .frame()/.override()/.set() return `this` (in-place mutation),

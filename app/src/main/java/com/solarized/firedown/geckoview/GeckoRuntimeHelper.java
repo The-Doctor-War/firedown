@@ -541,7 +541,7 @@ public class GeckoRuntimeHelper {
          * Logic for categorizing task urgency
          */
         private int getPriority(UrlType type) {
-            if (type.usesFFmpeg()) {
+            if (type.usesFFmpeg() || type == UrlType.SABR || type == UrlType.HLS_MASTER) {
                 return PriorityTaskThreadPoolExecutor.PRIORITY_HIGH;
             } else if (type == UrlType.SVG || type == UrlType.IMAGE) {
                 return PriorityTaskThreadPoolExecutor.PRIORITY_NORMAL;

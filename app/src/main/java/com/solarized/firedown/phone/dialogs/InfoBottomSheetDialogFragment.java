@@ -89,6 +89,9 @@ public class InfoBottomSheetDialogFragment extends BaseBottomSheetDialogFragment
             }else if(resId == R.id.info_details_language){
                 // Only subtitle downloads carry a language; skip the row otherwise.
                 if(!TextUtils.isEmpty(mDownloadEntity.getFileLanguage())) mData.add(new InfoEntity(resId, InfoEntity.ITEM, mLocalDataSet[i]));
+            }else if(resId == R.id.info_details_resolution){
+                // Only images carry a resolution; skip the row otherwise.
+                if(!TextUtils.isEmpty(mDownloadEntity.getFileResolution())) mData.add(new InfoEntity(resId, InfoEntity.ITEM, mLocalDataSet[i]));
             }else{
                 mData.add(new InfoEntity(resId, InfoEntity.ITEM, mLocalDataSet[i]));
             }
@@ -150,6 +153,8 @@ public class InfoBottomSheetDialogFragment extends BaseBottomSheetDialogFragment
                 clipboardText = mDownloadEntity.getFileUrl();
             } else if(id == R.id.info_details_language) {
                 clipboardText = mDownloadEntity.getFileLanguage();
+            } else if(id == R.id.info_details_resolution) {
+                clipboardText = mDownloadEntity.getFileResolution();
             }
             ClipboardManager clipboard = (ClipboardManager) mActivity.getSystemService(Context.CLIPBOARD_SERVICE);
             ClipData clip = ClipData.newPlainText(Preferences.CLIPBOARD_LABEL, clipboardText);

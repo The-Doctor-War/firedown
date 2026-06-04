@@ -143,6 +143,8 @@ public class InfoAdapter extends ListAdapter<InfoEntity, RecyclerView.ViewHolder
                 holder.textView.setText(mDownloadEntity.getFileUrl());
             } else if(id == R.id.info_details_language) {
                 holder.textView.setText(mDownloadEntity.getFileLanguage());
+            } else if(id == R.id.info_details_resolution) {
+                holder.textView.setText(mDownloadEntity.getFileResolution());
             }
 
         }

@@ -546,12 +546,12 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
         // every bind paid for a resource lookup (theme + LocaleList
         // resolution) plus a String concat on the list-mode path.
         String mimeLabel = mimeLabelFor(mimeType, isGrid);
-        // Surface a subtitle's language inline in the meta line, e.g.
-        // "SRT · English · example.com" (list) / "SRT · English" (grid). List
+        // Append the type's secondary metadatum inline, e.g.
+        // "MP4 · 12:34 · example.com" (list) / "PNG · 1920x1080" (grid). List
         // mimeLabel carries a trailing " · "; grid has none.
-        String language = entity.getFileLanguage();
-        if (!TextUtils.isEmpty(language) && !TextUtils.isEmpty(mimeLabel)) {
-            mimeLabel = isGrid ? (mimeLabel + " · " + language) : (mimeLabel + language + " · ");
+        String secondary = secondaryMetaLabel(entity, mimeType, isGrid);
+        if (!TextUtils.isEmpty(secondary) && !TextUtils.isEmpty(mimeLabel)) {
+            mimeLabel = isGrid ? (mimeLabel + " · " + secondary) : (mimeLabel + secondary + " · ");
         }
         if (TextUtils.isEmpty(mimeLabel)) {
             holder.mimeText.setVisibility(View.GONE);
@@ -817,6 +817,22 @@ public class DownloadItemAdapter extends PagingDataAdapter<Object, RecyclerView.
             cache.put(mimeType, label);
             return label;
         } finally { Tracing.end(); }
+    }
+
+    /**
+     * The single secondary metadatum to show inline on the meta line, chosen by
+     * type: duration (video/audio), resolution (image), or language (subtitle).
+     * Duration is returned only in list mode — the grid already renders it on the
+     * thumbnail (mimeDuration overlay), so adding it here would duplicate it.
+     */
+    private @Nullable String secondaryMetaLabel(DownloadEntity entity, @Nullable String mimeType, boolean isGrid) {
+        if (FileUriHelper.isVideo(mimeType) || FileUriHelper.isAudio(mimeType)) {
+            return isGrid ? null : entity.getDurationFormatted();
+        }
+        if (FileUriHelper.isImage(mimeType) || FileUriHelper.isSVG(mimeType)) {
+            return entity.getFileResolution();
+        }
+        return entity.getFileLanguage();
     }
 
     private void setActionIcon(DownloadViewHolder holder, boolean isGrid, int iconRes) {

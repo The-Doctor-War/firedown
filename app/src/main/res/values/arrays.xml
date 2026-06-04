@@ -315,6 +315,7 @@
         <item>@id/info_details_url</item>
         <item>@id/info_details_path</item>
         <item>@id/info_details_language</item>
+        <item>@id/info_details_resolution</item>
     </integer-array>
 
     <string-array name="download_details_items">
@@ -326,6 +327,7 @@
         <item>@string/details_url</item>
         <item>@string/details_path</item>
         <item>@string/details_language</item>
+        <item>@string/details_resolution</item>
     </string-array>
 
     <integer-array name="download_details_media_items_ids">
@@ -338,6 +340,7 @@
         <item>@id/info_details_url</item>
         <item>@id/info_details_path</item>
         <item>@id/info_details_language</item>
+        <item>@id/info_details_resolution</item>
     </integer-array>
 
     <string-array name="download_details_media_items">
@@ -350,6 +353,7 @@
         <item>@string/details_url</item>
         <item>@string/details_path</item>
         <item>@string/details_language</item>
+        <item>@string/details_resolution</item>
     </string-array>
 
 

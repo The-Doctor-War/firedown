@@ -110,11 +110,36 @@ Three layers prevent duplicate entries for one video:
 `PriorityTaskThreadPoolExecutor` exposes an in-flight task count
 (`getInFlight()` — incremented at submit, decremented in the run `finally` so
 aborts count too). `BrowserOptionFragment` observes it via
-`BrowserDownloadViewModel.getInflight()`, **debounced** (~600 ms show / ~300 ms
-hide, so fast/aborting tasks never flash): empty+busy → the LCEE loading
-spinner, content+busy → a tonal "Checking for media…" `MaterialCardView` banner
-(matching the tabs-archive / incognito list banners). This fills the gap where a
-slow capture (e.g. an HLS-master fetch) makes the sheet look empty for seconds.
+`BrowserDownloadViewModel.getInflight()` and shows a small brand-orange spinner
+next to the grid/list toggle whenever busy — debounced (show-now + ~500 ms
+hide-linger so it doesn't strobe; decoupled from the filter chips, so filtering
+to an empty type doesn't hide it). The empty list uses the LCEE loading spinner.
+Fills the gap where a slow capture (e.g. an HLS-master fetch) makes the sheet
+look empty for seconds.
+
+### Inspect task scheduling (`PriorityTaskThreadPoolExecutor`)
+
+Captures run on a small priority pool. Each task carries a **base** priority
+(urlType-derived — HIGH for media/SABR/HLS_MASTER, lower otherwise) plus its
+`tabId`; the executor demotes it to `PRIORITY_LOW` unless its tab is the
+**current** one (`-1`/unknown = treat as foreground). Two mutators keep the
+backlog relevant while browsing:
+
+- **`setCurrentTab(tabId)`** (from `GeckoRuntimeHelper` onActivated/onUpdated)
+  re-prioritizes the **whole pending queue** — drain → recompute each task's
+  effective priority → re-offer (a `PriorityBlockingQueue` can't re-heapify in
+  place when the comparator's external input changes) — so a tab you switch to
+  jumps ahead of a heavy background tab's backlog.
+- **`cancelTab(tabId)`** (onRemoved, beside `trimTabs`) drops a closed tab's
+  queued tasks so they don't saturate the pool, decrementing the in-flight count
+  per removed task.
+
+Both are `synchronized` on the **same monitor** as `executeWaitingTask`, so a
+switch and a close can't interleave (consistent queue + correct in-flight count
+in either order) and the drain window can't be observed by a poll. `execute()`'s
+offer stays lock-free (the queue is thread-safe; a task offered mid-drain just
+coexists with the re-offered ones). Running tasks are never interrupted —
+priority/cancellation only affect the *queued* tasks.
 
 ## Debugging "video not captured" — do this, in order
 

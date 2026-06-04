@@ -138,7 +138,11 @@
                 android:textColor="?attr/colorOnSurface"
                 tools:text="The Knight Who Chose the Dawn" />
 
-            <!-- Meta line: mime label · globe · domain. -->
+            <!-- Meta line: mime label · domain. The mime label carries
+                 its own trailing ' · ' (appended by the adapter), so it
+                 doubles as the separator — no globe icon between the two
+                 (it was decoration: identical on every row and redundant
+                 with both the domain text and that separator). -->
             <LinearLayout
                 android:id="@+id/row_meta"
                 android:layout_width="match_parent"
@@ -154,20 +158,11 @@
                     android:layout_height="wrap_content"
                     tools:text="VÍDEO · " />
 
-                <ImageView
-                    android:id="@+id/file_url_icon"
-                    android:layout_width="@dimen/list_item_domain"
-                    android:layout_height="@dimen/list_item_domain"
-                    android:contentDescription="@null"
-                    android:src="@drawable/ic_baseline_language_24"
-                    app:tint="?attr/colorOnSurfaceVariant" />
-
                 <TextView
                     android:id="@+id/file_url"
                     style="@style/TextAppearance.Material3.LabelSmall"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
                     android:layout_weight="1"
                     android:ellipsize="end"
                     android:singleLine="true"

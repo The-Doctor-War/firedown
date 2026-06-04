@@ -46,7 +46,6 @@
          BELOW the banner (~8dp net) matches the gap ABOVE it (list_spacing),
          instead of the lopsided 6 + 20 = 26dp. -->
     <dimen name="incognito_banner_margin_bottom">-12dp</dimen>
-    <dimen name="list_item_domain">12dp</dimen>
     <dimen name="list_spacing_search">18dp</dimen>
     <dimen name="list_spacing_search_bottom">12dp</dimen>
     <dimen name="list_spacing_search_top">24dp</dimen>

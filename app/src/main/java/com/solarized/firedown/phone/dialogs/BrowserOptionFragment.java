@@ -413,38 +413,35 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     }
 
     /**
-     * Single owner of the LCEE / banner state, driven by both the list and the
-     * busy signal. Empty + busy uses the LCEE loading spinner (the "scanning"
-     * cue, no separate banner); non-empty + busy shows the banner above the
-     * existing rows; otherwise the normal empty / content state.
+     * Owns the LCEE list state: content when non-empty, otherwise the empty
+     * state (with the active chip's message). The toolbar spinner is the single
+     * "work happening" cue and is driven independently — see
+     * {@link #updateProgressIndicator()} — so it doesn't double up with a centre
+     * loading spinner, and an empty *filtered* view (e.g. "Audio" with no audio)
+     * correctly reads "No audio available" rather than a misleading spinner.
      */
     private void renderListState() {
-        if (mActionModeEnabled) {
-            updateProgressIndicator();
-            return;
-        }
-        if (mListEmpty) {
-            if (mBusyShown) {
-                mLCEERecyclerView.showLoading();
-            } else {
+        if (!mActionModeEnabled) {
+            if (mListEmpty) {
                 configureEmptyState();
                 mLCEERecyclerView.showEmpty();
+            } else {
+                mLCEERecyclerView.hideAll();
             }
-        } else {
-            mLCEERecyclerView.hideAll();
         }
         updateProgressIndicator();
     }
 
     /**
-     * Toolbar "scanning" spinner: shown only when busy AND there's already
-     * content (the empty case uses the LCEE loading spinner instead, so the two
-     * never double up). No-op when the menu isn't inflated or is the action-mode
-     * menu (which has no progress item).
+     * Toolbar "scanning" spinner — a global "background work" indicator. It
+     * tracks only the in-flight count (debounced), independent of the active
+     * filter chip or whether the filtered list is currently empty: filtering to
+     * an empty type must not hide it while captures are still streaming in.
+     * No-op when the menu isn't inflated or is the action-mode menu.
      */
     private void updateProgressIndicator() {
         if (mProgressMenuItem != null) {
-            mProgressMenuItem.setVisible(mBusyShown && !mListEmpty && !mActionModeEnabled);
+            mProgressMenuItem.setVisible(mBusyShown && !mActionModeEnabled);
         }
     }
 

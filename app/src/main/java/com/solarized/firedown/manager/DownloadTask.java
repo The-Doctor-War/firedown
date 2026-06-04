@@ -9,6 +9,10 @@ import com.solarized.firedown.StoragePaths;
 import com.solarized.firedown.data.Download;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.data.repository.DownloadDataRepository;
+import com.solarized.firedown.ffmpegutils.FFmpegMetaData;
+import com.solarized.firedown.ffmpegutils.FFmpegMetaDataReader;
+import com.solarized.firedown.ffmpegutils.FFmpegUtils;
+import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.GalleryPublisher;
 import com.solarized.firedown.utils.Utils;
 
@@ -333,8 +337,48 @@ public class DownloadTask implements DownloadCallback {
     @Override
     public void onFinished() {
         if (sealed.get()) return;
+        backfillDurationIfMissing();
         repository.add(entity);
         publishToGalleryIfEnabled();
+    }
+
+    /**
+     * Stamp the audio/video duration from the finished file when it's missing.
+     * The capture probe is skipped for HLS-master sites (Twitch/Kick/niconico)
+     * to avoid burning a single-use key, and the master playlist carries no
+     * duration — so those downloads (e.g. a selected audio-only rendition)
+     * reached completion with no duration. The download strategies never wire
+     * onDurationResolved, so probe the local output here: cheap, no network, no
+     * keys. Only runs when the duration is actually absent.
+     */
+    private void backfillDurationIfMissing() {
+        String mime = entity.getFileMimeType();
+        if (!FileUriHelper.isAudio(mime) && !FileUriHelper.isVideo(mime)) {
+            return;
+        }
+        if (entity.getDuration() > 0 && !TextUtils.isEmpty(entity.getDurationFormatted())) {
+            return;
+        }
+        String path = entity.getFilePath();
+        if (TextUtils.isEmpty(path)) {
+            return;
+        }
+        FFmpegMetaDataReader reader = new FFmpegMetaDataReader();
+        try {
+            FFmpegMetaData meta = reader.getStreamInfo(path, null, false);
+            if (meta != null) {
+                long duration = meta.getDuration();
+                if (duration > 0) {
+                    entity.setFileDuration(duration);
+                    entity.setFileDurationFormatted(FFmpegUtils.getFileDuration(duration));
+                }
+            }
+        } catch (Exception e) {
+            // best-effort — leave the duration unset on probe failure
+        } finally {
+            reader.stop();
+            reader.release();
+        }
     }
 
     /**

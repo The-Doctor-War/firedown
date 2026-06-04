@@ -11,7 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 import com.solarized.firedown.data.dao.DownloadDao;
 import com.solarized.firedown.data.entity.DownloadEntity;
 
-@Database(entities = {DownloadEntity.class}, version = 12, exportSchema = true)
+@Database(entities = {DownloadEntity.class}, version = 13, exportSchema = true)
 public abstract class DownloadDatabase extends RoomDatabase {
 
     public static final String DATABASE_NAME = "download-db";
@@ -126,6 +126,13 @@ public abstract class DownloadDatabase extends RoomDatabase {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE 'download' ADD COLUMN 'file_language' TEXT DEFAULT NULL");
+        }
+    };
+
+    public static final Migration MIGRATION_12_13 = new Migration(12, 13) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE 'download' ADD COLUMN 'file_resolution' TEXT DEFAULT NULL");
         }
     };
 }

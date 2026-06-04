@@ -132,6 +132,11 @@ public class DownloadEntity implements Download, Parcelable {
     @ColumnInfo(name = "file_language")
     public String fileLanguage;
 
+    // Image resolution ("1920x1080"), carried from the capture's TYPE_RESOLUTION
+    // tag. Null for non-image downloads.
+    @ColumnInfo(name = "file_resolution")
+    public String fileResolution;
+
 
     protected DownloadEntity(Parcel in) {
         uid = in.readInt();
@@ -158,6 +163,7 @@ public class DownloadEntity implements Download, Parcelable {
         fileDurationFormatted = in.readString();
         fileThumbnailUnavailable = in.readByte() != 0;
         fileLanguage = in.readString();
+        fileResolution = in.readString();
     }
 
     public static final Creator<DownloadEntity> CREATOR = new Creator<>() {
@@ -396,6 +402,15 @@ public class DownloadEntity implements Download, Parcelable {
         this.fileLanguage = language;
     }
 
+    @Override
+    public String getFileResolution() {
+        return fileResolution;
+    }
+
+    public void setFileResolution(String resolution) {
+        this.fileResolution = resolution;
+    }
+
     public DownloadEntity(Download download){
         parseDownload(download);
     }
@@ -425,6 +440,7 @@ public class DownloadEntity implements Download, Parcelable {
         this.fileSafe = download.isFileSafe();
         this.fileThumbnailUnavailable = download.isFileThumbnailUnavailable();
         this.fileLanguage = download.getFileLanguage();
+        this.fileResolution = download.getFileResolution();
     }
 
     public DownloadEntity(){
@@ -462,6 +478,7 @@ public class DownloadEntity implements Download, Parcelable {
         parcel.writeString(fileDurationFormatted);
         parcel.writeByte((byte) (fileThumbnailUnavailable ? 1 : 0));
         parcel.writeString(fileLanguage);
+        parcel.writeString(fileResolution);
     }
 
 

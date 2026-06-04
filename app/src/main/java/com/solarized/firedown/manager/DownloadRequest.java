@@ -27,6 +27,7 @@ public class DownloadRequest implements Parcelable {
     private final String name;
     private final String description;
     @Nullable private final String language;
+    @Nullable private final String resolution;
     private final String origin;
     private final String mimeType;
     private final String headers;
@@ -65,6 +66,7 @@ public class DownloadRequest implements Parcelable {
         this.name = builder.name;
         this.description = builder.description;
         this.language = builder.language;
+        this.resolution = builder.resolution;
         this.origin = builder.origin;
         this.mimeType = builder.mimeType;
         this.headers = builder.headers;
@@ -106,7 +108,8 @@ public class DownloadRequest implements Parcelable {
         Builder builder = new Builder(entity.getFileUrl())
                 .name(entity.getFileName())
                 .description(entity.getFileDescription())
-                .language(languageFromTags(entity))
+                .language(tagText(entity, FFmpegTagEntity.TYPE_LANGUAGE))
+                .resolution(tagText(entity, FFmpegTagEntity.TYPE_RESOLUTION))
                 .origin(entity.getFileOrigin())
                 .mimeType(entity.getMimeType())
                 .headers(entity.getFileHeaders())
@@ -158,7 +161,8 @@ public class DownloadRequest implements Parcelable {
         Builder builder = new Builder(entity.getFileUrl())
                 .name(entity.getFileName())
                 .description(entity.getFileDescription())
-                .language(languageFromTags(entity))
+                .language(tagText(entity, FFmpegTagEntity.TYPE_LANGUAGE))
+                .resolution(tagText(entity, FFmpegTagEntity.TYPE_RESOLUTION))
                 .origin(entity.getFileOrigin())
                 .mimeType(entity.getMimeType())
                 .headers(entity.getFileHeaders())
@@ -201,15 +205,17 @@ public class DownloadRequest implements Parcelable {
         return builder.build();
     }
 
-    /** The capture's humanised subtitle language (TYPE_LANGUAGE tag), if any. */
+    /** Text of the capture's tag of the given {@link FFmpegTagEntity} type, if any
+     *  — e.g. TYPE_LANGUAGE ("English") for subtitles, TYPE_RESOLUTION
+     *  ("1920x1080") for images. */
     @Nullable
-    private static String languageFromTags(BrowserDownloadEntity entity) {
+    private static String tagText(BrowserDownloadEntity entity, int tagType) {
         ArrayList<FFmpegTagEntity> tags = entity.getTags();
         if (tags == null) {
             return null;
         }
         for (FFmpegTagEntity tag : tags) {
-            if (tag != null && tag.getType() == FFmpegTagEntity.TYPE_LANGUAGE) {
+            if (tag != null && tag.getType() == tagType) {
                 return tag.getText();
             }
         }
@@ -243,6 +249,7 @@ public class DownloadRequest implements Parcelable {
                 .name(name)
                 .description(description)
                 .language(language)
+                .resolution(resolution)
                 .origin(origin)
                 .mimeType(mimeType)
                 .headers(headers)
@@ -281,6 +288,7 @@ public class DownloadRequest implements Parcelable {
     public String getName()                 { return name; }
     public String getDescription()          { return description; }
     @Nullable public String getLanguage()   { return language; }
+    @Nullable public String getResolution() { return resolution; }
     public String getOrigin()               { return origin; }
     public String getMimeType()             { return mimeType; }
     public String getHeaders()              { return headers; }
@@ -334,6 +342,7 @@ public class DownloadRequest implements Parcelable {
         private String name = "";
         private String description = "";
         private String language;
+        private String resolution;
         private String origin = "";
         private String mimeType = "";
         private String headers = "";
@@ -371,6 +380,7 @@ public class DownloadRequest implements Parcelable {
         public Builder name(String name)                    { this.name = name; return this; }
         public Builder description(String description)      { this.description = description; return this; }
         public Builder language(String language)            { this.language = language; return this; }
+        public Builder resolution(String resolution)        { this.resolution = resolution; return this; }
         public Builder origin(String origin)                { this.origin = origin; return this; }
         public Builder mimeType(String mimeType)            { this.mimeType = mimeType; return this; }
         public Builder headers(String headers)              { this.headers = headers; return this; }
@@ -415,6 +425,7 @@ public class DownloadRequest implements Parcelable {
         name = in.readString();
         description = in.readString();
         language = in.readString();
+        resolution = in.readString();
         origin = in.readString();
         mimeType = in.readString();
         headers = in.readString();
@@ -451,6 +462,7 @@ public class DownloadRequest implements Parcelable {
         dest.writeString(name);
         dest.writeString(description);
         dest.writeString(language);
+        dest.writeString(resolution);
         dest.writeString(origin);
         dest.writeString(mimeType);
         dest.writeString(headers);

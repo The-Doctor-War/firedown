@@ -114,12 +114,12 @@
 
                     <TextView
                         android:id="@+id/file_url"
-                        style="@style/TextAppearance.Material3.LabelSmall"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:ellipsize="end"
                         android:singleLine="true"
+                        android:textSize="11sp"
                         android:textColor="?attr/colorOnSurfaceVariant"
                         tools:text="m.youtube.com" />
 

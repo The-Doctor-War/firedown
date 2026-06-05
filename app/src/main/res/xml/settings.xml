@@ -112,6 +112,14 @@
         <SwitchPreferenceCompat
             android:defaultValue="false"
             app:singleLineTitle="false"
+            android:key="com.solarized.firedown.preferences.browser.spoof.timezone"
+            android:summary="@string/settings_utc_timezone_summary"
+            android:title="@string/settings_utc_timezone"
+            app:icon="@drawable/schedule_24" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.ublock.block.cookie.notices"
             android:summary="@string/settings_block_cookie_notices_summary"
             android:title="@string/settings_block_cookie_notices_title"

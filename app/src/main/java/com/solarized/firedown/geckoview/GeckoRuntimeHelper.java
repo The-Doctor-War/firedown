@@ -204,6 +204,8 @@ public class GeckoRuntimeHelper {
                 Preferences.DEFAULT_BLOCK_LOCATION));
         setResistFingerPrinting(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_RESIST_FINGERPRINTING,
                 Preferences.DEFAULT_RESIST_FINGERPRINTING));
+        setTimezoneSpoofing(sharedPreferences.getBoolean(Preferences.SETTINGS_SPOOF_TIMEZONE,
+                Preferences.DEFAULT_SPOOF_TIMEZONE));
         boolean drmEnabledPref = Preferences.getDRMEnabled(sharedPreferences);
         Log.d(TAG, "init: SETTINGS_ENABLE_DRM resolved to " + drmEnabledPref
                 + " → setDRM(disable=" + (!drmEnabledPref) + ")");
@@ -917,6 +919,30 @@ public class GeckoRuntimeHelper {
         geckoResult.accept(unused -> {
             Log.d(TAG, "setResistFingerPrinting: " + unused + " enable: " + enable);
         });
+    }
+
+    /**
+     * Toggle UTC timezone spoofing. FPP is already enabled (see the constructor),
+     * so JSDateTimeUTC is a stock fingerprinting-protection target — we just flip
+     * it on/off via the GLOBAL privacy.fingerprintingProtection.overrides pref:
+     * ON => "+JSDateTimeUTC" (Date/Intl report UTC, hiding the local-timezone
+     * fingerprint), OFF => "" (no global override). This is intentionally the
+     * global `overrides` pref, distinct from the per-site `granularOverrides`
+     * that {@link #applyTikTokFingerprintingOverride()} owns for tiktok.com, so
+     * the two never collide. No browser restart: like Resist Fingerprinting it
+     * takes effect on the next page load. Default OFF — UTC clocks confuse
+     * calendar/scheduling sites, so it's a user opt-in (see {@link
+     * com.solarized.firedown.Preferences#SETTINGS_SPOOF_TIMEZONE}).
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    public void setTimezoneSpoofing(boolean enable) {
+        final String overrides = enable ? "+JSDateTimeUTC" : "";
+        GeckoResult<Void> geckoResult = GeckoPreferenceController.setGeckoPref(
+                "privacy.fingerprintingProtection.overrides", overrides,
+                GeckoPreferenceController.PREF_BRANCH_USER);
+        geckoResult.accept(
+                unused -> Log.d(TAG, "setTimezoneSpoofing: " + enable),
+                throwable -> Log.w(TAG, "setTimezoneSpoofing failed", throwable));
     }
 
     /**

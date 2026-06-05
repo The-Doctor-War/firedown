@@ -525,6 +525,23 @@ default. (Same reasoning as the `SETTINGS_DISABLE_WASM` migration.) Rename the
 string resources to match (`settings_jit_enabled*` → `settings_jit_disabled*`)
 and update **all** locale files, not just English.
 
+### UTC timezone spoofing toggle (FPP target, not a code patch)
+
+`SETTINGS_SPOOF_TIMEZONE` is an **enable-style opt-in** (default OFF, like Resist
+Fingerprinting — UTC clocks confuse calendar/scheduling sites). It does **not**
+need a GeckoView patch: FPP is already enabled at boot
+(`setFingerprintingProtection(true)`), so `JSDateTimeUTC` is a stock target.
+`GeckoRuntimeHelper.setTimezoneSpoofing` just flips it via the **global**
+`privacy.fingerprintingProtection.overrides` pref (`"+JSDateTimeUTC"` on, `""`
+off) — read at boot and on change in `SettingsFragment` (no restart; applies on
+next page load, like RFP). **Crucially, that GLOBAL `overrides` pref is distinct
+from the per-site `granularOverrides`** that `applyTikTokFingerprintingOverride`
+owns to scope CanvasRandomization to tiktok.com — the two never collide, so don't
+fold one into the other. This is deliberately the no-patch route over IronFox's
+`nsRFPService` code patch + custom bool pref (firedown-geckoview CLAUDE.md has the
+rationale). New string keys are default-`values/` only; the ~57 already-partial
+locales show the English fallback (MissingTranslation isn't build-fatal here).
+
 ## UI conventions (Material 3)
 
 - **Menu rows are M3 one-line list items: 56dp tall, 16sp text

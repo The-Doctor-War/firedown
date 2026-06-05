@@ -125,6 +125,22 @@ public class Preferences {
 
     public static final boolean DEFAULT_RESIST_FINGERPRINTING = false;
 
+    /**
+     * Spoof the timezone to UTC (anti-fingerprinting). Default OFF — UTC clocks
+     * confuse calendar/scheduling sites, so it is a deliberate opt-in for the
+     * privacy-conscious, like {@link #SETTINGS_ENABLE_RESIST_FINGERPRINTING}.
+     * Unlike global Resist Fingerprinting this flips ONLY the JSDateTimeUTC
+     * fingerprinting-protection target (FPP is already enabled at runtime), so it
+     * does not degrade the rest of the page or media capture. Applied by {@link
+     * com.solarized.firedown.geckoview.GeckoRuntimeHelper#setTimezoneSpoofing},
+     * which adds/clears "+JSDateTimeUTC" on the global
+     * privacy.fingerprintingProtection.overrides pref (independent of the
+     * per-site granularOverrides used to scope CanvasRandomization to tiktok.com).
+     */
+    public static final String SETTINGS_SPOOF_TIMEZONE = "com.solarized.firedown.preferences.browser.spoof.timezone";
+
+    public static final boolean DEFAULT_SPOOF_TIMEZONE = false;
+
     public static final String SETTINGS_ENABLE_WEBRTC = "com.solarized.firedown.preferences.browser.enable.webrtc";
 
     public static final boolean DEFAULT_ENABLE_WEBRTC = false;

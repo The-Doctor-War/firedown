@@ -369,6 +369,11 @@ public class SettingsFragment extends BasePreferenceFragment
             boolean value = sharedPreferences.getBoolean(key, false);
 
             mGeckoRuntimeHelper.setResistFingerPrinting(value);
+        } else if (Preferences.SETTINGS_SPOOF_TIMEZONE.equals(key)) {
+
+            boolean enabled = sharedPreferences.getBoolean(key, Preferences.DEFAULT_SPOOF_TIMEZONE);
+
+            mGeckoRuntimeHelper.setTimezoneSpoofing(enabled);
         } else if (Preferences.SETTINGS_BLOCK_LOCATION.equals(key)) {
 
             boolean block = sharedPreferences.getBoolean(key, false);

@@ -103,11 +103,11 @@ nowhere downstream (`getVideoCodec`/`getAudioCodec` live only inside
   the URL mime isn't recognisably audio (so an extensionless enclosure can't be
   misclassified).
 
-`VariantProcessor`'s skipProbe branch sets the entity **type** from the URL:
-default **FILE** (raw byte-exact `HttpDownloadStrategy`), **MEDIA** (ffmpeg) only
-for an `.m3u8`/`.mpd` manifest or a separate-audio pair. Test for a *manifest*,
-not a progressive extension — tokenized progressive URLs (TikTok) carry no `.mp4`
-and must not be needlessly remuxed.
+`VariantProcessor`'s skipProbe branch sets the entity **type**: default **FILE**
+(raw byte-exact `HttpDownloadStrategy`), **MEDIA** (ffmpeg) for a separate-audio
+pair or a **declared** manifest — see "Manifest vs progressive — declared, never
+URL-sniffed" under Downloading. Default is progressive so tokenized URLs (TikTok)
+carry no `.mp4` and aren't needlessly remuxed.
 
 ### YouTube / SABR
 
@@ -316,6 +316,21 @@ Symptom this prevents: the "open in app" dialog (or an alert/file picker) from
 a *previous* tab appearing after you switch tabs (repro: open bilibili.com,
 switch tab mid-load; it fires a `bilibili://` deeplink from the background).
 
+### Media notification — start the service from the controller, not the UI
+
+The `GeckoMediaPlaybackService` foreground notification is shown on a `MEDIA_PLAY`
+intent. That intent must be sent by **`GeckoMediaController`** (which always knows
+the truly-playing session and has seeded the metadata), **not** only by the gated
+`BrowserFragment.onMediaPlay` observer. `GeckoComponents` fires that observer only
+when `isCurrentGeckoState` is true at the instant GeckoView's `onPlay` arrives —
+so an `onPlay` that beats the current-tab-id update (fresh start / restore-autoplay
+/ resume / tab switch) was gated out with **no recovery** (`onMediaPosition` bails
+when the service isn't running; `onMetadata` only updates), leaving media playing
+with no notification. `onMediaPlay`/`onMediaPauseOrStop` call `refreshService()`
+which starts/updates the service directly (the tell was that the controller already
+*stopped* it directly via `stopService()` — only start was UI-delegated). So the
+notification follows actual playback, including a background tab that autoplays.
+
 ## Downloading & networking
 
 Two download paths, one shared OkHttp client (`NetworkModule`, with
@@ -348,6 +363,33 @@ such titles get truncated to their first segment (`156.mp3`).
 Headers (incl. any backfilled `Referer`) flow from the capture layer
 (`webrequests/requests.js` for the generic catcher, or a parser's
 `requestHeaders`) into both paths via `context.getHeaders()`.
+
+### Manifest vs progressive — declared, never URL-sniffed
+
+`DownloadTask.selectStrategy` routes from the entity: separate `audioUrl` →
+`FFmpegMergeStrategy`; `UrlType.MEDIA`/`TS` (`usesFFmpeg()`) → `FFmpegMuxStrategy`
+(HLS/DASH); else → `HttpDownloadStrategy` (raw). The MEDIA-vs-FILE decision for
+skip-probe variants must **not** be guessed from the URL extension — obfuscated/
+tokenized manifests carry no `.m3u8`/`.mpd`, and signed URLs append a `#fragment`
+(Dailymotion: `…/manifest.m3u8#cell=cf3`). Two layers, defense in depth:
+
+- **Declared (source of truth).** The code that enumerated the master marks it:
+  `M3U8Parser`/`processHlsMaster` → `VariantProcessor(…, manifest=true)`, and the
+  JS `parseHlsMaster` path sets `manifest:true` on the `sendVariants` message
+  (→ `JsonHelper` → `GeckoInspectEntity` → `GeckoInspectTask` → `VariantProcessor`).
+  `VariantProcessor` sets MEDIA on declared-manifest **or** separate-audio; the
+  URL regex (`MANIFEST_URL`, `[?#]`-tolerant) is only a fallback. Progressive is
+  the default so a tokenized extensionless mp4 (TikTok) isn't needlessly remuxed.
+- **Content backstop (ground truth).** `HttpDownloadStrategy` peeks the response
+  before writing — `#EXTM3U` (HLS), an `<MPD>` XML (DASH), or a manifest
+  Content-Type → hand off to `FFmpegMuxStrategy` instead of saving the playlist
+  text as the file. Catches anything misclassified onto the raw path, **esp. the
+  generic catcher's obfuscated manifests** (no parser to declare them). `stop()`
+  forwards to the delegate; checked only on a fresh (non-resume) request.
+
+Don't reintroduce extension-only manifest detection as the load-bearing test —
+it's a fallback at best. (`UrlStringUtils`' SVG/ICO/ADAPTATIVE patterns were also
+`?`-only and missed `#fragment`s; now `[?#]`.)
 
 ### Progress reporting (`downloader_mux`)
 

@@ -270,6 +270,11 @@ public class GeckoMediaController {
             notifyMediaSessionsChanged();
         }
         notifyCurrentSessionChanged();
+        // Controller-driven service start: guarantees the notification appears
+        // whenever media actually plays, even if this onPlay fired before the
+        // tab became current (fresh start / resume / tab switch) — the case the
+        // gated BrowserFragment observer misses with no recovery.
+        refreshService();
     }
 
     /**
@@ -290,6 +295,9 @@ public class GeckoMediaController {
             notifyMediaSessionsChanged();
         }
         notifyCurrentSessionChanged();
+        // Update the notification to paused (or hand off to a still-playing
+        // fallback session) without depending on the gated observer.
+        refreshService();
     }
 
     private int pickPlayingFallback() {
@@ -443,10 +451,55 @@ public class GeckoMediaController {
      * Sends MEDIA_STOP to the playback service.
      */
     private void stopService() {
-        if(GeckoMediaPlaybackService.isRunning()){
+        sendToService(IntentActions.MEDIA_STOP);
+    }
+
+    /**
+     * Start (or update) the playback service with the given action, **directly
+     * from the controller** — not via a BrowserFragment observer.
+     *
+     * <p>Why this exists: the foreground notification is shown by the service in
+     * response to a {@code MEDIA_PLAY} intent. That intent used to be sent only
+     * by {@code BrowserFragment.onMediaPlay}, which {@code GeckoComponents} fires
+     * only when {@code isCurrentGeckoState(geckoState)} is true at the instant
+     * {@code onPlay} arrives. So an {@code onPlay} that fired before its tab
+     * became the current one — a fresh start / process-restore autoplay, a resume,
+     * or a tab switch where the current-id update hadn't propagated yet — left
+     * media playing with **no notification and no recovery** ({@code onPosition}
+     * bails when the service isn't running, {@code onMetadata} only updates an
+     * existing one). The controller always knows the truly-playing session
+     * ({@link #mCurrentSessionId} / {@link #mPlayingSessionIds}) and has already
+     * seeded the metadata, so it is the reliable place to start the service.
+     *
+     * <p>{@code MEDIA_PLAY} starts the service; any other action is a no-op unless
+     * it's already running — we don't spin a service up just to show a paused
+     * notification. Wrapped in try/catch for the Android 8+/12+ background-start
+     * restriction (when there's no foreground context we couldn't show a
+     * notification anyway).
+     */
+    private void sendToService(String action) {
+        if (!IntentActions.MEDIA_PLAY.equals(action) && !GeckoMediaPlaybackService.isRunning()) {
+            return;
+        }
+        try {
             Intent intent = new Intent(mContext, GeckoMediaPlaybackService.class);
-            intent.setAction(IntentActions.MEDIA_STOP);
+            intent.setAction(action);
             mContext.startService(intent);
+        } catch (Exception e) {
+            Log.w(TAG, "sendToService failed for " + action, e);
+        }
+    }
+
+    /**
+     * Reflect the current playback state onto the service notification: PLAY when
+     * the spotlit session is actually playing (starts the service if needed),
+     * otherwise PAUSE (updates the notification only if the service is already up).
+     */
+    private void refreshService() {
+        if (mCurrentSessionId != 0 && mPlayingSessionIds.contains(mCurrentSessionId)) {
+            sendToService(IntentActions.MEDIA_PLAY);
+        } else {
+            sendToService(IntentActions.MEDIA_PAUSE);
         }
     }
 

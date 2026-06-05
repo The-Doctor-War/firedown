@@ -119,6 +119,39 @@ by `SabrStrategy`. `VariantProcessor` skips ffprobe for SABR variants (empty
 media URLs) and trusts the JS codec/resolution/duration. Captions use the
 separate `timedtext` path.
 
+### TikTok — page-world hook + the anti-bot throttle
+
+TikTok capture is **not** webRequest-based. A page-world inject
+(`tiktok-inject.js`, loaded as a moz-extension WAR by `tiktok-content.js` at
+`document_start`) hooks `window.fetch`/`XMLHttpRequest` and posts the
+`/api/*/item_list/` JSON bodies to the background (`handleTikTokItemList`). Why
+not `filterResponseData`: it perturbs the stream enough to trigger TikTok's
+"Something went wrong" React overlay, refetching trips the single-use
+`msToken`/`X-Bogus` signing, and the ServiceWorker serves some endpoints
+`filterResponseData` can't tap.
+
+- **The inject PAT must allow sub-segments.** A hashtag page fires
+  `/api/challenge/item_list/?…` AND `/api/challenge/item_list/newtab/?…`; the
+  regex is `\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?` so the `/newtab/` feed
+  (≈half the videos) isn't dropped.
+- **Tag/challenge pages SSR no video data** (the rehydration blob is only
+  app/i18n/seo context) — the feed is client-rendered via the item_list XHRs, so
+  the hook is the only source. Only `/@user/video/<id>` *detail* pages SSR a
+  single item (`captureVideoDetailSSR`).
+- **The anti-bot throttle is the real gotcha.** TikTok withholds the item_list
+  XHRs entirely (the `Take_A_Break` reminder shows, only `/api/preload/` fires)
+  unless the page's **fingerprint stays unstable**. Globally that's
+  `privacy.resistFingerprinting` — a user toggle that ships OFF and degrades
+  every site. Instead, `GeckoRuntimeHelper.applyTikTokFingerprintingOverride`
+  scopes **`CanvasRandomization`** to first-party `tiktok.com` via FPP's
+  `privacy.fingerprintingProtection.granularOverrides` (FPP is already on). That
+  noises the canvas readback per session so the fingerprint never stabilises —
+  the read still **succeeds**. Do **not** use `+AllTargets`: it also enables the
+  canvas-extraction *blocking* targets, so `webmssdk`'s read fails and the page
+  throws "Something went wrong". Randomize, don't block; and keep it per-site
+  (no global RFP). If canvas alone ever stops dodging the throttle, add other
+  *randomizing* (never blocking) vectors, not `AllTargets`.
+
 ### Capture dedup
 
 Three layers prevent duplicate entries for one video:

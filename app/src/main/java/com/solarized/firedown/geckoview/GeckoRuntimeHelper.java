@@ -154,12 +154,15 @@ public class GeckoRuntimeHelper {
         // capture unless the page's fingerprint stays unstable. Globally that is
         // privacy.resistFingerprinting — a user-facing toggle that ships OFF — so
         // TikTok capture would otherwise depend on the user enabling an advanced
-        // privacy switch that also degrades every other site. Instead, scope full
-        // Fingerprinting Protection to tiktok.com via FPP's per-site granular
-        // overrides (FPP itself is enabled just above). The override string is
-        // bidirectional (+enable / -disable a target); "+AllTargets" turns ON
-        // every protection — RFP-equivalent — but ONLY for first-party
-        // tiktok.com, so no other site is affected and no user action is needed.
+        // privacy switch that also degrades every other site. Instead, scope the
+        // one protection that matters to tiktok.com via FPP's per-site granular
+        // overrides (FPP itself is enabled just above). We enable ONLY
+        // CanvasRandomization: it noises the canvas readback per session so the
+        // fingerprint never stabilises (dodging the throttle, the same effect
+        // RFP relies on), while the read still SUCCEEDS. "+AllTargets" was tried
+        // and broke TikTok ("Something went wrong") because it also turns on the
+        // canvas-extraction BLOCKING/prompt targets, which make webmssdk's read
+        // fail and the React app throw. Randomize, don't block.
         applyTikTokFingerprintingOverride();
 
         mMessageDelegate = new MessageDelegate();
@@ -912,17 +915,20 @@ public class GeckoRuntimeHelper {
     }
 
     /**
-     * Apply RFP-equivalent fingerprinting protection to first-party tiktok.com
-     * ONLY, via FPP's per-site granular overrides, so TikTok's item_list feeds
-     * are captured without the user enabling the global Resist Fingerprinting
-     * switch. See the call site in the constructor for the why. Unconditional and
-     * idempotent — it's a fixed per-site policy, not a user setting.
+     * Destabilise the canvas fingerprint on first-party tiktok.com ONLY, via
+     * FPP's per-site granular overrides, so TikTok's item_list feeds are captured
+     * without the user enabling the global Resist Fingerprinting switch. See the
+     * call site in the constructor for the why. Unconditional and idempotent —
+     * a fixed per-site policy, not a user setting.
      */
     @OptIn(markerClass = ExperimentalGeckoViewApi.class)
     private void applyTikTokFingerprintingOverride() {
-        // JSON consumed by privacy.fingerprintingProtection.granularOverrides:
-        // [{ "firstPartyDomain": "tiktok.com", "overrides": "+AllTargets" }]
-        final String overrides = "[{\"firstPartyDomain\":\"tiktok.com\",\"overrides\":\"+AllTargets\"}]";
+        // JSON consumed by privacy.fingerprintingProtection.granularOverrides.
+        // ONLY CanvasRandomization — randomises the canvas readback per session
+        // (read still succeeds, fingerprint varies). NOT "+AllTargets", which
+        // also enables canvas-extraction blocking and broke TikTok's signer
+        // ("Something went wrong").
+        final String overrides = "[{\"firstPartyDomain\":\"tiktok.com\",\"overrides\":\"+CanvasRandomization\"}]";
         GeckoResult<Void> result = GeckoPreferenceController.setGeckoPref(
                 "privacy.fingerprintingProtection.granularOverrides", overrides,
                 GeckoPreferenceController.PREF_BRANCH_USER);

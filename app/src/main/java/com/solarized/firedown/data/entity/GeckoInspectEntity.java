@@ -36,6 +36,8 @@ public class GeckoInspectEntity {
     // AES-HLS here decrypts a segment and would burn a single-use key the
     // downloader needs (niconico domand). See CLAUDE.md "Niconico domand AES key".
     private boolean skipProbe;
+    // Parser declares these variants are HLS/DASH manifests (ffmpeg muxes them).
+    private boolean manifest;
     public String getRequestId() {
         return requestId;
     }
@@ -167,5 +169,11 @@ public class GeckoInspectEntity {
     }
     public void setSkipProbe(boolean skipProbe) {
         this.skipProbe = skipProbe;
+    }
+    public boolean isManifest() {
+        return manifest;
+    }
+    public void setManifest(boolean manifest) {
+        this.manifest = manifest;
     }
 }

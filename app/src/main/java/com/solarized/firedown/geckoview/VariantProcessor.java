@@ -31,6 +31,9 @@ public class VariantProcessor {
 
     private final Map<String, String> mHeaders;
     private final boolean mSkipProbe;
+    // Parser/enumerator-declared: the variants are HLS/DASH manifests (ffmpeg
+    // must mux them). Authoritative over the URL-extension fallback below.
+    private final boolean mManifest;
 
     // An HLS/DASH manifest (ffmpeg must mux it) — as opposed to a progressive
     // container, downloaded raw via HttpDownloadStrategy. Matches the extension
@@ -50,12 +53,26 @@ public class VariantProcessor {
     }
 
     public VariantProcessor(Map<String, String> headers) {
-        this(headers, false);
+        this(headers, false, false);
     }
 
     public VariantProcessor(Map<String, String> headers, boolean skipProbe) {
+        this(headers, skipProbe, false);
+    }
+
+    /**
+     * @param manifest the caller/parser declares these variants are HLS/DASH
+     *                 manifest playlists that ffmpeg must mux (entity type MEDIA).
+     *                 This is the authoritative signal — the code that parsed the
+     *                 master (M3U8Parser / parseHlsMaster) or knows the protocol
+     *                 sets it, so we don't have to guess from the URL extension
+     *                 (which fails on obfuscated/tokenized manifests with no
+     *                 .m3u8/.mpd, and on #fragment / ?query tails).
+     */
+    public VariantProcessor(Map<String, String> headers, boolean skipProbe, boolean manifest) {
         mHeaders = headers;
         mSkipProbe = skipProbe;
+        mManifest = manifest;
     }
 
     /**
@@ -82,18 +99,24 @@ public class VariantProcessor {
         if (mSkipProbe) {
             // entity type drives strategy selection (DownloadTask.selectStrategy):
             // MEDIA → ffmpeg (FFmpegMux/Merge), FILE → HttpDownloadStrategy (raw,
-            // byte-exact copy with truncation-resume). Treat the variant as a
-            // progressive file (FILE) UNLESS it's a separate video+audio pair or
-            // an HLS/DASH manifest, which ffmpeg must mux (MEDIA). Defaulting to
-            // progressive is what lets a tokenized, extensionless CDN URL (TikTok)
-            // download raw instead of being needlessly remuxed; HLS renditions
-            // (niconico/Twitch/Kick via processHlsMaster) always carry .m3u8 so
-            // the manifest test routes them to MEDIA, and separate-audio pairs
-            // (niconico variants) are caught by the audioUrl test.
+            // byte-exact copy with truncation-resume). A variant needs ffmpeg
+            // (MEDIA) when it's a separate video+audio pair OR an HLS/DASH
+            // manifest; otherwise it's a single progressive file (FILE).
+            //
+            // The manifest decision is AUTHORITATIVELY the parser's: the code that
+            // enumerated the master (M3U8Parser / parseHlsMaster) sets mManifest.
+            // We do NOT trust the URL extension for it — obfuscated/tokenized
+            // manifests don't end in .m3u8/.mpd, and Dailymotion renditions carry
+            // a #fragment. isManifestUrl stays only as a best-effort fallback for
+            // any caller that didn't declare it. Progressive (TikTok et al.) is
+            // the default, so a tokenized extensionless mp4 isn't needlessly
+            // remuxed.
             FFmpegEntity first = variants.get(0);
-            boolean progressive = TextUtils.isEmpty(first.getStreamAudioUrl())
-                    && !isManifestUrl(first.getStreamUrl());
-            Log.d(TAG, "skipProbe set, using parser metadata (no FFprobe), progressive=" + progressive);
+            boolean stream = mManifest
+                    || !TextUtils.isEmpty(first.getStreamAudioUrl())
+                    || isManifestUrl(first.getStreamUrl());
+            boolean progressive = !stream;
+            Log.d(TAG, "skipProbe set, using parser metadata (no FFprobe), manifest=" + mManifest + " progressive=" + progressive);
             entity.setMimeType(FileUriHelper.MIMETYPE_MP4);
             entity.setType((progressive ? UrlType.FILE : UrlType.MEDIA).getValue());
             entity.setAudio(false);

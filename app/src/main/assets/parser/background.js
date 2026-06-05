@@ -127,7 +127,7 @@ async function sendNative(message) {
  * Unified variant sender for Twitter, Instagram, and future parsers.
  * Handles dedup, sorting, and message construction.
  */
-async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders, skipProbe }) {
+async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders, skipProbe, manifest }) {
     if (!Array.isArray(variants) || variants.length === 0) return;
 
     // If the parser already has what the capture-time ffmpeg probe would supply
@@ -186,6 +186,12 @@ async function sendVariants(details, { variants, origin, description, img, name,
     // skipProbe: parser already supplied codecs/duration, so the Java side must
     // not FFprobe (probing an AES-HLS variant burns a single-use key — niconico).
     if (skipProbe) message.skipProbe = true;
+    // manifest: these variant URLs are HLS/DASH playlists ffmpeg must mux (not
+    // progressive files). Declared by the enumerator so Java needn't guess from
+    // the URL extension — robust against obfuscated/tokenized manifests and
+    // #fragment / ?query tails. (Separate video+audio pairs are detected from
+    // audioUrl and don't need this.)
+    if (manifest) message.manifest = true;
 
     sendNative(message);
 }
@@ -2540,7 +2546,7 @@ async function processDailymotionData(details, data, videoId) {
                 log("DAILYMOTION", `enumerated ${variants.length} variant(s)`, { videoId, name });
                 sendVariants(details, {
                     variants, origin, description: title, name, img, duration,
-                    requestHeaders, skipProbe: true
+                    requestHeaders, skipProbe: true, manifest: true
                 });
                 return;
             }

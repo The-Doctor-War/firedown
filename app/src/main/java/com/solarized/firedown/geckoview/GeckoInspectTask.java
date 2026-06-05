@@ -83,6 +83,8 @@ public class GeckoInspectTask implements Runnable {
     private final String mLanguage;
     private final boolean mIncognito;
     private final boolean mSkipProbe;
+    // Parser-declared: the variants are HLS/DASH manifests (ffmpeg must mux).
+    private final boolean mManifest;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
 
     public GeckoInspectTask(
@@ -112,6 +114,7 @@ public class GeckoInspectTask implements Runnable {
         mLanguage = geckoInspectEntity.getLanguage();
         mIncognito = geckoInspectEntity.isIncognito();
         mSkipProbe = geckoInspectEntity.isSkipProbe();
+        mManifest = geckoInspectEntity.isManifest();
 
         Log.d(TAG, "Task Created for URL: " + mUrl + " img: " + mImg
                 + " variants: " + (mVariants != null ? mVariants.size() : 0)
@@ -240,7 +243,7 @@ public class GeckoInspectTask implements Runnable {
             return processHlsMaster(entity);
 
         } else if (mVariants != null && !mVariants.isEmpty()) {
-            new VariantProcessor(mRequestHeaders, mSkipProbe).process(entity, mVariants);
+            new VariantProcessor(mRequestHeaders, mSkipProbe, mManifest).process(entity, mVariants);
             return true;
 
         } else if (mSkipProbe && processMediaSkipProbe(entity)) {
@@ -402,7 +405,8 @@ public class GeckoInspectTask implements Runnable {
         if (!TextUtils.isEmpty(first)) {
             entity.setFileUrl(first);
         }
-        new VariantProcessor(mRequestHeaders, true).process(entity, variants);
+        // Came from M3U8Parser on a fetched master → definitionally HLS manifests.
+        new VariantProcessor(mRequestHeaders, true, true).process(entity, variants);
         return true;
     }
 

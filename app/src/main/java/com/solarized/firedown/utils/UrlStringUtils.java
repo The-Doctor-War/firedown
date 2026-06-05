@@ -48,11 +48,14 @@ public class UrlStringUtils {
 
     private static final String BLOB = "blob:";
 
-    private static final Pattern SVG_PATTERN = Pattern.compile("https?://.*\\.(:?svg)(?:\\?.*|$)");
+    // The tail after the extension allows a ?query, a #fragment, or end-of-string.
+    // The #fragment case matters: signed CDN URLs append things like
+    // `…/manifest.m3u8#cell=cf3` (Dailymotion) — a `?`-only test misclassified those.
+    private static final Pattern SVG_PATTERN = Pattern.compile("https?://.*\\.(:?svg)(?:[?#].*|$)");
 
-    private static final Pattern ICO_PATTERN = Pattern.compile("https?://.*\\.(:?ico)(?:\\?.*|$)");
+    private static final Pattern ICO_PATTERN = Pattern.compile("https?://.*\\.(:?ico)(?:[?#].*|$)");
 
-    private static final Pattern ADAPTATIVE_PATTERN = Pattern.compile("https?://.*\\.(:?m3u8)(?:\\?.*|$)");
+    private static final Pattern ADAPTATIVE_PATTERN = Pattern.compile("https?://.*\\.(:?m3u8)(?:[?#].*|$)");
 
     // Be lenient about what is classified as potentially a URL.
     // (\w+-+)*\w+(://[/]*|:|\.)(\w+-+)*\w+([\S&&[^\w-]]\S*)?

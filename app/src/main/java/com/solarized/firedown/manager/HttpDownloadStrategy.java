@@ -45,6 +45,9 @@ public class HttpDownloadStrategy implements DownloadStrategy {
     private volatile boolean stopped;
     private long lastUpdated;
     private long downloadedLength;
+    // Set when the response turns out to be an HLS/DASH manifest and we hand off
+    // to ffmpeg mid-execute; stop() must forward cancellation to it.
+    private volatile DownloadStrategy mDelegate;
 
     @Override
     public void execute(DownloadRequest request, DownloadContext context, DownloadCallback callback) throws IOException {
@@ -110,6 +113,24 @@ public class HttpDownloadStrategy implements DownloadStrategy {
 
             body = httpResponse.body();
             long totalLength = body.contentLength() + downloadedLength;
+
+            // Backstop: if the body is actually an HLS/DASH manifest, this URL is
+            // not a progressive file — saving the playlist text as the "video"
+            // would produce a tiny broken file. Hand off to ffmpeg instead. This
+            // inspects ground truth (the bytes the server returned), so it catches
+            // anything that reached this raw path misclassified — most importantly
+            // the generic catcher's obfuscated/tokenized manifests that carry no
+            // .m3u8/.mpd extension to classify by. Only on a fresh request: a
+            // resume body is a byte range, not the document head.
+            if (!isResume && looksLikeManifest(httpResponse)) {
+                Log.w(TAG, "execute: body is an HLS/DASH manifest — handing off to ffmpeg: " + downloadUrl);
+                closeQuietly(null, null, body, httpResponse);
+                body = null;
+                httpResponse = null;
+                mDelegate = new FFmpegMuxStrategy();
+                mDelegate.execute(request, context, callback);
+                return;
+            }
 
             // ICY live stream detection
             if (isIcyStream(httpResponse)) {
@@ -291,6 +312,44 @@ public class HttpDownloadStrategy implements DownloadStrategy {
         Log.d(TAG, "stop: invoked at downloadedLength=" + downloadedLength
                 + " by " + Thread.currentThread().getName(), new Throwable("stop trace"));
         stopped = true;
+        // If we handed the download off to ffmpeg (manifest backstop), forward
+        // the cancellation — DownloadRunnable only holds this strategy.
+        DownloadStrategy delegate = mDelegate;
+        if (delegate != null) {
+            delegate.stop();
+        }
+    }
+
+    /**
+     * Whether the response body is actually an HLS/DASH manifest rather than a
+     * progressive media file. Checks the Content-Type, then peeks the first bytes
+     * (without consuming the body) for the unambiguous document signatures:
+     * {@code #EXTM3U} (HLS master or media playlist) or an {@code <MPD>} XML root
+     * (DASH). Ground-truth detection — independent of the URL's extension.
+     */
+    private static boolean looksLikeManifest(Response response) {
+        String contentType = response.header("Content-Type", "");
+        if (contentType != null) {
+            String ct = contentType.toLowerCase(Locale.ROOT);
+            if (ct.contains("mpegurl") || ct.contains("dash+xml")) {
+                return true;
+            }
+        }
+        String head;
+        try {
+            head = response.peekBody(2048).string();
+        } catch (Exception e) {
+            return false;
+        }
+        if (head == null) {
+            return false;
+        }
+        String h = head.trim();
+        if (h.startsWith("#EXTM3U")) {
+            return true;
+        }
+        // DASH manifest: an XML document whose root element is <MPD …>.
+        return h.startsWith("<") && h.contains("<MPD");
     }
 
     /**

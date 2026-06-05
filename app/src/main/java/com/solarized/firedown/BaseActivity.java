@@ -317,6 +317,11 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
     private void installWebAuthnDelegate() {
         sActivityDelegateOwner = this;
         mGeckoRuntimeHelper.getGeckoRuntime().setActivityDelegate(pendingIntent -> {
+            // Diagnostic: if this never logs when you pick "Use your passkey",
+            // Gecko isn't routing WebAuthn to the Android FIDO2 backend at all
+            // (the pref didn't take or this GeckoView build lacks the module) —
+            // i.e. not a launch-side problem.
+            Log.d(TAG, "WebAuthn ActivityDelegate invoked — launching credential UI");
             GeckoResult<Intent> result = new GeckoResult<>();
             try {
                 mWebAuthnPending.add(result);
@@ -326,6 +331,7 @@ public abstract class BaseActivity extends AppCompatActivity implements IntentHa
                 // Launcher already unregistered (activity tearing down) or the
                 // IntentSender was rejected — fail this request instead of
                 // leaving Gecko waiting on a promise that never resolves.
+                Log.w(TAG, "WebAuthn launch failed", e);
                 mWebAuthnPending.remove(result);
                 result.completeExceptionally(e);
             }

@@ -2481,7 +2481,7 @@ async function fetchDailymotionGeoApi(details, videoId) {
  * Process Dailymotion video JSON data and send to native.
  * The JSON contains qualities.auto[] with HLS URLs, plus metadata.
  */
-function processDailymotionData(details, data, videoId) {
+async function processDailymotionData(details, data, videoId) {
     const origin = `https://www.dailymotion.com/video/${videoId}`;
 
     // Extract HLS URL from qualities.auto
@@ -2513,15 +2513,9 @@ function processDailymotionData(details, data, videoId) {
         }
     }
 
-    // Dailymotion's manifest/segment CDN (dailymotion.com/cdn/manifest,
-    // dmcdn.net) rejects the bare request the server-side master fetch would
-    // otherwise send (okhttp default UA, no Referer): processHlsMaster's
-    // WebUtils.getString then returns empty and falls back to the metadatareader
-    // probe (which only worked because ffmpeg sends its own UA) — so the video
-    // was "still probed". Send a browser-like Referer + UA so enumeration
-    // succeeds, and so the SAME headers reach every download sub-request (master,
-    // media playlist, segments) via the entity. OriginInterceptor derives Origin
-    // from the Referer.
+    // Headers Dailymotion's manifest/segment CDN (dailymotion.com/cdn/manifest,
+    // dmcdn.net) expects — browser UA + Referer. Carried on the emit so they
+    // reach every download sub-request (media playlist, segments) via the entity.
     const requestHeaders = [
         { name: "User-Agent", value: navigator.userAgent },
         { name: "Referer", value: "https://www.dailymotion.com/" },
@@ -2529,15 +2523,38 @@ function processDailymotionData(details, data, videoId) {
         { name: "Accept-Language", value: "en-US,en;q=0.9" },
     ];
 
-    // qualities.auto's application/x-mpegURL entry is an HLS master. Enumerate it
-    // in native (M3U8Parser, skipProbe) instead of emitting a single media URL
-    // that the metadatareader probe would open at capture time — same path as
-    // niconico/Twitch/Kick/Vimeo. enumerateMasterNative owns the origin dedup, so
-    // we deliberately no longer alreadySent/markSent here (double-marking would
-    // make the helper see the origin as already-sent and emit nothing). Gives a
-    // per-quality picker and falls back to a single media capture (which then
-    // probes, as before) if enumeration fails.
-    log("DAILYMOTION", `Enumerate HLS master`, { videoId, name, hasImg: !!img });
+    // Enumerate the HLS master HERE, in the extension, with parseHlsMaster (the JS
+    // twin of M3U8Parser) and emit sendVariants(skipProbe) — never the
+    // metadatareader probe. We fetch the master in the BROWSER context
+    // (credentials:include) because Dailymotion's CDN needs the page's session
+    // cookies + UA + Referer; the server-side OkHttp fetch in processHlsMaster
+    // gets rejected and falls back to the probe (the "still probed" bug). This is
+    // the same shape niconico uses (parse the master in JS, emit variants).
+    try {
+        markOwnRequest(hlsUrl);
+        const resp = await fetch(hlsUrl, { credentials: "include", headers: { "Accept": "*/*" } });
+        if (resp.ok) {
+            const masterText = await resp.text();
+            const variants = parseHlsMaster(masterText, hlsUrl);
+            if (variants.length > 0) {
+                log("DAILYMOTION", `enumerated ${variants.length} variant(s)`, { videoId, name });
+                sendVariants(details, {
+                    variants, origin, description: title, name, img, duration,
+                    requestHeaders, skipProbe: true
+                });
+                return;
+            }
+            log("DAILYMOTION", `master had no STREAM-INF variants`, { videoId, head: masterText.slice(0, 60) });
+        } else {
+            log("DAILYMOTION", `master fetch failed`, { videoId, status: resp.status });
+        }
+    } catch (e) {
+        log("DAILYMOTION", `master fetch/parse error`, e.message);
+    }
+
+    // Fallback: hand the master URL to native enumeration (M3U8Parser, still
+    // skipProbe if it can fetch it; only if THAT also fails does it probe).
+    log("DAILYMOTION", `falling back to native enumeration`, { videoId });
     enumerateMasterNative(details, { url: hlsUrl, origin, name, description: title, img, duration, requestHeaders });
 }
 

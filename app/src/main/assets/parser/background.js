@@ -2513,6 +2513,22 @@ function processDailymotionData(details, data, videoId) {
         }
     }
 
+    // Dailymotion's manifest/segment CDN (dailymotion.com/cdn/manifest,
+    // dmcdn.net) rejects the bare request the server-side master fetch would
+    // otherwise send (okhttp default UA, no Referer): processHlsMaster's
+    // WebUtils.getString then returns empty and falls back to the metadatareader
+    // probe (which only worked because ffmpeg sends its own UA) — so the video
+    // was "still probed". Send a browser-like Referer + UA so enumeration
+    // succeeds, and so the SAME headers reach every download sub-request (master,
+    // media playlist, segments) via the entity. OriginInterceptor derives Origin
+    // from the Referer.
+    const requestHeaders = [
+        { name: "User-Agent", value: navigator.userAgent },
+        { name: "Referer", value: "https://www.dailymotion.com/" },
+        { name: "Accept", value: "*/*" },
+        { name: "Accept-Language", value: "en-US,en;q=0.9" },
+    ];
+
     // qualities.auto's application/x-mpegURL entry is an HLS master. Enumerate it
     // in native (M3U8Parser, skipProbe) instead of emitting a single media URL
     // that the metadatareader probe would open at capture time — same path as
@@ -2522,7 +2538,7 @@ function processDailymotionData(details, data, videoId) {
     // per-quality picker and falls back to a single media capture (which then
     // probes, as before) if enumeration fails.
     log("DAILYMOTION", `Enumerate HLS master`, { videoId, name, hasImg: !!img });
-    enumerateMasterNative(details, { url: hlsUrl, origin, name, description: title, img, duration });
+    enumerateMasterNative(details, { url: hlsUrl, origin, name, description: title, img, duration, requestHeaders });
 }
 
 /**

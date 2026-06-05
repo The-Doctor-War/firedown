@@ -415,6 +415,8 @@
     <string name="settings_tabs_archive_summary">自动关闭你一段时间未使用的标签页</string>
     <string name="settings_tabs_archive_title">自动关闭标签页</string>
     <string name="settings_theme">主题</string>
+    <string name="settings_utc_timezone">将时区伪装为 UTC</string>
+    <string name="settings_utc_timezone_summary">将您的时区报告为 UTC 以减少指纹追踪。可能在日历网站上显示错误时间。</string>
     <string name="settings_version">版本</string>
     <string name="settings_webgl_disabled">禁用 WebGL</string>
     <string name="settings_webgl_disabled_summary">阻止GPU指纹识别，可能影响3D内容</string>

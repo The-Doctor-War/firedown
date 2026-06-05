@@ -258,6 +258,8 @@
     <string name="settings_storage_manager_button_decline">EI NYT</string>
     <string name="settings_storage_manager_button_ok">AVAA ASETUKSET</string>
     <string name="settings_theme">Teema</string>
+    <string name="settings_utc_timezone">Väärennä aikavyöhyke UTC:ksi</string>
+    <string name="settings_utc_timezone_summary">Ilmoittaa aikavyöhykkeesi UTC:nä vähentääkseen sormenjälkeä. Voi näyttää väärän ajan kalenterisivustoilla.</string>
     <string name="settings_version">Versio</string>
     <string name="share">Jaa</string>
     <string name="share_image">Jaa KUVA</string>

@@ -294,6 +294,8 @@
     <string name="settings_storage_manager_button_decline">NIE TERAZ</string>
     <string name="settings_storage_manager_button_ok">OTWÓRZ USTAWIENIA</string>
     <string name="settings_theme">Motyw</string>
+    <string name="settings_utc_timezone">Podszywaj strefę czasową pod UTC</string>
+    <string name="settings_utc_timezone_summary">Zgłasza Twoją strefę czasową jako UTC, aby ograniczyć śledzenie. Na stronach kalendarzy może pokazywać zły czas.</string>
     <string name="settings_version">Wersja</string>
     <string name="share">Udział</string>
     <string name="share_image">Udostępnij obraz</string>

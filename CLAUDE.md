@@ -539,8 +539,9 @@ from the per-site `granularOverrides`** that `applyTikTokFingerprintingOverride`
 owns to scope CanvasRandomization to tiktok.com — the two never collide, so don't
 fold one into the other. This is deliberately the no-patch route over IronFox's
 `nsRFPService` code patch + custom bool pref (firedown-geckoview CLAUDE.md has the
-rationale). New string keys are default-`values/` only; the ~57 already-partial
-locales show the English fallback (MissingTranslation isn't build-fatal here).
+rationale). New string keys (`settings_utc_timezone*`) are translated across the
+same 16 locales the JIT toggle uses; the remaining (already-partial) locales fall
+back to English (MissingTranslation isn't build-fatal here).
 
 ## UI conventions (Material 3)
 

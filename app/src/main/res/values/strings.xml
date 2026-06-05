@@ -525,7 +525,7 @@
     <string name="home_card_style_preview_vault_subtitle">12 items saved</string>
     <string name="home_card_style_preview_trackers_subtitle">12,345 · ~580 MB saved</string>
     <string name="settings_utc_timezone">Spoof timezone to UTC</string>
-    <string name="settings_utc_timezone_summary">Reports your timezone as UTC to websites to reduce fingerprinting. Off by default — UTC clocks can show wrong times on calendar and scheduling sites. Applies to newly loaded pages.</string>
+    <string name="settings_utc_timezone_summary">Reports your timezone as UTC to reduce fingerprinting. May show wrong times on calendar sites.</string>
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">Disable WebGL</string>
     <string name="settings_webgl_disabled_summary">Blocks GPU fingerprinting, may break 3D content</string>

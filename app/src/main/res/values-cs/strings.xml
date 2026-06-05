@@ -259,6 +259,8 @@
     <string name="settings_storage_manager_button_decline">TEĎ NE</string>
     <string name="settings_storage_manager_button_ok">OTEVŘÍT NASTAVENÍ</string>
     <string name="settings_theme">Vzhled</string>
+    <string name="settings_utc_timezone">Předstírat časové pásmo UTC</string>
+    <string name="settings_utc_timezone_summary">Hlásí vaše časové pásmo jako UTC pro omezení sledování otisku. Na kalendářových webech může zobrazit špatný čas.</string>
     <string name="settings_version">Verze</string>
     <string name="share">Podíl</string>
     <string name="share_image">Sdílet IMAGE</string>

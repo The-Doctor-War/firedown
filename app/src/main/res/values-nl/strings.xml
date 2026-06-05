@@ -293,6 +293,8 @@
     <string name="settings_storage_manager_button_decline">NIET NU</string>
     <string name="settings_storage_manager_button_ok">INSTELLINGEN OPENEN</string>
     <string name="settings_theme">Thema</string>
+    <string name="settings_utc_timezone">Tijdzone vervalsen naar UTC</string>
+    <string name="settings_utc_timezone_summary">Meldt je tijdzone als UTC om fingerprinting te verminderen. Kan verkeerde tijden tonen op agendasites.</string>
     <string name="settings_version">Versie</string>
     <string name="share">Delen</string>
     <string name="share_image">Afbeelding delen</string>

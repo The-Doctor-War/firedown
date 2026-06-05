@@ -415,6 +415,8 @@
     <string name="settings_tabs_archive_summary">しばらく使っていないタブを自動的に閉じます</string>
     <string name="settings_tabs_archive_title">タブの自動クローズ</string>
     <string name="settings_theme">テーマ</string>
+    <string name="settings_utc_timezone">タイムゾーンを UTC に偽装</string>
+    <string name="settings_utc_timezone_summary">フィンガープリントを減らすため、タイムゾーンを UTC として報告します。カレンダーサイトで時刻が誤って表示されることがあります。</string>
     <string name="settings_version">バージョン</string>
     <string name="settings_webgl_disabled">WebGLを無効にする</string>
     <string name="settings_webgl_disabled_summary">GPUフィンガープリントを防止、3Dコンテンツが動作しない場合があります</string>

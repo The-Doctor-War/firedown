@@ -247,6 +247,8 @@
     <string name="settings_storage_manager_button_decline">НЕ ЗАРАЗ</string>
     <string name="settings_storage_manager_button_ok">ВІДКРИТИ НАЛАШТУВАННЯ</string>
     <string name="settings_theme">Тема</string>
+    <string name="settings_utc_timezone">Підміняти часовий пояс на UTC</string>
+    <string name="settings_utc_timezone_summary">Повідомляє ваш часовий пояс як UTC для зменшення відстеження. На сайтах-календарях може показувати неправильний час.</string>
     <string name="settings_version">Версія</string>
     <string name="share">Поділітись</string>
     <string name="share_image">Поділіться ЗОБРАЖЕННЯМ</string>

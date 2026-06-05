@@ -246,6 +246,8 @@
     <string name="settings_storage_manager_button_decline">НЕ СЕГА</string>
     <string name="settings_storage_manager_button_ok">ОТВАРЯНЕ НА НАСТРОЙКИ</string>
     <string name="settings_theme">Тема</string>
+    <string name="settings_utc_timezone">Подмяна на часовата зона с UTC</string>
+    <string name="settings_utc_timezone_summary">Съобщава часовата ви зона като UTC за по-малко идентифициране. Може да показва грешно време в календарни сайтове.</string>
     <string name="settings_version">Версия</string>
     <string name="share">Споделяне</string>
     <string name="share_image">Споделяне на ИЗОБРАЖЕНИЕ</string>

@@ -230,6 +230,8 @@
     <string name="settings_storage_manager_button_decline">MITTE PRAEGU</string>
     <string name="settings_storage_manager_button_ok">AVA SEADED</string>
     <string name="settings_theme">Teema</string>
+    <string name="settings_utc_timezone">Võltsi ajavöönd UTC-ks</string>
+    <string name="settings_utc_timezone_summary">Teatab ajavööndi UTC-na, et vähendada sõrmejälje võtmist. Võib kalendrisaitidel näidata vale aega.</string>
     <string name="settings_version">Versioon</string>
     <string name="share">Jaga</string>
     <string name="share_image">Jaga IMAGE</string>

@@ -417,6 +417,8 @@
     <string name="settings_tabs_archive_summary">Ferme automatiquement les onglets que vous n\'avez pas utilisés depuis un moment</string>
     <string name="settings_tabs_archive_title">Fermeture auto des onglets</string>
     <string name="settings_theme">Thème</string>
+    <string name="settings_utc_timezone">Simuler le fuseau horaire UTC</string>
+    <string name="settings_utc_timezone_summary">Indique votre fuseau horaire comme UTC pour réduire le pistage. Peut afficher de mauvaises heures sur les sites de calendrier.</string>
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">Désactiver WebGL</string>
     <string name="settings_webgl_disabled_summary">Bloque le fingerprinting GPU, peut casser les contenus 3D</string>

@@ -293,6 +293,8 @@
     <string name="settings_storage_manager_button_decline">ŞİMDİ DEĞİL</string>
     <string name="settings_storage_manager_button_ok">AYARLARI AÇ</string>
     <string name="settings_theme">Tema</string>
+    <string name="settings_utc_timezone">Saat dilimini UTC olarak taklit et</string>
+    <string name="settings_utc_timezone_summary">Parmak izini azaltmak için saat diliminizi UTC olarak bildirir. Takvim sitelerinde yanlış saat gösterebilir.</string>
     <string name="settings_version">Sürüm</string>
     <string name="share">Paylaşmak</string>
     <string name="share_image">Fotoğraf paylaşmak</string>

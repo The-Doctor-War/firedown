@@ -417,6 +417,8 @@
     <string name="settings_tabs_archive_summary">Schließt automatisch Tabs, die du eine Weile nicht benutzt hast</string>
     <string name="settings_tabs_archive_title">Tabs automatisch schließen</string>
     <string name="settings_theme">Theme</string>
+    <string name="settings_utc_timezone">Zeitzone als UTC vortäuschen</string>
+    <string name="settings_utc_timezone_summary">Meldet Ihre Zeitzone als UTC, um Fingerprinting zu reduzieren. Kann auf Kalenderseiten falsche Zeiten anzeigen.</string>
     <string name="settings_version">Version</string>
     <string name="settings_webgl_disabled">WebGL deaktivieren</string>
     <string name="settings_webgl_disabled_summary">Blockiert GPU-Fingerprinting, 3D-Inhalte können kaputt erscheinen</string>

@@ -12,7 +12,12 @@
 (() => {
     'use strict';
 
-    const PAT = /\/api\/[a-z_]+\/item_list\/?\?/i;
+    // /api/<endpoint>/item_list/[<sub>/]?…  — the optional sub-segment matters:
+    // a hashtag/challenge page (tiktok.com/tag/<x>) fires BOTH
+    // /api/challenge/item_list/?… AND /api/challenge/item_list/newtab/?…, and the
+    // old `…item_list/?\?` (query must follow item_list directly) silently
+    // dropped the /newtab/ feed (30 parseable video items) on the floor.
+    const PAT = /\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?/i;
 
     // Page-world script — can't reach browser.*. The content-script
     // fetches BuildConfig.DEBUG from Java and forwards it via the

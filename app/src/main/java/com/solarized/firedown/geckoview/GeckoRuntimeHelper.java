@@ -150,6 +150,18 @@ public class GeckoRuntimeHelper {
         sGeckoRuntime.getSettings().setFingerprintingProtection(true);
         sGeckoRuntime.getSettings().setFingerprintingProtectionPrivateBrowsing(true);
 
+        // TikTok's anti-bot throttle withholds the /api/*/item_list/ feeds we
+        // capture unless the page's fingerprint stays unstable. Globally that is
+        // privacy.resistFingerprinting — a user-facing toggle that ships OFF — so
+        // TikTok capture would otherwise depend on the user enabling an advanced
+        // privacy switch that also degrades every other site. Instead, scope full
+        // Fingerprinting Protection to tiktok.com via FPP's per-site granular
+        // overrides (FPP itself is enabled just above). The override string is
+        // bidirectional (+enable / -disable a target); "+AllTargets" turns ON
+        // every protection — RFP-equivalent — but ONLY for first-party
+        // tiktok.com, so no other site is affected and no user action is needed.
+        applyTikTokFingerprintingOverride();
+
         mMessageDelegate = new MessageDelegate();
 
         // PoTokenGenerator owns its own GeckoSession (created outside
@@ -897,6 +909,26 @@ public class GeckoRuntimeHelper {
         geckoResult.accept(unused -> {
             Log.d(TAG, "setResistFingerPrinting: " + unused + " enable: " + enable);
         });
+    }
+
+    /**
+     * Apply RFP-equivalent fingerprinting protection to first-party tiktok.com
+     * ONLY, via FPP's per-site granular overrides, so TikTok's item_list feeds
+     * are captured without the user enabling the global Resist Fingerprinting
+     * switch. See the call site in the constructor for the why. Unconditional and
+     * idempotent — it's a fixed per-site policy, not a user setting.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    private void applyTikTokFingerprintingOverride() {
+        // JSON consumed by privacy.fingerprintingProtection.granularOverrides:
+        // [{ "firstPartyDomain": "tiktok.com", "overrides": "+AllTargets" }]
+        final String overrides = "[{\"firstPartyDomain\":\"tiktok.com\",\"overrides\":\"+AllTargets\"}]";
+        GeckoResult<Void> result = GeckoPreferenceController.setGeckoPref(
+                "privacy.fingerprintingProtection.granularOverrides", overrides,
+                GeckoPreferenceController.PREF_BRANCH_USER);
+        result.accept(
+                unused -> Log.d(TAG, "applyTikTokFingerprintingOverride: granularOverrides set"),
+                throwable -> Log.w(TAG, "applyTikTokFingerprintingOverride failed", throwable));
     }
 
     @OptIn(markerClass = ExperimentalGeckoViewApi.class)

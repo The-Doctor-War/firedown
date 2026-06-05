@@ -34,12 +34,16 @@ public class VariantProcessor {
 
     // An HLS/DASH manifest (ffmpeg must mux it) — as opposed to a progressive
     // container, downloaded raw via HttpDownloadStrategy. Matches the extension
-    // before any query string. We test for a *manifest* rather than for a
-    // progressive extension because progressive CDN URLs are frequently tokenized
-    // with no .mp4 at all (TikTok), whereas HLS/DASH renditions reliably end in
-    // .m3u8/.mpd — so "not a manifest" reliably means progressive.
+    // followed by a query (?…), a fragment (#…), or end-of-string. The fragment
+    // case is load-bearing: Dailymotion renditions end in
+    // `…/manifest.m3u8#cell=cf3`, and a `?`-only test treated that as progressive
+    // → FILE → HttpDownloadStrategy downloaded the playlist text instead of
+    // muxing. We test for a *manifest* rather than a progressive extension
+    // because progressive CDN URLs are frequently tokenized with no .mp4 at all
+    // (TikTok), whereas HLS/DASH renditions reliably end in .m3u8/.mpd — so
+    // "not a manifest" reliably means progressive.
     private static final Pattern MANIFEST_URL =
-            Pattern.compile("https?://.*\\.(m3u8|mpd)(?:\\?.*|$)", Pattern.CASE_INSENSITIVE);
+            Pattern.compile("https?://.*\\.(m3u8|mpd)(?:[?#].*|$)", Pattern.CASE_INSENSITIVE);
 
     private static boolean isManifestUrl(String url) {
         return !TextUtils.isEmpty(url) && MANIFEST_URL.matcher(url).matches();

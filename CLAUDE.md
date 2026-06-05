@@ -500,6 +500,31 @@ mov→hls feedback channel that doesn't exist yet.
   Stock `ffmpeg -i <master>` on a PC reproduces it (no `X-Frontend-Id`) — same
   wrong-key cause, not a transport bug.
 
+## Security toggles & default inversion (the JIT/WASM pattern)
+
+Several "harden the browser at a cost" switches in the Security settings
+category are **disable-X** toggles that default **OFF** (the feature is on by
+default; turning the switch on hardens at a performance/compat cost):
+`SETTINGS_DISABLE_WASM`, `SETTINGS_DISABLE_WEBGL`, `SETTINGS_DISABLE_JIT`.
+
+JavaScript JIT is the canonical case. JIT widens the attack surface, so a
+"disable JIT" control belongs in the advanced/Security section — but disabling
+it globally noticeably degrades complex sites, so it must be **enabled by
+default** (most users should never touch it; only the security-conscious turn it
+off). `setJITCompiler(!disable)` is read at boot in `GeckoRuntimeHelper`
+(inverted) and on change in `SettingsFragment`; it sets
+`javascript.options.baselinejit` + `…wasm_baselinejit`; changing it restarts the
+browser.
+
+**When flipping an enable→disable default, always introduce a NEW preference
+key** (`…enable.jit` → `…disable.jit`). The stored boolean can't be reused: an
+old user who never touched the opt-in `enable` pref has `false` saved, which
+under the new default-enabled semantics would read back as "JIT off" and silently
+keep them on the old baseline. A fresh key lets existing installs fall to the new
+default. (Same reasoning as the `SETTINGS_DISABLE_WASM` migration.) Rename the
+string resources to match (`settings_jit_enabled*` → `settings_jit_disabled*`)
+and update **all** locale files, not just English.
+
 ## UI conventions (Material 3)
 
 - **Menu rows are M3 one-line list items: 56dp tall, 16sp text

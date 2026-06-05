@@ -182,8 +182,8 @@
     <string name="popup_toggle">Weergave inschakelen</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL moet beginnen met ‘https://’</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Ongeldige URL</string>
-    <string name="settings_jit_enabled">JavaScript Just-in-time Compilation (JIT) inschakelen</string>
-    <string name="settings_jit_enabled_summary">"Wanneer uitgeschakeld, kan de prestatie van complexe webpagina's verminderd zijn - Na wijziging zal de browser opnieuw opstarten"</string>
+    <string name="settings_jit_disabled">JavaScript-JIT-compilatie uitschakelen</string>
+    <string name="settings_jit_disabled_summary">JIT versnelt JavaScript-intensieve sites maar vergroot het aanvalsoppervlak. Het staat standaard aan; schakel dit in om de browser te verstevigen ten koste van wat prestaties. Deze wijziging herstart uw browser</string>
     <string name="settings_webgl_disabled">WebGL uitschakelen</string>
     <string name="settings_drm_enabled">DRM-weergave inschakelen</string>
     <string name="settings_drm_enabled_summary">Staat Widevine toe op sites die DRM vereisen (Netflix, Spotify, …). Firedown kan DRM-beveiligde inhoud nog steeds niet downloaden.</string>

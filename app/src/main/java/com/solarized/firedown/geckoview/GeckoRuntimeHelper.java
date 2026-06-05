@@ -196,8 +196,8 @@ public class GeckoRuntimeHelper {
                 Preferences. DEFAULT_ENABLE_WEBRTC));
         setWebAssembly(!sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WASM,
                 Preferences.DEFAULT_DISABLE_WASM));
-        setJITCompiler(sharedPreferences.getBoolean(Preferences.SETTINGS_ENABLE_JIT,
-                Preferences.DEFAULT_ENABLE_JIT));
+        setJITCompiler(!sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_JIT,
+                Preferences.DEFAULT_DISABLE_JIT));
         setWebGL(sharedPreferences.getBoolean(Preferences.SETTINGS_DISABLE_WEBGL,
                 Preferences.DEFAULT_DISABLE_WEBGL));
         setGeo(sharedPreferences.getBoolean(Preferences.SETTINGS_BLOCK_LOCATION,

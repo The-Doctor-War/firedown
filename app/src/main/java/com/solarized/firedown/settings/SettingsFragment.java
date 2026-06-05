@@ -346,11 +346,11 @@ public class SettingsFragment extends BasePreferenceFragment
                     + " → setDRM(disable=" + (!enabled) + ")");
             mGeckoRuntimeHelper.setDRM(!enabled);
 
-        } else if (Preferences.SETTINGS_ENABLE_JIT.equals(key)) {
+        } else if (Preferences.SETTINGS_DISABLE_JIT.equals(key)) {
 
-            boolean value = sharedPreferences.getBoolean(key, false);
+            boolean disabled = sharedPreferences.getBoolean(key, Preferences.DEFAULT_DISABLE_JIT);
 
-            mGeckoRuntimeHelper.setJITCompiler(value);
+            mGeckoRuntimeHelper.setJITCompiler(!disabled);
 
             Snackbar snackbar = Snackbar.make(
                     mActivity.getSnackAnchorView(),

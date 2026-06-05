@@ -384,8 +384,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">一般的</string>
     <string name="settings_help">帮助</string>
-    <string name="settings_jit_enabled">启用 JavaScript 即时编译(JIT)</string>
-    <string name="settings_jit_enabled_summary">禁用后，复杂网页的性能可能会降低——更改此设置将重启浏览器</string>
+    <string name="settings_jit_disabled">禁用 JavaScript JIT 编译</string>
+    <string name="settings_jit_disabled_summary">JIT 可加速大量使用 JavaScript 的网站，但会扩大攻击面。默认处于启用状态；开启此项可在牺牲一定性能的前提下增强浏览器安全性。更改此设置将重启浏览器</string>
     <string name="settings_license">许可证</string>
     <string name="settings_light_theme">明亮</string>
     <string name="settings_lock_15_min">15 分钟无操作</string>

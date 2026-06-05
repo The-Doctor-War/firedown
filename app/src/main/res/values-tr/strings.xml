@@ -182,8 +182,8 @@
     <string name="popup_toggle">Görünümü Değiştir</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL’ler “https://” ile başlamalıdır</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Geçersiz URL</string>
-    <string name="settings_jit_enabled">"JavaScript Just-in-time Dermelesi'ni (JIT) etkinleştir"</string>
-    <string name="settings_jit_enabled_summary">Devre dışı bırakıldığında, komplex web sayfalarında performansı azaltabilir - Bunu değiştirmek tarayıcınızı yeniden başlatır</string>
+    <string name="settings_jit_disabled">JavaScript JIT derlemesini devre dışı bırak</string>
+    <string name="settings_jit_disabled_summary">JIT, JavaScript ağırlıklı siteleri hızlandırır ancak saldırı yüzeyini genişletir. Varsayılan olarak açıktır; tarayıcıyı bir miktar performans pahasına sıkılaştırmak için bunu açın. Bu değişiklik tarayıcınızı yeniden başlatır</string>
     <string name="settings_webgl_disabled">"WebGL'i devre dışı bırak"</string>
     <string name="settings_drm_enabled">DRM oynatmayı etkinleştir</string>
     <string name="settings_drm_enabled_summary">DRM gerektiren sitelerde (Netflix, Spotify, …) Widevine oynatmasına izin verir. Firedown DRM korumalı içerikleri yine de indiremez.</string>

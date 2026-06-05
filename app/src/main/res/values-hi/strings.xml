@@ -143,8 +143,8 @@
     <string name="popup_tabs_close">सभी टैब को बंद करें</string>
     <string name="popup_tabs_new">नया टैब</string>
     <string name="popup_toggle">व्यू टॉगल करें</string>
-    <string name="settings_jit_enabled">जावास्क्रिप्ट जस्ट-इन-टाइम संकलन (JIT) सक्षम करें</string>
-    <string name="settings_jit_enabled_summary">अक्षम होने पर, जटिल वेबपृष्ठों के लिए प्रदर्शन कम हो सकता है - इस सेटिंग को बदलने से आपका ब्राउज़र पुनः प्रारंभ हो जाएगा</string>
+    <string name="settings_jit_disabled">जावास्क्रिप्ट JIT संकलन अक्षम करें</string>
+    <string name="settings_jit_disabled_summary">JIT जावास्क्रिप्ट-भारी साइटों को तेज़ करता है लेकिन हमले की सतह बढ़ाता है। यह डिफ़ॉल्ट रूप से चालू है; ब्राउज़र को कुछ प्रदर्शन की कीमत पर सुरक्षित करने के लिए इसे चालू करें। यह परिवर्तन आपके ब्राउज़र को पुनः आरंभ करेगा</string>
     <string name="settings_webrtc_enabled">WebRTC सक्षम करें</string>
     <string name="rename">नाम बदलें</string>
     <string name="rename_file">फ़ाइल का नाम बदलें</string>

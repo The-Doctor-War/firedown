@@ -468,8 +468,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">General</string>
     <string name="settings_help">Help</string>
-    <string name="settings_jit_enabled">Enable JavaScript Just-in-time Compilation (JIT)</string>
-    <string name="settings_jit_enabled_summary">When disabled, performance may be reduced for complex webpages - Changing this setting will restart your browser</string>
+    <string name="settings_jit_disabled">Disable JavaScript JIT compilation</string>
+    <string name="settings_jit_disabled_summary">JIT speeds up JavaScript-heavy sites but enlarges the attack surface. It is on by default; turn this on to harden the browser at the cost of some performance. Changing this restarts your browser</string>
     <string name="settings_license">Licenses</string>
     <string name="settings_light_theme">Light</string>
     <string name="settings_oled_theme">AMOLED black</string>

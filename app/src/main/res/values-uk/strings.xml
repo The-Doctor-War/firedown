@@ -167,8 +167,8 @@
     <string name="popup_toggle">Перемкнути перегляд</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL-адреса має починатися з “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Недійсний URL</string>
-    <string name="settings_jit_enabled">Увімкнути компіляцію JavaScript «точно в часі» (JIT)</string>
-    <string name="settings_jit_enabled_summary">Якщо вимкнено, продуктивність складних веб-сторінок може бути знижена. Зміна цього налаштування перезавантажить ваш браузер</string>
+    <string name="settings_jit_disabled">Вимкнути компіляцію JIT для JavaScript</string>
+    <string name="settings_jit_disabled_summary">JIT прискорює сайти з великою кількістю JavaScript, але збільшує поверхню атаки. Типово увімкнено; увімкніть цей параметр, щоб посилити захист браузера ціною певної продуктивності. Ця зміна перезавантажить ваш браузер</string>
     <string name="settings_webgl_disabled">Вимкнути WebGL</string>
     <string name="settings_webrtc_enabled">Увімкнути WebRTC</string>
 <string name="protection_panel_etp_toggle_disabled_description_2">Рекомендовано ввімкнути захист від відстеження.</string>

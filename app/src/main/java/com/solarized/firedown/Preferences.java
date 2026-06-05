@@ -98,9 +98,24 @@ public class Preferences {
      */
     public static final int THEME_OLED = -100;
 
-    public static final String SETTINGS_ENABLE_JIT = "com.solarized.firedown.preferences.browser.enable.jit";
+    /**
+     * JavaScript JIT is ENABLED by default — turning it off globally noticeably
+     * degrades complex sites, so it belongs with the other advanced "harden at a
+     * cost" toggles in the Security section rather than being something a normal
+     * user has to discover and switch on. This is a "Disable JIT" switch
+     * (default OFF = JIT enabled), mirroring the SETTINGS_DISABLE_WEBGL /
+     * SETTINGS_DISABLE_WASM convention. {@link
+     * com.solarized.firedown.geckoview.GeckoRuntimeHelper#setJITCompiler}
+     * receives the inverted value.
+     *
+     * <p>Deliberately a NEW key: the previous SETTINGS_ENABLE_JIT
+     * (default-disabled, opt-in) value must not carry over on update, or users
+     * who never touched it would read back {@code false} and stay on the old
+     * JIT-disabled baseline under the new default-enabled semantics.</p>
+     */
+    public static final String SETTINGS_DISABLE_JIT = "com.solarized.firedown.preferences.browser.disable.jit";
 
-    public static final boolean DEFAULT_ENABLE_JIT = false;
+    public static final boolean DEFAULT_DISABLE_JIT = false;
 
     public static final String SETTINGS_DISABLE_WEBGL = "com.solarized.firedown.preferences.browser.disable.webgl";
 

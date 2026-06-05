@@ -386,8 +386,8 @@
     <string name="settings_gecko_version">GeckoView</string>
     <string name="settings_general">General</string>
     <string name="settings_help">Ayuda</string>
-    <string name="settings_jit_enabled">Habilitar la compilación JavaScript Just-in-time (JIT)</string>
-    <string name="settings_jit_enabled_summary">Cuando está deshabilitado, el rendimiento puede verse reducido en páginas web complejas - Cambiar esta configuración reiniciará el navegador</string>
+    <string name="settings_jit_disabled">Desactivar la compilación JIT de JavaScript</string>
+    <string name="settings_jit_disabled_summary">El JIT acelera los sitios con mucho JavaScript pero amplía la superficie de ataque. Está activado de forma predeterminada; actívalo para reforzar el navegador a costa de cierto rendimiento. Cambiar esto reiniciará el navegador</string>
     <string name="settings_license">Licencias</string>
     <string name="settings_light_theme">Claro</string>
     <string name="settings_lock_15_min">15 minutos sin actividad</string>

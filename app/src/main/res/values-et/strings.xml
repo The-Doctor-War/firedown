@@ -155,8 +155,8 @@
     <string name="popup_tabs_close">Sulgege kõik vahelehed</string>
     <string name="popup_tabs_new">Uuel kaardil</string>
     <string name="popup_toggle">Vaade sisse- ja väljalülitamine</string>
-    <string name="settings_jit_enabled">Kasuta JavaScripti dünaamilist kompileerimist (Just-in-time Compilation ehk JIT)</string>
-    <string name="settings_jit_enabled_summary">Kui see eelistus pole kasutusel, siis keerukate veebisaitide jõudlus võib väheneda. Seadistuse muutmine eeldab veebibrauseri uuesti käivitamist</string>
+    <string name="settings_jit_disabled">Keela JavaScripti JIT-kompileerimine</string>
+    <string name="settings_jit_disabled_summary">JIT kiirendab JavaScripti-rohkeid saite, kuid suurendab ründepinda. See on vaikimisi sees; lülita see sisse, et veebibrauserit turvalisemaks muuta jõudluse arvelt. See muudatus käivitab brauseri uuesti</string>
     <string name="settings_webgl_disabled">Lülita WebGL välja</string>
     <string name="settings_webrtc_enabled">Kasuta WebRTC-d</string>
 <string name="quick_settings_sheet_insecure_connection_2">Ühendus pole turvaline</string>

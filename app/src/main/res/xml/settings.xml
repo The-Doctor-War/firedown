@@ -181,9 +181,9 @@
 
         <SwitchPreferenceCompat
             android:defaultValue="false"
-            android:key="com.solarized.firedown.preferences.browser.enable.jit"
-            android:summary="@string/settings_jit_enabled_summary"
-            android:title="@string/settings_jit_enabled"
+            android:key="com.solarized.firedown.preferences.browser.disable.jit"
+            android:summary="@string/settings_jit_disabled_summary"
+            android:title="@string/settings_jit_disabled"
             app:icon="@drawable/developer_board_24"
             app:singleLineTitle="false"/>
 

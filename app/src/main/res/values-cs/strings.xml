@@ -179,8 +179,8 @@
     <string name="popup_toggle">Přepnout zobrazení</string>
     <string name="settings_doh_provider_custom_dialog_error_https">URL musí začínat “https://”</string>
     <string name="settings_doh_provider_custom_dialog_error_invalid">Neplatná URL</string>
-    <string name="settings_jit_enabled">Povolit kompilaci JavaScriptu v reálném čase (JIT)</string>
-    <string name="settings_jit_enabled_summary">Pokud je zakázáno, může být u složitých webových stránek snížen výkon. Změna tohoto nastavení restartuje váš prohlížeč</string>
+    <string name="settings_jit_disabled">Zakázat kompilaci JIT v JavaScriptu</string>
+    <string name="settings_jit_disabled_summary">JIT zrychluje stránky náročné na JavaScript, ale zvětšuje plochu pro útok. Ve výchozím nastavení je zapnutý; zapnutím této volby zpřísníte zabezpečení prohlížeče na úkor výkonu. Tato změna restartuje váš prohlížeč</string>
     <string name="settings_webgl_disabled">Zakázat WebGL</string>
     <string name="settings_webrtc_enabled">Povolit WebRTC</string>
 <string name="protection_panel_etp_toggle_disabled_description_2">Je doporučeno zapnout ochranu proti sledování.</string>

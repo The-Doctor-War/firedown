@@ -165,6 +165,11 @@ public class GeckoRuntimeHelper {
         // fail and the React app throw. Randomize, don't block.
         applyTikTokFingerprintingOverride();
 
+        // Enable the Android FIDO2/Credential-Manager WebAuthn backend so passkey
+        // logins surface the OS prompt (the ActivityDelegate is wired in
+        // BaseActivity but Gecko only invokes it when this backend is enabled).
+        applyWebAuthnPrefs();
+
         mMessageDelegate = new MessageDelegate();
 
         // PoTokenGenerator owns its own GeckoSession (created outside
@@ -1284,6 +1289,30 @@ public class GeckoRuntimeHelper {
 
     public GeckoRuntime getGeckoRuntime() {
         return sGeckoRuntime;
+    }
+
+    /**
+     * Enable the WebAuthn / passkey backend. GeckoView routes
+     * {@code navigator.credentials.create/get} to Android's FIDO2 / Credential
+     * Manager and surfaces the OS passkey UI through the runtime
+     * {@code ActivityDelegate} (wired in {@code BaseActivity}). But the Android
+     * FIDO2 backend is gated by an embedder pref that does NOT default on in a
+     * bare GeckoView embedding (Fenix sets it). Without it Gecko never invokes
+     * the delegate, so the password-manager / passkey sheet never appears — which
+     * is why passkey login silently does nothing here while it works in other
+     * browsers. Enable the master switch + the Android FIDO2 backend so the
+     * delegate fires.
+     */
+    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
+    private void applyWebAuthnPrefs() {
+        List<GeckoPreferenceController.SetGeckoPreference<?>> prefs = new ArrayList<>();
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "security.webauth.webauthn", true, GeckoPreferenceController.PREF_BRANCH_USER));
+        prefs.add(GeckoPreferenceController.SetGeckoPreference.setBoolPref(
+                "security.webauth.webauthn_enable_android_fido2", true, GeckoPreferenceController.PREF_BRANCH_USER));
+        GeckoPreferenceController.setGeckoPrefs(prefs).accept(
+                map -> Log.d(TAG, "applyWebAuthnPrefs: set"),
+                throwable -> Log.w(TAG, "applyWebAuthnPrefs failed", throwable));
     }
 
     /** Singleton native PO-token minter. Callers should invoke

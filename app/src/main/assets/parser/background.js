@@ -1116,34 +1116,44 @@ async function buildTikTokHeaders() {
     ];
 }
 
-// Receives JSON bodies posted by the content-script bridge. The body
-// is the exact response the page itself received via fetch/XHR —
-// captured by a page-world hook (tiktok-inject.js) that observes
-// passively without touching the network stack. This avoids three
-// failure modes encountered with webRequest-based approaches:
-//   1. filterResponseData perturbs the page (TikTok shows a
-//      "something went wrong" overlay).
-//   2. Refetching the URL ourselves trips TikTok's single-use
-//      msToken / X-Bogus signature and returns a stripped response.
-//   3. ServiceWorker-served endpoints (/related/item_list/) can't be
-//      tapped via filterResponseData at all.
-async function handleTikTokItemList(msg, sender) {
-    // Empty body slips through if a future inject revision stops
-    // filtering them out; treat it as the no-op preflight it is
-    // without logging "parse failed" (misleading: there's nothing to
-    // parse, not a malformed JSON).
-    if (!msg.body) return;
+// Processes one /api/*/item_list/ JSON body, whatever its source. Two
+// transports feed it the SAME bytes the page received:
+//   * the page-world hook (tiktok-inject.js → tiktok-itemlist message)
+//   * a passive filterResponseData listener (below) — only viable since
+//     the geckoview ServiceWorker-visibility patch (0006) made SW-served
+//     /related/item_list/ responses tappable.
+// Source-agnostic by design so the two run in parallel and origin-dedup
+// (sendVariants → canonical origin) collapses any overlap. See the
+// listener comment below for why the inject still ships as a fallback.
+//
+// The historical reasons the inject was the ONLY source — and which the
+// 0006 patch does / doesn't retire:
+//   1. filterResponseData perturbs the page (TikTok shows a "something
+//      went wrong" overlay). NOT addressed by 0006 — this is the open
+//      risk the parallel rollout exists to validate on-device.
+//   2. Refetching the URL trips TikTok's single-use msToken / X-Bogus
+//      signature. N/A here — filterResponseData reads the page's OWN
+//      response passively, no refetch.
+//   3. ServiceWorker-served endpoints (/related/item_list/) couldn't be
+//      tapped via filterResponseData at all. FIXED by 0006.
+async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
+    // Empty body slips through (preflight / cache-warm). Treat it as the
+    // no-op it is without logging "parse failed" (misleading: there's
+    // nothing to parse, not a malformed JSON).
+    if (!body) return;
+    if (tabId === undefined || tabId === null) tabId = -1;
+    if (!pageUrl) pageUrl = "https://www.tiktok.com/";
 
-    log("TIKTOK", `onMessage`, {
-        url: (msg.url || "").slice(0, 120),
-        bodyLen: msg.body.length,
-        tabId: sender.tab?.id ?? -1,
-        tabUrl: (sender.tab?.url || "").slice(0, 80)
+    log("TIKTOK", `item_list body`, {
+        url: (url || "").slice(0, 120),
+        bodyLen: body.length,
+        tabId,
+        tabUrl: pageUrl.slice(0, 80)
     });
 
-    const json = tryParseJson(msg.body);
+    const json = tryParseJson(body);
     if (!json) {
-        log("TIKTOK", `JSON parse failed`, { head: msg.body.slice(0, 200) });
+        log("TIKTOK", `JSON parse failed`, { head: body.slice(0, 200) });
         return;
     }
 
@@ -1199,7 +1209,7 @@ async function handleTikTokItemList(msg, sender) {
     }
 
     if (!Array.isArray(items)) {
-        log("TIKTOK", `no itemList[] in body`, { topKeys: Object.keys(json).slice(0, 12), bodyLen: msg.body.length });
+        log("TIKTOK", `no itemList[] in body`, { topKeys: Object.keys(json).slice(0, 12), bodyLen: body.length });
         return;
     }
     if (items.length === 0) {
@@ -1209,14 +1219,12 @@ async function handleTikTokItemList(msg, sender) {
     log("TIKTOK", "items found", { count: items.length, source: itemsSource, firstId: items[0] && items[0].id });
 
     const pathname = (() => {
-        try { return new URL(msg.url, sender.tab?.url || "https://www.tiktok.com/").pathname; }
-        catch (_) { return msg.url; }
+        try { return new URL(url, pageUrl).pathname; }
+        catch (_) { return url; }
     })();
     log("TIKTOK", `${items.length} item(s) from ${pathname}`);
 
     const headers = await buildTikTokHeaders();
-    const tabId = sender.tab?.id ?? -1;
-    const pageUrl = sender.tab?.url || "https://www.tiktok.com/";
 
     let sentCount = 0;
     let skippedNoVariants = 0;
@@ -1268,7 +1276,7 @@ async function handleTikTokItemList(msg, sender) {
             tabId,
             documentUrl: pageUrl,
             originUrl: pageUrl,
-            url: msg.url,
+            url: url,
             requestId: `tiktok-${item.id || Date.now()}`
         };
 
@@ -1286,12 +1294,81 @@ async function handleTikTokItemList(msg, sender) {
     log("TIKTOK", `batch done`, { sent: sentCount, skippedNoVideo, skippedNoVariants, total: items.length });
 }
 
+// Source 1 — page-world inject bridge (tiktok-content.js → tiktok-inject.js).
+// Kept as the fallback while the filterResponseData path (Source 2) is
+// validated on-device; origin-dedup collapses any overlap between the two.
 browser.runtime.onMessage.addListener((msg, sender) => {
     if (!msg || msg.kind !== "tiktok-itemlist") return;
-    handleTikTokItemList(msg, sender).catch(e => {
-        log("TIKTOK", `handler error`, e.message);
+    log("TIKTOK", `inject bridge -> handler`, {
+        url: (msg.url || "").slice(0, 100),
+        bodyLen: (msg.body || "").length,
+        tabId: sender.tab?.id ?? -1
+    });
+    handleTikTokItemList({
+        url: msg.url,
+        body: msg.body,
+        tabId: sender.tab?.id ?? -1,
+        pageUrl: sender.tab?.url
+    }).catch(e => {
+        log("TIKTOK", `handler error (inject)`, e.message);
     });
 });
+
+// Source 2 — passive filterResponseData on the item_list XHR/fetch.
+// Reads the page's OWN response byte-exact (filterResponseText writes
+// every chunk straight through) — no refetch, so the single-use
+// msToken/X-Bogus signature is untouched. This is only viable because
+// the geckoview ServiceWorker-visibility patch (0006) makes SW-served
+// responses fire http-on-examine-response, so onBeforeRequest +
+// filterResponseData now reach the SW-intercepted /related/item_list/
+// (and /newtab/ sub-feeds) that were previously invisible.
+//
+// The open risk this rollout validates: even byte-exact passthrough
+// historically tripped TikTok's "Something went wrong" overlay. If the
+// overlay stays gone on-device, retire tiktok-inject.js + its bridge;
+// until then both sources run and dedup keeps captures unique.
+//
+// The pattern allows item_list sub-segments — a hashtag page fires both
+// /api/challenge/item_list/?… AND /api/challenge/item_list/newtab/?…;
+// matching only the former would drop ~half the feed (mirrors the PAT
+// in tiktok-inject.js).
+const TIKTOK_ITEMLIST_RE = /\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?/i;
+browser.webRequest.onBeforeRequest.addListener(
+    (details) => {
+        if (!TIKTOK_ITEMLIST_RE.test(details.url)) return {};
+        log("TIKTOK", `filter onBeforeRequest`, {
+            url: details.url.slice(0, 120),
+            type: details.type,
+            tabId: details.tabId,
+            requestId: details.requestId
+        });
+        const created = filterResponseText(details, (body) => {
+            if (!body) {
+                log("TIKTOK", `filter empty body`, { url: details.url.slice(0, 100) });
+                return;
+            }
+            log("TIKTOK", `filter body -> handler`, {
+                url: details.url.slice(0, 100),
+                bodyLen: body.length,
+                tabId: details.tabId
+            });
+            handleTikTokItemList({
+                url: details.url,
+                body,
+                tabId: details.tabId,
+                pageUrl: details.documentUrl || details.originUrl
+            }).catch(e => {
+                log("TIKTOK", `handler error (filter)`, e.message);
+            });
+        });
+        if (!created) {
+            log("TIKTOK", `filterResponseData unavailable`, { url: details.url.slice(0, 100) });
+        }
+        return {};
+    },
+    { urls: ["*://www.tiktok.com/*", "*://m.tiktok.com/*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
 
 // ============================================================================
 // Twitter / X

@@ -1296,33 +1296,29 @@ async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
     log("TIKTOK", `batch done`, { sent: sentCount, skippedNoVideo, skippedNoVariants, total: items.length });
 }
 
-// Document source — SSR-inlined items read from the main_frame HTML.
-// Some TikTok pages inline video data into the page document's
-// __UNIVERSAL_DATA_FOR_REHYDRATION__ blob and fire NO /api/*item_list/ XHR
-// for it, so the item_list filter below never sees them:
-//   * /@user/video/<id> detail pages — one item under the video-detail
-//     scope (__DEFAULT_SCOPE__["webapp.video-detail"|"webapp.reflow.video.detail"]).
-//   * /foryou (+ "/" home feed) — TikTok SSRs the FIRST feed video so it
-//     renders instantly; the recommend/preload item_list XHRs then carry
-//     only the REST of the swipe feed. Confirmed from a HAR of /foryou: the
-//     first-played media object id was in NEITHER item_list response, only
-//     in the document.
-// We read the DOCUMENT response (not the DOM) so the raw bytes are immune
-// to React stripping the rehydration <script> during hydration — the
-// Threads "read the network response, not the DOM" lesson. If TikTok's
-// document is itself SW-synthesized, the 0006 patch is what makes this
-// main_frame response tappable at all. (Cached/bfcache navigations serve no
-// network response so this won't fire — acceptable: the item was captured
-// on its first networked load, and SPA route changes use the item_list XHRs.)
+// Document source — the SSR-inlined item on a /@user/video/<id> DETAIL page.
+// Detail pages inline the video into the page document's
+// __UNIVERSAL_DATA_FOR_REHYDRATION__ blob (under webapp.video-detail /
+// webapp.reflow.video.detail) and fire NO /api/*item_list/ XHR, so there's
+// nothing else to tap. (The /foryou feed does NOT SSR video — proven on-device,
+// its blob holds only app/i18n/biz/seo scopes — so this runs on detail pages
+// ONLY; the FYP first video is cache-served off-wire and comes from the generic
+// catcher, see the TikTok note in regex.js. Don't re-add a /foryou branch here.)
+//
+// We read the DOCUMENT response (not the DOM) so the raw bytes are immune to
+// React stripping the rehydration <script> during hydration — the Threads "read
+// the network response, not the DOM" lesson. If TikTok's document is itself
+// SW-synthesized, the 0006 patch is what makes this main_frame response tappable.
+// (Cached/bfcache navigations serve no network response so this won't fire —
+// acceptable: the item was captured on its first networked load.)
+//
 // Attribute-order-agnostic: TikTok emits the id either first or after
 // type="application/json", and quoting can vary — so match any <script> whose
 // attributes include id=…__UNIVERSAL_DATA_FOR_REHYDRATION__… rather than
 // requiring id to lead. JSON escapes `<`, so the non-greedy body can't end early
 // on a stray </script>.
 const TIKTOK_REHYDRATION_RE = /<script\b[^>]*\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\s\S]*?)<\/script>/;
-const TIKTOK_FEED_PATH_RE = /^\/(foryou\/?)?$/;        // /foryou, /foryou/, /
 const TIKTOK_DETAIL_PATH_RE = /^\/@[^/]+\/video\/\d+/;
-const TIKTOK_SSR_ITEM_CAP = 30;                        // bound the feed walk
 
 // Strong structural signature — an object with a string id and a video
 // sub-object carrying a real address. Keeps the scope-agnostic walk off the
@@ -1333,7 +1329,7 @@ function tiktokLooksLikeVideoItem(o) {
         && o.video && typeof o.video === "object"
         && (o.video.playAddr || o.video.downloadAddr || o.video.bitrateInfo);
 }
-// First matching item anywhere under obj (depth-capped). Detail pages.
+// First matching item anywhere under obj (depth-capped).
 function tiktokFindVideoItem(obj, depth) {
     if (!obj || typeof obj !== "object" || depth > 8) return null;
     if (tiktokLooksLikeVideoItem(obj)) return obj;
@@ -1350,36 +1346,14 @@ function tiktokFindVideoItem(obj, depth) {
     }
     return null;
 }
-// ALL distinct items under obj (dedup by id, node-budgeted + capped). Feed
-// pages, where the blob may SSR more than one item. A matched item's own
-// children aren't separate videos, so don't descend into it.
-function tiktokCollectVideoItems(obj, depth, out, ids, seen, budget) {
-    if (out.length >= TIKTOK_SSR_ITEM_CAP || budget.n <= 0) return;
-    if (!obj || typeof obj !== "object" || depth > 12) return;
-    budget.n--;
-    if (seen.has(obj)) return;
-    seen.add(obj);
-    if (tiktokLooksLikeVideoItem(obj)) {
-        if (obj.id && !ids.has(obj.id)) { ids.add(obj.id); out.push(obj); }
-        return;
-    }
-    if (Array.isArray(obj)) {
-        for (const v of obj) tiktokCollectVideoItems(v, depth + 1, out, ids, seen, budget);
-    } else {
-        for (const k of Object.keys(obj)) tiktokCollectVideoItems(obj[k], depth + 1, out, ids, seen, budget);
-    }
-}
-// Pull the rehydration blob out of the document HTML and return its video
-// items: the single detail item, or every feed item (structural, since the
-// feed scope key varies by build).
-function extractTikTokSSRItems(html, pathname) {
+// Pull the rehydration blob out of a detail-page document and return its single
+// video item (as a one-element array), or [] if absent.
+function extractTikTokSSRItems(html) {
     const m = TIKTOK_REHYDRATION_RE.exec(html);
     if (!m) {
-        // Distinguish a regex miss from a genuinely blob-less document: is the
-        // marker string even present? markerPresent:true here would mean the
-        // tag exists but our pattern didn't match it (tighten the regex);
-        // markerPresent:false means TikTok SSR'd no rehydration blob at all
-        // (this load's first video, if any, must come from an item_list XHR).
+        // Distinguish a regex miss from a blob-less document: is the marker even
+        // present? markerPresent:true => tag exists but our pattern missed it
+        // (tighten the regex); false => no rehydration blob at all.
         const markerPresent = html.indexOf("__UNIVERSAL_DATA_FOR_REHYDRATION__") >= 0;
         log("TIKTOK", `ssr: rehydration tag not matched`, { markerPresent, htmlLen: html.length });
         return [];
@@ -1388,28 +1362,16 @@ function extractTikTokSSRItems(html, pathname) {
     try { data = JSON.parse(m[1]); }
     catch (e) { log("TIKTOK", `ssr: rehydration JSON parse failed`, e.message); return []; }
     const scope = data && data.__DEFAULT_SCOPE__;
-    if (TIKTOK_DETAIL_PATH_RE.test(pathname)) {
-        if (scope) {
-            for (const k of Object.keys(scope)) {
-                if (!/video[-.]detail/i.test(k)) continue;
-                const found = tiktokFindVideoItem(scope[k], 0);
-                if (found) return [found];
-            }
+    if (scope) {
+        for (const k of Object.keys(scope)) {
+            if (!/video[-.]detail/i.test(k)) continue;
+            const found = tiktokFindVideoItem(scope[k], 0);
+            if (found) return [found];
         }
-        log("TIKTOK", `ssr: detail blob has no video item`,
-            { scopeKeys: scope ? Object.keys(scope).slice(0, 20) : null });
-        return [];
     }
-    const out = [], ids = new Set(), seen = new WeakSet();
-    tiktokCollectVideoItems(scope || data, 0, out, ids, seen, { n: 200000 });
-    if (out.length === 0) {
-        // The blob parsed but held no video-shaped item. Dump the scope keys so
-        // we can see whether a recommend/feed scope is present (and named what)
-        // or whether the feed is purely client-rendered (only app/i18n context).
-        log("TIKTOK", `ssr: feed blob has no video items`,
-            { scopeKeys: scope ? Object.keys(scope).slice(0, 25) : Object.keys(data || {}).slice(0, 25) });
-    }
-    return out;
+    log("TIKTOK", `ssr: detail blob has no video item`,
+        { scopeKeys: scope ? Object.keys(scope).slice(0, 20) : null });
+    return [];
 }
 
 browser.webRequest.onBeforeRequest.addListener(
@@ -1418,14 +1380,14 @@ browser.webRequest.onBeforeRequest.addListener(
         let pathname;
         try { pathname = new URL(details.url).pathname; }
         catch (_) { return {}; }
-        if (!TIKTOK_FEED_PATH_RE.test(pathname) && !TIKTOK_DETAIL_PATH_RE.test(pathname)) return {};
+        if (!TIKTOK_DETAIL_PATH_RE.test(pathname)) return {};
         log("TIKTOK", `ssr main_frame`, { url: details.url.slice(0, 120), tabId: details.tabId });
         const created = filterResponseText(details, (html) => {
             if (!html) {
                 log("TIKTOK", `ssr: empty document`, { path: pathname });
                 return;
             }
-            const items = extractTikTokSSRItems(html, pathname);
+            const items = extractTikTokSSRItems(html);
             if (items.length === 0) {
                 log("TIKTOK", `ssr: no items in document`, { path: pathname, htmlLen: html.length });
                 return;

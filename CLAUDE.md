@@ -133,21 +133,21 @@ script does **no** capture (Take-A-Break dismissal only).
    geckoview **ServiceWorker-visibility patch (0006)** makes SW-synthesized
    responses fire `http-on-examine-response`, so `filterResponseData` now reaches
    the SW-served `/related/item_list/` feeds that were once untappable.
-2. **Document SSR — `filterResponseData` on the `main_frame` HTML**:
-   `/@user/video/<id>` **detail** pages inline the video into the document's
+2. **Document SSR — `filterResponseData` on the `main_frame` HTML, DETAIL pages
+   only**: `/@user/video/<id>` detail pages inline the video into the document's
    `__UNIVERSAL_DATA_FOR_REHYDRATION__` blob (under
    `webapp.video-detail`/`webapp.reflow.video.detail`) and fire **no** item_list
    XHR, so there's nothing else to tap. `extractTikTokSSRItems` pulls the blob from
-   the HTML (`TIKTOK_REHYDRATION_RE`), takes the single detail item (or walks the
-   blob structurally — `tiktokCollectVideoItems`), and feeds it to
+   the HTML (`TIKTOK_REHYDRATION_RE`) and returns the single detail item to
    `handleTikTokItemList`. **Read the document RESPONSE, not the DOM** — raw bytes
    are immune to React stripping the rehydration `<script>` during hydration (the
    Threads "read the network response, not the DOM" lesson). If the document is
-   SW-synthesized, 0006 is again what makes it tappable. The listener also runs on
-   `/foryou` (+ `/`) but — **proven on-device** — the feed document's blob holds
-   **no** video (only `webapp.app-context`/`i18n`/`biz`/`seo` scopes), so the feed
-   branch finds nothing; the FYP feed is fully client-rendered. (That branch is
-   effectively dead weight on `/foryou` — a candidate to strip to detail-only.)
+   SW-synthesized, 0006 is again what makes it tappable. The listener is gated to
+   `TIKTOK_DETAIL_PATH_RE` — it does **not** run on `/foryou`, because the feed
+   document's blob holds **no** video (**proven on-device**: only
+   `webapp.app-context`/`i18n`/`biz`/`seo` scopes); the FYP feed is fully
+   client-rendered. Don't re-add a `/foryou` branch — it would just read ~165 KB
+   per load to find nothing.
 
 **The first `/foryou` video — generic catcher, NOT the parser (deliberate
 cardinal-rule exception).** TikTok renders the first FYP video from its **own

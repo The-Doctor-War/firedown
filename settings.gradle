@@ -11,7 +11,17 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        mavenLocal()   // resolve the locally-built GeckoView AAR (~/.m2) first
+        // GeckoView resolves EXCLUSIVELY from our local build in ~/.m2 — never
+        // from maven.mozilla.org or any other internet repo. This guarantees the
+        // app links the in-house patched GeckoView (0001–0006), and FAILS LOUDLY
+        // if the local AAR hasn't been published yet rather than silently falling
+        // back to Mozilla's official build. (exclusiveContent is two-way: the
+        // org.mozilla.geckoview group comes only from mavenLocal, and mavenLocal
+        // is used only for that group — it won't shadow other deps.)
+        exclusiveContent {
+            forRepository { mavenLocal() }
+            filter { includeGroup "org.mozilla.geckoview" }
+        }
         google()
         mavenCentral()
         maven { url "https://maven.mozilla.org/maven2" }

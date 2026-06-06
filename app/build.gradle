@@ -9,12 +9,6 @@ android {
     defaultConfig {
 
 
-        packagingOptions {
-            exclude 'lib/*/libcrashhelper.so'
-            exclude 'lib/*/libcrashtools.so'
-        }
-
-
 //        packagingOptions {
 //            doNotStrip '**.so'     // ADD THIS! #1
 //        }
@@ -90,14 +84,12 @@ android {
     //  - https://stackoverflow.com/questions/9206117/how-to-workaround-autoomitting-fiiles-folders-starting-with-underscore-in
 }
 
-ext {
-    geckoviewChannel = "lite"
-    geckoviewVersion = "151.0.20260601110758"
-}
-
 
 
 dependencies {
+
+
+    implementation "org.mozilla.geckoview:geckoview-default:151.0.20260601110758"
 
     // Installs the bundled baseline profile (app/src/main/baseline-prof.txt)
     // at first launch so ART AOT-compiles the listed hot methods instead of

@@ -23,7 +23,18 @@ const DEFAULT_PATTERNS = [
   'microsoft-api\\.arkoselabs\\.com',
   'copilot\\.microsoft\\.com\\/(fd\\/ls\\/l|cl\\/eus2\\/collect)',
 
-  // TikTok
+  // TikTok — the parser (parser@) emits progressive MP4 variants from the
+  // item_list feeds + detail-page SSR on TikTok's video CDNs. Block those hosts
+  // so the generic catcher doesn't ALSO capture the same media (the cardinal
+  // rule — parser keeps metadata + quality variants; a bare catcher dup would
+  // be tokenized/extensionless). Two host families seen on-device:
+  //   v16-webapp-prime.tiktok.com/video/tos/…   (prime delivery host)
+  //   v16-webapp.tiktokcdn-eu.com/…             (tiktokcdn-{eu,us,…} host)
+  // The `webapp` prefix is the video host specifically — TikTok thumbnails
+  // live on p16-*/p19-* (…tiktokcdn…) hosts, which these patterns don't touch.
+  'webapp-prime\\.tiktok\\.com\\/video\\/',
+  'webapp\\.tiktokcdn[-a-z]*\\.com\\/',
+  // /report endpoints below are telemetry, not media.
   'tiktok\\.com\\/aweme\\/v1\\/report',
   'tiktokw.*\\/web\\/report',
 

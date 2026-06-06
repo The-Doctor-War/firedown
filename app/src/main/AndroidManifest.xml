@@ -22,6 +22,18 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="PackageVisibilityPolicy,QueryAllPackagesPermission" />
 
+    <!-- WebAuthn via Android Credential Manager (GeckoView WebAuthnCredentialManager,
+         the passkey path our source build uses instead of GMS FIDO2). A browser that
+         invokes Credential Manager ON BEHALF OF a website must hold
+         CREDENTIAL_MANAGER_SET_ORIGIN to call setOrigin(siteOrigin); without it
+         setOrigin throws SecurityException, which GeckoView swallows -> returns null
+         -> the passkey provider never prompts (symptom: Google shows "your device
+         will ask for fingerprint…" then nothing). QUERY_CANDIDATE_CREDENTIALS lets
+         prepareGetCredential see whether a passkey exists for the site. Both are
+         install-time (no runtime prompt). Fenix/IronFox declare these too. -->
+    <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_SET_ORIGIN" />
+    <uses-permission android:name="android.permission.CREDENTIAL_MANAGER_QUERY_CANDIDATE_CREDENTIALS" />
+
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false"/>

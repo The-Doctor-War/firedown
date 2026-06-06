@@ -336,24 +336,185 @@ if (window === window.top) {
     if (source.src) queue(source.src);
   }
 
+  // Tier-A passive media: a <video>/<audio> with a direct file src (not a
+  // blob:/MediaSource handle) declares the media URL right in the DOM, so we
+  // can capture it without the user pressing play. queue() filters non-http
+  // (so a blob: currentSrc is ignored), and the background reclassifies the
+  // .mp4/.m3u8 by extension into a media capture. currentSrc reflects the
+  // element's resolved source after <source> selection.
+  function reportMediaEl(el) {
+    if (!el) return;
+    const src = el.currentSrc || el.src || el.getAttribute('src');
+    if (src) queue(src);
+  }
+
   function scan(root) {
     if (!root || root.nodeType !== 1) return;
     if (root.tagName === 'IMG') reportImg(root);
     else if (root.tagName === 'SOURCE') reportSource(root);
+    else if (root.tagName === 'VIDEO' || root.tagName === 'AUDIO') reportMediaEl(root);
     if (root.querySelectorAll) {
       root.querySelectorAll('img').forEach(reportImg);
       root.querySelectorAll('source').forEach(reportSource);
+      root.querySelectorAll('video, audio').forEach(reportMediaEl);
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Passive embedded-media scrape (no playback required)
+  //
+  // Many sites inline the real progressive/HLS URL in the page source but only
+  // *fetch* it when the user presses play — so the wire (webRequest) source
+  // never fires and nothing is captured. The element scan above covers
+  // <video>/<source> with a direct src; this covers the two remaining shapes:
+  //
+  //   Tier A (declared, low noise): og:video* / twitter:player:stream meta
+  //     tags and JSON-LD VideoObject.contentUrl — each explicitly names "the
+  //     page's video".
+  //   Tier B (targeted): a media-extension URL inside an inline <script> that
+  //     sits next to a media-ish JSON/JS key (url/contentUrl/file/src/hls/…),
+  //     e.g. window.dataLayer.push({video:{url:"…mp4"}}). The key-proximity
+  //     requirement keeps us off the many unrelated absolute URLs in ad /
+  //     analytics blobs; the media extension itself already excludes most junk.
+  //
+  // Everything queued here rides the same images-detected path: the background
+  // reclassifies by extension into a media capture, HEAD-probes it for headers/
+  // cookies, applies the parser block-list (so parser-owned sites don't dupe),
+  // and the repository dedups against a later wire capture if the user does play.
+  // -------------------------------------------------------------------------
+  const MEDIA_EXT = 'mp4|m4v|mov|m3u8|m3u|mpd|webm|mkv|m4a|mp3|aac|flac|wav|opus|weba|ts';
+  // A media key (allow-listed) → quoted/bare media URL. Keys are the ones that
+  // in practice hold a playable URL; pairing the key with a media extension is
+  // what makes the blind script scan "targeted". `\\/` handling below covers
+  // URLs embedded as escaped JSON strings ("https:\/\/…").
+  const SCRIPT_MEDIA_RE = new RegExp(
+    '["\']?(?:contentUrl|playable_url(?:_quality_hd)?|playableUrl|playUrl|playurl|' +
+      'mediaUrl|videoUrl|manifestUrl|streamUrl|hlsUrl|dashUrl|src|source|file|url|hls|dash|stream)' +
+      '["\']?\\s*[:=]\\s*["\']' +
+      '((?:https?:)?\\\\?/\\\\?/[^"\'\\s]+?\\.(?:' + MEDIA_EXT + ')(?:\\?[^"\'\\s]*)?)["\']',
+    'gi'
+  );
+
+  const SCRIPT_SCAN_BUDGET = 4_000_000; // total chars of inline script scanned
+  const MAX_SCRIPT_MEDIA = 40;          // cap emitted URLs per scrape pass
+  const scrapedScripts = new WeakSet(); // each inline script scanned once
+
+  function unescapeUrl(u) {
+    // JSON-embedded URLs carry escaped slashes ("https:\/\/…"); a few also
+    // arrive protocol-relative ("//host/…"). Normalise both to an https URL so
+    // queue()'s ^https?: filter accepts them.
+    let s = u.replace(/\\\//g, '/');
+    if (s.startsWith('//')) s = 'https:' + s;
+    return s;
+  }
+
+  function scrapeMetaTags() {
+    // og:video / og:video:secure_url / twitter:player:stream — the standard
+    // "this page is a video" declarations. property= and name= are both used
+    // in the wild, so accept either.
+    const props = [
+      'og:video', 'og:video:url', 'og:video:secure_url',
+      'twitter:player:stream',
+    ];
+    for (const p of props) {
+      const el = document.querySelector(
+        `meta[property="${p}"], meta[name="${p}"]`
+      );
+      const content = el && el.getAttribute('content');
+      // og:video is often an embed *page* (text/html); only queue when it
+      // actually looks like a media file — otherwise the wire/HTML path owns it.
+      if (content && new RegExp('\\.(?:' + MEDIA_EXT + ')(?:[?#]|$)', 'i').test(content)) {
+        queue(content);
+      }
+    }
+  }
+
+  function scrapeJsonLdMedia() {
+    // JSON-LD VideoObject.contentUrl is the actual media file (embedUrl is a
+    // player page, so we skip it). Bounded, defensive parse — one bad block
+    // must not kill the rest.
+    const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+    let budget = 4000; // node walk cap, mirrors readVideoJsonLd's spirit
+    const visit = (node, depth) => {
+      if (!node || typeof node !== 'object' || depth > 8 || budget-- <= 0) return;
+      if (Array.isArray(node)) {
+        for (const it of node) visit(it, depth + 1);
+        return;
+      }
+      const t = node['@type'];
+      if ((t === 'VideoObject' || (Array.isArray(t) && t.includes('VideoObject')))
+          && typeof node.contentUrl === 'string') {
+        queue(node.contentUrl.trim());
+      }
+      for (const k in node) {
+        const v = node[k];
+        if (v && typeof v === 'object') visit(v, depth + 1);
+      }
+    };
+    for (const s of scripts) {
+      let data;
+      try { data = JSON.parse(s.textContent); } catch (_) { continue; }
+      visit(data, 0);
+    }
+  }
+
+  function scrapeInlineScripts() {
+    // Targeted Tier B: walk inline <script> text for media URLs that sit next
+    // to a media key. Bounded by a global char budget and a per-pass emit cap,
+    // and each script element is scanned at most once.
+    let budget = SCRIPT_SCAN_BUDGET;
+    let emitted = 0;
+    const scripts = document.querySelectorAll('script:not([src])');
+    for (const s of scripts) {
+      if (emitted >= MAX_SCRIPT_MEDIA || budget <= 0) break;
+      if (scrapedScripts.has(s)) continue;
+      scrapedScripts.add(s);
+      const text = s.textContent;
+      if (!text) continue;
+      // Cheap reject: skip scripts that mention no media extension at all.
+      if (!/\.(?:mp4|m4v|mov|m3u8|m3u|mpd|webm|mkv|m4a|mp3|aac|flac|wav|opus|weba|ts)\b/i.test(text)) {
+        continue;
+      }
+      const slice = text.length > budget ? text.slice(0, budget) : text;
+      budget -= slice.length;
+      SCRIPT_MEDIA_RE.lastIndex = 0;
+      let m;
+      while ((m = SCRIPT_MEDIA_RE.exec(slice)) !== null) {
+        const url = unescapeUrl(m[1]);
+        if (/^https?:/i.test(url)) {
+          queue(url);
+          if (++emitted >= MAX_SCRIPT_MEDIA) break;
+        }
+      }
+    }
+  }
+
+  function scrapeEmbeddedMedia() {
+    try { scrapeMetaTags(); } catch (_) {}
+    try { scrapeJsonLdMedia(); } catch (_) {}
+    try { scrapeInlineScripts(); } catch (_) {}
   }
 
   // Initial scan
   scan(document.documentElement);
 
-  // Re-scan at key lifecycle events
+  // Re-scan at key lifecycle events. The embedded-media scrape runs at
+  // DOMContentLoaded/load (not document_start) because the meta tags, JSON-LD
+  // and inline data blobs land during parse — and not on every mutation,
+  // since these SSR shapes are present at first load (the element-level scan
+  // below still covers SPA-injected <video> nodes via the MutationObserver).
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => scan(document.documentElement));
+    document.addEventListener('DOMContentLoaded', () => {
+      scan(document.documentElement);
+      scrapeEmbeddedMedia();
+    });
+  } else {
+    scrapeEmbeddedMedia();
   }
-  window.addEventListener('load', () => scan(document.documentElement));
+  window.addEventListener('load', () => {
+    scan(document.documentElement);
+    scrapeEmbeddedMedia();
+  });
 
   // Watch for DOM changes
   const mo = new MutationObserver((mutations) => {
@@ -364,6 +525,7 @@ if (window === window.top) {
         const t = m.target;
         if (t.tagName === 'IMG') reportImg(t);
         else if (t.tagName === 'SOURCE') reportSource(t);
+        else if (t.tagName === 'VIDEO' || t.tagName === 'AUDIO') reportMediaEl(t);
       }
     }
   });

@@ -1120,8 +1120,10 @@ async function buildTikTokHeaders() {
 // because two producers feed it the SAME video-item shape:
 //   * the wire filterResponseData listener (below) — the feed/grid feeds
 //     (FYP, profile, hashtag/challenge, /related/, /newtab/);
-//   * captureVideoDetailSSR in tiktok-content.js — single-video detail
-//     pages that SSR one item and fire no item_list XHR.
+//   * the main_frame document filterResponseData listener (below) — SSR
+//     items inlined in the page HTML with no item_list XHR: /@user/video/<id>
+//     detail pages, and the /foryou feed's SSR'd FIRST video (the item_list
+//     XHRs carry only the rest, so the wire filter never sees the first one).
 // origin-dedup (sendVariants → canonical origin) collapses any overlap.
 //
 // Why the wire path is filterResponseData and not a refetch or the old
@@ -1294,29 +1296,133 @@ async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
     log("TIKTOK", `batch done`, { sent: sentCount, skippedNoVideo, skippedNoVariants, total: items.length });
 }
 
-// DOM source — single-video detail pages (/@user/video/<id>). These SSR
-// one item into __UNIVERSAL_DATA_FOR_REHYDRATION__ and fire NO
-// /api/*item_list/ XHR, so the filter listener below can't see them;
-// tiktok-content.js reads the blob from the DOM and forwards it here
-// wrapped as a one-item itemList. (This was also the inject bridge, but
-// the page-world inject was retired once the filter path was validated —
-// the only remaining producer of this message is captureVideoDetailSSR.)
-browser.runtime.onMessage.addListener((msg, sender) => {
-    if (!msg || msg.kind !== "tiktok-itemlist") return;
-    log("TIKTOK", `detail-SSR -> handler`, {
-        url: (msg.url || "").slice(0, 100),
-        bodyLen: (msg.body || "").length,
-        tabId: sender.tab?.id ?? -1
-    });
-    handleTikTokItemList({
-        url: msg.url,
-        body: msg.body,
-        tabId: sender.tab?.id ?? -1,
-        pageUrl: sender.tab?.url
-    }).catch(e => {
-        log("TIKTOK", `handler error (detail-SSR)`, e.message);
-    });
-});
+// Document source — SSR-inlined items read from the main_frame HTML.
+// Some TikTok pages inline video data into the page document's
+// __UNIVERSAL_DATA_FOR_REHYDRATION__ blob and fire NO /api/*item_list/ XHR
+// for it, so the item_list filter below never sees them:
+//   * /@user/video/<id> detail pages — one item under the video-detail
+//     scope (__DEFAULT_SCOPE__["webapp.video-detail"|"webapp.reflow.video.detail"]).
+//   * /foryou (+ "/" home feed) — TikTok SSRs the FIRST feed video so it
+//     renders instantly; the recommend/preload item_list XHRs then carry
+//     only the REST of the swipe feed. Confirmed from a HAR of /foryou: the
+//     first-played media object id was in NEITHER item_list response, only
+//     in the document.
+// We read the DOCUMENT response (not the DOM) so the raw bytes are immune
+// to React stripping the rehydration <script> during hydration — the
+// Threads "read the network response, not the DOM" lesson. If TikTok's
+// document is itself SW-synthesized, the 0006 patch is what makes this
+// main_frame response tappable at all. (Cached/bfcache navigations serve no
+// network response so this won't fire — acceptable: the item was captured
+// on its first networked load, and SPA route changes use the item_list XHRs.)
+const TIKTOK_REHYDRATION_RE = /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/;
+const TIKTOK_FEED_PATH_RE = /^\/(foryou\/?)?$/;        // /foryou, /foryou/, /
+const TIKTOK_DETAIL_PATH_RE = /^\/@[^/]+\/video\/\d+/;
+const TIKTOK_SSR_ITEM_CAP = 30;                        // bound the feed walk
+
+// Strong structural signature — an object with a string id and a video
+// sub-object carrying a real address. Keeps the scope-agnostic walk off the
+// app/i18n/seo context the blob is mostly made of.
+function tiktokLooksLikeVideoItem(o) {
+    return o && typeof o === "object"
+        && typeof o.id === "string"
+        && o.video && typeof o.video === "object"
+        && (o.video.playAddr || o.video.downloadAddr || o.video.bitrateInfo);
+}
+// First matching item anywhere under obj (depth-capped). Detail pages.
+function tiktokFindVideoItem(obj, depth) {
+    if (!obj || typeof obj !== "object" || depth > 8) return null;
+    if (tiktokLooksLikeVideoItem(obj)) return obj;
+    if (Array.isArray(obj)) {
+        for (const v of obj) {
+            const f = tiktokFindVideoItem(v, depth + 1);
+            if (f) return f;
+        }
+    } else {
+        for (const k of Object.keys(obj)) {
+            const f = tiktokFindVideoItem(obj[k], depth + 1);
+            if (f) return f;
+        }
+    }
+    return null;
+}
+// ALL distinct items under obj (dedup by id, node-budgeted + capped). Feed
+// pages, where the blob may SSR more than one item. A matched item's own
+// children aren't separate videos, so don't descend into it.
+function tiktokCollectVideoItems(obj, depth, out, ids, seen, budget) {
+    if (out.length >= TIKTOK_SSR_ITEM_CAP || budget.n <= 0) return;
+    if (!obj || typeof obj !== "object" || depth > 12) return;
+    budget.n--;
+    if (seen.has(obj)) return;
+    seen.add(obj);
+    if (tiktokLooksLikeVideoItem(obj)) {
+        if (obj.id && !ids.has(obj.id)) { ids.add(obj.id); out.push(obj); }
+        return;
+    }
+    if (Array.isArray(obj)) {
+        for (const v of obj) tiktokCollectVideoItems(v, depth + 1, out, ids, seen, budget);
+    } else {
+        for (const k of Object.keys(obj)) tiktokCollectVideoItems(obj[k], depth + 1, out, ids, seen, budget);
+    }
+}
+// Pull the rehydration blob out of the document HTML and return its video
+// items: the single detail item, or every feed item (structural, since the
+// feed scope key varies by build).
+function extractTikTokSSRItems(html, pathname) {
+    const m = TIKTOK_REHYDRATION_RE.exec(html);
+    if (!m) return [];
+    let data;
+    try { data = JSON.parse(m[1]); }
+    catch (e) { log("TIKTOK", `ssr: rehydration JSON parse failed`, e.message); return []; }
+    const scope = data && data.__DEFAULT_SCOPE__;
+    if (TIKTOK_DETAIL_PATH_RE.test(pathname)) {
+        if (scope) {
+            for (const k of Object.keys(scope)) {
+                if (!/video[-.]detail/i.test(k)) continue;
+                const found = tiktokFindVideoItem(scope[k], 0);
+                if (found) return [found];
+            }
+        }
+        return [];
+    }
+    const out = [], ids = new Set(), seen = new WeakSet();
+    tiktokCollectVideoItems(scope || data, 0, out, ids, seen, { n: 200000 });
+    return out;
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    (details) => {
+        if (details.type !== "main_frame") return {};
+        let pathname;
+        try { pathname = new URL(details.url).pathname; }
+        catch (_) { return {}; }
+        if (!TIKTOK_FEED_PATH_RE.test(pathname) && !TIKTOK_DETAIL_PATH_RE.test(pathname)) return {};
+        log("TIKTOK", `ssr main_frame`, { url: details.url.slice(0, 120), tabId: details.tabId });
+        const created = filterResponseText(details, (html) => {
+            if (!html) {
+                log("TIKTOK", `ssr: empty document`, { path: pathname });
+                return;
+            }
+            const items = extractTikTokSSRItems(html, pathname);
+            if (items.length === 0) {
+                log("TIKTOK", `ssr: no items in document`, { path: pathname, htmlLen: html.length });
+                return;
+            }
+            log("TIKTOK", `ssr items -> handler`, { count: items.length, firstId: items[0] && items[0].id, path: pathname });
+            handleTikTokItemList({
+                url: details.url,
+                body: JSON.stringify({ itemList: items }),
+                tabId: details.tabId,
+                pageUrl: details.url
+            }).catch(e => log("TIKTOK", `handler error (ssr)`, e.message));
+        });
+        if (!created) {
+            log("TIKTOK", `ssr: filterResponseData unavailable`, { path: pathname });
+        }
+        return {};
+    },
+    { urls: ["*://www.tiktok.com/*", "*://m.tiktok.com/*"], types: ["main_frame"] },
+    ["blocking"]
+);
 
 // Wire source — passive filterResponseData on the item_list XHR/fetch.
 // Reads the page's OWN response byte-exact (filterResponseText writes

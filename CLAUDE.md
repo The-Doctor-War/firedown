@@ -119,23 +119,36 @@ by `SabrStrategy`. `VariantProcessor` skips ffprobe for SABR variants (empty
 media URLs) and trusts the JS codec/resolution/duration. Captions use the
 separate `timedtext` path.
 
-### TikTok — filterResponseData feeds + DOM detail-page SSR
+### TikTok — filterResponseData (item_list feeds + document SSR)
 
-TikTok capture has **two** producers, both feeding `handleTikTokItemList`:
+TikTok capture is entirely on the wire/document side — **two** `filterResponseData`
+producers in `background.js`, both feeding `handleTikTokItemList`. The content
+script does **no** capture (Take-A-Break dismissal only).
 
-1. **Wire — `filterResponseData`** (`background.js`): a passive `onBeforeRequest`
-   listener on `/api/*/item_list/` reads the page's OWN response **byte-exact**
+1. **item_list XHRs — `filterResponseData` on `/api/*/item_list/`**: a passive
+   `onBeforeRequest` listener reads the page's OWN response **byte-exact**
    (`filterResponseText` writes every chunk straight through — no refetch, so the
    single-use `msToken`/`X-Bogus` signing is untouched). Covers FYP, profile,
-   hashtag/challenge, `/related/`, and `/newtab/`. This is only viable because
-   the geckoview **ServiceWorker-visibility patch (0006)** makes SW-synthesized
+   hashtag/challenge, `/related/`, and `/newtab/`. Only viable because the
+   geckoview **ServiceWorker-visibility patch (0006)** makes SW-synthesized
    responses fire `http-on-examine-response`, so `filterResponseData` now reaches
    the SW-served `/related/item_list/` feeds that were once untappable.
-2. **DOM — `captureVideoDetailSSR`** (`tiktok-content.js`): single-video
-   `/@user/video/<id>` pages SSR one item into
-   `__UNIVERSAL_DATA_FOR_REHYDRATION__` and fire **no** item_list XHR, so there's
-   no response to tap. The content script reads the blob from the DOM and
-   forwards it through the same `tiktok-itemlist` message.
+2. **Document SSR — `filterResponseData` on the `main_frame` HTML**: some pages
+   inline video data into the document's `__UNIVERSAL_DATA_FOR_REHYDRATION__` blob
+   and fire **no** item_list XHR for it — `/@user/video/<id>` detail pages (one
+   item under `webapp.video-detail`/`webapp.reflow.video.detail`), and the
+   `/foryou` (+ `/`) feed, which SSRs the **first** video while the item_list XHRs
+   carry only the rest. `extractTikTokSSRItems` pulls the blob from the HTML
+   (`TIKTOK_REHYDRATION_RE`), takes the single detail item or walks the whole blob
+   structurally for all feed items (`tiktokCollectVideoItems` — the feed scope key
+   varies by build), and feeds them to `handleTikTokItemList`. **Read the document
+   RESPONSE, not the DOM** — raw bytes are immune to React stripping the
+   rehydration `<script>` during hydration (the Threads "read the network response,
+   not the DOM" lesson). If the document is SW-synthesized, 0006 is again what
+   makes it tappable. Confirmed from a `/foryou` HAR: the first-played media id was
+   in **neither** the recommend nor preload item_list — only in the document.
+   (Caveat: cached/bfcache navigations serve no network response so this won't
+   fire; acceptable — the item was captured on its first networked load.)
 
 **History — the page-world inject was retired.** TikTok capture *used* to depend
 on a page-world inject (`tiktok-inject.js`, a moz-extension WAR hooking
@@ -144,18 +157,19 @@ refetch tripping `msToken`/`X-Bogus` (N/A to a passive read), SW-served feeds
 being untappable (fixed by 0006), and a fear that the stream perturbation tripped
 the "Something went wrong" overlay. That last one **did not reproduce on-device**
 with byte-exact write-through, so the inject + its postMessage bridge were
-removed. Don't reintroduce the inject for the feeds — `filterResponseData` covers
-them. The content script remains **only** for the two DOM-bound jobs
-(`captureVideoDetailSSR` + Take-A-Break dismissal), which webRequest can't do.
+removed. The detail-page SSR read *also* started in the content script
+(`captureVideoDetailSSR`, DOM) but moved to the `main_frame` document filter (2.)
+when the feed-first-video gap surfaced — one mechanism, immune to hydration
+timing. Don't reintroduce the inject, and don't move SSR reading back to the DOM.
 
-- **The filter PAT must allow sub-segments.** A hashtag page fires
+- **The item_list PAT must allow sub-segments.** A hashtag page fires
   `/api/challenge/item_list/?…` AND `/api/challenge/item_list/newtab/?…`; the
   regex is `\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?` so the `/newtab/` feed
   (≈half the videos) isn't dropped.
 - **Tag/challenge pages SSR no video data** (the rehydration blob is only
   app/i18n/seo context) — the feed is client-rendered via the item_list XHRs, so
-  the filter listener is the only source. Only `/@user/video/<id>` *detail* pages
-  SSR a single item (`captureVideoDetailSSR`).
+  the item_list listener is the only source there. The `main_frame` SSR listener
+  only runs on the detail (`/@user/video/<id>`) and feed (`/foryou`, `/`) paths.
 - **The anti-bot throttle is the real gotcha.** TikTok withholds the item_list
   XHRs entirely (the `Take_A_Break` reminder shows, only `/api/preload/` fires)
   unless the page's **fingerprint stays unstable**. Globally that's

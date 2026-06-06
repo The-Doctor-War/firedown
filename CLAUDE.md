@@ -397,6 +397,52 @@ Headers (incl. any backfilled `Referer`) flow from the capture layer
 (`webrequests/requests.js` for the generic catcher, or a parser's
 `requestHeaders`) into both paths via `context.getHeaders()`.
 
+### Capture-layer headers & cookies (how a re-download authenticates)
+
+A captured media URL is re-fetched later by the native downloader, so it must
+carry the headers + cookies the browser's original request had or the CDN 403s
+it. How each is obtained (current architecture):
+
+- **Request headers — `webRequest` is the backbone.** `requests.js` listens on
+  `onSendHeaders` (with `['requestHeaders']`) + `onHeadersReceived` and **caches
+  the request headers keyed by URL** (`cacheHeaders`/`getCachedHeaders`). When a
+  media URL is emitted, its cached headers ride along on the `sendNative` message.
+  Entries are tagged **page-context vs extension-context** (`fromExtensionContext`):
+  headers from a request the *extension itself* issued get `Origin`/`Referer`/
+  `Sec-Fetch-*` **sanitized** (`sanitizeHeadersForPage`) so we don't leak the
+  moz-extension origin; page-context headers are used as-is. `Referer` is
+  backfilled from the page URL when absent.
+- **Cookies — `browser.cookies.getAll`, NOT `document.cookie`.** Session/auth
+  cookies are usually `HttpOnly`, invisible to page JS. `cookies.js`
+  `handleCookieRequest` answers the native `getCookiesForUrl` message by calling
+  `browser.cookies.getAll({url})` (privileged → **includes HttpOnly**) and
+  returns a built `Cookie` header string. So cookies are pulled from the browser
+  jar on the native side's request, not scraped from the page.
+- **Content-script-discovered URLs** (e.g. a `<video>` `src` the catcher didn't
+  see on the wire) have no cached headers, so `requests.js` does a `HEAD`
+  `fetch(url, {credentials:'include', referrer: tab.url})` to **populate the
+  header cache via `onSendHeaders`**, then forwards the (sanitized) result.
+
+The captured header set + cookie are reused for the whole stream — for HLS/DASH,
+ffmpeg propagates them to every sub-request (master/playlist/segment/key); see
+"Per-site request quirks" below.
+
+### MSE / `blob:` players are captured at the segment-request level
+
+A `blob:` URL on a `<video>` is just a handle to a `MediaSource`; it's never the
+download target. But MSE/HLS/DASH players still `fetch`/XHR their manifest +
+segments over HTTP, so those are **ordinary network requests the generic catcher
+already sees** (URL + headers via `webRequest`, cookies via the API above,
+metadata via the `metadatareader` probe). So there is **no `blob:`-specific
+capture path** — network-level capture is the backbone, and an MSE player is just
+its segment requests. The cases `webRequest` structurally *can't* see, which is
+why per-site **page-world injects** exist (TikTok, Bilibili), are: ServiceWorker-
+*synthesized* responses (the inject's `fetch`/XHR hook runs before the SW),
+segments assembled/decrypted in JS with no per-segment network fetch, and
+single-use/signed URLs that capture fine but can't be re-fetched (there you'd
+need the bytes, not the URL). Reach for an inject only for those; the catcher
+covers the rest.
+
 ### Manifest vs progressive — declared, never URL-sniffed
 
 `DownloadTask.selectStrategy` routes from the entity: separate `audioUrl` →

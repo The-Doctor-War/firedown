@@ -162,6 +162,18 @@ dependencies {
 
     implementation "org.mozilla.geckoview:geckoview-default:${geckoviewVersion}"
 
+    // GeckoView's own dependency, lost because our local geckoview-default POM has
+    // no <dependencies> (Mozilla's POM declared it). GeckoRuntime.init ->
+    // DebugConfig.fromFile parses a YAML debug config at startup on debuggable
+    // builds via SnakeYAML; without it the app crashes with
+    // NoClassDefFoundError: org.yaml.snakeyaml.LoaderOptions. Version matches
+    // GeckoView's build.gradle (org.yaml:snakeyaml:2.2). GeckoView's other deps
+    // (androidx.annotation/collection/core/lifecycle) already resolve transitively
+    // via the app's existing AndroidX libs; play-services-fido is unused (patch
+    // 0001 routes WebAuthn through Credential Manager), and exoplayer2 isn't in the
+    // geckoview-lite build.
+    implementation "org.yaml:snakeyaml:2.2"
+
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 
     implementation "androidx.biometric:biometric:1.1.0"
@@ -190,12 +202,15 @@ dependencies {
     // official GeckoView POM; our locally-built geckoview-default POM carries no
     // <dependencies>, so without this the version drops to ~1.13 (what appcompat/
     // material pull), which lacks WindowCompat.enableEdgeToEdge(Window) and breaks
-    // BaseActivity. 1.16.0 was NOT enough (verified on device: the single-Window
-    // enableEdgeToEdge overload isn't in 1.16.0); pin the latest stable, which has
-    // it. Keep this until/unless the local GeckoView POM publishes its transitive
-    // deps. (androidx publishes version-alignment constraints, so core-ktx etc.
-    // follow this version automatically.)
-    implementation 'androidx.core:core:1.19.0'
+    // BaseActivity. Version matters two ways: 1.16.0 lacks the single-Window
+    // enableEdgeToEdge overload, while 1.18.0 needs compileSdk 36.1 and 1.19.0
+    // needs compileSdk 37 — both above this app's compileSdk 36. 1.17.0 is the
+    // sweet spot: it requires only compileSdk 36 AND has enableEdgeToEdge(Window)
+    // (it's the API-36 androidx.core that Mozilla's GeckoView used to pull, which
+    // is why this compiled before). If you raise compileSdk, you can raise this
+    // too. Keep it until/unless the local GeckoView POM publishes its transitive
+    // deps. (androidx version-alignment constraints carry core-ktx along.)
+    implementation 'androidx.core:core:1.17.0'
 
     //nav components
     implementation 'androidx.navigation:navigation-fragment:2.9.8'

@@ -76,6 +76,19 @@ android {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         noCompress 'ja'
     }
+    // Strip GeckoView's crash-reporter native libs from the APK. The GeckoView AAR
+    // bundles libcrashhelper.so + libcrashtools.so even though we build with
+    // --disable-crashreporter (verified via `unzip -l` of the AAR — the flag does
+    // NOT drop them; ~10 MB on arm64). We ship no crash reporter (no-telemetry app),
+    // so exclude them. MUST be `jniLibs.excludes` at the `android {}` level: the old
+    // top-level `exclude 'lib/*/…'` form (and anything nested in defaultConfig)
+    // targets Java resources, not native .so files, on AGP 8 — it silently did
+    // nothing, which is why the libs kept shipping.
+    packagingOptions {
+        jniLibs {
+            excludes += ['**/libcrashhelper.so', '**/libcrashtools.so']
+        }
+    }
     // By default the android plugins ignores folders that start with `_`, but
     // we need those in web extensions.
     // See also:

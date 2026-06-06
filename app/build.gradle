@@ -188,11 +188,14 @@ dependencies {
 
     // Pin androidx.core explicitly. It used to arrive transitively via Mozilla's
     // official GeckoView POM; our locally-built geckoview-default POM carries no
-    // <dependencies>, so without this the version drops to whatever appcompat/
-    // material pull — which predates WindowCompat.enableEdgeToEdge(Window) (added
-    // in core 1.16.0) and breaks BaseActivity. Keep this until/unless the local
-    // GeckoView POM publishes its transitive deps.
-    implementation 'androidx.core:core:1.16.0'
+    // <dependencies>, so without this the version drops to ~1.13 (what appcompat/
+    // material pull), which lacks WindowCompat.enableEdgeToEdge(Window) and breaks
+    // BaseActivity. 1.16.0 was NOT enough (verified on device: the single-Window
+    // enableEdgeToEdge overload isn't in 1.16.0); pin the latest stable, which has
+    // it. Keep this until/unless the local GeckoView POM publishes its transitive
+    // deps. (androidx publishes version-alignment constraints, so core-ktx etc.
+    // follow this version automatically.)
+    implementation 'androidx.core:core:1.19.0'
 
     //nav components
     implementation 'androidx.navigation:navigation-fragment:2.9.8'

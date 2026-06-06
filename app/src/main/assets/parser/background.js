@@ -1116,6 +1116,33 @@ async function buildTikTokHeaders() {
     ];
 }
 
+// TikTok media URLs embed a stable per-video object id in their path:
+//   …/video/tos/<region>/<bucket>/<STORAGE_ID>/…?<signing tokens>
+// It is the SAME across quality, CDN mirror (v16/v19/…) and signing token, so
+// it's a reliable per-video dedup key — unlike the full URL, which rotates.
+const TIKTOK_SID_RE = /\/video\/tos\/[^/]+\/[^/]+\/([^/?#]+)/;
+function tiktokStorageId(url) {
+    const m = TIKTOK_SID_RE.exec(url || "");
+    return m ? m[1] : null;
+}
+
+// Storage ids the parser has already captured (rich, via item_list / SSR). The
+// media-fallback listener uses this to emit ONLY videos the parser never saw —
+// the cache-served first /foryou video, whose metadata is off-wire — while
+// skipping the swipe videos the parser already owns (so no duplicates). This is
+// why we can keep the regex block on webapp-prime (no generic-catcher dup) and
+// still get the one missing video. Capped FIFO; ids are globally unique so a
+// flat cross-tab set is fine.
+const TIKTOK_SID_CAP = 1000;
+const tiktokCapturedSids = new Set();
+function tiktokMarkSid(sid) {
+    if (!sid || tiktokCapturedSids.has(sid)) return;
+    if (tiktokCapturedSids.size >= TIKTOK_SID_CAP) {
+        tiktokCapturedSids.delete(tiktokCapturedSids.values().next().value);
+    }
+    tiktokCapturedSids.add(sid);
+}
+
 // Processes one item_list JSON body, whatever its source. Source-agnostic
 // because two producers feed it the SAME video-item shape:
 //   * the wire filterResponseData listener (below) — the feed/grid feeds
@@ -1263,6 +1290,10 @@ async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
             });
         }
         if (variants.length === 0) { skippedNoVariants++; continue; }
+
+        // Record this video's storage id(s) so the media-fallback listener
+        // (below) treats it as already-captured and never re-emits it bare.
+        for (const vv of variants) tiktokMarkSid(tiktokStorageId(vv.url));
 
         log("TIKTOK", `item -> sendVariants`, {
             id: item.id,
@@ -1498,6 +1529,51 @@ browser.webRequest.onBeforeRequest.addListener(
     },
     { urls: ["*://www.tiktok.com/*", "*://m.tiktok.com/*"], types: ["xmlhttprequest"] },
     ["blocking"]
+);
+
+// Media fallback — the cache-served first /foryou video. Its metadata is
+// off-wire (not in the document SSR, not in any item_list XHR — confirmed from a
+// HAR: the first-played storage id was in NEITHER feed), so neither the item_list
+// filter nor the document read can capture it. But its media BYTES are fetched
+// from the webapp-prime CDN like every video, so we watch those fetches and emit
+// a media capture for any whose storage id the parser did NOT already capture.
+//
+// The storage-id gate is the whole point: it lets exactly the uncaptured video
+// through while skipping the swipe videos the parser already owns — which is why
+// we keep the regex block on webapp-prime (no generic-catcher duplicate) instead
+// of just unblocking it (the generic catcher can't tell captured from not, so it
+// would dup every swipe video). The emitted capture is bare (no title/author —
+// that metadata never crossed the wire) but type:"media" makes native probe it
+// for duration/resolution + a thumbnail, so it's a usable, downloadable entry.
+//
+// Gate on a 2xx (onHeadersReceived) so we capture a URL that actually served —
+// TikTok issues a v16 403 before the v19 200 for the same video. Marking the sid
+// on first capture makes the subsequent range fetches (206) no-ops.
+async function captureTikTokMediaFallback(details) {
+    const sid = tiktokStorageId(details.url);
+    if (!sid) return;
+    if (tiktokCapturedSids.has(sid)) return;   // parser already has it, or already emitted
+    tiktokMarkSid(sid);                          // mark before the await — no double-emit race
+    log("TIKTOK", `media-fallback capture (uncaptured sid)`,
+        { sid: sid.slice(0, 20), url: details.url.slice(0, 90), tabId: details.tabId });
+    const headers = await buildTikTokHeaders();
+    sendNative({
+        url: details.url,
+        type: "media",
+        origin: `https://www.tiktok.com/video/${sid}`,
+        tabId: details.tabId,
+        request: details.requestId,
+        requestHeaders: headers
+    });
+}
+browser.webRequest.onHeadersReceived.addListener(
+    (details) => {
+        if (details.statusCode !== 200 && details.statusCode !== 206) return {};
+        captureTikTokMediaFallback(details).catch(e => log("TIKTOK", `media-fallback error`, e.message));
+        return {};
+    },
+    { urls: ["*://*.tiktok.com/video/*"], types: ["media", "xmlhttprequest", "other"] },
+    []
 );
 
 // ============================================================================

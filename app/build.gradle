@@ -172,17 +172,7 @@ dependencies {
     // SnakeYAML: GeckoRuntime.init -> DebugConfig.fromFile parses a YAML debug
     // config at startup on debuggable builds; without it: NoClassDefFoundError
     // org.yaml.snakeyaml.LoaderOptions.
-    implementation "org.yaml:snakeyaml:2.2"
-    // NO play-services-fido: GeckoView patch 0007 (firedown-geckoview) removes the
-    // GMS FIDO runtime dependency entirely — SUPPORTED_ALGORITHMS is lazy so
-    // WebAuthnTokenManager loads without it, and the live GMS paths are guarded out,
-    // so the class never touches GMS at runtime (WebAuthn = Credential Manager only).
-    // GeckoView builds it `compileOnly`, so the AAR bundles no Google FIDO classes;
-    // adding the dep back here would re-bundle the Google binary we removed. REQUIRES
-    // the 0007 GeckoView build — against an older AAR (no 0007) this WILL crash at
-    // WebAuthnTokenManager.<clinit> (rebuild GeckoView first). The release-R8
-    // `-dontwarn com.google.android.gms.fido.**/.tasks.**` in proguard-rules.pro
-    // stays: GeckoView's classes.jar still contains the (now dead) GMS references.
+    implementation "org.yaml:snakeyaml:2.6"
 
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 

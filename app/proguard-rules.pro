@@ -27,6 +27,14 @@
 -dontwarn java.awt.**
 -dontwarn java.beans.**
 
+# GeckoView's WebAuthnTokenManager references the GMS FIDO2 / Tasks APIs, but we
+# deliberately don't ship play-services-fido: patched GeckoView (firedown-geckoview
+# patch 0001) routes WebAuthn through Android Credential Manager, so the GMS FIDO
+# code path is dead. Debug builds skip R8 and tolerate the missing classes; release
+# R8 errors on the dangling references. Tell R8 they're intentionally absent.
+-dontwarn com.google.android.gms.fido.**
+-dontwarn com.google.android.gms.tasks.**
+
 -keep class java8.** { *; }
 -dontwarn java8.**
 

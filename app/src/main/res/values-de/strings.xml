@@ -305,7 +305,7 @@
     <string name="security_blocked_in_this_page">Auf dieser Seite blockiert</string>
     <string name="select_all">Alle auswählen</string>
     <string name="select_all_not">Alle abwählen</string>
-    <string name="separator">-</string>
+    <string name="separator">·</string>
     <string name="settings_about">Über</string>
     <string name="settings_autofill_active">System-Autofill ist aktiv. Tippen zum Ändern.</string>
     <string name="settings_autofill_none_configured">Kein Autofill-Dienst konfiguriert. Tippen zum Einrichten.</string>

@@ -303,7 +303,7 @@
     <string name="security_blocked_in_this_page">このページでブロック</string>
     <string name="select_all">すべて選択</string>
     <string name="select_all_not">すべての選択を解除</string>
-    <string name="separator">-</string>
+    <string name="separator">·</string>
     <string name="settings_about">バージョン情報</string>
     <string name="settings_autofill_active">システムの自動入力が有効です。タップして変更します。</string>
     <string name="settings_autofill_none_configured">自動入力サービスが設定されていません。タップして設定します。</string>

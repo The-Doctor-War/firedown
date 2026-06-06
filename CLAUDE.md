@@ -435,13 +435,16 @@ The generic catcher has **two** sources, because `webRequest` alone misses media
    from cache, before the listener attached, or that lives in a DOM attribute
    without a fresh request.
 2. **DOM — content script** (`content-script.js`): scrapes the page for media the
-   wire never showed. It reports `<img>` / `<source>` `src`/`srcset` URLs (with a
-   `MutationObserver` on `src`/`srcset` for dynamically-added ones) to the
-   background, and **separately scrapes JSON-LD `VideoObject` + `og:`/`twitter:`
-   metadata** to enrich captures with accurate title/description (on video SPAs
-   the `<title>`/`og:title` are usually the generic site name, so JSON-LD/
-   `og:video:title` rank higher). A DOM-discovered URL has **no cached headers**,
-   so `requests.js` does a `HEAD` `fetch(url, {credentials:'include',
+   wire never showed. It reports `<img>` / `<source>` `src`/`srcset` **and
+   `<video>`/`<audio>` `src`/`currentSrc`** URLs (with a `MutationObserver` on
+   `src`/`srcset` for dynamically-added ones) to the background, **passively
+   scrapes embedded media URLs from the page source** (see "Passive
+   embedded-media scrape" below — this is what captures a video before the user
+   presses play), and **separately scrapes JSON-LD `VideoObject` + `og:`/
+   `twitter:` metadata** to enrich captures with accurate title/description (on
+   video SPAs the `<title>`/`og:title` are usually the generic site name, so
+   JSON-LD/`og:video:title` rank higher). A DOM-discovered URL has **no cached
+   headers**, so `requests.js` does a `HEAD` `fetch(url, {credentials:'include',
    referrer: tab.url})` to populate the header cache via `onSendHeaders`, then
    forwards the (sanitized) result through the same emit path. So: content script
    *finds* it, the HEAD probe *authenticates* it.
@@ -458,6 +461,51 @@ responses (the inject's `fetch`/XHR hook runs before the SW), segments assembled
 decrypted in JS with no network fetch, and single-use/signed URLs that capture
 fine but can't be re-fetched (there you need the bytes, not the URL). Reach for an
 inject only for those.
+
+### Passive embedded-media scrape (capture without playback)
+
+Many sites **inline the real progressive/HLS URL in the page source but only
+*fetch* it on play** — so the wire source never fires and nothing is captured
+until the user presses play. Example: El Periódico Mediterráneo
+(`elperiodicomediterraneo.com`) ships the mp4 only inside
+`window.dataLayer.push({video:{url:"…mp4"}})` — no `<source>` element, no
+`og:video`, no playurl XHR. The content script's `scrapeEmbeddedMedia()` closes
+this gap **passively** (no play needed), in two tiers:
+
+- **Tier A (declared, low noise):** `<video>`/`<audio>` direct `src`,
+  `og:video`/`og:video:secure_url`/`twitter:player:stream` meta tags (only when
+  the content is itself a media-extension URL — an og:video that points at an
+  embed *page* is left to the wire/HTML path), and JSON-LD
+  `VideoObject.contentUrl` (`embedUrl` is a player page — skipped).
+- **Tier B (targeted):** a media-extension URL inside an inline `<script>` that
+  sits **next to a media-ish key** (`url`/`contentUrl`/`file`/`src`/`hls`/`dash`/
+  `playable_url`/… — `SCRIPT_MEDIA_RE`). The key-proximity requirement is what
+  makes the blind script scan targeted: it keeps us off the many unrelated
+  absolute URLs in ad/analytics blobs, while the media extension itself already
+  excludes most junk (a canonical page URL or poster `.jpg` next to `"url":`
+  won't match). Handles escaped JSON slashes (`https:\/\/…`) and
+  protocol-relative (`//host/…`) URLs. Bounded: a 4 MB total char budget, a
+  40-URL/pass emit cap, and each inline script scanned at most once (`WeakSet`).
+
+It runs at **DOMContentLoaded/load**, not `document_start` (the data lands during
+parse) and **not on every mutation** (these SSR shapes are present at first load;
+the element-level `scan()` + `MutationObserver` still cover SPA-injected
+`<video>` nodes). Everything queued rides the **same `images-detected` path** as
+DOM images: the background **reclassifies by extension** into a media capture
+(`classifyByUrl`/`getTypeFromUrl`), **HEAD-probes** for headers/cookies, applies
+the **parser block-list** (`matchInRegex` — so a parser-owned site doesn't get a
+duplicate bare capture; the cardinal rule still holds), and the **repository
+dedups** against a later wire capture if the user *does* play. So no new
+transport, no Java changes — discovery only. On by default; the precision/noise
+trade-off is held by the Tier-B key-proximity filter, not a setting.
+
+This is **not** the "don't read inline `<script>` data from the DOM" Threads
+anti-pattern: that warning is specifically about **Meta's bootstrap**
+(`<script data-sjs>`), which `ServerJSPayloadListener.process` *consumes the
+instant it parses* — by the time a content-script observer runs, the blob is
+gone. Ordinary SSR data blobs (`dataLayer`, Redux state, JSON-LD) are **not**
+self-consumed and remain readable at DOMContentLoaded, which is why the passive
+scrape works on them. Meta sites have dedicated parsers anyway.
 
 ### Manifest vs progressive — declared, never URL-sniffed
 

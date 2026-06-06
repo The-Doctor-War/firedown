@@ -69,14 +69,15 @@
 
             <!-- Metadata row, one consistent hierarchy for every media kind:
                  a decorated mime CHIP (identity) followed by subtle scrim TEXT
-                 for its single key fact — duration for audio/video, dimensions
-                 for image/SVG — then a primary-tinted CC affordance when
-                 captions exist. Clustered at the start (no weighted spacer), so
-                 a video reads "[VIDEO] 19:34 · CC 2" and an image reads
-                 "[IMAGE] 73×73". Only the mime tag carries a background, which
-                 mirrors list mode; attributes stay quiet so the photo leads.
-                 Quality/Adaptive stays out of the tile (it overflows the narrow
-                 cell; it's in the download sheet). -->
+                 for its key facts — "quality · duration" for video, duration
+                 for audio, dimensions for image/SVG — then a primary-tinted CC
+                 affordance when captions exist. Clustered at the start (no
+                 weighted spacer), so a video reads "[VIDEO] 1080p · 19:34 · CC 2",
+                 an audio reads "[AUDIO] 19:34", and an image reads "[IMAGE] 73×73".
+                 Only the mime tag carries a background, which mirrors list mode;
+                 attributes stay quiet so the photo leads. The mime chip's
+                 marginEnd offsets whichever fact is first; the "·" separators are
+                 bound only between two visible facts. -->
             <LinearLayout
                 android:id="@+id/tag_row"
                 android:layout_width="match_parent"
@@ -89,37 +90,19 @@
                     style="@style/MimePrimary"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginEnd="6dp"
                     android:paddingLeft="4dp"
                     android:paddingRight="4dp"
                     tools:text="VIDEO" />
 
-                <!-- Duration (AV) / dimensions (image, SVG) — the item's single
-                     key fact. Subtle scrim text, NOT a chip: only the mime tag
-                     is decorated (it's the identity, and maps to the filter
-                     rail), matching list mode. Attributes recede so the photo
-                     and the type lead. Duration and dimensions share the slot —
-                     never both on one tile. -->
-                <TextView
-                    android:id="@+id/tag_duration"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:singleLine="true"
-                    android:textSize="11.5sp"
-                    android:textColor="#E0FFFFFF"
-                    android:shadowColor="#80000000"
-                    android:shadowDx="0"
-                    android:shadowDy="1"
-                    android:shadowRadius="2"
-                    android:visibility="gone"
-                    tools:text="53:25"
-                    tools:visibility="visible" />
-
+                <!-- Quality (video, e.g. "1080p") / dimensions (image, SVG) /
+                     language (subtitle). Subtle scrim text, NOT a chip — only the
+                     mime tag is decorated. Leads the fact cluster; the mime chip's
+                     marginEnd provides its left gap. -->
                 <TextView
                     android:id="@+id/tag_quality"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
                     android:ellipsize="end"
                     android:maxLines="1"
                     android:textSize="11.5sp"
@@ -129,7 +112,44 @@
                     android:shadowDy="1"
                     android:shadowRadius="2"
                     android:visibility="gone"
-                    tools:text="320 × 180"
+                    tools:text="1080p"
+                    tools:visibility="visible" />
+
+                <!-- "·" between quality and duration — shown by the adapter only
+                     when BOTH are visible (mirrors list mode). -->
+                <TextView
+                    android:id="@+id/tag_separator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="5dp"
+                    android:text="@string/separator"
+                    android:textSize="11sp"
+                    android:textColor="#73FFFFFF"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    android:visibility="gone"
+                    tools:visibility="visible" />
+
+                <!-- Duration (audio/video) — the item's key time fact. When it
+                     follows the separator the gap comes from there; when it's the
+                     only fact (audio) the mime chip's marginEnd provides the gap,
+                     so no marginStart here. Duration and dimensions never co-occur. -->
+                <TextView
+                    android:id="@+id/tag_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:textSize="11.5sp"
+                    android:textColor="#E0FFFFFF"
+                    android:shadowColor="#80000000"
+                    android:shadowDx="0"
+                    android:shadowDy="1"
+                    android:shadowRadius="2"
+                    android:visibility="gone"
+                    tools:text="53:25"
                     tools:visibility="visible" />
 
                 <!-- "·" before CC — shown by the adapter only when a preceding

@@ -283,9 +283,10 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
                 break;
 
             case FFmpegTagEntity.TYPE_QUALITY:
-                // Video quality (e.g. "1080p") — list only; it overflows the
-                // narrow grid cell and quality lives in the download sheet.
-                if (holder.tagQuality != null && holder.isList && !TextUtils.isEmpty(tag.getText())) {
+                // Video quality (e.g. "1080p") — shown in BOTH layouts. In the
+                // grid it leads the meta row as "[mime] quality · duration"
+                // (the separator is bound only when duration is also present).
+                if (holder.tagQuality != null && !TextUtils.isEmpty(tag.getText())) {
                     holder.tagQuality.setText(tag.getText());
                     holder.tagQuality.setVisibility(View.VISIBLE);
                 }

@@ -122,8 +122,10 @@ separate `timedtext` path.
 ### TikTok — filterResponseData (item_list feeds + document SSR)
 
 TikTok capture is entirely on the wire/document side — **two** `filterResponseData`
-producers in `background.js`, both feeding `handleTikTokItemList`. The content
-script does **no** capture (Take-A-Break dismissal only).
+producers in `background.js`, both feeding `handleTikTokItemList`. There is **no
+TikTok content script** (it was deleted — `filterResponseData` covers capture, and
+the Take-A-Break dismissal it used to do was dropped with it; see the throttle
+note below).
 
 1. **item_list XHRs — `filterResponseData` on `/api/*/item_list/`**: a passive
    `onBeforeRequest` listener reads the page's OWN response **byte-exact**
@@ -185,7 +187,7 @@ Don't reintroduce the inject, and don't move SSR reading back to the DOM.
 - **Tag/challenge pages SSR no video data** (the rehydration blob is only
   app/i18n/seo context) — the feed is client-rendered via the item_list XHRs, so
   the item_list listener is the only source there. The `main_frame` SSR listener
-  only runs on the detail (`/@user/video/<id>`) and feed (`/foryou`, `/`) paths.
+  runs on the detail (`/@user/video/<id>`) paths only.
 - **The anti-bot throttle is the real gotcha.** TikTok withholds the item_list
   XHRs entirely (the `Take_A_Break` reminder shows, only `/api/preload/` fires)
   unless the page's **fingerprint stays unstable**. Globally that's
@@ -206,7 +208,12 @@ Don't reintroduce the inject, and don't move SSR reading back to the DOM.
   — the throttle is server-side, not a response-visibility problem. If TikTok
   capture regresses to only `/api/preload/`, this removal is the first suspect;
   the fix is a *randomizing* (never blocking) FPP vector scoped to tiktok.com,
-  not global RFP and not `+AllTargets`.
+  not global RFP and not `+AllTargets`. **The `Take_A_Break` overlay is also no
+  longer auto-dismissed** — the content script that did it was deleted (capture is
+  all `filterResponseData` now). The overlay visually suppresses `/api/*` until
+  closed, so if it mounts, feeds pause until the user dismisses it manually. If
+  this becomes a problem, prefer a DOM-only dismissal — a content script that does
+  *only* that, not capture — over reviving any page-world inject.
 
 ### Capture dedup
 

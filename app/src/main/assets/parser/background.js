@@ -1314,7 +1314,12 @@ async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
 // main_frame response tappable at all. (Cached/bfcache navigations serve no
 // network response so this won't fire — acceptable: the item was captured
 // on its first networked load, and SPA route changes use the item_list XHRs.)
-const TIKTOK_REHYDRATION_RE = /<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__"[^>]*>([\s\S]*?)<\/script>/;
+// Attribute-order-agnostic: TikTok emits the id either first or after
+// type="application/json", and quoting can vary — so match any <script> whose
+// attributes include id=…__UNIVERSAL_DATA_FOR_REHYDRATION__… rather than
+// requiring id to lead. JSON escapes `<`, so the non-greedy body can't end early
+// on a stray </script>.
+const TIKTOK_REHYDRATION_RE = /<script\b[^>]*\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\s\S]*?)<\/script>/;
 const TIKTOK_FEED_PATH_RE = /^\/(foryou\/?)?$/;        // /foryou, /foryou/, /
 const TIKTOK_DETAIL_PATH_RE = /^\/@[^/]+\/video\/\d+/;
 const TIKTOK_SSR_ITEM_CAP = 30;                        // bound the feed walk
@@ -1369,7 +1374,16 @@ function tiktokCollectVideoItems(obj, depth, out, ids, seen, budget) {
 // feed scope key varies by build).
 function extractTikTokSSRItems(html, pathname) {
     const m = TIKTOK_REHYDRATION_RE.exec(html);
-    if (!m) return [];
+    if (!m) {
+        // Distinguish a regex miss from a genuinely blob-less document: is the
+        // marker string even present? markerPresent:true here would mean the
+        // tag exists but our pattern didn't match it (tighten the regex);
+        // markerPresent:false means TikTok SSR'd no rehydration blob at all
+        // (this load's first video, if any, must come from an item_list XHR).
+        const markerPresent = html.indexOf("__UNIVERSAL_DATA_FOR_REHYDRATION__") >= 0;
+        log("TIKTOK", `ssr: rehydration tag not matched`, { markerPresent, htmlLen: html.length });
+        return [];
+    }
     let data;
     try { data = JSON.parse(m[1]); }
     catch (e) { log("TIKTOK", `ssr: rehydration JSON parse failed`, e.message); return []; }
@@ -1382,10 +1396,19 @@ function extractTikTokSSRItems(html, pathname) {
                 if (found) return [found];
             }
         }
+        log("TIKTOK", `ssr: detail blob has no video item`,
+            { scopeKeys: scope ? Object.keys(scope).slice(0, 20) : null });
         return [];
     }
     const out = [], ids = new Set(), seen = new WeakSet();
     tiktokCollectVideoItems(scope || data, 0, out, ids, seen, { n: 200000 });
+    if (out.length === 0) {
+        // The blob parsed but held no video-shaped item. Dump the scope keys so
+        // we can see whether a recommend/feed scope is present (and named what)
+        // or whether the feed is purely client-rendered (only app/i18n context).
+        log("TIKTOK", `ssr: feed blob has no video items`,
+            { scopeKeys: scope ? Object.keys(scope).slice(0, 25) : Object.keys(data || {}).slice(0, 25) });
+    }
     return out;
 }
 

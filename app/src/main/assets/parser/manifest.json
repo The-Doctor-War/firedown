@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "5.16",
+  "version": "5.17",
   "browser_specific_settings": {
     "gecko": {
       "id": "parser@solarized.dev"
@@ -48,7 +48,6 @@
     }
   ],
   "web_accessible_resources": [
-    "tiktok-inject.js",
     "bilibili-tv-inject.js"
   ],
   "permissions": [

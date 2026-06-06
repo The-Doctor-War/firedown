@@ -1,39 +1,30 @@
-// Bridge between TikTok's page-world fetch/XHR and the parser
-// extension's background.
+// TikTok content script — DOM-bound capture jobs only.
 //
-// Why a page-world hook and not webRequest.filterResponseData?
-//   * filterResponseData perturbs the response stream enough that
-//     TikTok's React app shows a "something went wrong" overlay,
-//     even with byte-exact pass-through.
-//   * Refetching the api URL from the extension trips TikTok's
-//     single-use msToken / X-Bogus signature → stripped response.
-//   * The ServiceWorker on www.tiktok.com intercepts /related/item_list/
-//     and filterResponseData can't tap SW-served responses.
+// The feed/grid item_list capture (FYP, profile, hashtag/challenge,
+// /related/, /newtab/) is handled in background.js by a passive
+// webRequest.filterResponseData listener on /api/*/item_list/. That is
+// possible because the geckoview ServiceWorker-visibility patch (0006)
+// makes SW-synthesized responses fire http-on-examine-response, so
+// filterResponseData now reaches the SW-served feeds that previously
+// forced a page-world inject. The old tiktok-inject.js (a fetch/XHR
+// hook posting bodies over postMessage) was retired once that path was
+// validated on-device (no "Something went wrong" overlay, byte-exact
+// pass-through, all feeds captured incl. /newtab/).
 //
-// Observing the page's OWN fetch/XHR at the JS layer dodges all three:
-// we read whatever the page already received, without touching the
-// network stack.
-//
-// The injected script is loaded as a moz-extension:// URL rather than
-// inline, because TikTok's CSP (`script-src 'self' ...`) blocks
-// inline scripts even when injected by an extension content script.
-// moz-extension:// resources are exempt from page CSP because they're
-// a different origin.
-//
-// Dependency on Gecko Fingerprinting Protection. TikTok's anti-abuse
-// stack uses a device/session fingerprint to drive two suppressions
-// we directly care about: (1) the Take-A-Break modal that gates the
-// profile view, and (2) per-session throttling that withholds
-// /api/post/item_list/ on subsequent loads. Empirically — verified
-// from side-by-side logs — when FPP is enabled the fingerprint never
-// stabilises, neither suppression engages, and /api/post/ fires
-// reliably on every cold load (the Take-A-Break overlay may still
-// render visually but TikTok no longer holds the XHR back behind it).
-// With FPP off, the same loads stochastically produce no XHR and
-// require manual refreshes. Several elaborate workarounds tried here
-// previously (auto-reload, multi-checkpoint scans, scroll-trigger
-// nudges) were all chasing symptoms of that throttle. Don't add them
-// back; if reliability regresses, check FPP state before patching.
+// What CANNOT move to webRequest, and is why this content script still
+// exists:
+//   1. captureVideoDetailSSR — single-video /@user/video/<id> pages SSR
+//      one item into __UNIVERSAL_DATA_FOR_REHYDRATION__ and fire NO
+//      /api/*item_list/ XHR, so there's no network response to tap. We
+//      read the blob from the DOM and forward it through the same
+//      tiktok-itemlist message the background already handles.
+//   2. Take-A-Break dismissal — clearing the overlay is DOM
+//      manipulation; webRequest can't touch the page. This matters more
+//      now that the per-site CanvasRandomization FPP override was
+//      removed: the overlay/throttle can re-engage, and the overlay
+//      visually suppresses /api/* calls until dismissed. (Reloading
+//      flagged the session and made it worse — dismiss in place only.
+//      Don't re-add auto-reload / scroll-nudge workarounds.)
 (() => {
     'use strict';
 
@@ -42,29 +33,8 @@
     browser.runtime.sendNativeMessage("parser", { kind: "get-debug-flag" })
         .then(r => {
             DEBUG = r === true;
-            try {
-                window.postMessage({ __firedown_tt__: 2, debug: DEBUG }, '*');
-            } catch (_) {}
             log('[TT] content script loaded ' + location.href);
         }, () => {});
-
-    const src = browser.runtime.getURL('tiktok-inject.js');
-    const s = document.createElement('script');
-    s.src = src;
-    s.async = false;
-    (document.head || document.documentElement || document).appendChild(s);
-
-    // Page-world inject → background bridge.
-    window.addEventListener('message', (event) => {
-        if (event.source !== window) return;
-        const d = event.data;
-        if (!d || d.__firedown_tt__ !== 1) return;
-        browser.runtime.sendMessage({
-            kind: 'tiktok-itemlist',
-            url: d.url,
-            body: d.body
-        }).then(() => {}, () => {});
-    });
 
     // Single-video pages (/@user/video/ID) never fire /api/*item_list/ —
     // TikTok hydrates the player directly from the JSON blob in

@@ -1116,26 +1116,26 @@ async function buildTikTokHeaders() {
     ];
 }
 
-// Processes one /api/*/item_list/ JSON body, whatever its source. Two
-// transports feed it the SAME bytes the page received:
-//   * the page-world hook (tiktok-inject.js → tiktok-itemlist message)
-//   * a passive filterResponseData listener (below) — only viable since
-//     the geckoview ServiceWorker-visibility patch (0006) made SW-served
-//     /related/item_list/ responses tappable.
-// Source-agnostic by design so the two run in parallel and origin-dedup
-// (sendVariants → canonical origin) collapses any overlap. See the
-// listener comment below for why the inject still ships as a fallback.
+// Processes one item_list JSON body, whatever its source. Source-agnostic
+// because two producers feed it the SAME video-item shape:
+//   * the wire filterResponseData listener (below) — the feed/grid feeds
+//     (FYP, profile, hashtag/challenge, /related/, /newtab/);
+//   * captureVideoDetailSSR in tiktok-content.js — single-video detail
+//     pages that SSR one item and fire no item_list XHR.
+// origin-dedup (sendVariants → canonical origin) collapses any overlap.
 //
-// The historical reasons the inject was the ONLY source — and which the
-// 0006 patch does / doesn't retire:
-//   1. filterResponseData perturbs the page (TikTok shows a "something
-//      went wrong" overlay). NOT addressed by 0006 — this is the open
-//      risk the parallel rollout exists to validate on-device.
-//   2. Refetching the URL trips TikTok's single-use msToken / X-Bogus
-//      signature. N/A here — filterResponseData reads the page's OWN
-//      response passively, no refetch.
-//   3. ServiceWorker-served endpoints (/related/item_list/) couldn't be
-//      tapped via filterResponseData at all. FIXED by 0006.
+// Why the wire path is filterResponseData and not a refetch or the old
+// page-world inject:
+//   1. A refetch of the item_list URL trips TikTok's single-use
+//      msToken / X-Bogus signature → stripped response. filterResponseData
+//      reads the page's OWN response passively, no refetch.
+//   2. ServiceWorker-served endpoints (/related/item_list/) were once
+//      untappable by filterResponseData — FIXED by the geckoview
+//      ServiceWorker-visibility patch (0006), which is what let the
+//      inject be retired.
+//   3. The historical fear that filterResponseData perturbs the stream
+//      into a "Something went wrong" overlay did NOT reproduce on-device
+//      with byte-exact write-through (see filterResponseText).
 async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
     // Empty body slips through (preflight / cache-warm). Treat it as the
     // no-op it is without logging "parse failed" (misleading: there's
@@ -1294,12 +1294,16 @@ async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
     log("TIKTOK", `batch done`, { sent: sentCount, skippedNoVideo, skippedNoVariants, total: items.length });
 }
 
-// Source 1 — page-world inject bridge (tiktok-content.js → tiktok-inject.js).
-// Kept as the fallback while the filterResponseData path (Source 2) is
-// validated on-device; origin-dedup collapses any overlap between the two.
+// DOM source — single-video detail pages (/@user/video/<id>). These SSR
+// one item into __UNIVERSAL_DATA_FOR_REHYDRATION__ and fire NO
+// /api/*item_list/ XHR, so the filter listener below can't see them;
+// tiktok-content.js reads the blob from the DOM and forwards it here
+// wrapped as a one-item itemList. (This was also the inject bridge, but
+// the page-world inject was retired once the filter path was validated —
+// the only remaining producer of this message is captureVideoDetailSSR.)
 browser.runtime.onMessage.addListener((msg, sender) => {
     if (!msg || msg.kind !== "tiktok-itemlist") return;
-    log("TIKTOK", `inject bridge -> handler`, {
+    log("TIKTOK", `detail-SSR -> handler`, {
         url: (msg.url || "").slice(0, 100),
         bodyLen: (msg.body || "").length,
         tabId: sender.tab?.id ?? -1
@@ -1310,28 +1314,25 @@ browser.runtime.onMessage.addListener((msg, sender) => {
         tabId: sender.tab?.id ?? -1,
         pageUrl: sender.tab?.url
     }).catch(e => {
-        log("TIKTOK", `handler error (inject)`, e.message);
+        log("TIKTOK", `handler error (detail-SSR)`, e.message);
     });
 });
 
-// Source 2 — passive filterResponseData on the item_list XHR/fetch.
+// Wire source — passive filterResponseData on the item_list XHR/fetch.
 // Reads the page's OWN response byte-exact (filterResponseText writes
 // every chunk straight through) — no refetch, so the single-use
 // msToken/X-Bogus signature is untouched. This is only viable because
 // the geckoview ServiceWorker-visibility patch (0006) makes SW-served
 // responses fire http-on-examine-response, so onBeforeRequest +
 // filterResponseData now reach the SW-intercepted /related/item_list/
-// (and /newtab/ sub-feeds) that were previously invisible.
-//
-// The open risk this rollout validates: even byte-exact passthrough
-// historically tripped TikTok's "Something went wrong" overlay. If the
-// overlay stays gone on-device, retire tiktok-inject.js + its bridge;
-// until then both sources run and dedup keeps captures unique.
+// (and /newtab/ sub-feeds) that were previously invisible. Validated
+// on-device: byte-exact passthrough does NOT trip the "Something went
+// wrong" overlay, so this replaced the page-world inject entirely.
 //
 // The pattern allows item_list sub-segments — a hashtag page fires both
 // /api/challenge/item_list/?… AND /api/challenge/item_list/newtab/?…;
-// matching only the former would drop ~half the feed (mirrors the PAT
-// in tiktok-inject.js).
+// matching only the former would drop ~half the feed (the /newtab/ feed,
+// ~30 items, confirmed captured on-device).
 const TIKTOK_ITEMLIST_RE = /\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?/i;
 browser.webRequest.onBeforeRequest.addListener(
     (details) => {

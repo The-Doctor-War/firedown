@@ -119,25 +119,43 @@ by `SabrStrategy`. `VariantProcessor` skips ffprobe for SABR variants (empty
 media URLs) and trusts the JS codec/resolution/duration. Captions use the
 separate `timedtext` path.
 
-### TikTok — page-world hook + the anti-bot throttle
+### TikTok — filterResponseData feeds + DOM detail-page SSR
 
-TikTok capture is **not** webRequest-based. A page-world inject
-(`tiktok-inject.js`, loaded as a moz-extension WAR by `tiktok-content.js` at
-`document_start`) hooks `window.fetch`/`XMLHttpRequest` and posts the
-`/api/*/item_list/` JSON bodies to the background (`handleTikTokItemList`). Why
-not `filterResponseData`: it perturbs the stream enough to trigger TikTok's
-"Something went wrong" React overlay, refetching trips the single-use
-`msToken`/`X-Bogus` signing, and the ServiceWorker serves some endpoints
-`filterResponseData` can't tap.
+TikTok capture has **two** producers, both feeding `handleTikTokItemList`:
 
-- **The inject PAT must allow sub-segments.** A hashtag page fires
+1. **Wire — `filterResponseData`** (`background.js`): a passive `onBeforeRequest`
+   listener on `/api/*/item_list/` reads the page's OWN response **byte-exact**
+   (`filterResponseText` writes every chunk straight through — no refetch, so the
+   single-use `msToken`/`X-Bogus` signing is untouched). Covers FYP, profile,
+   hashtag/challenge, `/related/`, and `/newtab/`. This is only viable because
+   the geckoview **ServiceWorker-visibility patch (0006)** makes SW-synthesized
+   responses fire `http-on-examine-response`, so `filterResponseData` now reaches
+   the SW-served `/related/item_list/` feeds that were once untappable.
+2. **DOM — `captureVideoDetailSSR`** (`tiktok-content.js`): single-video
+   `/@user/video/<id>` pages SSR one item into
+   `__UNIVERSAL_DATA_FOR_REHYDRATION__` and fire **no** item_list XHR, so there's
+   no response to tap. The content script reads the blob from the DOM and
+   forwards it through the same `tiktok-itemlist` message.
+
+**History — the page-world inject was retired.** TikTok capture *used* to depend
+on a page-world inject (`tiktok-inject.js`, a moz-extension WAR hooking
+`window.fetch`/`XMLHttpRequest`) because three things blocked `filterResponseData`:
+refetch tripping `msToken`/`X-Bogus` (N/A to a passive read), SW-served feeds
+being untappable (fixed by 0006), and a fear that the stream perturbation tripped
+the "Something went wrong" overlay. That last one **did not reproduce on-device**
+with byte-exact write-through, so the inject + its postMessage bridge were
+removed. Don't reintroduce the inject for the feeds — `filterResponseData` covers
+them. The content script remains **only** for the two DOM-bound jobs
+(`captureVideoDetailSSR` + Take-A-Break dismissal), which webRequest can't do.
+
+- **The filter PAT must allow sub-segments.** A hashtag page fires
   `/api/challenge/item_list/?…` AND `/api/challenge/item_list/newtab/?…`; the
   regex is `\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?` so the `/newtab/` feed
   (≈half the videos) isn't dropped.
 - **Tag/challenge pages SSR no video data** (the rehydration blob is only
   app/i18n/seo context) — the feed is client-rendered via the item_list XHRs, so
-  the hook is the only source. Only `/@user/video/<id>` *detail* pages SSR a
-  single item (`captureVideoDetailSSR`).
+  the filter listener is the only source. Only `/@user/video/<id>` *detail* pages
+  SSR a single item (`captureVideoDetailSSR`).
 - **The anti-bot throttle is the real gotcha.** TikTok withholds the item_list
   XHRs entirely (the `Take_A_Break` reminder shows, only `/api/preload/` fires)
   unless the page's **fingerprint stays unstable**. Globally that's
@@ -456,8 +474,10 @@ The generic catcher has **two** sources, because `webRequest` alone misses media
    referrer: tab.url})` to populate the header cache via `onSendHeaders`, then
    forwards the (sanitized) result through the same emit path. So: content script
    *finds* it, the HEAD probe *authenticates* it.
-3. **Per-site page-world injects** (TikTok, Bilibili): the exception layer, for
-   what neither of the above can reach — see below.
+3. **Per-site page-world injects** (Bilibili): the exception layer, for what
+   neither of the above can reach — see below. (TikTok used one too, but its
+   inject was retired once `filterResponseData` + the 0006 SW-visibility patch
+   could read the feeds; see the TikTok section.)
 
 **MSE / `blob:` is not special.** A `blob:` URL on a `<video>` is just a handle to
 a `MediaSource`, never the download target — but MSE/HLS/DASH players still

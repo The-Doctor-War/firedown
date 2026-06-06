@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "5.22",
+  "version": "5.23",
   "browser_specific_settings": {
     "gecko": {
       "id": "parser@solarized.dev"
@@ -14,17 +14,6 @@
     ]
   },
   "content_scripts": [
-    {
-      "matches": [
-        "*://www.tiktok.com/*",
-        "*://m.tiktok.com/*"
-      ],
-      "js": [
-        "tiktok-content.js"
-      ],
-      "run_at": "document_start",
-      "all_frames": false
-    },
     {
       "matches": [
         "*://www.threads.com/*",

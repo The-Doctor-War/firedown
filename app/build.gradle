@@ -162,17 +162,29 @@ dependencies {
 
     implementation "org.mozilla.geckoview:geckoview-default:${geckoviewVersion}"
 
-    // GeckoView's own dependency, lost because our local geckoview-default POM has
-    // no <dependencies> (Mozilla's POM declared it). GeckoRuntime.init ->
-    // DebugConfig.fromFile parses a YAML debug config at startup on debuggable
-    // builds via SnakeYAML; without it the app crashes with
-    // NoClassDefFoundError: org.yaml.snakeyaml.LoaderOptions. Version matches
-    // GeckoView's build.gradle (org.yaml:snakeyaml:2.2). GeckoView's other deps
-    // (androidx.annotation/collection/core/lifecycle) already resolve transitively
-    // via the app's existing AndroidX libs; play-services-fido is unused (patch
-    // 0001 routes WebAuthn through Credential Manager), and exoplayer2 isn't in the
-    // geckoview-lite build.
+    // GeckoView's own dependencies, lost because our local geckoview-default POM
+    // has no <dependencies> (Mozilla's POM declared them). We re-add the ones the
+    // app doesn't already pull transitively. Versions match GeckoView 151's
+    // build.gradle / version catalog. (androidx.annotation/collection/core/lifecycle
+    // already resolve via the app's AndroidX stack; exoplayer2 isn't in the
+    // geckoview-lite build.)
+    //
+    // SnakeYAML: GeckoRuntime.init -> DebugConfig.fromFile parses a YAML debug
+    // config at startup on debuggable builds; without it: NoClassDefFoundError
+    // org.yaml.snakeyaml.LoaderOptions.
     implementation "org.yaml:snakeyaml:2.2"
+    // play-services-fido: REQUIRED even though patch 0001 routes WebAuthn through
+    // Android Credential Manager. 0001 stops GeckoView from *calling* the GMS FIDO2
+    // API at runtime, but WebAuthnTokenManager still *references* GMS FIDO types in
+    // static fields (SUPPORTED_ALGORITHMS = {EC2Algorithm…, RSAAlgorithm…}), so the
+    // CLASS can't even load without them on the classpath. When a page triggers
+    // WebAuthn (e.g. accounts.google.com), WebAuthnTokenManager.<clinit> runs and,
+    // with the lib absent, throws NoClassDefFoundError -> the native caller doesn't
+    // handle it -> libxul SIGSEGV (the accounts.google.com crash). This is a
+    // LINK-only dep: the classes are bundled so the class loads, but the GMS FIDO2
+    // API is never invoked at runtime (CredManager is), so no Google Play Services
+    // is required on-device. Version matches GeckoView 151 (play-services-fido 21.2.0).
+    implementation "com.google.android.gms:play-services-fido:21.2.0"
 
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 

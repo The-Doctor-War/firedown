@@ -150,21 +150,6 @@ public class GeckoRuntimeHelper {
         sGeckoRuntime.getSettings().setFingerprintingProtection(true);
         sGeckoRuntime.getSettings().setFingerprintingProtectionPrivateBrowsing(true);
 
-        // TikTok's anti-bot throttle withholds the /api/*/item_list/ feeds we
-        // capture unless the page's fingerprint stays unstable. Globally that is
-        // privacy.resistFingerprinting — a user-facing toggle that ships OFF — so
-        // TikTok capture would otherwise depend on the user enabling an advanced
-        // privacy switch that also degrades every other site. Instead, scope the
-        // one protection that matters to tiktok.com via FPP's per-site granular
-        // overrides (FPP itself is enabled just above). We enable ONLY
-        // CanvasRandomization: it noises the canvas readback per session so the
-        // fingerprint never stabilises (dodging the throttle, the same effect
-        // RFP relies on), while the read still SUCCEEDS. "+AllTargets" was tried
-        // and broke TikTok ("Something went wrong") because it also turns on the
-        // canvas-extraction BLOCKING/prompt targets, which make webmssdk's read
-        // fail and the React app throw. Randomize, don't block.
-        applyTikTokFingerprintingOverride();
-
         // Enable the Android FIDO2/Credential-Manager WebAuthn backend so passkey
         // logins surface the OS prompt (the ActivityDelegate is wired in
         // BaseActivity but Gecko only invokes it when this backend is enabled).
@@ -928,8 +913,8 @@ public class GeckoRuntimeHelper {
      * ON => "+JSDateTimeUTC" (Date/Intl report UTC, hiding the local-timezone
      * fingerprint), OFF => "" (no global override). This is intentionally the
      * global `overrides` pref, distinct from the per-site `granularOverrides`
-     * that {@link #applyTikTokFingerprintingOverride()} owns for tiktok.com, so
-     * the two never collide. No browser restart: like Resist Fingerprinting it
+     * pref (which nothing else currently sets), so the two never collide. No
+     * browser restart: like Resist Fingerprinting it
      * takes effect on the next page load. Default OFF — UTC clocks confuse
      * calendar/scheduling sites, so it's a user opt-in (see {@link
      * com.solarized.firedown.Preferences#SETTINGS_SPOOF_TIMEZONE}).
@@ -943,29 +928,6 @@ public class GeckoRuntimeHelper {
         geckoResult.accept(
                 unused -> Log.d(TAG, "setTimezoneSpoofing: " + enable),
                 throwable -> Log.w(TAG, "setTimezoneSpoofing failed", throwable));
-    }
-
-    /**
-     * Destabilise the canvas fingerprint on first-party tiktok.com ONLY, via
-     * FPP's per-site granular overrides, so TikTok's item_list feeds are captured
-     * without the user enabling the global Resist Fingerprinting switch. See the
-     * call site in the constructor for the why. Unconditional and idempotent —
-     * a fixed per-site policy, not a user setting.
-     */
-    @OptIn(markerClass = ExperimentalGeckoViewApi.class)
-    private void applyTikTokFingerprintingOverride() {
-        // JSON consumed by privacy.fingerprintingProtection.granularOverrides.
-        // ONLY CanvasRandomization — randomises the canvas readback per session
-        // (read still succeeds, fingerprint varies). NOT "+AllTargets", which
-        // also enables canvas-extraction blocking and broke TikTok's signer
-        // ("Something went wrong").
-        final String overrides = "[{\"firstPartyDomain\":\"tiktok.com\",\"overrides\":\"+CanvasRandomization\"}]";
-        GeckoResult<Void> result = GeckoPreferenceController.setGeckoPref(
-                "privacy.fingerprintingProtection.granularOverrides", overrides,
-                GeckoPreferenceController.PREF_BRANCH_USER);
-        result.accept(
-                unused -> Log.d(TAG, "applyTikTokFingerprintingOverride: granularOverrides set"),
-                throwable -> Log.w(TAG, "applyTikTokFingerprintingOverride failed", throwable));
     }
 
     @OptIn(markerClass = ExperimentalGeckoViewApi.class)

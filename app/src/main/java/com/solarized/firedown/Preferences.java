@@ -135,7 +135,7 @@ public class Preferences {
      * com.solarized.firedown.geckoview.GeckoRuntimeHelper#setTimezoneSpoofing},
      * which adds/clears "+JSDateTimeUTC" on the global
      * privacy.fingerprintingProtection.overrides pref (independent of the
-     * per-site granularOverrides used to scope CanvasRandomization to tiktok.com).
+     * per-site granularOverrides pref).
      */
     public static final String SETTINGS_SPOOF_TIMEZONE = "com.solarized.firedown.preferences.browser.spoof.timezone";
 

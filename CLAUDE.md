@@ -142,15 +142,23 @@ not `filterResponseData`: it perturbs the stream enough to trigger TikTok's
   XHRs entirely (the `Take_A_Break` reminder shows, only `/api/preload/` fires)
   unless the page's **fingerprint stays unstable**. Globally that's
   `privacy.resistFingerprinting` — a user toggle that ships OFF and degrades
-  every site. Instead, `GeckoRuntimeHelper.applyTikTokFingerprintingOverride`
-  scopes **`CanvasRandomization`** to first-party `tiktok.com` via FPP's
-  `privacy.fingerprintingProtection.granularOverrides` (FPP is already on). That
-  noises the canvas readback per session so the fingerprint never stabilises —
-  the read still **succeeds**. Do **not** use `+AllTargets`: it also enables the
-  canvas-extraction *blocking* targets, so `webmssdk`'s read fails and the page
-  throws "Something went wrong". Randomize, don't block; and keep it per-site
-  (no global RFP). If canvas alone ever stops dodging the throttle, add other
-  *randomizing* (never blocking) vectors, not `AllTargets`.
+  every site. The previous mitigation was a per-site FPP override
+  (`GeckoRuntimeHelper.applyTikTokFingerprintingOverride`) that scoped
+  `+CanvasRandomization` to first-party `tiktok.com` via
+  `privacy.fingerprintingProtection.granularOverrides` so the canvas readback
+  noised per session and the fingerprint never stabilised (the read still
+  succeeded — `+AllTargets` was the wrong knob: it enables the canvas-extraction
+  *blocking* targets, breaking `webmssdk`'s read → "Something went wrong").
+  **That override was REMOVED at the maintainer's request** (commit on
+  `claude/happy-fermi-VY4tV`). Consequence to be aware of: with no per-site
+  randomization, the throttle can re-engage and the item_list feeds may stop
+  firing on some loads — which starves **both** capture sources (the inject and
+  the new `filterResponseData` path), since neither can read a request the page
+  never makes. The ServiceWorker-visibility patch (0006) does **not** help here
+  — the throttle is server-side, not a response-visibility problem. If TikTok
+  capture regresses to only `/api/preload/`, this removal is the first suspect;
+  the fix is a *randomizing* (never blocking) FPP vector scoped to tiktok.com,
+  not global RFP and not `+AllTargets`.
 
 ### Capture dedup
 
@@ -645,9 +653,11 @@ need a GeckoView patch: FPP is already enabled at boot
 `privacy.fingerprintingProtection.overrides` pref (`"+JSDateTimeUTC"` on, `""`
 off) — read at boot and on change in `SettingsFragment` (no restart; applies on
 next page load, like RFP). **Crucially, that GLOBAL `overrides` pref is distinct
-from the per-site `granularOverrides`** that `applyTikTokFingerprintingOverride`
-owns to scope CanvasRandomization to tiktok.com — the two never collide, so don't
-fold one into the other. This is deliberately the no-patch route over IronFox's
+from the per-site `granularOverrides`** pref. The latter is no longer set by
+anything (it used to scope CanvasRandomization to tiktok.com via the now-removed
+`applyTikTokFingerprintingOverride`); keep these two prefs distinct — if a
+per-site override is ever reintroduced, it must not fold into this global
+`overrides` pref. This is deliberately the no-patch route over IronFox's
 `nsRFPService` code patch + custom bool pref (firedown-geckoview CLAUDE.md has the
 rationale). New string keys (`settings_utc_timezone*`) are translated across the
 same 16 locales the JIT toggle uses; the remaining (already-partial) locales fall

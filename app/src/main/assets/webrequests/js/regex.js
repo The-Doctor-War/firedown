@@ -23,7 +23,10 @@ const DEFAULT_PATTERNS = [
   'microsoft-api\\.arkoselabs\\.com',
   'copilot\\.microsoft\\.com\\/(fd\\/ls\\/l|cl\\/eus2\\/collect)',
 
-  // TikTok
+  // TikTok — the webapp-prime media URLs are intentionally NOT blocked here:
+  // the generic catcher (downloader@) is the source for the cache-served first
+  // /foryou video, whose metadata never crosses the wire so the parser can't
+  // capture it. (These /report entries are telemetry, not media.)
   'tiktok\\.com\\/aweme\\/v1\\/report',
   'tiktokw.*\\/web\\/report',
 

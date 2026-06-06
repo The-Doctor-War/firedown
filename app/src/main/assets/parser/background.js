@@ -1116,34 +1116,46 @@ async function buildTikTokHeaders() {
     ];
 }
 
-// Receives JSON bodies posted by the content-script bridge. The body
-// is the exact response the page itself received via fetch/XHR —
-// captured by a page-world hook (tiktok-inject.js) that observes
-// passively without touching the network stack. This avoids three
-// failure modes encountered with webRequest-based approaches:
-//   1. filterResponseData perturbs the page (TikTok shows a
-//      "something went wrong" overlay).
-//   2. Refetching the URL ourselves trips TikTok's single-use
-//      msToken / X-Bogus signature and returns a stripped response.
-//   3. ServiceWorker-served endpoints (/related/item_list/) can't be
-//      tapped via filterResponseData at all.
-async function handleTikTokItemList(msg, sender) {
-    // Empty body slips through if a future inject revision stops
-    // filtering them out; treat it as the no-op preflight it is
-    // without logging "parse failed" (misleading: there's nothing to
-    // parse, not a malformed JSON).
-    if (!msg.body) return;
+// Processes one item_list JSON body, whatever its source. Source-agnostic
+// because two producers feed it the SAME video-item shape:
+//   * the wire filterResponseData listener (below) — the feed/grid feeds
+//     (FYP, profile, hashtag/challenge, /related/, /newtab/);
+//   * the main_frame document filterResponseData listener (below) — SSR
+//     items inlined in the page HTML with no item_list XHR: /@user/video/<id>
+//     detail pages, and the /foryou feed's SSR'd FIRST video (the item_list
+//     XHRs carry only the rest, so the wire filter never sees the first one).
+// origin-dedup (sendVariants → canonical origin) collapses any overlap.
+//
+// Why the wire path is filterResponseData and not a refetch or the old
+// page-world inject:
+//   1. A refetch of the item_list URL trips TikTok's single-use
+//      msToken / X-Bogus signature → stripped response. filterResponseData
+//      reads the page's OWN response passively, no refetch.
+//   2. ServiceWorker-served endpoints (/related/item_list/) were once
+//      untappable by filterResponseData — FIXED by the geckoview
+//      ServiceWorker-visibility patch (0006), which is what let the
+//      inject be retired.
+//   3. The historical fear that filterResponseData perturbs the stream
+//      into a "Something went wrong" overlay did NOT reproduce on-device
+//      with byte-exact write-through (see filterResponseText).
+async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
+    // Empty body slips through (preflight / cache-warm). Treat it as the
+    // no-op it is without logging "parse failed" (misleading: there's
+    // nothing to parse, not a malformed JSON).
+    if (!body) return;
+    if (tabId === undefined || tabId === null) tabId = -1;
+    if (!pageUrl) pageUrl = "https://www.tiktok.com/";
 
-    log("TIKTOK", `onMessage`, {
-        url: (msg.url || "").slice(0, 120),
-        bodyLen: msg.body.length,
-        tabId: sender.tab?.id ?? -1,
-        tabUrl: (sender.tab?.url || "").slice(0, 80)
+    log("TIKTOK", `item_list body`, {
+        url: (url || "").slice(0, 120),
+        bodyLen: body.length,
+        tabId,
+        tabUrl: pageUrl.slice(0, 80)
     });
 
-    const json = tryParseJson(msg.body);
+    const json = tryParseJson(body);
     if (!json) {
-        log("TIKTOK", `JSON parse failed`, { head: msg.body.slice(0, 200) });
+        log("TIKTOK", `JSON parse failed`, { head: body.slice(0, 200) });
         return;
     }
 
@@ -1199,7 +1211,7 @@ async function handleTikTokItemList(msg, sender) {
     }
 
     if (!Array.isArray(items)) {
-        log("TIKTOK", `no itemList[] in body`, { topKeys: Object.keys(json).slice(0, 12), bodyLen: msg.body.length });
+        log("TIKTOK", `no itemList[] in body`, { topKeys: Object.keys(json).slice(0, 12), bodyLen: body.length });
         return;
     }
     if (items.length === 0) {
@@ -1209,14 +1221,12 @@ async function handleTikTokItemList(msg, sender) {
     log("TIKTOK", "items found", { count: items.length, source: itemsSource, firstId: items[0] && items[0].id });
 
     const pathname = (() => {
-        try { return new URL(msg.url, sender.tab?.url || "https://www.tiktok.com/").pathname; }
-        catch (_) { return msg.url; }
+        try { return new URL(url, pageUrl).pathname; }
+        catch (_) { return url; }
     })();
     log("TIKTOK", `${items.length} item(s) from ${pathname}`);
 
     const headers = await buildTikTokHeaders();
-    const tabId = sender.tab?.id ?? -1;
-    const pageUrl = sender.tab?.url || "https://www.tiktok.com/";
 
     let sentCount = 0;
     let skippedNoVariants = 0;
@@ -1268,7 +1278,7 @@ async function handleTikTokItemList(msg, sender) {
             tabId,
             documentUrl: pageUrl,
             originUrl: pageUrl,
-            url: msg.url,
+            url: url,
             requestId: `tiktok-${item.id || Date.now()}`
         };
 
@@ -1286,12 +1296,171 @@ async function handleTikTokItemList(msg, sender) {
     log("TIKTOK", `batch done`, { sent: sentCount, skippedNoVideo, skippedNoVariants, total: items.length });
 }
 
-browser.runtime.onMessage.addListener((msg, sender) => {
-    if (!msg || msg.kind !== "tiktok-itemlist") return;
-    handleTikTokItemList(msg, sender).catch(e => {
-        log("TIKTOK", `handler error`, e.message);
-    });
-});
+// Document source — the SSR-inlined item on a /@user/video/<id> DETAIL page.
+// Detail pages inline the video into the page document's
+// __UNIVERSAL_DATA_FOR_REHYDRATION__ blob (under webapp.video-detail /
+// webapp.reflow.video.detail) and fire NO /api/*item_list/ XHR, so there's
+// nothing else to tap. (The /foryou feed does NOT SSR video — proven on-device,
+// its blob holds only app/i18n/biz/seo scopes — so this runs on detail pages
+// ONLY; the FYP first video is cache-served off-wire and comes from the generic
+// catcher, see the TikTok note in regex.js. Don't re-add a /foryou branch here.)
+//
+// We read the DOCUMENT response (not the DOM) so the raw bytes are immune to
+// React stripping the rehydration <script> during hydration — the Threads "read
+// the network response, not the DOM" lesson. If TikTok's document is itself
+// SW-synthesized, the 0006 patch is what makes this main_frame response tappable.
+// (Cached/bfcache navigations serve no network response so this won't fire —
+// acceptable: the item was captured on its first networked load.)
+//
+// Attribute-order-agnostic: TikTok emits the id either first or after
+// type="application/json", and quoting can vary — so match any <script> whose
+// attributes include id=…__UNIVERSAL_DATA_FOR_REHYDRATION__… rather than
+// requiring id to lead. JSON escapes `<`, so the non-greedy body can't end early
+// on a stray </script>.
+const TIKTOK_REHYDRATION_RE = /<script\b[^>]*\bid=["']__UNIVERSAL_DATA_FOR_REHYDRATION__["'][^>]*>([\s\S]*?)<\/script>/;
+const TIKTOK_DETAIL_PATH_RE = /^\/@[^/]+\/video\/\d+/;
+
+// Strong structural signature — an object with a string id and a video
+// sub-object carrying a real address. Keeps the scope-agnostic walk off the
+// app/i18n/seo context the blob is mostly made of.
+function tiktokLooksLikeVideoItem(o) {
+    return o && typeof o === "object"
+        && typeof o.id === "string"
+        && o.video && typeof o.video === "object"
+        && (o.video.playAddr || o.video.downloadAddr || o.video.bitrateInfo);
+}
+// First matching item anywhere under obj (depth-capped).
+function tiktokFindVideoItem(obj, depth) {
+    if (!obj || typeof obj !== "object" || depth > 8) return null;
+    if (tiktokLooksLikeVideoItem(obj)) return obj;
+    if (Array.isArray(obj)) {
+        for (const v of obj) {
+            const f = tiktokFindVideoItem(v, depth + 1);
+            if (f) return f;
+        }
+    } else {
+        for (const k of Object.keys(obj)) {
+            const f = tiktokFindVideoItem(obj[k], depth + 1);
+            if (f) return f;
+        }
+    }
+    return null;
+}
+// Pull the rehydration blob out of a detail-page document and return its single
+// video item (as a one-element array), or [] if absent.
+function extractTikTokSSRItems(html) {
+    const m = TIKTOK_REHYDRATION_RE.exec(html);
+    if (!m) {
+        // Distinguish a regex miss from a blob-less document: is the marker even
+        // present? markerPresent:true => tag exists but our pattern missed it
+        // (tighten the regex); false => no rehydration blob at all.
+        const markerPresent = html.indexOf("__UNIVERSAL_DATA_FOR_REHYDRATION__") >= 0;
+        log("TIKTOK", `ssr: rehydration tag not matched`, { markerPresent, htmlLen: html.length });
+        return [];
+    }
+    let data;
+    try { data = JSON.parse(m[1]); }
+    catch (e) { log("TIKTOK", `ssr: rehydration JSON parse failed`, e.message); return []; }
+    const scope = data && data.__DEFAULT_SCOPE__;
+    if (scope) {
+        for (const k of Object.keys(scope)) {
+            if (!/video[-.]detail/i.test(k)) continue;
+            const found = tiktokFindVideoItem(scope[k], 0);
+            if (found) return [found];
+        }
+    }
+    log("TIKTOK", `ssr: detail blob has no video item`,
+        { scopeKeys: scope ? Object.keys(scope).slice(0, 20) : null });
+    return [];
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    (details) => {
+        if (details.type !== "main_frame") return {};
+        let pathname;
+        try { pathname = new URL(details.url).pathname; }
+        catch (_) { return {}; }
+        if (!TIKTOK_DETAIL_PATH_RE.test(pathname)) return {};
+        log("TIKTOK", `ssr main_frame`, { url: details.url.slice(0, 120), tabId: details.tabId });
+        const created = filterResponseText(details, (html) => {
+            if (!html) {
+                log("TIKTOK", `ssr: empty document`, { path: pathname });
+                return;
+            }
+            const items = extractTikTokSSRItems(html);
+            if (items.length === 0) {
+                log("TIKTOK", `ssr: no items in document`, { path: pathname, htmlLen: html.length });
+                return;
+            }
+            log("TIKTOK", `ssr items -> handler`, { count: items.length, firstId: items[0] && items[0].id, path: pathname });
+            handleTikTokItemList({
+                url: details.url,
+                body: JSON.stringify({ itemList: items }),
+                tabId: details.tabId,
+                pageUrl: details.url
+            }).catch(e => log("TIKTOK", `handler error (ssr)`, e.message));
+        });
+        if (!created) {
+            log("TIKTOK", `ssr: filterResponseData unavailable`, { path: pathname });
+        }
+        return {};
+    },
+    { urls: ["*://www.tiktok.com/*", "*://m.tiktok.com/*"], types: ["main_frame"] },
+    ["blocking"]
+);
+
+// Wire source — passive filterResponseData on the item_list XHR/fetch.
+// Reads the page's OWN response byte-exact (filterResponseText writes
+// every chunk straight through) — no refetch, so the single-use
+// msToken/X-Bogus signature is untouched. This is only viable because
+// the geckoview ServiceWorker-visibility patch (0006) makes SW-served
+// responses fire http-on-examine-response, so onBeforeRequest +
+// filterResponseData now reach the SW-intercepted /related/item_list/
+// (and /newtab/ sub-feeds) that were previously invisible. Validated
+// on-device: byte-exact passthrough does NOT trip the "Something went
+// wrong" overlay, so this replaced the page-world inject entirely.
+//
+// The pattern allows item_list sub-segments — a hashtag page fires both
+// /api/challenge/item_list/?… AND /api/challenge/item_list/newtab/?…;
+// matching only the former would drop ~half the feed (the /newtab/ feed,
+// ~30 items, confirmed captured on-device).
+const TIKTOK_ITEMLIST_RE = /\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?/i;
+browser.webRequest.onBeforeRequest.addListener(
+    (details) => {
+        if (!TIKTOK_ITEMLIST_RE.test(details.url)) return {};
+        log("TIKTOK", `filter onBeforeRequest`, {
+            url: details.url.slice(0, 120),
+            type: details.type,
+            tabId: details.tabId,
+            requestId: details.requestId
+        });
+        const created = filterResponseText(details, (body) => {
+            if (!body) {
+                log("TIKTOK", `filter empty body`, { url: details.url.slice(0, 100) });
+                return;
+            }
+            log("TIKTOK", `filter body -> handler`, {
+                url: details.url.slice(0, 100),
+                bodyLen: body.length,
+                tabId: details.tabId
+            });
+            handleTikTokItemList({
+                url: details.url,
+                body,
+                tabId: details.tabId,
+                pageUrl: details.documentUrl || details.originUrl
+            }).catch(e => {
+                log("TIKTOK", `handler error (filter)`, e.message);
+            });
+        });
+        if (!created) {
+            log("TIKTOK", `filterResponseData unavailable`, { url: details.url.slice(0, 100) });
+        }
+        return {};
+    },
+    { urls: ["*://www.tiktok.com/*", "*://m.tiktok.com/*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
 
 // ============================================================================
 // Twitter / X

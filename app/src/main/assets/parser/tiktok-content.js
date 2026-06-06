@@ -1,39 +1,27 @@
-// Bridge between TikTok's page-world fetch/XHR and the parser
-// extension's background.
+// TikTok content script — Take-A-Break dismissal only.
 //
-// Why a page-world hook and not webRequest.filterResponseData?
-//   * filterResponseData perturbs the response stream enough that
-//     TikTok's React app shows a "something went wrong" overlay,
-//     even with byte-exact pass-through.
-//   * Refetching the api URL from the extension trips TikTok's
-//     single-use msToken / X-Bogus signature → stripped response.
-//   * The ServiceWorker on www.tiktok.com intercepts /related/item_list/
-//     and filterResponseData can't tap SW-served responses.
+// All video capture is handled in background.js, on the wire/document side:
+//   * /api/*/item_list/ feeds (FYP, profile, hashtag/challenge, /related/,
+//     /newtab/) via a passive webRequest.filterResponseData listener —
+//     possible since the geckoview ServiceWorker-visibility patch (0006)
+//     makes SW-synthesized responses fire http-on-examine-response. (This
+//     replaced the old page-world inject, tiktok-inject.js, now retired.)
+//   * SSR-inlined items (single-video /@user/video/<id> detail pages, and
+//     the /foryou + "/" feed's FIRST video, which is inlined into the page
+//     document and NOT in any item_list XHR) via a main_frame
+//     filterResponseData read of the document HTML — reading the raw
+//     response bytes is immune to React stripping the rehydration <script>
+//     during hydration, the reason we do NOT read it from this DOM (the
+//     Threads "read the network response, not the DOM" lesson — see
+//     CLAUDE.md).
 //
-// Observing the page's OWN fetch/XHR at the JS layer dodges all three:
-// we read whatever the page already received, without touching the
-// network stack.
-//
-// The injected script is loaded as a moz-extension:// URL rather than
-// inline, because TikTok's CSP (`script-src 'self' ...`) blocks
-// inline scripts even when injected by an extension content script.
-// moz-extension:// resources are exempt from page CSP because they're
-// a different origin.
-//
-// Dependency on Gecko Fingerprinting Protection. TikTok's anti-abuse
-// stack uses a device/session fingerprint to drive two suppressions
-// we directly care about: (1) the Take-A-Break modal that gates the
-// profile view, and (2) per-session throttling that withholds
-// /api/post/item_list/ on subsequent loads. Empirically — verified
-// from side-by-side logs — when FPP is enabled the fingerprint never
-// stabilises, neither suppression engages, and /api/post/ fires
-// reliably on every cold load (the Take-A-Break overlay may still
-// render visually but TikTok no longer holds the XHR back behind it).
-// With FPP off, the same loads stochastically produce no XHR and
-// require manual refreshes. Several elaborate workarounds tried here
-// previously (auto-reload, multi-checkpoint scans, scroll-trigger
-// nudges) were all chasing symptoms of that throttle. Don't add them
-// back; if reliability regresses, check FPP state before patching.
+// So this content script is left with ONE job webRequest can't do — DOM
+// manipulation:
+//   Take-A-Break dismissal — clearing the overlay that visually suppresses
+//   /api/* calls. Matters more now that the per-site CanvasRandomization
+//   FPP override was removed: the overlay/throttle can re-engage. (Reloading
+//   flagged the session and made it worse — dismiss in place only. Don't
+//   re-add auto-reload / scroll-nudge / SSR-DOM-scrape workarounds.)
 (() => {
     'use strict';
 
@@ -42,139 +30,8 @@
     browser.runtime.sendNativeMessage("parser", { kind: "get-debug-flag" })
         .then(r => {
             DEBUG = r === true;
-            try {
-                window.postMessage({ __firedown_tt__: 2, debug: DEBUG }, '*');
-            } catch (_) {}
             log('[TT] content script loaded ' + location.href);
         }, () => {});
-
-    const src = browser.runtime.getURL('tiktok-inject.js');
-    const s = document.createElement('script');
-    s.src = src;
-    s.async = false;
-    (document.head || document.documentElement || document).appendChild(s);
-
-    // Page-world inject → background bridge.
-    window.addEventListener('message', (event) => {
-        if (event.source !== window) return;
-        const d = event.data;
-        if (!d || d.__firedown_tt__ !== 1) return;
-        browser.runtime.sendMessage({
-            kind: 'tiktok-itemlist',
-            url: d.url,
-            body: d.body
-        }).then(() => {}, () => {});
-    });
-
-    // Single-video pages (/@user/video/ID) never fire /api/*item_list/ —
-    // TikTok hydrates the player directly from the JSON blob in
-    // __UNIVERSAL_DATA_FOR_REHYDRATION__ under
-    // __DEFAULT_SCOPE__["webapp.video-detail"].itemInfo.itemStruct.
-    // Read that one object and forward it through the same bridge
-    // wrapped as a one-item itemList, so the background parser picks
-    // it up with no special-casing.
-    //
-    // Retry across multiple checkpoints because React may strip the
-    // rehydration <script> tag during hydration (timing varies by
-    // device); whichever checkpoint sees the tag first wins, the rest
-    // are no-ops via videoDetailCaptured.
-    let videoDetailCaptured = false;
-    function captureVideoDetailSSR(label) {
-        if (videoDetailCaptured) return;
-        try {
-            if (!/^\/@[^/]+\/video\/\d+/.test(location.pathname)) {
-                log('[TT] video-detail(' + label + '): path no-match ' + location.pathname);
-                return;
-            }
-            const tag = document.getElementById('__UNIVERSAL_DATA_FOR_REHYDRATION__');
-            if (!tag || !tag.textContent) {
-                log('[TT] video-detail(' + label + '): SSR tag missing');
-                return;
-            }
-            let data;
-            try { data = JSON.parse(tag.textContent); }
-            catch (e) {
-                log('[TT] video-detail(' + label + '): JSON parse failed: '
-                    + (e && e.message));
-                return;
-            }
-            const scope = data && data.__DEFAULT_SCOPE__;
-            // Both the desktop ("webapp.video-detail") and reflow /
-            // mobile ("webapp.reflow.video.detail") variants put a
-            // video object under one of these scopes, but at different
-            // paths within (itemInfo.itemStruct vs nested deeper).
-            // Walk each matching scope structurally for the first
-            // object that looks like a video item — has id + video
-            // with playAddr/downloadAddr/bitrateInfo.
-            function looksLikeVideoItem(o) {
-                return o && typeof o === 'object'
-                    && typeof o.id === 'string'
-                    && o.video && typeof o.video === 'object'
-                    && (o.video.playAddr || o.video.downloadAddr
-                        || o.video.bitrateInfo);
-            }
-            function findVideoItem(obj, depth) {
-                if (!obj || typeof obj !== 'object' || depth > 8) return null;
-                if (looksLikeVideoItem(obj)) return obj;
-                if (Array.isArray(obj)) {
-                    for (const v of obj) {
-                        const f = findVideoItem(v, depth + 1);
-                        if (f) return f;
-                    }
-                } else {
-                    for (const k of Object.keys(obj)) {
-                        const f = findVideoItem(obj[k], depth + 1);
-                        if (f) return f;
-                    }
-                }
-                return null;
-            }
-            let item = null;
-            let itemKey = null;
-            if (scope) {
-                for (const k of Object.keys(scope)) {
-                    if (!/video[-.]detail/i.test(k)) continue;
-                    const found = findVideoItem(scope[k], 0);
-                    if (found) {
-                        item = found;
-                        itemKey = k;
-                        break;
-                    }
-                }
-            }
-            if (!item) {
-                const matched = scope
-                    ? Object.keys(scope).filter(k => /video[-.]detail/i.test(k))
-                    : [];
-                const dump = matched
-                    .map(k => k + ':{' + (scope[k]
-                        ? Object.keys(scope[k]).slice(0, 8).join(',')
-                        : 'null') + '}')
-                    .join(' | ');
-                log('[TT] video-detail(' + label + '): no itemStruct (matched='
-                    + (dump || 'none') + ')');
-                return;
-            }
-            videoDetailCaptured = true;
-            log('[TT] video-detail SSR captured (' + label + ') id='
-                + item.id + ' via ' + itemKey);
-            browser.runtime.sendMessage({
-                kind: 'tiktok-itemlist',
-                url: location.href,
-                body: JSON.stringify({ itemList: [item] })
-            }).then(() => {}, () => {});
-        } catch (e) {
-            log('[TT] video-detail(' + label + ') threw: ' + (e && e.message));
-        }
-    }
-    captureVideoDetailSSR('document_start');
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded',
-            () => captureVideoDetailSSR('DOMContentLoaded'), { once: true });
-    }
-    window.addEventListener('load', () => captureVideoDetailSSR('load'), { once: true });
-    setTimeout(() => captureVideoDetailSSR('timer-500'), 500);
-    setTimeout(() => captureVideoDetailSSR('timer-2000'), 2000);
 
     // Take-A-Break dismiss-in-place. The overlay suppresses /api/*
     // calls until it goes away. Reloading flagged the session and

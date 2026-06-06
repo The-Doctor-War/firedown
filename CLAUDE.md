@@ -119,38 +119,94 @@ by `SabrStrategy`. `VariantProcessor` skips ffprobe for SABR variants (empty
 media URLs) and trusts the JS codec/resolution/duration. Captions use the
 separate `timedtext` path.
 
-### TikTok — page-world hook + the anti-bot throttle
+### TikTok — filterResponseData (item_list feeds + document SSR)
 
-TikTok capture is **not** webRequest-based. A page-world inject
-(`tiktok-inject.js`, loaded as a moz-extension WAR by `tiktok-content.js` at
-`document_start`) hooks `window.fetch`/`XMLHttpRequest` and posts the
-`/api/*/item_list/` JSON bodies to the background (`handleTikTokItemList`). Why
-not `filterResponseData`: it perturbs the stream enough to trigger TikTok's
-"Something went wrong" React overlay, refetching trips the single-use
-`msToken`/`X-Bogus` signing, and the ServiceWorker serves some endpoints
-`filterResponseData` can't tap.
+TikTok capture is entirely on the wire/document side — **two** `filterResponseData`
+producers in `background.js`, both feeding `handleTikTokItemList`. The content
+script does **no** capture (Take-A-Break dismissal only).
 
-- **The inject PAT must allow sub-segments.** A hashtag page fires
+1. **item_list XHRs — `filterResponseData` on `/api/*/item_list/`**: a passive
+   `onBeforeRequest` listener reads the page's OWN response **byte-exact**
+   (`filterResponseText` writes every chunk straight through — no refetch, so the
+   single-use `msToken`/`X-Bogus` signing is untouched). Covers FYP, profile,
+   hashtag/challenge, `/related/`, and `/newtab/`. Only viable because the
+   geckoview **ServiceWorker-visibility patch (0006)** makes SW-synthesized
+   responses fire `http-on-examine-response`, so `filterResponseData` now reaches
+   the SW-served `/related/item_list/` feeds that were once untappable.
+2. **Document SSR — `filterResponseData` on the `main_frame` HTML, DETAIL pages
+   only**: `/@user/video/<id>` detail pages inline the video into the document's
+   `__UNIVERSAL_DATA_FOR_REHYDRATION__` blob (under
+   `webapp.video-detail`/`webapp.reflow.video.detail`) and fire **no** item_list
+   XHR, so there's nothing else to tap. `extractTikTokSSRItems` pulls the blob from
+   the HTML (`TIKTOK_REHYDRATION_RE`) and returns the single detail item to
+   `handleTikTokItemList`. **Read the document RESPONSE, not the DOM** — raw bytes
+   are immune to React stripping the rehydration `<script>` during hydration (the
+   Threads "read the network response, not the DOM" lesson). If the document is
+   SW-synthesized, 0006 is again what makes it tappable. The listener is gated to
+   `TIKTOK_DETAIL_PATH_RE` — it does **not** run on `/foryou`, because the feed
+   document's blob holds **no** video (**proven on-device**: only
+   `webapp.app-context`/`i18n`/`biz`/`seo` scopes); the FYP feed is fully
+   client-rendered. Don't re-add a `/foryou` branch — it would just read ~165 KB
+   per load to find nothing.
+
+**The first `/foryou` video — generic catcher, NOT the parser (deliberate
+cardinal-rule exception).** TikTok renders the first FYP video from its **own
+client-side cache**, so that video's metadata **never crosses the wire** — it's in
+neither the document SSR (feed blob has no video, above) nor any item_list XHR
+(verified from a HAR: the first-played storage id was in *neither* recommend nor
+preload, only in the media fetch). So the parser structurally **cannot** capture
+it. The decision (maintainer's call) is to let the **generic catcher**
+(`downloader@`) grab it: TikTok's `webapp-prime` media host is **deliberately NOT
+block-listed in `regex.js`** — the one parser-owned site without a media block, on
+purpose. **Do not re-add a `webapp-prime`/`tiktokcdn` block rule** — it would
+re-break first-video capture. Trade-off accepted: because the block is gone, the
+generic catcher can also capture the *swipe* videos' media (which the parser
+already has rich), so duplicates are possible where the played URL differs from
+the parser's emitted variant URL (`BrowserDownloadRepository.isPresent` only
+collapses exact/trivially-different URLs). A storage-id-gated media fallback that
+captured *only* the uncaptured video was built and then **removed** at the
+maintainer's request — don't reintroduce it.
+
+**History — the page-world inject was retired.** TikTok capture *used* to depend
+on a page-world inject (`tiktok-inject.js`, a moz-extension WAR hooking
+`window.fetch`/`XMLHttpRequest`) because three things blocked `filterResponseData`:
+refetch tripping `msToken`/`X-Bogus` (N/A to a passive read), SW-served feeds
+being untappable (fixed by 0006), and a fear that the stream perturbation tripped
+the "Something went wrong" overlay. That last one **did not reproduce on-device**
+with byte-exact write-through, so the inject + its postMessage bridge were
+removed. The detail-page SSR read *also* started in the content script
+(`captureVideoDetailSSR`, DOM) but moved to the `main_frame` document filter (2.).
+Don't reintroduce the inject, and don't move SSR reading back to the DOM.
+
+- **The item_list PAT must allow sub-segments.** A hashtag page fires
   `/api/challenge/item_list/?…` AND `/api/challenge/item_list/newtab/?…`; the
   regex is `\/api\/[a-z_]+\/item_list(?:\/[a-z_]+)*\/?\?` so the `/newtab/` feed
   (≈half the videos) isn't dropped.
 - **Tag/challenge pages SSR no video data** (the rehydration blob is only
   app/i18n/seo context) — the feed is client-rendered via the item_list XHRs, so
-  the hook is the only source. Only `/@user/video/<id>` *detail* pages SSR a
-  single item (`captureVideoDetailSSR`).
+  the item_list listener is the only source there. The `main_frame` SSR listener
+  only runs on the detail (`/@user/video/<id>`) and feed (`/foryou`, `/`) paths.
 - **The anti-bot throttle is the real gotcha.** TikTok withholds the item_list
   XHRs entirely (the `Take_A_Break` reminder shows, only `/api/preload/` fires)
   unless the page's **fingerprint stays unstable**. Globally that's
   `privacy.resistFingerprinting` — a user toggle that ships OFF and degrades
-  every site. Instead, `GeckoRuntimeHelper.applyTikTokFingerprintingOverride`
-  scopes **`CanvasRandomization`** to first-party `tiktok.com` via FPP's
-  `privacy.fingerprintingProtection.granularOverrides` (FPP is already on). That
-  noises the canvas readback per session so the fingerprint never stabilises —
-  the read still **succeeds**. Do **not** use `+AllTargets`: it also enables the
-  canvas-extraction *blocking* targets, so `webmssdk`'s read fails and the page
-  throws "Something went wrong". Randomize, don't block; and keep it per-site
-  (no global RFP). If canvas alone ever stops dodging the throttle, add other
-  *randomizing* (never blocking) vectors, not `AllTargets`.
+  every site. The previous mitigation was a per-site FPP override
+  (`GeckoRuntimeHelper.applyTikTokFingerprintingOverride`) that scoped
+  `+CanvasRandomization` to first-party `tiktok.com` via
+  `privacy.fingerprintingProtection.granularOverrides` so the canvas readback
+  noised per session and the fingerprint never stabilised (the read still
+  succeeded — `+AllTargets` was the wrong knob: it enables the canvas-extraction
+  *blocking* targets, breaking `webmssdk`'s read → "Something went wrong").
+  **That override was REMOVED at the maintainer's request** (commit on
+  `claude/happy-fermi-VY4tV`). Consequence to be aware of: with no per-site
+  randomization, the throttle can re-engage and the item_list feeds may stop
+  firing on some loads — which starves **both** capture sources (the inject and
+  the new `filterResponseData` path), since neither can read a request the page
+  never makes. The ServiceWorker-visibility patch (0006) does **not** help here
+  — the throttle is server-side, not a response-visibility problem. If TikTok
+  capture regresses to only `/api/preload/`, this removal is the first suspect;
+  the fix is a *randomizing* (never blocking) FPP vector scoped to tiktok.com,
+  not global RFP and not `+AllTargets`.
 
 ### Capture dedup
 
@@ -448,8 +504,10 @@ The generic catcher has **two** sources, because `webRequest` alone misses media
    referrer: tab.url})` to populate the header cache via `onSendHeaders`, then
    forwards the (sanitized) result through the same emit path. So: content script
    *finds* it, the HEAD probe *authenticates* it.
-3. **Per-site page-world injects** (TikTok, Bilibili): the exception layer, for
-   what neither of the above can reach — see below.
+3. **Per-site page-world injects** (Bilibili): the exception layer, for what
+   neither of the above can reach — see below. (TikTok used one too, but its
+   inject was retired once `filterResponseData` + the 0006 SW-visibility patch
+   could read the feeds; see the TikTok section.)
 
 **MSE / `blob:` is not special.** A `blob:` URL on a `<video>` is just a handle to
 a `MediaSource`, never the download target — but MSE/HLS/DASH players still
@@ -645,9 +703,11 @@ need a GeckoView patch: FPP is already enabled at boot
 `privacy.fingerprintingProtection.overrides` pref (`"+JSDateTimeUTC"` on, `""`
 off) — read at boot and on change in `SettingsFragment` (no restart; applies on
 next page load, like RFP). **Crucially, that GLOBAL `overrides` pref is distinct
-from the per-site `granularOverrides`** that `applyTikTokFingerprintingOverride`
-owns to scope CanvasRandomization to tiktok.com — the two never collide, so don't
-fold one into the other. This is deliberately the no-patch route over IronFox's
+from the per-site `granularOverrides`** pref. The latter is no longer set by
+anything (it used to scope CanvasRandomization to tiktok.com via the now-removed
+`applyTikTokFingerprintingOverride`); keep these two prefs distinct — if a
+per-site override is ever reintroduced, it must not fold into this global
+`overrides` pref. This is deliberately the no-patch route over IronFox's
 `nsRFPService` code patch + custom bool pref (firedown-geckoview CLAUDE.md has the
 rationale). New string keys (`settings_utc_timezone*`) are translated across the
 same 16 locales the JIT toggle uses; the remaining (already-partial) locales fall

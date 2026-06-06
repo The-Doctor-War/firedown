@@ -356,7 +356,7 @@
     <string name="security_stat_blocked_scope">blocked on this page</string>
     <string name="select_all">Select all</string>
     <string name="select_all_not">Deselect all</string>
-    <string name="separator">-</string>
+    <string name="separator">·</string>
     <!-- Caption-count badge on a video row, e.g. "CC 52". %1$d = track count. -->
     <string name="caption_count_badge">CC %1$d</string>
     <!-- Section headers in the variant/download picker sheet. -->

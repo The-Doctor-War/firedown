@@ -64,8 +64,9 @@ public class WebHistoryDataRepository {
     }
 
     public void purgeDatabase() {
-        // Purge records older than 180 days
-        mDiskExecutor.execute(() -> mDao.purgeDatabase(System.currentTimeMillis() - TimeUnit.DAYS.toMillis(180)));
+        // Purge records older than the retention window (HISTORY_RETENTION_INTERVAL).
+        // Throttled to once/day by App.purgeDatabases().
+        mDiskExecutor.execute(() -> mDao.purgeDatabase(System.currentTimeMillis() - Preferences.HISTORY_RETENTION_INTERVAL));
     }
 
     public void add(WebHistoryEntity web) {

@@ -176,6 +176,17 @@ public class App extends Application implements Configuration.Provider{
     }
 
     public void purgeDatabases(){
+        // Throttle to at most once per day. The purge only removes history
+        // older than the retention window, so running it on every cold start
+        // is a redundant full-table DELETE scan — gate it on a last-run
+        // timestamp (mirrors the tab-archive last-run pattern).
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mAppContext);
+        long lastRun = prefs.getLong(Preferences.SETTINGS_HISTORY_PURGE_LAST_RUN, 0L);
+        long now = System.currentTimeMillis();
+        if (now - lastRun < Preferences.ONE_DAY_INTERVAL) {
+            return;
+        }
+        prefs.edit().putLong(Preferences.SETTINGS_HISTORY_PURGE_LAST_RUN, now).apply();
         mWebHistoryDataRepository.purgeDatabase();
     }
 

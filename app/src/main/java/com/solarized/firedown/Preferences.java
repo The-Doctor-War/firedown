@@ -313,6 +313,9 @@ public class Preferences {
     public static final String SETTINGS_TABS_ARCHIVE_LAST_RUN = "com.solarized.firedown.preferences.tabs.archive.last.run";
     public static final String SETTINGS_TABS_ARCHIVE_INTERVAL = "com.solarized.firedown.preferences.tabs.archive.interval";
 
+    /** Last time the web-history retention purge ran, used to throttle it to once/day. */
+    public static final String SETTINGS_HISTORY_PURGE_LAST_RUN = "com.solarized.firedown.preferences.history.purge.last.run";
+
     /**
      * Snapshot of the archived-tab count at the moment the user last
      * dismissed the archive banner. The banner re-appears when the live
@@ -360,6 +363,9 @@ public class Preferences {
     public static final long ONE_WEEK_INTERVAL = 604_800_000L;
     public static final long THIRTY_DAYS_INTERVAL = 2_592_000_000L;
     public static final long NEVER_INTERVAL     = -1L;
+
+    /** Web-history retention window: entries older than this are purged. */
+    public static final long HISTORY_RETENTION_INTERVAL = 180L * ONE_DAY_INTERVAL;
 
     public static final int LIST_LIMIT = 25;
 

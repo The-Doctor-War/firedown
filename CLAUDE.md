@@ -133,22 +133,39 @@ script does **no** capture (Take-A-Break dismissal only).
    geckoview **ServiceWorker-visibility patch (0006)** makes SW-synthesized
    responses fire `http-on-examine-response`, so `filterResponseData` now reaches
    the SW-served `/related/item_list/` feeds that were once untappable.
-2. **Document SSR — `filterResponseData` on the `main_frame` HTML**: some pages
-   inline video data into the document's `__UNIVERSAL_DATA_FOR_REHYDRATION__` blob
-   and fire **no** item_list XHR for it — `/@user/video/<id>` detail pages (one
-   item under `webapp.video-detail`/`webapp.reflow.video.detail`), and the
-   `/foryou` (+ `/`) feed, which SSRs the **first** video while the item_list XHRs
-   carry only the rest. `extractTikTokSSRItems` pulls the blob from the HTML
-   (`TIKTOK_REHYDRATION_RE`), takes the single detail item or walks the whole blob
-   structurally for all feed items (`tiktokCollectVideoItems` — the feed scope key
-   varies by build), and feeds them to `handleTikTokItemList`. **Read the document
-   RESPONSE, not the DOM** — raw bytes are immune to React stripping the
-   rehydration `<script>` during hydration (the Threads "read the network response,
-   not the DOM" lesson). If the document is SW-synthesized, 0006 is again what
-   makes it tappable. Confirmed from a `/foryou` HAR: the first-played media id was
-   in **neither** the recommend nor preload item_list — only in the document.
-   (Caveat: cached/bfcache navigations serve no network response so this won't
-   fire; acceptable — the item was captured on its first networked load.)
+2. **Document SSR — `filterResponseData` on the `main_frame` HTML**:
+   `/@user/video/<id>` **detail** pages inline the video into the document's
+   `__UNIVERSAL_DATA_FOR_REHYDRATION__` blob (under
+   `webapp.video-detail`/`webapp.reflow.video.detail`) and fire **no** item_list
+   XHR, so there's nothing else to tap. `extractTikTokSSRItems` pulls the blob from
+   the HTML (`TIKTOK_REHYDRATION_RE`), takes the single detail item (or walks the
+   blob structurally — `tiktokCollectVideoItems`), and feeds it to
+   `handleTikTokItemList`. **Read the document RESPONSE, not the DOM** — raw bytes
+   are immune to React stripping the rehydration `<script>` during hydration (the
+   Threads "read the network response, not the DOM" lesson). If the document is
+   SW-synthesized, 0006 is again what makes it tappable. The listener also runs on
+   `/foryou` (+ `/`) but — **proven on-device** — the feed document's blob holds
+   **no** video (only `webapp.app-context`/`i18n`/`biz`/`seo` scopes), so the feed
+   branch finds nothing; the FYP feed is fully client-rendered. (That branch is
+   effectively dead weight on `/foryou` — a candidate to strip to detail-only.)
+
+**The first `/foryou` video — generic catcher, NOT the parser (deliberate
+cardinal-rule exception).** TikTok renders the first FYP video from its **own
+client-side cache**, so that video's metadata **never crosses the wire** — it's in
+neither the document SSR (feed blob has no video, above) nor any item_list XHR
+(verified from a HAR: the first-played storage id was in *neither* recommend nor
+preload, only in the media fetch). So the parser structurally **cannot** capture
+it. The decision (maintainer's call) is to let the **generic catcher**
+(`downloader@`) grab it: TikTok's `webapp-prime` media host is **deliberately NOT
+block-listed in `regex.js`** — the one parser-owned site without a media block, on
+purpose. **Do not re-add a `webapp-prime`/`tiktokcdn` block rule** — it would
+re-break first-video capture. Trade-off accepted: because the block is gone, the
+generic catcher can also capture the *swipe* videos' media (which the parser
+already has rich), so duplicates are possible where the played URL differs from
+the parser's emitted variant URL (`BrowserDownloadRepository.isPresent` only
+collapses exact/trivially-different URLs). A storage-id-gated media fallback that
+captured *only* the uncaptured video was built and then **removed** at the
+maintainer's request — don't reintroduce it.
 
 **History — the page-world inject was retired.** TikTok capture *used* to depend
 on a page-world inject (`tiktok-inject.js`, a moz-extension WAR hooking
@@ -158,9 +175,8 @@ being untappable (fixed by 0006), and a fear that the stream perturbation trippe
 the "Something went wrong" overlay. That last one **did not reproduce on-device**
 with byte-exact write-through, so the inject + its postMessage bridge were
 removed. The detail-page SSR read *also* started in the content script
-(`captureVideoDetailSSR`, DOM) but moved to the `main_frame` document filter (2.)
-when the feed-first-video gap surfaced — one mechanism, immune to hydration
-timing. Don't reintroduce the inject, and don't move SSR reading back to the DOM.
+(`captureVideoDetailSSR`, DOM) but moved to the `main_frame` document filter (2.).
+Don't reintroduce the inject, and don't move SSR reading back to the DOM.
 
 - **The item_list PAT must allow sub-segments.** A hashtag page fires
   `/api/challenge/item_list/?…` AND `/api/challenge/item_list/newtab/?…`; the

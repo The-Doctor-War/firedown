@@ -9,6 +9,12 @@ android {
     defaultConfig {
 
 
+        packagingOptions {
+            exclude 'lib/*/libcrashhelper.so'
+            exclude 'lib/*/libcrashtools.so'
+        }
+
+
 //        packagingOptions {
 //            doNotStrip '**.so'     // ADD THIS! #1
 //        }
@@ -84,12 +90,22 @@ android {
     //  - https://stackoverflow.com/questions/9206117/how-to-workaround-autoomitting-fiiles-folders-starting-with-underscore-in
 }
 
+ext {
+    geckoviewChannel = "lite"
+    // Locally-built GeckoView from firedown-geckoview, published to mavenLocal
+    // (~/.m2). A non-official source build is versioned with a `-SNAPSHOT` suffix
+    // by Gecko's gradle (the build log prints "GeckoView version =
+    // 151.0.20260601110758-SNAPSHOT"), and `mavenLocal()` is added first in
+    // settings.gradle so it resolves ahead of maven.mozilla.org. To go back to
+    // Mozilla's official AAR, drop the `-SNAPSHOT` (and the local build wins only
+    // while it's in ~/.m2). Run `./build.sh sync --apply` in firedown-geckoview
+    // to auto-detect/rewrite this from whatever was actually published.
+    geckoviewVersion = "151.0.20260601110758-SNAPSHOT"
+}
+
 
 
 dependencies {
-
-
-    implementation "org.mozilla.geckoview:geckoview-default:151.0.20260601110758"
 
     // Installs the bundled baseline profile (app/src/main/baseline-prof.txt)
     // at first launch so ART AOT-compiles the listed hot methods instead of

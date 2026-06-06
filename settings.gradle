@@ -11,6 +11,7 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
+        mavenLocal()   // resolve the locally-built GeckoView AAR (~/.m2) first
         google()
         mavenCentral()
         maven { url "https://maven.mozilla.org/maven2" }

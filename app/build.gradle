@@ -8,12 +8,10 @@ android {
 
     defaultConfig {
 
-
-        packagingOptions {
-            exclude 'lib/*/libcrashhelper.so'
-            exclude 'lib/*/libcrashtools.so'
-        }
-
+        // No crash-reporter packagingOptions: our local GeckoView is built with
+        // --disable-crashreporter, so the AAR carries no libcrashhelper.so /
+        // libcrashtools.so to exclude. (If you ever fall back to Mozilla's
+        // official AAR, which bundles them, re-add the excludes.)
 
 //        packagingOptions {
 //            doNotStrip '**.so'     // ADD THIS! #1

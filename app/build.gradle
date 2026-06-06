@@ -8,10 +8,16 @@ android {
 
     defaultConfig {
 
-        // No crash-reporter packagingOptions: our local GeckoView is built with
-        // --disable-crashreporter, so the AAR carries no libcrashhelper.so /
-        // libcrashtools.so to exclude. (If you ever fall back to Mozilla's
-        // official AAR, which bundles them, re-add the excludes.)
+        // Strip GeckoView's crash-reporter native libs from the APK. VERIFIED that
+        // even our --disable-crashreporter local build STILL bundles these in the
+        // AAR (unzip -l geckoview-default-*.aar shows jni/arm64-v8a/libcrashhelper.so
+        // ~3.5 MB + libcrashtools.so ~6.1 MB) — the build flag doesn't drop them.
+        // We don't ship a crash reporter (no-telemetry app), so exclude them: ~10 MB
+        // off the arm64 APK. Path is the APK layout (lib/<abi>/), not the AAR's jni/.
+        packagingOptions {
+            exclude 'lib/*/libcrashhelper.so'
+            exclude 'lib/*/libcrashtools.so'
+        }
 
 //        packagingOptions {
 //            doNotStrip '**.so'     // ADD THIS! #1

@@ -418,30 +418,46 @@ it. How each is obtained (current architecture):
   `browser.cookies.getAll({url})` (privileged → **includes HttpOnly**) and
   returns a built `Cookie` header string. So cookies are pulled from the browser
   jar on the native side's request, not scraped from the page.
-- **Content-script-discovered URLs** (e.g. a `<video>` `src` the catcher didn't
-  see on the wire) have no cached headers, so `requests.js` does a `HEAD`
-  `fetch(url, {credentials:'include', referrer: tab.url})` to **populate the
-  header cache via `onSendHeaders`**, then forwards the (sanitized) result.
+- For headers on **content-script-discovered** URLs (next section), see the
+  `HEAD`-probe backfill there.
 
 The captured header set + cookie are reused for the whole stream — for HLS/DASH,
 ffmpeg propagates them to every sub-request (master/playlist/segment/key); see
 "Per-site request quirks" below.
 
-### MSE / `blob:` players are captured at the segment-request level
+### Three capture sources — wire, DOM, inject (webRequest is NOT enough alone)
 
-A `blob:` URL on a `<video>` is just a handle to a `MediaSource`; it's never the
-download target. But MSE/HLS/DASH players still `fetch`/XHR their manifest +
-segments over HTTP, so those are **ordinary network requests the generic catcher
-already sees** (URL + headers via `webRequest`, cookies via the API above,
-metadata via the `metadatareader` probe). So there is **no `blob:`-specific
-capture path** — network-level capture is the backbone, and an MSE player is just
-its segment requests. The cases `webRequest` structurally *can't* see, which is
-why per-site **page-world injects** exist (TikTok, Bilibili), are: ServiceWorker-
-*synthesized* responses (the inject's `fetch`/XHR hook runs before the SW),
-segments assembled/decrypted in JS with no per-segment network fetch, and
-single-use/signed URLs that capture fine but can't be re-fetched (there you'd
-need the bytes, not the URL). Reach for an inject only for those; the catcher
-covers the rest.
+The generic catcher has **two** sources, because `webRequest` alone misses media:
+
+1. **Wire — `webRequest`** (`requests.js`): media fetched over HTTP. The backbone,
+   and the only source that gets request headers + cookies "for free". But it
+   **only fires for requests it actually observes** — it misses media that loaded
+   from cache, before the listener attached, or that lives in a DOM attribute
+   without a fresh request.
+2. **DOM — content script** (`content-script.js`): scrapes the page for media the
+   wire never showed. It reports `<img>` / `<source>` `src`/`srcset` URLs (with a
+   `MutationObserver` on `src`/`srcset` for dynamically-added ones) to the
+   background, and **separately scrapes JSON-LD `VideoObject` + `og:`/`twitter:`
+   metadata** to enrich captures with accurate title/description (on video SPAs
+   the `<title>`/`og:title` are usually the generic site name, so JSON-LD/
+   `og:video:title` rank higher). A DOM-discovered URL has **no cached headers**,
+   so `requests.js` does a `HEAD` `fetch(url, {credentials:'include',
+   referrer: tab.url})` to populate the header cache via `onSendHeaders`, then
+   forwards the (sanitized) result through the same emit path. So: content script
+   *finds* it, the HEAD probe *authenticates* it.
+3. **Per-site page-world injects** (TikTok, Bilibili): the exception layer, for
+   what neither of the above can reach — see below.
+
+**MSE / `blob:` is not special.** A `blob:` URL on a `<video>` is just a handle to
+a `MediaSource`, never the download target — but MSE/HLS/DASH players still
+`fetch`/XHR their manifest + segments over HTTP, so those are ordinary requests
+the wire source already catches (and the content script catches `<source>`s). So
+there's **no `blob:`-specific path**. An inject is only needed for what's
+structurally invisible to *both* wire and DOM: ServiceWorker-*synthesized*
+responses (the inject's `fetch`/XHR hook runs before the SW), segments assembled/
+decrypted in JS with no network fetch, and single-use/signed URLs that capture
+fine but can't be re-fetched (there you need the bytes, not the URL). Reach for an
+inject only for those.
 
 ### Manifest vs progressive — declared, never URL-sniffed
 

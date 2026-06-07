@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.UUID;
 
 /**
@@ -84,6 +85,12 @@ public class SaveFrameTask extends TaskRunnable {
                 return;
             }
 
+            // Capture the frame dimensions before recycle so the saved image
+            // carries a resolution tag (it never passes through DownloadTask's
+            // metadata backfill — it's added straight to the repository).
+            final int frameW = frame.getWidth();
+            final int frameH = frame.getHeight();
+
             String base = FilenameUtils.getBaseName(filePath);
             outFile = ensureFilePath(new File(StoragePaths.getDownloadPath(mTaskManager),
                     base + "_frame.jpg").getAbsolutePath());
@@ -97,7 +104,7 @@ public class SaveFrameTask extends TaskRunnable {
                 frame.recycle();
             }
 
-            DownloadEntity out = buildEntity(source, outFile);
+            DownloadEntity out = buildEntity(source, outFile, frameW, frameH);
             mDownloadRepository.addSync(out);
             success = true;
             // Pass the saved image through so the UI can offer a "View" that
@@ -146,7 +153,7 @@ public class SaveFrameTask extends TaskRunnable {
     }
 
     /** A finished image download for the saved frame. */
-    private DownloadEntity buildEntity(DownloadEntity source, File outFile) {
+    private DownloadEntity buildEntity(DownloadEntity source, File outFile, int width, int height) {
         DownloadEntity entity = new DownloadEntity();
         entity.setId(UUID.randomUUID().hashCode());
         entity.setFileName(outFile.getName());
@@ -157,6 +164,11 @@ public class SaveFrameTask extends TaskRunnable {
         entity.setFileOriginUrl(source.getOriginUrl());
         entity.setFileStatus(Download.FINISHED);
         entity.setFileThumbnailUnavailable(false);
+        // "WxH" — same format the parser/probe path uses for images, so the
+        // Downloads list/info row shows a resolution tag for the saved frame.
+        if (width > 0 && height > 0) {
+            entity.setFileResolution(String.format(Locale.US, "%dx%d", width, height));
+        }
         return entity;
     }
 }

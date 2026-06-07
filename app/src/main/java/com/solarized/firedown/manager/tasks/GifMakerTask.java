@@ -8,6 +8,7 @@ import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.data.repository.DownloadDataRepository;
 import com.solarized.firedown.ffmpegutils.FFmpegGifMaker;
 import com.solarized.firedown.ffmpegutils.FFmpegListener;
+import com.solarized.firedown.ffmpegutils.FFmpegMetaDataReader;
 import com.solarized.firedown.manager.ServiceActions;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.StoragePaths;
@@ -114,6 +115,14 @@ public class GifMakerTask extends TaskRunnable implements FFmpegListener {
             mDownloadEntity.setFileSize(outFile.length());
 
             mDownloadEntity.setFileStatus(Download.FINISHED);
+
+            // Stamp the resolution so the Downloads list/info row shows a tag.
+            // Only the target width is known here (ffmpeg derives the height
+            // from the source aspect), so probe the finished GIF for "WxH".
+            // This entity is added straight to the repo — it never passes
+            // through DownloadTask's metadata backfill.
+            mDownloadEntity.setFileResolution(
+                    FFmpegMetaDataReader.probeImageResolution(outFile.getAbsolutePath()));
 
             mDownloadRepository.addSync(mDownloadEntity);
 

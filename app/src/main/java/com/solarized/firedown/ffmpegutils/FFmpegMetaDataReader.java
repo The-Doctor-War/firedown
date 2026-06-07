@@ -545,6 +545,44 @@ public class FFmpegMetaDataReader {
 
     }
 
+    /**
+     * Probe a finished local file and return its image resolution as "WxH"
+     * (the format the parser/getStreams path uses for images), or null if it
+     * can't be determined. Self-contained — opens, reads, and releases its own
+     * reader. Used by tasks that create an image entity outside the normal
+     * DownloadTask flow (saved frames, made GIFs) and so don't get its
+     * metadata backfill.
+     */
+    public static String probeImageResolution(String path) {
+        if (TextUtils.isEmpty(path)) {
+            return null;
+        }
+        FFmpegMetaDataReader reader = new FFmpegMetaDataReader();
+        try {
+            FFmpegMetaData meta = reader.getStreamInfo(path, null, false);
+            if (meta == null) {
+                return null;
+            }
+            ArrayList<FFmpegEntity> streams = reader.getStreams();
+            if (streams == null) {
+                return null;
+            }
+            for (FFmpegEntity stream : streams) {
+                if (stream != null
+                        && stream.getCodecType() == FFmpegStreamInfo.CodecType.VIDEO.getValue()
+                        && !TextUtils.isEmpty(stream.getInfo())) {
+                    return stream.getInfo();
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            reader.stop();
+            reader.release();
+        }
+    }
+
 
     private boolean hasVideoStream(FFmpegStreamInfo[] fFmpegStreamInfo) {
         for (FFmpegStreamInfo info : fFmpegStreamInfo) {

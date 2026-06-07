@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "5.25",
+  "version": "5.26",
   "browser_specific_settings": {
     "gecko": {
       "id": "parser@solarized.dev"
@@ -16,17 +16,14 @@
   "content_scripts": [
     {
       "matches": [
-        "*://www.bilibili.tv/*"
+        "<all_urls>"
       ],
       "js": [
-        "bilibili-tv-content.js"
+        "page-state-bridge.js"
       ],
-      "run_at": "document_idle",
+      "run_at": "document_start",
       "all_frames": false
     }
-  ],
-  "web_accessible_resources": [
-    "bilibili-tv-inject.js"
   ],
   "permissions": [
     "nativeMessaging",

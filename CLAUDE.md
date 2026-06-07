@@ -53,12 +53,48 @@ Consequences when working on a parser:
 
 Some parsers read the page's own JS state instead of a network response —
 **Bilibili.tv** is the example: the play page SSR-inlines the playurl into
-`window.__initialState` (a devalue IIFE) and fires no playurl XHR, so a
-page-world inject (`bilibili-tv-inject.js`, loaded as a moz-extension WAR to
-bypass CSP — the TikTok pattern) reads `player.playUrl.dash.{video,audio}` and
-emits the two whole-track `.m4s` baseUrls (DASH SegmentBase — each baseUrl is
-one complete track byte-range-fetched, *not* a segment list) as video+audio
-variants, which `FFmpegMergeStrategy` muxes natively (no ffmpeg.wasm).
+`window.__initialState` (a devalue IIFE) and fires no playurl XHR, so it can be
+read **only** from the page world. This is handled by the **generic page-state
+bridge** (see below), not a per-site script: the bridge finds
+`player.playUrl.dash.{video,audio}` and emits the two whole-track `.m4s` baseUrls
+(DASH SegmentBase — each baseUrl is one complete track byte-range-fetched, *not*
+a segment list) as video+audio variants, which `FFmpegMergeStrategy` muxes
+natively (no ffmpeg.wasm).
+
+### Page-world state — the generic `wrappedJSObject` bridge (no per-site scripts)
+
+When a site inlines the playable media into a page-world JS global
+(`window.__initialState`, `__NEXT_DATA__`, `__NUXT__`, a Redux/Apollo store, a
+devalue blob …) and fires **no** playurl XHR, neither the wire nor the DOM can
+see it — only page-world JS can. **Do NOT add a per-site content-script + WAR
+inject pair for this** (the old Bilibili.tv approach, since removed). One
+catch-all content script, `parser/page-state-bridge.js`, matched on
+**`<all_urls>`** (so it needs **no per-site `matches` and no host permissions**),
+covers every such site:
+
+- It reads the page's real globals via Firefox's Xray **`window.wrappedJSObject`**
+  waiver — the same mechanism `youtube/content.js` (PoToken `eval`) and
+  `webrequests/content-script.js` already rely on in this GeckoView, so it's
+  confirmed to work. **No `<script>` inject, no web-accessible resource, no
+  page-CSP problem.**
+- It runs a **bounded** generic search (`findDash`, depth/node-capped) for a DASH
+  `{video[],audio[]}` slice, **copies it to plain data** with index loops
+  (Xray-waived page arrays misbehave with `.some`/`.map`/`.filter` callbacks —
+  use direct reads), builds video+audio variants, and posts them to the
+  background.
+- Background `kind:"page-state-media"` → `sendVariants` with a **generic** Referer
+  = the page origin (covers bilibili's upos/bilivideo anti-leech without any
+  per-site host check). Per-site specifics, if ever needed, belong in
+  `background.js`, never as new injected files.
+- Cheap on the ~all sites with no such state: it probes a short list of known
+  state-global names and no-ops when none hold media; the persistent SPA-nav
+  observer is armed **only after** a successful capture.
+
+Trade-off vs. the old bespoke inject: metadata is generic (title from
+`og:title`/`document.title`, thumb from `og:image`) rather than episode-precise —
+accepted to keep one mechanism with zero per-site scripts. A site still needs its
+`regex.js` block rule for the media it emits (Bilibili.tv's `.m4s` rule is
+unchanged), same cardinal rule as any parser.
 - **Do not** "fix" a missing capture by removing/bypassing the regex block so
   the generic catcher grabs it. That reintroduces the duplicate and drops
   metadata. Fix the **parser** instead.
@@ -574,10 +610,14 @@ The generic catcher has **two** sources, because `webRequest` alone misses media
    referrer: tab.url})` to populate the header cache via `onSendHeaders`, then
    forwards the (sanitized) result through the same emit path. So: content script
    *finds* it, the HEAD probe *authenticates* it.
-3. **Per-site page-world injects** (Bilibili): the exception layer, for what
-   neither of the above can reach — see below. (TikTok used one too, but its
-   inject was retired once `filterResponseData` + the 0006 SW-visibility patch
-   could read the feeds; see the TikTok section.)
+3. **Page-world state** — read via the generic `wrappedJSObject` bridge
+   (`parser/page-state-bridge.js`, `<all_urls>`), for media inlined into a page
+   JS global with no XHR (Bilibili.tv). See "Page-world state — the generic
+   `wrappedJSObject` bridge" above. This **replaced** per-site inject pairs;
+   prefer `wrappedJSObject` from a content script over a `<script>`/WAR inject.
+   (TikTok used an inject too, retired once `filterResponseData` + the 0006
+   SW-visibility patch could read the feeds; see the TikTok section. A WAR inject
+   is now only for what `wrappedJSObject` genuinely can't reach.)
 
 **MSE / `blob:` is not special.** A `blob:` URL on a `<video>` is just a handle to
 a `MediaSource`, never the download target — but MSE/HLS/DASH players still

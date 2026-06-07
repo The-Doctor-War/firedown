@@ -3999,44 +3999,58 @@ browser.webRequest.onBeforeRequest.addListener(
 );
 
 // ============================================================================
-// Bilibili.tv (international / bstation)
+// Page-world state media (generic) — backs Bilibili.tv and any state-inlining
+// site
 // ----------------------------------------------------------------------------
-// The play page SSR-inlines the playurl into window.__initialState (a devalue
-// IIFE the page evaluates), and fires no separate playurl XHR — so a page-world
-// content script (bilibili-tv-content.js + bilibili-tv-inject.js) reads
-// player.playUrl.dash.{video[],audio[]} directly and posts the video+audio DASH
-// baseUrls here. Each rep's baseUrl is ONE complete .m4s track (DASH
-// SegmentBase, byte-range accessed) — not a segment list — so emitting
-// {url: video, audioUrl: audio} routes to FFmpegMergeStrategy, which muxes the
-// two whole-track files natively (FFmpegOkhttp does the range fetches). No
-// ffmpeg.wasm. Referer https://www.bilibili.tv/ is required by the upos/
-// bilivideo CDN; segments are .m4s which the generic catcher already drops, and
-// the regex.js block reinforces it for the emitted baseUrls.
+// Some sites SSR-inline the playurl into a page-world JS global and fire no
+// playurl XHR — bilibili.tv is the canonical case: window.__initialState (a
+// devalue IIFE) carries player.playUrl.dash.{video[],audio[]}. The wire and the
+// DOM both miss it; only page-world JS can read it. The generic
+// page-state-bridge.js content script (ONE file, <all_urls>, reads via the Xray
+// wrappedJSObject waiver — no inject/WAR/CSP, no per-site files) finds the DASH
+// slice, builds video+audio variants, and posts them here.
+//
+// Each rep's baseUrl is ONE complete .m4s track (DASH SegmentBase, byte-range
+// accessed) — not a segment list — so {url: video, audioUrl: audio} routes to
+// FFmpegMergeStrategy, which muxes the two whole-track files natively
+// (FFmpegOkhttp does the range fetches). No ffmpeg.wasm.
+//
+// Referer: anti-leech CDNs (e.g. bilibili's upos/bilivideo, which truncates
+// without one) check the page origin, so we attach the page's own origin
+// generically — no per-site host check. For bilibili the emitted .m4s baseUrls
+// stay block-listed in regex.js so the generic catcher can't dupe them.
 // ============================================================================
 
 browser.runtime.onMessage.addListener((message, sender) => {
-    if (message?.kind !== "bilibili-tv-streams") return;
+    if (message?.kind !== "page-state-media") return;
     const p = message.payload;
     if (!p || !Array.isArray(p.variants) || p.variants.length === 0) return;
 
     const tabId = sender.tab?.id ?? -1;
+    const pageUrl = p.origin || sender.tab?.url || "";
     const details = {
         tabId,
         _resolvedTabId: tabId >= 0 ? tabId : undefined,
-        url: p.origin || sender.tab?.url || "",
-        requestId: `bilibili-tv-${Date.now()}`
+        url: pageUrl,
+        requestId: `page-state-${Date.now()}`
     };
 
-    // The upos/bilivideo CDN truncates without a Referer; attach the site one.
-    const requestHeaders = [{ name: "Referer", value: "https://www.bilibili.tv/" }];
+    // Attach the page's own origin as Referer so the native re-fetch
+    // authenticates against anti-leech CDNs. Generic — derived from the page URL.
+    let requestHeaders;
+    try {
+        requestHeaders = [{ name: "Referer", value: new URL(pageUrl).origin + "/" }];
+    } catch (_) {
+        requestHeaders = [];
+    }
 
-    log("BILIBILI-TV", `received ${p.variants.length} variant(s)`, {
-        title: p.title, origin: (p.origin || "").slice(0, 80), tabId
+    log("PAGE-STATE", `received ${p.variants.length} variant(s)`, {
+        title: p.title, origin: pageUrl.slice(0, 80), tabId
     });
 
     sendVariants(details, {
         variants: p.variants,
-        origin: p.origin,
+        origin: pageUrl,
         description: p.title,
         name: p.title,
         img: p.img,

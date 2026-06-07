@@ -2897,6 +2897,39 @@ async function fetchInstagramGraphQL(shortcode, cookieString) {
 // Instagram — video extraction from different response shapes
 // ============================================================================
 
+// Instagram/Threads video_versions quality tiers. `type` is the only thing that
+// distinguishes renditions on lean items (Threads logged-out: each version is
+// just {type, url} — no width/height/bitrate). Lower type = higher quality; the
+// best tier is the source rendition, so it carries the item's original_*.
+const IG_QUALITY_TIER = { 101: "High", 102: "Medium", 103: "Low", 104: "Lowest" };
+
+/**
+ * Build sendVariants() variants from an IG/Threads video_versions array.
+ * Prefers each rendition's own width/height; for lean items that ship only a
+ * `type`, the best tier gets the item's real original_* resolution and the
+ * lower tiers get a quality-name label, so the picker rows are distinct instead
+ * of all blank or all showing the same source resolution.
+ */
+function buildInstagramVariants(videoVersions, ow, oh) {
+    let bestType = Infinity;
+    for (const vv of videoVersions) {
+        if (typeof vv?.type === "number" && vv.type < bestType) bestType = vv.type;
+    }
+    return videoVersions.map(v => {
+        const variant = { url: v.url };
+        if (v.width && v.height) {
+            variant.width = v.width;
+            variant.height = v.height;
+        } else if (typeof v.type === "number" && v.type === bestType && ow && oh) {
+            variant.width = ow;
+            variant.height = oh;
+        } else if (typeof v.type === "number") {
+            variant.label = IG_QUALITY_TIER[v.type] || ("Quality " + v.type);
+        }
+        return variant;
+    });
+}
+
 /**
  * Extract and send videos from an Instagram media API item.
  */
@@ -2929,33 +2962,8 @@ function sendInstagramItem(details, item, originOverride) {
     });
 
     if (item.video_versions) {
-        // DIAGNOSTIC: dump the raw per-rendition shape so we can see which field
-        // distinguishes Threads renditions (Instagram uses width/height/type;
-        // Threads' lean items appear to drop them). Object.keys reveals every
-        // field present; the named fields are the likely candidates. DEBUG-gated.
-        log("IG-ITEM", `video_versions raw dump`, {
-            code,
-            original_width: item.original_width,
-            original_height: item.original_height,
-            versions: item.video_versions.map(v => ({
-                keys: v && typeof v === "object" ? Object.keys(v) : typeof v,
-                type: v?.type,
-                width: v?.width,
-                height: v?.height,
-                bandwidth: v?.bandwidth,
-                bitrate: v?.bitrate,
-                url: typeof v?.url === "string" ? v.url.slice(0, 70) : v?.url
-            }))
-        });
-        // video_versions sometimes omit per-rendition width/height (notably the
-        // lean Relay/API fragments Threads serves logged-out); fall back to the
-        // item's declared original_* so the quality picker still shows a
-        // resolution instead of blank rows. v.width wins when present.
-        const ow = item.original_width || 0;
-        const oh = item.original_height || 0;
-        const variants = item.video_versions.map(v => ({
-            url: v.url, width: v.width || ow || 0, height: v.height || oh || 0
-        }));
+        const variants = buildInstagramVariants(
+            item.video_versions, item.original_width || 0, item.original_height || 0);
         log("IG-ITEM", `Sending ${variants.length} video variant(s)`, { code, firstUrl: variants[0]?.url?.slice(0, 80) });
         sendVariants(details, { variants, origin, description: videoText, img, name: author, duration });
     }
@@ -2965,11 +2973,8 @@ function sendInstagramItem(details, item, originOverride) {
         for (const media of item.carousel_media) {
             if (!media.video_versions) continue;
             carouselVideos++;
-            const mow = media.original_width || 0;
-            const moh = media.original_height || 0;
-            const variants = media.video_versions.map(v => ({
-                url: v.url, width: v.width || mow || 0, height: v.height || moh || 0
-            }));
+            const variants = buildInstagramVariants(
+                media.video_versions, media.original_width || 0, media.original_height || 0);
             const mediaImg = getInstagramThumbnail(media) || img;
             const mediaDuration = Math.round((media.video_duration || 0) * 1000);
             sendVariants(details, { variants, origin, description: videoText, img: mediaImg, name: author, duration: mediaDuration });

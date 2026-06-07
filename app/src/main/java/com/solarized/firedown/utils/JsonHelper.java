@@ -166,6 +166,7 @@ public class JsonHelper {
                 int width = v.optInt("width", 0);
                 int height = v.optInt("height", 0);
                 int bitrate = v.optInt("bitrate", 0);
+                String label = v.optString("label", "");
 
                 FFmpegEntity stream = new FFmpegEntity();
                 stream.setStreamUrl(v.optString("url", ""));
@@ -193,10 +194,15 @@ public class JsonHelper {
                 } else if (height > 0) {
                     stream.setStreamDescription(String.format(Locale.US, "%dp", height));
                     stream.setInfo(String.format(Locale.US, "%dp", height));
-                } else if (bitrate > 0) {
-                    String label = formatBitrate(bitrate);
+                } else if (!label.isEmpty()) {
+                    // Explicit parser label (e.g. IG/Threads quality tier
+                    // "Medium"/"Low" when only a `type` distinguishes renditions).
                     stream.setStreamDescription(label);
                     stream.setInfo(label);
+                } else if (bitrate > 0) {
+                    String br = formatBitrate(bitrate);
+                    stream.setStreamDescription(br);
+                    stream.setInfo(br);
                 }
 
                 // Populate SABR FormatId fields from variant + SABR format lookup

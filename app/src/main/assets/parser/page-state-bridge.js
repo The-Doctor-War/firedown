@@ -18,9 +18,12 @@
 //     and hands them to the background, which emits them via sendVariants →
 //     native FFmpegMergeStrategy (whole-track .m4s mux, no ffmpeg.wasm).
 //
-// Per-site specifics stay in background.js (data/logic), never as new injected
-// files. Cheap on the ~all sites that have no such state: it probes a short
-// list of known state globals by name and no-ops when none hold media.
+// Per-site logic that needs page-world DATA (e.g. bilibili.tv's ogv episode
+// title/cover) is a host-keyed branch in `resolveMeta` HERE — this is the only
+// place that holds the page-world `root`, which the background can't read.
+// Per-site REQUEST/emit specifics stay in background.js. Either way: never a new
+// injected file. Cheap on the ~all sites that have no such state: it probes a
+// short list of known state globals by name and no-ops when none hold media.
 (() => {
     'use strict';
 
@@ -172,8 +175,87 @@
         return t || location.host || "video";
     }
 
+    // Read a string/number property off an Xray-waived object, defensively.
+    function readPrim(o, key) {
+        try {
+            const v = o[key];
+            return (typeof v === "string" || typeof v === "number") ? v : null;
+        } catch (_) { return null; }
+    }
+
+    // Bilibili.tv episode model lives at root.ogv: season.title + the playing
+    // episode (ogv.epId matched against ogv.sectionsList[].episodes[].episode_id)
+    // give an episode-precise "Season Episode" title and a per-episode cover.
+    // Index-loop / primitive reads only (Xray-safe). Returns null if absent.
+    function resolveBilibiliMeta(root) {
+        let ogv;
+        try { ogv = root.ogv; } catch (_) { ogv = null; }
+        if (!ogv || typeof ogv !== "object") return null;
+
+        let season;
+        try { season = ogv.season || {}; } catch (_) { season = {}; }
+        const seasonTitle = readPrim(season, "title");
+
+        let epId = readPrim(ogv, "epId");
+        epId = epId != null ? String(epId) : null;
+
+        let epPart = null, cover = null;
+        let sections;
+        try { sections = ogv.sectionsList; } catch (_) { sections = null; }
+        let slen = 0;
+        try { slen = (sections && typeof sections.length === "number") ? sections.length : 0; } catch (_) { slen = 0; }
+        for (let i = 0; i < slen && !epPart; i++) {
+            let sec;
+            try { sec = sections[i]; } catch (_) { continue; }
+            let eps;
+            try { eps = sec && sec.episodes; } catch (_) { eps = null; }
+            let elen = 0;
+            try { elen = (eps && typeof eps.length === "number") ? eps.length : 0; } catch (_) { elen = 0; }
+            for (let j = 0; j < elen; j++) {
+                let ep;
+                try { ep = eps[j]; } catch (_) { continue; }
+                const eid = readPrim(ep, "episode_id");
+                if (epId && eid != null && String(eid) === epId) {
+                    epPart = readPrim(ep, "title_display")
+                        || readPrim(ep, "long_title_display")
+                        || readPrim(ep, "short_title_display");
+                    cover = readPrim(ep, "cover");
+                    break;
+                }
+            }
+        }
+
+        let title = null;
+        if (epPart) title = seasonTitle ? `${seasonTitle} ${epPart}` : epPart;
+        if (!title) title = seasonTitle || null;
+        const img = cover || readPrim(season, "horizontal_cover")
+            || readPrim(season, "vertical_cover") || null;
+        if (!title && !img) return null;
+        return { title: title || undefined, img: img || undefined };
+    }
+
+    // Host-keyed metadata enrichment. Default is generic (og:/document.title +
+    // og:image); a known host whose page state carries richer fields overrides
+    // it. Add a host branch here (not a new content script) — this is the one
+    // place that already holds the page-world `root`, which the background can't
+    // read. Per-site REQUEST/emit specifics still belong in background.js.
+    function resolveMeta(root) {
+        let rich = null;
+        try {
+            if (/(?:^|\.)bilibili\.tv$/i.test(location.hostname)) {
+                rich = resolveBilibiliMeta(root);
+            }
+        } catch (_) {}
+        return {
+            title: (rich && rich.title) || pageTitle(),
+            img: (rich && rich.img) || ogMeta("og:image") || undefined
+        };
+    }
+
     // ---- Read page-world state via the Xray wrappedJSObject waiver -----------
-    function readPageDash() {
+    // Returns { root, dash } — root is the state global that held the dash slice,
+    // so a host-keyed metadata resolver can read sibling fields (e.g. ogv).
+    function readPageState() {
         let pw;
         try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
         if (!pw) return null;
@@ -185,11 +267,11 @@
             // no enumeration. Then a bounded generic search for everything else.
             try {
                 const direct = g.player && g.player.playUrl && g.player.playUrl.dash;
-                if (isDashShape(direct)) return direct;
+                if (isDashShape(direct)) return { root: g, dash: direct };
             } catch (_) {}
             let dash;
             try { dash = findDash(g); } catch (_) { dash = null; }
-            if (dash) return dash;
+            if (dash) return { root: g, dash };
         }
         return null;
     }
@@ -199,19 +281,20 @@
     let spaArmed = false;
 
     function extractAndSend(label) {
-        const wDash = readPageDash();
-        if (!wDash) return false;
-        const built = buildVariants(cloneDash(wDash));
+        const state = readPageState();
+        if (!state) return false;
+        const built = buildVariants(cloneDash(state.dash));
         if (!built) return false;
         // Dedup so retries / SPA re-reads don't re-emit the same set.
         const key = built.variants.map(v => v.url).join("|");
         if (sentKeys.has(key)) { armSpaObserver(); return true; }
         sentKeys.add(key);
+        const meta = resolveMeta(state.root);
         const payload = {
             variants: built.variants,
             origin: location.href,
-            title: pageTitle(),
-            img: ogMeta("og:image") || undefined,
+            title: meta.title,
+            img: meta.img,
             durationMs: built.durationMs
         };
         log("sending", built.variants.length, "variant(s) at", label, payload.title);

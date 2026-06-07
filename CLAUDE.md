@@ -84,17 +84,23 @@ covers every such site:
   background.
 - Background `kind:"page-state-media"` → `sendVariants` with a **generic** Referer
   = the page origin (covers bilibili's upos/bilivideo anti-leech without any
-  per-site host check). Per-site specifics, if ever needed, belong in
+  per-site host check). Per-site **request/emit** specifics belong in
   `background.js`, never as new injected files.
 - Cheap on the ~all sites with no such state: it probes a short list of known
   state-global names and no-ops when none hold media; the persistent SPA-nav
   observer is armed **only after** a successful capture.
 
-Trade-off vs. the old bespoke inject: metadata is generic (title from
-`og:title`/`document.title`, thumb from `og:image`) rather than episode-precise —
-accepted to keep one mechanism with zero per-site scripts. A site still needs its
-`regex.js` block rule for the media it emits (Bilibili.tv's `.m4s` rule is
-unchanged), same cardinal rule as any parser.
+**Metadata: generic by default, host-keyed when richer fields exist in page
+state.** `resolveMeta(root)` defaults to `og:title`/`document.title` + `og:image`;
+a known host overrides it with a branch **in the bridge** (e.g. Bilibili.tv reads
+`root.ogv` for the episode-precise `Season Episode` title + per-episode cover).
+That branch lives in the bridge — **not** `background.js` — because the bridge is
+the only place that holds the page-world `root`; the background can't read page
+state. Adding a host here is still **not** a new content script. Reads in such a
+branch must be index-loop / primitive only (Xray-waived page arrays misbehave
+with iterator/callback methods). A site still needs its `regex.js` block rule for
+the media it emits (Bilibili.tv's `.m4s` rule is unchanged), same cardinal rule
+as any parser.
 - **Do not** "fix" a missing capture by removing/bypassing the regex block so
   the generic catcher grabs it. That reintroduces the duplicate and drops
   metadata. Fix the **parser** instead.

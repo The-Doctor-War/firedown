@@ -167,17 +167,17 @@ dependencies {
 
     implementation "org.mozilla.geckoview:geckoview-default:${geckoviewVersion}"
 
-    // GeckoView's own dependencies, lost because our local geckoview-default POM
-    // has no <dependencies> (Mozilla's POM declared them). We re-add the ones the
-    // app doesn't already pull transitively. Versions match GeckoView 151's
-    // build.gradle / version catalog. (androidx.annotation/collection/core/lifecycle
-    // already resolve via the app's AndroidX stack; exoplayer2 isn't in the
-    // geckoview-lite build.)
-    //
-    // SnakeYAML: GeckoRuntime.init -> DebugConfig.fromFile parses a YAML debug
-    // config at startup on debuggable builds; without it: NoClassDefFoundError
-    // org.yaml.snakeyaml.LoaderOptions.
-    implementation "org.yaml:snakeyaml:2.6"
+    // GeckoView's own transitive dependencies are now SUPPLIED BY ITS POM. The
+    // firedown-geckoview build injects them into the published geckoview-default POM
+    // (androidx annotation/collection/core/lifecycle, the media3 set, and snakeyaml),
+    // so the app no longer hand-pins them here — the dep-less-POM workarounds that
+    // used to live in this block (snakeyaml for DebugConfig.fromFile's YAML parse,
+    // androidx.core for WindowCompat.enableEdgeToEdge) are gone. This REQUIRES the
+    // republished AAR (the POM-deps injection landed on firedown-geckoview main); build
+    // against an older dep-less AAR and these resolves vanish (snakeyaml ->
+    // NoClassDefFoundError org.yaml.snakeyaml.LoaderOptions, core drops to ~1.13). The
+    // only GeckoView deps still pinned below are the media3 modules, and only to hold
+    // ONE media3 version across the app's own player (see media3-exoplayer-hls).
 
     implementation fileTree(include: ['*.jar', '*.aar'], dir: 'libs')
 
@@ -191,14 +191,15 @@ dependencies {
 
     // GeckoView's in-browser HLS player. GeckoView builds with MOZ_ANDROID_HLS_SUPPORT
     // (default ON; not disabled by --enable-geckoview-lite), so its Java references
-    // androidx.media3.exoplayer.hls.* — official GeckoView declares media3-exoplayer-hls,
-    // but our dep-less geckoview-default POM drops it. media3-exoplayer above pulls
-    // common/datasource/decoder/exoplayer transitively, but NOT the -hls module, so an
-    // HLS <video> playing in a page crashes with NoClassDefFoundError
-    // (androidx.media3.exoplayer.hls.HlsMediaSource). Add it at the SAME media3 version
-    // as the app's other media3 (1.10.1) — all media3 modules must share one version;
-    // GeckoView 151's catalog pins 1.9.3 but 1.10.1 is API-compatible and already
-    // satisfies GeckoView's other media3 usage here.
+    // androidx.media3.exoplayer.hls.* (HlsMediaSource). The geckoview-default POM now
+    // DECLARES media3-exoplayer-hls — but at GeckoView 151's catalog version 1.9.3,
+    // while the app's own player uses media3-exoplayer + media3-ui at 1.10.1, and ALL
+    // media3 modules must resolve to ONE version. media3-ui is not in the POM, so the
+    // app can't simply fall to 1.9.3 across the board. So KEEP this explicit
+    // media3-exoplayer-hls:1.10.1 pin: gradle's highest-wins then lifts the POM's
+    // 1.9.3 -hls up to 1.10.1, keeping the whole media3 set aligned. (This is the one
+    // GeckoView dep still hand-pinned, purely for version alignment — not because the
+    // POM omits it.)
     implementation 'androidx.media3:media3-exoplayer-hls:1.10.1'
 
     implementation 'androidx.media3:media3-ui:1.10.1'
@@ -215,19 +216,12 @@ dependencies {
 
     implementation 'androidx.core:core-splashscreen:1.2.0'
 
-    // Pin androidx.core explicitly. It used to arrive transitively via Mozilla's
-    // official GeckoView POM; our locally-built geckoview-default POM carries no
-    // <dependencies>, so without this the version drops to ~1.13 (what appcompat/
-    // material pull), which lacks WindowCompat.enableEdgeToEdge(Window) and breaks
-    // BaseActivity. Version matters two ways: 1.16.0 lacks the single-Window
-    // enableEdgeToEdge overload, while 1.18.0 needs compileSdk 36.1 and 1.19.0
-    // needs compileSdk 37 — both above this app's compileSdk 36. 1.17.0 is the
-    // sweet spot: it requires only compileSdk 36 AND has enableEdgeToEdge(Window)
-    // (it's the API-36 androidx.core that Mozilla's GeckoView used to pull, which
-    // is why this compiled before). If you raise compileSdk, you can raise this
-    // too. Keep it until/unless the local GeckoView POM publishes its transitive
-    // deps. (androidx version-alignment constraints carry core-ktx along.)
-    implementation 'androidx.core:core:1.17.0'
+    // androidx.core is no longer pinned here — the geckoview-default POM now declares
+    // it (1.18.0), which gradle's highest-wins lifts over the ~1.13 that appcompat/
+    // material pull, giving us WindowCompat.enableEdgeToEdge(Window) for BaseActivity.
+    // 1.18.0 requires compileSdk >= 36.1, which is why the app moved to compileSdk 37
+    // in the same change. (Reinstate an explicit pin only if you drop back below
+    // compileSdk 37 or build against an older dep-less GeckoView AAR.)
 
     //nav components
     implementation 'androidx.navigation:navigation-fragment:2.9.8'

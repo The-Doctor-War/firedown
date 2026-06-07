@@ -1509,6 +1509,16 @@ public class BrowserFragment extends BaseBrowserFragment
                 Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
                 Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
 
+        // Whether any installed app can actually handle this intent. Gates every
+        // "Open" affordance below: no point offering to open (or popping an
+        // "open in another app" dialog) when nothing will — that's a dead-end
+        // tap, and a follow-up "no app found" snackbar would be one too many. For
+        // an uninstalled-app deeplink createBrowsableIntent already rewrote this
+        // to a Play Store intent, so on a de-Googled device with no Play Store
+        // this is correctly false.
+        boolean canOpen = mActivity != null
+                && browsableIntent.resolveActivity(mActivity.getPackageManager()) != null;
+
         // When the toggle is on, silently block any PAGE-initiated app redirect
         // (autoRedirect = !isDirectNavigation): TikTok firing tiktok://, a site
         // bouncing to market://, etc. wasRedirector (recent load + back-history)
@@ -1524,22 +1534,31 @@ public class BrowserFragment extends BaseBrowserFragment
             if (wasRedirector && geckoState != null) {
                 geckoState.goBack();
             }
-            // One-shot escape hatch: "Open" launches the app/store this redirect
-            // targeted, just this once (no persistent exception). browsableIntent
-            // is effectively final and non-null here (passed the guard above).
-            // For an uninstalled-app deeplink createBrowsableIntent already
-            // rewrote it to a Play Store intent — same as the dialog's "Open".
-            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar))
-                    .setAction(R.string.open, v -> {
-                        try {
-                            if (browsableIntent.resolveActivity(mActivity.getPackageManager()) != null) {
-                                mActivity.startActivity(browsableIntent);
-                            }
-                        } catch (ActivityNotFoundException e) {
-                            Log.e(TAG, "No Activity found: " + browsableIntent, e);
-                        }
-                    })
-                    .show();
+            // Silent block + a one-shot "Open" escape — but only attach "Open"
+            // when an app can actually handle it (canOpen): no dead-end tap, and
+            // no need for a follow-up "nothing can open this" snackbar.
+            // browsableIntent is effectively final and non-null here.
+            Snackbar snackbar = makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar));
+            if (canOpen) {
+                snackbar.setAction(R.string.open, v -> {
+                    try {
+                        mActivity.startActivity(browsableIntent);
+                    } catch (ActivityNotFoundException e) {
+                        Log.e(TAG, "No Activity found: " + browsableIntent, e);
+                    }
+                });
+            }
+            snackbar.show();
+            return;
+        }
+
+        // Not blocking (or carved out / direct nav) → the "open in another app"
+        // dialog. Only show it when an app can actually handle the intent —
+        // otherwise its only button would no-op, so skip the prompt entirely
+        // rather than offer a dead end (e.g. an uninstalled-app deeplink with no
+        // Play Store to fall back to).
+        if (!canOpen) {
+            Log.d(TAG, "onLoadRequest: no app resolves " + uri + " — skipping open-in-app dialog");
             return;
         }
 

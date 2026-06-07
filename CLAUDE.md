@@ -546,6 +546,15 @@ not a typed/bookmarked URL):
   Don't reintroduce a `wasRedirector`/`canGoBackward` *gate* — it silently drops
   first-load deeplink nags like TikTok's.
 
+Every "Open" affordance is gated on `resolveActivity != null` (computed once as
+`canOpen` in `onLoadRequest`): the block snackbar attaches its "Open" action only
+when an app can handle the intent, and the non-blocking "open in another app"
+dialog is **skipped entirely** when nothing can — no dead-end button, and no
+follow-up "no app found" snackbar. This matters on de-Googled devices: an
+uninstalled-app deeplink is rewritten to a Play Store intent, which doesn't
+resolve without Play Store, so `canOpen` is correctly false. (The Play Store
+path's "Open" is a `loadUri` web load, not an intent, so it isn't gated.)
+
 `GeckoComponents` computes `autoRedirect`(=`!isDirectNavigation`) + `wasRedirector`
 and passes both through the `LOAD_REQUEST` observer; `BrowserFragment.onLoadRequest`
 blocks on `autoRedirect` (+ comms carve-out) and uses `wasRedirector` **only** to

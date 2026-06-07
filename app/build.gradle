@@ -180,6 +180,18 @@ dependencies {
 
     implementation 'androidx.media3:media3-exoplayer:1.10.1'
 
+    // GeckoView's in-browser HLS player. GeckoView builds with MOZ_ANDROID_HLS_SUPPORT
+    // (default ON; not disabled by --enable-geckoview-lite), so its Java references
+    // androidx.media3.exoplayer.hls.* — official GeckoView declares media3-exoplayer-hls,
+    // but our dep-less geckoview-default POM drops it. media3-exoplayer above pulls
+    // common/datasource/decoder/exoplayer transitively, but NOT the -hls module, so an
+    // HLS <video> playing in a page crashes with NoClassDefFoundError
+    // (androidx.media3.exoplayer.hls.HlsMediaSource). Add it at the SAME media3 version
+    // as the app's other media3 (1.10.1) — all media3 modules must share one version;
+    // GeckoView 151's catalog pins 1.9.3 but 1.10.1 is API-compatible and already
+    // satisfies GeckoView's other media3 usage here.
+    implementation 'androidx.media3:media3-exoplayer-hls:1.10.1'
+
     implementation 'androidx.media3:media3-ui:1.10.1'
 
     implementation 'commons-io:commons-io:2.22.0'

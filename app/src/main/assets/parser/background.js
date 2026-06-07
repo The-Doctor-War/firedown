@@ -3701,35 +3701,13 @@ browser.webRequest.onBeforeRequest.addListener(
     ["blocking"]
 );
 
-// SPA-navigation fallback: items the content script scrapes from the DOM.
-browser.runtime.onMessage.addListener((message, sender) => {
-    if (message?.type !== "threads_intercept") return;
-
-    const items = message.payload?.items;
-    if (!Array.isArray(items) || items.length === 0) return;
-
-    const tabId = sender.tab?.id ?? -1;
-    const details = {
-        tabId,
-        _resolvedTabId: tabId >= 0 ? tabId : undefined,
-        url: message.payload.url || sender.tab?.url || "",
-        requestId: `threads-cs-${Date.now()}`
-    };
-
-    log("THREADS", `received ${items.length} item(s) from content script`, {
-        url: message.payload.url?.slice(0, 100),
-        tabId
-    });
-
-    for (const entry of items) {
-        if (!entry?.item || !entry.origin) continue;
-        try {
-            sendInstagramItem(details, entry.item, entry.origin);
-        } catch (e) {
-            log("THREADS", `error processing item`, { origin: entry.origin, error: e.message });
-        }
-    }
-});
+// Note: Threads needs no content script. The main_frame doc filter
+// (listenerThreadsPage) reads the same <script data-sjs> blobs straight from
+// the raw network response — stock GeckoView filterResponseData, no patch — and
+// the API filter (listenerThreadsApi) covers the logged-out / SPA XHRs. The old
+// threads-content.js only re-read the initial-load data-sjs from the DOM (a
+// duplicate of the doc filter) and captured nothing on SPA nav, so it was
+// removed (CLAUDE.md "prefer one capture mechanism per site").
 
 // ============================================================================
 // Rumble

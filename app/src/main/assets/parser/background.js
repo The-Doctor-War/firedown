@@ -2927,8 +2927,14 @@ function sendInstagramItem(details, item, originOverride) {
     });
 
     if (item.video_versions) {
+        // video_versions sometimes omit per-rendition width/height (notably the
+        // lean Relay/API fragments Threads serves logged-out); fall back to the
+        // item's declared original_* so the quality picker still shows a
+        // resolution instead of blank rows. v.width wins when present.
+        const ow = item.original_width || 0;
+        const oh = item.original_height || 0;
         const variants = item.video_versions.map(v => ({
-            url: v.url, width: v.width || 0, height: v.height || 0
+            url: v.url, width: v.width || ow || 0, height: v.height || oh || 0
         }));
         log("IG-ITEM", `Sending ${variants.length} video variant(s)`, { code, firstUrl: variants[0]?.url?.slice(0, 80) });
         sendVariants(details, { variants, origin, description: videoText, img, name: author, duration });
@@ -2939,8 +2945,10 @@ function sendInstagramItem(details, item, originOverride) {
         for (const media of item.carousel_media) {
             if (!media.video_versions) continue;
             carouselVideos++;
+            const mow = media.original_width || 0;
+            const moh = media.original_height || 0;
             const variants = media.video_versions.map(v => ({
-                url: v.url, width: v.width || 0, height: v.height || 0
+                url: v.url, width: v.width || mow || 0, height: v.height || moh || 0
             }));
             const mediaImg = getInstagramThumbnail(media) || img;
             const mediaDuration = Math.round((media.video_duration || 0) * 1000);

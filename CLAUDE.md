@@ -109,6 +109,50 @@ pair or a **declared** manifest — see "Manifest vs progressive — declared, n
 URL-sniffed" under Downloading. Default is progressive so tokenized URLs (TikTok)
 carry no `.mp4` and aren't needlessly remuxed.
 
+### Post-download metadata backfill (when capture skipped the probe)
+
+`DownloadTask.backfillMetadataIfMissing()` (called from `onRunComplete` on a
+FINISHED download) stamps the **secondary metadatum** the Downloads UI shows when
+it's absent — probing the **finished local file** once (cheap, no network, no
+keys), so it never burns a single-use key the way a capture-time probe would. Two
+gaps reach it:
+
+- **Duration** (audio/video) — HLS-master captures (Twitch/Kick/niconico) skip
+  the capture probe and the master carries no duration, so a selected
+  audio-only rendition finishes with none.
+- **Resolution** (image/SVG) — an image saved via the browser long-press menu
+  ("save image", `BrowserFragment`) is a bare `DownloadRequest` (url + name +
+  cookies); it never goes through the parser/`VariantProcessor`, so it has no
+  resolution and the list/info row would render a blank resolution tag.
+
+It only probes when the field for the entity's **type** is actually missing
+(mime resolved by then via `HttpDownloadStrategy.onMimeResolved`). Resolution
+reuses `FFmpegMetaDataReader.getStreams()` so the `"WxH"` / SVG-encoded-size
+formatting matches the parser path exactly. Don't widen this into an
+unconditional probe — it's a targeted backfill, not a second capture probe.
+
+### HTML character references in scraped titles/descriptions
+
+Captured metadata can carry HTML character references **verbatim** — most
+notably from **JSON-LD**: the HTML parser treats a
+`<script type="application/ld+json">` body as *raw text* and does **not** resolve
+references inside it, so `JSON.parse` keeps `&#x41c;` (М) / `&amp;` literal and it
+flows into the stored name/description (the info Downloads dialog then shows it
+raw). `og:`/`twitter:` meta read via `getAttribute('content')` are already
+decoded by the DOM, so this is a JSON-LD/JSON-source problem, not a meta-tag one.
+Two layers, both best-effort with a **raw-text fallback** on error:
+
+- **`parser/background.js` `decodeHtmlEntities`** — decimal `&#NNN;`, hex
+  `&#xHHH;`, and the named refs that appear in titles/descriptions; applied to
+  `name`/`description` at the emit choke points (`sendVariants`,
+  `enumerateMasterNative`, `emitHlsMasterOrSingle`). Idempotent; unknown refs
+  left untouched.
+- **`InfoAdapter` `decodeHtml`** — display-layer catch-all via
+  `HtmlCompat.fromHtml(FROM_HTML_MODE_LEGACY)` on the description field, so the
+  generic catcher's JSON-LD descriptions (which never pass the parser emit) are
+  covered too. `stripHtml` only strips tags/whitespace — it does **not** decode
+  entities; don't conflate the two.
+
 ### YouTube / SABR
 
 YouTube isn't HLS/DASH — it's Google's SABR (itag formats, a
@@ -332,17 +376,36 @@ This section exists because a Threads bug took ~8 rounds that should have taken
 - Don't reach for a "logged-in vs logged-out" explanation without evidence; it
   was a red herring.
 
+#### Threads has NO content script — two `filterResponseData` paths only
+
+Threads capture lives entirely in `background.js`: `listenerThreadsPage`
+(`main_frame` doc filter — reads the `<script data-sjs>` Relay blobs from the
+**raw network response**, logged-in) + `listenerThreadsApi` (the GraphQL/`api/v1`
+XHRs, logged-out / SPA). **No content script, no GeckoView patch** — stock
+`filterResponseData` on the main_frame is all it takes. The old
+`threads-content.js` (a `document_start` MutationObserver that snapshotted the
+same `data-sjs` from the DOM) was **removed**: it only *duplicated* the doc
+filter on initial load and captured nothing on SPA nav (it just logged). Its
+header claim that "filterResponseData on main_frame never fired" was the caching
+artifact above, not the truth. **Don't reintroduce a Threads content script** to
+"fix" a missed capture — fix the doc/API filter or the media-walk depth cap
+instead. The one case a content script alone could see (a *cached* main_frame
+document, where the filter may not re-fire but the DOM parse still inserts the
+scripts) is marginal for dynamic post pages and irrelevant to the in-app
+browser's usual logged-out state.
+
 ## WebExtension loading & versioning (GeckoView gotcha)
 
 `registerBuiltIn` → `WebExtensionController.ensureBuiltIn(uri, id)` caches the
 extension **keyed by the manifest `version`**. If you change a manifest
-(e.g. add a `content_scripts` entry) but **don't bump
+(e.g. add **or remove** a `content_scripts` entry) but **don't bump
 `parser/manifest.json`'s `version`**, an in-place app update
 (`adb install -r`) keeps the old registration and your change silently doesn't
-load. To force a re-register: **bump the version**, or do a clean
-**uninstall + install** (which wipes the registration so any version reloads).
-Symptom of this trap: a brand-new listener/content-script produces *no logs at
-all*.
+load — a *removed* content script keeps running, an added one never starts. To
+force a re-register: **bump the version**, or do a clean **uninstall + install**
+(which wipes the registration so any version reloads). Symptom of this trap: a
+brand-new listener/content-script produces *no logs at all* (or a deleted one
+still does).
 
 ## After changing a parser
 

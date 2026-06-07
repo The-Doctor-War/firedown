@@ -163,15 +163,18 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
         // ── Tags ─────────────────────────────────────────────────────────
         bindTags(context, holder, entity);
 
-        // Title is shown in both layouts — list as the primary row text, grid
-        // as a one-line overlay in the bottom scrim. fileUrl/domain stays
-        // list-only (no room on the tile). We always show whatever name we
-        // have, even a URL-derived one: the only test for "junk name" we had
-        // was "contains no spaces", which misclassifies legitimate titles in
-        // space-less scripts (Japanese, Chinese, Thai). Hiding a real title is
-        // silent, locale-specific information loss; showing a dumb slug is just
-        // cosmetic — so we fail toward showing.
-        holder.setTextOrHide(holder.fileName, entity.getFileName());
+        // Title: list shows it as the primary row text; grid as a one-line
+        // overlay in the bottom scrim. In the GRID, hide it for self-identifying
+        // image tiles (incl. GIF/SVG) — same rule as Downloads: the thumbnail IS
+        // the content and the name is almost always a junk slug, so the title is
+        // just ink over the picture. Everything else (audio/video/docs/subs) and
+        // the list always keep it; a non-empty real title in a space-less script
+        // is still shown (we don't junk-test the name itself).
+        if (!holder.isList && FileUriHelper.isImage(mimeType)) {
+            holder.setTextOrHide(holder.fileName, null);
+        } else {
+            holder.setTextOrHide(holder.fileName, entity.getFileName());
+        }
 
         // ── Layout-specific bindings ─────────────────────────────────────
         if (holder.isList) {

@@ -861,24 +861,24 @@ back to English (MissingTranslation isn't build-fatal here).
   globe. The third line (`size · date · duration/resolution/language`) is the
   informative density and stays. The two layouts and the grid tile are kept in
   lockstep — change the meta line in both list rows together.
-- **Grid tile title: hidden only for self-identifying image tiles in Downloads;
-  Captured always shows it.** The rule is *not* "images are clutter" — it's
+- **Grid tile title: hidden for self-identifying image tiles in BOTH Downloads
+  and Captured.** The rule is *not* "images are clutter" — it's
   "drop the title only for the one type whose thumbnail fully identifies it."
-  `DownloadItemAdapter` hides `file_name` in the grid **iff**
-  `isGrid && FileUriHelper.isImage(mimeType)` (covers GIF/SVG) — image
-  thumbnails *are* the content and their names are almost always junk slugs, so
-  the title is ink over the picture. Everything else keeps it: **audio is the
-  load-bearing case** (no real thumbnail — hiding the title leaves an
-  unidentifiable mime tile), and video/subtitle/doc thumbnails are too weak
-  (black frames, generic glyphs) to discriminate without the name. The list
-  always shows the title. `BrowserOptionAdapter` (Captured) **always** shows it
-  regardless of type, because Captured is a pre-download *decision* surface, not
-  a file manager — every title earns its place there. Keep this keyed on the
-  **mime** (`isImage`), not on a filename-content heuristic: the old
+  Both `DownloadItemAdapter` and `BrowserOptionAdapter` (Captured) hide
+  `file_name` in the grid **iff** `isGrid && FileUriHelper.isImage(mimeType)`
+  (covers GIF/SVG) — image thumbnails *are* the content and their names are
+  almost always junk slugs, so the title is ink over the picture. Everything
+  else keeps it: **audio is the load-bearing case** (no real thumbnail — hiding
+  the title leaves an unidentifiable mime tile), and video/subtitle/doc
+  thumbnails are too weak (black frames, generic glyphs) to discriminate without
+  the name. The list always shows the title (both adapters). Keep this keyed on
+  the **mime** (`isImage`), not on a filename-content heuristic: the old
   "name has no spaces ⇒ junk" test was removed because it misclassifies
   space-less scripts (CJK/Thai) and silently drops real titles. The mime chip is
   always present in both grids, so type stays labelled even when the title is
-  hidden.
+  hidden. (Captured used to *always* show the title as a pre-download decision
+  surface; that was changed to match Downloads — an image tile's slug name is
+  noise on the decision surface too.)
 
 ## Thumbnails (native `thumbnailer.c`)
 

@@ -2929,6 +2929,24 @@ function sendInstagramItem(details, item, originOverride) {
     });
 
     if (item.video_versions) {
+        // DIAGNOSTIC: dump the raw per-rendition shape so we can see which field
+        // distinguishes Threads renditions (Instagram uses width/height/type;
+        // Threads' lean items appear to drop them). Object.keys reveals every
+        // field present; the named fields are the likely candidates. DEBUG-gated.
+        log("IG-ITEM", `video_versions raw dump`, {
+            code,
+            original_width: item.original_width,
+            original_height: item.original_height,
+            versions: item.video_versions.map(v => ({
+                keys: v && typeof v === "object" ? Object.keys(v) : typeof v,
+                type: v?.type,
+                width: v?.width,
+                height: v?.height,
+                bandwidth: v?.bandwidth,
+                bitrate: v?.bitrate,
+                url: typeof v?.url === "string" ? v.url.slice(0, 70) : v?.url
+            }))
+        });
         // video_versions sometimes omit per-rendition width/height (notably the
         // lean Relay/API fragments Threads serves logged-out); fall back to the
         // item's declared original_* so the quality picker still shows a

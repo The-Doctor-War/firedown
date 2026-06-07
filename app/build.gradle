@@ -36,7 +36,16 @@ android {
         applicationId "com.solarized.firedown"
         minSdkVersion 26
         targetSdkVersion 36
-        compileSdk = 36
+        // compileSdk 37 (Android 17): compile against the newer SDK so the AndroidX
+        // that GeckoView 151's POM now supplies resolves cleanly — specifically
+        // androidx.core 1.18.0 (and lifecycle 2.10.0), which the firedown-geckoview
+        // POM-deps injection re-includes for the lite AAR. Those AARs FAIL metadata
+        // checks under compileSdk 36 (core 1.18.0 requires 36.1); 37 satisfies them.
+        // COMPILE-ONLY: targetSdk stays 36, so there is NO Android-17 runtime behavior
+        // change to migrate (behavior changes gate on targetSdk, not compileSdk), and
+        // minSdk stays 26 (same device support). Needs the android-37 platform
+        // installed (sdkmanager "platforms;android-37"); current AGP/Gradle support it.
+        compileSdk = 37
         versionCode 1177
         versionName "1.1.77"
 

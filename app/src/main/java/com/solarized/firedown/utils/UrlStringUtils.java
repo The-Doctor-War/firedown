@@ -258,6 +258,24 @@ public class UrlStringUtils {
     }
 
     /**
+     * User-initiated communication / map schemes (mailto:, tel:, sms:, geo:, …).
+     * These are never "open/install our app" nags, so the block-app-redirects
+     * path must NOT silently swallow them — they fall through to the normal
+     * open-in-app dialog (or the OS handler) like before.
+     */
+    public static boolean isUserCommsScheme(String url) {
+        if (TextUtils.isEmpty(url)) return false;
+        String lower = url.toLowerCase(java.util.Locale.ROOT);
+        return lower.startsWith("mailto:")
+                || lower.startsWith("tel:")
+                || lower.startsWith("sms:")
+                || lower.startsWith("smsto:")
+                || lower.startsWith("mms:")
+                || lower.startsWith("mmsto:")
+                || lower.startsWith("geo:");
+    }
+
+    /**
      * Extract the {@code id=} query param from a Play Store URL so the
      * confirmation dialog can show the user which app the site wants
      * to push. Returns null when the URL has no id parameter (rare —

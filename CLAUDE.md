@@ -527,23 +527,29 @@ nags are near-universally unwanted; sits with HTTPS-only / disk-cache-off). When
 ON, the `NavigationDelegate` denial is taken **silently** (snackbar, +`goBack()`)
 instead of prompting; when OFF, the per-redirect dialogs show.
 
-**The two paths gate differently on purpose — because this ships ON:**
-- **Play Store** path gates on `!request.isDirectNavigation`. Safe to be that
-  broad: a `market://`/store URL is essentially never a deliberate in-browser
-  destination.
-- **Generic deeplink** path gates on **`wasRedirector`** (page loaded
-  <`REDIRECTOR_WINDOW_MS` ago **and** `canGoBackward()`), **NOT** on
-  `!isDirectNavigation`. GeckoView reports a deliberate link **tap** as
-  non-direct too, so with the pref ON by default, gating the generic block on
-  `!isDirectNavigation` would silently swallow real "open in app" taps for
-  everyone ("nothing happens"). `wasRedirector` isolates the *bounce* (auto
-  redirect just after load) from a considered tap (read first, then tap → window
-  elapsed → dialog). Don't "simplify" the generic gate back to
-  `!isDirectNavigation`.
+**Both paths gate on `!request.isDirectNavigation`** (a PAGE-initiated redirect,
+not a typed/bookmarked URL):
+- **Play Store**: `market://`/store URL → silent block. A store URL is never a
+  deliberate in-browser destination, so this is pure win.
+- **Generic deeplink** (`tiktok://`, `intent://`, …): silent block too, with two
+  carve-outs — **user comms schemes** (`mailto:`/`tel:`/`sms:`/`geo:`,
+  `UrlStringUtils.isUserCommsScheme`) are never blocked, and the snackbar's
+  one-shot **"Open"** is the escape for a deliberately-tapped app link.
+  **History/landmine:** an earlier version gated the generic path on
+  `wasRedirector` (recent load **and** `canGoBackward()`) to spare deliberate
+  taps — but that **missed TikTok**, which fires its deeplink on a first/cached
+  view with **no back-entry**, so the "open in app" dialog leaked through with the
+  pref ON. Lesson: GeckoView gives no reliable tap-vs-auto signal on `LoadRequest`
+  (`isDirectNavigation` is false for *both* a link tap and a JS redirect, and
+  there's no `hasUserGesture`), so the generic block uses `!isDirectNavigation`
+  and leans on the comms carve-out + the "Open" escape rather than `wasRedirector`.
+  Don't reintroduce a `wasRedirector`/`canGoBackward` *gate* — it silently drops
+  first-load deeplink nags like TikTok's.
 
 `GeckoComponents` computes `autoRedirect`(=`!isDirectNavigation`) + `wasRedirector`
 and passes both through the `LOAD_REQUEST` observer; `BrowserFragment.onLoadRequest`
-reads the pref and decides snackbar-vs-dialog (using `wasRedirector`). The pref
+blocks on `autoRedirect` (+ comms carve-out) and uses `wasRedirector` **only** to
+decide whether to `goBack()` off a bounce. The pref
 **key value keeps the legacy `…block.playstore.redirects` name** on purpose, and
 flipping the **default** false→true needed **no new key**: there's no semantic
 inversion (`true` still means "block") and the app never persists defaults (no

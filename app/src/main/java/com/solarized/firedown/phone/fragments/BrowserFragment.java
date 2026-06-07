@@ -1509,18 +1509,19 @@ public class BrowserFragment extends BaseBrowserFragment
                 Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
                 Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
 
-        // When the toggle is on, silently block UNSOLICITED app redirects — a
-        // page that bounced to an app/store deeplink right after loading. We
-        // gate on wasRedirector (recent load + back-history), NOT merely
-        // !isDirectNavigation: GeckoView reports a deliberate link TAP as
-        // non-direct too, so since this pref ships ON by default, gating on
-        // autoRedirect alone would silently swallow real "open in app" taps for
-        // everyone ("nothing happens"). wasRedirector implies canGoBackward, so
-        // goBack lands the user on the page they actually wanted, off the
-        // tracker shell, and a considered tap (read first, then tap) still gets
-        // the dialog below.
-        if (blockAppRedirects && wasRedirector) {
-            if (geckoState != null) {
+        // When the toggle is on, silently block any PAGE-initiated app redirect
+        // (autoRedirect = !isDirectNavigation): TikTok firing tiktok://, a site
+        // bouncing to market://, etc. wasRedirector (recent load + back-history)
+        // was too narrow — it missed TikTok, which fires its deeplink on a
+        // first/cached view with no back-entry, so the dialog leaked through.
+        // The deliberately-typed/bookmarked deeplink (isDirectNavigation) still
+        // falls through to the dialog, and for the rarer deliberately-TAPPED app
+        // link the snackbar's "Open" is the one-tap escape. User comms schemes
+        // (mailto:/tel:/sms:/geo:) are carved out — never app nags, must keep
+        // working. goBack only when we actually bounced (wasRedirector implies
+        // back-history), so a first-load deeplink just stays put.
+        if (blockAppRedirects && autoRedirect && !UrlStringUtils.isUserCommsScheme(uri)) {
+            if (wasRedirector && geckoState != null) {
                 geckoState.goBack();
             }
             // One-shot escape hatch: "Open" launches the app/store this redirect

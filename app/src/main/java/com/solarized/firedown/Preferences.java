@@ -59,15 +59,16 @@ public class Preferences {
     public static final boolean DEFAULT_BLOCK_LOCATION = true;
 
     /**
-     * Auto-block sites' UNSOLICITED "open in app" / "install our app" redirects
-     * without prompting. Covers both Play Store install nags (play.google.com /
-     * market://) and generic app deeplinks fired as an automatic redirect. When
-     * ON (the default), NavigationDelegate's denial is taken silently (with a
-     * Snackbar) for AUTOMATIC redirects only — a page that bounces to an app/
-     * store right after loading. A deliberate tap on a deeplink still prompts
-     * (the generic path gates on the wasRedirector bounce heuristic, not merely
-     * !isDirectNavigation, because GeckoView reports a link tap as non-direct
-     * too — so gating on that alone would swallow real taps once default-on).
+     * Auto-block sites' "open in app" / "install our app" redirects without
+     * prompting. Covers both Play Store install nags (play.google.com /
+     * market://) and generic app deeplinks (tiktok://, intent://, …). When ON
+     * (the default), NavigationDelegate's denial is taken silently (with a
+     * Snackbar that carries a one-shot "Open") for any PAGE-INITIATED redirect
+     * (autoRedirect = !isDirectNavigation). A deliberately typed/bookmarked
+     * deeplink (isDirectNavigation) still prompts, and user comms schemes
+     * (mailto:/tel:/sms:/geo:) are never blocked. (An earlier wasRedirector-only
+     * gate was too narrow — it missed TikTok, whose deeplink fires on a
+     * first/cached view with no back-entry — so the dialog leaked through.)
      * When OFF the user is asked per-redirect (BlockRedirectDialogFragment for
      * Play Store, BrowserAppDialogFragment for app deeplinks).
      *

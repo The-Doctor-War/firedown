@@ -1523,7 +1523,22 @@ public class BrowserFragment extends BaseBrowserFragment
             if (geckoState != null) {
                 geckoState.goBack();
             }
-            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar)).show();
+            // One-shot escape hatch: "Open" launches the app/store this redirect
+            // targeted, just this once (no persistent exception). browsableIntent
+            // is effectively final and non-null here (passed the guard above).
+            // For an uninstalled-app deeplink createBrowsableIntent already
+            // rewrote it to a Play Store intent — same as the dialog's "Open".
+            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar))
+                    .setAction(R.string.open, v -> {
+                        try {
+                            if (browsableIntent.resolveActivity(mActivity.getPackageManager()) != null) {
+                                mActivity.startActivity(browsableIntent);
+                            }
+                        } catch (ActivityNotFoundException e) {
+                            Log.e(TAG, "No Activity found: " + browsableIntent, e);
+                        }
+                    })
+                    .show();
             return;
         }
 
@@ -1575,10 +1590,20 @@ public class BrowserFragment extends BaseBrowserFragment
                 Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
                 Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
         if (autoBlock) {
-            // Pref is on — silent block path. Show a Snackbar so the
-            // denial isn't invisible to the user.
-            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar)).show();
-
+            // Pref is on — silent block path. Show a Snackbar so the denial
+            // isn't invisible, with a one-shot "Open" escape hatch that loads
+            // the store target the same way the "Open Play Store" dialog action
+            // does (loadUri sets isDirectNavigation=true so it isn't
+            // re-intercepted). Resolved against the currently-visible session in
+            // case the user switched tabs before tapping.
+            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar))
+                    .setAction(R.string.open, v -> {
+                        GeckoState state = peekCurrentGeckoState();
+                        if (state != null && !TextUtils.isEmpty(uri)) {
+                            state.getOrCreateGeckoSession().loadUri(uri);
+                        }
+                    })
+                    .show();
             return;
         }
         Bundle bundle = new Bundle();

@@ -522,19 +522,34 @@ switch tab mid-load; it fires a `bilibili://` deeplink from the background).
 One Security toggle, `SETTINGS_BLOCK_APP_REDIRECTS`, governs **both** anti-nag
 paths: the Play Store install redirect (`PLAYSTORE_REDIRECT`,
 `market://`/`play.google.com`) **and** generic "open in app" deeplinks
-(`LOAD_REQUEST`, `bilibili://`/`intent://`/…). When ON, the `NavigationDelegate`
-denial is taken **silently** (snackbar, +`goBack()` if the page was a redirector)
-instead of prompting. **Crucially it only fires on UNSOLICITED redirects** —
-both paths gate on `!request.isDirectNavigation`, so a *user-tapped* deeplink
-(and `mailto:`/`tel:`/intended app opens) still shows the dialog. Don't widen it
-to block direct taps — that turns into "I tap a link and nothing happens" with no
-feedback. `GeckoComponents` computes `autoRedirect`(=`!isDirectNavigation`) +
-`wasRedirector` and passes both through the `LOAD_REQUEST` observer;
-`BrowserFragment.onLoadRequest` reads the pref and decides snackbar-vs-dialog.
-The pref **key value keeps the legacy `…block.playstore.redirects` name** on
-purpose — the semantics only broadened (default stays `false`, no inversion), so
-existing users keep their choice; this is the one case where NOT minting a new
-key is correct (contrast the JIT/WASM default-inversion rule below).
+(`LOAD_REQUEST`, `bilibili://`/`intent://`/…). **Default ON** (app-install/open
+nags are near-universally unwanted; sits with HTTPS-only / disk-cache-off). When
+ON, the `NavigationDelegate` denial is taken **silently** (snackbar, +`goBack()`)
+instead of prompting; when OFF, the per-redirect dialogs show.
+
+**The two paths gate differently on purpose — because this ships ON:**
+- **Play Store** path gates on `!request.isDirectNavigation`. Safe to be that
+  broad: a `market://`/store URL is essentially never a deliberate in-browser
+  destination.
+- **Generic deeplink** path gates on **`wasRedirector`** (page loaded
+  <`REDIRECTOR_WINDOW_MS` ago **and** `canGoBackward()`), **NOT** on
+  `!isDirectNavigation`. GeckoView reports a deliberate link **tap** as
+  non-direct too, so with the pref ON by default, gating the generic block on
+  `!isDirectNavigation` would silently swallow real "open in app" taps for
+  everyone ("nothing happens"). `wasRedirector` isolates the *bounce* (auto
+  redirect just after load) from a considered tap (read first, then tap → window
+  elapsed → dialog). Don't "simplify" the generic gate back to
+  `!isDirectNavigation`.
+
+`GeckoComponents` computes `autoRedirect`(=`!isDirectNavigation`) + `wasRedirector`
+and passes both through the `LOAD_REQUEST` observer; `BrowserFragment.onLoadRequest`
+reads the pref and decides snackbar-vs-dialog (using `wasRedirector`). The pref
+**key value keeps the legacy `…block.playstore.redirects` name** on purpose, and
+flipping the **default** false→true needed **no new key**: there's no semantic
+inversion (`true` still means "block") and the app never persists defaults (no
+`setDefaultValues`), so an untouched install reads the new default while an
+explicit toggler keeps their stored value. (The new-key rule is for enable→disable
+*inversions* — see the JIT/WASM pattern below — which this isn't.)
 
 ### Media notification — start the service from the controller, not the UI
 

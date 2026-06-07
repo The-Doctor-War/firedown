@@ -1509,15 +1509,18 @@ public class BrowserFragment extends BaseBrowserFragment
                 Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
                 Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
 
-        // Option A: when the toggle is on, silently block UNSOLICITED app
-        // redirects (page/script-initiated, !isDirectNavigation) — the same
-        // anti-nag treatment the Play Store path gets. A deliberately-tapped
-        // deeplink (isDirectNavigation, autoRedirect=false) still gets the
-        // dialog so mailto:/tel:/intended app opens keep working. If the page
-        // bounced here right after loading, goBack first so the user lands on
-        // the page they actually wanted, not the tracker shell.
-        if (blockAppRedirects && autoRedirect) {
-            if (wasRedirector && geckoState != null) {
+        // When the toggle is on, silently block UNSOLICITED app redirects — a
+        // page that bounced to an app/store deeplink right after loading. We
+        // gate on wasRedirector (recent load + back-history), NOT merely
+        // !isDirectNavigation: GeckoView reports a deliberate link TAP as
+        // non-direct too, so since this pref ships ON by default, gating on
+        // autoRedirect alone would silently swallow real "open in app" taps for
+        // everyone ("nothing happens"). wasRedirector implies canGoBackward, so
+        // goBack lands the user on the page they actually wanted, off the
+        // tracker shell, and a considered tap (read first, then tap) still gets
+        // the dialog below.
+        if (blockAppRedirects && wasRedirector) {
+            if (geckoState != null) {
                 geckoState.goBack();
             }
             makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar)).show();

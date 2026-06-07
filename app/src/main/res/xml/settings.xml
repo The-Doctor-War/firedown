@@ -147,6 +147,15 @@
         <SwitchPreferenceCompat
             android:defaultValue="true"
             app:singleLineTitle="false"
+            android:key="com.solarized.firedown.preferences.browser.block.playstore.redirects"
+            android:summary="@string/settings_block_app_redirects_summary"
+            android:title="@string/settings_block_app_redirects_title"
+            app:icon="@drawable/ic_shop_24" />
+
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.browser.disable.disk.cache"
             android:summary="@string/settings_disk_cache_disabled_summary"
             android:title="@string/settings_disk_cache_disabled"
@@ -160,15 +169,6 @@
             android:summary="@string/settings_safe_browsing_disabled_summary"
             android:title="@string/settings_safe_browsing_disabled"
             app:icon="@drawable/ic_shield_24" />
-
-
-        <SwitchPreferenceCompat
-            android:defaultValue="false"
-            app:singleLineTitle="false"
-            android:key="com.solarized.firedown.preferences.browser.block.playstore.redirects"
-            android:summary="@string/settings_block_app_redirects_summary"
-            android:title="@string/settings_block_app_redirects_title"
-            app:icon="@drawable/ic_shop_24" />
 
 
     </PreferenceCategory>

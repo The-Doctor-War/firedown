@@ -62,21 +62,30 @@ public class Preferences {
      * Auto-block sites' UNSOLICITED "open in app" / "install our app" redirects
      * without prompting. Covers both Play Store install nags (play.google.com /
      * market://) and generic app deeplinks fired as an automatic redirect. When
-     * false (default) the user is asked per-redirect (BlockRedirectDialogFragment
-     * for Play Store, BrowserAppDialogFragment for app deeplinks). When true,
-     * NavigationDelegate's denial is taken silently (with a Snackbar) for
-     * AUTOMATIC redirects only — a deliberate tap on a deeplink still prompts
-     * (gated on !isDirectNavigation, the same heuristic as the Play Store path).
+     * ON (the default), NavigationDelegate's denial is taken silently (with a
+     * Snackbar) for AUTOMATIC redirects only — a page that bounces to an app/
+     * store right after loading. A deliberate tap on a deeplink still prompts
+     * (the generic path gates on the wasRedirector bounce heuristic, not merely
+     * !isDirectNavigation, because GeckoView reports a link tap as non-direct
+     * too — so gating on that alone would swallow real taps once default-on).
+     * When OFF the user is asked per-redirect (BlockRedirectDialogFragment for
+     * Play Store, BrowserAppDialogFragment for app deeplinks).
      *
-     * The key value keeps the legacy …block.playstore.redirects name on purpose:
-     * the semantics only broadened (default is unchanged — false, no inversion),
-     * so existing users who enabled the old "block Play Store redirects" toggle
-     * keep their choice under the new, wider toggle.
+     * Default ON: app-install/open nags are near-universally unwanted, matching
+     * the app's other hardened defaults (HTTPS-only, disk cache off).
+     *
+     * The key value keeps the legacy …block.playstore.redirects name on purpose.
+     * Changing the DEFAULT (false→true) needs no new key here: there's no
+     * semantic inversion (true still means "block"), and the app never persists
+     * defaults (no PreferenceManager.setDefaultValues), so an untouched install
+     * reads the new default while a user who explicitly toggled keeps their
+     * stored choice. (The new-key rule applies to enable→disable *inversions*,
+     * which this isn't.)
      */
     public static final String SETTINGS_BLOCK_APP_REDIRECTS =
             "com.solarized.firedown.preferences.browser.block.playstore.redirects";
 
-    public static final boolean DEFAULT_BLOCK_APP_REDIRECTS = false;
+    public static final boolean DEFAULT_BLOCK_APP_REDIRECTS = true;
 
     public static final String SETTINGS_THEME = "com.solarized.firedown.preferences.theme";
 

@@ -57,6 +57,11 @@ const DEFAULT_PATTERNS = [
   // block the delivery.domand playlists so the generic catcher doesn't also
   // grab the bare master/media m3u8.
   'delivery\\.domand\\.nicovideo\\.jp\\/.*\\.m3u8',
+  // …and block the CMAF media on the asset CDN — the player fetches per-track
+  // init + data segments (init01.cmfv / init01.cmfa, video=.cmfv, audio=.cmfa)
+  // which ffmpeg pulls for the parser's download; the generic catcher would
+  // otherwise capture the init segments as standalone (unplayable) entries.
+  'asset\\.domand\\.nicovideo\\.jp\\/.*\\.cmf[va]',
 
   // Dailymotion
   'dmcdn\\.net.*init\\.mp4',

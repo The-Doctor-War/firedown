@@ -176,9 +176,9 @@ async function sendVariants(details, { variants, origin, description, img, name,
         incognito
     };
 
-    if (description) message.description = description;
+    if (description) message.description = decodeHtmlEntities(description);
     if (img) message.img = img;
-    if (name) message.name = name;
+    if (name) message.name = decodeHtmlEntities(name);
     if (duration > 0) message.duration = duration;
     if (Array.isArray(requestHeaders) && requestHeaders.length > 0) {
         message.requestHeaders = requestHeaders;
@@ -332,8 +332,8 @@ async function enumerateMasterNative(details, { url, origin, name, description, 
     }
 
     const message = { type: "hls-master", url, origin, tabId, request: details.requestId, incognito };
-    if (name) message.name = name;
-    if (description) message.description = description;
+    if (name) message.name = decodeHtmlEntities(name);
+    if (description) message.description = decodeHtmlEntities(description);
     if (img) message.img = img;
     if (duration > 0) message.duration = duration;
     if (Array.isArray(requestHeaders) && requestHeaders.length > 0) message.requestHeaders = requestHeaders;
@@ -357,8 +357,8 @@ async function emitHlsMasterOrSingle(details, { url, origin, tabId, name, title,
         origin,
         tabId,
         request: details.requestId,
-        name,
-        description: title,
+        name: decodeHtmlEntities(name),
+        description: decodeHtmlEntities(title),
         img,
         ...(duration > 0 ? { duration } : {})
     });
@@ -743,6 +743,52 @@ function parseApplePodcastsUrl(url) {
 function stripHtml(s) {
     if (typeof s !== "string") return "";
     return s.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
+}
+
+// The named character references that actually turn up in titles/descriptions.
+// (The numeric forms — &#NNN; / &#xHHH; — are handled generically below, so we
+// only need to spell out the named ones.)
+const HTML_NAMED_ENTITIES = {
+    amp: "&", lt: "<", gt: ">", quot: "\"", apos: "'", nbsp: " ",
+    hellip: "…", mdash: "—", ndash: "–",
+    lsquo: "‘", rsquo: "’", ldquo: "“", rdquo: "”",
+    laquo: "«", raquo: "»", middot: "·", bull: "•",
+    deg: "°", trade: "™", copy: "©", reg: "®", euro: "€",
+};
+
+// Decode HTML character references in scraped metadata text. The HTML parser
+// leaves character references RAW inside <script type="application/ld+json">
+// (script content is "raw text"), so a JSON-LD name/description can reach us as
+// the literal "&#x41c;" (М) or "&amp;" and would otherwise render verbatim in
+// the capture's title/description and the Downloads info dialog. Decodes the
+// decimal (&#NNN;) and hex (&#xHHH;) numeric forms plus the named refs above;
+// an unknown ref is left untouched. Safe to call on already-clean text (no '&'
+// → early return) and idempotent for these refs (decoded output has none left).
+function decodeHtmlEntities(s) {
+    if (typeof s !== "string" || s.indexOf("&") === -1) return s;
+    try {
+        return s.replace(/&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z][a-zA-Z0-9]*);/g, (match, body) => {
+            if (body[0] === "#") {
+                let code;
+                if (body[1] === "x" || body[1] === "X") {
+                    code = parseInt(body.slice(2), 16);
+                } else {
+                    code = parseInt(body.slice(1), 10);
+                }
+                if (!Number.isFinite(code) || code < 0 || code > 0x10FFFF) return match;
+                try {
+                    return String.fromCodePoint(code);
+                } catch (e) {
+                    return match;
+                }
+            }
+            const named = HTML_NAMED_ENTITIES[body];
+            return named !== undefined ? named : match;
+        });
+    } catch (e) {
+        // Best-effort — fall back to the original text on any decode failure.
+        return s;
+    }
 }
 
 /**

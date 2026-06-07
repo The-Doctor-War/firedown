@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.core.text.HtmlCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -128,7 +129,7 @@ public class InfoAdapter extends ListAdapter<InfoEntity, RecyclerView.ViewHolder
             if(id == R.id.info_details_name) {
                 holder.textView.setText(mDownloadEntity.getFileName());
             } else if(id == R.id.info_details_description) {
-                holder.textView.setText(mDownloadEntity.getFileDescription());
+                holder.textView.setText(decodeHtml(mDownloadEntity.getFileDescription()));
             } else if(id == R.id.info_details_size) {
                 holder.textView.setText(Utils.getFileSize(mDownloadEntity.getFileSize()));
             } else if(id == R.id.info_details_modified) {
@@ -153,6 +154,31 @@ public class InfoAdapter extends ListAdapter<InfoEntity, RecyclerView.ViewHolder
     @Override
     public int getItemViewType(int position) {
         return getItem(position).getType();
+    }
+
+    /**
+     * Display-layer catch-all for HTML character references in a description.
+     * Captured metadata can carry refs like {@code &#x41c;} (М) or {@code &amp;}
+     * verbatim — most notably from JSON-LD, whose entities the HTML parser leaves
+     * raw inside the {@code <script>} text, so they survive into the stored
+     * description. Decoding here covers every capture source (parser and the
+     * generic catcher alike); {@code FROM_HTML_MODE_LEGACY} also drops any stray
+     * tags. Idempotent — already-decoded text (e.g. from the parser's own
+     * {@code decodeHtmlEntities}) has nothing left to decode. The trailing
+     * newline {@code fromHtml} appends is trimmed.
+     */
+    private static CharSequence decodeHtml(String s) {
+        if (TextUtils.isEmpty(s)) {
+            return s;
+        }
+        try {
+            String decoded = HtmlCompat.fromHtml(s, HtmlCompat.FROM_HTML_MODE_LEGACY).toString();
+            return decoded.replaceAll("\\s+$", "");
+        } catch (Exception e) {
+            // Decode is best-effort — fall back to the raw text so a malformed
+            // description still shows something rather than nothing.
+            return s;
+        }
     }
 
 }

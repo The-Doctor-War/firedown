@@ -9,8 +9,10 @@ import com.solarized.firedown.StoragePaths;
 import com.solarized.firedown.data.Download;
 import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.data.repository.DownloadDataRepository;
+import com.solarized.firedown.ffmpegutils.FFmpegEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegMetaData;
 import com.solarized.firedown.ffmpegutils.FFmpegMetaDataReader;
+import com.solarized.firedown.ffmpegutils.FFmpegStreamInfo;
 import com.solarized.firedown.ffmpegutils.FFmpegUtils;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.GalleryPublisher;
@@ -20,6 +22,7 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import okhttp3.OkHttpClient;
@@ -170,7 +173,7 @@ public class DownloadTask implements DownloadCallback {
             // sealWithStatus, or ERROR from onError). For SABR/FFmpeg finish,
             // onFileSizeKnown already updated the size before we get here.
             if (entity.getFileStatus() == Download.FINISHED) {
-                backfillDurationIfMissing();
+                backfillMetadataIfMissing();
             }
             repository.add(entity);
         }
@@ -345,42 +348,89 @@ public class DownloadTask implements DownloadCallback {
     }
 
     /**
-     * Stamp the audio/video duration from the finished file when it's missing.
-     * The capture probe is skipped for HLS-master sites (Twitch/Kick/niconico)
-     * to avoid burning a single-use key, and the master playlist carries no
-     * duration — so those downloads (e.g. a selected audio-only rendition)
-     * reached completion with no duration. The download strategies never wire
-     * onDurationResolved, so probe the local output here: cheap, no network, no
-     * keys. Only runs when the duration is actually absent.
+     * Stamp the secondary metadatum from the finished file when it's missing:
+     * <b>duration</b> for audio/video, <b>resolution</b> for images.
+     *
+     * <p>Two completion paths reach here lacking it. (1) The capture probe is
+     * skipped for HLS-master sites (Twitch/Kick/niconico) to avoid burning a
+     * single-use key, and the master playlist carries no duration — so those
+     * downloads (e.g. a selected audio-only rendition) finish with no duration.
+     * (2) An image saved straight from the browser long-press menu
+     * ("save image") is built as a bare {@link DownloadRequest} (url + name +
+     * cookies only — see {@code BrowserFragment}); it never goes through the
+     * parser/{@code VariantProcessor}, so it carries no resolution and the
+     * Downloads list renders a blank resolution tag.
+     *
+     * <p>The download strategies never wire {@code onDurationResolved} and there
+     * is no resolution callback at all, so probe the local output here once:
+     * cheap, no network, no keys. Only probes when the relevant field is
+     * actually absent for the entity's type. Resolution reuses the reader's
+     * stream formatter ("WxH", SVG-aware), matching what the parser path emits.
      */
-    private void backfillDurationIfMissing() {
+    private void backfillMetadataIfMissing() {
         String mime = entity.getFileMimeType();
-        if (!FileUriHelper.isAudio(mime) && !FileUriHelper.isVideo(mime)) {
+        boolean isAv = FileUriHelper.isAudio(mime) || FileUriHelper.isVideo(mime);
+        boolean isImage = FileUriHelper.isImage(mime) || FileUriHelper.isSVG(mime);
+
+        boolean needDuration = isAv
+                && (entity.getDuration() <= 0 || TextUtils.isEmpty(entity.getDurationFormatted()));
+        boolean needResolution = isImage && TextUtils.isEmpty(entity.getFileResolution());
+        if (!needDuration && !needResolution) {
             return;
         }
-        if (entity.getDuration() > 0 && !TextUtils.isEmpty(entity.getDurationFormatted())) {
-            return;
-        }
+
         String path = entity.getFilePath();
         if (TextUtils.isEmpty(path)) {
             return;
         }
+
         FFmpegMetaDataReader reader = new FFmpegMetaDataReader();
         try {
             FFmpegMetaData meta = reader.getStreamInfo(path, null, false);
             if (meta != null) {
-                long duration = meta.getDuration();
-                if (duration > 0) {
-                    entity.setFileDuration(duration);
-                    entity.setFileDurationFormatted(FFmpegUtils.getFileDuration(duration));
+                if (needDuration) {
+                    long duration = meta.getDuration();
+                    if (duration > 0) {
+                        entity.setFileDuration(duration);
+                        entity.setFileDurationFormatted(FFmpegUtils.getFileDuration(duration));
+                    }
+                }
+                if (needResolution) {
+                    String resolution = readVideoStreamInfo(reader);
+                    if (!TextUtils.isEmpty(resolution)) {
+                        entity.setFileResolution(resolution);
+                    }
                 }
             }
         } catch (Exception e) {
-            // best-effort — leave the duration unset on probe failure
+            // best-effort — leave the metadata unset on probe failure
         } finally {
             reader.stop();
             reader.release();
         }
+    }
+
+    /**
+     * Pull the formatted resolution ("WxH" for images) of the first video
+     * stream from a reader whose {@code getStreamInfo} has already run. Reuses
+     * {@link FFmpegMetaDataReader#getStreams()} so the image-vs-video and
+     * SVG-encoded-size formatting stays in one place.
+     */
+    private static String readVideoStreamInfo(FFmpegMetaDataReader reader) {
+        ArrayList<FFmpegEntity> streams = reader.getStreams();
+        if (streams == null) {
+            return null;
+        }
+        for (FFmpegEntity stream : streams) {
+            if (stream == null) {
+                continue;
+            }
+            if (stream.getCodecType() == FFmpegStreamInfo.CodecType.VIDEO.getValue()
+                    && !TextUtils.isEmpty(stream.getInfo())) {
+                return stream.getInfo();
+            }
+        }
+        return null;
     }
 
     /**

@@ -2911,11 +2911,24 @@ const IG_QUALITY_TIER = { 101: "High", 102: "Medium", 103: "Low", 104: "Lowest" 
  * of all blank or all showing the same source resolution.
  */
 function buildInstagramVariants(videoVersions, ow, oh) {
+    // Threads commonly lists the SAME progressive URL several times under
+    // different `type` ids (101/102/103) — verified by HAR to be byte-identical
+    // URLs, i.e. NOT distinct renditions (Threads ships one progressive file
+    // with no per-rendition dimensions). Dedup by URL so the picker shows one
+    // row per actual file instead of N identical ones. When a post genuinely
+    // does carry distinct URLs per type, they survive and are labelled by tier.
+    const seenUrl = new Set();
+    const versions = [];
+    for (const v of videoVersions) {
+        if (!v || typeof v.url !== "string" || seenUrl.has(v.url)) continue;
+        seenUrl.add(v.url);
+        versions.push(v);
+    }
     let bestType = Infinity;
-    for (const vv of videoVersions) {
+    for (const vv of versions) {
         if (typeof vv?.type === "number" && vv.type < bestType) bestType = vv.type;
     }
-    return videoVersions.map(v => {
+    return versions.map(v => {
         const variant = { url: v.url };
         if (v.width && v.height) {
             variant.width = v.width;

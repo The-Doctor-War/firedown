@@ -1446,7 +1446,8 @@ public class GeckoComponents {
                         || UrlStringUtils.isBlobLike(request.uri)) {
                     return GeckoResult.allow();
                 }
-                mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST, geckoState, request.uri);
+                mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST,
+                        geckoState, request.uri, !request.isDirectNavigation, false);
                 return GeckoResult.deny();
             }
 
@@ -1508,8 +1509,20 @@ public class GeckoComponents {
                 // away mid-load) must not pop a dialog over the visible tab.
                 // Same isCurrentGeckoState guard the START/STOP/PROGRESS
                 // notifications use.
+                //
+                // Pass the same anti-nag signals the Play Store path computes so
+                // the observer can honour the "block app redirects" toggle:
+                // autoRedirect (!isDirectNavigation) gates the silent block —
+                // a deliberately-tapped deeplink still prompts — and wasRedirector
+                // (bounced here just after a load, with back-history) lets it
+                // goBack() off the tracker page.
+                long ageMs = System.currentTimeMillis() - geckoState.getLastNavigationTime();
+                boolean wasRedirector = geckoState.getLastNavigationTime() > 0
+                        && ageMs < REDIRECTOR_WINDOW_MS
+                        && geckoState.canGoBackward();
                 if (isCurrentGeckoState(geckoState)) {
-                    mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST, geckoState, request.uri);
+                    mGeckoObserverRegistry.notifyObservers(GeckoObserverInvoker.LOAD_REQUEST,
+                            geckoState, request.uri, !request.isDirectNavigation, wasRedirector);
                 }
                 return GeckoResult.deny();
             }

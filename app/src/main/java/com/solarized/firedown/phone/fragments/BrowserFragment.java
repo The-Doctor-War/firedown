@@ -1491,8 +1491,9 @@ public class BrowserFragment extends BaseBrowserFragment
     }
 
     @Override
-    public void onLoadRequest(GeckoState geckoState, String uri) {
-        Log.d(TAG, "onLoadRequest: " + uri);
+    public void onLoadRequest(GeckoState geckoState, String uri, boolean autoRedirect, boolean wasRedirector) {
+        Log.d(TAG, "onLoadRequest: " + uri + " autoRedirect=" + autoRedirect
+                + " wasRedirector=" + wasRedirector);
         Intent browsableIntent = AppLinkUseCases.createBrowsableIntent(uri);
         if (browsableIntent == null
                 || UrlStringUtils.isHttpOrHttps(uri)
@@ -1503,17 +1504,35 @@ public class BrowserFragment extends BaseBrowserFragment
                 // never surface the "open in app" dialog.
                 || UrlStringUtils.isBlobLike(uri))
             return;
+
+        boolean blockAppRedirects = mSharedPreferences.getBoolean(
+                Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
+                Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
+
+        // Option A: when the toggle is on, silently block UNSOLICITED app
+        // redirects (page/script-initiated, !isDirectNavigation) — the same
+        // anti-nag treatment the Play Store path gets. A deliberately-tapped
+        // deeplink (isDirectNavigation, autoRedirect=false) still gets the
+        // dialog so mailto:/tel:/intended app opens keep working. If the page
+        // bounced here right after loading, goBack first so the user lands on
+        // the page they actually wanted, not the tracker shell.
+        if (blockAppRedirects && autoRedirect) {
+            if (wasRedirector && geckoState != null) {
+                geckoState.goBack();
+            }
+            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar)).show();
+            return;
+        }
+
         // "Open in app" links to an uninstalled app get rewritten by
         // createBrowsableIntent into a Play Store intent (the "install our
         // app" nag). That hop is born after the NavigationDelegate's
-        // URL-level anti-nag check, so honour SETTINGS_BLOCK_PLAYSTORE_REDIRECTS
+        // URL-level anti-nag check, so honour the block-app-redirects toggle
         // here too: when it's on and this resolves to the store, the dialog's
         // "Open" blocks + shows the snackbar instead of launching Google Play.
         // The dialog itself is unchanged for genuine app opens.
         boolean blockStoreRedirect = AppLinkUseCases.isMarketplaceIntent(browsableIntent)
-                && mSharedPreferences.getBoolean(
-                        Preferences.SETTINGS_BLOCK_PLAYSTORE_REDIRECTS,
-                        Preferences.DEFAULT_BLOCK_PLAYSTORE_REDIRECTS);
+                && blockAppRedirects;
         try {
             Bundle bundle = new Bundle();
             bundle.putParcelable(Keys.ITEM_ID, browsableIntent);
@@ -1550,8 +1569,8 @@ public class BrowserFragment extends BaseBrowserFragment
             geckoState.goBack();
         }
         boolean autoBlock = mSharedPreferences.getBoolean(
-                Preferences.SETTINGS_BLOCK_PLAYSTORE_REDIRECTS,
-                Preferences.DEFAULT_BLOCK_PLAYSTORE_REDIRECTS);
+                Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
+                Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
         if (autoBlock) {
             // Pref is on — silent block path. Show a Snackbar so the
             // denial isn't invisible to the user.

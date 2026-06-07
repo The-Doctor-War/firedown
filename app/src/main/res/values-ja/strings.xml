@@ -316,8 +316,6 @@
     <string name="settings_block_javascript_title">JavaScript をブロック</string>
     <string name="settings_block_location_summary">Webサイトが位置情報を要求するのを防ぎます</string>
     <string name="settings_block_location_title">位置情報リクエストをブロック</string>
-    <string name="settings_block_playstore_redirects_summary">Google Play へのアプリインストールを促すサイトを通知なくブロックします</string>
-    <string name="settings_block_playstore_redirects_title">Play ストアへのリダイレクトをブロック</string>
     <string name="block_redirect_title">Google Play を開きますか?</string>
     <string name="block_redirect_subtitle">このサイトは Google Play へリダイレクトしようとしています。</string>
     <string name="block_redirect_subtitle_package">このサイトは Google Play で %1$s をインストールさせようとしています。</string>

@@ -166,8 +166,8 @@
             android:defaultValue="false"
             app:singleLineTitle="false"
             android:key="com.solarized.firedown.preferences.browser.block.playstore.redirects"
-            android:summary="@string/settings_block_playstore_redirects_summary"
-            android:title="@string/settings_block_playstore_redirects_title"
+            android:summary="@string/settings_block_app_redirects_summary"
+            android:title="@string/settings_block_app_redirects_title"
             app:icon="@drawable/ic_shop_24" />
 
 

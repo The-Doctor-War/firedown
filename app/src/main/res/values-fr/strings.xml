@@ -318,8 +318,6 @@
     <string name="settings_block_javascript_title">Bloquer JavaScript</string>
     <string name="settings_block_location_summary">Empêche les sites de demander votre localisation</string>
     <string name="settings_block_location_title">Bloquer les demandes de localisation</string>
-    <string name="settings_block_playstore_redirects_summary">Bloque silencieusement les sites qui tentent de vous pousser à installer leur application via Google Play</string>
-    <string name="settings_block_playstore_redirects_title">Bloquer les redirections vers le Play Store</string>
     <string name="block_redirect_title">Ouvrir Google Play ?</string>
     <string name="block_redirect_subtitle">Ce site tente de vous rediriger vers Google Play.</string>
     <string name="block_redirect_subtitle_package">Ce site veut vous envoyer sur Google Play pour installer %1$s.</string>

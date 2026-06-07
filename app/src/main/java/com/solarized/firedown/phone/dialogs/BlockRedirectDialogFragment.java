@@ -111,7 +111,7 @@ public class BlockRedirectDialogFragment extends BaseDialogFragment {
 
         btnAlways.setOnClickListener(v -> {
             mSharedPreferences.edit()
-                    .putBoolean(Preferences.SETTINGS_BLOCK_PLAYSTORE_REDIRECTS, true)
+                    .putBoolean(Preferences.SETTINGS_BLOCK_APP_REDIRECTS, true)
                     .apply();
             sendResult(ACTION_BLOCK, null);
         });

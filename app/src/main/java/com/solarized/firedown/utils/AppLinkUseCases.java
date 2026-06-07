@@ -124,7 +124,7 @@ public class AppLinkUseCases {
      * that isn't installed (the "install our app" nag pattern). That
      * manufactured Play Store hop happens *after* the NavigationDelegate's
      * URL-level anti-nag check (which only inspects the navigation URI), so
-     * it would otherwise escape the SETTINGS_BLOCK_PLAYSTORE_REDIRECTS
+     * it would otherwise escape the SETTINGS_BLOCK_APP_REDIRECTS
      * toggle and dump the user on Google Play. Callers use this to route it
      * back through the same block-and-snackbar path.
      */

@@ -59,17 +59,24 @@ public class Preferences {
     public static final boolean DEFAULT_BLOCK_LOCATION = true;
 
     /**
-     * Auto-block sites' "open in Play Store" redirects without prompting.
-     * When false (default) the user is asked per-redirect via
-     * BlockRedirectDialogFragment with an "Always block" action that
-     * flips this preference on. When true, NavigationDelegate denies
-     * any play.google.com / market:// redirect silently (with a
-     * Snackbar so the block isn't invisible).
+     * Auto-block sites' UNSOLICITED "open in app" / "install our app" redirects
+     * without prompting. Covers both Play Store install nags (play.google.com /
+     * market://) and generic app deeplinks fired as an automatic redirect. When
+     * false (default) the user is asked per-redirect (BlockRedirectDialogFragment
+     * for Play Store, BrowserAppDialogFragment for app deeplinks). When true,
+     * NavigationDelegate's denial is taken silently (with a Snackbar) for
+     * AUTOMATIC redirects only — a deliberate tap on a deeplink still prompts
+     * (gated on !isDirectNavigation, the same heuristic as the Play Store path).
+     *
+     * The key value keeps the legacy …block.playstore.redirects name on purpose:
+     * the semantics only broadened (default is unchanged — false, no inversion),
+     * so existing users who enabled the old "block Play Store redirects" toggle
+     * keep their choice under the new, wider toggle.
      */
-    public static final String SETTINGS_BLOCK_PLAYSTORE_REDIRECTS =
+    public static final String SETTINGS_BLOCK_APP_REDIRECTS =
             "com.solarized.firedown.preferences.browser.block.playstore.redirects";
 
-    public static final boolean DEFAULT_BLOCK_PLAYSTORE_REDIRECTS = false;
+    public static final boolean DEFAULT_BLOCK_APP_REDIRECTS = false;
 
     public static final String SETTINGS_THEME = "com.solarized.firedown.preferences.theme";
 

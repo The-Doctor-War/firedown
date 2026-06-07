@@ -31,7 +31,12 @@ public interface GeckoObserver {
 
     void onThumbnail(GeckoState geckoState);
 
-    void onLoadRequest(GeckoState geckoState, String uri);
+    // autoRedirect: the navigation was NOT a direct user action (typed URL /
+    // bookmark) — i.e. an unsolicited page/script-initiated app deeplink, the
+    // signal the "block app redirects" toggle acts on. wasRedirector: the page
+    // bounced here just after loading and has back-history, so the handler can
+    // goBack() before/instead of prompting (same heuristic as the Play Store path).
+    void onLoadRequest(GeckoState geckoState, String uri, boolean autoRedirect, boolean wasRedirector);
 
     /**
      * Fired when {@link NavigationDelegate#onLoadRequest} catches a

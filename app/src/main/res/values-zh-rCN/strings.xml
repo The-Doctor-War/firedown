@@ -316,8 +316,6 @@
     <string name="settings_block_javascript_title">拦阻 JavaScript</string>
     <string name="settings_block_location_summary">阻止网站请求你的位置</string>
     <string name="settings_block_location_title">拦截位置请求</string>
-    <string name="settings_block_playstore_redirects_summary">静默拦截试图将你推送到 Google Play 安装其应用的网站</string>
-    <string name="settings_block_playstore_redirects_title">拦截 Play 商店跳转</string>
     <string name="block_redirect_title">打开 Google Play？</string>
     <string name="block_redirect_subtitle">此网站正尝试将你跳转到 Google Play。</string>
     <string name="block_redirect_subtitle_package">此网站想把你送到 Google Play 安装 %1$s。</string>

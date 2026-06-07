@@ -337,6 +337,30 @@ function isMediaContentType(contentType) {
   return MEDIA_CONTENT_TYPES.some((type) => contentType.includes(type));
 }
 
+// True when an <img>-loaded request (webRequest type 'image'/'imageset') looks
+// like a telemetry beacon rather than a real image: a *definitively* non-image
+// content-type (json / text/html / text/plain) AND no image/svg extension to
+// vouch for it. This is the source of the manual telemetry exclusions in
+// regex.js — pixel/beacon endpoints fired via <img> are captured on type alone
+// (classifyByUrl's `data.type === 'image'` fallback) and then needlessly probed.
+//
+// Deliberately scoped to the image family ONLY: real media (m3u8/mpd/…) is
+// loaded as type 'media' by a <video>/<audio> element, never via <img>, so this
+// can't drop a stream with a disguised MIME (text/*, octet-stream). Ambiguous
+// content-types (octet-stream / binary / missing) are NOT treated as beacons —
+// some CDNs serve genuine images that way (and the content-script DOM scrape
+// backs those up regardless).
+function isNonImageBeacon(url, headers) {
+  if (PATTERNS.image.test(url) || PATTERNS.svg.test(url)) return false;
+  const ct = getHeader(headers, 'content-type');
+  if (!ct) return false;
+  const lower = ct.toLowerCase();
+  if (lower.includes('image')) return false;
+  return lower.includes('application/json')
+      || lower.includes('text/html')
+      || lower.includes('text/plain');
+}
+
 function validateAndClassify(data) {
   const { url, type, responseHeaders } = data;
   const interesting = isInteresting(url, type);
@@ -357,6 +381,14 @@ function validateAndClassify(data) {
   }
 
   if (type === 'media' || type === 'imageset' || type === 'image') {
+    // Drop <img>-loaded telemetry beacons (non-image content-type, no image
+    // extension) before they reach native + a wasted metadatareader probe.
+    // Image family only — the 'media' type is left untrusted-by-content-type so
+    // disguised streams (m3u8/mpd served as text/*, octet-stream) still pass.
+    if ((type === 'image' || type === 'imageset') && isNonImageBeacon(url, responseHeaders)) {
+      if (interesting) dlog('reject:image-beacon', url, 'content-type=', getHeader(responseHeaders, 'content-type'));
+      return false;
+    }
     const ok = classifyByUrl(data);
     if (interesting && !ok) dlog('reject:classifyByUrl(media/image)', url, 'type=', type);
     return ok;

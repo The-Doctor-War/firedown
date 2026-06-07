@@ -69,8 +69,9 @@ public class Preferences {
      * (mailto:/tel:/sms:/geo:) are never blocked. (An earlier wasRedirector-only
      * gate was too narrow — it missed TikTok, whose deeplink fires on a
      * first/cached view with no back-entry — so the dialog leaked through.)
-     * When OFF the user is asked per-redirect (BlockRedirectDialogFragment for
-     * Play Store, BrowserAppDialogFragment for app deeplinks).
+     * When OFF: a Play Store redirect just loads the listing in-browser (no
+     * prompt — it stays in the browser), and a generic app deeplink shows the
+     * BrowserAppDialogFragment "open in another app" dialog.
      *
      * Default ON: app-install/open nags are near-universally unwanted, matching
      * the app's other hardened defaults (HTTPS-only, disk cache off).

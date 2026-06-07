@@ -62,7 +62,6 @@ import com.solarized.firedown.geckoview.media.GeckoMetaData;
 import com.solarized.firedown.geckoview.toolbar.BottomNavigationBar;
 import com.solarized.firedown.manager.DownloadRequest;
 import com.solarized.firedown.phone.DownloadsActivity;
-import com.solarized.firedown.phone.dialogs.BlockRedirectDialogFragment;
 import com.solarized.firedown.phone.dialogs.BrowserAppDialogFragment;
 import com.solarized.firedown.phone.SettingsActivity;
 import com.solarized.firedown.phone.VaultActivity;
@@ -809,26 +808,6 @@ public class BrowserFragment extends BaseBrowserFragment
         mGeckoToolbar.updateTheme(mActivity, false);
         mAutoCompleteView.updateTheme(mActivity, false);
         mSearchAutocompleteAdapter.setIncognito(false);
-
-        // BlockRedirectDialogFragment reports "Open Play Store" via
-        // FragmentResult — load the URI through the currently
-        // visible session so the user-initiated retry actually
-        // navigates. Goes through peekCurrentGeckoState so regular
-        // vs. incognito routing matches the rest of BrowserFragment.
-        // The retry bypasses the NavigationDelegate filter because
-        // loadUri sets isDirectNavigation=true.
-        getParentFragmentManager().setFragmentResultListener(
-                BlockRedirectDialogFragment.RESULT_KEY,
-                getViewLifecycleOwner(),
-                (requestKey, result) -> {
-                    String action = result.getString(BlockRedirectDialogFragment.RESULT_ACTION);
-                    if (!BlockRedirectDialogFragment.ACTION_OPEN.equals(action)) return;
-                    String uri = result.getString(BlockRedirectDialogFragment.RESULT_OPEN_URI);
-                    if (TextUtils.isEmpty(uri)) return;
-                    GeckoState state = peekCurrentGeckoState();
-                    if (state == null) return;
-                    state.getOrCreateGeckoSession().loadUri(uri);
-                });
 
         // BrowserAppDialogFragment reports a blocked Play Store "open in
         // app" redirect here — the user tapped Open but the target app
@@ -1583,55 +1562,46 @@ public class BrowserFragment extends BaseBrowserFragment
     }
 
     /**
-     * Site is trying to push the user to a Play Store listing. The
-     * NavigationDelegate has already denied the navigation by the
-     * time we get here — our job is to either:
-     *   • show a one-shot Snackbar (when the auto-block preference
-     *     is ON), so the silent block doesn't look like a broken
-     *     link, or
-     *   • pop BlockRedirectDialogFragment which surfaces three
-     *     choices (Cancel / Open Play Store / Always block).
+     * Site is trying to push the user to a Play Store listing (the
+     * NavigationDelegate already denied the navigation). With the unified
+     * "block app redirects" toggle:
+     *   • ON (default): silent block — bounce off the tracker page if we came
+     *     from one, then a Snackbar with a one-shot "Open" that loads the
+     *     listing in-browser, so the block isn't invisible.
+     *   • OFF: not blocking, so just load the listing in-browser. No prompt —
+     *     unlike a generic app deeplink this stays in the browser (no app
+     *     context switch), so there's nothing to confirm. (This replaced the
+     *     old 3-choice BlockRedirectDialogFragment, which was redundant with
+     *     the Settings toggle once the pref defaulted ON.)
      *
-     * When the delegate flagged the current page as a redirector
-     * (loaded just before firing the Play Store nav, and we have
-     * history to fall back on), call goBack first so the user is
-     * already on the source page by the time the dialog dismisses
-     * — otherwise they'd be stranded on the tracker URL like
-     * ivoox.com/rf/{id}.
+     * "Open"/load uses loadUri (isDirectNavigation=true → not re-intercepted),
+     * resolved against the currently-visible session in case the user switched
+     * tabs before tapping.
      */
     @Override
-    public void onPlayStoreRedirect(GeckoState geckoState, String uri, String packageId, boolean wasRedirector) {
-        Log.d(TAG, "onPlayStoreRedirect: uri=" + uri + " pkg=" + packageId
-                + " wasRedirector=" + wasRedirector);
-        if (wasRedirector) {
-            geckoState.goBack();
-        }
+    public void onPlayStoreRedirect(GeckoState geckoState, String uri, boolean wasRedirector) {
+        Log.d(TAG, "onPlayStoreRedirect: uri=" + uri + " wasRedirector=" + wasRedirector);
         boolean autoBlock = mSharedPreferences.getBoolean(
                 Preferences.SETTINGS_BLOCK_APP_REDIRECTS,
                 Preferences.DEFAULT_BLOCK_APP_REDIRECTS);
-        if (autoBlock) {
-            // Pref is on — silent block path. Show a Snackbar so the denial
-            // isn't invisible, with a one-shot "Open" escape hatch that loads
-            // the store target the same way the "Open Play Store" dialog action
-            // does (loadUri sets isDirectNavigation=true so it isn't
-            // re-intercepted). Resolved against the currently-visible session in
-            // case the user switched tabs before tapping.
-            makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar))
-                    .setAction(R.string.open, v -> {
-                        GeckoState state = peekCurrentGeckoState();
-                        if (state != null && !TextUtils.isEmpty(uri)) {
-                            state.getOrCreateGeckoSession().loadUri(uri);
-                        }
-                    })
-                    .show();
+        if (!autoBlock) {
+            loadInCurrentSession(uri);
             return;
         }
-        Bundle bundle = new Bundle();
-        bundle.putString(Keys.ITEM_ID, uri);
-        bundle.putString(Keys.PACKAGE_ID, packageId);
-        bundle.putBoolean(Keys.IS_INCOGNITO, mIsIncognitoThemed);
-        NavigationUtils.navigateSafe(mNavController,
-                R.id.dialog_block_redirect, R.id.browser, bundle);
+        if (wasRedirector && geckoState != null) {
+            geckoState.goBack();
+        }
+        makeAnchoredSnackbar(getString(R.string.block_redirect_snackbar))
+                .setAction(R.string.open, v -> loadInCurrentSession(uri))
+                .show();
+    }
+
+    /** Load a URL through the currently-visible session (regular/incognito). */
+    private void loadInCurrentSession(String uri) {
+        GeckoState state = peekCurrentGeckoState();
+        if (state != null && !TextUtils.isEmpty(uri)) {
+            state.getOrCreateGeckoSession().loadUri(uri);
+        }
     }
 
     @Override

@@ -1471,20 +1471,19 @@ public class GeckoComponents {
             // observer will goBack() before showing the dialog so
             // the user ends up on the page they actually wanted.
             if (UrlStringUtils.isPlayStoreUrl(request.uri) && !request.isDirectNavigation) {
-                String packageId = UrlStringUtils.extractPlayStorePackage(request.uri);
                 long ageMs = System.currentTimeMillis() - geckoState.getLastNavigationTime();
                 boolean wasRedirector = geckoState.getLastNavigationTime() > 0
                         && ageMs < REDIRECTOR_WINDOW_MS
                         && geckoState.canGoBackward();
                 // Only surface the redirect UI for the foreground tab. A
                 // background tab that bounces to Play Store while the user has
-                // switched away must still be denied, but its snackbar/dialog
-                // would otherwise pop over the now-visible tab. Same guard the
+                // switched away must still be denied, but its snackbar would
+                // otherwise pop over the now-visible tab. Same guard the
                 // START/STOP/PROGRESS notifications already use.
                 if (isCurrentGeckoState(geckoState)) {
                     mGeckoObserverRegistry.notifyObservers(
                             GeckoObserverInvoker.PLAYSTORE_REDIRECT,
-                            geckoState, request.uri, packageId, wasRedirector);
+                            geckoState, request.uri, wasRedirector);
                 }
                 return GeckoResult.deny();
             }

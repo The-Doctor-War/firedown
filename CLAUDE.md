@@ -525,7 +525,16 @@ paths: the Play Store install redirect (`PLAYSTORE_REDIRECT`,
 (`LOAD_REQUEST`, `bilibili://`/`intent://`/…). **Default ON** (app-install/open
 nags are near-universally unwanted; sits with HTTPS-only / disk-cache-off). When
 ON, the `NavigationDelegate` denial is taken **silently** (snackbar, +`goBack()`)
-instead of prompting; when OFF, the per-redirect dialogs show.
+instead of prompting. When OFF: a generic deeplink shows the
+`BrowserAppDialogFragment` "open in another app" prompt, while a Play Store
+redirect just **loads the listing in-browser** (no prompt — it stays in the
+browser, no app context-switch to confirm). There is **no** Play-Store-specific
+dialog: the old 3-choice `BlockRedirectDialogFragment` ("Always block / Block
+once / Open Play Store") was **removed** as redundant once the toggle defaulted
+ON — its "Always block" merely duplicated the Settings switch, and it was only
+ever reachable after the user had turned blocking *off* (so offering to re-enable
+was incoherent). Don't reintroduce it; `onPlayStoreRedirect` handles both states
+inline.
 
 **Both paths gate on `!request.isDirectNavigation`** (a PAGE-initiated redirect,
 not a typed/bookmarked URL):

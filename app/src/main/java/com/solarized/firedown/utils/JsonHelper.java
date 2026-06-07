@@ -129,6 +129,18 @@ public class JsonHelper {
      *   "formats": [ { "itag": N, "lastModified": "...", "xtags": "...",
      *                   "audioTrackId": "...", ... } ] }
      */
+
+    /**
+     * Human-readable bitrate label for a quality row that carries no resolution
+     * (lean Threads items, RESOLUTION-less HLS renditions). Input is bits/sec
+     * (HLS {@code BANDWIDTH}, Twitter variant {@code bitrate}).
+     */
+    private static String formatBitrate(int bitsPerSec) {
+        if (bitsPerSec >= 1_000_000) {
+            return String.format(Locale.US, "%.1f Mbps", bitsPerSec / 1_000_000.0);
+        }
+        return String.format(Locale.US, "%d kbps", Math.max(1, bitsPerSec / 1000));
+    }
     public static ArrayList<FFmpegEntity> parseVariants(JSONArray jsonArray, JSONObject sabr) {
         if (jsonArray == null) return null;
 
@@ -153,6 +165,7 @@ public class JsonHelper {
                 JSONObject v = jsonArray.getJSONObject(i);
                 int width = v.optInt("width", 0);
                 int height = v.optInt("height", 0);
+                int bitrate = v.optInt("bitrate", 0);
 
                 FFmpegEntity stream = new FFmpegEntity();
                 stream.setStreamUrl(v.optString("url", ""));
@@ -169,10 +182,21 @@ public class JsonHelper {
                 if (videoCodec != null && !videoCodec.isEmpty()) stream.setVideoCodec(videoCodec);
                 if (audioCodec != null && !audioCodec.isEmpty()) stream.setAudioCodec(audioCodec);
 
+                // Quality-row label, degrading gracefully so a rendition that
+                // lacks dimensions doesn't render a blank, indistinguishable row
+                // (the Threads lean-item case, and any RESOLUTION-less HLS
+                // rendition): full WxH → height-only → bitrate → nothing.
                 if (height > 0 && width > 0) {
                     stream.setStreamDescription(
                             String.format(Locale.US, "%dp (%d x %d)", height, width, height));
                     stream.setInfo(String.format(Locale.US, "%dp", height));
+                } else if (height > 0) {
+                    stream.setStreamDescription(String.format(Locale.US, "%dp", height));
+                    stream.setInfo(String.format(Locale.US, "%dp", height));
+                } else if (bitrate > 0) {
+                    String label = formatBitrate(bitrate);
+                    stream.setStreamDescription(label);
+                    stream.setInfo(label);
                 }
 
                 // Populate SABR FormatId fields from variant + SABR format lookup

@@ -279,7 +279,7 @@ function parseHlsMaster(text, baseUrl) {
     const variants = [];
     for (let i = 0; i < V; i++) {
         const s = vids[i];
-        const v = { url: s.url, width: s.width, height: s.height };
+        const v = { url: s.url, width: s.width, height: s.height, bitrate: s.bw || 0 };
         if (A > 0) {
             const idx = Math.min(A - 1, Math.floor((i * A) / V));
             v.audioUrl = audioRanked[idx];
@@ -1296,6 +1296,7 @@ async function handleTikTokItemList({ url, body, tabId, pageUrl }) {
                     url: list[0],
                     width: b.PlayAddr?.Width || v.width || 0,
                     height: b.PlayAddr?.Height || v.height || 0,
+                    bitrate: b.Bitrate || 0,
                     videoCodec: "h264"
                 });
             }
@@ -1697,6 +1698,7 @@ function emitTwitterTweetVideos(details, result) {
                     url: v.url,
                     width: wh ? parseInt(wh[1]) : 0,
                     height: wh ? parseInt(wh[2]) : 0,
+                    bitrate: v.bitrate || 0,
                     videoCodec: "h264",
                     audioCodec: "aac"
                 };

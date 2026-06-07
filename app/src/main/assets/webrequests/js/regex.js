@@ -90,8 +90,19 @@ const DEFAULT_PATTERNS = [
   // bare .m4s fragment. Filename is universally 'init' across CDNs
   // that ship CMAF (smoothpal, generic nginx setups, …); the
   // domain-specific entries above cover the cases where the path
-  // doesn't follow that convention.
-  '\\/init\\.(mp4|m4s)(?:[?#]|$)',
+  // doesn't follow that convention. Covers init / init01 / init-1 / init_0
+  // and the common init extensions (this also generalizes the niconico
+  // init01.cmfv case — the host rule above still covers its data segments).
+  '\\/init[-_]?\\d*\\.(mp4|m4s|cmf[va]|ts|aac|m4a|webm)(?:[?#]|$)',
+
+  // Generic numbered stream segments (seg5 / segment-5 / chunk_5 / frag12 …).
+  // A digit right after seg/segment/chunk/frag is a strong "HLS/DASH fragment"
+  // signal — never a standalone file — so these would only ever fan out junk
+  // entries + wasted probes. The leading '/' keeps it from matching mid-word
+  // (e.g. 'message5.ts' won't match).
+  '\\/seg(?:ment)?[-_]?\\d+\\.(ts|m4s|mp4|aac)(?:[?#]|$)',
+  '\\/chunk[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
+  '\\/frag(?:ment)?[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
 
   // Rumble — the parser emits videos (with metadata) from embedJS (watch
   // pages, HLS master) and service.php?name=shorts.feed (shorts, MP4 variants

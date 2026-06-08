@@ -3,7 +3,12 @@ package com.solarized.firedown.manager;
 public enum UrlType {
 
     UNKNOWN(-1), DUMMY(0), FILE(1), GECKO(2),
-    MEDIA(3), IMAGE(4), SVG(5), TIMEDTEXT(6), TS(7), SABR(8), SUBTITLE(9), HLS_MASTER(10);
+    MEDIA(3), IMAGE(4), SVG(5), TIMEDTEXT(6), TS(7), SABR(8), SUBTITLE(9), HLS_MASTER(10),
+    // Mega.nz folder-link file: a zero-knowledge AES capture. The media URL alone
+    // is undownloadable (the bytes are AES-CTR ciphertext), so — like SABR — it
+    // needs side-channel data (the per-file key) and a dedicated strategy
+    // (MegaStrategy) that resolves the temp URL and decrypts the stream.
+    MEGA(11);
 
     private final int value;
 

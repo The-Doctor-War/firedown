@@ -4149,6 +4149,39 @@ browser.runtime.onMessage.addListener((message, sender) => {
     });
 });
 
+// Mega.nz folder link (page-state-bridge extractMega). The folder share key is
+// in the URL fragment — invisible to the wire — so the bridge reads it page-world
+// and hands us the folder handle + master key. We forward both to native, which
+// enumerates the share tree (anonymous cs `f` call), decrypts each node key with
+// the master key, and emits one entity per media file. The file bytes are
+// AES-CTR ciphertext, so there's nothing to capture off the wire — the native
+// MegaStrategy resolves the temp URL and decrypts on download. No origin dedup
+// here: the native side dedups per file by its synthetic URL's uid, and re-enumeration is idempotent.
+browser.runtime.onMessage.addListener((message, sender) => {
+    if (message?.kind !== "mega-folder") return;
+    const p = message.payload;
+    if (!p || typeof p.folderHandle !== "string" || typeof p.masterKey !== "string") return;
+
+    const tabId = sender.tab?.id ?? -1;
+    const pageUrl = p.origin || sender.tab?.url || "";
+
+    log("MEGA", `folder ${p.folderHandle}`, { origin: pageUrl.slice(0, 80), tabId });
+
+    const message2 = {
+        type: "mega-folder",
+        url: pageUrl,
+        origin: pageUrl,
+        folderHandle: p.folderHandle,
+        masterKey: p.masterKey,
+        tabId,
+        requestId: `mega-folder-${Date.now()}`
+    };
+    if (p.title) message2.name = decodeHtmlEntities(p.title);
+    if (p.img) message2.img = p.img;
+
+    sendNative(message2);
+});
+
 // ============================================================================
 // Niconico (nicovideo.jp)
 // ----------------------------------------------------------------------------

@@ -347,11 +347,60 @@
         return null;
     }
 
+    // ---- Mega.nz folder link -------------------------------------------------
+    // Mega is zero-knowledge: the folder share key lives in the URL fragment
+    // (after #), which is NEVER sent to any server — so neither the wire nor the
+    // DOM can see it, only page-world. We don't even need wrappedJSObject here:
+    // the handle is in the path and the key is in location.hash. We hand both to
+    // the background, which enumerates the share tree natively (an anonymous cs
+    // `f` call) and emits one entity per media file. The file bytes are AES-CTR
+    // ciphertext on the wire, so the generic catcher can't produce a usable
+    // download — the native MegaStrategy decrypts on download instead.
+    //
+    // Folder links only (/folder/<handle>#<key>[/folder|/file/<sub>]). The first
+    // hash segment is the 128-bit master key (~22 base64url chars); anything after
+    // a '/' is in-app navigation state. (Single /file/ links — a 256-bit key — are
+    // a separate, not-yet-handled shape.)
+    function extractMega() {
+        let host;
+        try { host = location.hostname; } catch (_) { return false; }
+        if (!/(?:^|\.)mega\.nz$/i.test(host)) return false;
+
+        const m = /^\/folder\/([0-9A-Za-z_-]+)/.exec(location.pathname || "");
+        if (!m) return false;
+        const folderHandle = m[1];
+
+        let hash = "";
+        try { hash = (location.hash || "").replace(/^#/, ""); } catch (_) { return false; }
+        const masterKey = hash.split("/")[0];
+        if (!masterKey || masterKey.length < 16) return false; // a 128-bit key is ~22 chars
+
+        const key = "mega:" + folderHandle;
+        if (sentKeys.has(key)) { armSpaObserver(); return true; }
+        sentKeys.add(key);
+
+        const folderPage = location.origin + "/folder/" + folderHandle;
+        const payload = {
+            folderHandle,
+            masterKey,
+            origin: folderPage, // clean page URL, no key fragment
+            title: (document.title || "").split(/\s[-|]\s/)[0].trim() || "Mega folder",
+            img: ogMeta("og:image") || undefined
+        };
+        log("sending mega folder", folderHandle, "key", masterKey.length, "chars");
+        browser.runtime.sendMessage({ kind: "mega-folder", payload }).then(() => {}, () => {});
+        armSpaObserver();
+        return true;
+    }
+
     // ---- Emit + lifecycle ----------------------------------------------------
     const sentKeys = new Set();
     let spaArmed = false;
 
     function extractAndSend(label) {
+        // 0) Mega.nz folder link — key is in the URL fragment, page-world only.
+        if (extractMega()) return true;
+
         // 1) SSR-inlined DASH slice (bilibili.tv etc.) → video+audio variants.
         const state = readPageState();
         if (state) {

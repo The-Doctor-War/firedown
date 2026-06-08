@@ -554,7 +554,10 @@ public class GeckoRuntimeHelper {
          * Logic for categorizing task urgency
          */
         private int getPriority(UrlType type) {
-            if (type.usesFFmpeg() || type == UrlType.SABR || type == UrlType.HLS_MASTER) {
+            if (type.usesFFmpeg() || type == UrlType.SABR || type == UrlType.HLS_MASTER
+                    || type == UrlType.MEGA) {
+                // MEGA, like HLS_MASTER, does a network enumeration at capture
+                // (the cs `f` tree listing), so it earns the high lane.
                 return PriorityTaskThreadPoolExecutor.PRIORITY_HIGH;
             } else if (type == UrlType.SVG || type == UrlType.IMAGE) {
                 return PriorityTaskThreadPoolExecutor.PRIORITY_NORMAL;

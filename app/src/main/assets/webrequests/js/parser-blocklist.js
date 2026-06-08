@@ -88,6 +88,16 @@ const PARSER_BLOCKLIST = {
     'rumble\\.com\\/hls-vod\\/.*\\.m3u8',
     'rumble\\.cloud\\/.*\\.mp4',
   ],
+
+  // Mega.nz — the page-state bridge captures folder-link files (the share key is
+  // page-world only) and the native MegaStrategy resolves + decrypts them. Block
+  // the encrypted-byte download hosts (gfs*.[userstorage.]mega.co.nz) so the
+  // generic catcher can't emit a second, bare, AES-CTR-ciphertext entry that no
+  // amount of re-fetching could ever decrypt. (Playback is unaffected — the
+  // block-list only governs capture, not the page's own requests.)
+  mega: [
+    'gfs[^/.]*\\.(userstorage\\.)?mega\\.co\\.nz\\/',
+  ],
 };
 
 // Flatten every parser's patterns into one compiled RegExp — same approach and

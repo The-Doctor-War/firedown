@@ -11,6 +11,7 @@ import com.solarized.firedown.data.repository.BrowserDownloadRepository;
 import com.solarized.firedown.ffmpegutils.FFmpegEntity;
 import com.solarized.firedown.ffmpegutils.FFmpegMetaData;
 import com.solarized.firedown.ffmpegutils.FFmpegMetaDataReader;
+import com.solarized.firedown.manager.MegaCrypto;
 import com.solarized.firedown.manager.UrlType;
 import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.FileUriHelper;
@@ -20,8 +21,10 @@ import com.solarized.firedown.utils.UrlStringUtils;
 import com.solarized.firedown.utils.WebUtils;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
@@ -85,6 +88,9 @@ public class GeckoInspectTask implements Runnable {
     private final boolean mSkipProbe;
     // Parser-declared: the variants are HLS/DASH manifests (ffmpeg must mux).
     private final boolean mManifest;
+    // Mega.nz folder link — share handle + 128-bit master key (base64url).
+    private final String mMegaFolderHandle;
+    private final String mMegaMasterKey;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
 
     public GeckoInspectTask(
@@ -115,6 +121,8 @@ public class GeckoInspectTask implements Runnable {
         mIncognito = geckoInspectEntity.isIncognito();
         mSkipProbe = geckoInspectEntity.isSkipProbe();
         mManifest = geckoInspectEntity.isManifest();
+        mMegaFolderHandle = geckoInspectEntity.getMegaFolderHandle();
+        mMegaMasterKey = geckoInspectEntity.getMegaMasterKey();
 
         Log.d(TAG, "Task Created for URL: " + mUrl + " img: " + mImg
                 + " variants: " + (mVariants != null ? mVariants.size() : 0)
@@ -241,6 +249,9 @@ public class GeckoInspectTask implements Runnable {
 
         } else if (mUrlType == UrlType.HLS_MASTER) {
             return processHlsMaster(entity);
+
+        } else if (mUrlType == UrlType.MEGA) {
+            return processMegaFolder(entity);
 
         } else if (mVariants != null && !mVariants.isEmpty()) {
             new VariantProcessor(mRequestHeaders, mSkipProbe, mManifest).process(entity, mVariants);
@@ -408,6 +419,118 @@ public class GeckoInspectTask implements Runnable {
         // Came from M3U8Parser on a fetched master → definitionally HLS manifests.
         new VariantProcessor(mRequestHeaders, true, true).process(entity, variants);
         return true;
+    }
+
+    // ========================================================================
+    // Mega.nz folder (zero-knowledge AES)
+    // ========================================================================
+
+    private static final String MEGA_API = "https://g.api.mega.co.nz/cs";
+
+    /**
+     * Enumerate a Mega.nz folder-link tree and emit one capture per media file.
+     *
+     * <p>Mega is zero-knowledge: the folder share key is in the URL fragment
+     * (read page-world by the bridge and carried here as {@code mMegaMasterKey}),
+     * never on the wire. We POST the anonymous cs {@code f} command (scoped by
+     * {@code &n=<folder>}) to list every node, then for each <b>file</b> node
+     * decrypt its key with the share key (AES-ECB), decrypt its attributes for the
+     * filename (AES-CBC), and — for media files — emit a {@link BrowserDownloadEntity}
+     * whose URL is a self-describing synthetic link carrying the per-file key. The
+     * actual {@code g}-URL resolution + AES-CTR stream decrypt happen later in
+     * {@code MegaStrategy}; nothing is fetched or decrypted at capture time.
+     *
+     * <p>Like the HLS-master path this builds its own entities and adds them
+     * directly (one folder yields many downloads), so it returns {@code false}:
+     * the prepared folder entity itself is not a download.
+     */
+    private boolean processMegaFolder(BrowserDownloadEntity folderEntity) {
+        if (TextUtils.isEmpty(mMegaFolderHandle) || TextUtils.isEmpty(mMegaMasterKey)) {
+            Log.w(TAG, "Mega: missing folder handle / master key");
+            return false;
+        }
+        byte[] masterKey = MegaCrypto.b64(mMegaMasterKey);
+        if (masterKey.length != 16) {
+            Log.w(TAG, "Mega: master key is " + masterKey.length + " bytes, expected 16 (folder link)");
+            return false;
+        }
+
+        // Anonymous tree listing — the &n=<folderHandle> scopes the share.
+        String body = "[{\"a\":\"f\",\"c\":1,\"r\":1,\"ca\":1}]";
+        String url = MEGA_API + "?id=" + Math.abs(new SecureRandom().nextInt()) + "&n=" + mMegaFolderHandle;
+        String response;
+        try {
+            response = WebUtils.postContent(url, body, new HashMap<>());
+        } catch (Exception e) {
+            Log.w(TAG, "Mega: folder enumeration failed", e);
+            return false;
+        }
+
+        JSONArray nodes = MegaCrypto.parseFolderNodes(response);
+        if (nodes == null || nodes.length() == 0) {
+            Log.w(TAG, "Mega: empty / error folder response for " + mMegaFolderHandle);
+            return false;
+        }
+
+        String folderPage = "https://mega.nz/folder/" + mMegaFolderHandle;
+        int emitted = 0;
+        for (int i = 0; i < nodes.length(); i++) {
+            try {
+                JSONObject node = nodes.getJSONObject(i);
+                if (node.optInt("t", -1) != 0) continue; // files only (t==0)
+
+                String nodeHandle = node.optString("h", "");
+                String encKey = MegaCrypto.shareKeyPart(node.optString("k", ""));
+                long size = node.optLong("s", 0);
+                if (TextUtils.isEmpty(nodeHandle) || TextUtils.isEmpty(encKey)) continue;
+
+                byte[] nodeKey = MegaCrypto.decryptNodeKey(masterKey, encKey);
+                if (nodeKey == null || nodeKey.length != 32) continue; // a file key is 256-bit
+
+                String name = MegaCrypto.decryptName(nodeKey, node.optString("a", ""));
+                if (TextUtils.isEmpty(name)) name = nodeHandle;
+
+                // "All media files": keep video / audio / image, drop archives,
+                // docs, etc. — the Captured sheet is a media surface.
+                String mime = FileUriHelper.getMimeTypeFromFile(name);
+                if (!FileUriHelper.isVideo(mime) && !FileUriHelper.isAudio(mime)
+                        && !FileUriHelper.isImage(mime)) {
+                    continue;
+                }
+
+                // Self-describing synthetic URL: a valid https URL (so
+                // URLUtil.isValidUrl passes and uid = url.hashCode() dedups per
+                // file) carrying the per-file key. MegaStrategy re-derives the AES
+                // key + nonce from `fk` and does the g-URL fetch + CTR decrypt.
+                String fileUrl = folderPage + "/file/" + nodeHandle
+                        + "?fk=" + MegaCrypto.b64encode(nodeKey);
+
+                BrowserDownloadEntity e = new BrowserDownloadEntity();
+                e.setUid(fileUrl.hashCode());
+                e.setFileUrl(fileUrl);
+                e.setFileName(name);
+                e.setFileNameForced(true); // the decrypted name is authoritative
+                e.setFileOrigin(folderPage);
+                e.setMimeType(mime);
+                e.setType(UrlType.MEGA.getValue());
+                e.setAudio(FileUriHelper.isAudio(mime));
+                e.setFileLength(size);
+                e.setFileThumbnail(mImg);
+                e.setTabId(mTabId);
+                e.setVisitId(mVisitId);
+                e.setRequestId(mRequestId);
+                e.setIncognito(mIncognito);
+                e.setUpdateTime(System.currentTimeMillis());
+
+                mBrowserDownloadRepository.addValue(e); // dedups by uid internally
+                emitted++;
+            } catch (Exception ex) {
+                Log.w(TAG, "Mega: node parse failed", ex);
+            }
+        }
+
+        Log.d(TAG, "Mega: emitted " + emitted + " media file(s) from folder " + mMegaFolderHandle);
+        return false; // entities added above; the folder itself is not a download
     }
 
     // ========================================================================

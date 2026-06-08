@@ -37,6 +37,11 @@ public class JsonHelper {
             entity.setSkipProbe(json.optBoolean("skipProbe", false));
             entity.setManifest(json.optBoolean("manifest", false));
 
+            // Mega.nz folder link — share handle + master key from the page-world
+            // URL fragment (see page-state-bridge.js extractMega / background.js).
+            entity.setMegaFolderHandle(json.optString("folderHandle", null));
+            entity.setMegaMasterKey(json.optString("masterKey", null));
+
             // Parse variants with SABR data if available
             JSONObject sabr = json.optJSONObject("sabr");
             entity.setVariants(parseVariants(json.optJSONArray("variants"), sabr));

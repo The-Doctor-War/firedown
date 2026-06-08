@@ -68,7 +68,12 @@ public class UrlParser {
             return returnType;
         }
 
-        if (type.contains("hls-master")) {
+        if (type.contains("mega")) {
+            // Mega.nz folder link (type "mega-folder"). Checked first so it never
+            // falls through to another branch; "mega-folder" shares no substring
+            // with the keywords below, but the ordering keeps it explicit.
+            returnType = UrlType.MEGA;
+        } else if (type.contains("hls-master")) {
             returnType = UrlType.HLS_MASTER;
         } else if (type.contains("image")) {
             returnType = UrlType.IMAGE;

@@ -200,6 +200,12 @@ public class DownloadTask implements DownloadCallback {
 
         UrlType type = UrlType.getType(request.getFileType());
 
+        // Mega.nz: resolve the temp download URL via Mega's API, then stream it
+        // through AES-CTR decryption (the captured URL serves ciphertext).
+        if (type == UrlType.MEGA) {
+            return new MegaStrategy();
+        }
+
         // HLS, DASH, TS manifests
         if (type.usesFFmpeg()) {
             return new FFmpegMuxStrategy();

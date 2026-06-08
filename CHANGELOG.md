@@ -1,3 +1,9 @@
+## [1.1.77] - 2026-06-08
+
+- Download from Mega.nz — folder links, single file links, and embedded Mega videos
+- Captured Mega files now show real thumbnails
+- Minor bugfixes and improvements
+
 ## [1.1.76] - 2026-05-30
 
 - Disk cache is now on by default for faster repeat visits; the memory-only option stays available for advanced users

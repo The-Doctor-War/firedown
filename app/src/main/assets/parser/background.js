@@ -4105,6 +4105,50 @@ browser.runtime.onMessage.addListener((message, sender) => {
     });
 });
 
+// HLS master read from a page-world JS player (page-state-bridge findPlayerHls):
+// a site whose player fetches the (often obfuscated) master only on PLAY
+// (preload:none) is invisible to the wire until the user clicks, but the player
+// holds the de-obfuscated url at setup — the bridge reads it and posts it here.
+// Routed through the normal HLS-master path (Java OkHttp-enumerates qualities,
+// no probe), with the embed iframe's origin as Referer so the master fetch
+// authenticates. enumerateMasterNative owns origin dedup; when the user does
+// press play the wire sees the SAME signed master URL and the repository dedups
+// it by URL, while its raw .ts segments are dropped natively (format==mpegts).
+browser.runtime.onMessage.addListener((message, sender) => {
+    if (message?.kind !== "page-state-hls") return;
+    const p = message.payload;
+    if (!p || typeof p.url !== "string") return;
+
+    const tabId = sender.tab?.id ?? -1;
+    const pageUrl = p.origin || sender.tab?.url || "";
+    const details = {
+        tabId,
+        _resolvedTabId: tabId >= 0 ? tabId : undefined,
+        url: pageUrl,
+        requestId: `page-state-hls-${Date.now()}`
+    };
+
+    let requestHeaders;
+    try {
+        requestHeaders = [{ name: "Referer", value: new URL(pageUrl).origin + "/" }];
+    } catch (_) {
+        requestHeaders = [];
+    }
+
+    log("PAGE-STATE", `received HLS master`, {
+        title: p.title, url: p.url.slice(0, 80), origin: pageUrl.slice(0, 80), tabId
+    });
+
+    enumerateMasterNative(details, {
+        url: p.url,
+        origin: pageUrl,
+        name: p.title,
+        description: p.title,
+        img: p.img,
+        requestHeaders
+    });
+});
+
 // ============================================================================
 // Niconico (nicovideo.jp)
 // ----------------------------------------------------------------------------

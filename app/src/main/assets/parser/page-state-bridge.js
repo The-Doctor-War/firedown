@@ -17,6 +17,12 @@
 //     slice, copies it to plain data (Xray-safe), builds video+audio variants,
 //     and hands them to the background, which emits them via sendVariants →
 //     native FFmpegMergeStrategy (whole-track .m4s mux, no ffmpeg.wasm).
+//   - It ALSO reads a page-world JS player's RESOLVED source (JWPlayer
+//     getPlaylist().file) for sites whose player fetches a (often obfuscated)
+//     HLS master only on PLAY (preload:none) — the wire can't see it pre-play,
+//     but the player must hold the de-obfuscated url to play, so we read it and
+//     emit an hls-master. This is why it runs in subframes (all_frames): the
+//     player is usually an embedded cross-origin iframe.
 //
 // Per-site logic that needs page-world DATA (e.g. bilibili.tv's ogv episode
 // title/cover) is a host-keyed branch in `resolveMeta` HERE — this is the only
@@ -276,31 +282,121 @@
         return null;
     }
 
+    // ---- HLS master from a page-world JS player (JWPlayer …) -----------------
+    // A site can hand a (often obfuscated) HLS master to a player that fetches it
+    // only on PLAY (preload:none) — so the wire never sees it until the user
+    // clicks. But to play, the player must hold the DE-OBFUSCATED url, so we read
+    // it from the player's resolved state via the same wrappedJSObject waiver.
+    // Agnostic to however the site packed the source (we read the result, not the
+    // packed blob), so it's not cat-and-mouse. Index-loop / primitive reads only
+    // (Xray-safe). Runs in subframes too (all_frames) because the player is
+    // usually an embedded cross-origin iframe.
+    const HLS_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
+
+    // Pull an HLS .m3u8 (and a title if present) out of a JWPlayer playlist item.
+    function readHlsFromItem(item) {
+        if (!item || typeof item !== "object") return null;
+        let url = null;
+        const f = readPrim(item, "file");
+        if (typeof f === "string" && HLS_RE.test(f)) url = f;
+        if (!url) {
+            let sources;
+            try { sources = item.sources; } catch (_) { sources = null; }
+            let n = 0;
+            try { n = (sources && typeof sources.length === "number") ? sources.length : 0; } catch (_) { n = 0; }
+            for (let i = 0; i < n && !url; i++) {
+                let s;
+                try { s = sources[i]; } catch (_) { continue; }
+                const sf = readPrim(s, "file");
+                if (typeof sf === "string" && HLS_RE.test(sf)) url = sf;
+            }
+        }
+        if (!url) return null;
+        const t = readPrim(item, "title");
+        return { url, title: (typeof t === "string" && t.trim()) ? t.trim() : null };
+    }
+
+    // JWPlayer (jw8) covers the common embed hosts (vibuxer / luluvdo /
+    // lulustream …): jwplayer().getPlaylist() → [{file, sources:[{file}], title}],
+    // resolved at setup() — preload:none defers only the FETCH, not setup, so the
+    // url is present on load. Add another player as a new block here, never a
+    // per-site file. Returns { url, title } or null.
+    function findPlayerHls() {
+        let pw;
+        try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
+        if (!pw) return null;
+
+        let jw;
+        try { jw = pw.jwplayer; } catch (_) { jw = null; }
+        if (typeof jw === "function") {
+            let api;
+            try { api = jw(); } catch (_) { api = null; }
+            if (api && typeof api === "object") {
+                let pl;
+                try { pl = api.getPlaylist(); } catch (_) { pl = null; }
+                let n = 0;
+                try { n = (pl && typeof pl.length === "number") ? pl.length : 0; } catch (_) { n = 0; }
+                for (let i = 0; i < n; i++) {
+                    let it;
+                    try { it = pl[i]; } catch (_) { continue; }
+                    const hit = readHlsFromItem(it);
+                    if (hit) return hit;
+                }
+            }
+        }
+        return null;
+    }
+
     // ---- Emit + lifecycle ----------------------------------------------------
     const sentKeys = new Set();
     let spaArmed = false;
 
     function extractAndSend(label) {
+        // 1) SSR-inlined DASH slice (bilibili.tv etc.) → video+audio variants.
         const state = readPageState();
-        if (!state) return false;
-        const built = buildVariants(cloneDash(state.dash));
-        if (!built) return false;
-        // Dedup so retries / SPA re-reads don't re-emit the same set.
-        const key = built.variants.map(v => v.url).join("|");
-        if (sentKeys.has(key)) { armSpaObserver(); return true; }
-        sentKeys.add(key);
-        const meta = resolveMeta(state.root);
-        const payload = {
-            variants: built.variants,
-            origin: location.href,
-            title: meta.title,
-            img: meta.img,
-            durationMs: built.durationMs
-        };
-        log("sending", built.variants.length, "variant(s) at", label, payload.title);
-        browser.runtime.sendMessage({ kind: "page-state-media", payload }).then(() => {}, () => {});
-        armSpaObserver();
-        return true;
+        if (state) {
+            const built = buildVariants(cloneDash(state.dash));
+            if (built) {
+                // Dedup so retries / SPA re-reads don't re-emit the same set.
+                const key = built.variants.map(v => v.url).join("|");
+                if (sentKeys.has(key)) { armSpaObserver(); return true; }
+                sentKeys.add(key);
+                const meta = resolveMeta(state.root);
+                const payload = {
+                    variants: built.variants,
+                    origin: location.href,
+                    title: meta.title,
+                    img: meta.img,
+                    durationMs: built.durationMs
+                };
+                log("sending", built.variants.length, "variant(s) at", label, payload.title);
+                browser.runtime.sendMessage({ kind: "page-state-media", payload }).then(() => {}, () => {});
+                armSpaObserver();
+                return true;
+            }
+        }
+
+        // 2) A JS player holding a preload:none HLS master (read the resolved url,
+        //    so we capture without the user pressing play). The native side
+        //    enumerates the master (no probe); the played master URL dedups by URL
+        //    against this, and its raw .ts segments are dropped natively (mpegts).
+        const hls = findPlayerHls();
+        if (hls && hls.url) {
+            if (sentKeys.has(hls.url)) { armSpaObserver(); return true; }
+            sentKeys.add(hls.url);
+            const meta = resolveMeta(null);
+            const payload = {
+                url: hls.url,
+                origin: location.href,
+                title: hls.title || meta.title,
+                img: meta.img
+            };
+            log("sending HLS master at", label, payload.title, hls.url.slice(0, 80));
+            browser.runtime.sendMessage({ kind: "page-state-hls", payload }).then(() => {}, () => {});
+            armSpaObserver();
+            return true;
+        }
+        return false;
     }
 
     // SPA episode navigation swaps the page model without a document reload.
@@ -328,4 +424,7 @@
     }
     setTimeout(() => extractAndSend("t500"), 500);
     setTimeout(() => extractAndSend("t1500"), 1500);
+    // A JS player's setup() can lag the page load, so one later attempt — a cheap
+    // no-op in the ~all frames (incl. ad iframes) that have no player global.
+    setTimeout(() => extractAndSend("t4000"), 4000);
 })();

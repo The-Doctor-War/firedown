@@ -76,8 +76,9 @@ devalue blob …) and fires **no** playurl XHR, neither the wire nor the DOM can
 see it — only page-world JS can. **Do NOT add a per-site content-script + WAR
 inject pair for this** (the old Bilibili.tv approach, since removed). One
 catch-all content script, `parser/page-state-bridge.js`, matched on
-**`<all_urls>`** (so it needs **no per-site `matches` and no host permissions**),
-covers every such site:
+**`<all_urls>`** and **`all_frames: true`** (so it needs **no per-site `matches`
+and no host permissions**, and it reaches embedded cross-origin player iframes —
+see the HLS-master path below), covers every such site:
 
 - It reads the page's real globals via Firefox's Xray **`window.wrappedJSObject`**
   waiver — the same mechanism `youtube/content.js` (PoToken `eval`) and
@@ -93,9 +94,27 @@ covers every such site:
   = the page origin (covers bilibili's upos/bilivideo anti-leech without any
   per-site host check). Per-site **request/emit** specifics belong in
   `background.js`, never as new injected files.
-- Cheap on the ~all sites with no such state: it probes a short list of known
-  state-global names and no-ops when none hold media; the persistent SPA-nav
-  observer is armed **only after** a successful capture.
+- **It ALSO reads a page-world JS player's RESOLVED HLS master** (`findPlayerHls`
+  → JWPlayer `jwplayer().getPlaylist()[].file`/`.sources[].file`), for sites
+  whose player fetches a (often obfuscated/packed) master **only on PLAY**
+  (`preload: none`) — e.g. series.ly's vibuxer/luluvdo/lulustream jw8 embeds.
+  The wire can't see the master pre-play, but the player must hold the
+  **de-obfuscated** url at `setup()` (preload defers only the *fetch*, not setup),
+  so reading the resolved `.file` captures it without a play click — and it's
+  **agnostic to however the site packed the source** (we read the result, not the
+  packed blob — *not* cat-and-mouse). This is **why** the bridge runs
+  `all_frames` (the player is an embedded cross-origin iframe). Background
+  `kind:"page-state-hls"` → `enumerateMasterNative` (the normal HLS-master path:
+  Java enumerates qualities, no probe) with the iframe origin as Referer.
+  **No dup on play:** the master URL is signed/stable, so when the user does play,
+  the wire sees the **same** master URL and the repository dedups it by URL; the
+  player's raw `.ts` segments are dropped natively (`isValidMedia` → `mpegts`).
+  Add another player (Video.js/Plyr…) as a new block in `findPlayerHls`, never a
+  per-site file.
+- Cheap on the ~all sites/frames with no such state: it probes a short list of
+  known state-global names + a player global (`jwplayer`) and no-ops instantly
+  when neither holds media (so ad/tracker iframes pay only a presence check); the
+  persistent SPA-nav observer is armed **only after** a successful capture.
 
 **Metadata: generic by default, host-keyed when richer fields exist in page
 state.** `resolveMeta(root)` defaults to `og:title`/`document.title` + `og:image`;

@@ -399,15 +399,19 @@ keep the backlog relevant while browsing:
   place when the comparator's external input changes) — so a tab you switch to
   jumps ahead of a heavy background tab's backlog.
 - **`cancelTab(tabId)`** (onRemoved, beside `trimTabs`) drops a closed tab's
-  queued tasks so they don't saturate the pool, decrementing the in-flight count
-  per removed task.
+  queued tasks (decrementing in-flight per removed task) **and** interrupts its
+  *running* tasks via `GeckoInspectTask.cancel()` (see "Bounding a wedged capture
+  probe" below) — those still complete, so their run-finally clears the count.
 
 Both are `synchronized` on the **same monitor** as `executeWaitingTask`, so a
 switch and a close can't interleave (consistent queue + correct in-flight count
 in either order) and the drain window can't be observed by a poll. `execute()`'s
 offer stays lock-free (the queue is thread-safe; a task offered mid-drain just
-coexists with the re-offered ones). Running tasks are never interrupted —
-priority/cancellation only affect the *queued* tasks.
+coexists with the re-offered ones). *Re-prioritisation* only affects queued
+tasks (a running task isn't reordered), but `cancelTab` **does** cooperatively
+interrupt running ones. `executeWaitingTask` drains **all** free slots per call
+(bounded loop, capped by `corePoolSize`) and rolls back the counters if a submit
+is ever rejected, so a freed slot can't be lost.
 
 Pool sizing: `NETWORK_CORE_POOL_SIZE = max(1, cores/2)` drives **both** the
 thread pool and the submit gate, and `executeWaitingTask` submits while
@@ -422,6 +426,38 @@ foreground tab leaves it dangling only until the next `onActivated →
 setCurrentTab` (always fired, bar closing the last tab, after which no captures
 flow); resetting to `-1` would treat every task as foreground and surge a
 background tab's backlog back to base priority.
+
+### Bounding a wedged capture probe (live HLS/DASH)
+
+A **live** HLS/DASH whose every segment fails to open (e.g. all 403) spins
+ffmpeg's reload loop forever: the live edge keeps advancing so vanilla's
+`max_reload`/`m3u8_hold_counters` never trip, and `find_stream_info` never
+returns. Two independent layers bound it:
+
+- **Demuxer** (firedown-ffmpeg, hls.c patch `0005`): bail after N *consecutive*
+  segment-open failures (reset on any success) → propagate the error. Self-bounds
+  the probe **and** the downloader, regardless of tab state.
+- **App** (this executor): closing the tab → `cancelTab` →
+  `GeckoInspectTask.cancel()` → `FFmpegMetaDataReader.stop()`, which sets the
+  native AVIO interrupt flag (same path as a user Stop) so the probe unwinds at
+  once. `stop()` only sets a flag (non-blocking, safe under the monitor);
+  `release()` (closes contexts, can block) runs on the worker, never under the
+  monitor. A per-task lock orders unregister-before-release so `cancel()` can't
+  `stop()` a freed reader.
+
+**Timer vs. failure-count — pick by what you're bounding.** A wall-clock timeout
+was *rejected* for the probe loop: it can't tell "slow" from "broken", and the
+real failure (a run of open failures) is **countable** — so count it. A timer is
+the *right* tool only for an inherently-unbounded **external wait that has a
+correct fallback** and no better signal — e.g. `handlePageStateHls`'s 200 ms
+`Promise.race` on the cross-extension `get-ambient-headers` lookup, which falls
+back to the bridge's reconstructed `navigator` headers. Rule: count a detectable
+failure condition; time-box only a best-effort external dependency with a
+fallback.
+
+(YouTube **live** is HLS, not SABR — `youtube@` routes `isLive` → `hlsManifestUrl`;
+SABR is VOD-only. A live 403-on-every-segment loop is the HLS n-param transform
+not taking effect, not a transport bug.)
 
 ## Debugging "video not captured" — do this, in order
 

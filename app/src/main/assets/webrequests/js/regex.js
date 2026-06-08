@@ -6,48 +6,24 @@ const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // Refresh every 6 hours
 
 // Bundled fallback patterns (used if remote fetch fails on first load).
 //
-// SCOPE: generic, CDN-agnostic junk only — telemetry/beacon endpoints and
-// init/numbered HLS-DASH segment fragments that are never standalone media.
-// PARSER-DEDUP host/CDN blocks (the cardinal rule — keeping the generic catcher
-// off a site that has a dedicated parser) live in parser-blocklist.js, keyed by
-// parser. Don't add per-parser media blocks here; add them there.
+// SCOPE: only junk that LOOKS like media to the classifier — URLs carrying a
+// media-ish extension, or served with a media/video/audio/image content-type,
+// that classifyXhr/classifyByUrl (requests.js) would otherwise capture. Pure
+// telemetry/RPC endpoints (no media extension, JSON/text/204 responses) are
+// deliberately NOT listed: the classifier already rejects them on
+// content-type/extension, so a host block for them is dead weight. Don't
+// hand-grow this list with new junk hosts — it's a frozen fallback; generic-junk
+// curation belongs in the REMOTE regex-patterns.txt (refetched every 6h).
+// PARSER-DEDUP host/CDN blocks live in parser-blocklist.js, keyed by parser.
 const DEFAULT_PATTERNS = [
-  // YouTube
-  'youtube\\.com\\/(complete\\/search|api\\/stats)',
+  // YouTube — a .mp3 the catcher would otherwise grab as audio (extension match,
+  // not caught by content-type alone).
   'youtube\\.com.*\\.mp3',
-  'youtube-nocookie\\.com\\/api\\/stats',
-  '\\.youtube\\.com\\/api',
-
-  // Google
-  '\\.google.*\\/(async|verify)\\/',
-  'googleapis\\.com\\/(\\$rpc|identitytoolkit)\\/',
-  'ogads-pa\\.clients.*\\.google\\.com\\/\\$rpc\\/google\\.internal\\.onegoogle\\.asyncdata',
-  'news\\.google\\.com\\/.*\\/jserror',
-
-  // Bing / Microsoft
-  'bing\\.com\\/(rewardsapp\\/reportActivity|notifications\\/handle|AS\\/Suggestions|ipv6test\\/test|videos\\/async|sharing\\/getsharecommoncontrol|images\\/detail\\/insights|images\\/search\\?view)',
-  'microsoft-api\\.arkoselabs\\.com',
-  'copilot\\.microsoft\\.com\\/(fd\\/ls\\/l|cl\\/eus2\\/collect)',
-
-  // TikTok — telemetry only. (The webapp-prime media URLs are intentionally NOT
-  // blocked anywhere — neither here nor in parser-blocklist.js — so the generic
-  // catcher can grab the cache-served first /foryou video the parser can't see.
-  // See the TikTok note in CLAUDE.md. These /report entries are not media.)
-  'tiktok\\.com\\/aweme\\/v1\\/report',
-  'tiktokw.*\\/web\\/report',
 
   // CloudFront (general media) — a broad CDN block, not tied to one parser.
   // (Twitch's own cloudfront VOD index playlists are a parser-dedup rule in
   // parser-blocklist.js.)
   'cloudfront\\.net.*\\.(ts|mp4)',
-
-  // Instagram — login/ajax telemetry. (The Instagram/Threads media block,
-  // instagram.*\.mp4, is a parser-dedup rule in parser-blocklist.js.)
-  'instagram\\.com\\/(accounts\\/login|ajax)',
-
-  // Dailymotion — history/log telemetry. (Its media blocks are in
-  // parser-blocklist.js.)
-  'dailymotion\\.com\\/history\\/log\\/user',
 
   // SoundCloud (init segment)
   '\\.soundcloud\\.cloud\\/.*\\/init\\.mp4',
@@ -95,11 +71,8 @@ const DEFAULT_PATTERNS = [
   // deliberately left un-blocked for first-/foryou capture.
   'tiktokcdn\\.com\\/ad-site-i18n[^?]*\\.image',
 
-  // Other
-  'startpage\\.com\\/sp\\/cl',
-  'rumble\\.com\\/service\\.php\\?name=video\\.watching-now',
-  'midjourney\\.com\\/cdn-cgi\\/challenge-platform',
-  '\\/cdn-cgi\\/challenge-platform\\/',
+  // fMP4 init segment with no standard extension — served as video/mp4, so the
+  // classifier captures it on content-type; name it so it's dropped.
   '.*segment\\.init',
 ];
 

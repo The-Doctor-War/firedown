@@ -420,8 +420,20 @@
             let ua = "", lang = "";
             try { ua = navigator.userAgent || ""; } catch (_) { ua = ""; }
             try {
-                lang = (navigator.languages && navigator.languages.length)
-                    ? navigator.languages.join(",") : (navigator.language || "");
+                // Build a browser-shaped Accept-Language WITH q-values
+                // ("en-US,ko-KR;q=0.9"). A bare comma-join ("en-US,ko-KR") is a
+                // bot tell — no real browser omits the q-values — and the stream
+                // CDN's anti-bot 403s on it (proven on-device: that was the only
+                // header differing from the request that gets 200).
+                let ls = [];
+                if (navigator.languages && navigator.languages.length) ls = navigator.languages;
+                else if (navigator.language) ls = [navigator.language];
+                if (ls.length) {
+                    lang = ls[0];
+                    for (let i = 1, q = 9; i < ls.length && q >= 1; i++, q--) {
+                        lang += "," + ls[i] + ";q=0." + q;
+                    }
+                }
             } catch (_) { lang = ""; }
             const payload = {
                 url: hls.url,

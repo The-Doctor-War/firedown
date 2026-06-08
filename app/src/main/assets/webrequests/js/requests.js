@@ -765,6 +765,20 @@ browser.webRequest.onErrorOccurred.addListener(
 
 const SNIFF_MAX_BYTES = 1024;
 
+// Debug-only running tally so an on-device logcat (`adb logcat -s GeckoConsole:*`,
+// grep `manifest-sniff`) shows how often the filter arms and its hit/miss split.
+// All of it is gated on DEBUG — release builds increment nothing and log nothing.
+const sniffStats = { armed: 0, hls: 0, dash: 0, miss: 0, unavailable: 0 };
+function logSniff(tag, url, verdict) {
+  if (!DEBUG) return;
+  dlog(
+    `manifest-sniff:${tag}`,
+    url,
+    `verdict=${verdict} armed=${sniffStats.armed} hls=${sniffStats.hls} `
+      + `dash=${sniffStats.dash} miss=${sniffStats.miss} unavail=${sniffStats.unavailable}`
+  );
+}
+
 // The only shape an obfuscated manifest can take: a GET the classifier rejects,
 // fetched by a JS player (xhr/fetch → 'xmlhttprequest'/'other'), with no media
 // extension and a non-media, manifest-plausible content-type. Media/image/json
@@ -818,8 +832,11 @@ browser.webRequest.onHeadersReceived.addListener(
     try {
       filter = browser.webRequest.filterResponseData(data.requestId);
     } catch (e) {
-      return; // not interceptable (e.g. cached/!ok) — leave the stream alone
+      // Not interceptable (e.g. cached / non-2xx) — leave the stream alone.
+      if (DEBUG) { sniffStats.unavailable++; logSniff('unavailable', data.url, 'n/a'); }
+      return;
     }
+    if (DEBUG) sniffStats.armed++;
     const decoder = new TextDecoder('utf-8', { fatal: false });
     let acc = '';
     let done = false;
@@ -828,8 +845,13 @@ browser.webRequest.onHeadersReceived.addListener(
       if (done) return;
       done = true;
       try { filter.disconnect(); } catch (e) { /* already detached */ }
+      if (DEBUG) {
+        if (kind === 'hls') sniffStats.hls++;
+        else if (kind === 'dash') sniffStats.dash++;
+        else sniffStats.miss++;
+        logSniff(kind === 'hls' || kind === 'dash' ? 'hit' : 'miss', data.url, kind);
+      }
       if (kind === 'hls' || kind === 'dash') {
-        dlog('manifest-sniff:hit', data.url, kind);
         // Force the media classification we just proved by content, then ride
         // the normal emit path (header recovery, tab/meta, native dedup).
         processResponse({ ...data, type: 'media' }, 'manifestSniff', true);

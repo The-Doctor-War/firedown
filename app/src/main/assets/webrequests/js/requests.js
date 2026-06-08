@@ -1,4 +1,5 @@
 import * as RegexMap from './regex.js';
+import * as ParserBlock from './parser-blocklist.js';
 import { handleCookieRequest } from './cookies.js';
 
 // Configuration
@@ -396,6 +397,16 @@ function validateAndClassify(data) {
 
   if (RegexMap.matchInRegex(url)) {
     if (interesting) dlog('reject:regex-block', url);
+    return false;
+  }
+
+  // Parser-dedup (the cardinal rule): a site with a dedicated parser is captured
+  // — with metadata + variants — by the parser@ extension, so the generic
+  // catcher must not also probe/capture its media. These host/CDN blocks are
+  // kept declarative and per-parser in parser-blocklist.js, separate from the
+  // remote-managed generic junk above. See CLAUDE.md "Parser vs. generic catcher".
+  if (ParserBlock.matchInParserBlocklist(url)) {
+    if (interesting) dlog('reject:parser-block', url);
     return false;
   }
 

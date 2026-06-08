@@ -4,7 +4,13 @@ import { DEBUG } from './debug.js';
 const REGEX_URL = 'https://raw.githubusercontent.com/solarizeddev/firedown-webrequests/main/regex-patterns.txt';
 const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // Refresh every 6 hours
 
-// Bundled fallback patterns (used if remote fetch fails on first load)
+// Bundled fallback patterns (used if remote fetch fails on first load).
+//
+// SCOPE: generic, CDN-agnostic junk only — telemetry/beacon endpoints and
+// init/numbered HLS-DASH segment fragments that are never standalone media.
+// PARSER-DEDUP host/CDN blocks (the cardinal rule — keeping the generic catcher
+// off a site that has a dedicated parser) live in parser-blocklist.js, keyed by
+// parser. Don't add per-parser media blocks here; add them there.
 const DEFAULT_PATTERNS = [
   // YouTube
   'youtube\\.com\\/(complete\\/search|api\\/stats)',
@@ -23,63 +29,33 @@ const DEFAULT_PATTERNS = [
   'microsoft-api\\.arkoselabs\\.com',
   'copilot\\.microsoft\\.com\\/(fd\\/ls\\/l|cl\\/eus2\\/collect)',
 
-  // TikTok — the webapp-prime media URLs are intentionally NOT blocked here:
-  // the generic catcher (downloader@) is the source for the cache-served first
-  // /foryou video, whose metadata never crosses the wire so the parser can't
-  // capture it. (These /report entries are telemetry, not media.)
+  // TikTok — telemetry only. (The webapp-prime media URLs are intentionally NOT
+  // blocked anywhere — neither here nor in parser-blocklist.js — so the generic
+  // catcher can grab the cache-served first /foryou video the parser can't see.
+  // See the TikTok note in CLAUDE.md. These /report entries are not media.)
   'tiktok\\.com\\/aweme\\/v1\\/report',
   'tiktokw.*\\/web\\/report',
 
-  // Twitch
-  '(ttvnw\\.net|hls\\.live-video).*\\.(m3u8|ts)',
-  'cloudfront\\.hls\\.ttvnw\\.net\\/v1\\/segment.*',
-  'twitchcdn.*\\.mp4',
-
-  // CloudFront (general media)
+  // CloudFront (general media) — a broad CDN block, not tied to one parser.
+  // (Twitch's own cloudfront VOD index playlists are a parser-dedup rule in
+  // parser-blocklist.js.)
   'cloudfront\\.net.*\\.(ts|mp4)',
-  'cloudfront\\.net\\/.*\\/(index-dvr|index-muted-[^.]+)\\.m3u8',
 
-  // Twitter / X
-  'video\\.twimg\\.com.*\\.(mp4|m4s|m3u8)',
-  'pscp\\.tv.*\\.aac',
-
-  // Instagram
-  'instagram.*\\.mp4',
+  // Instagram — login/ajax telemetry. (The Instagram/Threads media block,
+  // instagram.*\.mp4, is a parser-dedup rule in parser-blocklist.js.)
   'instagram\\.com\\/(accounts\\/login|ajax)',
 
-  // Bilibili.tv — DASH .m4s tracks the parser emits (video+audio baseUrls on
-  // the upos/bilivideo bstar CDN). The generic catcher already drops bare .m4s,
-  // but block the iupxcodeboss path explicitly so the emitted baseUrls are
-  // never double-captured.
-  'upos-.*(bilivideo\\.com|akamaized\\.net)\\/iupxcodeboss\\/.*\\.m4s',
-
-  // Niconico — the parser emits the signed HLS master from access-rights/hls;
-  // block the delivery.domand playlists so the generic catcher doesn't also
-  // grab the bare master/media m3u8.
-  'delivery\\.domand\\.nicovideo\\.jp\\/.*\\.m3u8',
-  // …and block the CMAF media on the asset CDN — the player fetches per-track
-  // init + data segments (init01.cmfv / init01.cmfa, video=.cmfv, audio=.cmfa)
-  // which ffmpeg pulls for the parser's download; the generic catcher would
-  // otherwise capture the init segments as standalone (unplayable) entries.
-  'asset\\.domand\\.nicovideo\\.jp\\/.*\\.cmf[va]',
-
-  // Dailymotion
-  'dmcdn\\.net.*init\\.mp4',
-  'dmcdn\\.net.*manifest\\.m3u8',
+  // Dailymotion — history/log telemetry. (Its media blocks are in
+  // parser-blocklist.js.)
   'dailymotion\\.com\\/history\\/log\\/user',
-  'dailymotion\\.com\\/cdn\\/manifest\\/video\\/.*\\.m3u8',
 
-  // Live video platforms
-  '(playlist|playback)\\.live-video\\.net.*\\.m3u8',
-
-  // SoundCloud
+  // SoundCloud (init segment)
   '\\.soundcloud\\.cloud\\/.*\\/init\\.mp4',
 
   // StreamTheWorld (HLS radio segments)
   'live\\.streamtheworld\\.com.*\\.aac',
 
-
-    // Akamai
+  // Akamai
   '\\.akamaized\\.net\\/.*\\/(init|cmaf-|chunk-|segment[-_]?)[^/]*\\.(mp4|m4s)',
 
   // Generic CMAF / fMP4 initialization segments. These hold the moov
@@ -92,7 +68,8 @@ const DEFAULT_PATTERNS = [
   // domain-specific entries above cover the cases where the path
   // doesn't follow that convention. Covers init / init01 / init-1 / init_0
   // and the common init extensions (this also generalizes the niconico
-  // init01.cmfv case — the host rule above still covers its data segments).
+  // init01.cmfv case — niconico's own host rule in parser-blocklist.js still
+  // covers its data segments).
   '\\/init[-_]?\\d*\\.(mp4|m4s|cmf[va]|ts|aac|m4a|webm)(?:[?#]|$)',
 
   // Generic numbered stream segments (seg5 / segment-5 / chunk_5 / frag12 …).
@@ -103,13 +80,6 @@ const DEFAULT_PATTERNS = [
   '\\/seg(?:ment)?[-_]?\\d+\\.(ts|m4s|mp4|aac)(?:[?#]|$)',
   '\\/chunk[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
   '\\/frag(?:ment)?[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
-
-  // Rumble — the parser emits videos (with metadata) from embedJS (watch
-  // pages, HLS master) and service.php?name=shorts.feed (shorts, MP4 variants
-  // on the rumble.cloud CDN). Block both so the generic catcher doesn't also
-  // grab them and double-add / mislabel with the page title.
-  'rumble\\.com\\/hls-vod\\/.*\\.m3u8',
-  'rumble\\.cloud\\/.*\\.mp4',
 
   // Disguised-HLS segments — sites like series.ly serve a real HLS stream
   // whose .ts segments are uploaded to TikTok's *ad-image* CDN under a

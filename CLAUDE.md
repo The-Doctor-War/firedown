@@ -33,17 +33,25 @@ generic catcher.** The two are mutually exclusive *by design*:
   bare URL.
 - To stop them both firing on the same video (which produces a **duplicate**
   download entry), the site's media URL is **block-listed** in
-  `app/src/main/assets/webrequests/js/regex.js`. Examples already there:
-  `instagram.*\.mp4` (covers Instagram **and** Threads — same fbcdn hosts),
-  `video\.twimg\.com.*\.(mp4|m4s|m3u8)` (Twitter/X).
+  `app/src/main/assets/webrequests/js/parser-blocklist.js` — a declarative,
+  per-parser host/CDN table consulted pre-probe by `validateAndClassify` in
+  `requests.js`. Examples already there: `instagram.*\.mp4` (covers Instagram
+  **and** Threads — same fbcdn hosts), `video\.twimg\.com.*\.(mp4|m4s|m3u8)`
+  (Twitter/X). (This is **separate from `regex.js`**, which holds only the
+  generic, CDN-agnostic junk — telemetry beacons, init/numbered segment
+  fragments — and is remote-managed; parser-dedup blocks are bundled-only and
+  pair 1:1 with a parser, so they live in their own file. See the split note
+  below.)
 
 Consequences when working on a parser:
 
 - **MANDATORY: every new or changed parser MUST add a matching block rule to
-  `app/src/main/assets/webrequests/js/regex.js` for the media URL(s) it emits.**
-  Without it, the generic catcher *also* captures the same media and you get a
-  duplicate download entry (one rich from the parser, one bare from the
-  catcher). Adding a parser is not done until its block rule exists. Examples:
+  `app/src/main/assets/webrequests/js/parser-blocklist.js` for the media URL(s)
+  it emits.** Add a key for the parser (or extend its existing key) in the
+  `PARSER_BLOCKLIST` table. Without it, the generic catcher *also* captures the
+  same media and you get a duplicate download entry (one rich from the parser,
+  one bare from the catcher). Adding a parser is not done until its block rule
+  exists. Examples:
   - Instagram/Threads → `instagram.*\.mp4`
   - Twitter/X → `video\.twimg\.com.*\.(mp4|m4s|m3u8)`
   - Rumble → `rumble\.com\/hls-vod\/.*\.m3u8` (the HLS master the parser emits)
@@ -98,19 +106,24 @@ That branch lives in the bridge — **not** `background.js` — because the brid
 the only place that holds the page-world `root`; the background can't read page
 state. Adding a host here is still **not** a new content script. Reads in such a
 branch must be index-loop / primitive only (Xray-waived page arrays misbehave
-with iterator/callback methods). A site still needs its `regex.js` block rule for
-the media it emits (Bilibili.tv's `.m4s` rule is unchanged), same cardinal rule
-as any parser.
-- **Do not** "fix" a missing capture by removing/bypassing the regex block so
+with iterator/callback methods). A site still needs its `parser-blocklist.js`
+block rule for the media it emits (Bilibili.tv's `.m4s` rule is unchanged), same
+cardinal rule as any parser.
+- **Do not** "fix" a missing capture by removing/bypassing the block so
   the generic catcher grabs it. That reintroduces the duplicate and drops
   metadata. Fix the **parser** instead.
-- That regex list is **remote-managed** (fetched from
-  `firedown-webrequests/main/regex-patterns.txt` every 6h); `DEFAULT_PATTERNS`
-  in `regex.js` is only the bundled fallback. Logic changes in `requests.js`
-  ship in the APK; pattern changes generally belong in the remote list — so add
-  the rule to **both** the bundled `DEFAULT_PATTERNS` (covers fresh installs /
-  remote-fetch failures) **and** the remote `regex-patterns.txt` (governs
-  production once fetched).
+- **The two block lists are different in kind — put each rule in the right one:**
+  - **`parser-blocklist.js`** (`PARSER_BLOCKLIST`) — the per-parser host/CDN
+    dedup blocks (the cardinal rule). **Bundled-only**, shipped in the APK, keyed
+    by parser. This is where a parser's media block goes.
+  - **`regex.js`** (`DEFAULT_PATTERNS`) — generic, CDN-agnostic junk (telemetry
+    beacons, init/numbered segment fragments). **Remote-managed**: fetched from
+    `firedown-webrequests/main/regex-patterns.txt` every 6h, with `DEFAULT_PATTERNS`
+    only the bundled fallback. A *generic* pattern change belongs in **both** the
+    bundled `DEFAULT_PATTERNS` (covers fresh installs / remote-fetch failures)
+    **and** the remote `regex-patterns.txt` (governs production once fetched). A
+    *parser-dedup* block does **not** go here and is **not** remote-managed.
+  Logic changes in `requests.js` ship in the APK.
 
 ### HLS-master sites — Java enumeration, no ffmpeg probe
 
@@ -122,7 +135,7 @@ Origin/Referer/Cookie, unlike a page `fetch()`), enumerates qualities with
 through `VariantProcessor` with `skipProbe=true`. So capture neither runs the
 ffmpeg `metadatareader` probe nor decrypts anything — which for niconico avoids
 burning the single-use AES key at capture time (see Niconico below). Routed via
-`UrlType.HLS_MASTER`; still needs a `regex.js` block rule like any parser; and
+`UrlType.HLS_MASTER`; still needs a `parser-blocklist.js` block rule like any parser; and
 the capture is **deduped on the page origin** (a fresh signed master URL per
 refresh would otherwise create duplicate entries) via `entity.setUid` in
 `GeckoInspectTask`.
@@ -245,7 +258,8 @@ neither the document SSR (feed blob has no video, above) nor any item_list XHR
 preload, only in the media fetch). So the parser structurally **cannot** capture
 it. The decision (maintainer's call) is to let the **generic catcher**
 (`downloader@`) grab it: TikTok's `webapp-prime` media host is **deliberately NOT
-block-listed in `regex.js`** — the one parser-owned site without a media block, on
+block-listed** (it has no key in `parser-blocklist.js`, and no media rule in
+`regex.js` either) — the one parser-owned site without a media block, on
 purpose. **Do not re-add a `webapp-prime`/`tiktokcdn` block rule** — it would
 re-break first-video capture. Trade-off accepted: because the block is gone, the
 generic catcher can also capture the *swipe* videos' media (which the parser
@@ -454,9 +468,10 @@ still does).
 - `node --check` the JS file(s) you touched.
 - Re-run your HAR simulation with the **final** code (caps included) and confirm
   it finds the expected item(s) with `user`, `caption`, and `video_versions`.
-- **Confirm the `regex.js` block rule exists** for the media this parser emits
-  (see the cardinal rule above) — this is the #1 thing that gets forgotten and
-  causes duplicate entries.
+- **Confirm the `parser-blocklist.js` block rule exists** (the per-parser
+  `PARSER_BLOCKLIST` entry) for the media this parser emits (see the cardinal
+  rule above) — this is the #1 thing that gets forgotten and causes duplicate
+  entries.
 - Prefer one capture mechanism per site. Multiple (doc filter + API filter +
   content script) can all fire and, if origins differ, produce duplicate
   entries; origin-dedup (`sendVariants` `alreadySent`) only collapses identical
@@ -725,9 +740,10 @@ the element-level `scan()` + `MutationObserver` still cover SPA-injected
 `<video>` nodes). Everything queued rides the **same `images-detected` path** as
 DOM images: the background **reclassifies by extension** into a media capture
 (`classifyByUrl`/`getTypeFromUrl`), **HEAD-probes** for headers/cookies, applies
-the **parser block-list** (`matchInRegex` — so a parser-owned site doesn't get a
-duplicate bare capture; the cardinal rule still holds), and the **repository
-dedups** against a later wire capture if the user *does* play. So no new
+the **parser block-list** (`validateAndClassify` → `matchInParserBlocklist` +
+the generic `matchInRegex` — so a parser-owned site doesn't get a duplicate bare
+capture; the cardinal rule still holds), and the **repository dedups** against a
+later wire capture if the user *does* play. So no new
 transport, no Java changes — discovery only. On by default; the precision/noise
 trade-off is held by the Tier-B key-proximity filter, not a setting.
 

@@ -742,7 +742,13 @@ function harvestAmbientHeaders(requestHeaders) {
 }
 
 // parser@ asks for the harvested real ambient headers (kind:"get-ambient-headers").
-browser.runtime.onMessageExternal.addListener((msg) => {
+// Only answer our own parser@ extension — uBO is also loaded as a built-in and
+// would deliver its messages here too. The values aren't secret (any page reads
+// navigator.userAgent / Accept-Language), so this is hygiene, not a secret gate;
+// returning undefined for anyone/anything else signals "no async response" so we
+// don't hold their sendMessage open.
+browser.runtime.onMessageExternal.addListener((msg, sender) => {
+  if (!sender || sender.id !== 'parser@solarized.dev') return;
   if (msg && msg.kind === 'get-ambient-headers') {
     return Promise.resolve({
       acceptLanguage: ambientAcceptLanguage,

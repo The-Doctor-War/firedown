@@ -4143,13 +4143,27 @@ async function handlePageStateHls(message, sender) {
     // browser-global, so any request's values are correct for this fetch.
     let realAcceptLanguage = null, realUserAgent = null;
     try {
+        // sendMessage rejects if the catcher isn't loaded yet, and can be slow on
+        // a cold start, so race it against a timeout and fall back to the bridge's
+        // reconstruction. Two race subtleties this guards:
+        //   1. Attach a no-op `.catch` to the message promise BEFORE the race, so
+        //      that if the timeout wins, a *later* rejection of the still-pending
+        //      message promise doesn't surface as an unhandled rejection (the
+        //      classic Promise.race leak — the loser keeps running). The same
+        //      promise also feeds the race, so an *early* rejection still rejects
+        //      the race and is caught below; both handlers coexist.
+        //   2. Validate the response is the {acceptLanguage,userAgent} shape with
+        //      non-empty strings before trusting it — a malformed/empty reply must
+        //      fall through to reconstruction, not poison the header with "".
+        const ask = browser.runtime.sendMessage("downloader@solarized.dev", { kind: "get-ambient-headers" });
+        ask.catch(() => {});
         const ambient = await Promise.race([
-            browser.runtime.sendMessage("downloader@solarized.dev", { kind: "get-ambient-headers" }),
-            new Promise((resolve) => setTimeout(() => resolve(null), 200))
+            ask,
+            new Promise((resolve) => setTimeout(() => resolve(null), 250))
         ]);
-        if (ambient) {
-            realAcceptLanguage = ambient.acceptLanguage;
-            realUserAgent = ambient.userAgent;
+        if (ambient && typeof ambient === "object") {
+            if (typeof ambient.acceptLanguage === "string" && ambient.acceptLanguage) realAcceptLanguage = ambient.acceptLanguage;
+            if (typeof ambient.userAgent === "string" && ambient.userAgent) realUserAgent = ambient.userAgent;
         }
     } catch (_) { /* cross-extension messaging unavailable — use reconstruction */ }
 
@@ -4171,15 +4185,21 @@ async function handlePageStateHls(message, sender) {
     // TLS (JA3/JA4) and header order, which the native OkHttp client can't mimic.
     let requestHeaders;
     try {
-        const playerOrigin = new URL(pageUrl).origin; // scheme://host
+        const pageUrlObj = new URL(pageUrl);
+        const playerOrigin = pageUrlObj.origin; // scheme://host
         // Sec-Fetch-Site exactly as the browser derives it for this fetch:
-        // same-origin / same-site (same registrable domain) / cross-site.
+        // same-origin / same-site (same registrable domain) / cross-site. The
+        // registrable-domain test is a last-two-labels heuristic (no PSL), so a
+        // multi-part eTLD like .co.uk would mis-read same-site as cross-site —
+        // acceptable here because these stream CDNs live on a different
+        // registrable domain than the embed host anyway, so the common answer is
+        // cross-site and the heuristic returns it correctly.
         let secSite = "cross-site";
         try {
             const mediaUrl = new URL(p.url);
             const regDomain = (h) => h.split(".").slice(-2).join(".");
             if (mediaUrl.origin === playerOrigin) secSite = "same-origin";
-            else if (regDomain(mediaUrl.hostname) === regDomain(new URL(pageUrl).hostname)) secSite = "same-site";
+            else if (regDomain(mediaUrl.hostname) === regDomain(pageUrlObj.hostname)) secSite = "same-site";
         } catch (_) {}
         requestHeaders = [
             { name: "Origin", value: playerOrigin },

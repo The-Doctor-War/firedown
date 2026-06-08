@@ -98,6 +98,20 @@ const PARSER_BLOCKLIST = {
   mega: [
     'gfs[^/.]*\\.(userstorage\\.)?mega\\.co\\.nz\\/',
   ],
+
+  // Tube8 / Pornhub-network family (tube8, pornhub, youporn, redtube, white-label
+  // clones). The page-state bridge reads the player's `mediaDefinitions` list
+  // page-world, resolves the …/media/mp4/?s= JSON delegate, and emits the
+  // progressive .mp4 (and any .m3u8 master) on the t8cdn/phncdn/ypncdn/rdtcdn
+  // media CDNs — so block them so the generic catcher doesn't ALSO grab the same
+  // media when the user presses play. (The default-quality URL the player picks
+  // already dedups by URL against the parser's entity; this block additionally
+  // covers a manually-selected OTHER quality, whose URL the parser emitted as a
+  // variant but isn't the entity's primary URL.) Scoped to the media path's
+  // extension so it never swallows the thumbnails these same CDNs serve (.jpg).
+  pornhubNetwork: [
+    '(t8cdn|phncdn|ypncdn|rdtcdn)\\.com\\/.*\\.(mp4|m3u8)',
+  ],
 };
 
 // Flatten every parser's patterns into one compiled RegExp — same approach and

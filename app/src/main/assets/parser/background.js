@@ -4105,6 +4105,46 @@ browser.runtime.onMessage.addListener((message, sender) => {
     });
 });
 
+// Progressive (single-URL) media variants read from a page-world player's media
+// list (page-state-bridge resolveAndEmitMediaDefs — Pornhub-network family:
+// tube8 / pornhub / youporn / redtube). Their player fetches its quality list on
+// LOAD, but only into an application/json XHR body the generic catcher rejects,
+// so nothing is captured until the user presses play and the wire sees a real
+// .mp4. The bridge reads the list page-world (resolving the same-origin JSON
+// delegate) and posts the real progressive URLs here. Routed through sendVariants
+// as progressive files (skipProbe is auto-set from the page duration). No special
+// requestHeaders: the media URL is query-signed and self-authorizing (the real
+// browser fetch carries no Referer/Origin/Cookie). The played default-quality URL
+// dedups by URL against this; the t8cdn-family media block in parser-blocklist.js
+// keeps the catcher off a manually-selected other-quality URL.
+browser.runtime.onMessage.addListener((message, sender) => {
+    if (message?.kind !== "page-state-progressive") return;
+    const p = message.payload;
+    if (!p || !Array.isArray(p.variants) || p.variants.length === 0) return;
+
+    const tabId = sender.tab?.id ?? -1;
+    const pageUrl = p.origin || sender.tab?.url || "";
+    const details = {
+        tabId,
+        _resolvedTabId: tabId >= 0 ? tabId : undefined,
+        url: pageUrl,
+        requestId: `page-state-prog-${Date.now()}`
+    };
+
+    log("PAGE-STATE", `received ${p.variants.length} progressive variant(s)`, {
+        title: p.title, origin: pageUrl.slice(0, 80), tabId
+    });
+
+    sendVariants(details, {
+        variants: p.variants,
+        origin: pageUrl,
+        description: p.title,
+        name: p.title,
+        img: p.img,
+        duration: p.durationMs > 0 ? p.durationMs : 0
+    });
+});
+
 // HLS master read from a page-world JS player (page-state-bridge findPlayerHls):
 // a site whose player fetches the (often obfuscated) master only on PLAY
 // (preload:none) is invisible to the wire until the user clicks, but the player

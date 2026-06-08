@@ -365,6 +365,255 @@
         return null;
     }
 
+    // Browser-shaped navigator hints for a native re-fetch that must look real to
+    // a stream CDN's anti-bot. UA verbatim; Accept-Language built WITH q-values
+    // ("en-US,ko-KR;q=0.9") — a bare comma-join is a bot tell that once cost a 403
+    // (proven on-device: the only header differing from the request that got 200).
+    function readNavigatorHints() {
+        let ua = "", lang = "";
+        try { ua = navigator.userAgent || ""; } catch (_) { ua = ""; }
+        try {
+            let ls = [];
+            if (navigator.languages && navigator.languages.length) ls = navigator.languages;
+            else if (navigator.language) ls = [navigator.language];
+            if (ls.length) {
+                lang = ls[0];
+                for (let i = 1, q = 9; i < ls.length && q >= 1; i++, q--) {
+                    lang += "," + ls[i] + ";q=0." + q;
+                }
+            }
+        } catch (_) { lang = ""; }
+        return { ua, lang };
+    }
+
+    // Post an HLS master to background (Java enumerates qualities, no probe). The
+    // stream CDN's anti-bot rejects any non-browser-like request, so we send the
+    // real UA + q-valued Accept-Language for background.js to rebuild the request.
+    function postHlsMaster(url, title, img, label) {
+        const { ua, lang } = readNavigatorHints();
+        const payload = { url, origin: location.href, title, img, ua, lang };
+        log("sending HLS master at", label, title, url.slice(0, 80));
+        browser.runtime.sendMessage({ kind: "page-state-hls", payload }).then(() => {}, () => {});
+    }
+
+    // ---- mediaDefinitions player (Pornhub-network family) --------------------
+    // tube8 / pornhub / youporn / redtube and their white-label clones inline,
+    // into a page-world global (page_params.video_player_setup.playervars), a
+    // `mediaDefinitions` array plus rich metadata (video_title / video_duration /
+    // image_url). Each entry's `videoUrl` is EITHER a direct media URL OR a
+    // same-origin JSON DELEGATE (…/media/mp4/?s=<token>) returning
+    // [{quality, videoUrl:…mp4}]. The page fetches that delegate on LOAD (not on
+    // play), so the real progressive URLs exist pre-play — but only inside an
+    // application/json XHR body, which the generic catcher rejects, and never in
+    // the DOM (the page carries only the tokenized delegate). So nothing is
+    // captured until the user presses play and the wire finally sees a real .mp4.
+    // We read mediaDefinitions page-world (same wrappedJSObject waiver as the HLS
+    // path), resolve the delegate with a SAME-ORIGIN fetch (the bridge runs ON the
+    // page, so no host permission is needed), and emit the variants. Generic by
+    // SHAPE (the player), not by host — exactly like findPlayerHls is generic to
+    // JWPlayer. A direct .mp4/.webm becomes a progressive variant; a direct .m3u8
+    // rides the existing HLS-master path.
+    const DIRECT_MEDIA_RE = /^https?:\/\/[^\s"']+\.(?:mp4|m4v|webm)(?:[?#]|$)/i;
+    const HLS_MASTER_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
+
+    // True when `o` looks like a playervars object: it carries a non-empty
+    // mediaDefinitions array whose first entry has an http(s) `videoUrl`.
+    function looksLikeMediaDefs(o) {
+        if (!o || typeof o !== "object") return false;
+        let md;
+        try { md = o.mediaDefinitions; } catch (_) { return false; }
+        if (!md) return false;
+        let n;
+        try { n = md.length; } catch (_) { return false; }
+        if (typeof n !== "number" || n === 0) return false;
+        let first;
+        try { first = md[0]; } catch (_) { return false; }
+        if (!first || typeof first !== "object") return false;
+        const vu = readPrim(first, "videoUrl");
+        return typeof vu === "string" && /^https?:\/\//i.test(vu);
+    }
+
+    // Bounded search for the playervars object inside a page-world global. Fast
+    // known path first (Pornhub-network: video_player_setup.playervars), then a
+    // depth/node-capped generic walk. Index loops / direct reads only (Xray-safe).
+    function findPlayervars(root) {
+        try {
+            const pv = root.video_player_setup && root.video_player_setup.playervars;
+            if (looksLikeMediaDefs(pv)) return pv;
+        } catch (_) {}
+        if (looksLikeMediaDefs(root)) return root;
+        const seen = new Set();
+        let budget = 20000;
+        let found = null;
+        (function walk(o, depth) {
+            if (found || !o || typeof o !== "object" || depth > 8 || budget-- <= 0) return;
+            if (seen.has(o)) return;
+            seen.add(o);
+            if (looksLikeMediaDefs(o)) { found = o; return; }
+            if (Array.isArray(o)) {
+                let n;
+                try { n = o.length; } catch (_) { return; }
+                if (typeof n !== "number") return;
+                for (let i = 0; i < n && !found; i++) {
+                    let v;
+                    try { v = o[i]; } catch (_) { continue; }
+                    walk(v, depth + 1);
+                }
+                return;
+            }
+            let keys;
+            try { keys = Object.keys(o); } catch (_) { return; }
+            for (let i = 0; i < keys.length && !found; i++) {
+                let v;
+                try { v = o[keys[i]]; } catch (_) { continue; }
+                walk(v, depth + 1);
+            }
+        })(root, 0);
+        return found;
+    }
+
+    // Probe the known state globals (plus page_params, where the Pornhub-network
+    // player lives) for a playervars object. Cheap no-op when none holds one.
+    function readMediaDefs() {
+        let pw;
+        try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
+        if (!pw) return null;
+        const names = ["page_params"].concat(STATE_GLOBALS);
+        for (const name of names) {
+            let g;
+            try { g = pw[name]; } catch (_) { continue; }
+            if (!g || typeof g !== "object") continue;
+            let pv;
+            try { pv = findPlayervars(g); } catch (_) { pv = null; }
+            if (pv) return pv;
+        }
+        return null;
+    }
+
+    // Extract { url, format, quality } from each mediaDefinitions entry (Xray-safe
+    // primitive reads). Bounded to 50 entries.
+    function extractMediaDefs(pv) {
+        const out = [];
+        let md;
+        try { md = pv.mediaDefinitions; } catch (_) { md = null; }
+        let n = 0;
+        try { n = (md && typeof md.length === "number") ? md.length : 0; } catch (_) { n = 0; }
+        for (let i = 0; i < n && i < 50; i++) {
+            let d;
+            try { d = md[i]; } catch (_) { continue; }
+            const url = readPrim(d, "videoUrl");
+            if (typeof url !== "string" || !/^https?:\/\//i.test(url)) continue;
+            const format = readPrim(d, "format");
+            const quality = readPrim(d, "quality");
+            out.push({
+                url,
+                format: typeof format === "string" ? format : "",
+                quality: quality != null ? String(quality) : ""
+            });
+        }
+        return out;
+    }
+
+    // Title / duration / cover from the same playervars (generic field names the
+    // Pornhub-network player uses), falling back to the page's og:/title.
+    function mediaDefsMeta(pv) {
+        const t = readPrim(pv, "video_title");
+        const durRaw = readPrim(pv, "video_duration");
+        const dur = Number(durRaw);
+        const img = readPrim(pv, "image_url");
+        return {
+            title: (typeof t === "string" && t.trim()) ? t.trim() : pageTitle(),
+            durationMs: (isFinite(dur) && dur > 0) ? Math.round(dur * 1000) : 0,
+            img: (typeof img === "string" && img) ? img : (ogMeta("og:image") || undefined)
+        };
+    }
+
+    // Resolve a same-origin JSON delegate (…/media/mp4/?s=<token>) to its real
+    // media URLs. The page already made this exact fetch on load, so a same-origin
+    // credentialed re-fetch is cheap and authenticated. Returns [{url, height}].
+    async function fetchMediaList(url) {
+        let data;
+        try {
+            const resp = await fetch(url, { credentials: "include", cache: "no-store" });
+            if (!resp || !resp.ok) return [];
+            data = await resp.json();
+        } catch (_) { return []; }
+        const out = [];
+        let n = 0;
+        try { n = (data && typeof data.length === "number") ? data.length : 0; } catch (_) { n = 0; }
+        for (let i = 0; i < n && i < 50; i++) {
+            const it = data[i];
+            if (!it || typeof it !== "object") continue;
+            const u = (typeof it.videoUrl === "string" && it.videoUrl)
+                || (typeof it.url === "string" && it.url)
+                || (typeof it.src === "string" && it.src);
+            if (typeof u !== "string" || !/^https?:\/\//i.test(u)) continue;
+            const h = parseInt(it.quality || it.height || it.label, 10) || 0;
+            out.push({ url: u, height: h });
+        }
+        return out;
+    }
+
+    // Pre-fetch guard: don't re-resolve the same delegate set across the retry
+    // passes (immediate/DOMContentLoaded/t500/t1500/t4000). Cleared on SPA nav.
+    const mediaDefsTried = new Set();
+
+    async function resolveAndEmitMediaDefs(pv, label) {
+        const defs = extractMediaDefs(pv);
+        if (!defs.length) return false;
+        const preKey = defs.map(d => d.url).join("|");
+        if (mediaDefsTried.has(preKey)) return true;
+        mediaDefsTried.add(preKey);
+
+        const meta = mediaDefsMeta(pv);
+        const progressive = []; // { url, height }
+        let hlsMaster = null;
+
+        for (const def of defs) {
+            if (HLS_MASTER_RE.test(def.url)) {
+                if (!hlsMaster) hlsMaster = def.url;
+            } else if (DIRECT_MEDIA_RE.test(def.url)) {
+                progressive.push({ url: def.url, height: parseInt(def.quality, 10) || 0 });
+            } else {
+                // Tokenized JSON delegate — resolve to the real media URLs.
+                const list = await fetchMediaList(def.url);
+                for (const item of list) {
+                    if (HLS_MASTER_RE.test(item.url)) {
+                        if (!hlsMaster) hlsMaster = item.url;
+                    } else if (DIRECT_MEDIA_RE.test(item.url)) {
+                        progressive.push({ url: item.url, height: item.height });
+                    }
+                }
+            }
+        }
+
+        if (progressive.length) {
+            // Dedup by URL, best (highest) quality first.
+            const byUrl = new Map();
+            for (const v of progressive) { if (!byUrl.has(v.url)) byUrl.set(v.url, v); }
+            const variants = Array.from(byUrl.values())
+                .sort((a, b) => (b.height || 0) - (a.height || 0))
+                .map(v => ({ url: v.url, width: 0, height: v.height || 0 }));
+            if (!sentKeys.has(variants[0].url)) {
+                sentKeys.add(variants[0].url);
+                const payload = {
+                    variants,
+                    origin: location.href,
+                    title: meta.title,
+                    img: meta.img,
+                    durationMs: meta.durationMs
+                };
+                log("sending", variants.length, "mediaDefs progressive variant(s) at", label, meta.title);
+                browser.runtime.sendMessage({ kind: "page-state-progressive", payload }).then(() => {}, () => {});
+            }
+        }
+        if (hlsMaster && !sentKeys.has(hlsMaster)) {
+            sentKeys.add(hlsMaster);
+            postHlsMaster(hlsMaster, meta.title, meta.img, label);
+        }
+        return true;
+    }
+
     // ---- Mega.nz links (folder, single file, embed) --------------------------
     // Mega is zero-knowledge: the decryption key lives in the URL fragment (after
     // #), which is NEVER sent to any server — so neither the wire nor the DOM can
@@ -502,39 +751,19 @@
             if (sentKeys.has(hls.url)) { armSpaObserver(); return true; }
             sentKeys.add(hls.url);
             const meta = resolveMeta(null);
-            // The stream CDN's nginx anti-bot rejects a request that isn't
-            // browser-like (proven on-device: Origin+UA alone → 403; the player's
-            // full set with Sec-Fetch-* + Accept-Language → 200). Capture the real
-            // UA + languages here (the content script sees the page's navigator)
-            // so background.js can rebuild the player's exact request.
-            let ua = "", lang = "";
-            try { ua = navigator.userAgent || ""; } catch (_) { ua = ""; }
-            try {
-                // Build a browser-shaped Accept-Language WITH q-values
-                // ("en-US,ko-KR;q=0.9"). A bare comma-join ("en-US,ko-KR") is a
-                // bot tell — no real browser omits the q-values — and the stream
-                // CDN's anti-bot 403s on it (proven on-device: that was the only
-                // header differing from the request that gets 200).
-                let ls = [];
-                if (navigator.languages && navigator.languages.length) ls = navigator.languages;
-                else if (navigator.language) ls = [navigator.language];
-                if (ls.length) {
-                    lang = ls[0];
-                    for (let i = 1, q = 9; i < ls.length && q >= 1; i++, q--) {
-                        lang += "," + ls[i] + ";q=0." + q;
-                    }
-                }
-            } catch (_) { lang = ""; }
-            const payload = {
-                url: hls.url,
-                origin: location.href,
-                title: hls.title || meta.title,
-                img: meta.img,
-                ua: ua,
-                lang: lang
-            };
-            log("sending HLS master at", label, payload.title, hls.url.slice(0, 80));
-            browser.runtime.sendMessage({ kind: "page-state-hls", payload }).then(() => {}, () => {});
+            postHlsMaster(hls.url, hls.title || meta.title, meta.img, label);
+            armSpaObserver();
+            return true;
+        }
+
+        // 3) mediaDefinitions player (Pornhub-network family: tube8, pornhub,
+        //    youporn, redtube, white-label clones). The real media list is fetched
+        //    on LOAD into a same-origin JSON delegate the catcher drops, so nothing
+        //    is captured until play. Read it page-world + resolve the delegate.
+        //    Async (a same-origin fetch), so fire-and-forget and arm the observer.
+        const pv = readMediaDefs();
+        if (pv) {
+            resolveAndEmitMediaDefs(pv, label).then(() => {}, () => {});
             armSpaObserver();
             return true;
         }
@@ -553,6 +782,7 @@
             if (location.href === lastUrl) return;
             lastUrl = location.href;
             sentKeys.clear();
+            mediaDefsTried.clear();
             clearTimeout(debounce);
             debounce = setTimeout(() => extractAndSend("spa"), 600);
         }).observe(document.documentElement, { childList: true, subtree: true });

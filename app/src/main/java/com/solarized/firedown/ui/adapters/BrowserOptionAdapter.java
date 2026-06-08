@@ -243,14 +243,19 @@ public class BrowserOptionAdapter extends GridListBaseAdapter<BrowserDownloadEnt
     /**
      * Shows a "CC N" badge on a video row when the parser captured subtitle
      * tracks for that video. Count comes from {@link #mSubtitleCounts} (built
-     * from the unfiltered repository), keyed by origin. The entity itself must
-     * not be a subtitle — we badge the parent video, not the caption rows.
+     * from the unfiltered repository), keyed by origin. The badge must land on
+     * the VIDEO only: captions belong to a video, and the count is keyed on the
+     * page origin, so every other capture from the same page (thumbnail-sprite
+     * images, a player-logo SVG, poster images, audio) shares that origin and
+     * would otherwise wrongly inherit the badge — the "CC 1 on a PNG / SVG" bug.
      */
     private void bindCaptionBadge(@NonNull Context context,
                                   @NonNull ViewHolder holder,
                                   @NonNull BrowserDownloadEntity entity) {
         if (holder.tagCc == null) return;
-        if (FileUriHelper.isSubtitle(entity.getMimeType())) return;
+        // Captions attach to a video; gate strictly on the video mime so a
+        // same-origin image/SVG/audio capture never inherits the count.
+        if (!FileUriHelper.isVideo(entity.getMimeType())) return;
 
         String origin = entity.getFileOrigin();
         if (TextUtils.isEmpty(origin)) return;

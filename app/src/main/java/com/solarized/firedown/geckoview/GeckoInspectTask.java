@@ -516,7 +516,8 @@ public class GeckoInspectTask implements Runnable {
                 // `n` (folder-scoped) download call.
                 String fileUrl = folderPage + "/file/" + nodeHandle
                         + "?fk=" + MegaCrypto.b64encode(nodeKey);
-                emitMegaEntity(fileUrl, name, mime, size, folderPage);
+                String thumb = fetchMegaThumbnail(nodeKey, node.optString("fa", null), mMegaFolderHandle);
+                emitMegaEntity(fileUrl, name, mime, size, folderPage, thumb);
                 emitted++;
             } catch (Exception ex) {
                 Log.w(TAG, "Mega: node parse failed", ex);
@@ -556,6 +557,7 @@ public class GeckoInspectTask implements Runnable {
         // page-title / handle name and let MegaStrategy resolve the rest.
         String name = null;
         long size = 0;
+        String fa = null;
         String body = "[{\"a\":\"g\",\"p\":\"" + mMegaFileHandle + "\"}]";
         String url = MEGA_API + "?id=" + Math.abs(new SecureRandom().nextInt());
         try {
@@ -566,6 +568,7 @@ public class GeckoInspectTask implements Runnable {
                 JSONObject obj = (JSONObject) first;
                 size = obj.optLong("s", 0);
                 name = MegaCrypto.decryptName(nodeKey, obj.optString("at", ""));
+                fa = obj.optString("fa", null);
             }
         } catch (Exception e) {
             Log.w(TAG, "Mega: file attribute fetch failed (emitting anyway)", e);
@@ -583,13 +586,16 @@ public class GeckoInspectTask implements Runnable {
             mime = FileUriHelper.MIMETYPE_MP4;
         }
 
-        emitMegaEntity(fileUrl, name, mime, size, filePage);
+        // A single-file g call is anonymous (public handle, no folder scope).
+        String thumb = fetchMegaThumbnail(nodeKey, fa, null);
+        emitMegaEntity(fileUrl, name, mime, size, filePage, thumb);
         Log.d(TAG, "Mega: emitted single file " + mMegaFileHandle + " (" + name + ")");
         return false; // entity added above; this capture row is the download
     }
 
     /** Build + commit one Mega capture entity (dedups by uid internally). */
-    private void emitMegaEntity(String fileUrl, String name, String mime, long size, String origin) {
+    private void emitMegaEntity(String fileUrl, String name, String mime, long size,
+                                String origin, String thumbnail) {
         BrowserDownloadEntity e = new BrowserDownloadEntity();
         e.setUid(fileUrl.hashCode());
         e.setFileUrl(fileUrl);
@@ -600,7 +606,9 @@ public class GeckoInspectTask implements Runnable {
         e.setType(UrlType.MEGA.getValue());
         e.setAudio(FileUriHelper.isAudio(mime));
         e.setFileLength(size);
-        e.setFileThumbnail(mImg);
+        // The synthetic URL can't be fetched for a frame, so a real thumbnail can
+        // only come from Mega's stored file-attribute JPEG (a data: URI here).
+        e.setFileThumbnail(!TextUtils.isEmpty(thumbnail) ? thumbnail : mImg);
         // Must be non-null: the Captured adapter feeds getFileHeaders() straight
         // into Glide's RequestOptions.set(HEADERS, …), which NPEs on a null value
         // (every other capture path sets it via prepareEntity). Mega's gfs
@@ -613,6 +621,69 @@ public class GeckoInspectTask implements Runnable {
         e.setIncognito(mIncognito);
         e.setUpdateTime(System.currentTimeMillis());
         mBrowserDownloadRepository.addValue(e);
+    }
+
+    /**
+     * Best-effort fetch of a Mega file's stored thumbnail (the type-0
+     * file-attribute JPEG, ~120px), returned as a {@code data:image/jpeg;base64,…}
+     * URI for the Captured grid — the only real preview available pre-download,
+     * since the encrypted media itself can't be frame-decoded over the wire.
+     *
+     * <p>Two steps against Mega's API, both anonymous: {@code ufa} resolves the
+     * file-attribute storage URL for the thumbnail handle, then a binary POST of
+     * the 8-byte handle returns {@code handle(8) + len(4 LE) + AES-CBC JPEG},
+     * which we decrypt with the file key. Any failure (no thumbnail, network,
+     * malformed framing) returns {@code null} and the row falls back to the mime
+     * tile — never fatal.
+     *
+     * @param folderScope the share handle for a folder file (cs {@code &n}), or
+     *                    {@code null} for an anonymous single-file link.
+     */
+    private String fetchMegaThumbnail(byte[] nodeKey, String fa, String folderScope) {
+        String handle = MegaCrypto.faHandle(fa, 0); // 0 = thumbnail
+        if (handle == null) {
+            return null;
+        }
+        try {
+            // 1. Resolve the file-attribute storage URL.
+            String reqUrl = MEGA_API + "?id=" + Math.abs(new SecureRandom().nextInt())
+                    + (TextUtils.isEmpty(folderScope) ? "" : "&n=" + folderScope);
+            String reqBody = "[{\"a\":\"ufa\",\"fah\":\"" + handle + "\",\"ssl\":2,\"r\":1}]";
+            String resp = WebUtils.postContent(reqUrl, reqBody, new HashMap<>());
+            JSONArray arr = new JSONArray(resp.trim());
+            Object first = arr.length() > 0 ? arr.get(0) : null;
+            if (!(first instanceof JSONObject)) {
+                return null;
+            }
+            String faUrl = ((JSONObject) first).optString("p", null);
+            if (TextUtils.isEmpty(faUrl)) {
+                return null;
+            }
+
+            // 2. POST the 8-byte handle; response is handle(8) + len(4 LE) + blob.
+            byte[] handleBytes = MegaCrypto.b64(handle);
+            byte[] raw = WebUtils.postBytes(faUrl, handleBytes);
+            if (raw == null || raw.length < 12) {
+                return null;
+            }
+            int len = (raw[8] & 0xFF) | ((raw[9] & 0xFF) << 8)
+                    | ((raw[10] & 0xFF) << 16) | ((raw[11] & 0xFF) << 24);
+            if (len <= 0 || 12 + len > raw.length) {
+                return null;
+            }
+            byte[] enc = new byte[len];
+            System.arraycopy(raw, 12, enc, 0, len);
+
+            byte[] jpeg = MegaCrypto.decryptFileAttr(nodeKey, enc);
+            if (jpeg == null || jpeg.length == 0) {
+                return null;
+            }
+            return "data:image/jpeg;base64," + android.util.Base64.encodeToString(
+                    jpeg, android.util.Base64.NO_WRAP);
+        } catch (Exception e) {
+            Log.w(TAG, "Mega: thumbnail fetch failed", e);
+            return null;
+        }
     }
 
     // ========================================================================

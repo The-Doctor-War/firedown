@@ -176,4 +176,47 @@ public final class MegaCrypto {
             return null;
         }
     }
+
+    // ---- File-attribute thumbnails (the per-file preview JPEG Mega stores) ----
+
+    /**
+     * A node's {@code fa} field lists its stored file attributes — a thumbnail
+     * (type 0, ~120px JPEG) and/or a preview (type 1, ~1000px), as
+     * {@code "<id>:<type>*<handle>"} entries joined by {@code /}. Returns the
+     * base64url handle for the requested type, or {@code null} if absent.
+     */
+    public static String faHandle(String fa, int type) {
+        if (TextUtils.isEmpty(fa)) return null;
+        for (String entry : fa.split("/")) {
+            int star = entry.indexOf('*');
+            if (star <= 0 || star + 1 >= entry.length()) continue;
+            int colon = entry.lastIndexOf(':', star);
+            String t = entry.substring(colon + 1, star);
+            if (String.valueOf(type).equals(t.trim())) {
+                return entry.substring(star + 1);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Decrypt a file-attribute blob (thumbnail/preview JPEG) — AES-CBC, zero IV,
+     * the file's AES key, same as the attributes but the payload is a JPEG rather
+     * than JSON. CBC needs a 16-byte-multiple input, so a trailing partial block
+     * (shouldn't happen for a well-formed blob) is dropped; the JPEG's own EOI
+     * marker makes any 16-byte padding tail harmless to the decoder.
+     */
+    public static byte[] decryptFileAttr(byte[] nodeKey32, byte[] enc) {
+        try {
+            int len = enc.length - (enc.length % 16);
+            if (len <= 0) return null;
+            byte[] aesKey = fileAesKey(nodeKey32);
+            Cipher c = Cipher.getInstance("AES/CBC/NoPadding");
+            c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(aesKey, "AES"),
+                    new IvParameterSpec(new byte[16]));
+            return c.doFinal(enc, 0, len);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

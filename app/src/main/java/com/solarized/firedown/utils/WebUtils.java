@@ -442,8 +442,7 @@ public class WebUtils {
     }
 
 
-    public static String postContent(String url, String post, Map<String, String> headers) throws IOException, IllegalArgumentException {
-        Response httpResponse = null;
+    public static String postContent(String url, String post, Map<String, String> headers) throws IOException, IllegalArgumentException {        Response httpResponse = null;
         try {
 
             RequestBody reqbody = null;
@@ -473,6 +472,30 @@ public class WebUtils {
         }
     }
 
+
+    /**
+     * Binary POST — raw bytes in, raw bytes out. Unlike {@link #postContent}
+     * (which calls {@code body.string()} and would corrupt non-UTF-8 data), this
+     * preserves the response verbatim. Used for Mega's file-attribute server,
+     * which speaks a binary framing (handle + length + AES-CBC JPEG), not text.
+     */
+    public static byte[] postBytes(String url, byte[] body) throws IOException, IllegalArgumentException {
+        Response response = null;
+        try {
+            RequestBody reqBody = RequestBody.create(body != null ? body : new byte[0], null);
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(reqBody)
+                    .build();
+            response = NetworkModule.requireClient().newCall(request).execute();
+            ResponseBody responseBody = response.body();
+            return responseBody != null ? responseBody.bytes() : null;
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
+    }
 
     public static String getDomainName(String url) {
         try{

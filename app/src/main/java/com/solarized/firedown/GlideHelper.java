@@ -32,6 +32,7 @@ import com.solarized.firedown.data.entity.DownloadEntity;
 import com.solarized.firedown.data.repository.DownloadDataRepository;
 import com.solarized.firedown.glide.DomainThumbnail;
 import com.solarized.firedown.glide.MimeTypeThumbnail;
+import com.solarized.firedown.manager.UrlType;
 import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.Utils;
@@ -533,9 +534,23 @@ public class GlideHelper {
                 image.setImageDrawable(generateThumbnail(mimeType, image));
                 return;
             }
+            // A Mega capture's URL is a synthetic, un-fetchable handle and the
+            // media bytes are AES-CTR ciphertext, so there's no frame to decode
+            // from it. When the capture couldn't attach Mega's stored thumbnail
+            // (a data: URI), render the mime tile directly rather than firing a
+            // doomed network fetch that just errors and falls back anyway.
+            if (!hasThumbnail && entity.getType() == UrlType.MEGA.getValue()) {
+                clearSafe(image);
+                image.setImageDrawable(generateThumbnail(mimeType, image));
+                return;
+            }
             String source = hasThumbnail ? thumbnail : entity.getFileUrl();
-            Glide.with(image).load(Uri.parse(source))
-                    .override(THUMB_WIDTH, THUMB_HEIGHT)
+            // A data: URI (Mega's stored thumbnail JPEG) must load via the String
+            // model so Glide's DataUrlLoader decodes it; everything else is a Uri.
+            RequestBuilder<Drawable> request = source.startsWith("data:")
+                    ? Glide.with(image).load(source)
+                    : Glide.with(image).load(Uri.parse(source));
+            request.override(THUMB_WIDTH, THUMB_HEIGHT)
                     .signature(signature)
                     .listener(fallbackListener(mimeType, image))
                     .apply(requestOptions).centerCrop()
@@ -588,8 +603,16 @@ public class GlideHelper {
                     && !FileUriHelper.canHaveEmbeddedArt(mimeType)) {
                 return null;
             }
+            // Mega capture with no stored thumbnail renders a static mime tile in
+            // load() — nothing to preload (mirror the load() short-circuit).
+            if (!hasThumbnail && entity.getType() == UrlType.MEGA.getValue()) {
+                return null;
+            }
             String source = hasThumbnail ? thumbnail : entity.getFileUrl();
-            return glide.load(Uri.parse(source))
+            RequestBuilder<?> request = source.startsWith("data:")
+                    ? glide.load(source)
+                    : glide.load(Uri.parse(source));
+            return request
                     .override(THUMB_WIDTH, THUMB_HEIGHT)
                     .signature(signature)
                     .apply(requestOptions).centerCrop();

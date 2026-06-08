@@ -4128,25 +4128,41 @@ browser.runtime.onMessage.addListener((message, sender) => {
         requestId: `page-state-hls-${Date.now()}`
     };
 
-    // Replicate the player's EXACT master request — proven on-device: Origin+UA
-    // alone gets 403 from the stream CDN's nginx anti-bot; the full browser-like
-    // set (the same headers the wire capture sends on play) gets 200. The
-    // load-bearing additions over a bare fetch are the Sec-Fetch-* trio +
-    // Accept-Language (the "this is a real browser" signal) and the full-path
-    // Referer = the embed iframe URL. Origin is sent explicitly because
-    // OriginInterceptor only derives it for SAME-site requests (isSecSameSite),
-    // and the UA because the native client has no UA interceptor (would send
-    // "okhttp/…"). ffmpeg propagates all of these to the playlist/segment/key
-    // sub-requests on download.
+    // Replicate the player's EXACT master request, because a strong CDN anti-bot
+    // rejects ANY deviation from a real browser request (proven on-device: the
+    // ONLY difference between a 403 and a 200 was a missing ";q=0.9" on
+    // Accept-Language). So every header here must byte-match what hls.js's fetch
+    // would send: Origin (explicit — OriginInterceptor only derives it same-site),
+    // the full-path Referer (the embed iframe URL), the Sec-Fetch-* trio,
+    // Accept-Language and User-Agent read from the page's real navigator (so they
+    // track the actual browser, never a hardcoded guess), and Sec-Fetch-Site
+    // computed the way the browser does. Add a header only if the browser sends
+    // it, and format it exactly (the q-value lesson). ffmpeg propagates all of
+    // these to the playlist/segment/key sub-requests on download.
+    //
+    // Ceiling: this matches header VALUES; the very strongest systems also
+    // fingerprint TLS (JA3/JA4) and header order, which the native OkHttp client
+    // can't mimic — those are beyond what header spoofing can win.
     let requestHeaders;
     try {
         const playerOrigin = new URL(pageUrl).origin; // scheme://host
+        // Sec-Fetch-Site exactly as the browser derives it for this fetch:
+        // same-origin / same-site (same registrable domain) / cross-site. Most
+        // embed→CDN fetches are cross-site, but computing it avoids mislabelling
+        // a same-site CDN (anti-bot cross-checks it against Origin/Referer).
+        let secSite = "cross-site";
+        try {
+            const mediaUrl = new URL(p.url);
+            const regDomain = (h) => h.split(".").slice(-2).join(".");
+            if (mediaUrl.origin === playerOrigin) secSite = "same-origin";
+            else if (regDomain(mediaUrl.hostname) === regDomain(new URL(pageUrl).hostname)) secSite = "same-site";
+        } catch (_) {}
         requestHeaders = [
             { name: "Origin", value: playerOrigin },
             { name: "Referer", value: pageUrl },        // full embed iframe URL
             { name: "Sec-Fetch-Dest", value: "empty" },
             { name: "Sec-Fetch-Mode", value: "cors" },
-            { name: "Sec-Fetch-Site", value: "cross-site" }
+            { name: "Sec-Fetch-Site", value: secSite }
         ];
         if (p.lang) requestHeaders.push({ name: "Accept-Language", value: p.lang });
         if (p.ua) requestHeaders.push({ name: "User-Agent", value: p.ua });

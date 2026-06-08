@@ -640,8 +640,10 @@ public class GeckoInspectTask implements Runnable {
      *                    {@code null} for an anonymous single-file link.
      */
     private String fetchMegaThumbnail(byte[] nodeKey, String fa, String folderScope) {
+        Log.d(TAG, "Mega thumb: fa=" + fa);
         String handle = MegaCrypto.faHandle(fa, 0); // 0 = thumbnail
         if (handle == null) {
+            Log.d(TAG, "Mega thumb: no type-0 (thumbnail) handle in fa — file has no stored thumbnail");
             return null;
         }
         try {
@@ -650,31 +652,45 @@ public class GeckoInspectTask implements Runnable {
                     + (TextUtils.isEmpty(folderScope) ? "" : "&n=" + folderScope);
             String reqBody = "[{\"a\":\"ufa\",\"fah\":\"" + handle + "\",\"ssl\":2,\"r\":1}]";
             String resp = WebUtils.postContent(reqUrl, reqBody, new HashMap<>());
+            Log.d(TAG, "Mega thumb: handle=" + handle + " ufa resp=" + resp);
             JSONArray arr = new JSONArray(resp.trim());
             Object first = arr.length() > 0 ? arr.get(0) : null;
             if (!(first instanceof JSONObject)) {
+                Log.w(TAG, "Mega thumb: ufa returned no object (error code?) — " + resp);
                 return null;
             }
             String faUrl = ((JSONObject) first).optString("p", null);
             if (TextUtils.isEmpty(faUrl)) {
+                Log.w(TAG, "Mega thumb: ufa response had no `p` URL — " + resp);
                 return null;
             }
+            Log.d(TAG, "Mega thumb: faUrl=" + faUrl);
 
             // 2. POST the 8-byte handle; response is handle(8) + len(4 LE) + blob.
             byte[] handleBytes = MegaCrypto.b64(handle);
             byte[] raw = WebUtils.postBytes(faUrl, handleBytes);
+            Log.d(TAG, "Mega thumb: handleBytes=" + handleBytes.length
+                    + " raw resp len=" + (raw == null ? -1 : raw.length)
+                    + " head=" + hex(raw, 28));
             if (raw == null || raw.length < 12) {
+                Log.w(TAG, "Mega thumb: fa-server response too short");
                 return null;
             }
             int len = (raw[8] & 0xFF) | ((raw[9] & 0xFF) << 8)
                     | ((raw[10] & 0xFF) << 16) | ((raw[11] & 0xFF) << 24);
+            Log.d(TAG, "Mega thumb: framed blob len=" + len + " (raw=" + raw.length + ")");
             if (len <= 0 || 12 + len > raw.length) {
+                Log.w(TAG, "Mega thumb: framed length out of range (framing/endianness wrong?)");
                 return null;
             }
             byte[] enc = new byte[len];
             System.arraycopy(raw, 12, enc, 0, len);
 
             byte[] jpeg = MegaCrypto.decryptFileAttr(nodeKey, enc);
+            boolean isJpeg = jpeg != null && jpeg.length > 2
+                    && (jpeg[0] & 0xFF) == 0xFF && (jpeg[1] & 0xFF) == 0xD8;
+            Log.d(TAG, "Mega thumb: decrypted len=" + (jpeg == null ? -1 : jpeg.length)
+                    + " head=" + hex(jpeg, 6) + " jpegMagic=" + isJpeg);
             if (jpeg == null || jpeg.length == 0) {
                 return null;
             }
@@ -684,6 +700,17 @@ public class GeckoInspectTask implements Runnable {
             Log.w(TAG, "Mega: thumbnail fetch failed", e);
             return null;
         }
+    }
+
+    /** Hex of the first {@code max} bytes, for protocol diagnostics. */
+    private static String hex(byte[] b, int max) {
+        if (b == null) return "null";
+        StringBuilder sb = new StringBuilder();
+        int n = Math.min(max, b.length);
+        for (int i = 0; i < n; i++) {
+            sb.append(String.format(Locale.US, "%02x", b[i] & 0xFF));
+        }
+        return sb.toString();
     }
 
     // ========================================================================

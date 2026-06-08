@@ -412,17 +412,24 @@
             if (sentKeys.has(hls.url)) { armSpaObserver(); return true; }
             sentKeys.add(hls.url);
             const meta = resolveMeta(null);
-            let ua = "";
+            // The stream CDN's nginx anti-bot rejects a request that isn't
+            // browser-like (proven on-device: Origin+UA alone → 403; the player's
+            // full set with Sec-Fetch-* + Accept-Language → 200). Capture the real
+            // UA + languages here (the content script sees the page's navigator)
+            // so background.js can rebuild the player's exact request.
+            let ua = "", lang = "";
             try { ua = navigator.userAgent || ""; } catch (_) { ua = ""; }
+            try {
+                lang = (navigator.languages && navigator.languages.length)
+                    ? navigator.languages.join(",") : (navigator.language || "");
+            } catch (_) { lang = ""; }
             const payload = {
                 url: hls.url,
                 origin: location.href,
                 title: hls.title || meta.title,
                 img: meta.img,
-                // The real GeckoView UA (this content script sees the page's
-                // navigator). The stream CDN's anti-bot rejects okhttp's default
-                // UA, so the native master fetch must send the browser's.
-                ua: ua
+                ua: ua,
+                lang: lang
             };
             log("sending HLS master at", label, payload.title, hls.url.slice(0, 80));
             browser.runtime.sendMessage({ kind: "page-state-hls", payload }).then(() => {}, () => {});

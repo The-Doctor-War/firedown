@@ -4128,24 +4128,27 @@ browser.runtime.onMessage.addListener((message, sender) => {
         requestId: `page-state-hls-${Date.now()}`
     };
 
-    // Replicate the player's actual master request (confirmed from a HAR): a
-    // CROSS-SITE CORS fetch to the stream CDN carrying Origin + the browser
-    // User-Agent, and NO Referer/cookie. Two things our defaults get wrong:
-    //   - Origin: OriginInterceptor only DERIVES it for SAME-site requests (its
-    //     isSecSameSite guard), so it adds nothing here — send it explicitly.
-    //   - User-Agent: the native client has no UA interceptor, so it would send
-    //     "okhttp/…", which the CDN's nginx anti-bot rejects — send the real
-    //     GeckoView UA the bridge captured.
-    // Deliberately NO Referer: the working request sent none, and an nginx
-    // `valid_referers none;` rule would REJECT a request that carries one. ffmpeg
-    // propagates these to the playlist/segment/key sub-requests on download.
+    // Replicate the player's EXACT master request — proven on-device: Origin+UA
+    // alone gets 403 from the stream CDN's nginx anti-bot; the full browser-like
+    // set (the same headers the wire capture sends on play) gets 200. The
+    // load-bearing additions over a bare fetch are the Sec-Fetch-* trio +
+    // Accept-Language (the "this is a real browser" signal) and the full-path
+    // Referer = the embed iframe URL. Origin is sent explicitly because
+    // OriginInterceptor only derives it for SAME-site requests (isSecSameSite),
+    // and the UA because the native client has no UA interceptor (would send
+    // "okhttp/…"). ffmpeg propagates all of these to the playlist/segment/key
+    // sub-requests on download.
     let requestHeaders;
     try {
-        const playerOrigin = new URL(pageUrl).origin; // scheme://host, no trailing slash
+        const playerOrigin = new URL(pageUrl).origin; // scheme://host
         requestHeaders = [
             { name: "Origin", value: playerOrigin },
-            { name: "Accept", value: "*/*" }
+            { name: "Referer", value: pageUrl },        // full embed iframe URL
+            { name: "Sec-Fetch-Dest", value: "empty" },
+            { name: "Sec-Fetch-Mode", value: "cors" },
+            { name: "Sec-Fetch-Site", value: "cross-site" }
         ];
+        if (p.lang) requestHeaders.push({ name: "Accept-Language", value: p.lang });
         if (p.ua) requestHeaders.push({ name: "User-Agent", value: p.ua });
     } catch (_) {
         requestHeaders = [];

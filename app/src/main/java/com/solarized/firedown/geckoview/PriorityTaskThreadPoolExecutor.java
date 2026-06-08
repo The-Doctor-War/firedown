@@ -6,6 +6,8 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
 import java.util.Comparator;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -52,6 +54,16 @@ public class PriorityTaskThreadPoolExecutor {
     private static final int PRIORITY_CAPACITY = 100;
 
     private final PriorityBlockingQueue<Task> awaitingTasks;
+
+    /**
+     * Tasks currently executing on the pool (added at submit, removed in the
+     * run's {@code finally}). Unlike the queued {@link #awaitingTasks}, a running
+     * task can't be dropped — but it CAN be interrupted: {@link #cancelTab} calls
+     * {@link GeckoInspectTask#cancel()} on each running task of a closed tab so a
+     * wedged native probe unwinds at once. Concurrent set: added under {@code
+     * this} (in {@link #executeWaitingTask}), removed off-monitor in the finally.
+     */
+    private final Set<Task> runningTasks = ConcurrentHashMap.newKeySet();
 
     private final ExecutorService executor;
 
@@ -120,11 +132,18 @@ public class PriorityTaskThreadPoolExecutor {
     }
 
     /**
-     * Drop queued (not-yet-started) inspect tasks for a closed tab, so its
-     * backlog doesn't keep occupying the pool and delay the next tab's captures.
-     * Already-running tasks are left to finish (there are only a few, and they
-     * aren't interruptible). Each removed task is decremented from the in-flight
-     * count — it was counted at execute() and its run-finally will never fire.
+     * Handle a closed tab. Two parts:
+     * <ul>
+     *   <li><b>Queued</b> (not-yet-started) tasks are <em>dropped</em> so the
+     *       closed tab's backlog doesn't occupy the pool — each is decremented
+     *       from the in-flight count, since its run-finally will never fire.</li>
+     *   <li><b>Running</b> tasks can't be dropped, so they are <em>interrupted</em>
+     *       via {@link GeckoInspectTask#cancel()}: a probe wedged in a native
+     *       HLS/DASH reload loop (e.g. every segment 403s on a dead live stream)
+     *       unwinds at once instead of pinning a pool thread until the hls.c
+     *       consecutive-failure bail trips. Their in-flight count is NOT touched
+     *       here — they still complete and their run-finally decrements it.</li>
+     * </ul>
      *
      * <p>Deliberately does <b>not</b> touch {@link #currentTabId}: closing the
      * foreground tab leaves it pointing at the now-dead tab only until the
@@ -145,6 +164,20 @@ public class PriorityTaskThreadPoolExecutor {
             Log.d(TAG, "cancelTab " + tabId + " dropped " + removed + " queued task(s)");
             int n = inFlight.addAndGet(-removed);
             inFlightLive.postValue(Math.max(0, n));
+        }
+
+        // Interrupt any RUNNING tasks for this tab (queued ones are gone above).
+        // cancel() is safe/idempotent and only acts if a probe is actually in
+        // flight; the task still finishes and its run-finally clears the count.
+        int interrupted = 0;
+        for (Task t : runningTasks) {
+            if (t != null && t.tabId == tabId) {
+                t.task.cancel();
+                interrupted++;
+            }
+        }
+        if (interrupted > 0) {
+            Log.d(TAG, "cancelTab " + tabId + " interrupted " + interrupted + " running task(s)");
         }
     }
 
@@ -205,11 +238,13 @@ public class PriorityTaskThreadPoolExecutor {
             final Task nextTask = awaitingTasks.poll();
             if (nextTask != null) {
                 poolSize.incrementAndGet();
+                runningTasks.add(nextTask);
                 executor.submit(() -> {
                     try {
                         nextTask.task.run();
                     } finally {
                         Log.w(TAG, "taskHandler Finish");
+                        runningTasks.remove(nextTask);
                         // Clamp the published value to >= 0, same as cancelTab.
                         // remove() (cancel) and poll() (run) share this monitor,
                         // so a task is never both cancelled and run and the count

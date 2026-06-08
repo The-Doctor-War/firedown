@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * - FFmpeg (HLS, DASH, direct media): single URL probed by FFmpegMetaDataReader
  * - Special types (SVG, timed text): custom handling
  */
-public class GeckoInspectTask implements Runnable {
+public class GeckoInspectTask implements Runnable, GeckoInspectTask.ProbeRegistry {
 
     private static final String TAG = GeckoInspectTask.class.getSimpleName();
 
@@ -96,6 +96,23 @@ public class GeckoInspectTask implements Runnable {
     private final String mMegaFileKey;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
 
+    /**
+     * Cooperative cancellation for a *running* probe (the executor calls
+     * {@link #cancel()} when this task's tab is closed). Both guarded by
+     * {@link #mReaderLock}:
+     *   - {@code mCancelled}    — once set, the run won't emit a (partial) entity.
+     *   - {@code mActiveReader} — the reader currently inside a blocking native
+     *     probe ({@code avformat_open_input}/{@code find_stream_info}), or null.
+     *     {@link FFmpegMetaDataReader#stop()} flips the native interrupt flag the
+     *     AVIO interrupt callback honors, so calling it mid-probe unwinds a wedged
+     *     HLS/DASH reload loop at once — the same mechanism a user Stop uses,
+     *     here driven by tab-close rather than waiting out the hls.c
+     *     consecutive-failure bail.
+     */
+    private final Object mReaderLock = new Object();
+    private boolean mCancelled = false;
+    private FFmpegMetaDataReader mActiveReader;
+
     public GeckoInspectTask(
             BrowserDownloadRepository repository,
             UrlType type,
@@ -150,7 +167,10 @@ public class GeckoInspectTask implements Runnable {
 
         try {
             boolean processed = processTask(entity);
-            if (processed) {
+            // Don't emit a (possibly partial) entity for a tab that was closed
+            // mid-probe — the cancel interrupted the probe precisely so this
+            // capture is abandoned, and trimTabs already drops the tab's entries.
+            if (processed && !isCancelled()) {
                 applyDisplayName(entity);
                 mBrowserDownloadRepository.addValue(entity);
             }
@@ -264,7 +284,9 @@ public class GeckoInspectTask implements Runnable {
             return processMegaFile(entity);
 
         } else if (mVariants != null && !mVariants.isEmpty()) {
-            new VariantProcessor(mRequestHeaders, mSkipProbe, mManifest).process(entity, mVariants);
+            new VariantProcessor(mRequestHeaders, mSkipProbe, mManifest)
+                    .setProbeRegistry(this)
+                    .process(entity, mVariants);
             return true;
 
         } else if (mSkipProbe && processMediaSkipProbe(entity)) {
@@ -282,6 +304,7 @@ public class GeckoInspectTask implements Runnable {
     private boolean processFFmpeg(BrowserDownloadEntity entity, String url) throws IOException {
         Log.d(TAG, "processFFmpeg: " + url);
         mFFmpegMetaDataReader = new FFmpegMetaDataReader();
+        setActiveReader(mFFmpegMetaDataReader);
         FFmpegMetaData metadata = mFFmpegMetaDataReader.getStreamInfo(url, mRequestHeaders, false);
 
         if (metadata == null || !metadata.isValidMedia()) {
@@ -427,7 +450,9 @@ public class GeckoInspectTask implements Runnable {
             entity.setFileUrl(first);
         }
         // Came from M3U8Parser on a fetched master → definitionally HLS manifests.
-        new VariantProcessor(mRequestHeaders, true, true).process(entity, variants);
+        new VariantProcessor(mRequestHeaders, true, true)
+                .setProbeRegistry(this)
+                .process(entity, variants);
         return true;
     }
 
@@ -821,11 +846,66 @@ public class GeckoInspectTask implements Runnable {
     // ========================================================================
 
     private void cleanupFFmpeg() {
+        // Drop the registration (under the lock) before releasing, so an
+        // in-flight cancel() can't call stop() on a reader we then free.
+        setActiveReader(null);
         if (mFFmpegMetaDataReader != null) {
             mFFmpegMetaDataReader.stop();
             mFFmpegMetaDataReader.release();
             mFFmpegMetaDataReader = null;
         }
+    }
+
+    /**
+     * Interrupt a probe in flight. Called by the executor when this task's tab
+     * is closed (see {@code PriorityTaskThreadPoolExecutor.cancelTab}). Safe to
+     * call from any thread and at any time — if no probe is running it just sets
+     * the no-emit flag; if one is, {@code stop()} flips the native interrupt flag
+     * so {@code find_stream_info} returns promptly instead of spinning a dead
+     * live HLS/DASH reload loop. Idempotent ({@code stop()} just re-sets a flag).
+     */
+    public void cancel() {
+        synchronized (mReaderLock) {
+            mCancelled = true;
+            if (mActiveReader != null) {
+                mActiveReader.stop();
+            }
+        }
+    }
+
+    private boolean isCancelled() {
+        synchronized (mReaderLock) {
+            return mCancelled;
+        }
+    }
+
+    /**
+     * Register (or, with null, unregister) the reader about to enter / leaving a
+     * blocking probe, so {@link #cancel()} can interrupt it. If cancellation
+     * already arrived, stop the just-registered reader immediately so a probe
+     * that started racing the close still unwinds. The lock pairs with
+     * {@link #cancel()}: a concurrent cancel finishes its {@code stop()} before
+     * an unregister (null) can return, so the caller's subsequent
+     * {@code release()} never races that {@code stop()}.
+     */
+    @Override
+    public void setActiveReader(FFmpegMetaDataReader reader) {
+        synchronized (mReaderLock) {
+            mActiveReader = reader;
+            if (reader != null && mCancelled) {
+                reader.stop();
+            }
+        }
+    }
+
+    /**
+     * Lets {@link VariantProcessor} (which owns its own {@link FFmpegMetaDataReader})
+     * register that reader with the task for the lifetime of a blocking probe,
+     * so a tab-close cancellation reaches it too — not just the reader owned
+     * directly by {@link #processFFmpeg}.
+     */
+    public interface ProbeRegistry {
+        void setActiveReader(FFmpegMetaDataReader reader);
     }
 
     private Map<String, String> safeHeaders(Map<String, String> headers) {

@@ -31,6 +31,9 @@ public class VariantProcessor {
 
     private final Map<String, String> mHeaders;
     private final boolean mSkipProbe;
+    // Optional: lets the owning GeckoInspectTask interrupt our probe reader when
+    // its tab is closed. Null for callers that don't need cancellation.
+    private GeckoInspectTask.ProbeRegistry mProbeRegistry;
     // Parser/enumerator-declared: the variants are HLS/DASH manifests (ffmpeg
     // must mux them). Authoritative over the URL-extension fallback below.
     private final boolean mManifest;
@@ -81,6 +84,17 @@ public class VariantProcessor {
      * The codec assumption (all variants from the same source share codecs) is valid for Twitter, Instagram, and YouTube (we already filter to mp4 family).
      * If you later add a source where variants have mixed codecs, the JS-side pre-populated videoCodec/audioCodec fields would already be set and the variant.getVideoCodec() == null check would skip the override.
      */
+    /**
+     * Register the owning task so it can interrupt our probe reader on tab
+     * close. Chainable so call sites stay one expression. Optional — when unset,
+     * the probe simply isn't externally cancellable (it still self-bounds via the
+     * hls.c consecutive-failure bail).
+     */
+    public VariantProcessor setProbeRegistry(GeckoInspectTask.ProbeRegistry registry) {
+        mProbeRegistry = registry;
+        return this;
+    }
+
     public void process(BrowserDownloadEntity entity, ArrayList<FFmpegEntity> variants) {
         if(BuildConfig.DEBUG){
             for(FFmpegEntity fFmpegEntity : variants){
@@ -154,6 +168,9 @@ public class VariantProcessor {
         boolean hasAudioUrl = !TextUtils.isEmpty(audioUrl);
 
         FFmpegMetaDataReader reader = new FFmpegMetaDataReader();
+        if (mProbeRegistry != null) {
+            mProbeRegistry.setActiveReader(reader);
+        }
         try {
 
             Log.d(TAG, "processVariants ffmpeg: " + (hasAudioUrl ? ( " videoUrl: " + videoUrl) : (" videoUrl: " + videoUrl + " audioUrl: " +audioUrl)));
@@ -196,6 +213,11 @@ public class VariantProcessor {
             entity.setMimeType(FileUriHelper.MIMETYPE_MP4);
             entity.setType(UrlType.FILE.getValue());
         } finally {
+            // Unregister (under the task's lock) before releasing, so a
+            // concurrent cancel() finishes its stop() before we free the reader.
+            if (mProbeRegistry != null) {
+                mProbeRegistry.setActiveReader(null);
+            }
             reader.stop();
             reader.release();
         }

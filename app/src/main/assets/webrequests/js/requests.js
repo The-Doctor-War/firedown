@@ -333,20 +333,23 @@ function getTypeFromUrl(url) {
   return null;
 }
 
-// True when the media URL already carries its own descriptive filename, i.e. a
-// progressive file like .../notification.mp3 or .../episode-04.mp4. For these we
-// must NOT overwrite the name with the page's og:title — otherwise an incidental
-// file (e.g. series.ly's /audio/notification.mp3 UI sound on a movie page) is
-// captured looking "as if it was the file we are trying to capture", named after
-// the movie ("The Breadwinner"). The page-title enrichment is meant only for
-// captures whose own URL gives no usable name: HLS/DASH manifests (master.m3u8,
-// index-v1-a1.m3u8, manifest.mpd — always generic) and tokenized/extensionless
-// URLs. So manifests return false here (keep enriching), real progressive files
-// return true (keep their own filename).
-const MANIFEST_EXT_RE = /\.(?:m3u8?|mpd)(?:[?#]|$)/i;
-function urlCarriesOwnName(url) {
-  if (MANIFEST_EXT_RE.test(url)) return false;
-  return PATTERNS.media.test(url);
+// True for a standalone AUDIO file URL (…/notification.mp3, …/ding.wav). These
+// are almost always *incidental* on a generic page — a UI sound, a notification
+// ding, background music — not the content the page is about. The generic
+// catcher otherwise enriches every media capture's name with the page og:title
+// (and GeckoInspectTask lets that name win over the URL filename), so such a
+// sound gets captured looking "as if it was the file we are trying to capture":
+// series.ly's /audio/notification.mp3 came out named after the movie ("The
+// Breadwinner"). Suppress the title override for standalone audio only — VIDEO
+// keeps it (an .mp4 embedded in a news article still inherits the headline), and
+// so do HLS/DASH manifests (master.m3u8 / manifest.mpd — always generic) and
+// tokenized/extensionless URLs. Trade-off: a main-content audio file on a
+// parser-less site keeps its own filename instead of the page title — acceptable,
+// and for audio the filename is usually the better label anyway. (Audio sites
+// with real metadata — Apple Podcasts — go through a parser, not this path.)
+const AUDIO_FILE_RE = /^https?:\/\/[^/]+\/[^?#]*\.(?:mp3|m4a|aac|wav|weba|opus|flac|oga|midi?)(?:[?#]|$)/i;
+function urlIsStandaloneAudio(url) {
+  return AUDIO_FILE_RE.test(url);
 }
 
 function isMediaContentType(contentType) {
@@ -624,7 +627,7 @@ async function processResponse(data, listenerName) {
   // if the content script isn't there yet or the page blocks messaging,
   // the message just goes without the enriched fields.
   if ((data.type === 'media' || data.type === 'object') && tabId >= 0
-      && !urlCarriesOwnName(data.url)) {
+      && !urlIsStandaloneAudio(data.url)) {
     try {
       const meta = await Promise.race([
         browser.tabs.sendMessage(tabId, { kind: 'get-page-metadata' }),

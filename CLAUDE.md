@@ -39,9 +39,8 @@ generic catcher.** The two are mutually exclusive *by design*:
   **and** Threads — same fbcdn hosts), `video\.twimg\.com.*\.(mp4|m4s|m3u8)`
   (Twitter/X). (This is **separate from `regex.js`**, which holds only the
   generic, CDN-agnostic junk — telemetry beacons, init/numbered segment
-  fragments — and is remote-managed; parser-dedup blocks are bundled-only and
-  pair 1:1 with a parser, so they live in their own file. See the split note
-  below.)
+  fragments; parser-dedup blocks pair 1:1 with a parser, so they live in their
+  own file. See the split note below.)
 
 Consequences when working on a parser:
 
@@ -117,13 +116,22 @@ cardinal rule as any parser.
     dedup blocks (the cardinal rule). **Bundled-only**, shipped in the APK, keyed
     by parser. This is where a parser's media block goes.
   - **`regex.js`** (`DEFAULT_PATTERNS`) — generic, CDN-agnostic junk (telemetry
-    beacons, init/numbered segment fragments). **Remote-managed**: fetched from
-    `firedown-webrequests/main/regex-patterns.txt` every 6h, with `DEFAULT_PATTERNS`
-    only the bundled fallback. A *generic* pattern change belongs in **both** the
-    bundled `DEFAULT_PATTERNS` (covers fresh installs / remote-fetch failures)
-    **and** the remote `regex-patterns.txt` (governs production once fetched). A
-    *parser-dedup* block does **not** go here and is **not** remote-managed.
+    beacons, init/numbered segment fragments). **Bundled-only**, shipped in the
+    APK. (The old 6h remote fetch of `firedown-webrequests/regex-patterns.txt`
+    was removed — the endpoint 404s and the bundled list is the single source of
+    truth; ship pattern changes in the APK like any other capture logic.)
   Logic changes in `requests.js` ship in the APK.
+
+  Note one thing that is **NOT** a URL rule in either file: **ts-in-png** (MPEG-TS
+  video disguised as `image/png` — the series.ly / tiktokcdn ad-CDN trick). It's
+  caught **content-side on the native probe**, not by URL: `TSInterceptor` strips
+  the fake PNG header and `FFmpegMetaData.isValidMedia` drops it on
+  `format == "mpegts"`. That's CDN- and extension-independent, so don't re-add a
+  `.image`/`tiktokcdn` URL rule — it would just be cat-and-mouse. (Inspect bytes
+  where they're already read: a captured segment is re-fetched+probed by the
+  native pool anyway, so the format check there is free; the obfuscated-*manifest*
+  body-sniff stays in JS `filterResponseData` because the classifier drops it and
+  only the page ever reads it — see "Obfuscated manifests" below.)
 
 ### HLS-master sites — Java enumeration, no ffmpeg probe
 

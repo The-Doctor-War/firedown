@@ -1,20 +1,17 @@
-import { DEBUG } from './debug.js';
-
-// Remote regex pattern list URL
-const REGEX_URL = 'https://raw.githubusercontent.com/solarizeddev/firedown-webrequests/main/regex-patterns.txt';
-const REFRESH_INTERVAL_MS = 6 * 60 * 60 * 1000; // Refresh every 6 hours
-
-// Bundled fallback patterns (used if remote fetch fails on first load).
+// Generic, CDN-agnostic capture-block patterns for the downloader@ catcher,
+// compiled once into a single exclusion regex tested by matchInRegex.
 //
-// SCOPE: only junk that LOOKS like media to the classifier — URLs carrying a
+// SCOPE: only junk that LOOKS like media to the classifier — URLs with a
 // media-ish extension, or served with a media/video/audio/image content-type,
 // that classifyXhr/classifyByUrl (requests.js) would otherwise capture. Pure
-// telemetry/RPC endpoints (no media extension, JSON/text/204 responses) are
-// deliberately NOT listed: the classifier already rejects them on
-// content-type/extension, so a host block for them is dead weight. Don't
-// hand-grow this list with new junk hosts — it's a frozen fallback; generic-junk
-// curation belongs in the REMOTE regex-patterns.txt (refetched every 6h).
+// telemetry/RPC endpoints (no media extension, JSON/text/204) are deliberately
+// absent: the classifier already rejects them on content-type/extension.
 // PARSER-DEDUP host/CDN blocks live in parser-blocklist.js, keyed by parser.
+//
+// BUNDLED-ONLY — there is no remote update mechanism. (The old 6h fetch of
+// firedown-webrequests/regex-patterns.txt was removed: the endpoint 404s and
+// this list is the single source of truth. Ship pattern changes in the APK,
+// like any other capture logic.)
 const DEFAULT_PATTERNS = [
   // YouTube — a .mp3 the catcher would otherwise grab as audio (extension match,
   // not caught by content-type alone).
@@ -57,65 +54,28 @@ const DEFAULT_PATTERNS = [
   '\\/chunk[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
   '\\/frag(?:ment)?[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
 
-  // Disguised-HLS segments — sites like series.ly serve a real HLS stream
-  // whose .ts segments are uploaded to TikTok's *ad-image* CDN under a
-  // ".image" pseudo-extension (…tplv-d5opwmad15-ttam-origin.image) and
-  // delivered as image/png. The page's hls.js fetches each segment during
-  // preview, so the generic catcher (which classifies on the image/png
-  // content-type) captures every one as a standalone image — junk "frames"
-  // (e.g. 875x369, even carrying a CC track, because the bytes are really
-  // mpegts video). The actual stream is the .m3u8, captured as a single video
-  // once ffmpeg's extension_picky is off (see utils_set_dict_options). Block
-  // the segments so only the playlist is captured. Scoped to the ad-site CDN
-  // path: it never matches TikTok's own webapp-prime video media, which is
-  // deliberately left un-blocked for first-/foryou capture.
-  'tiktokcdn\\.com\\/ad-site-i18n[^?]*\\.image',
+  // NOTE: there is deliberately NO ".image" / ts-in-png URL rule here. MPEG-TS
+  // video disguised as image/png (the series.ly / tiktokcdn ad-CDN trick) is
+  // caught content-side, not by URL — the native probe runs the bytes through
+  // TSInterceptor (strips the fake PNG header) and FFmpegMetaData.isValidMedia
+  // drops it on format == "mpegts". That's CDN- and extension-independent, so a
+  // per-CDN URL rule would just be cat-and-mouse. Don't re-add one. (See
+  // GeckoInspectTask / TSInterceptor.)
 
   // fMP4 init segment with no standard extension — served as video/mp4, so the
   // classifier captures it on content-type; name it so it's dropped.
   '.*segment\\.init',
 ];
 
-let combinedRegex = buildRegex(DEFAULT_PATTERNS);
-
-/**
- * Build a single RegExp from an array of pattern strings.
- * Blank lines and lines starting with # are ignored.
- */
+// Compile once into a single exclusion regex. Blank entries are filtered so a
+// stray '' can't introduce an empty alternation (which would match everything
+// and block all captures); an all-empty list yields null → matchInRegex false.
 function buildRegex(patterns) {
-  const filtered = patterns
-    .map(p => p.trim())
-    .filter(p => p && !p.startsWith('#'));
-  if (filtered.length === 0) return null;
-  return new RegExp(filtered.join('|'));
+  const filtered = patterns.filter((p) => p && p.trim());
+  return filtered.length ? new RegExp(filtered.join('|')) : null;
 }
 
-/**
- * Fetch patterns from remote, recompile regex.
- * Falls back silently to current regex on any error.
- */
-async function refreshPatterns() {
-  try {
-    const res = await fetch(REGEX_URL, { cache: 'no-cache' });
-    if (!res.ok) {
-      if (DEBUG) console.warn(`[regex] Remote fetch failed: ${res.status}`);
-      return;
-    }
-    const text = await res.text();
-    const lines = text.split('\n');
-    const newRegex = buildRegex(lines);
-    if (newRegex) {
-      combinedRegex = newRegex;
-      if (DEBUG) console.log(`[regex] Updated ${lines.filter(l => l.trim() && !l.trim().startsWith('#')).length} patterns from remote`);
-    }
-  } catch (e) {
-    if (DEBUG) console.warn('[regex] Remote fetch error:', e.message);
-  }
-}
-
-// Initial fetch + periodic refresh
-refreshPatterns();
-setInterval(refreshPatterns, REFRESH_INTERVAL_MS);
+const combinedRegex = buildRegex(DEFAULT_PATTERNS);
 
 /**
  * Test a URL against the combined exclusion regex.

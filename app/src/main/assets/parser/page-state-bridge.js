@@ -347,48 +347,88 @@
         return null;
     }
 
-    // ---- Mega.nz folder link -------------------------------------------------
-    // Mega is zero-knowledge: the folder share key lives in the URL fragment
-    // (after #), which is NEVER sent to any server — so neither the wire nor the
-    // DOM can see it, only page-world. We don't even need wrappedJSObject here:
-    // the handle is in the path and the key is in location.hash. We hand both to
-    // the background, which enumerates the share tree natively (an anonymous cs
-    // `f` call) and emits one entity per media file. The file bytes are AES-CTR
-    // ciphertext on the wire, so the generic catcher can't produce a usable
-    // download — the native MegaStrategy decrypts on download instead.
+    // ---- Mega.nz links (folder, single file, embed) --------------------------
+    // Mega is zero-knowledge: the decryption key lives in the URL fragment (after
+    // #), which is NEVER sent to any server — so neither the wire nor the DOM can
+    // see it, only page-world. We don't even need wrappedJSObject here: the handle
+    // is in the path and the key is in location.hash. We hand both to the
+    // background, which talks to Mega's API natively (anonymous cs `f`/`g`) and
+    // emits entities; the file bytes are AES-CTR ciphertext on the wire, so the
+    // generic catcher can't produce a usable download — the native MegaStrategy
+    // decrypts on download instead.
     //
-    // Folder links only (/folder/<handle>#<key>[/folder|/file/<sub>]). The first
-    // hash segment is the 128-bit master key (~22 base64url chars); anything after
-    // a '/' is in-app navigation state. (Single /file/ links — a 256-bit key — are
-    // a separate, not-yet-handled shape.)
+    // Shapes handled (modern + legacy):
+    //   folder: /folder/<h>#<key>[/folder|/file/<sub>]   |  #F!<h>!<key>
+    //   file:   /file/<h>#<key>                           |  #!<h>!<key>
+    //   embed:  /embed/<h>#<key>  (a single file in a cross-origin iframe — the
+    //           bridge reaches it because it runs all_frames)
+    // A folder key is 128-bit (~22 base64url chars); a file key is 256-bit (~43).
+    // The first hash segment is the key; anything after a '/' is in-app nav state.
+    function parseMegaLink(pathname, rawHash) {
+        let hash = (rawHash || "").replace(/^#/, "");
+        // Legacy: #F!<h>!<key> (folder) / #!<h>!<key> (file), possibly under /embed.
+        if (hash[0] === "F" && hash[1] === "!") {
+            const p = hash.slice(2).split("!");
+            if (p[0] && p[1]) return { kind: "folder", handle: p[0], key: p[1] };
+        }
+        if (hash[0] === "!") {
+            const p = hash.slice(1).split("!");
+            if (p[0] && p[1]) return { kind: "file", handle: p[0], key: p[1] };
+        }
+        // Modern path-based forms.
+        let m;
+        if ((m = /^\/folder\/([0-9A-Za-z_-]+)/.exec(pathname))) {
+            return { kind: "folder", handle: m[1], key: hash.split("/")[0] };
+        }
+        if ((m = /^\/(?:file|embed)\/([0-9A-Za-z_-]+)/.exec(pathname))) {
+            return { kind: "file", handle: m[1], key: hash.split("/")[0] };
+        }
+        return null;
+    }
+
     function extractMega() {
         let host;
         try { host = location.hostname; } catch (_) { return false; }
-        if (!/(?:^|\.)mega\.nz$/i.test(host)) return false;
+        if (!/(?:^|\.)mega\.(nz|co\.nz)$/i.test(host)) return false;
 
-        const m = /^\/folder\/([0-9A-Za-z_-]+)/.exec(location.pathname || "");
-        if (!m) return false;
-        const folderHandle = m[1];
+        let link;
+        try { link = parseMegaLink(location.pathname || "", location.hash || ""); } catch (_) { link = null; }
+        if (!link || !link.handle || !link.key) return false;
+        // Reject the wrong-size key for the link kind (a folder key is ~22 chars,
+        // a file key ~43) so a half-loaded URL doesn't emit a doomed capture.
+        const minLen = link.kind === "folder" ? 16 : 40;
+        if (link.key.length < minLen) return false;
 
-        let hash = "";
-        try { hash = (location.hash || "").replace(/^#/, ""); } catch (_) { return false; }
-        const masterKey = hash.split("/")[0];
-        if (!masterKey || masterKey.length < 16) return false; // a 128-bit key is ~22 chars
+        const dedupKey = "mega:" + link.kind + ":" + link.handle;
+        if (sentKeys.has(dedupKey)) { armSpaObserver(); return true; }
+        sentKeys.add(dedupKey);
 
-        const key = "mega:" + folderHandle;
-        if (sentKeys.has(key)) { armSpaObserver(); return true; }
-        sentKeys.add(key);
+        const title = (document.title || "").split(/\s[-|]\s/)[0].trim();
+        const img = ogMeta("og:image") || undefined;
 
-        const folderPage = location.origin + "/folder/" + folderHandle;
-        const payload = {
-            folderHandle,
-            masterKey,
-            origin: folderPage, // clean page URL, no key fragment
-            title: (document.title || "").split(/\s[-|]\s/)[0].trim() || "Mega folder",
-            img: ogMeta("og:image") || undefined
-        };
-        log("sending mega folder", folderHandle, "key", masterKey.length, "chars");
-        browser.runtime.sendMessage({ kind: "mega-folder", payload }).then(() => {}, () => {});
+        if (link.kind === "folder") {
+            const folderPage = location.origin + "/folder/" + link.handle;
+            const payload = {
+                folderHandle: link.handle,
+                masterKey: link.key,
+                origin: folderPage, // clean page URL, no key fragment
+                title: title || "Mega folder",
+                img
+            };
+            log("sending mega folder", link.handle, "key", link.key.length, "chars");
+            browser.runtime.sendMessage({ kind: "mega-folder", payload }).then(() => {}, () => {});
+        } else {
+            const filePage = location.origin + "/file/" + link.handle;
+            const payload = {
+                fileHandle: link.handle,
+                fileKey: link.key,
+                origin: filePage,
+                title: title || undefined, // real name comes from the native attr fetch
+                img
+            };
+            log("sending mega file", link.handle, "key", link.key.length, "chars");
+            browser.runtime.sendMessage({ kind: "mega-file", payload }).then(() => {}, () => {});
+        }
         armSpaObserver();
         return true;
     }

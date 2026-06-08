@@ -91,6 +91,9 @@ public class GeckoInspectTask implements Runnable {
     // Mega.nz folder link — share handle + 128-bit master key (base64url).
     private final String mMegaFolderHandle;
     private final String mMegaMasterKey;
+    // Mega.nz single file / embed — public handle + 256-bit file key (base64url).
+    private final String mMegaFileHandle;
+    private final String mMegaFileKey;
     private FFmpegMetaDataReader mFFmpegMetaDataReader;
 
     public GeckoInspectTask(
@@ -123,6 +126,8 @@ public class GeckoInspectTask implements Runnable {
         mManifest = geckoInspectEntity.isManifest();
         mMegaFolderHandle = geckoInspectEntity.getMegaFolderHandle();
         mMegaMasterKey = geckoInspectEntity.getMegaMasterKey();
+        mMegaFileHandle = geckoInspectEntity.getMegaFileHandle();
+        mMegaFileKey = geckoInspectEntity.getMegaFileKey();
 
         Log.d(TAG, "Task Created for URL: " + mUrl + " img: " + mImg
                 + " variants: " + (mVariants != null ? mVariants.size() : 0)
@@ -251,7 +256,12 @@ public class GeckoInspectTask implements Runnable {
             return processHlsMaster(entity);
 
         } else if (mUrlType == UrlType.MEGA) {
-            return processMegaFolder(entity);
+            // Folder share vs. single file / embed — distinguished by which
+            // page-world fields the bridge supplied.
+            if (!TextUtils.isEmpty(mMegaFolderHandle)) {
+                return processMegaFolder(entity);
+            }
+            return processMegaFile(entity);
 
         } else if (mVariants != null && !mVariants.isEmpty()) {
             new VariantProcessor(mRequestHeaders, mSkipProbe, mManifest).process(entity, mVariants);
@@ -501,28 +511,12 @@ public class GeckoInspectTask implements Runnable {
                 // Self-describing synthetic URL: a valid https URL (so
                 // URLUtil.isValidUrl passes and uid = url.hashCode() dedups per
                 // file) carrying the per-file key. MegaStrategy re-derives the AES
-                // key + nonce from `fk` and does the g-URL fetch + CTR decrypt.
+                // key + nonce from `fk` and does the g-URL fetch + CTR decrypt. The
+                // "/folder/<h>/file/<node>" shape tells MegaStrategy to use the cs
+                // `n` (folder-scoped) download call.
                 String fileUrl = folderPage + "/file/" + nodeHandle
                         + "?fk=" + MegaCrypto.b64encode(nodeKey);
-
-                BrowserDownloadEntity e = new BrowserDownloadEntity();
-                e.setUid(fileUrl.hashCode());
-                e.setFileUrl(fileUrl);
-                e.setFileName(name);
-                e.setFileNameForced(true); // the decrypted name is authoritative
-                e.setFileOrigin(folderPage);
-                e.setMimeType(mime);
-                e.setType(UrlType.MEGA.getValue());
-                e.setAudio(FileUriHelper.isAudio(mime));
-                e.setFileLength(size);
-                e.setFileThumbnail(mImg);
-                e.setTabId(mTabId);
-                e.setVisitId(mVisitId);
-                e.setRequestId(mRequestId);
-                e.setIncognito(mIncognito);
-                e.setUpdateTime(System.currentTimeMillis());
-
-                mBrowserDownloadRepository.addValue(e); // dedups by uid internally
+                emitMegaEntity(fileUrl, name, mime, size, folderPage);
                 emitted++;
             } catch (Exception ex) {
                 Log.w(TAG, "Mega: node parse failed", ex);
@@ -531,6 +525,88 @@ public class GeckoInspectTask implements Runnable {
 
         Log.d(TAG, "Mega: emitted " + emitted + " media file(s) from folder " + mMegaFolderHandle);
         return false; // entities added above; the folder itself is not a download
+    }
+
+    /**
+     * Single Mega.nz file / embed link. The 256-bit key in the URL fragment IS
+     * the cleartext node key (no master-key decryption — that's the folder case),
+     * so we just fetch the file's attributes ({@code [{"a":"g","p":<handle>}]} —
+     * no {@code g:1}, so no temp download URL is minted at capture) for the
+     * filename + size, decrypt the name with the file key, and emit one entity.
+     * The synthetic URL uses the "/file/<handle>" shape, which tells MegaStrategy
+     * to use the cs `p` (public-handle) download call rather than `n`.
+     */
+    private boolean processMegaFile(BrowserDownloadEntity fileEntity) {
+        if (TextUtils.isEmpty(mMegaFileHandle) || TextUtils.isEmpty(mMegaFileKey)) {
+            Log.w(TAG, "Mega: missing file handle / key");
+            return false;
+        }
+        byte[] nodeKey = MegaCrypto.b64(mMegaFileKey);
+        if (nodeKey.length != 32) {
+            Log.w(TAG, "Mega: file key is " + nodeKey.length + " bytes, expected 32");
+            return false;
+        }
+
+        String filePage = "https://mega.nz/file/" + mMegaFileHandle;
+        String fileUrl = filePage + "?fk=" + MegaCrypto.b64encode(nodeKey);
+
+        // Best-effort attributes fetch for the real name + size. A transient
+        // failure shouldn't drop the only capture (unlike a folder, there's no
+        // other file to fall back to), so on failure we still emit with a
+        // page-title / handle name and let MegaStrategy resolve the rest.
+        String name = null;
+        long size = 0;
+        String body = "[{\"a\":\"g\",\"p\":\"" + mMegaFileHandle + "\"}]";
+        String url = MEGA_API + "?id=" + Math.abs(new SecureRandom().nextInt());
+        try {
+            String response = WebUtils.postContent(url, body, new HashMap<>());
+            JSONArray arr = new JSONArray(response.trim());
+            Object first = arr.length() > 0 ? arr.get(0) : null;
+            if (first instanceof JSONObject) {
+                JSONObject obj = (JSONObject) first;
+                size = obj.optLong("s", 0);
+                name = MegaCrypto.decryptName(nodeKey, obj.optString("at", ""));
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "Mega: file attribute fetch failed (emitting anyway)", e);
+        }
+        if (TextUtils.isEmpty(name)) {
+            name = !TextUtils.isEmpty(mName) ? mName : mMegaFileHandle;
+        }
+
+        String mime = FileUriHelper.getMimeTypeFromFile(name);
+        if (!FileUriHelper.isVideo(mime) && !FileUriHelper.isAudio(mime)
+                && !FileUriHelper.isImage(mime)) {
+            // A name we couldn't resolve to a media mime (e.g. attr fetch failed
+            // and there's no extension) — default to mp4 so an embedded Mega video
+            // still captures rather than being silently dropped.
+            mime = FileUriHelper.MIMETYPE_MP4;
+        }
+
+        emitMegaEntity(fileUrl, name, mime, size, filePage);
+        Log.d(TAG, "Mega: emitted single file " + mMegaFileHandle + " (" + name + ")");
+        return false; // entity added above; this capture row is the download
+    }
+
+    /** Build + commit one Mega capture entity (dedups by uid internally). */
+    private void emitMegaEntity(String fileUrl, String name, String mime, long size, String origin) {
+        BrowserDownloadEntity e = new BrowserDownloadEntity();
+        e.setUid(fileUrl.hashCode());
+        e.setFileUrl(fileUrl);
+        e.setFileName(name);
+        e.setFileNameForced(true); // the decrypted Mega name is authoritative
+        e.setFileOrigin(origin);
+        e.setMimeType(mime);
+        e.setType(UrlType.MEGA.getValue());
+        e.setAudio(FileUriHelper.isAudio(mime));
+        e.setFileLength(size);
+        e.setFileThumbnail(mImg);
+        e.setTabId(mTabId);
+        e.setVisitId(mVisitId);
+        e.setRequestId(mRequestId);
+        e.setIncognito(mIncognito);
+        e.setUpdateTime(System.currentTimeMillis());
+        mBrowserDownloadRepository.addValue(e);
     }
 
     // ========================================================================

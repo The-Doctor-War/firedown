@@ -43,6 +43,11 @@ public class GeckoInspectEntity {
     // by GeckoInspectTask.processMegaFolder to enumerate + decrypt the tree.
     private String megaFolderHandle;
     private String megaMasterKey;
+    // Mega.nz single file / embed link: the public file handle (the cs `p` param)
+    // + the 256-bit file key (base64url, the cleartext node key from the URL
+    // fragment — no master-key decryption). Used by processMegaFile.
+    private String megaFileHandle;
+    private String megaFileKey;
     public String getRequestId() {
         return requestId;
     }
@@ -192,5 +197,17 @@ public class GeckoInspectEntity {
     }
     public void setMegaMasterKey(String megaMasterKey) {
         this.megaMasterKey = megaMasterKey;
+    }
+    public String getMegaFileHandle() {
+        return megaFileHandle;
+    }
+    public void setMegaFileHandle(String megaFileHandle) {
+        this.megaFileHandle = megaFileHandle;
+    }
+    public String getMegaFileKey() {
+        return megaFileKey;
+    }
+    public void setMegaFileKey(String megaFileKey) {
+        this.megaFileKey = megaFileKey;
     }
 }

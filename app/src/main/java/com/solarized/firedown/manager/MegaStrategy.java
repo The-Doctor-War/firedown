@@ -67,18 +67,20 @@ public class MegaStrategy implements DownloadStrategy {
             throws IOException {
 
         // ====================================================================
-        // 1. Parse the synthetic capture URL: folder handle, node handle, key.
+        // 1. Parse the synthetic capture URL. Two shapes:
+        //    folder file: /folder/<folder>/file/<node>?fk=…  → cs `n` (folder-scoped)
+        //    single file: /file/<handle>?fk=…                → cs `p` (public handle)
         // ====================================================================
         Uri uri = Uri.parse(request.getUrl());
         String fk = uri.getQueryParameter("fk");
-        List<String> seg = uri.getPathSegments(); // [folder, <handle>, file, <node>]
+        List<String> seg = uri.getPathSegments();
         String folderHandle = null;
-        String nodeHandle = null;
+        String fileHandle = null;
         for (int i = 0; i + 1 < seg.size(); i++) {
             if ("folder".equals(seg.get(i))) folderHandle = seg.get(i + 1);
-            else if ("file".equals(seg.get(i))) nodeHandle = seg.get(i + 1);
+            else if ("file".equals(seg.get(i))) fileHandle = seg.get(i + 1);
         }
-        if (TextUtils.isEmpty(folderHandle) || TextUtils.isEmpty(nodeHandle) || TextUtils.isEmpty(fk)) {
+        if (TextUtils.isEmpty(fileHandle) || TextUtils.isEmpty(fk)) {
             Log.e(TAG, "Mega: malformed capture URL: " + request.getUrl());
             callback.onError(MessageHelper.IOEXCEPTION);
             return;
@@ -95,9 +97,15 @@ public class MegaStrategy implements DownloadStrategy {
 
         // ====================================================================
         // 2. Resolve the temp download URL + size via the anonymous `g` API.
+        //    Folder file: handle goes in `n` and the folder scopes the query.
+        //    Single file: handle goes in `p` (public), no folder scope.
         // ====================================================================
-        String body = "[{\"a\":\"g\",\"g\":1,\"ssl\":2,\"n\":\"" + nodeHandle + "\"}]";
-        String api = MEGA_API + "?id=" + Math.abs(new SecureRandom().nextInt()) + "&n=" + folderHandle;
+        boolean isFolder = !TextUtils.isEmpty(folderHandle);
+        String body = isFolder
+                ? "[{\"a\":\"g\",\"g\":1,\"ssl\":2,\"n\":\"" + fileHandle + "\"}]"
+                : "[{\"a\":\"g\",\"g\":1,\"ssl\":2,\"p\":\"" + fileHandle + "\"}]";
+        String api = MEGA_API + "?id=" + Math.abs(new SecureRandom().nextInt())
+                + (isFolder ? "&n=" + folderHandle : "");
         String dlUrl = null;
         long size = 0;
         try {

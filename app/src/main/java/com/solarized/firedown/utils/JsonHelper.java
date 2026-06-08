@@ -41,6 +41,9 @@ public class JsonHelper {
             // URL fragment (see page-state-bridge.js extractMega / background.js).
             entity.setMegaFolderHandle(json.optString("folderHandle", null));
             entity.setMegaMasterKey(json.optString("masterKey", null));
+            // Mega.nz single file / embed link — public handle + cleartext file key.
+            entity.setMegaFileHandle(json.optString("fileHandle", null));
+            entity.setMegaFileKey(json.optString("fileKey", null));
 
             // Parse variants with SABR data if available
             JSONObject sabr = json.optJSONObject("sabr");

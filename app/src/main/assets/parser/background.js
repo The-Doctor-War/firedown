@@ -4182,6 +4182,39 @@ browser.runtime.onMessage.addListener((message, sender) => {
     sendNative(message2);
 });
 
+// Mega.nz single file / embed link (page-state-bridge extractMega). Same story
+// as the folder case, but the 256-bit key in the fragment IS the cleartext file
+// key (no master-key decryption). The native side fetches the file attributes
+// (cs `g` with the public `p` handle, no g:1) for the real name + size, then
+// MegaStrategy mints the temp download URL and AES-CTR-decrypts the stream. This
+// is also the embedded-video path: the bridge runs in the cross-origin mega.nz
+// /embed iframe (all_frames), so a Mega video embedded on a third-party page is
+// captured without ever leaving that page.
+browser.runtime.onMessage.addListener((message, sender) => {
+    if (message?.kind !== "mega-file") return;
+    const p = message.payload;
+    if (!p || typeof p.fileHandle !== "string" || typeof p.fileKey !== "string") return;
+
+    const tabId = sender.tab?.id ?? -1;
+    const pageUrl = p.origin || sender.tab?.url || "";
+
+    log("MEGA", `file ${p.fileHandle}`, { origin: pageUrl.slice(0, 80), tabId });
+
+    const message2 = {
+        type: "mega-file",
+        url: pageUrl,
+        origin: pageUrl,
+        fileHandle: p.fileHandle,
+        fileKey: p.fileKey,
+        tabId,
+        requestId: `mega-file-${Date.now()}`
+    };
+    if (p.title) message2.name = decodeHtmlEntities(p.title);
+    if (p.img) message2.img = p.img;
+
+    sendNative(message2);
+});
+
 // ============================================================================
 // Niconico (nicovideo.jp)
 // ----------------------------------------------------------------------------

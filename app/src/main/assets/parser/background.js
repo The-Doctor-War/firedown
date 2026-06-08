@@ -4116,6 +4116,12 @@ browser.runtime.onMessage.addListener((message, sender) => {
 // it by URL, while its raw .ts segments are dropped natively (format==mpegts).
 browser.runtime.onMessage.addListener((message, sender) => {
     if (message?.kind !== "page-state-hls") return;
+    // Fire-and-forget async (we owe the bridge no response); awaiting a
+    // cross-extension lookup below must not turn this listener into a responder.
+    handlePageStateHls(message, sender);
+});
+
+async function handlePageStateHls(message, sender) {
     const p = message.payload;
     if (!p || typeof p.url !== "string") return;
 
@@ -4128,28 +4134,46 @@ browser.runtime.onMessage.addListener((message, sender) => {
         requestId: `page-state-hls-${Date.now()}`
     };
 
+    // Prefer the REAL ambient headers (the exact Accept-Language / User-Agent
+    // Gecko sends) over the bridge's reconstruction. The bridge can only rebuild
+    // Accept-Language from navigator.languages, and a format slip there once cost
+    // a 403 (missing ";q=0.9"). The downloader@ catcher sees every request on
+    // <all_urls> and harvests the real strings; ask it (graceful fallback to the
+    // reconstructed p.lang / p.ua if it's unavailable or slow). Both are
+    // browser-global, so any request's values are correct for this fetch.
+    let realAcceptLanguage = null, realUserAgent = null;
+    try {
+        const ambient = await Promise.race([
+            browser.runtime.sendMessage("downloader@solarized.dev", { kind: "get-ambient-headers" }),
+            new Promise((resolve) => setTimeout(() => resolve(null), 200))
+        ]);
+        if (ambient) {
+            realAcceptLanguage = ambient.acceptLanguage;
+            realUserAgent = ambient.userAgent;
+        }
+    } catch (_) { /* cross-extension messaging unavailable — use reconstruction */ }
+
+    const acceptLanguage = realAcceptLanguage || p.lang;
+    const userAgent = realUserAgent || p.ua;
+
     // Replicate the player's EXACT master request, because a strong CDN anti-bot
     // rejects ANY deviation from a real browser request (proven on-device: the
     // ONLY difference between a 403 and a 200 was a missing ";q=0.9" on
-    // Accept-Language). So every header here must byte-match what hls.js's fetch
-    // would send: Origin (explicit — OriginInterceptor only derives it same-site),
-    // the full-path Referer (the embed iframe URL), the Sec-Fetch-* trio,
-    // Accept-Language and User-Agent read from the page's real navigator (so they
-    // track the actual browser, never a hardcoded guess), and Sec-Fetch-Site
-    // computed the way the browser does. Add a header only if the browser sends
-    // it, and format it exactly (the q-value lesson). ffmpeg propagates all of
-    // these to the playlist/segment/key sub-requests on download.
+    // Accept-Language). Every header must byte-match what hls.js's fetch sends:
+    // Origin (explicit — OriginInterceptor only derives it same-site), the
+    // full-path Referer (the embed iframe URL), the Sec-Fetch-* trio
+    // (Sec-Fetch-Site computed, not hardcoded), and Accept-Language + User-Agent
+    // (REAL harvested values, else the bridge's navigator-read ones). ffmpeg
+    // propagates all of these to the playlist/segment/key sub-requests on
+    // download.
     //
-    // Ceiling: this matches header VALUES; the very strongest systems also
-    // fingerprint TLS (JA3/JA4) and header order, which the native OkHttp client
-    // can't mimic — those are beyond what header spoofing can win.
+    // Ceiling: this matches header VALUES; the strongest systems also fingerprint
+    // TLS (JA3/JA4) and header order, which the native OkHttp client can't mimic.
     let requestHeaders;
     try {
         const playerOrigin = new URL(pageUrl).origin; // scheme://host
         // Sec-Fetch-Site exactly as the browser derives it for this fetch:
-        // same-origin / same-site (same registrable domain) / cross-site. Most
-        // embed→CDN fetches are cross-site, but computing it avoids mislabelling
-        // a same-site CDN (anti-bot cross-checks it against Origin/Referer).
+        // same-origin / same-site (same registrable domain) / cross-site.
         let secSite = "cross-site";
         try {
             const mediaUrl = new URL(p.url);
@@ -4164,14 +4188,15 @@ browser.runtime.onMessage.addListener((message, sender) => {
             { name: "Sec-Fetch-Mode", value: "cors" },
             { name: "Sec-Fetch-Site", value: secSite }
         ];
-        if (p.lang) requestHeaders.push({ name: "Accept-Language", value: p.lang });
-        if (p.ua) requestHeaders.push({ name: "User-Agent", value: p.ua });
+        if (acceptLanguage) requestHeaders.push({ name: "Accept-Language", value: acceptLanguage });
+        if (userAgent) requestHeaders.push({ name: "User-Agent", value: userAgent });
     } catch (_) {
         requestHeaders = [];
     }
 
     log("PAGE-STATE", `received HLS master`, {
-        title: p.title, url: p.url.slice(0, 80), origin: pageUrl.slice(0, 80), tabId
+        title: p.title, url: p.url.slice(0, 80), origin: pageUrl.slice(0, 80), tabId,
+        ambient: !!realAcceptLanguage
     });
 
     enumerateMasterNative(details, {
@@ -4182,7 +4207,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
         img: p.img,
         requestHeaders
     });
-});
+}
 
 // Mega.nz folder link (page-state-bridge extractMega). The folder share key is
 // in the URL fragment — invisible to the wire — so the bridge reads it page-world

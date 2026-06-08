@@ -708,11 +708,48 @@ browser.webRequest.onSendHeaders.addListener(
     if (DEBUG && isInteresting(data.url, data.type)) {
       dlog('onSendHeaders', data.url, `tabId=${data.tabId} type=${data.type}`);
     }
+    harvestAmbientHeaders(data.requestHeaders);
     addPendingRequest(data);
   },
   { urls: ['<all_urls>'] },
   ['requestHeaders']
 );
+
+// ---------------------------------------------------------------------------
+// Ambient browser headers (cross-extension)
+//
+// Accept-Language and User-Agent are browser-GLOBAL — identical on every request
+// Gecko makes — so any request we observe yields the EXACT strings the browser
+// sends. The parser@ extension's page-world HLS capture (parser/page-state-bridge)
+// must look like a real browser to the stream CDN's anti-bot, but it can't read
+// these itself (its webRequest is host-scoped, and a content script can't read
+// request headers), and RECONSTRUCTING Accept-Language is exactly what once cost
+// a 403 (a missing ";q=0.9"). This catcher already sees every request on
+// <all_urls>, so it harvests the real values and hands them to parser@ on
+// request — no reconstruction, no widened permissions.
+// ---------------------------------------------------------------------------
+
+let ambientAcceptLanguage = null;
+let ambientUserAgent = null;
+
+function harvestAmbientHeaders(requestHeaders) {
+  if (!requestHeaders) return;
+  for (const h of requestHeaders) {
+    const n = h.name.toLowerCase();
+    if (n === 'accept-language') { if (h.value) ambientAcceptLanguage = h.value; }
+    else if (n === 'user-agent') { if (h.value) ambientUserAgent = h.value; }
+  }
+}
+
+// parser@ asks for the harvested real ambient headers (kind:"get-ambient-headers").
+browser.runtime.onMessageExternal.addListener((msg) => {
+  if (msg && msg.kind === 'get-ambient-headers') {
+    return Promise.resolve({
+      acceptLanguage: ambientAcceptLanguage,
+      userAgent: ambientUserAgent
+    });
+  }
+});
 
 browser.webRequest.onHeadersReceived.addListener(
   (data) => processResponse(data, 'onHeadersReceived'),

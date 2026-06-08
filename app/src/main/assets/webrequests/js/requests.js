@@ -333,6 +333,22 @@ function getTypeFromUrl(url) {
   return null;
 }
 
+// True when the media URL already carries its own descriptive filename, i.e. a
+// progressive file like .../notification.mp3 or .../episode-04.mp4. For these we
+// must NOT overwrite the name with the page's og:title — otherwise an incidental
+// file (e.g. series.ly's /audio/notification.mp3 UI sound on a movie page) is
+// captured looking "as if it was the file we are trying to capture", named after
+// the movie ("The Breadwinner"). The page-title enrichment is meant only for
+// captures whose own URL gives no usable name: HLS/DASH manifests (master.m3u8,
+// index-v1-a1.m3u8, manifest.mpd — always generic) and tokenized/extensionless
+// URLs. So manifests return false here (keep enriching), real progressive files
+// return true (keep their own filename).
+const MANIFEST_EXT_RE = /\.(?:m3u8?|mpd)(?:[?#]|$)/i;
+function urlCarriesOwnName(url) {
+  if (MANIFEST_EXT_RE.test(url)) return false;
+  return PATTERNS.media.test(url);
+}
+
 function isMediaContentType(contentType) {
   return MEDIA_CONTENT_TYPES.some((type) => contentType.includes(type));
 }
@@ -607,7 +623,8 @@ async function processResponse(data, listenerName) {
   // user-saveable. The query is fire-and-forget with a short timeout;
   // if the content script isn't there yet or the page blocks messaging,
   // the message just goes without the enriched fields.
-  if ((data.type === 'media' || data.type === 'object') && tabId >= 0) {
+  if ((data.type === 'media' || data.type === 'object') && tabId >= 0
+      && !urlCarriesOwnName(data.url)) {
     try {
       const meta = await Promise.race([
         browser.tabs.sendMessage(tabId, { kind: 'get-page-metadata' }),

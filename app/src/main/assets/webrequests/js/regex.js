@@ -125,12 +125,6 @@ const DEFAULT_PATTERNS = [
   // deliberately left un-blocked for first-/foryou capture.
   'tiktokcdn\\.com\\/ad-site-i18n[^?]*\\.image',
 
-  // series.ly plays a short UI notification sound (/audio/notification.mp3) on
-  // its watch page. The generic catcher would otherwise capture it as an audio
-  // download and — via get-page-metadata — mislabel it with the movie's
-  // og:title (e.g. "The Breadwinner"). It is not user content, so block it.
-  'series\\.ly\\/audio\\/notification\\.mp3',
-
   // Other
   'startpage\\.com\\/sp\\/cl',
   'rumble\\.com\\/service\\.php\\?name=video\\.watching-now',

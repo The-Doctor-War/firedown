@@ -729,12 +729,18 @@ trusts the MIME, so neither can we). The only ground truth is the bytes.
   content-type (`text/html` without `nosniff`, `text/plain`, `octet-stream`,
   empty). Everything else fails the gate without ever touching a filter — cheap
   on the hot path.
-- **Non-blocking, byte-exact, first-bytes-only:** every chunk is written straight
-  back (`filter.write`, the same write-through the parser's `filterResponseText`
-  uses — no refetch, no stream perturbation), at most `SNIFF_MAX_BYTES` (1 KB) is
-  decoded, and the filter `disconnect()`s the instant it decides (`#EXTM3U` →
-  HLS, `<MPD` → DASH, any other leading byte → not a manifest) so the rest
-  streams natively.
+- **Non-blocking, byte-exact, first-bytes-only — and never `disconnect()`s
+  mid-stream.** Every chunk is written straight back (`filter.write`, the same
+  write-through the parser's `filterResponseText` uses — no refetch, no
+  perturbation); only the first `SNIFF_MAX_BYTES` (1 KB) is *decoded* to decide
+  (`#EXTM3U` → HLS, `<MPD` → DASH, any other leading byte → not a manifest), after
+  which it keeps passing the body through **unread** to `onstop`/`close()`. The
+  early-`disconnect()` optimisation was dropped on purpose: a `disconnect()` over
+  a **ServiceWorker-synthesized** response (the stream the geckoview `0006` patch
+  exposes) has no confirmation it resumes the remainder cleanly, so we don't risk
+  truncating the page's own `fetch`. A `Content-Length` over
+  `SNIFF_MAX_DECLARED_BYTES` (4 MB) skips arming, so a big non-manifest body is
+  never write-through'd just to read its head.
 - **On a hit** it re-enters the normal emit via `processResponse(…, type:'media',
   skipClassify=true)` — header/cookie recovery, tab/meta, native dedup all apply;
   download is muxed by ffmpeg (and `HttpDownloadStrategy`'s `#EXTM3U`/`<MPD>`

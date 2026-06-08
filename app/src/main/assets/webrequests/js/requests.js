@@ -755,15 +755,24 @@ browser.webRequest.onErrorOccurred.addListener(
 // backstop covers it even if it lands on the raw path).
 //
 // Cost-bounded on purpose (per design): it only ARMS a filter for the narrow
-// candidate set below, reads at most SNIFF_MAX_BYTES, never holds or mutates
-// the stream (every chunk is written straight back — byte-exact, no refetch,
-// the same write-through the parser's filterResponseText uses), and
-// disconnect()s the instant it decides, so the rest of the body streams
-// natively. Most responses fail the candidate gate without ever touching a
-// filter.
+// candidate set below (and skips a body a Content-Length declares too big to be
+// a playlist). It INSPECTS at most SNIFF_MAX_BYTES, but stays a transparent
+// write-through for the WHOLE body — every chunk is written straight back,
+// byte-exact, and it NEVER disconnect()s mid-stream. That is deliberate: a
+// disconnect() over a ServiceWorker-*synthesized* response (the stream the
+// firedown-geckoview 0006 patch exposes) has no confirmation it resumes the
+// remainder cleanly, so rather than risk truncating the page's own fetch we just
+// stop reading after the first KB and let the rest flow through, then close() at
+// onstop — the same proven pattern as the parser's filterResponseText. Most
+// responses fail the candidate gate without ever touching a filter.
 // ---------------------------------------------------------------------------
 
 const SNIFF_MAX_BYTES = 1024;
+// A real playlist is small; never arm on a response that DECLARES a body far
+// larger than any manifest, so we don't write-through a big text/html /
+// octet-stream body just to read its first KB. (Chunked / unknown-length still
+// arms — those are usually small, and the inspection itself is capped anyway.)
+const SNIFF_MAX_DECLARED_BYTES = 4 * 1024 * 1024;
 
 // Debug-only running tally so an on-device logcat (`adb logcat -s GeckoConsole:*`,
 // grep `manifest-sniff`) shows how often the filter arms and its hit/miss split.
@@ -790,6 +799,8 @@ function isManifestSniffCandidate(data) {
   if (getTypeFromUrl(data.url)) return false;            // real media extension → normal path
   if (RegexMap.matchInRegex(data.url)) return false;     // generic junk / blocked
   if (ParserBlock.matchInParserBlocklist(data.url)) return false; // parser-owned media
+  const declaredLen = parseInt(getHeader(data.responseHeaders, 'content-length') || '', 10);
+  if (Number.isFinite(declaredLen) && declaredLen > SNIFF_MAX_DECLARED_BYTES) return false;
   const ct = (getHeader(data.responseHeaders, 'content-type') || '').toLowerCase();
   if (ct.includes('text/html')) {
     // A server asserting nosniff on text/html means "this really is HTML" — the
@@ -844,7 +855,10 @@ browser.webRequest.onHeadersReceived.addListener(
     const finish = (kind) => {
       if (done) return;
       done = true;
-      try { filter.disconnect(); } catch (e) { /* already detached */ }
+      // Deliberately NO filter.disconnect() — see the header comment. We've
+      // decided from the first <=1KB; the filter stays attached as a transparent
+      // write-through to onstop/close so a (possibly SW-synthesized) response is
+      // never truncated. Subsequent chunks are passed on unread.
       if (DEBUG) {
         if (kind === 'hls') sniffStats.hls++;
         else if (kind === 'dash') sniffStats.dash++;
@@ -859,17 +873,18 @@ browser.webRequest.onHeadersReceived.addListener(
     };
 
     filter.ondata = (event) => {
-      filter.write(event.data); // byte-exact pass-through — never block the stream
-      if (done) return;
+      filter.write(event.data); // byte-exact pass-through, every chunk, to the end
+      if (done) return;         // already decided — keep passing through, unread
       acc += decoder.decode(event.data, { stream: true });
       const verdict = decideManifest(acc);
       if (verdict !== 'more') finish(verdict);
       else if (acc.length >= SNIFF_MAX_BYTES) finish('no');
     };
     filter.onstop = () => {
-      // Short body delivered without ever tripping the cap — decide on what we have.
+      // Short body that never tripped the cap — decide on what we have, then end
+      // the (fully written-through) stream.
       if (!done) finish(decideManifest(acc));
-      try { filter.close(); } catch (e) { /* disconnected already */ }
+      try { filter.close(); } catch (e) { /* nothing more to flush */ }
     };
     filter.onerror = () => { try { filter.close(); } catch (e) {} };
   },

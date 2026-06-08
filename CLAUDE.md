@@ -124,6 +124,44 @@ see the HLS-master path below), covers every such site:
   player's raw `.ts` segments are dropped natively (`isValidMedia` → `mpegts`).
   Add another player (Video.js/Plyr…) as a new block in `findPlayerHls`, never a
   per-site file.
+- **It ALSO reads a page-world player's MEDIA LIST and resolves a JSON delegate**
+  (`readMediaDefs` → `findPlayervars` → `resolveAndEmitMediaDefs`), for the
+  **Pornhub-network family** (tube8, pornhub, youporn, redtube + white-label
+  clones) and any player with the same shape. They inline, into a page-world
+  global (`page_params.video_player_setup.playervars`), a **`mediaDefinitions`**
+  array + rich metadata (`video_title` / `video_duration` / `image_url`). The
+  catch: each entry's `videoUrl` is **not** a media file but a **tokenized
+  same-origin JSON delegate** (`…/media/mp4/?s=<token>`) that returns
+  `[{quality, videoUrl:…mp4}]`. The page fetches that delegate **on LOAD, not on
+  play** — but the real `.mp4` URLs live **only inside an `application/json` XHR
+  body** (which the generic catcher rejects — `classifyXhr` drops
+  `application/json`) and **never in the DOM** (the page carries only the
+  tokenized delegate, no media extension, so the passive scrape and the manifest
+  body-sniff both skip it). So **nothing is captured until the user presses play**
+  and the wire finally sees a real `.mp4` — the exact symptom this path fixes. The
+  bridge reads `mediaDefinitions` page-world, then **resolves the delegate with a
+  credentialed SAME-ORIGIN `fetch`** (`fetchMediaList`) — same-origin because the
+  bridge runs ON the page, so **no host permission is needed** (this is the whole
+  reason to do the resolve in the bridge, not `background.js`, which would need a
+  per-host permission + CORS bypass). A direct `.mp4`/`.webm` entry becomes a
+  progressive variant; a direct `.m3u8` rides the `findPlayerHls` HLS path. Emit:
+  Background **`kind:"page-state-progressive"`** → `sendVariants` (skip-probe
+  auto-set from the page `duration`; the variant carries only `height` from the
+  quality string, `width:0` — `JsonHelper` renders that as `"720p"`, never
+  `"0x720"`). **No request headers** — these progressive media URLs are
+  query-signed/self-authorizing (the real browser fetch carries **no**
+  Referer/Origin/Cookie — verified in the HAR), unlike the HLS-master CDNs above.
+  **No dup on play:** the player's default quality is the entity's primary URL, so
+  it dedups by URL; the family's media CDNs (`t8cdn`/`phncdn`/`ypncdn`/`rdtcdn`)
+  are block-listed in `parser-blocklist.js` (cardinal rule) to also cover a
+  manually-selected *other* quality. **Trade-off to know:** that block also
+  suppresses the play-time fallback if the delegate-resolve ever fails at runtime
+  — judged acceptable because the bridge reads SSR-inlined state and re-fetches
+  the same stable signed delegate the page itself uses. **To extend:** add another
+  player's media-list shape as a new branch in `findPlayervars`/`extractMediaDefs`
+  (match by the array/field shape, **not** by host — generic like `findPlayerHls`),
+  resolve any delegate in `fetchMediaList`, and add the new media CDN(s) to
+  `parser-blocklist.js`. Never a per-site file, never a `background.js` host check.
 - Cheap on the ~all sites/frames with no such state: it probes a short list of
   known state-global names + a player global (`jwplayer`) and no-ops instantly
   when neither holds media (so ad/tracker iframes pay only a presence check); the

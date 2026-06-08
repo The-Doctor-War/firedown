@@ -33,7 +33,7 @@ public class VariantProcessor {
     private final boolean mSkipProbe;
     // Optional: lets the owning GeckoInspectTask interrupt our probe reader when
     // its tab is closed. Null for callers that don't need cancellation.
-    private GeckoInspectTask.ProbeRegistry mProbeRegistry;
+    private ProbeRegistry mProbeRegistry;
     // Parser/enumerator-declared: the variants are HLS/DASH manifests (ffmpeg
     // must mux them). Authoritative over the URL-extension fallback below.
     private final boolean mManifest;
@@ -90,7 +90,7 @@ public class VariantProcessor {
      * the probe simply isn't externally cancellable (it still self-bounds via the
      * hls.c consecutive-failure bail).
      */
-    public VariantProcessor setProbeRegistry(GeckoInspectTask.ProbeRegistry registry) {
+    public VariantProcessor setProbeRegistry(ProbeRegistry registry) {
         mProbeRegistry = registry;
         return this;
     }

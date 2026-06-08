@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
  * - FFmpeg (HLS, DASH, direct media): single URL probed by FFmpegMetaDataReader
  * - Special types (SVG, timed text): custom handling
  */
-public class GeckoInspectTask implements Runnable, GeckoInspectTask.ProbeRegistry {
+public class GeckoInspectTask implements Runnable, ProbeRegistry {
 
     private static final String TAG = GeckoInspectTask.class.getSimpleName();
 
@@ -896,16 +896,6 @@ public class GeckoInspectTask implements Runnable, GeckoInspectTask.ProbeRegistr
                 reader.stop();
             }
         }
-    }
-
-    /**
-     * Lets {@link VariantProcessor} (which owns its own {@link FFmpegMetaDataReader})
-     * register that reader with the task for the lifetime of a blocking probe,
-     * so a tab-close cancellation reaches it too — not just the reader owned
-     * directly by {@link #processFFmpeg}.
-     */
-    public interface ProbeRegistry {
-        void setActiveReader(FFmpegMetaDataReader reader);
     }
 
     private Map<String, String> safeHeaders(Map<String, String> headers) {

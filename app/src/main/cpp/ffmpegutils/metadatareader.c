@@ -1505,64 +1505,84 @@ int jni_extract_metadata(JNIEnv *env, jobject thiz, jobjectArray jurls, jobjectA
 
         LOGI(1, "jni_extract_metadata open input[%d]: %s", i, file_paths[i]);
 
-        /* Decouple the I/O url from the format-probe filename. Open the AVIO on
-         * the FULL url (query intact) so the HTTP fetch hits the real resource,
-         * then hand avformat_open_input a query-stripped filename for format
-         * probing. Why: a proxied/extensionless url such as
+        /* Probe the format from CONTENT, not from a deceptive URL extension.
+         * A proxied/extensionless url such as
          *   images.weserv.nl/?output=webp&url=https://.../poster.jpg
-         * makes ffmpeg's probe match the trailing ".jpg" and pick the
-         * image2/mjpeg demuxer (extension score ~52) over the content-based
-         * webp_pipe (score 99) whenever the content probe isn't decisive. mjpeg
-         * then can't decode the actual webp bytes, the stream reports no
-         * width/height, and the capture shows an image with no resolution tag.
-         * Stripping the query from the probe name only (I/O keeps the full url)
-         * removes the deceptive extension so the content probe wins. The query
-         * never participates in HLS relative segment resolution, so a manifest
-         * base like .../master.m3u8?token is unaffected. This is purely how we
-         * call ffmpeg — no demuxer patch.
+         * makes ffmpeg's probe match the trailing ".jpg" (carried in the query)
+         * and pick image2/mjpeg (extension score ~52) over the content-based
+         * webp_pipe (score 99) when the content probe isn't decisive. mjpeg then
+         * can't decode the webp bytes -> no width/height -> the capture shows an
+         * image with no resolution tag. Two steps:
          *
-         * io_opts is a COPY: avio_open2 consumes the HTTP options (headers,
-         * cookies) from the copy and leaves dicts[i] intact, so the hls/dash
-         * demuxer still reads the same headers from dicts[i] to authenticate
-         * every segment/key fetch. */
+         *   1. Pre-open the AVIO on the FULL url (query intact, real fetch), then
+         *      hand avformat_open_input a query-STRIPPED filename so the bogus
+         *      ".jpg" can't steer demuxer selection and the content probe wins.
+         *      The query never participates in HLS relative-segment resolution,
+         *      so a manifest base like .../master.m3u8?token still resolves. No
+         *      demuxer patch — purely how we call ffmpeg.
+         *
+         *   2. FALLBACK: if step 1 can't open the input at all (e.g. a raw format
+         *      that genuinely needs the filename extension to be recognised),
+         *      fall back to the original behaviour — let avformat_open_input open
+         *      + probe the full url itself. So we never do worse than before.
+         *
+         * Each attempt gets its OWN copy of the options because
+         * avformat_open_input consumes recognised entries; dicts[i] stays
+         * canonical (it carries the headers the hls/dash demuxer needs to
+         * authenticate every segment/key fetch) until the fallback uses it or it
+         * is freed at end:. */
         {
             AVDictionary *io_opts = NULL;
+            AVDictionary *probe_opts = NULL;
+            char *probe_name = NULL;
+
             if (dicts[i] != NULL) {
                 av_dict_copy(&io_opts, dicts[i], 0);
+                av_dict_copy(&probe_opts, dicts[i], 0);
             }
+
             ret = avio_open2(&metadataReader->format_ctx[i]->pb, file_paths[i],
                              AVIO_FLAG_READ,
                              &metadataReader->format_ctx[i]->interrupt_callback,
                              &io_opts);
             av_dict_free(&io_opts);
+
+            if (ret >= 0) {
+                /* avformat_open_input auto-sets AVFMT_FLAG_CUSTOM_IO once it sees
+                 * our pb, so avformat_close_input won't close it — we own it and
+                 * avio_closep it at end: (or in the fallback below). */
+                avio_ctxs[i] = metadataReader->format_ctx[i]->pb;
+
+                probe_name = metadatareader_strip_query(file_paths[i]);
+                ret = avformat_open_input(&metadataReader->format_ctx[i],
+                                          probe_name != NULL ? probe_name : file_paths[i],
+                                          NULL, &probe_opts);
+                av_freep(&probe_name);
+            }
+
+            av_dict_free(&probe_opts);
         }
 
         if (ret < 0) {
-            const char *errbuf_ptr = errbuf;
-
-            if (av_strerror(ret, errbuf, sizeof(errbuf)) < 0) {
-                errbuf_ptr = strerror(AVUNERROR(ret));
+            /* Step 1 couldn't open the input — tear down its half-open state and
+             * retry the original full-url open. format_ctx[i] is already NULL if
+             * avformat_open_input freed it; close our pre-opened pb either way. */
+            if (metadataReader->format_ctx[i] != NULL) {
+                avformat_close_input(&metadataReader->format_ctx[i]);
+            }
+            if (avio_ctxs[i] != NULL) {
+                avio_closep(&avio_ctxs[i]);
             }
 
-            LOGE(3, "jni_extract_metadata Could not open AVIO[%d]: %s (%d: %s)\n",
-                 i, file_paths[i], ret, errbuf_ptr);
+            metadataReader->format_ctx[i] = avformat_alloc_context();
+            if (metadataReader->format_ctx[i] == NULL) {
+                LOGE(1, "jni_extract_metadata Could not create AVContext for fallback %d\n", i);
+                err = -ERROR_CREATE_AVCONTEXT;
+                goto end;
+            }
+            metadatareader_create_interrupt_callback(metadataReader, i);
 
-            err = -ERROR_COULD_NOT_OPEN_INPUT;
-            goto end;
-        }
-
-        /* Track the pre-opened pb for cleanup. avformat_open_input auto-sets
-         * AVFMT_FLAG_CUSTOM_IO once it sees a caller-supplied pb, so
-         * avformat_close_input will NOT close it — we own it and avio_closep it
-         * at end: (same ownership the InputStream path uses for its avio). */
-        avio_ctxs[i] = metadataReader->format_ctx[i]->pb;
-
-        {
-            char *probe_name = metadatareader_strip_query(file_paths[i]);
-            ret = avformat_open_input(&metadataReader->format_ctx[i],
-                                      probe_name != NULL ? probe_name : file_paths[i],
-                                      NULL, &dicts[i]);
-            av_freep(&probe_name);
+            ret = avformat_open_input(&metadataReader->format_ctx[i], file_paths[i], NULL, &dicts[i]);
         }
 
         if (ret < 0) {

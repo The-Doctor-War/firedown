@@ -4128,9 +4128,20 @@ browser.runtime.onMessage.addListener((message, sender) => {
         requestId: `page-state-hls-${Date.now()}`
     };
 
+    // The player fetches the master CROSS-SITE to the stream CDN (luluvdo.com →
+    // tnmr.org) with an explicit Origin under CORS, and the CDN's anti-leech
+    // checks Origin. Our OriginInterceptor only DERIVES Origin for SAME-site
+    // requests (its isSecSameSite guard), so it won't add one for this cross-site
+    // fetch — send Origin explicitly (= the embed iframe's origin), exactly as the
+    // player's hls.js does. A matching Referer rides along for Referer-checking
+    // CDNs; ffmpeg propagates both to the playlist/segment/key sub-requests.
     let requestHeaders;
     try {
-        requestHeaders = [{ name: "Referer", value: new URL(pageUrl).origin + "/" }];
+        const playerOrigin = new URL(pageUrl).origin; // scheme://host, no trailing slash
+        requestHeaders = [
+            { name: "Origin", value: playerOrigin },
+            { name: "Referer", value: playerOrigin + "/" }
+        ];
     } catch (_) {
         requestHeaders = [];
     }

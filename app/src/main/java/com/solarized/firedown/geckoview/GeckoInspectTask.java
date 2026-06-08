@@ -601,6 +601,12 @@ public class GeckoInspectTask implements Runnable {
         e.setAudio(FileUriHelper.isAudio(mime));
         e.setFileLength(size);
         e.setFileThumbnail(mImg);
+        // Must be non-null: the Captured adapter feeds getFileHeaders() straight
+        // into Glide's RequestOptions.set(HEADERS, …), which NPEs on a null value
+        // (every other capture path sets it via prepareEntity). Mega's gfs
+        // download URL is self-authorizing, so the content doesn't matter — only
+        // that it isn't null; reuse the page's request headers like the rest do.
+        e.setHeaders(mRequestHeaders);
         e.setTabId(mTabId);
         e.setVisitId(mVisitId);
         e.setRequestId(mRequestId);

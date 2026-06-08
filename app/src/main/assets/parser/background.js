@@ -4128,20 +4128,25 @@ browser.runtime.onMessage.addListener((message, sender) => {
         requestId: `page-state-hls-${Date.now()}`
     };
 
-    // The player fetches the master CROSS-SITE to the stream CDN (luluvdo.com →
-    // tnmr.org) with an explicit Origin under CORS, and the CDN's anti-leech
-    // checks Origin. Our OriginInterceptor only DERIVES Origin for SAME-site
-    // requests (its isSecSameSite guard), so it won't add one for this cross-site
-    // fetch — send Origin explicitly (= the embed iframe's origin), exactly as the
-    // player's hls.js does. A matching Referer rides along for Referer-checking
-    // CDNs; ffmpeg propagates both to the playlist/segment/key sub-requests.
+    // Replicate the player's actual master request (confirmed from a HAR): a
+    // CROSS-SITE CORS fetch to the stream CDN carrying Origin + the browser
+    // User-Agent, and NO Referer/cookie. Two things our defaults get wrong:
+    //   - Origin: OriginInterceptor only DERIVES it for SAME-site requests (its
+    //     isSecSameSite guard), so it adds nothing here — send it explicitly.
+    //   - User-Agent: the native client has no UA interceptor, so it would send
+    //     "okhttp/…", which the CDN's nginx anti-bot rejects — send the real
+    //     GeckoView UA the bridge captured.
+    // Deliberately NO Referer: the working request sent none, and an nginx
+    // `valid_referers none;` rule would REJECT a request that carries one. ffmpeg
+    // propagates these to the playlist/segment/key sub-requests on download.
     let requestHeaders;
     try {
         const playerOrigin = new URL(pageUrl).origin; // scheme://host, no trailing slash
         requestHeaders = [
             { name: "Origin", value: playerOrigin },
-            { name: "Referer", value: playerOrigin + "/" }
+            { name: "Accept", value: "*/*" }
         ];
+        if (p.ua) requestHeaders.push({ name: "User-Agent", value: p.ua });
     } catch (_) {
         requestHeaders = [];
     }

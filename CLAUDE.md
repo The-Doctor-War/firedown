@@ -105,7 +105,20 @@ see the HLS-master path below), covers every such site:
   packed blob — *not* cat-and-mouse). This is **why** the bridge runs
   `all_frames` (the player is an embedded cross-origin iframe). Background
   `kind:"page-state-hls"` → `enumerateMasterNative` (the normal HLS-master path:
-  Java enumerates qualities, no probe) with the iframe origin as Referer.
+  Java enumerates qualities, no probe). **Headers must byte-match a real browser
+  fetch** — these stream CDNs run a strong anti-bot, and the native master fetch
+  is synthetic (the wire never saw it, so there are no cached headers to reuse).
+  On-device the ONLY difference between a 403 and a 200 was a missing `;q=0.9` on
+  `Accept-Language`. So the `page-state-hls` emit sends the full browser set:
+  `Origin` (explicit — `OriginInterceptor` only derives it same-site), full-path
+  `Referer` = the embed iframe URL, the `Sec-Fetch-Dest/Mode/Site` trio
+  (Sec-Fetch-Site *computed* same-origin/same-site/cross-site, not hardcoded),
+  and `User-Agent` + `Accept-Language` read from the page's real `navigator`
+  (UA verbatim; languages formatted WITH q-values, `en-US,ko-KR;q=0.9` — a bare
+  `join(",")` is a bot tell). Rule: add a header only if the browser sends it and
+  format it exactly. Ceiling worth knowing: this matches header *values*; the
+  strongest systems also fingerprint TLS (JA3/JA4) + header order, which OkHttp
+  can't mimic — header spoofing can't beat those.
   **No dup on play:** the master URL is signed/stable, so when the user does play,
   the wire sees the **same** master URL and the repository dedups it by URL; the
   player's raw `.ts` segments are dropped natively (`isValidMedia` → `mpegts`).

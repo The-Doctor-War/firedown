@@ -324,26 +324,44 @@
     function findPlayerHls() {
         let pw;
         try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
-        if (!pw) return null;
+        if (!pw) { log("hls-probe: no wrappedJSObject @", location.host); return null; }
 
         let jw;
         try { jw = pw.jwplayer; } catch (_) { jw = null; }
-        if (typeof jw === "function") {
-            let api;
-            try { api = jw(); } catch (_) { api = null; }
-            if (api && typeof api === "object") {
-                let pl;
-                try { pl = api.getPlaylist(); } catch (_) { pl = null; }
-                let n = 0;
-                try { n = (pl && typeof pl.length === "number") ? pl.length : 0; } catch (_) { n = 0; }
-                for (let i = 0; i < n; i++) {
-                    let it;
-                    try { it = pl[i]; } catch (_) { continue; }
-                    const hit = readHlsFromItem(it);
-                    if (hit) return hit;
-                }
-            }
+        // No JWPlayer in this frame: stay silent (this runs in every frame incl.
+        // ad iframes, so logging here would spam). Verbose only once a player is
+        // actually present, to pinpoint where extraction fails.
+        if (typeof jw !== "function") return null;
+
+        log("hls-probe: jwplayer present @", location.host);
+        let api;
+        try { api = jw(); } catch (e) { log("hls-probe: jwplayer() threw:", e && e.message); return null; }
+        if (!api || typeof api !== "object") { log("hls-probe: jwplayer() gave no api (player not set up yet?)"); return null; }
+
+        let getPl;
+        try { getPl = api.getPlaylist; } catch (_) { getPl = null; }
+        if (typeof getPl !== "function") { log("hls-probe: api has no getPlaylist()"); return null; }
+
+        let pl;
+        try { pl = api.getPlaylist(); } catch (e) { log("hls-probe: getPlaylist() threw:", e && e.message); return null; }
+        let n = 0;
+        try { n = (pl && typeof pl.length === "number") ? pl.length : 0; } catch (_) { n = 0; }
+        log("hls-probe: getPlaylist length =", n);
+
+        for (let i = 0; i < n; i++) {
+            let it;
+            try { it = pl[i]; } catch (_) { continue; }
+            const f = readPrim(it, "file");
+            let nsrc = 0;
+            try { const s = it.sources; nsrc = (s && typeof s.length === "number") ? s.length : 0; } catch (_) { nsrc = 0; }
+            const hit = readHlsFromItem(it);
+            log("hls-probe: item", i,
+                "file=", f != null ? String(f).slice(0, 90) : "(none)",
+                "sources=", nsrc,
+                "hit=", hit ? hit.url.slice(0, 90) : "no");
+            if (hit) return hit;
         }
+        log("hls-probe: no .m3u8 in playlist");
         return null;
     }
 
@@ -436,9 +454,19 @@
     // ---- Emit + lifecycle ----------------------------------------------------
     const sentKeys = new Set();
     let spaArmed = false;
+    let loggedFrame = false;
 
     function extractAndSend(label) {
-        // 0) Mega.nz folder link — key is in the URL fragment, page-world only.
+        // One line per frame (after DEBUG resolves) so you can confirm the bridge
+        // is actually running INSIDE the player iframe — i.e. all_frames took and
+        // the version bump re-registered. If you never see the player iframe's
+        // host here, the bridge isn't reaching it (re-register / all_frames issue).
+        if (!loggedFrame) {
+            loggedFrame = true;
+            log("bridge active @", location.host, "top=" + (window === window.top), "label=" + label);
+        }
+        // 0) Mega.nz folder / file / embed link — key is in the URL fragment,
+        //    page-world only (neither wire nor DOM can see it).
         if (extractMega()) return true;
 
         // 1) SSR-inlined DASH slice (bilibili.tv etc.) → video+audio variants.
@@ -474,11 +502,36 @@
             if (sentKeys.has(hls.url)) { armSpaObserver(); return true; }
             sentKeys.add(hls.url);
             const meta = resolveMeta(null);
+            // The stream CDN's nginx anti-bot rejects a request that isn't
+            // browser-like (proven on-device: Origin+UA alone → 403; the player's
+            // full set with Sec-Fetch-* + Accept-Language → 200). Capture the real
+            // UA + languages here (the content script sees the page's navigator)
+            // so background.js can rebuild the player's exact request.
+            let ua = "", lang = "";
+            try { ua = navigator.userAgent || ""; } catch (_) { ua = ""; }
+            try {
+                // Build a browser-shaped Accept-Language WITH q-values
+                // ("en-US,ko-KR;q=0.9"). A bare comma-join ("en-US,ko-KR") is a
+                // bot tell — no real browser omits the q-values — and the stream
+                // CDN's anti-bot 403s on it (proven on-device: that was the only
+                // header differing from the request that gets 200).
+                let ls = [];
+                if (navigator.languages && navigator.languages.length) ls = navigator.languages;
+                else if (navigator.language) ls = [navigator.language];
+                if (ls.length) {
+                    lang = ls[0];
+                    for (let i = 1, q = 9; i < ls.length && q >= 1; i++, q--) {
+                        lang += "," + ls[i] + ";q=0." + q;
+                    }
+                }
+            } catch (_) { lang = ""; }
             const payload = {
                 url: hls.url,
                 origin: location.href,
                 title: hls.title || meta.title,
-                img: meta.img
+                img: meta.img,
+                ua: ua,
+                lang: lang
             };
             log("sending HLS master at", label, payload.title, hls.url.slice(0, 80));
             browser.runtime.sendMessage({ kind: "page-state-hls", payload }).then(() => {}, () => {});

@@ -111,6 +111,40 @@ void utils_set_dict_options(AVDictionary **dictionary) {
     if (av_dict_set(dictionary, "allowed_extensions", "ALL", AV_DICT_DONT_OVERWRITE) < 0) {
         LOGE(1, "utils_set_dict_options error allowed_extensions");
     }
+    /*
+     * Disguised-HLS streams hide their .ts segments behind a non-media
+     * pseudo-extension. series.ly is the example: its embed plays a real HLS
+     * stream whose segments are uploaded to TikTok's ad-image CDN as
+     * "...tplv-d5opwmad15-ttam-origin.image" and served with Content-Type
+     * image/png, while the bytes are ordinary mpegts. ffmpeg's hls demuxer
+     * gates segment opens in two independent places, and only turning
+     * extension_picky off admits such a segment:
+     *   - open_url() rejects a *file://* segment whose extension isn't in
+     *     `allowed_extensions` (ALL, above). This gate does NOT apply to
+     *     http(s) segments, so for us it is effectively file:// completeness.
+     *   - test_segment() gates *http(s)* segments while `extension_picky` is
+     *     on (its default). It requires BOTH matchA — the URL extension is in
+     *     `allowed_segment_extensions` — AND matchF — the *detected* format's
+     *     own extension list contains the URL extension. A ".image" URL that
+     *     probes as mpegts fails matchF even when allowed_segment_extensions
+     *     is ALL, because mpegts' list is "ts,m4s,mpeg,..." with no ".image".
+     *     The only escape is extension_picky=0, which makes test_segment()
+     *     return early before either check.
+     * Without this, both the capture probe (metadatareader) and the download
+     * fail to open the master and the whole stream is dropped — no entry, no
+     * file. This is an AVOption on the hls demuxer, so it needs no hls.c
+     * patch; it mirrors Firedown's existing allow-all-extensions stance, and
+     * the protocol whitelist (open_url permits only http/file/crypto/data)
+     * still bounds what a playlist can reference. allowed_segment_extensions
+     * is set too for parallelism with allowed_extensions, though
+     * extension_picky=0 short-circuits before it is read.
+     */
+    if (av_dict_set(dictionary, "allowed_segment_extensions", "ALL", AV_DICT_DONT_OVERWRITE) < 0) {
+        LOGE(1, "utils_set_dict_options error allowed_segment_extensions");
+    }
+    if (av_dict_set(dictionary, "extension_picky", "0", AV_DICT_DONT_OVERWRITE) < 0) {
+        LOGE(1, "utils_set_dict_options error extension_picky");
+    }
 }
 
 

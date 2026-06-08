@@ -111,6 +111,26 @@ const DEFAULT_PATTERNS = [
   'rumble\\.com\\/hls-vod\\/.*\\.m3u8',
   'rumble\\.cloud\\/.*\\.mp4',
 
+  // Disguised-HLS segments — sites like series.ly serve a real HLS stream
+  // whose .ts segments are uploaded to TikTok's *ad-image* CDN under a
+  // ".image" pseudo-extension (…tplv-d5opwmad15-ttam-origin.image) and
+  // delivered as image/png. The page's hls.js fetches each segment during
+  // preview, so the generic catcher (which classifies on the image/png
+  // content-type) captures every one as a standalone image — junk "frames"
+  // (e.g. 875x369, even carrying a CC track, because the bytes are really
+  // mpegts video). The actual stream is the .m3u8, captured as a single video
+  // once ffmpeg's extension_picky is off (see utils_set_dict_options). Block
+  // the segments so only the playlist is captured. Scoped to the ad-site CDN
+  // path: it never matches TikTok's own webapp-prime video media, which is
+  // deliberately left un-blocked for first-/foryou capture.
+  'tiktokcdn\\.com\\/ad-site-i18n[^?]*\\.image',
+
+  // series.ly plays a short UI notification sound (/audio/notification.mp3) on
+  // its watch page. The generic catcher would otherwise capture it as an audio
+  // download and — via get-page-metadata — mislabel it with the movie's
+  // og:title (e.g. "The Breadwinner"). It is not user content, so block it.
+  'series\\.ly\\/audio\\/notification\\.mp3',
+
   // Other
   'startpage\\.com\\/sp\\/cl',
   'rumble\\.com\\/service\\.php\\?name=video\\.watching-now',

@@ -526,7 +526,7 @@ function classifyXhr(data, headers) {
 // Response processing
 // ---------------------------------------------------------------------------
 
-async function processResponse(data, listenerName) {
+async function processResponse(data, listenerName, skipClassify = false) {
   // EARLY DIAGNOSTIC: log every interesting URL the listener sees, before
   // any filtering. If this never fires, listeners aren't being called.
   if (DEBUG && isInteresting(data.url, data.type)) {
@@ -567,7 +567,12 @@ async function processResponse(data, listenerName) {
     dlog('enter', data.url, `[${listenerName}] tabId=${data.tabId} type=${data.type}`);
   }
 
-  if (!validateAndClassify(data)) {
+  // skipClassify: the manifest body-sniff (below) already proved this is a
+  // playable HLS/DASH manifest from its bytes (#EXTM3U / <MPD>), so the
+  // header/extension classifier — which correctly rejects it (no media
+  // extension, lied-about text/html mime) — must be bypassed for it. data.type
+  // is set to 'media' by the caller, so it rides the normal media-capture path.
+  if (!skipClassify && !validateAndClassify(data)) {
     return;
   }
 
@@ -734,6 +739,120 @@ browser.webRequest.onErrorOccurred.addListener(
     pendingRequests.delete(data.requestId);
   },
   { urls: ['<all_urls>'] }
+);
+
+// ---------------------------------------------------------------------------
+// Obfuscated-manifest body sniff (filterResponseData)
+//
+// HLS/DASH in GeckoView always play through hls.js / dash.js over MSE — those
+// fetch the manifest and parse its BODY (#EXTM3U / <MPD>), ignoring the HTTP
+// Content-Type entirely. So a site can serve a real playlist at an extensionless
+// URL with a bogus `text/html` mime and it still plays, while the header/
+// extension classifier (validateAndClassify) correctly drops it — a capture
+// miss. This peeks the first bytes of exactly those rejected-but-suspect
+// responses for the manifest magic and, on a hit, emits a normal media capture
+// (download is muxed by ffmpeg; HttpDownloadStrategy's #EXTM3U/<MPD> content
+// backstop covers it even if it lands on the raw path).
+//
+// Cost-bounded on purpose (per design): it only ARMS a filter for the narrow
+// candidate set below, reads at most SNIFF_MAX_BYTES, never holds or mutates
+// the stream (every chunk is written straight back — byte-exact, no refetch,
+// the same write-through the parser's filterResponseText uses), and
+// disconnect()s the instant it decides, so the rest of the body streams
+// natively. Most responses fail the candidate gate without ever touching a
+// filter.
+// ---------------------------------------------------------------------------
+
+const SNIFF_MAX_BYTES = 1024;
+
+// The only shape an obfuscated manifest can take: a GET the classifier rejects,
+// fetched by a JS player (xhr/fetch → 'xmlhttprequest'/'other'), with no media
+// extension and a non-media, manifest-plausible content-type. Media/image/json
+// content-types and media-extension URLs are already captured (or are data) on
+// the normal path and must never be re-sniffed here.
+function isManifestSniffCandidate(data) {
+  if (data.method && data.method !== 'GET') return false;
+  if (data.type !== 'xmlhttprequest' && data.type !== 'other') return false;
+  if (getTypeFromUrl(data.url)) return false;            // real media extension → normal path
+  if (RegexMap.matchInRegex(data.url)) return false;     // generic junk / blocked
+  if (ParserBlock.matchInParserBlocklist(data.url)) return false; // parser-owned media
+  const ct = (getHeader(data.responseHeaders, 'content-type') || '').toLowerCase();
+  if (ct.includes('text/html')) {
+    // A server asserting nosniff on text/html means "this really is HTML" — the
+    // classifier hard-rejects it too; don't bother sniffing.
+    const noSniff = getHeader(data.responseHeaders, 'x-content-type-options');
+    if (noSniff && noSniff.toLowerCase().includes('nosniff')) return false;
+    return true;
+  }
+  // Empty / generic mimes an obfuscator hides a playlist behind. (text/plain is
+  // also the honest mime some CDNs serve playlists with, yet the URL carried no
+  // extension so classifyByUrl still dropped it.)
+  return !ct
+    || ct.includes('text/plain')
+    || ct.includes('octet-stream')
+    || ct.includes('application/binary');
+}
+
+// First-bytes verdict: 'hls' | 'dash' | 'no' | 'more'. HLS playlists MUST begin
+// with #EXTM3U (after an optional BOM/whitespace); DASH MPDs carry a <MPD root
+// (after an optional <?xml …?> prolog). Anything starting with another char
+// (JSON '{'/'[', an HTML text node, a letter) is decided 'no' immediately.
+function decideManifest(text) {
+  const t = text.replace(/^\uFEFF/, '').replace(/^\s+/, '');
+  if (!t) return 'more';
+  if (t[0] === '#') {
+    if (t.length < 7) return 'more';
+    return t.startsWith('#EXTM3U') ? 'hls' : 'no';
+  }
+  if (t[0] === '<') {
+    if (/<MPD[\s>]/.test(t)) return 'dash';
+    return text.length >= SNIFF_MAX_BYTES ? 'no' : 'more'; // else still scanning past the prolog
+  }
+  return 'no';
+}
+
+browser.webRequest.onHeadersReceived.addListener(
+  (data) => {
+    if (!isManifestSniffCandidate(data)) return;
+    let filter;
+    try {
+      filter = browser.webRequest.filterResponseData(data.requestId);
+    } catch (e) {
+      return; // not interceptable (e.g. cached/!ok) — leave the stream alone
+    }
+    const decoder = new TextDecoder('utf-8', { fatal: false });
+    let acc = '';
+    let done = false;
+
+    const finish = (kind) => {
+      if (done) return;
+      done = true;
+      try { filter.disconnect(); } catch (e) { /* already detached */ }
+      if (kind === 'hls' || kind === 'dash') {
+        dlog('manifest-sniff:hit', data.url, kind);
+        // Force the media classification we just proved by content, then ride
+        // the normal emit path (header recovery, tab/meta, native dedup).
+        processResponse({ ...data, type: 'media' }, 'manifestSniff', true);
+      }
+    };
+
+    filter.ondata = (event) => {
+      filter.write(event.data); // byte-exact pass-through — never block the stream
+      if (done) return;
+      acc += decoder.decode(event.data, { stream: true });
+      const verdict = decideManifest(acc);
+      if (verdict !== 'more') finish(verdict);
+      else if (acc.length >= SNIFF_MAX_BYTES) finish('no');
+    };
+    filter.onstop = () => {
+      // Short body delivered without ever tripping the cap — decide on what we have.
+      if (!done) finish(decideManifest(acc));
+      try { filter.close(); } catch (e) { /* disconnected already */ }
+    };
+    filter.onerror = () => { try { filter.close(); } catch (e) {} };
+  },
+  { urls: ['<all_urls>'] },
+  ['responseHeaders', 'blocking']
 );
 
 // ---------------------------------------------------------------------------

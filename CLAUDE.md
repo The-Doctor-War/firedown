@@ -709,6 +709,43 @@ decrypted in JS with no network fetch, and single-use/signed URLs that capture
 fine but can't be re-fetched (there you need the bytes, not the URL). Reach for an
 inject only for those.
 
+### Obfuscated manifests — body-sniff, never MIME-trust (`filterResponseData`)
+
+GeckoView has **no native HLS/DASH** — every adaptive stream plays through
+**hls.js / dash.js over MSE**, and those parse the manifest **body** (`#EXTM3U` /
+`<MPD>`) and **ignore its HTTP `Content-Type`**. So a site can serve a real
+playlist at an **extensionless URL with a bogus `text/html` mime** and it still
+plays, while the header/extension classifier (`validateAndClassify`) correctly
+drops it — a capture miss that **no MIME check can close** (the player never
+trusts the MIME, so neither can we). The only ground truth is the bytes.
+
+`requests.js` closes this with a **bounded** `filterResponseData` body-sniff
+(`isManifestSniffCandidate` / `decideManifest`, registered on a dedicated
+`onHeadersReceived` + `['responseHeaders','blocking']`):
+
+- **Armed only for the obfuscated-manifest shape:** a `GET` the classifier
+  rejects, `type` `xmlhttprequest`/`other` (a JS player fetch), **no media
+  extension**, not regex/parser-blocked, and a **non-media, manifest-plausible**
+  content-type (`text/html` without `nosniff`, `text/plain`, `octet-stream`,
+  empty). Everything else fails the gate without ever touching a filter — cheap
+  on the hot path.
+- **Non-blocking, byte-exact, first-bytes-only:** every chunk is written straight
+  back (`filter.write`, the same write-through the parser's `filterResponseText`
+  uses — no refetch, no stream perturbation), at most `SNIFF_MAX_BYTES` (1 KB) is
+  decoded, and the filter `disconnect()`s the instant it decides (`#EXTM3U` →
+  HLS, `<MPD` → DASH, any other leading byte → not a manifest) so the rest
+  streams natively.
+- **On a hit** it re-enters the normal emit via `processResponse(…, type:'media',
+  skipClassify=true)` — header/cookie recovery, tab/meta, native dedup all apply;
+  download is muxed by ffmpeg (and `HttpDownloadStrategy`'s `#EXTM3U`/`<MPD>`
+  content backstop covers it even on the raw path). No new native plumbing — it's
+  an ordinary media capture whose *only* novelty was being found by content.
+
+This is the wire source's third gap-closer (alongside the DOM scrape and the
+page-state bridge); it is **not** a reason to add a per-site inject. A site whose
+manifest needs richer metadata still belongs in a parser (declared `manifest`),
+same cardinal rule.
+
 ### Passive embedded-media scrape (capture without playback)
 
 Many sites **inline the real progressive/HLS URL in the page source but only

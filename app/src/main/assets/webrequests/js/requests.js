@@ -875,10 +875,26 @@ browser.webRequest.onHeadersReceived.addListener(
     filter.ondata = (event) => {
       filter.write(event.data); // byte-exact pass-through, every chunk, to the end
       if (done) return;         // already decided — keep passing through, unread
-      acc += decoder.decode(event.data, { stream: true });
-      const verdict = decideManifest(acc);
-      if (verdict !== 'more') finish(verdict);
-      else if (acc.length >= SNIFF_MAX_BYTES) finish('no');
+      try {
+        // Decode only enough bytes to reach the cap — never turn a large first
+        // chunk into a large string. `acc` is therefore provably <=
+        // SNIFF_MAX_BYTES; the full chunk was already written through above. We
+        // only ever decode a truncated slice on the chunk that fills the cap,
+        // after which `done` is set, so the stream decoder is never resumed past
+        // a slice boundary.
+        const view = new Uint8Array(event.data);
+        const need = SNIFF_MAX_BYTES - acc.length;
+        const slice = view.length > need ? view.subarray(0, need) : view;
+        acc += decoder.decode(slice, { stream: true });
+        const verdict = decideManifest(acc);
+        if (verdict !== 'more') finish(verdict);
+        else if (acc.length >= SNIFF_MAX_BYTES) finish('no');
+      } catch (e) {
+        // An inspection error must never stall the (already-written) pass-through
+        // — just stop sniffing this response and let it stream to completion.
+        done = true;
+        if (DEBUG) dlog('manifest-sniff:err', data.url, e && e.message);
+      }
     };
     filter.onstop = () => {
       // Short body that never tripped the cap — decide on what we have, then end

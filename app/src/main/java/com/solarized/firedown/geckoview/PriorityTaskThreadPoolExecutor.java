@@ -229,35 +229,70 @@ public class PriorityTaskThreadPoolExecutor {
             return;
         }
 
-        int poolAvailable = corePoolSize-poolSize.get();
-        Log.d(TAG, "executeWaitingTask: " + poolAvailable);
-        // Submit while any slot is free. (>1 left one thread permanently idle —
-        // and on a 2-core device, where corePoolSize is 1, it stalled the pool
-        // entirely since poolAvailable never exceeded 1.)
-        if (poolAvailable > 0) {
+        // Drain into every free slot, not just one. Bounded: each submit
+        // increments poolSize, so the loop runs at most (corePoolSize - busy)
+        // times before the gate closes, or until the queue empties. (Submitting
+        // one-per-call was already correct — every offer and every completion
+        // triggers a call — but draining here removes any reliance on that
+        // balance and fills all slots in a single pass after a setCurrentTab
+        // re-prioritize. The gate is "> 0", never "> 1": reserving a slot left a
+        // thread permanently idle, and on a 2-core device (corePoolSize 1)
+        // stalled the pool entirely.)
+        while (corePoolSize - poolSize.get() > 0) {
             final Task nextTask = awaitingTasks.poll();
-            if (nextTask != null) {
-                poolSize.incrementAndGet();
-                runningTasks.add(nextTask);
+            if (nextTask == null) {
+                break;
+            }
+            poolSize.incrementAndGet();
+            runningTasks.add(nextTask);
+
+            boolean submitted = false;
+            try {
                 executor.submit(() -> {
                     try {
                         nextTask.task.run();
                     } finally {
                         Log.w(TAG, "taskHandler Finish");
-                        runningTasks.remove(nextTask);
-                        // Clamp the published value to >= 0, same as cancelTab.
-                        // remove() (cancel) and poll() (run) share this monitor,
-                        // so a task is never both cancelled and run and the count
-                        // shouldn't underflow — the clamp is belt-and-braces so a
-                        // stray negative can't get stuck on the "scanning" UI.
-                        int n = inFlight.decrementAndGet();
-                        inFlightLive.postValue(Math.max(0, n));
-                        poolSize.decrementAndGet();
+                        releaseSlot(nextTask);
                         executeWaitingTask();
                     }
                 });
+                submitted = true;
+            } finally {
+                // If submit() threw (e.g. RejectedExecutionException — the
+                // executor was shut down between the isShutdown() check above
+                // and here), the lambda's finally will never run, so its
+                // bookkeeping would leak: poolSize/runningTasks/inFlight would
+                // never be undone and the freed slot would be lost, eventually
+                // stalling the pool. Roll the just-added task back here and stop
+                // draining (the executor is going away).
+                if (!submitted) {
+                    releaseSlot(nextTask);
+                }
+            }
+            if (!submitted) {
+                break;
             }
         }
+    }
+
+    /**
+     * Release a pool slot: drop the task from the running set and decrement both
+     * counters (clamping the published value to >= 0). Called from a worker's
+     * run-finally on normal completion, and from {@link #executeWaitingTask} to
+     * roll back a task whose submit was rejected — the same three counters in
+     * both cases, so they can't drift. Each task hits this at most once: it was
+     * counted into {@code inFlight} at {@link #execute}, and is either dropped by
+     * {@link #cancelTab} while still queued (never submitted, so never here) or
+     * released here exactly once. The clamp is belt-and-braces — poll() (run)
+     * and remove() (cancel) share the monitor, so a task is never both cancelled
+     * and run — so a stray negative can't get stuck on the "scanning" UI.
+     */
+    private void releaseSlot(Task task) {
+        runningTasks.remove(task);
+        poolSize.decrementAndGet();
+        int n = inFlight.decrementAndGet();
+        inFlightLive.postValue(Math.max(0, n));
     }
 
     private static class Task {

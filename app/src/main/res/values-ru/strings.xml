@@ -425,4 +425,7 @@
     <string name="task_frame_finished">Кадр сохранён</string>
     <string name="task_frame_failed">Не удалось сохранить кадр</string>
     <string name="task_frame_cancelled">Сохранение кадра отменено</string>
+    <string name="capture_help_menu">Справка</string>
+    <string name="capture_help_banner_title">Видео нет в списке?</string>
+    <string name="capture_help_banner">Некоторые встроенные медиа нужно сначала воспроизвести. Нажмите, чтобы узнать как.</string>
 </resources>

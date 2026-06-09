@@ -358,4 +358,7 @@
     <string name="task_frame_finished">Billede gemt</string>
     <string name="task_frame_failed">Kunne ikke gemme billede</string>
     <string name="task_frame_cancelled">Lagring af billede annulleret</string>
+    <string name="capture_help_menu">Hjælp</string>
+    <string name="capture_help_banner_title">Mangler videoen?</string>
+    <string name="capture_help_banner">Nogle indlejrede medier skal afspilles først. Tryk for at læse mere.</string>
 </resources>

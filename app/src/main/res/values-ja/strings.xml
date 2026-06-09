@@ -554,4 +554,7 @@
     <string name="task_frame_finished">フレームを保存しました</string>
     <string name="task_frame_failed">フレームを保存できませんでした</string>
     <string name="task_frame_cancelled">フレームの保存をキャンセルしました</string>
+    <string name="capture_help_menu">ヘルプ</string>
+    <string name="capture_help_banner_title">動画が見つかりませんか？</string>
+    <string name="capture_help_banner">一部の埋め込みメディアは先に再生する必要があります。タップして詳細をご覧ください。</string>
 </resources>

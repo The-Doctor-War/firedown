@@ -321,4 +321,7 @@
 
     <string name="tabs_incognito_empty">Nincsenek privát lapok</string>
     <string name="security_stat_blocked_scope">letiltva ezen az oldalon</string>
+    <string name="capture_help_menu">Súgó</string>
+    <string name="capture_help_banner_title">Nincs a listában a videó?</string>
+    <string name="capture_help_banner">Egyes beágyazott médiákat előbb le kell játszani. Koppints a részletekért.</string>
 </resources>

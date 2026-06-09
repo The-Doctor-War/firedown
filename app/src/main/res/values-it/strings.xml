@@ -404,4 +404,7 @@
     <string name="task_frame_finished">Fotogramma salvato</string>
     <string name="task_frame_failed">Impossibile salvare il fotogramma</string>
     <string name="task_frame_cancelled">Salvataggio annullato</string>
+    <string name="capture_help_menu">Aiuto</string>
+    <string name="capture_help_banner_title">Video non in elenco?</string>
+    <string name="capture_help_banner">Alcuni contenuti incorporati vanno riprodotti prima. Tocca per scoprire come.</string>
 </resources>

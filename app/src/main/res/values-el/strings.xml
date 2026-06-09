@@ -321,4 +321,7 @@
 
     <string name="tabs_incognito_empty">Καμία ιδιωτική καρτέλα</string>
     <string name="security_stat_blocked_scope">αποκλείστηκαν σε αυτή τη σελίδα</string>
+    <string name="capture_help_menu">Βοήθεια</string>
+    <string name="capture_help_banner_title">Δεν εμφανίζεται το βίντεο;</string>
+    <string name="capture_help_banner">Ορισμένα ενσωματωμένα μέσα πρέπει να αναπαραχθούν πρώτα. Πατήστε για να μάθετε πώς.</string>
 </resources>

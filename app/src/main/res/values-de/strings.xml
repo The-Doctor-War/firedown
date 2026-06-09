@@ -556,4 +556,7 @@
     <string name="task_frame_finished">Bild gespeichert</string>
     <string name="task_frame_failed">Bild konnte nicht gespeichert werden</string>
     <string name="task_frame_cancelled">Speichern abgebrochen</string>
+    <string name="capture_help_menu">Hilfe</string>
+    <string name="capture_help_banner_title">Video nicht aufgeführt?</string>
+    <string name="capture_help_banner">Manche eingebetteten Medien müssen erst abgespielt werden – zum Erfahren tippen.</string>
 </resources>

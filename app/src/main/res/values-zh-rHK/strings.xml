@@ -243,4 +243,7 @@
 
 
 
+    <string name="capture_help_menu">說明</string>
+    <string name="capture_help_banner_title">找不到影片？</string>
+    <string name="capture_help_banner">部分嵌入的媒體需先播放才能偵測。輕觸瞭解詳情。</string>
 </resources>

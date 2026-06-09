@@ -340,4 +340,7 @@
 
     <string name="tabs_incognito_empty">Немає приватних вкладок</string>
     <string name="security_stat_blocked_scope">заблоковано на цій сторінці</string>
+    <string name="capture_help_menu">Довідка</string>
+    <string name="capture_help_banner_title">Відео немає у списку?</string>
+    <string name="capture_help_banner">Деякі вбудовані медіа потрібно спочатку відтворити. Торкніться, щоб дізнатися як.</string>
 </resources>

@@ -425,4 +425,7 @@
     <string name="task_frame_finished">Fotograma guardado</string>
     <string name="task_frame_failed">Não foi possível guardar o fotograma</string>
     <string name="task_frame_cancelled">Gravação do fotograma cancelada</string>
+    <string name="capture_help_menu">Ajuda</string>
+    <string name="capture_help_banner_title">Vídeo não listado?</string>
+    <string name="capture_help_banner">Algumas mídias incorporadas precisam ser reproduzidas primeiro. Toque para saber como.</string>
 </resources>

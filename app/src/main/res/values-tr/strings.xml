@@ -424,4 +424,7 @@
     <string name="task_frame_finished">Kare kaydedildi</string>
     <string name="task_frame_failed">Kare kaydedilemedi</string>
     <string name="task_frame_cancelled">Kare kaydetme iptal edildi</string>
+    <string name="capture_help_menu">Yardım</string>
+    <string name="capture_help_banner_title">Video listede yok mu?</string>
+    <string name="capture_help_banner">Bazı gömülü medyaların önce oynatılması gerekir. Nasıl olduğunu öğrenmek için dokunun.</string>
 </resources>

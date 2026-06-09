@@ -355,4 +355,7 @@
     <string name="task_frame_finished">Bilde lagret</string>
     <string name="task_frame_failed">Kunne ikke lagre bilde</string>
     <string name="task_frame_cancelled">Lagring av bilde avbrutt</string>
+    <string name="capture_help_menu">Hjelp</string>
+    <string name="capture_help_banner_title">Mangler videoen?</string>
+    <string name="capture_help_banner">Noen innebygde medier må spilles av først. Trykk for å lære mer.</string>
 </resources>

@@ -378,4 +378,7 @@
     <string name="task_frame_finished">Snímek uložen</string>
     <string name="task_frame_failed">Snímek se nepodařilo uložit</string>
     <string name="task_frame_cancelled">Ukládání snímku zrušeno</string>
+    <string name="capture_help_menu">Nápověda</string>
+    <string name="capture_help_banner_title">Video není v seznamu?</string>
+    <string name="capture_help_banner">Některá vložená média je nutné nejdřív přehrát. Klepnutím zjistíte jak.</string>
 </resources>

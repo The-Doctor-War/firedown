@@ -554,4 +554,7 @@
     <string name="task_frame_finished">已保存帧</string>
     <string name="task_frame_failed">无法保存帧</string>
     <string name="task_frame_cancelled">已取消保存帧</string>
+    <string name="capture_help_menu">帮助</string>
+    <string name="capture_help_banner_title">找不到视频？</string>
+    <string name="capture_help_banner">部分嵌入的媒体需先播放才能识别。点按了解详情。</string>
 </resources>

@@ -425,4 +425,7 @@
     <string name="task_frame_finished">Frame opgeslagen</string>
     <string name="task_frame_failed">Kan frame niet opslaan</string>
     <string name="task_frame_cancelled">Opslaan van frame geannuleerd</string>
+    <string name="capture_help_menu">Help</string>
+    <string name="capture_help_banner_title">Video niet in de lijst?</string>
+    <string name="capture_help_banner">Sommige ingesloten media moeten eerst worden afgespeeld. Tik voor meer info.</string>
 </resources>

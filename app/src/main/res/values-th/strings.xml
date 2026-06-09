@@ -309,4 +309,7 @@
 
 
 
+    <string name="capture_help_menu">ความช่วยเหลือ</string>
+    <string name="capture_help_banner_title">ไม่พบวิดีโอใช่ไหม</string>
+    <string name="capture_help_banner">สื่อที่ฝังไว้บางรายการต้องเล่นก่อน แตะเพื่อดูวิธี</string>
 </resources>

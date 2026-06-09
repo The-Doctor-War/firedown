@@ -556,4 +556,7 @@
     <string name="task_frame_finished">Image enregistrée</string>
     <string name="task_frame_failed">Impossible d\'enregistrer l\'image</string>
     <string name="task_frame_cancelled">Enregistrement annulé</string>
+    <string name="capture_help_menu">Aide</string>
+    <string name="capture_help_banner_title">Vidéo introuvable ?</string>
+    <string name="capture_help_banner">Certains médias intégrés doivent d\'abord être lus. Touchez pour en savoir plus.</string>
 </resources>

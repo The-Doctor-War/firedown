@@ -422,4 +422,7 @@
     <string name="task_frame_finished">Zapisano klatkę</string>
     <string name="task_frame_failed">Nie udało się zapisać klatki</string>
     <string name="task_frame_cancelled">Anulowano zapisywanie klatki</string>
+    <string name="capture_help_menu">Pomoc</string>
+    <string name="capture_help_banner_title">Nie ma filmu na liście?</string>
+    <string name="capture_help_banner">Niektóre osadzone multimedia trzeba najpierw odtworzyć. Dotknij, aby dowiedzieć się jak.</string>
 </resources>

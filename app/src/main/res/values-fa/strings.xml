@@ -303,4 +303,7 @@
 
 
 
+    <string name="capture_help_menu">راهنما</string>
+    <string name="capture_help_banner_title">ویدیو در فهرست نیست؟</string>
+    <string name="capture_help_banner">برخی رسانه‌های جاسازی‌شده باید ابتدا پخش شوند. برای آموزش ضربه بزنید.</string>
 </resources>

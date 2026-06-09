@@ -312,4 +312,7 @@
 
     <string name="tabs_incognito_empty">Tidak ada tab privat</string>
     <string name="security_stat_blocked_scope">diblokir di halaman ini</string>
+    <string name="capture_help_menu">Bantuan</string>
+    <string name="capture_help_banner_title">Video tidak ada di daftar?</string>
+    <string name="capture_help_banner">Beberapa media tersemat harus diputar dulu. Ketuk untuk mempelajari caranya.</string>
 </resources>

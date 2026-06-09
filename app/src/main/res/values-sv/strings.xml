@@ -358,4 +358,7 @@
     <string name="task_frame_finished">Bildruta sparad</string>
     <string name="task_frame_failed">Kunde inte spara bildruta</string>
     <string name="task_frame_cancelled">Sparande av bildruta avbröts</string>
+    <string name="capture_help_menu">Hjälp</string>
+    <string name="capture_help_banner_title">Saknas videon?</string>
+    <string name="capture_help_banner">Vissa inbäddade media måste spelas upp först. Tryck för att läsa mer.</string>
 </resources>

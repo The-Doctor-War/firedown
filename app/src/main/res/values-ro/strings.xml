@@ -301,4 +301,7 @@
 
     <string name="tabs_incognito_empty">Nicio filă privată</string>
     <string name="security_stat_blocked_scope">blocate pe această pagină</string>
+    <string name="capture_help_menu">Ajutor</string>
+    <string name="capture_help_banner_title">Videoclipul nu apare?</string>
+    <string name="capture_help_banner">Unele conținuturi încorporate trebuie redate mai întâi. Atinge pentru a afla cum.</string>
 </resources>

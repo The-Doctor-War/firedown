@@ -324,4 +324,7 @@
     <string name="task_frame_finished">फ़्रेम सहेजा गया</string>
     <string name="task_frame_failed">फ़्रेम सहेज नहीं सके</string>
     <string name="task_frame_cancelled">फ़्रेम सहेजना रद्द किया गया</string>
+    <string name="capture_help_menu">मदद</string>
+    <string name="capture_help_banner_title">वीडियो सूची में नहीं है?</string>
+    <string name="capture_help_banner">कुछ एम्बेड किए गए मीडिया को पहले चलाना ज़रूरी है. जानने के लिए टैप करें.</string>
 </resources>

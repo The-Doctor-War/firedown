@@ -364,4 +364,7 @@
     <string name="task_frame_finished">Kuva tallennettu</string>
     <string name="task_frame_failed">Kuvan tallennus epäonnistui</string>
     <string name="task_frame_cancelled">Kuvan tallennus peruutettu</string>
+    <string name="capture_help_menu">Ohje</string>
+    <string name="capture_help_banner_title">Eikö videota näy?</string>
+    <string name="capture_help_banner">Jotkin upotetut mediat on toistettava ensin. Napauta nähdäksesi ohjeet.</string>
 </resources>

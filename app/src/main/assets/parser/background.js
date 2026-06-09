@@ -1969,8 +1969,12 @@ async function processBskyResponse(details, json) {
 // Passive read of the page's OWN authenticated app-view response (no refetch,
 // byte-exact pass-through), same as the Twitter/Threads paths.
 function listenerBskyApi(details) {
+    // Unconditional entry log: every xrpc request that reaches the extension,
+    // BEFORE the method gate, with its webRequest type. If a feed/profile load
+    // shows no "xrpc seen" line, the request isn't reaching the extension at all
+    // (not a method/parse problem). type tells us if it's not "xmlhttprequest".
+    log("BSKY", "xrpc seen", { url: details.url.slice(0, 120), type: details.type });
     if (!BSKY_POST_METHOD_RE.test(details.url)) return {};
-    log("BSKY", "listener fired", { url: details.url.slice(0, 110), type: details.type });
     const ok = filterResponseText(details, (body) => {
         if (!body) return;
         const json = tryParseJson(body);
@@ -1981,11 +1985,19 @@ function listenerBskyApi(details) {
     return {};
 }
 
+// Match ALL bsky subdomains (api / public.api / any future appview host) and ALL
+// request types (no `types` filter) — a narrow exact-host + xmlhttprequest-only
+// filter was the suspected reason the listener never fired. The path is gated to
+// /xrpc/ so it stays off the hundreds of image/media requests.
 browser.webRequest.onBeforeRequest.addListener(
     listenerBskyApi,
-    { urls: ["*://api.bsky.app/xrpc/*", "*://public.api.bsky.app/xrpc/*"], types: ["xmlhttprequest"] },
+    { urls: ["*://*.bsky.app/xrpc/*"] },
     ["blocking"]
 );
+
+// Module-load sanity check: if this line doesn't appear in logcat, the bsky
+// parser code isn't in the running build (or the module threw before here).
+log("BSKY", "hello world — bsky parser loaded, xrpc listener registered");
 
 // Wire-master fallback: capture the HLS master the player fetches whenever a
 // video is actually viewed/played, so capture never depends on the xrpc JSON

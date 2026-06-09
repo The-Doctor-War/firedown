@@ -778,6 +778,38 @@ flag. No unconditional logging ships.**
   guarded helper). Do not leave bare `Log.d/​i/​w/​e` on hot paths in release.
 - Rationale: this is a privacy/no-telemetry app — logs can contain URLs, titles,
   cookies-adjacent data. Release builds must be silent.
+- **Never log user-controlled text whole — truncate it.** The URL bar can hold
+  an arbitrarily large paste (a user once pasted a multi-hundred-KB logcat dump);
+  `AutoCompleteEditText` used to log the full before/after text on **every**
+  text/focus event, multiplying the blob through logcat and churning the main
+  thread. Its logs now go through `logPreview(...)` (128-char cap + length
+  suffix). Apply the same cap to any new log of field content, page titles,
+  clipboard text, etc.
+
+## URL-bar clipboard chip & system-service binder calls
+
+Two hardenings in `AutoCompleteView.showClipboard()` (the clipboard suggestion
+chip shown when the address bar gains focus) — both from one on-device episode:
+
+- **`ClipboardManager.getPrimaryClip()` must not be fatal.** It's a binder call
+  into system_server's clipboard service; when system_server is dying/restarting
+  it throws `RuntimeException(DeadSystemException)` — observed killing the app
+  from the URL-bar focus tap that raced the system's death (stack:
+  `showClipboard ← showEmpty ← HomeFragment.onFocusChanged`). Some OEM clipboard
+  services also throw `SecurityException` on background reads. The read is
+  wrapped in try/catch(RuntimeException); on any failure the chip is simply not
+  offered. Treat other "decorative" system-service binder reads the same way —
+  a convenience UI affordance never gets to crash the app. (A `DeadSystemException`
+  crash report means **the OS died**, not the app — the real cause is in
+  system_server's logs, `adb logcat -b crash -b system` / `adb bugreport`.)
+- **Don't volunteer giant clips.** A clip over `MAX_CLIP_SUGGESTION_LENGTH`
+  (8192 chars — generous for any real URL or search phrase) is skipped: one tap
+  on the chip would push the whole blob into the address bar, from where it gets
+  carried across binder repeatedly (an EditText saves its **full text** in
+  view-hierarchy saved state on every `onStop`; accessibility announcements ship
+  the field text too) and churned through text-change handling and the
+  history/suggestion path. A deliberate long-press paste still works — the cap
+  only stops the app from *offering* the blob.
 
 ## Tabs, sessions & delegate callbacks (foreground-only UI)
 
@@ -929,6 +961,49 @@ such titles get truncated to their first segment (`156.mp3`).
 Headers (incl. any backfilled `Referer`) flow from the capture layer
 (`webrequests/requests.js` for the generic catcher, or a parser's
 `requestHeaders`) into both paths via `context.getHeaders()`.
+
+### Cancel must evict idle pooled connections — the HTTP/2 discard loop
+
+Cancelling a download/probe mid-stream only closes the response body, which on
+HTTP/2 resets the **stream** (`RST_STREAM`) — the pooled **connection** stays
+open. A server with an endless byte source (a live-stream CDN; Kick was the
+on-device case) keeps pushing DATA frames for the dead stream, and OkHttp's
+"correct" handling becomes a trap: discard the bytes, queue a `writeSynReset`
+per frame, and **replenish the connection-level flow-control window** — so the
+server is never throttled. ~2000 frames/sec until the ConnectionPool's
+**5-minute** idle keep-alive finally sends GOAWAY (observed:
+`Q10560 finished run in 312 s : OkHttp stream.kick.com`, ending exactly at the
+pool closer). While it spins, the dead transfer saturates downlink bandwidth
+and (on debug builds) log/string churn drives GC thrashing — the user-visible
+symptom is "every tab keeps loading / app not responding", which looks like a
+Gecko bug and isn't.
+
+Fix shape: `NetworkModule.evictIdleConnections()` (`connectionPool().evictAll()`
+— closes **idle** connections only, so an active concurrent download can never
+be stopped by it; its worst case is one fresh TLS handshake on its *next*
+request) is called on every **user-cancel** path, *after* the cancelled
+connection has been released (it must be idle to be evictable):
+
+- `FFmpegOkhttp.interruptedReturn()` + `okhttpClose()` (gated on the thread
+  interrupt flag) — the Java-interrupt cancels.
+- `FFmpegMuxStrategy`/`FFmpegMergeStrategy` after `downloader.start()` returns,
+  gated on `stopped`/`context.isInterrupted()` — **required** because
+  `RunnableManager.cancelAll()` signals ffmpeg through the **native** interrupt
+  flag and never sets the worker's Java interrupt status, so the `FFmpegOkhttp`
+  gates can't see that cancel.
+- `HttpDownloadStrategy`'s `finally`, same gate — a cancelled progressive
+  download of a large file has the same exposure.
+- `GeckoInspectTask.cleanupFFmpeg()` gated on `isCancelled()` — a tab close
+  interrupting a capture probe (`cancelTab` → `GeckoInspectTask.cancel()`).
+
+Rules: keep it **host-agnostic** (no `kick.com` conditions — any HTTP/2 server
+that keeps sending reproduces it; same transport rule as `FFmpegOkhttp`), and
+**cancel-only** — never evict on normal completion, seeks, or range-chunk
+reconnects (the warm pool is the common-case win; an HLS download reopens the
+same host hundreds of times). The call is idempotent and cheap; multiple call
+sites firing for one cancel is fine. Known limit: `evictAll()` closes what is
+idle *at that instant* — a cancel racing the release window falls back to the
+5-minute janitor, which is acceptable (the systematic hang is what's fixed).
 
 ### Capture-layer headers & cookies (how a re-download authenticates)
 

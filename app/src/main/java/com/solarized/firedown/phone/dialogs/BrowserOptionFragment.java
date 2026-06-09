@@ -77,6 +77,8 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
     private GridLayoutManager mLayoutManager;
     private ChipGroup mChipGroup;
     private Toolbar mToolbar;
+    private View mHelpBanner;
+    private boolean mHelpBannerDismissed;
     private boolean mEnableGrid;
     private boolean mIsIncognito;
     private int mScrollLimit;
@@ -99,6 +101,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         mScrollLimit = Preferences.LIST_LIMIT;
         mEnableGrid = mSharedPreferences.getBoolean(Preferences.SORT_LIST, false);
         mIsIncognito = getArguments() != null && getArguments().getBoolean(Keys.IS_INCOGNITO, false);
+        mHelpBannerDismissed = mSharedPreferences.getBoolean(Preferences.CAPTURE_HELP_BANNER_DISMISSED, false);
         mBrowserDownloadViewModel = new ViewModelProvider(this).get(BrowserDownloadViewModel.class);
         mFragmentsViewModel = new ViewModelProvider(mActivity).get(FragmentsOptionsViewModel.class);
     }
@@ -117,6 +120,17 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         mChipGroup = view.findViewById(R.id.chip_group);
         mLCEERecyclerView = view.findViewById(R.id.list_recycler_lcee);
         mLCEERecyclerView.setEmptyButtonVisibility(View.VISIBLE);
+
+        // One-shot help banner (non-empty list only). Tapping the body opens the
+        // same help screen as the toolbar Help item; the X just dismisses. Either
+        // gesture persists the dismissal so it never returns.
+        mHelpBanner = view.findViewById(R.id.capture_help_banner);
+        mHelpBanner.setOnClickListener(v -> {
+            openCaptureHelp();
+            dismissHelpBanner();
+        });
+        view.findViewById(R.id.capture_help_banner_dismiss)
+                .setOnClickListener(v -> dismissHelpBanner());
 
         if (mIsIncognito) {
             mToolbar.setPopupTheme(R.style.Theme_FireDown_Popup_Vault);
@@ -295,13 +309,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                     updateActionModeTitle();
                     return true;
                 } else if (id == R.id.action_help) {
-                    // Opens the same "play the media before downloading" help the
-                    // empty-state button shows — but reachable even when the list
-                    // is non-empty (some media captured, but not the embedded one
-                    // the user must play first).
-                    OptionEntity option = new OptionEntity();
-                    option.setId(R.id.action_help);
-                    mFragmentsViewModel.onOptionsSelected(option);
+                    openCaptureHelp();
                     return true;
                 } else if (id == R.id.action_downloads) {
                     mStartForResult.launch(new Intent(requireContext(), DownloadsActivity.class));
@@ -439,6 +447,33 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
             }
         }
         updateProgressIndicator();
+        updateHelpBanner();
+    }
+
+    /**
+     * The one-shot help banner shows only on a NON-empty list (the empty state
+     * already carries the same guidance via its button), while not in action mode,
+     * and only until the user taps or dismisses it once (persisted). The toolbar
+     * Help item remains the permanent way back to the same screen.
+     */
+    private void updateHelpBanner() {
+        if (mHelpBanner == null) return;
+        boolean show = !mActionModeEnabled && !mListEmpty && !mHelpBannerDismissed;
+        mHelpBanner.setVisibility(show ? View.VISIBLE : View.GONE);
+    }
+
+    /** Persist the dismissal and hide the banner — both the tap and the X land here. */
+    private void dismissHelpBanner() {
+        mHelpBannerDismissed = true;
+        mSharedPreferences.edit().putBoolean(Preferences.CAPTURE_HELP_BANNER_DISMISSED, true).apply();
+        updateHelpBanner();
+    }
+
+    /** Open the "play the media before downloading" help screen (toolbar item + banner). */
+    private void openCaptureHelp() {
+        OptionEntity option = new OptionEntity();
+        option.setId(R.id.action_help);
+        mFragmentsViewModel.onOptionsSelected(option);
     }
 
     /**
@@ -604,6 +639,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
             setChipsEnabled(false);
             updateActionModeTitle();
             mToolbar.invalidateMenu();
+            updateHelpBanner();
         }
     }
 
@@ -673,6 +709,7 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         mSpinnerHandler.removeCallbacks(mHideSpinner);
         mChipGroup = null;
         mToolbar = null;
+        mHelpBanner = null;
         mAdapter = null;
         mLayoutManager = null;
         mProgressMenuItem = null;

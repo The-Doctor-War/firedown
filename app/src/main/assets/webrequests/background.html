@@ -9,15 +9,12 @@
 <script src="js/parser-blocklist.js" type="module"></script>
 <script src="js/requests.js" type="module"></script>
 <script src="js/cookies.js" type="module"></script>
-<!-- The per-site parsers + page-state bridge background, merged in from the
-     former parser@ extension. Classic (non-module) script: its globals sit
-     alone on window (the scripts above are module-scoped). NOTE the real
-     execution order: type="module" scripts are implicitly deferred, so this
-     classic script runs FIRST, before the modules publish
-     globalThis.matchInParserBlocklist / __getAmbientHeaders. That's safe only
-     because every read of those globals happens at navigation/message time
-     (long after all scripts ran) and is typeof-guarded — never at top level.
-     Keep it that way: top-level code here must not touch the module globals. -->
-<script src="parser-background.js"></script>
+<!-- The per-site parsers (the former monolithic parser-background.js, once a
+     classic script): now ES modules under js/parsers/, entered through
+     index.js. Everything is a module, so the old classic-vs-deferred
+     execution-order trap (and its typeof-guarded globalThis reads) is gone —
+     cross-module access is explicit imports, and tag order no longer
+     matters beyond aesthetics. -->
+<script src="js/parsers/index.js" type="module"></script>
 </body>
 </html>

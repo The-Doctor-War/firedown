@@ -193,14 +193,11 @@ function matchInParserBlocklist(string) {
   return parserBlockRegex ? parserBlockRegex.test(string) : false;
 }
 
+// The matcher is what lets the page-state bridge's generic readers
+// (handlePageStateHls / handlePageStateProgressive in js/parsers/page-state.js)
+// skip media a dedicated parser already owns (e.g. Dailymotion), instead of
+// emitting a second, duplicate entry the URL/origin dedup can't collapse.
+// (The old globalThis.matchInParserBlocklist bridge for the classic
+// parser-background.js was removed when the parsers became ES modules — they
+// import this directly now.)
 export { PARSER_BLOCKLIST, matchInParserBlocklist };
-
-// Also expose the matcher on the shared background global so the (classic,
-// non-module) parser-background.js — merged into this same extension — can
-// consult the blocklist directly. This is what lets the page-state bridge's
-// generic readers (handlePageStateHls / handlePageStateProgressive) skip media a
-// dedicated parser already owns (e.g. Dailymotion), instead of emitting a second,
-// duplicate entry the URL/origin dedup can't collapse. A module's top-level
-// scope doesn't leak to `window`, so the assignment is explicit. The classic
-// script only ever READS it at navigation time, long after this module has run.
-globalThis.matchInParserBlocklist = matchInParserBlocklist;

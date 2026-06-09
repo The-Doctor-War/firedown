@@ -742,17 +742,20 @@ function harvestAmbientHeaders(requestHeaders) {
 }
 
 // Direct intra-extension access to the harvested ambient headers. The parser
-// background (parser-background.js) lives in THIS extension's background page,
-// so it reads the values synchronously off the shared global. (The old
-// cross-extension get-ambient-headers onMessageExternal round-trip from the
-// standalone parser@ extension was removed with the merge — runtime.sendMessage
-// to one's own id goes to onMessage, never onMessageExternal, so that listener
-// could never fire again.) A getter (not a snapshot) so callers always see the
-// latest values harvested from the wire.
-globalThis.__getAmbientHeaders = () => ({
-  acceptLanguage: ambientAcceptLanguage,
-  userAgent: ambientUserAgent
-});
+// background modules (js/parsers/) live in THIS extension's background page,
+// so they import and read the values synchronously. (The old cross-extension
+// get-ambient-headers onMessageExternal round-trip from the standalone
+// parser@ extension was removed with the merge — runtime.sendMessage to one's
+// own id goes to onMessage, never onMessageExternal, so that listener could
+// never fire again; the interim globalThis.__getAmbientHeaders bridge went
+// with the parsers' module conversion.) A getter (not a snapshot) so callers
+// always see the latest values harvested from the wire.
+export function getAmbientHeaders() {
+  return {
+    acceptLanguage: ambientAcceptLanguage,
+    userAgent: ambientUserAgent
+  };
+}
 
 browser.webRequest.onHeadersReceived.addListener(
   (data) => processResponse(data, 'onHeadersReceived'),

@@ -7,6 +7,7 @@ import android.util.Log;
 import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.StoragePaths;
 import com.solarized.firedown.data.Download;
+import com.solarized.firedown.data.di.NetworkModule;
 import com.solarized.firedown.utils.BrowserHeaders;
 import com.solarized.firedown.utils.FileUriHelper;
 import com.solarized.firedown.utils.MessageHelper;
@@ -323,6 +324,16 @@ public class HttpDownloadStrategy implements DownloadStrategy {
             throw e;
         } finally {
             closeQuietly(input, output, body, httpResponse);
+            // User cancel (stop()/thread interrupt) mid-body: closeQuietly only
+            // reset the HTTP/2 *stream*; the pooled *connection* survives, and a
+            // server still pushing the rest of a large file traps OkHttp in a
+            // DATA→RST_STREAM discard loop until the pool's 5-minute idle
+            // eviction (see NetworkModule.evictIdleConnections()). The
+            // connection went idle on the closes above, so evict it now.
+            // Normal completion (neither flag set) never touches the pool.
+            if (stopped || context.isInterrupted()) {
+                NetworkModule.evictIdleConnections();
+            }
         }
     }
 

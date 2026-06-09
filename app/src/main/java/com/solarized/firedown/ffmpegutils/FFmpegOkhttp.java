@@ -194,6 +194,19 @@ public class FFmpegOkhttp {
      */
     private static int interruptedReturn() {
         Thread.currentThread().interrupt();
+        /* User cancel: also kick the now-idle pooled connection. Closing the
+         * body only RSTs the HTTP/2 *stream*; the pooled *connection* stays
+         * open, and a server that keeps pushing data for the dead stream (a
+         * live-stream CDN) locks OkHttp into a DATA→RST_STREAM discard loop
+         * until the pool's 5-minute idle eviction. Evicting here closes the
+         * socket immediately so the server stops at TCP level. The catch
+         * paths call okhttpClose() before this, so the cancelled connection
+         * is already idle and eligible; for the fail-fast paths (connection
+         * still held) the eviction in okhttpClose() covers it when ffmpeg
+         * closes the URL. Idle-only and host-agnostic — active downloads on
+         * other connections are untouched. See
+         * NetworkModule.evictIdleConnections(). */
+        NetworkModule.evictIdleConnections();
         return FFMPEG_AVERROR_INTERRUPTED;
     }
 
@@ -643,6 +656,15 @@ public class FFmpegOkhttp {
     @Keep
     private void okhttpClose() {
         closeConnection();
+        /* Cancel path only (interrupt flag set by interruptedReturn() or the
+         * stop plumbing): the connection just released above is now idle, so
+         * evict it before the server can spin the cancelled-stream discard
+         * loop (see interruptedReturn()). Gated on the interrupt flag so
+         * normal closes — seeks, range-chunk reconnects, end-of-download —
+         * never touch the pool. */
+        if (Thread.currentThread().isInterrupted()) {
+            NetworkModule.evictIdleConnections();
+        }
     }
 
     private String parseMimeType() {

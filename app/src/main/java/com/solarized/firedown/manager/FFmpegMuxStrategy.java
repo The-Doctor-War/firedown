@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.solarized.firedown.data.Download;
+import com.solarized.firedown.data.di.NetworkModule;
 import com.solarized.firedown.ffmpegutils.FFmpegDownloader;
 import com.solarized.firedown.ffmpegutils.FFmpegErrors;
 import com.solarized.firedown.ffmpegutils.FFmpegListener;
@@ -214,6 +215,20 @@ public class FFmpegMuxStrategy implements DownloadStrategy, FFmpegListener {
             // file descriptor until GC finalised it.
             try { if (output != null) output.flush(); } catch (IOException ignored) {}
             try { if (output != null) output.close(); } catch (IOException ignored) {}
+            // User cancel: ffmpeg has unwound (downloader.start() returned) and
+            // closed its FFmpegOkhttp connections, but on HTTP/2 those closes
+            // only RST the *stream* — the pooled *connection* stays open, and a
+            // live-stream CDN that keeps pushing segments for the dead stream
+            // traps OkHttp in a DATA→RST_STREAM discard loop until the pool's
+            // 5-minute idle eviction (see NetworkModule.evictIdleConnections()).
+            // The cancelled connections are idle by now, so evict them. Gated:
+            // normal completion never touches the pool. This gate is needed
+            // here (not only in FFmpegOkhttp) because cancelAll/stop() signals
+            // through the NATIVE interrupt flag — the worker thread's Java
+            // interrupt status is never set on that path.
+            if (stopped || context.isInterrupted()) {
+                NetworkModule.evictIdleConnections();
+            }
         }
     }
 

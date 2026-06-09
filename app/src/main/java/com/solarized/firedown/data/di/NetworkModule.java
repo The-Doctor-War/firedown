@@ -104,4 +104,36 @@ public class NetworkModule {
         }
         return c;
     }
+
+    /**
+     * Close every idle pooled connection NOW instead of after the pool's
+     * 5-minute keep-alive.
+     *
+     * Why this exists: cancelling a download mid-stream only closes the
+     * response body, which on HTTP/2 resets the *stream* (RST_STREAM) but
+     * keeps the pooled *connection* open. A server that keeps pushing data
+     * for the dead stream — a live-stream CDN is the worst case — then traps
+     * OkHttp in a discard loop: one received DATA frame → one queued
+     * writeSynReset task → connection-level window replenished → server
+     * sends more, thousands of times per second, until the pool's idle
+     * eviction finally sends GOAWAY five minutes later. Observed on-device
+     * as a cancelled Kick live capture saturating two TaskRunner threads,
+     * GC, and bandwidth for 312 s ("finished run in 312 s : OkHttp
+     * stream.kick.com"), starving Gecko page loads.
+     *
+     * evictAll() closes only IDLE connections, so callers must invoke it
+     * AFTER releasing their body/response (the cancelled connection becomes
+     * idle at that point). Active downloads on other connections are
+     * untouched; the only cost is a fresh TCP+TLS handshake for the next
+     * request to a previously-pooled host — negligible against a
+     * user-initiated cancel. Call this only on the cancel/stop path, never
+     * on normal completion or chunk reconnects.
+     */
+    public static void evictIdleConnections() {
+        OkHttpClient c = globalClient;
+        if (c == null) {
+            return;
+        }
+        c.connectionPool().evictAll();
+    }
 }

@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.caverock.androidsvg.SVG;
+import com.solarized.firedown.data.di.NetworkModule;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.data.entity.FFmpegTagEntity;
 import com.solarized.firedown.data.entity.GeckoInspectEntity;
@@ -853,6 +854,17 @@ public class GeckoInspectTask implements Runnable, ProbeRegistry {
             mFFmpegMetaDataReader.stop();
             mFFmpegMetaDataReader.release();
             mFFmpegMetaDataReader = null;
+        }
+        // Cancelled probe (tab closed mid-probe): release() above closed the
+        // probe's FFmpegOkhttp responses, but on HTTP/2 that only RSTs the
+        // *streams* — the pooled *connection* survives, and a live-stream CDN
+        // that keeps pushing segments for the dead stream spins OkHttp's
+        // DATA→RST_STREAM discard loop until the pool's 5-minute idle
+        // eviction. Evict the now-idle connection so the socket closes at
+        // once. Cancel-only: a normal probe completion keeps the pool warm
+        // for the download that usually follows.
+        if (isCancelled()) {
+            NetworkModule.evictIdleConnections();
         }
     }
 

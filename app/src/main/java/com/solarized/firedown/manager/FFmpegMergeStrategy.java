@@ -4,6 +4,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.solarized.firedown.data.Download;
+import com.solarized.firedown.data.di.NetworkModule;
 import com.solarized.firedown.ffmpegutils.FFmpegDownloader;
 import com.solarized.firedown.ffmpegutils.FFmpegErrors;
 import com.solarized.firedown.ffmpegutils.FFmpegListener;
@@ -73,6 +74,17 @@ public class FFmpegMergeStrategy implements DownloadStrategy, FFmpegListener {
 
         // Free after start() returns (C threads have exited at this point)
         downloader.free();
+
+        // User cancel: ffmpeg unwound via the NATIVE interrupt flag (stop()
+        // never sets the worker's Java interrupt status), and its HTTP/2
+        // closes only RST the streams — the pooled connections survive, and a
+        // server still pushing data for a dead stream spins OkHttp's discard
+        // loop until the pool's 5-minute idle eviction. The cancelled
+        // connections are idle now, so evict them; a normal completion skips
+        // this. See NetworkModule.evictIdleConnections().
+        if (context.isInterrupted()) {
+            NetworkModule.evictIdleConnections();
+        }
 
         if (error < 0) {
             Log.e(TAG, "FFmpegDownloader error: " + error);

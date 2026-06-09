@@ -1852,6 +1852,31 @@ const BSKY_VIDEO_VIEW = "app.bsky.embed.video#view";
 const BSKY_POST_METHOD_RE =
     /\/xrpc\/(?:app\.bsky\.feed\.(?:getFeed|getAuthorFeed|getTimeline|getActorLikes|getListFeed|getPostThread|searchPosts|getPosts|getQuotes)|app\.bsky\.unspecced\.getPostThread\w*)\b/;
 
+// The HLS master a video plays from. Matches ONLY the multivariant master
+// (.../watch/<did>/<cid>/playlist.m3u8), not the per-quality child playlists
+// (.../<cid>/360p/video.m3u8) — those have an extra path segment.
+const BSKY_MASTER_RE =
+    /^https:\/\/video\.bsky\.app\/watch\/[^/]+\/[^/]+\/playlist\.m3u8(?:[?#]|$)/;
+
+// playlist-URL -> { name, description, img }. Populated from every xrpc response
+// we parse (feed/profile/thread). bsky is an SPA backed by an in-memory
+// React-Query cache, so navigating within it (profile -> post) or revisiting a
+// cached view fires NO xrpc request — the app-view JSON never crosses the wire,
+// so listenerBskyApi can't see it. But the player ALWAYS fetches the HLS master
+// off the wire when a video is viewed/played, so listenerBskyMaster captures
+// that directly and enriches it from this cache when we did see the JSON earlier.
+const bskyMetaCache = new Map();
+const BSKY_META_CACHE_MAX = 512;
+
+function cacheBskyMeta(playlist, meta) {
+    if (!playlist) return;
+    if (bskyMetaCache.has(playlist)) return;
+    if (bskyMetaCache.size >= BSKY_META_CACHE_MAX) {
+        bskyMetaCache.delete(bskyMetaCache.keys().next().value); // FIFO trim
+    }
+    bskyMetaCache.set(playlist, meta);
+}
+
 // A post's embed is either the video view directly, or a recordWithMedia#view
 // whose `.media` is the video view (a quote-post with an attached video).
 function bskyVideoView(embed) {
@@ -1927,6 +1952,9 @@ async function processBskyResponse(details, json) {
     const requestHeaders = [{ name: "Referer", value: "https://bsky.app/" }];
 
     for (const v of videos) {
+        // Cache for the wire-master fallback (a later cached/SPA view of this
+        // same video fires no xrpc, but its master still hits the wire).
+        cacheBskyMeta(v.playlist, { name: v.name, description: v.description, img: v.thumbnail || undefined });
         await enumerateMasterNative(details, {
             url: v.playlist,
             origin: v.playlist, // stable per-video uid (master carries no token)
@@ -1957,6 +1985,35 @@ browser.webRequest.onBeforeRequest.addListener(
     listenerBskyApi,
     { urls: ["*://api.bsky.app/xrpc/*", "*://public.api.bsky.app/xrpc/*"], types: ["xmlhttprequest"] },
     ["blocking"]
+);
+
+// Wire-master fallback: capture the HLS master the player fetches whenever a
+// video is actually viewed/played, so capture never depends on the xrpc JSON
+// being on the wire (it often isn't — see bskyMetaCache). Read-only (no filter,
+// no blocking) — the page's own player still gets its response untouched.
+// Deduped on the master URL (origin), so it collapses with a richer pre-play
+// capture from listenerBskyApi when both fire for the same video.
+function listenerBskyMaster(details) {
+    if (details.tabId < 0) return {};            // page player only, not our own probe
+    if (!BSKY_MASTER_RE.test(details.url)) return {};
+    const playlist = details.url.split(/[?#]/)[0];
+    const meta = bskyMetaCache.get(playlist);
+    log("BSKY", "master on wire", { url: playlist.slice(0, 100), cached: !!meta });
+    enumerateMasterNative(details, {
+        url: playlist,
+        origin: playlist,
+        name: meta ? meta.name : "Bluesky video",
+        description: meta ? meta.description : "bsky.app",
+        img: meta ? meta.img : undefined,
+        requestHeaders: [{ name: "Referer", value: "https://bsky.app/" }],
+    });
+    return {};
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerBskyMaster,
+    { urls: ["*://video.bsky.app/watch/*"], types: ["xmlhttprequest", "media", "object", "other"] },
+    []
 );
 
 // ============================================================================

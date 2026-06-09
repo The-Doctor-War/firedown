@@ -245,7 +245,29 @@ niconico, Twitch, Kick and Bluesky emit `type:"hls-master"` from the parser
 (`enumerateMasterNative` in `background.js`). (Bluesky reads the HLS master URL
 straight from the AT-Proto app-view JSON — `app.bsky.embed.video#view.playlist`,
 deduped per-video on that stable master URL, not the page origin, so a whole feed
-of videos is captured rather than collapsing to one.) `GeckoInspectTask.processHlsMaster`
+of videos is captured rather than collapsing to one.
+
+**Bluesky needs TWO capture paths, because the app-view JSON is often NOT on the
+wire.** bsky.app is an SPA backed by an in-memory React-Query cache: navigating
+*within* it (profile → post) or revisiting a cached view fires **no** xrpc
+request, so the `app.bsky.feed.*` / `getPostThreadV2` response never crosses the
+wire and the JSON reader (`listenerBskyApi`, a `filterResponseData` read of
+`api.bsky.app`/`public.api.bsky.app`) has nothing to read. On its own that path
+silently captures nothing for any cached/SPA view — and because the media is
+parser-block-listed, the generic catcher can't grab it either, so the video is
+lost entirely. The fix is a second listener, `listenerBskyMaster`, that captures
+the HLS master (`video.bsky.app/watch/<did>/<cid>/playlist.m3u8`) **straight off
+the wire** the moment the player fetches it (always happens on view/play),
+read-only and gated to the master (not the per-quality children). It enriches the
+capture from `bskyMetaCache` (playlist-URL → title/author/thumbnail, populated by
+every xrpc response the JSON reader *did* see), falling back to a generic
+"Bluesky video" title when the JSON was never observed. The JSON reader still
+runs — it captures a whole feed/profile **pre-play** on a fresh load with rich
+metadata; the wire-master listener is the reliability backbone that makes capture
+independent of xrpc caching. Both emit `hls-master` deduped on the same master
+URL, so they collapse to one entity when both fire. Don't drop the wire-master
+listener "because the JSON reader already covers it" — it doesn't, for the SPA
+cache case, which is the common one once a session is warm.) `GeckoInspectTask.processHlsMaster`
 fetches the master with native OkHttp (`WebUtils.getString` — can set
 Origin/Referer/Cookie, unlike a page `fetch()`), enumerates qualities with
 `M3U8Parser.parseMaster` (text only — never opens a segment), and runs them

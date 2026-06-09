@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "version": "5.44",
+  "version": "5.45",
   "browser_specific_settings": {
     "gecko": {
       "id": "parser@solarized.dev"
@@ -62,6 +62,7 @@
     "*://itunes.apple.com/*",
     "*://*.tiktok.com/*",
     "*://api.bsky.app/*",
-    "*://public.api.bsky.app/*"
+    "*://public.api.bsky.app/*",
+    "*://video.bsky.app/*"
   ]
 }

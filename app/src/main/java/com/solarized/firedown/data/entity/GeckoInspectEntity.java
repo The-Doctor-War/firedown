@@ -13,6 +13,10 @@ public class GeckoInspectEntity {
     private String requestId;
     private JSONObject message;
     private int tabId;
+    // Metadata authority of the capture SOURCE, for same-URL dedup merge: a
+    // per-site parser / page-state bridge outranks the generic catcher, so its
+    // title/thumbnail wins regardless of arrival order. 0 = generic (default).
+    private int metaPriority;
     // Navigation-visit id at capture time (GeckoState#getVisitId), stamped by
     // GeckoRuntimeHelper before the task runs and copied onto the persisted
     // BrowserDownloadEntity. Drives the session-aware "this page" grouping.
@@ -53,6 +57,12 @@ public class GeckoInspectEntity {
     }
     public int getTabId() {
         return tabId;
+    }
+    public int getMetaPriority() {
+        return metaPriority;
+    }
+    public void setMetaPriority(int metaPriority) {
+        this.metaPriority = metaPriority;
     }
     public int getVisitId() {
         return visitId;

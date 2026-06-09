@@ -28,6 +28,9 @@ public class JsonHelper {
             entity.setGeckoType(json.optString("type", ""));
             entity.setDescription(json.optString("description", ""));
             entity.setTabId(json.optInt("tabId", 0));
+            // Source authority for same-URL dedup merge (parser/bridge > generic);
+            // absent on the generic catcher's messages → 0.
+            entity.setMetaPriority(json.optInt("metaPriority", 0));
             entity.setName(json.optString("name", null));
             entity.setRequestId(json.optString("requestId", ""));
             entity.setImg(json.optString("img", null));

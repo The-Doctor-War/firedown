@@ -11,7 +11,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.utils.BuildUtils;
 import com.solarized.firedown.utils.FileUriHelper;
-import com.solarized.firedown.utils.WebUtils;
 
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -148,36 +147,51 @@ public class BrowserDownloadRepository {
     }
 
     /**
-     * On a same-URL dedup, prefer the RICHER capture's display metadata. When the
-     * existing entry is named after its URL — a bare generic catch, e.g. an
-     * extensionless {@code /play/video/<token>} the catcher classified by its
-     * HEAD content-type — and the incoming capture of the SAME url carries a real
-     * title (a parser / page-state-bridge capture), upgrade the existing entity in
-     * place instead of dropping the incoming. Order-independent: whoever landed
-     * first, the human title wins. Keeps the existing entity's already-working
-     * headers/strategy. Returns true if anything changed (→ re-emit).
+     * Same URL captured twice — keep ONE entry, but merge its DISPLAY metadata
+     * priority-weighted, so the richer source wins regardless of arrival order.
+     * Each capture carries a {@code metaPriority} stamped by its source (per-site
+     * parser / page-state bridge &gt; generic catcher, the latter = 0). For each
+     * display field (name / thumbnail / description) we take the incoming value
+     * when it's non-empty AND the incoming source is at least as authoritative as
+     * the existing one (and never downgrade a higher-priority title); we also fill
+     * any field the existing entry simply lacks. This is order-independent — a
+     * late higher-priority capture upgrades, a late lower-priority one only fills
+     * gaps — and uses no name heuristic. The existing entity's already-working
+     * headers / download strategy are left untouched. Returns true if anything
+     * changed (→ re-emit).
      */
     private boolean upgradeMetadata(BrowserDownloadEntity existing, BrowserDownloadEntity incoming) {
         boolean changed = false;
+        boolean incomingWins = incoming.getMetaPriority() > existing.getMetaPriority();
 
-        String existingName = existing.getFileName();
+        // Title: adopt the incoming title when the existing one is missing, or when
+        // the incoming source outranks it (a real title never gets downgraded —
+        // the generic catcher is priority 0, so its URL-token name can't win).
         String incomingName = incoming.getFileName();
-        boolean existingBare = TextUtils.isEmpty(existingName)
-                || existingName.equals(WebUtils.getFileNameFromURL(existing.getFileUrl()));
-        boolean incomingRich = !TextUtils.isEmpty(incomingName)
-                && !incomingName.equals(WebUtils.getFileNameFromURL(incoming.getFileUrl()));
-        if (existingBare && incomingRich && !existing.isFileNameForced()) {
+        if (!TextUtils.isEmpty(incomingName) && !existing.isFileNameForced()
+                && (TextUtils.isEmpty(existing.getFileName()) || incomingWins)) {
             existing.setFileName(incomingName);
             changed = true;
         }
 
-        if (TextUtils.isEmpty(existing.getFileThumbnail()) && !TextUtils.isEmpty(incoming.getFileThumbnail())) {
-            existing.setFileThumbnail(incoming.getFileThumbnail());
+        String incomingThumb = incoming.getFileThumbnail();
+        if (!TextUtils.isEmpty(incomingThumb)
+                && (TextUtils.isEmpty(existing.getFileThumbnail()) || incomingWins)) {
+            existing.setFileThumbnail(incomingThumb);
             changed = true;
         }
-        if (TextUtils.isEmpty(existing.getFileDescription()) && !TextUtils.isEmpty(incoming.getFileDescription())) {
-            existing.setFileDescription(incoming.getFileDescription());
+
+        String incomingDesc = incoming.getFileDescription();
+        if (!TextUtils.isEmpty(incomingDesc)
+                && (TextUtils.isEmpty(existing.getFileDescription()) || incomingWins)) {
+            existing.setFileDescription(incomingDesc);
             changed = true;
+        }
+
+        // Remember the highest authority seen for this entry, so a still-later,
+        // even-lower-priority capture can't override what a winner just set.
+        if (incomingWins) {
+            existing.setMetaPriority(incoming.getMetaPriority());
         }
         return changed;
     }

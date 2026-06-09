@@ -4,12 +4,14 @@ package com.solarized.firedown.data.repository;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 import com.solarized.firedown.data.entity.BrowserDownloadEntity;
 import com.solarized.firedown.utils.BuildUtils;
 import com.solarized.firedown.utils.FileUriHelper;
+import com.solarized.firedown.utils.WebUtils;
 
 import org.apache.commons.collections4.QueueUtils;
 import org.apache.commons.collections4.queue.CircularFifoQueue;
@@ -121,11 +123,15 @@ public class BrowserDownloadRepository {
 
     public void addValue(BrowserDownloadEntity browserDownloadEntity) {
         boolean added = false;
+        boolean upgraded = false;
         synchronized (mInterceptedList) {
             boolean exists = false;
             for (BrowserDownloadEntity entity : mInterceptedList) {
                 if (isPresent(entity, browserDownloadEntity)) {
                     exists = true;
+                    // Same URL captured twice — keep ONE entry, but let the RICHER
+                    // capture's title/thumbnail win regardless of arrival order.
+                    upgraded = upgradeMetadata(entity, browserDownloadEntity);
                     break;
                 }
             }
@@ -136,9 +142,44 @@ public class BrowserDownloadRepository {
             }
         }
         // Throttled emit, outside the list lock (see scheduleEmit / mEmitRunnable).
-        if (added) {
+        if (added || upgraded) {
             scheduleEmit();
         }
+    }
+
+    /**
+     * On a same-URL dedup, prefer the RICHER capture's display metadata. When the
+     * existing entry is named after its URL — a bare generic catch, e.g. an
+     * extensionless {@code /play/video/<token>} the catcher classified by its
+     * HEAD content-type — and the incoming capture of the SAME url carries a real
+     * title (a parser / page-state-bridge capture), upgrade the existing entity in
+     * place instead of dropping the incoming. Order-independent: whoever landed
+     * first, the human title wins. Keeps the existing entity's already-working
+     * headers/strategy. Returns true if anything changed (→ re-emit).
+     */
+    private boolean upgradeMetadata(BrowserDownloadEntity existing, BrowserDownloadEntity incoming) {
+        boolean changed = false;
+
+        String existingName = existing.getFileName();
+        String incomingName = incoming.getFileName();
+        boolean existingBare = TextUtils.isEmpty(existingName)
+                || existingName.equals(WebUtils.getFileNameFromURL(existing.getFileUrl()));
+        boolean incomingRich = !TextUtils.isEmpty(incomingName)
+                && !incomingName.equals(WebUtils.getFileNameFromURL(incoming.getFileUrl()));
+        if (existingBare && incomingRich && !existing.isFileNameForced()) {
+            existing.setFileName(incomingName);
+            changed = true;
+        }
+
+        if (TextUtils.isEmpty(existing.getFileThumbnail()) && !TextUtils.isEmpty(incoming.getFileThumbnail())) {
+            existing.setFileThumbnail(incoming.getFileThumbnail());
+            changed = true;
+        }
+        if (TextUtils.isEmpty(existing.getFileDescription()) && !TextUtils.isEmpty(incoming.getFileDescription())) {
+            existing.setFileDescription(incoming.getFileDescription());
+            changed = true;
+        }
+        return changed;
     }
 
     public void postComplete() {

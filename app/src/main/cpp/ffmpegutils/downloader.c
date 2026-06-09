@@ -103,11 +103,6 @@ struct Downloader {
 
     int input_stream_numbers[MAX_STREAMS];
     int input_source_index[MAX_STREAMS];
-    /* Fixed media type per capture slot, recorded at find time. The reader
-     * routes packets by this (not only by the frozen input-stream index) so an
-     * HLS discontinuity that renumbers the underlying MPEG-TS streams can't
-     * misroute a packet — see the match loop in downloader_read. */
-    enum AVMediaType capture_codec_type[MAX_STREAMS];
     int64_t last_mux_dts[MAX_STREAMS];
     int64_t current_recording_time[MAX_STREAMS];
     int64_t filter_in_rescale_delta_last[MAX_STREAMS];
@@ -542,7 +537,6 @@ int downloader_find_streams(struct Downloader *downloader,
     downloader->input_codec_ctxs[streams_no] = dec_ctx;
     downloader->input_stream_numbers[streams_no] = bn_stream;
     downloader->input_source_index[streams_no] = source_input;
-    downloader->capture_codec_type[streams_no] = codec_type;
     downloader->capture_streams_no += 1;
 
     LOGI(2, "downloader_find_stream type=%d input[%d] stream_idx=%d -> capture[%d]",
@@ -1379,8 +1373,6 @@ int downloader_read(struct Downloader *downloader) {
     int err = ERROR_NO_ERROR;
     int ret;
     int all_eof;
-    AVStream *pkt_stream;
-    enum AVMediaType pkt_type;
 
     /* read_thread_created is now set by jni_downloader_start before
      * it releases mutex_operation, so dealloc's threads-free wait sees
@@ -1441,59 +1433,16 @@ int downloader_read(struct Downloader *downloader) {
 
             any_read = TRUE;
 
-            /* Match packet → capture stream.
-             *
-             * The slot was bound at find time to a specific (input,
-             * input-stream-index). But an HLS EXT-X-DISCONTINUITY can splice in a
-             * segment from a different encoder whose MPEG-TS PIDs differ, and the
-             * mpegts demuxer then RENUMBERS / REUSES AVStream indices across the
-             * splice. Observed on Kick VODs: a ~2 s CloudFront preroll carries
-             * audio on pid 0x101, while the main IVS content carries VIDEO on pid
-             * 0x101 — reusing AVStream index 1. A frozen index map then feeds the
-             * new H264 packets into the AUDIO capture, and the mp4 muxer's
-             * auto-inserted aac_adtstoasc bitstream filter aborts the whole
-             * download ("Error parsing ADTS frame header").
-             *
-             * So match by the capture's CODEC TYPE (fixed for the whole download)
-             * against the packet's CURRENT input-stream type, and re-bind the
-             * slot's input-stream index when the splice moved it. firedown
-             * captures exactly one stream per type (one video + one audio; split
-             * audio/video are separate inputs, disambiguated by input_source_index
-             * below), so a type maps to a single capture unambiguously — a multi-
-             * resolution ABR master is never one input here, each rendition is its
-             * own playlist and we download one. A foreign stream whose type matches
-             * no capture (e.g. the main content's timed_id3 data track) matches
-             * nothing and is dropped, exactly as before. */
-            pkt_stream = NULL;
-            pkt_type = AVMEDIA_TYPE_UNKNOWN;
-            if (pkt->stream_index >= 0 && pkt->stream_index < (int) fmt_ctx->nb_streams) {
-                pkt_stream = fmt_ctx->streams[pkt->stream_index];
-                pkt_type = pkt_stream->codecpar->codec_type;
-            }
-
+            /* Match packet → capture stream. */
             pthread_mutex_lock(&downloader->mutex_queue);
 
             queue = NULL;
             for (stream_no = 0; stream_no < downloader->capture_streams_no; ++stream_no) {
-                if (input_idx != downloader->input_source_index[stream_no])
-                    continue;
-                if (pkt_type != downloader->capture_codec_type[stream_no])
-                    continue;
-                /* Packet belongs to this capture's type. Follow a discontinuity
-                 * remap by re-pointing the slot at the packet's current input
-                 * stream. Only input_stream_numbers is updated (read by this
-                 * reader thread alone); input_streams[] is deliberately left as-is
-                 * — the muxer reads it without the queue lock for the stream
-                 * timebase, and an MPEG-TS discontinuity keeps the 1/90000
-                 * timebase, so the stored stream stays valid for that use. */
-                if (downloader->input_stream_numbers[stream_no] != pkt->stream_index) {
-                    LOGW(2, "downloader_read re-bind capture[%d] type=%d input-stream %d -> %d (discontinuity remap)",
-                         stream_no, pkt_type,
-                         downloader->input_stream_numbers[stream_no], pkt->stream_index);
-                    downloader->input_stream_numbers[stream_no] = pkt->stream_index;
+                if (pkt->stream_index == downloader->input_stream_numbers[stream_no] &&
+                    input_idx == downloader->input_source_index[stream_no]) {
+                    queue = downloader->packets;
+                    break;
                 }
-                queue = downloader->packets;
-                break;
             }
             if (queue == NULL) {
                 av_packet_unref(pkt);

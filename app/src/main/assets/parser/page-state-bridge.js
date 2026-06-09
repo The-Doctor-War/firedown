@@ -426,13 +426,20 @@
         const n = els ? els.length : 0;
         if (!n) return null;
 
-        const variants = [];
-        const hls = [];
+        // Collect (url -> {type,label}) deduped, preferring an EXPLICIT type over
+        // none. A <video> with a <source type="video/mp4"> ALSO exposes the SAME
+        // url via currentSrc with NO type — without this merge that one url is
+        // classified twice (progressive from the typed <source>, HLS from the
+        // typeless currentSrc default), emitting a spurious second entity for one
+        // video.
+        const byUrl = new Map();
         let img;
-        const take = (url, type, label) => {
-            const kind = mediaKindOf(url, type);
-            if (kind === "hls") hls.push(url);
-            else if (kind === "progressive") variants.push({ url, height: heightFrom(label, url) });
+        const add = (url, type, label) => {
+            if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return;
+            const prev = byUrl.get(url);
+            if (!prev) { byUrl.set(url, { type: type || "", label: label || "" }); return; }
+            if (!prev.type && type) prev.type = type;
+            if (!prev.label && label) prev.label = label;
         };
         for (let i = 0; i < n; i++) {
             const el = els[i];
@@ -445,8 +452,8 @@
             try { cur = el.currentSrc; } catch (_) {}
             try { attr = el.getAttribute("src"); } catch (_) {}
             try { etype = el.getAttribute("type"); } catch (_) {}
-            take(cur, etype);
-            take(attr, etype);
+            add(cur, etype);
+            add(attr, etype);
             let sources;
             try { sources = el.querySelectorAll("source"); } catch (_) { sources = null; }
             const sn = sources ? sources.length : 0;
@@ -456,8 +463,17 @@
                 try { su = s.getAttribute("src"); } catch (_) {}
                 try { st = s.getAttribute("type"); } catch (_) {}
                 try { sl = s.getAttribute("size") || s.getAttribute("label") || s.getAttribute("data-quality"); } catch (_) {}
-                take(su, st, sl);
+                add(su, st, sl);
             }
+        }
+        const variants = [];
+        const hls = [];
+        for (const entry of byUrl) {
+            const url = entry[0];
+            const info = entry[1];
+            const kind = mediaKindOf(url, info.type);
+            if (kind === "hls") hls.push(url);
+            else if (kind === "progressive") variants.push({ url, height: heightFrom(info.label, url) });
         }
         if (!variants.length && !hls.length) return null;
         log("player-probe: DOM <video>/<source> @", location.host, "variants=", variants.length, "hls=", hls.length);
@@ -866,6 +882,20 @@
     // retry passes (immediate/DOMContentLoaded/t500/t1500/t4000). Cleared on SPA nav.
     const mediaDefsTried = new Set();
 
+    // Player/embed pages often title the document with a FILENAME-ish string —
+    // krakenfiles serves "Embed <name>.mp4". Strip a leading "Embed " (the embed
+    // host's own prefix; no real title starts with it) and a trailing media file
+    // extension so the entry reads as a title, not a filename. Conservative: only
+    // the unambiguous "Embed " verb (not Watch/Play, which can begin real titles).
+    function sanitizePlayerTitle(t) {
+        if (typeof t !== "string") return t;
+        let s = t.trim();
+        s = s.replace(/^embed\s+/i, "");
+        s = s.replace(/\.(?:mp4|m4v|mkv|avi|webm|mov|ts|flv|wmv|ogv|3gp)$/i, "");
+        s = s.trim();
+        return s || t;
+    }
+
     // Emit one group as its own entity: resolve its delegates, then post the
     // progressive variants (page-state-progressive) and/or HLS master(s). Title is
     // the generic page title; duration/poster come from the group when present.
@@ -889,7 +919,7 @@
 
         const meta = resolveMeta(null); // generic og:/title + og:image
         // A player-API item can carry its own title; prefer it over the page title.
-        const title = (typeof grp.title === "string" && grp.title) ? grp.title : meta.title;
+        const title = sanitizePlayerTitle((typeof grp.title === "string" && grp.title) ? grp.title : meta.title);
         const img = meta.img || grp.img;
         const durationMs = grp.durationSec > 0 ? Math.round(grp.durationSec * 1000) : 0;
 

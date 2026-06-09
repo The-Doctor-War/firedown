@@ -1889,18 +1889,59 @@ function bskyVideoView(embed) {
     return null;
 }
 
+// Collapse whitespace/newlines to single spaces so a multi-line caption becomes
+// one clean title line.
+function cleanBskyText(s) {
+    return (typeof s === "string" ? s : "").replace(/\s+/g, " ").trim();
+}
+
+// A caption/alt is only usable as a title if it carries an actual letter or
+// number (any script) — this drops empty captions and emoji-only ones
+// (e.g. "🎧🫶"), which make poor titles, so we fall back to the author instead.
+function isUsableTitle(s) {
+    return /[\p{L}\p{N}]/u.test(s);
+}
+
+// Titles can be long (full post captions); trim to a filename-friendly length on
+// a word boundary with an ellipsis.
+function truncateBskyTitle(s, max) {
+    if (s.length <= max) return s;
+    const cut = s.slice(0, max);
+    const sp = cut.lastIndexOf(" ");
+    return (sp > max * 0.6 ? cut.slice(0, sp) : cut).trim() + "…";
+}
+
 function buildBskyVideo(post, view) {
     const author = post.author || {};
     const handle = author.handle || "";
     const displayName = author.displayName || handle || "Bluesky";
     const record = post.record || {};
-    const text = (typeof record.text === "string") ? record.text.trim() : "";
+    const caption = cleanBskyText(record.text);   // the post text
+    const alt = cleanBskyText(view.alt);           // the video's alt/description
+
+    // bsky posts have no title. Prefer the post caption; fall back to the video
+    // alt text (often a rich description); finally the author so it's never blank.
+    let name;
+    if (isUsableTitle(caption)) name = truncateBskyTitle(caption, 120);
+    else if (isUsableTitle(alt)) name = truncateBskyTitle(alt, 120);
+    else name = `${displayName} on Bluesky`;
+
+    // What each video offers, so the title heuristic above can be tuned from logs.
+    log("BSKY", "video metadata", {
+        displayName,
+        handle,
+        captionLen: caption.length,
+        caption: caption.slice(0, 80),
+        altLen: alt.length,
+        createdAt: record.createdAt || null,
+        aspectRatio: view.aspectRatio || null,
+        chosenName: name,
+    });
+
     return {
         playlist: view.playlist,
         thumbnail: view.thumbnail || null,
-        // bsky posts have no title; the caption is the closest thing, with the
-        // author as a fallback so the entry is never blank.
-        name: text || `Video by ${displayName}`,
+        name,
         description: handle ? `${displayName} (@${handle})` : displayName,
     };
 }

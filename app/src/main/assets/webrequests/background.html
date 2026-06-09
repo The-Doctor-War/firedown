@@ -11,9 +11,13 @@
 <script src="js/cookies.js" type="module"></script>
 <!-- The per-site parsers + page-state bridge background, merged in from the
      former parser@ extension. Classic (non-module) script: its globals sit
-     alone on window (the scripts above are module-scoped). It reads the
-     blocklist matcher and ambient-header getter those modules publish on
-     globalThis, but only at navigation time — long after they've run. -->
+     alone on window (the scripts above are module-scoped). NOTE the real
+     execution order: type="module" scripts are implicitly deferred, so this
+     classic script runs FIRST, before the modules publish
+     globalThis.matchInParserBlocklist / __getAmbientHeaders. That's safe only
+     because every read of those globals happens at navigation/message time
+     (long after all scripts ran) and is typeof-guarded — never at top level.
+     Keep it that way: top-level code here must not touch the module globals. -->
 <script src="parser-background.js"></script>
 </body>
 </html>

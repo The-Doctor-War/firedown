@@ -13,14 +13,14 @@
 // probing a URL and drops a match.
 //
 // WHY A SEPARATE FILE FROM regex.js. regex.js holds the generic, CDN-agnostic
-// junk (telemetry/beacon endpoints, init/numbered HLS-DASH segment fragments)
-// and is REMOTE-MANAGED — its pattern list is refetched every 6h. The
-// parser-dedup blocks are different in kind: they're bundled-only, they pair
-// 1:1 with a parser in the other extension, and they change when a parser
+// junk (telemetry/beacon endpoints, init/numbered HLS-DASH segment fragments).
+// Both lists are bundled-only (regex.js's old 6h remote refetch was removed —
+// the bundled list is the single source of truth), but they differ in KIND:
+// the parser-dedup blocks pair 1:1 with a parser and change when a parser
 // changes. Keeping them here, keyed by parser, makes the cardinal rule
 // mechanical — adding or changing a parser means adding/adjusting its entry
 // HERE, next to nothing else, instead of threading another line into the
-// remote-managed generic list.
+// generic junk list.
 //
 // HOW TO ADD A PARSER: drop a new key below with the host/CDN pattern(s) for the
 // media that parser emits. Each value is a JS-regex SOURCE string (the same

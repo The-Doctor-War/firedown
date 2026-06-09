@@ -100,6 +100,21 @@ const PARSER_BLOCKLIST = {
     '(playlist|playback)\\.live-video\\.net.*\\.m3u8',
   ],
 
+  // Kick — the kick@ parser emits the HLS master (data.source) for VODs, served
+  // from the AWS-IVS-backed stream.kick.com CDN (the /ivs/v1/ path). Block the
+  // master + media playlists (.m3u8) AND the .ts segments the player fetches from
+  // that host: Kick's segments are BARE-NUMBERED (.../720p60/7.ts), so regex.js's
+  // generic numbered-fragment rules (which require a seg/segment/chunk/frag
+  // prefix) never match them. Without this entry the generic catcher captures
+  // every segment, runs a metadatareader probe on each (~5 MB fetched per probe),
+  // drops it as raw mpegts (isValidMedia), and — because a dropped capture is
+  // never added to the repository — RE-probes the same buffered segments on every
+  // player re-fetch, an unbounded probe loop. Scoped to .m3u8/.ts so the
+  // thumbnails this host may serve (.jpg) are untouched.
+  kick: [
+    'stream\\.kick\\.com\\/.*\\.(m3u8|ts)',
+  ],
+
   // Rumble — the parser emits the HLS master (watch pages, via embedJS) and the
   // MP4 shorts variants on the rumble.cloud CDN.
   rumble: [

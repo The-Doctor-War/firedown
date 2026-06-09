@@ -83,6 +83,12 @@
 #define LOGW(level, ...) if (level <= LOG_LEVEL) {__android_log_print(ANDROID_LOG_WARN, LOG_TAG, __VA_ARGS__);}
 
 #define UPDATE_TIME_US 50000ll
+/* Consecutive progress ticks (UPDATE_TIME_US each) a stream's recording-time
+ * accumulator may fail to advance before it is treated as stalled and dropped
+ * from the muxed-position min (see downloader_muxed_position). Sized to tolerate
+ * a brief gap between an audio stream's bursty packets (~21 ms AAC frames vs the
+ * 50 ms tick) while still reacting promptly to a genuine freeze. */
+#define PROGRESS_STALL_TICKS 5
 
 #define BUFFER_SIZE 1500
 
@@ -103,10 +109,23 @@ struct Downloader {
 
     int input_stream_numbers[MAX_STREAMS];
     int input_source_index[MAX_STREAMS];
+    /* Fixed media type per capture slot, recorded at find time. The reader
+     * routes packets by this (not only by the frozen input-stream index) so an
+     * HLS discontinuity that renumbers the underlying MPEG-TS streams can't
+     * misroute a packet — see the match loop in downloader_read. */
+    enum AVMediaType capture_codec_type[MAX_STREAMS];
     int64_t last_mux_dts[MAX_STREAMS];
     int64_t current_recording_time[MAX_STREAMS];
     int64_t filter_in_rescale_delta_last[MAX_STREAMS];
     int64_t start_time;
+
+    /* Progress-only state (mux thread, no lock). Tracks whether each stream's
+     * recording-time accumulator is still advancing so a stalled track can be
+     * excluded from the muxed-position min, plus the last reported position so
+     * that exclusion can never step the bar backward. */
+    int64_t progress_prev_recording_time[MAX_STREAMS];
+    int progress_stall_ticks[MAX_STREAMS];
+    int64_t progress_last_position;
 
     int capture_streams_no;
     int video_stream_no;
@@ -537,6 +556,7 @@ int downloader_find_streams(struct Downloader *downloader,
     downloader->input_codec_ctxs[streams_no] = dec_ctx;
     downloader->input_stream_numbers[streams_no] = bn_stream;
     downloader->input_source_index[streams_no] = source_input;
+    downloader->capture_codec_type[streams_no] = codec_type;
     downloader->capture_streams_no += 1;
 
     LOGI(2, "downloader_find_stream type=%d input[%d] stream_idx=%d -> capture[%d]",
@@ -687,10 +707,13 @@ void downloader_stop_without_lock(struct State *state) {
     downloader->last_updated_time = 0;
     downloader->start_time = INT64_MAX;
     downloader->stop_stream = FALSE;
+    downloader->progress_last_position = 0;
     for (int i = 0; i < MAX_STREAMS; i++) {
         downloader->last_mux_dts[i] = 0;
         downloader->current_recording_time[i] = 0;
         downloader->filter_in_rescale_delta_last[i] = 0;
+        downloader->progress_prev_recording_time[i] = 0;
+        downloader->progress_stall_ticks[i] = 0;
     }
     for (int i = 0; i < MAX_DOWNLOAD_INPUTS; i++) {
         downloader->input_eof[i] = FALSE;
@@ -841,17 +864,70 @@ void clean_downloader_field(JNIEnv *env, jobject thiz) {
 enum ProgressMode { PROGRESS_TIME, PROGRESS_SIZE, PROGRESS_NONE };
 
 /* Muxed position common to every stream — the minimum of the per-stream
- * accumulators. With split audio+video the accumulators advance at different
- * rates; the min is the position every track has reached, so it is monotonic
- * (the min of non-decreasing series is non-decreasing) and reflects how much
- * complete output exists. For a single stream it is just that stream's value. */
-static int64_t downloader_muxed_position(const struct Downloader *downloader) {
-    int64_t pos = downloader->current_recording_time[0];
-    for (int s = 1; s < downloader->capture_streams_no; s++) {
+ * accumulators that are still ADVANCING. With split audio+video the accumulators
+ * advance at different rates, so the min is the position every active track has
+ * reached: monotonic (the min of non-decreasing series is non-decreasing) and a
+ * measure of how much complete output exists. For a single stream it is just
+ * that stream's value.
+ *
+ * A stream is dropped from the min once it stalls for PROGRESS_STALL_TICKS
+ * consecutive ticks (hysteresis, so a momentary gap between an audio stream's
+ * bursty packets does not bounce it in and out). This is what keeps a spliced
+ * VOD's progress moving: the post-discontinuity audio packets are demuxed with
+ * duration 0, so the audio accumulator FREEZES while video keeps advancing —
+ * without the exclusion, min() would pin progress to the frozen audio track.
+ * A final non-regress clamp guarantees the reported position never steps back
+ * when a stream flips between stalled and advancing.
+ *
+ * Mutates progress-only state; called once per progress tick from the mux
+ * thread, so the stall counters are in tick units and need no lock. */
+static int64_t downloader_muxed_position(struct Downloader *downloader) {
+    int64_t pos;
+    int64_t cur;
+    int counted;
+    int s;
+
+    /* Update per-stream stall tracking: growth resets the counter, no growth
+     * since the previous tick increments it. */
+    for (s = 0; s < downloader->capture_streams_no; s++) {
+        cur = downloader->current_recording_time[s];
+        if (cur > downloader->progress_prev_recording_time[s]) {
+            downloader->progress_stall_ticks[s] = 0;
+        } else {
+            downloader->progress_stall_ticks[s] += 1;
+        }
+        downloader->progress_prev_recording_time[s] = cur;
+    }
+
+    /* Min over the streams that are not (yet) considered stalled. */
+    pos = INT64_MAX;
+    counted = 0;
+    for (s = 0; s < downloader->capture_streams_no; s++) {
+        if (downloader->progress_stall_ticks[s] >= PROGRESS_STALL_TICKS) {
+            continue;
+        }
         if (downloader->current_recording_time[s] < pos) {
             pos = downloader->current_recording_time[s];
         }
+        counted += 1;
     }
+
+    /* Every stream stalled (a genuine pause, or before any data has flowed):
+     * fall back to the plain min over all streams. */
+    if (counted == 0) {
+        pos = downloader->current_recording_time[0];
+        for (s = 1; s < downloader->capture_streams_no; s++) {
+            if (downloader->current_recording_time[s] < pos) {
+                pos = downloader->current_recording_time[s];
+            }
+        }
+    }
+
+    /* Never regress. */
+    if (pos < downloader->progress_last_position) {
+        pos = downloader->progress_last_position;
+    }
+    downloader->progress_last_position = pos;
     return pos;
 }
 
@@ -1058,19 +1134,37 @@ void *downloader_mux(void *data) {
             pkt->pts += av_rescale_q(-downloader->start_time, AV_TIME_BASE_Q, pkt->time_base);
 
         if (output_stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
-            /* Use av_rescale_delta to preserve accuracy with coarse audio timebases. */
-            int duration = av_get_audio_frame_duration2(output_stream->codecpar, pkt->size);
-            if (!duration)
-                duration = output_stream->codecpar->frame_size;
+            if (pkt->dts == AV_NOPTS_VALUE) {
+                /* av_rescale_delta() av_assert0()s that its input timestamp is
+                 * not AV_NOPTS_VALUE and abort()s (SIGABRT) otherwise. Audio
+                 * packets CAN arrive with no timestamp right after an HLS
+                 * EXT-X-DISCONTINUITY — observed on spliced Kick VODs, where the
+                 * first audio packet of the post-splice segment had
+                 * pts=dts=AV_NOPTS_VALUE. Synthesise a monotonic dts in the output
+                 * timebase from the last muxed one instead of rescaling. (The
+                 * generic no-PTS synthesis further down runs only AFTER this
+                 * rescale, too late to prevent the abort.) */
+                if (downloader->last_mux_dts[stream_no] != AV_NOPTS_VALUE)
+                    pkt->dts = downloader->last_mux_dts[stream_no] + 1;
+                else
+                    pkt->dts = 0;
+                pkt->pts = pkt->dts;
+                pkt->duration = 0;
+            } else {
+                /* Use av_rescale_delta to preserve accuracy with coarse audio timebases. */
+                int duration = av_get_audio_frame_duration2(output_stream->codecpar, pkt->size);
+                if (!duration)
+                    duration = output_stream->codecpar->frame_size;
 
-            pkt->dts = av_rescale_delta(pkt->time_base, pkt->dts,
-                                        (AVRational) {1, output_stream->codecpar->sample_rate},
-                                        duration,
-                                        &downloader->filter_in_rescale_delta_last[stream_no],
-                                        output_stream->time_base);
-            pkt->pts = pkt->dts;
-            pkt->duration = av_rescale_q(pkt->duration, input_stream->time_base,
-                                         output_stream->time_base);
+                pkt->dts = av_rescale_delta(pkt->time_base, pkt->dts,
+                                            (AVRational) {1, output_stream->codecpar->sample_rate},
+                                            duration,
+                                            &downloader->filter_in_rescale_delta_last[stream_no],
+                                            output_stream->time_base);
+                pkt->pts = pkt->dts;
+                pkt->duration = av_rescale_q(pkt->duration, input_stream->time_base,
+                                             output_stream->time_base);
+            }
         } else {
             av_packet_rescale_ts(pkt, pkt->time_base, output_stream->time_base);
         }
@@ -1373,6 +1467,8 @@ int downloader_read(struct Downloader *downloader) {
     int err = ERROR_NO_ERROR;
     int ret;
     int all_eof;
+    AVStream *pkt_stream;
+    enum AVMediaType pkt_type;
 
     /* read_thread_created is now set by jni_downloader_start before
      * it releases mutex_operation, so dealloc's threads-free wait sees
@@ -1433,16 +1529,59 @@ int downloader_read(struct Downloader *downloader) {
 
             any_read = TRUE;
 
-            /* Match packet → capture stream. */
+            /* Match packet → capture stream.
+             *
+             * The slot was bound at find time to a specific (input,
+             * input-stream-index). But an HLS EXT-X-DISCONTINUITY can splice in a
+             * segment from a different encoder whose MPEG-TS PIDs differ, and the
+             * mpegts demuxer then RENUMBERS / REUSES AVStream indices across the
+             * splice. Observed on Kick VODs: a ~2 s CloudFront preroll carries
+             * audio on pid 0x101, while the main IVS content carries VIDEO on pid
+             * 0x101 — reusing AVStream index 1. A frozen index map then feeds the
+             * new H264 packets into the AUDIO capture, and the mp4 muxer's
+             * auto-inserted aac_adtstoasc bitstream filter aborts the whole
+             * download ("Error parsing ADTS frame header").
+             *
+             * So match by the capture's CODEC TYPE (fixed for the whole download)
+             * against the packet's CURRENT input-stream type, and re-bind the
+             * slot's input-stream index when the splice moved it. firedown
+             * captures exactly one stream per type (one video + one audio; split
+             * audio/video are separate inputs, disambiguated by input_source_index
+             * below), so a type maps to a single capture unambiguously — a multi-
+             * resolution ABR master is never one input here, each rendition is its
+             * own playlist and we download one. A foreign stream whose type matches
+             * no capture (e.g. the main content's timed_id3 data track) matches
+             * nothing and is dropped, exactly as before. */
+            pkt_stream = NULL;
+            pkt_type = AVMEDIA_TYPE_UNKNOWN;
+            if (pkt->stream_index >= 0 && pkt->stream_index < (int) fmt_ctx->nb_streams) {
+                pkt_stream = fmt_ctx->streams[pkt->stream_index];
+                pkt_type = pkt_stream->codecpar->codec_type;
+            }
+
             pthread_mutex_lock(&downloader->mutex_queue);
 
             queue = NULL;
             for (stream_no = 0; stream_no < downloader->capture_streams_no; ++stream_no) {
-                if (pkt->stream_index == downloader->input_stream_numbers[stream_no] &&
-                    input_idx == downloader->input_source_index[stream_no]) {
-                    queue = downloader->packets;
-                    break;
+                if (input_idx != downloader->input_source_index[stream_no])
+                    continue;
+                if (pkt_type != downloader->capture_codec_type[stream_no])
+                    continue;
+                /* Packet belongs to this capture's type. Follow a discontinuity
+                 * remap by re-pointing the slot at the packet's current input
+                 * stream. Only input_stream_numbers is updated (read by this
+                 * reader thread alone); input_streams[] is deliberately left as-is
+                 * — the muxer reads it without the queue lock for the stream
+                 * timebase, and an MPEG-TS discontinuity keeps the 1/90000
+                 * timebase, so the stored stream stays valid for that use. */
+                if (downloader->input_stream_numbers[stream_no] != pkt->stream_index) {
+                    LOGW(2, "downloader_read re-bind capture[%d] type=%d input-stream %d -> %d (discontinuity remap)",
+                         stream_no, pkt_type,
+                         downloader->input_stream_numbers[stream_no], pkt->stream_index);
+                    downloader->input_stream_numbers[stream_no] = pkt->stream_index;
                 }
+                queue = downloader->packets;
+                break;
             }
             if (queue == NULL) {
                 av_packet_unref(pkt);

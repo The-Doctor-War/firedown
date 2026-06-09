@@ -291,40 +291,59 @@
     // packed blob), so it's not cat-and-mouse. Index-loop / primitive reads only
     // (Xray-safe). Runs in subframes too (all_frames) because the player is
     // usually an embedded cross-origin iframe.
-    const HLS_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
+    // Media URL shapes, shared by the player-API reader (here) and the generic
+    // page-state reader (further down): a progressive file vs an HLS master.
+    const PROGRESSIVE_RE = /^https?:\/\/[^\s"']+\.(?:mp4|m4v|webm)(?:[?#]|$)/i;
+    const HLS_MASTER_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
 
-    // Pull an HLS .m3u8 (and a title if present) out of a JWPlayer playlist item.
-    function readHlsFromItem(item) {
+    // Pull the RESOLVED source URL(s) the player was fed out of a JWPlayer playlist
+    // item — BOTH an HLS master (.m3u8) and progressive (.mp4/.m4v/.webm) sources,
+    // each with its label/height. This is "read the final url passed to the
+    // player": getPlaylist() returns the player's RESOLVED sources, so a packed /
+    // eval-obfuscated source is read AFTER the player de-obfuscated it (the result,
+    // not the packer). Returns { variants:[{url,height}], hls:[url], title,
+    // durationSec } or null.
+    function readPlayerItem(item) {
         if (!item || typeof item !== "object") return null;
-        let url = null;
-        const f = readPrim(item, "file");
-        if (typeof f === "string" && HLS_RE.test(f)) url = f;
-        if (!url) {
-            let sources;
-            try { sources = item.sources; } catch (_) { sources = null; }
-            let n = 0;
-            try { n = (sources && typeof sources.length === "number") ? sources.length : 0; } catch (_) { n = 0; }
-            for (let i = 0; i < n && !url; i++) {
-                let s;
-                try { s = sources[i]; } catch (_) { continue; }
-                const sf = readPrim(s, "file");
-                if (typeof sf === "string" && HLS_RE.test(sf)) url = sf;
-            }
+        const variants = [];
+        const hls = [];
+        const take = (url, label) => {
+            if (typeof url !== "string") return;
+            if (HLS_MASTER_RE.test(url)) hls.push(url);
+            else if (PROGRESSIVE_RE.test(url)) variants.push({ url, height: heightFrom(label, url) });
+        };
+        // The item's own resolved `file`, then each entry of `sources` (qualities).
+        take(readPrim(item, "file"), readPrim(item, "label") || readPrim(item, "height"));
+        let sources;
+        try { sources = item.sources; } catch (_) { sources = null; }
+        let n = 0;
+        try { n = (sources && typeof sources.length === "number") ? sources.length : 0; } catch (_) { n = 0; }
+        for (let i = 0; i < n; i++) {
+            let s;
+            try { s = sources[i]; } catch (_) { continue; }
+            take(readPrim(s, "file"), readPrim(s, "label") || readPrim(s, "height") || readPrim(s, "quality"));
         }
-        if (!url) return null;
+        if (!variants.length && !hls.length) return null;
         const t = readPrim(item, "title");
-        return { url, title: (typeof t === "string" && t.trim()) ? t.trim() : null };
+        const d = Number(readPrim(item, "duration"));
+        return {
+            variants, hls, delegates: [], img: undefined,
+            title: (typeof t === "string" && t.trim()) ? t.trim() : null,
+            durationSec: (isFinite(d) && d > 0) ? d : 0
+        };
     }
 
-    // JWPlayer (jw8) covers the common embed hosts (vibuxer / luluvdo /
-    // lulustream …): jwplayer().getPlaylist() → [{file, sources:[{file}], title}],
+    // Read the media the player was FED from its live JS API (not page state) —
+    // the most precise "final url passed to the player", de-obfuscation-proof.
+    // JWPlayer (jw8) covers the common embed hosts (vibuxer / luluvdo / lulustream
+    // …): jwplayer().getPlaylist() → [{file, sources:[{file,label}], title}],
     // resolved at setup() — preload:none defers only the FETCH, not setup, so the
-    // url is present on load. Add another player as a new block here, never a
-    // per-site file. Returns { url, title } or null.
-    function findPlayerHls() {
+    // url is present on load. Add another player's API as a new block here, never a
+    // per-site file. Returns a media group (see readPlayerItem) or null.
+    function findPlayerMedia() {
         let pw;
         try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
-        if (!pw) { log("hls-probe: no wrappedJSObject @", location.host); return null; }
+        if (!pw) return null;
 
         let jw;
         try { jw = pw.jwplayer; } catch (_) { jw = null; }
@@ -333,35 +352,31 @@
         // actually present, to pinpoint where extraction fails.
         if (typeof jw !== "function") return null;
 
-        log("hls-probe: jwplayer present @", location.host);
+        log("player-probe: jwplayer present @", location.host);
         let api;
-        try { api = jw(); } catch (e) { log("hls-probe: jwplayer() threw:", e && e.message); return null; }
-        if (!api || typeof api !== "object") { log("hls-probe: jwplayer() gave no api (player not set up yet?)"); return null; }
+        try { api = jw(); } catch (e) { log("player-probe: jwplayer() threw:", e && e.message); return null; }
+        if (!api || typeof api !== "object") { log("player-probe: jwplayer() gave no api (player not set up yet?)"); return null; }
 
         let getPl;
         try { getPl = api.getPlaylist; } catch (_) { getPl = null; }
-        if (typeof getPl !== "function") { log("hls-probe: api has no getPlaylist()"); return null; }
+        if (typeof getPl !== "function") { log("player-probe: api has no getPlaylist()"); return null; }
 
         let pl;
-        try { pl = api.getPlaylist(); } catch (e) { log("hls-probe: getPlaylist() threw:", e && e.message); return null; }
+        try { pl = api.getPlaylist(); } catch (e) { log("player-probe: getPlaylist() threw:", e && e.message); return null; }
         let n = 0;
         try { n = (pl && typeof pl.length === "number") ? pl.length : 0; } catch (_) { n = 0; }
-        log("hls-probe: getPlaylist length =", n);
+        log("player-probe: getPlaylist length =", n);
 
         for (let i = 0; i < n; i++) {
             let it;
             try { it = pl[i]; } catch (_) { continue; }
-            const f = readPrim(it, "file");
-            let nsrc = 0;
-            try { const s = it.sources; nsrc = (s && typeof s.length === "number") ? s.length : 0; } catch (_) { nsrc = 0; }
-            const hit = readHlsFromItem(it);
-            log("hls-probe: item", i,
-                "file=", f != null ? String(f).slice(0, 90) : "(none)",
-                "sources=", nsrc,
-                "hit=", hit ? hit.url.slice(0, 90) : "no");
-            if (hit) return hit;
+            const grp = readPlayerItem(it);
+            log("player-probe: item", i,
+                "variants=", grp ? grp.variants.length : 0,
+                "hls=", grp ? grp.hls.length : 0);
+            if (grp) return grp;
         }
-        log("hls-probe: no .m3u8 in playlist");
+        log("player-probe: no playable source in playlist");
         return null;
     }
 
@@ -396,220 +411,340 @@
         browser.runtime.sendMessage({ kind: "page-state-hls", payload }).then(() => {}, () => {});
     }
 
-    // ---- mediaDefinitions player (Pornhub-network family) --------------------
-    // tube8 / pornhub / youporn / redtube and their white-label clones inline,
-    // into a page-world global (page_params.video_player_setup.playervars), a
-    // `mediaDefinitions` array plus rich metadata (video_title / video_duration /
-    // image_url). Each entry's `videoUrl` is EITHER a direct media URL OR a
-    // same-origin JSON DELEGATE (…/media/mp4/?s=<token>) returning
-    // [{quality, videoUrl:…mp4}]. The page fetches that delegate on LOAD (not on
-    // play), so the real progressive URLs exist pre-play — but only inside an
-    // application/json XHR body, which the generic catcher rejects, and never in
-    // the DOM (the page carries only the tokenized delegate). So nothing is
-    // captured until the user presses play and the wire finally sees a real .mp4.
-    // We read mediaDefinitions page-world (same wrappedJSObject waiver as the HLS
-    // path), resolve the delegate with a SAME-ORIGIN fetch (the bridge runs ON the
-    // page, so no host permission is needed), and emit the variants. Generic by
-    // SHAPE (the player), not by host — exactly like findPlayerHls is generic to
-    // JWPlayer. A direct .mp4/.webm becomes a progressive variant; a direct .m3u8
-    // rides the existing HLS-master path.
-    const DIRECT_MEDIA_RE = /^https?:\/\/[^\s"']+\.(?:mp4|m4v|webm)(?:[?#]|$)/i;
-    const HLS_MASTER_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
+    // ---- Generic page-world player media (ANY site, ANY player) --------------
+    // findPlayerMedia (above) reads the resolved URL from a live player API
+    // (JWPlayer); this is the GENERAL fallback for players that DON'T expose their
+    // fed URL on a readable API — capture WHENEVER a site holds a playable media URL
+    // in a page-world JS global before the player fetches it on play — a custom
+    // player config (window.page_params, flashvars…), a framework store
+    // (__NEXT_DATA__/__NUXT__/Redux…), or any plain object. We walk the page-world
+    // state and collect a URL only when it sits under a media-ish KEY
+    // (videoUrl/url/src/file/hls/source/contentUrl…) AND its VALUE is a real media
+    // URL: the key says "a player", the value extension says "a url to play"
+    // (this key-proximity is what keeps us off the page's many non-media URLs —
+    // share/canonical/next links never carry a media extension). Three outcomes:
+    //   - .m3u8            → HLS master  (postHlsMaster → Java enumerates, no probe)
+    //   - .mp4/.m4v/.webm  → progressive variant (page-state-progressive)
+    //   - a SAME-ORIGIN non-media url beside a format/quality/segmentFormats hint
+    //     → a tokenized media-list DELEGATE (e.g. the Pornhub-network player's
+    //     …/media/mp4/?s=… returning [{quality, videoUrl:…mp4}]); resolved with a
+    //     same-origin credentialed fetch (the bridge runs ON the page, so NO host
+    //     permission and no CORS problem — that's why the resolve is here, not in
+    //     background.js). Generic by SHAPE, never by host. Quality/height comes
+    //     from a sibling quality/height/label/resolution field or is parsed from
+    //     the URL (…_720P_…); duration from a sibling duration/video_duration.
+    // (PROGRESSIVE_RE / HLS_MASTER_RE are defined above, shared with the player-API
+    //  reader.)
+    // Keys a player holds its source(s) under. The VALUE still has to be a media
+    // URL (or a same-origin delegate), so a broad key like `url` is safe.
+    const MEDIA_KEY_RE = /^(?:video_?url|videourl|url|uri|src|source|file|hls|hls_?url|m3u8|dash|manifest_?url|playback_?url|stream_?url|content_?url|media_?url|play_?url)$/i;
+    // Keys whose value is an ARRAY of quality variants for ONE video (so the whole
+    // array is grouped into a single entity, not split). Deliberately narrow —
+    // a player's source/quality list, NOT a generic `videos`/`items`/`playlist`
+    // (those hold DIFFERENT videos — related/recommended — and must not merge).
+    const LIST_KEY_RE = /^(?:media_?definitions|sources|qualities|levels|renditions|formats|variants)$/i;
+    // Sibling keys that carry a quality/height hint next to a source URL.
+    const QUALITY_KEY_RE = /^(?:quality|height|res|resolution|label)$/i;
+    // Sibling keys that mark a media-list entry (so a non-media same-origin URL
+    // beside one is treated as a resolvable delegate, not ignored).
+    const DELEGATE_HINT_RE = /^(?:format|quality|segment_?formats|defaultquality|remote)$/i;
+    // Sibling keys that carry the clip duration (seconds).
+    const DURATION_KEY_RE = /^(?:duration|video_?duration|length|seconds)$/i;
+    // Sibling keys that carry a poster/thumbnail for the clip.
+    const IMG_KEY_RE = /^(?:image_?url|poster|thumb(?:nail)?|cover|preview)$/i;
+    // A media-key value that is one of these is never a media delegate (so a
+    // same-origin page/asset URL beside a quality hint isn't mistaken for one).
+    const NON_MEDIA_EXT_RE = /\.(?:jpe?g|png|gif|webp|svg|ico|css|js|json|html?|xml|woff2?|ttf)(?:[?#]|$)/i;
 
-    // True when `o` looks like a playervars object: it carries a non-empty
-    // mediaDefinitions array whose first entry has an http(s) `videoUrl`.
-    function looksLikeMediaDefs(o) {
-        if (!o || typeof o !== "object") return false;
-        let md;
-        try { md = o.mediaDefinitions; } catch (_) { return false; }
-        if (!md) return false;
-        let n;
-        try { n = md.length; } catch (_) { return false; }
-        if (typeof n !== "number" || n === 0) return false;
-        let first;
-        try { first = md[0]; } catch (_) { return false; }
-        if (!first || typeof first !== "object") return false;
-        const vu = readPrim(first, "videoUrl");
-        return typeof vu === "string" && /^https?:\/\//i.test(vu);
+    // Parse a height (px) from a quality/label value ("720", "720p", "1080P HD")
+    // or, failing that, from a media URL (…_720P_… / …/720/…). 0 if unknown.
+    function heightFrom(qualityVal, url) {
+        if (qualityVal != null) {
+            const m = String(qualityVal).match(/(\d{3,4})/);
+            if (m) return parseInt(m[1], 10) || 0;
+        }
+        if (typeof url === "string") {
+            const m = url.match(/[_/-](\d{3,4})[pP][_/.-]/) || url.match(/[_/-](\d{3,4})[pP]?(?:[?#]|$)/);
+            if (m) return parseInt(m[1], 10) || 0;
+        }
+        return 0;
     }
 
-    // Bounded search for the playervars object inside a page-world global. Fast
-    // known path first (Pornhub-network: video_player_setup.playervars), then a
-    // depth/node-capped generic walk. Index loops / direct reads only (Xray-safe).
-    function findPlayervars(root) {
-        try {
-            const pv = root.video_player_setup && root.video_player_setup.playervars;
-            if (looksLikeMediaDefs(pv)) return pv;
-        } catch (_) {}
-        if (looksLikeMediaDefs(root)) return root;
+    // Read a quality/height hint from any QUALITY_KEY sibling in the same object.
+    function siblingQuality(o, keys) {
+        for (let i = 0; i < keys.length; i++) {
+            if (!QUALITY_KEY_RE.test(keys[i])) continue;
+            const v = readPrim(o, keys[i]);
+            if (v != null) return v;
+        }
+        return null;
+    }
+    // True when the object carries a media-list-entry hint (format/quality/…),
+    // qualifying a same-origin non-media value as a resolvable delegate.
+    function hasDelegateHint(o, keys) {
+        for (let i = 0; i < keys.length; i++) {
+            if (DELEGATE_HINT_RE.test(keys[i])) return true;
+        }
+        return false;
+    }
+
+    // Walk a page-world state tree (bounded: depth + node budget + visited set,
+    // index-loop / primitive reads only — Xray-safe) and collect playable media as
+    // GROUPS — one group per VIDEO, so quality variants of one clip stay together
+    // and DIFFERENT clips never merge. A group:
+    //   { variants:[{url,height}], hls:[url], delegates:[{url,height}], durationSec, img }
+    // Two ways a group forms:
+    //   (1) a media-LIST array under a LIST_KEY (sources/mediaDefinitions/…): all
+    //       its entries are qualities of ONE clip → one group;
+    //   (2) a single player object's own media-key string value(s).
+    // NOISE GUARD: (2) is skipped for objects that are ENTRIES OF AN ARRAY — a
+    // related/recommended-videos array would otherwise turn every item into its
+    // own capture. Such an item is still walked for a nested (1) list, so a main
+    // clip carried inside an array still yields its source list. Generic by SHAPE,
+    // host-agnostic; runs in every frame (all_frames), reading the player's
+    // RESOLVED page-world values — so a packed/eval-obfuscated source URL is read
+    // post-resolution, never the packed blob.
+    function collectPlayableMedia(root) {
         const seen = new Set();
-        let budget = 20000;
-        let found = null;
-        (function walk(o, depth) {
-            if (found || !o || typeof o !== "object" || depth > 8 || budget-- <= 0) return;
+        let budget = 30000;
+        const groups = [];
+        let pageOrigin = "";
+        try { pageOrigin = location.origin; } catch (_) { pageOrigin = ""; }
+        const sameOrigin = (u) => {
+            try { return new URL(u, location.href).origin === pageOrigin; } catch (_) { return false; }
+        };
+        const newGroup = () => ({ variants: [], hls: [], delegates: [], durationSec: 0, img: undefined });
+        const nonEmpty = (g) => g.variants.length || g.hls.length || g.delegates.length;
+
+        // Categorise one media-key URL into a group (variant / hls / delegate).
+        function classifyInto(g, url, qualityHint, owner, ownerKeys) {
+            if (HLS_MASTER_RE.test(url)) { g.hls.push(url); return; }
+            if (PROGRESSIVE_RE.test(url)) {
+                g.variants.push({ url, height: heightFrom(qualityHint, url) });
+                return;
+            }
+            if (sameOrigin(url) && !NON_MEDIA_EXT_RE.test(url)
+                && hasDelegateHint(owner, ownerKeys)) {
+                g.delegates.push({ url, height: heightFrom(qualityHint, url) });
+            }
+        }
+        // Best-effort duration/poster for a group from the object that owns it.
+        function fillMeta(g, o, keys) {
+            if (!g.durationSec) {
+                for (let i = 0; i < keys.length; i++) {
+                    if (!DURATION_KEY_RE.test(keys[i])) continue;
+                    const d = Number(readPrim(o, keys[i]));
+                    if (isFinite(d) && d > 0 && d < 86400) { g.durationSec = d; break; }
+                }
+            }
+            if (!g.img) {
+                for (let i = 0; i < keys.length; i++) {
+                    if (!IMG_KEY_RE.test(keys[i])) continue;
+                    const iv = readPrim(o, keys[i]);
+                    if (typeof iv === "string" && /^https?:\/\//i.test(iv)) { g.img = iv; break; }
+                }
+            }
+        }
+
+        (function walk(o, depth, fromArray) {
+            if (!o || typeof o !== "object" || depth > 9 || budget-- <= 0) return;
             if (seen.has(o)) return;
             seen.add(o);
-            if (looksLikeMediaDefs(o)) { found = o; return; }
+
             if (Array.isArray(o)) {
                 let n;
                 try { n = o.length; } catch (_) { return; }
                 if (typeof n !== "number") return;
-                for (let i = 0; i < n && !found; i++) {
+                for (let i = 0; i < n && i < 500; i++) {
                     let v;
                     try { v = o[i]; } catch (_) { continue; }
-                    walk(v, depth + 1);
+                    if (v && typeof v === "object") walk(v, depth + 1, true);
                 }
                 return;
             }
             let keys;
             try { keys = Object.keys(o); } catch (_) { return; }
-            for (let i = 0; i < keys.length && !found; i++) {
-                let v;
-                try { v = o[keys[i]]; } catch (_) { continue; }
-                walk(v, depth + 1);
+
+            // (1) media-LIST arrays on this object → one group per list.
+            for (let ki = 0; ki < keys.length; ki++) {
+                if (!LIST_KEY_RE.test(keys[ki])) continue;
+                let arr;
+                try { arr = o[keys[ki]]; } catch (_) { continue; }
+                let n = 0;
+                try { n = (arr && typeof arr.length === "number") ? arr.length : 0; } catch (_) { n = 0; }
+                if (!n) continue;
+                const g = newGroup();
+                for (let i = 0; i < n && i < 50; i++) {
+                    let e;
+                    try { e = arr[i]; } catch (_) { continue; }
+                    if (typeof e === "string") {
+                        if (/^https?:\/\//i.test(e)) classifyInto(g, e, null, o, keys);
+                        continue;
+                    }
+                    if (!e || typeof e !== "object") continue;
+                    seen.add(e); // consumed — don't let it also form a (2) group
+                    let ekeys;
+                    try { ekeys = Object.keys(e); } catch (_) { continue; }
+                    const eq = siblingQuality(e, ekeys);
+                    for (let ek = 0; ek < ekeys.length; ek++) {
+                        if (!MEDIA_KEY_RE.test(ekeys[ek])) continue;
+                        let ev;
+                        try { ev = e[ekeys[ek]]; } catch (_) { continue; }
+                        if (typeof ev !== "string" || !/^https?:\/\//i.test(ev)) continue;
+                        classifyInto(g, ev, eq, e, ekeys);
+                    }
+                }
+                if (nonEmpty(g)) { fillMeta(g, o, keys); groups.push(g); }
             }
-        })(root, 0);
-        return found;
+
+            // (2) a single player object's own media-key strings → one group.
+            // Skipped for array entries (related-list noise guard).
+            if (!fromArray) {
+                const g = newGroup();
+                const q = siblingQuality(o, keys);
+                for (let ki = 0; ki < keys.length; ki++) {
+                    if (!MEDIA_KEY_RE.test(keys[ki])) continue;
+                    let v;
+                    try { v = o[keys[ki]]; } catch (_) { continue; }
+                    if (typeof v !== "string" || !/^https?:\/\//i.test(v)) continue;
+                    classifyInto(g, v, q, o, keys);
+                }
+                if (nonEmpty(g)) { fillMeta(g, o, keys); groups.push(g); }
+            }
+
+            // Recurse into child objects/arrays.
+            for (let ki = 0; ki < keys.length; ki++) {
+                let v;
+                try { v = o[keys[ki]]; } catch (_) { continue; }
+                if (v && typeof v === "object") walk(v, depth + 1, false);
+            }
+        })(root, 0, false);
+
+        return groups;
     }
 
-    // Probe the known state globals (plus page_params, where the Pornhub-network
-    // player lives) for a playervars object. Cheap no-op when none holds one.
-    function readMediaDefs() {
-        let pw;
-        try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
-        if (!pw) return null;
-        const names = ["page_params"].concat(STATE_GLOBALS);
-        for (const name of names) {
-            let g;
-            try { g = pw[name]; } catch (_) { continue; }
-            if (!g || typeof g !== "object") continue;
-            let pv;
-            try { pv = findPlayervars(g); } catch (_) { pv = null; }
-            if (pv) return pv;
-        }
-        return null;
-    }
-
-    // Extract { url, format, quality } from each mediaDefinitions entry (Xray-safe
-    // primitive reads). Bounded to 50 entries.
-    function extractMediaDefs(pv) {
-        const out = [];
-        let md;
-        try { md = pv.mediaDefinitions; } catch (_) { md = null; }
-        let n = 0;
-        try { n = (md && typeof md.length === "number") ? md.length : 0; } catch (_) { n = 0; }
-        for (let i = 0; i < n && i < 50; i++) {
-            let d;
-            try { d = md[i]; } catch (_) { continue; }
-            const url = readPrim(d, "videoUrl");
-            if (typeof url !== "string" || !/^https?:\/\//i.test(url)) continue;
-            const format = readPrim(d, "format");
-            const quality = readPrim(d, "quality");
-            out.push({
-                url,
-                format: typeof format === "string" ? format : "",
-                quality: quality != null ? String(quality) : ""
-            });
-        }
-        return out;
-    }
-
-    // Title / duration / cover from the same playervars (generic field names the
-    // Pornhub-network player uses), falling back to the page's og:/title.
-    function mediaDefsMeta(pv) {
-        const t = readPrim(pv, "video_title");
-        const durRaw = readPrim(pv, "video_duration");
-        const dur = Number(durRaw);
-        const img = readPrim(pv, "image_url");
-        return {
-            title: (typeof t === "string" && t.trim()) ? t.trim() : pageTitle(),
-            durationMs: (isFinite(dur) && dur > 0) ? Math.round(dur * 1000) : 0,
-            img: (typeof img === "string" && img) ? img : (ogMeta("og:image") || undefined)
-        };
-    }
-
-    // Resolve a same-origin JSON delegate (…/media/mp4/?s=<token>) to its real
-    // media URLs. The page already made this exact fetch on load, so a same-origin
-    // credentialed re-fetch is cheap and authenticated. Returns [{url, height}].
+    // Resolve a same-origin JSON delegate to its real media URLs. The page already
+    // made this exact fetch on load, so a same-origin credentialed re-fetch is
+    // cheap and authenticated. Accepts a top-level array OR an object wrapping one
+    // (mediaDefinitions/sources/videos/items/data). Returns [{url, height}].
     async function fetchMediaList(url) {
         let data;
         try {
             const resp = await fetch(url, { credentials: "include", cache: "no-store" });
             if (!resp || !resp.ok) return [];
+            const ct = (resp.headers.get("content-type") || "").toLowerCase();
+            if (ct && !ct.includes("json") && !ct.includes("text")) return [];
             data = await resp.json();
         } catch (_) { return []; }
+        let arr = data;
+        if (arr && typeof arr === "object" && typeof arr.length !== "number") {
+            arr = data.mediaDefinitions || data.sources || data.videos || data.items
+                || data.formats || data.qualities || data.data || [];
+        }
         const out = [];
         let n = 0;
-        try { n = (data && typeof data.length === "number") ? data.length : 0; } catch (_) { n = 0; }
+        try { n = (arr && typeof arr.length === "number") ? arr.length : 0; } catch (_) { n = 0; }
         for (let i = 0; i < n && i < 50; i++) {
-            const it = data[i];
+            const it = arr[i];
             if (!it || typeof it !== "object") continue;
             const u = (typeof it.videoUrl === "string" && it.videoUrl)
                 || (typeof it.url === "string" && it.url)
-                || (typeof it.src === "string" && it.src);
+                || (typeof it.src === "string" && it.src)
+                || (typeof it.file === "string" && it.file);
             if (typeof u !== "string" || !/^https?:\/\//i.test(u)) continue;
-            const h = parseInt(it.quality || it.height || it.label, 10) || 0;
+            const h = heightFrom(it.quality || it.height || it.label || it.res, u);
             out.push({ url: u, height: h });
         }
         return out;
     }
 
-    // Pre-fetch guard: don't re-resolve the same delegate set across the retry
-    // passes (immediate/DOMContentLoaded/t500/t1500/t4000). Cleared on SPA nav.
+    // Probe page_params + flashvars + the known framework state globals for
+    // playable-media groups. Cheap no-op on the ~all pages/frames whose globals
+    // hold none. Capped so a state-heavy page can't emit an unbounded set.
+    const PLAYER_MEDIA_GLOBALS = ["page_params", "flashvars"].concat(STATE_GLOBALS);
+    const MAX_PLAYER_GROUPS = 12;
+    function readPlayerMedia() {
+        let pw;
+        try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
+        if (!pw) return null;
+        const groups = [];
+        const seenSig = new Set();
+        for (const name of PLAYER_MEDIA_GLOBALS) {
+            let g;
+            try { g = pw[name]; } catch (_) { continue; }
+            if (!g || typeof g !== "object") continue;
+            let found;
+            try { found = collectPlayableMedia(g); } catch (_) { found = null; }
+            if (!found) continue;
+            for (const grp of found) {
+                // Dedup identical groups seen via two globals (a signature of its
+                // URL set), and cap the total.
+                const sig = grp.variants.map(v => v.url).join("|") + "#"
+                    + grp.hls.slice().sort().join("|") + "#"
+                    + grp.delegates.map(d => d.url).join("|");
+                if (seenSig.has(sig)) continue;
+                seenSig.add(sig);
+                groups.push(grp);
+                if (groups.length >= MAX_PLAYER_GROUPS) return groups;
+            }
+        }
+        return groups.length ? groups : null;
+    }
+
+    // Pre-fetch / re-emit guard: don't re-resolve the same delegate set across the
+    // retry passes (immediate/DOMContentLoaded/t500/t1500/t4000). Cleared on SPA nav.
     const mediaDefsTried = new Set();
 
-    async function resolveAndEmitMediaDefs(pv, label) {
-        const defs = extractMediaDefs(pv);
-        if (!defs.length) return false;
-        const preKey = defs.map(d => d.url).join("|");
-        if (mediaDefsTried.has(preKey)) return true;
-        mediaDefsTried.add(preKey);
+    // Emit one group as its own entity: resolve its delegates, then post the
+    // progressive variants (page-state-progressive) and/or HLS master(s). Title is
+    // the generic page title; duration/poster come from the group when present.
+    async function emitOneGroup(grp, label) {
+        const progressive = grp.variants.slice(); // { url, height }
+        const hlsSet = new Set(grp.hls);
 
-        const meta = mediaDefsMeta(pv);
-        const progressive = []; // { url, height }
-        let hlsMaster = null;
-
-        for (const def of defs) {
-            if (HLS_MASTER_RE.test(def.url)) {
-                if (!hlsMaster) hlsMaster = def.url;
-            } else if (DIRECT_MEDIA_RE.test(def.url)) {
-                progressive.push({ url: def.url, height: parseInt(def.quality, 10) || 0 });
-            } else {
-                // Tokenized JSON delegate — resolve to the real media URLs.
-                const list = await fetchMediaList(def.url);
-                for (const item of list) {
-                    if (HLS_MASTER_RE.test(item.url)) {
-                        if (!hlsMaster) hlsMaster = item.url;
-                    } else if (DIRECT_MEDIA_RE.test(item.url)) {
-                        progressive.push({ url: item.url, height: item.height });
+        if (grp.delegates.length) {
+            const preKey = grp.delegates.map(d => d.url).join("|");
+            if (!mediaDefsTried.has(preKey)) {
+                mediaDefsTried.add(preKey);
+                for (const d of grp.delegates) {
+                    const list = await fetchMediaList(d.url);
+                    for (const item of list) {
+                        if (HLS_MASTER_RE.test(item.url)) hlsSet.add(item.url);
+                        else if (PROGRESSIVE_RE.test(item.url)) progressive.push(item);
                     }
                 }
             }
         }
 
+        const meta = resolveMeta(null); // generic og:/title + og:image
+        // A player-API item can carry its own title; prefer it over the page title.
+        const title = (typeof grp.title === "string" && grp.title) ? grp.title : meta.title;
+        const img = meta.img || grp.img;
+        const durationMs = grp.durationSec > 0 ? Math.round(grp.durationSec * 1000) : 0;
+
         if (progressive.length) {
-            // Dedup by URL, best (highest) quality first.
             const byUrl = new Map();
             for (const v of progressive) { if (!byUrl.has(v.url)) byUrl.set(v.url, v); }
             const variants = Array.from(byUrl.values())
                 .sort((a, b) => (b.height || 0) - (a.height || 0))
                 .map(v => ({ url: v.url, width: 0, height: v.height || 0 }));
-            if (!sentKeys.has(variants[0].url)) {
+            if (variants.length && !sentKeys.has(variants[0].url)) {
                 sentKeys.add(variants[0].url);
-                const payload = {
-                    variants,
-                    origin: location.href,
-                    title: meta.title,
-                    img: meta.img,
-                    durationMs: meta.durationMs
-                };
-                log("sending", variants.length, "mediaDefs progressive variant(s) at", label, meta.title);
+                const payload = { variants, origin: location.href, title, img, durationMs };
+                log("sending", variants.length, "page-player progressive variant(s) at", label, title);
                 browser.runtime.sendMessage({ kind: "page-state-progressive", payload }).then(() => {}, () => {});
             }
         }
-        if (hlsMaster && !sentKeys.has(hlsMaster)) {
-            sentKeys.add(hlsMaster);
-            postHlsMaster(hlsMaster, meta.title, meta.img, label);
+        for (const masterUrl of hlsSet) {
+            if (sentKeys.has(masterUrl)) continue;
+            sentKeys.add(masterUrl);
+            postHlsMaster(masterUrl, title, img, label);
+        }
+    }
+
+    async function resolveAndEmitPlayerMedia(groups, label) {
+        for (const grp of groups) {
+            try { await emitOneGroup(grp, label); } catch (_) {}
         }
         return true;
     }
@@ -742,28 +877,28 @@
             }
         }
 
-        // 2) A JS player holding a preload:none HLS master (read the resolved url,
-        //    so we capture without the user pressing play). The native side
-        //    enumerates the master (no probe); the played master URL dedups by URL
-        //    against this, and its raw .ts segments are dropped natively (mpegts).
-        const hls = findPlayerHls();
-        if (hls && hls.url) {
-            if (sentKeys.has(hls.url)) { armSpaObserver(); return true; }
-            sentKeys.add(hls.url);
-            const meta = resolveMeta(null);
-            postHlsMaster(hls.url, hls.title || meta.title, meta.img, label);
+        // 2) READ THE URL THE PLAYER WAS FED, from its live JS API (the resolved
+        //    source, so we capture without the user pressing play and read it
+        //    AFTER any eval/packer de-obfuscation). Now covers BOTH an HLS master
+        //    and progressive .mp4 (generalised from the old HLS-only reader). The
+        //    played URL dedups by URL against this; raw .ts segments are dropped
+        //    natively (mpegts).
+        const playerMedia = findPlayerMedia();
+        if (playerMedia) {
+            resolveAndEmitPlayerMedia([playerMedia], label).then(() => {}, () => {});
             armSpaObserver();
             return true;
         }
 
-        // 3) mediaDefinitions player (Pornhub-network family: tube8, pornhub,
-        //    youporn, redtube, white-label clones). The real media list is fetched
-        //    on LOAD into a same-origin JSON delegate the catcher drops, so nothing
-        //    is captured until play. Read it page-world + resolve the delegate.
-        //    Async (a same-origin fetch), so fire-and-forget and arm the observer.
-        const pv = readMediaDefs();
-        if (pv) {
-            resolveAndEmitMediaDefs(pv, label).then(() => {}, () => {});
+        // 3) GENERIC page-world player media (any site, any player) for players
+        //    whose fed value is NOT a final URL on a readable API but a config/
+        //    source-list in a page-world global (or a tokenized JSON delegate that
+        //    only resolves to a URL after a fetch — e.g. tube8). Direct .mp4/.m3u8
+        //    under a media-ish key, a source list, or a same-origin delegate
+        //    (resolved with a same-origin fetch). Async; fire-and-forget.
+        const found = readPlayerMedia();
+        if (found) {
+            resolveAndEmitPlayerMedia(found, label).then(() => {}, () => {});
             armSpaObserver();
             return true;
         }

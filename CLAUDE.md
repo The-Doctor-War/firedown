@@ -94,74 +94,110 @@ see the HLS-master path below), covers every such site:
   = the page origin (covers bilibili's upos/bilivideo anti-leech without any
   per-site host check). Per-site **request/emit** specifics belong in
   `background.js`, never as new injected files.
-- **It ALSO reads a page-world JS player's RESOLVED HLS master** (`findPlayerHls`
-  → JWPlayer `jwplayer().getPlaylist()[].file`/`.sources[].file`), for sites
-  whose player fetches a (often obfuscated/packed) master **only on PLAY**
-  (`preload: none`) — e.g. series.ly's vibuxer/luluvdo/lulustream jw8 embeds.
-  The wire can't see the master pre-play, but the player must hold the
-  **de-obfuscated** url at `setup()` (preload defers only the *fetch*, not setup),
-  so reading the resolved `.file` captures it without a play click — and it's
-  **agnostic to however the site packed the source** (we read the result, not the
-  packed blob — *not* cat-and-mouse). This is **why** the bridge runs
-  `all_frames` (the player is an embedded cross-origin iframe). Background
-  `kind:"page-state-hls"` → `enumerateMasterNative` (the normal HLS-master path:
-  Java enumerates qualities, no probe). **Headers must byte-match a real browser
-  fetch** — these stream CDNs run a strong anti-bot, and the native master fetch
-  is synthetic (the wire never saw it, so there are no cached headers to reuse).
-  On-device the ONLY difference between a 403 and a 200 was a missing `;q=0.9` on
-  `Accept-Language`. So the `page-state-hls` emit sends the full browser set:
-  `Origin` (explicit — `OriginInterceptor` only derives it same-site), full-path
-  `Referer` = the embed iframe URL, the `Sec-Fetch-Dest/Mode/Site` trio
-  (Sec-Fetch-Site *computed* same-origin/same-site/cross-site, not hardcoded),
-  and `User-Agent` + `Accept-Language` read from the page's real `navigator`
-  (UA verbatim; languages formatted WITH q-values, `en-US,ko-KR;q=0.9` — a bare
-  `join(",")` is a bot tell). Rule: add a header only if the browser sends it and
-  format it exactly. Ceiling worth knowing: this matches header *values*; the
-  strongest systems also fingerprint TLS (JA3/JA4) + header order, which OkHttp
-  can't mimic — header spoofing can't beat those.
-  **No dup on play:** the master URL is signed/stable, so when the user does play,
-  the wire sees the **same** master URL and the repository dedups it by URL; the
-  player's raw `.ts` segments are dropped natively (`isValidMedia` → `mpegts`).
-  Add another player (Video.js/Plyr…) as a new block in `findPlayerHls`, never a
-  per-site file.
-- **It ALSO reads a page-world player's MEDIA LIST and resolves a JSON delegate**
-  (`readMediaDefs` → `findPlayervars` → `resolveAndEmitMediaDefs`), for the
-  **Pornhub-network family** (tube8, pornhub, youporn, redtube + white-label
-  clones) and any player with the same shape. They inline, into a page-world
-  global (`page_params.video_player_setup.playervars`), a **`mediaDefinitions`**
-  array + rich metadata (`video_title` / `video_duration` / `image_url`). The
-  catch: each entry's `videoUrl` is **not** a media file but a **tokenized
-  same-origin JSON delegate** (`…/media/mp4/?s=<token>`) that returns
-  `[{quality, videoUrl:…mp4}]`. The page fetches that delegate **on LOAD, not on
-  play** — but the real `.mp4` URLs live **only inside an `application/json` XHR
-  body** (which the generic catcher rejects — `classifyXhr` drops
-  `application/json`) and **never in the DOM** (the page carries only the
-  tokenized delegate, no media extension, so the passive scrape and the manifest
-  body-sniff both skip it). So **nothing is captured until the user presses play**
-  and the wire finally sees a real `.mp4` — the exact symptom this path fixes. The
-  bridge reads `mediaDefinitions` page-world, then **resolves the delegate with a
-  credentialed SAME-ORIGIN `fetch`** (`fetchMediaList`) — same-origin because the
-  bridge runs ON the page, so **no host permission is needed** (this is the whole
-  reason to do the resolve in the bridge, not `background.js`, which would need a
-  per-host permission + CORS bypass). A direct `.mp4`/`.webm` entry becomes a
-  progressive variant; a direct `.m3u8` rides the `findPlayerHls` HLS path. Emit:
-  Background **`kind:"page-state-progressive"`** → `sendVariants` (skip-probe
-  auto-set from the page `duration`; the variant carries only `height` from the
-  quality string, `width:0` — `JsonHelper` renders that as `"720p"`, never
-  `"0x720"`). **No request headers** — these progressive media URLs are
-  query-signed/self-authorizing (the real browser fetch carries **no**
-  Referer/Origin/Cookie — verified in the HAR), unlike the HLS-master CDNs above.
-  **No dup on play:** the player's default quality is the entity's primary URL, so
-  it dedups by URL; the family's media CDNs (`t8cdn`/`phncdn`/`ypncdn`/`rdtcdn`)
-  are block-listed in `parser-blocklist.js` (cardinal rule) to also cover a
-  manually-selected *other* quality. **Trade-off to know:** that block also
-  suppresses the play-time fallback if the delegate-resolve ever fails at runtime
-  — judged acceptable because the bridge reads SSR-inlined state and re-fetches
-  the same stable signed delegate the page itself uses. **To extend:** add another
-  player's media-list shape as a new branch in `findPlayervars`/`extractMediaDefs`
-  (match by the array/field shape, **not** by host — generic like `findPlayerHls`),
-  resolve any delegate in `fetchMediaList`, and add the new media CDN(s) to
-  `parser-blocklist.js`. Never a per-site file, never a `background.js` host check.
+- **It ALSO reads the URL the PLAYER WAS FED, from its live JS API**
+  (`findPlayerMedia` → `readPlayerItem`, JWPlayer
+  `jwplayer().getPlaylist()[].file`/`.sources[].file`), for sites whose player
+  fetches a (often obfuscated/packed) source **only on PLAY** (`preload: none`) —
+  e.g. series.ly's vibuxer/luluvdo/lulustream jw8 embeds. The wire can't see it
+  pre-play, but the player must hold the **de-obfuscated** url at `setup()`
+  (preload defers only the *fetch*, not setup), so reading the resolved source
+  captures it without a play click — **agnostic to however the site packed the
+  source** (we read the *result*, not the packed blob — *not* cat-and-mouse). This
+  is the most precise capture and the **preferred** one when a player exposes its
+  source on an API. It reads **both** an **HLS master** (`.m3u8`) **and progressive
+  `.mp4`/`.m4v`/`.webm`** sources, each with its label/height (generalised from the
+  old HLS-only `findPlayerHls`). This is **why** the bridge runs `all_frames` (the
+  player is an embedded cross-origin iframe). Emit splits by kind: an HLS master →
+  Background `kind:"page-state-hls"` → `enumerateMasterNative` (Java enumerates
+  qualities, no probe); progressive → `kind:"page-state-progressive"` (see below).
+  For the HLS master, **headers must byte-match a real browser fetch** — these
+  stream CDNs run a strong anti-bot, and the native master fetch is synthetic (the
+  wire never saw it, so there are no cached headers to reuse). On-device the ONLY
+  difference between a 403 and a 200 was a missing `;q=0.9` on `Accept-Language`.
+  So the `page-state-hls` emit sends the full browser set: `Origin` (explicit —
+  `OriginInterceptor` only derives it same-site), full-path `Referer` = the embed
+  iframe URL, the `Sec-Fetch-Dest/Mode/Site` trio (Sec-Fetch-Site *computed*
+  same-origin/same-site/cross-site, not hardcoded), and `User-Agent` +
+  `Accept-Language` read from the page's real `navigator` (UA verbatim; languages
+  formatted WITH q-values, `en-US,ko-KR;q=0.9` — a bare `join(",")` is a bot tell).
+  Rule: add a header only if the browser sends it and format it exactly. Ceiling
+  worth knowing: this matches header *values*; the strongest systems also
+  fingerprint TLS (JA3/JA4) + header order, which OkHttp can't mimic — header
+  spoofing can't beat those. **No dup on play:** the source URL is signed/stable,
+  so when the user does play, the wire sees the **same** URL and the repository
+  dedups it by URL; the player's raw `.ts` segments are dropped natively
+  (`isValidMedia` → `mpegts`). Add another player's API (Video.js/Plyr…) as a new
+  block in `findPlayerMedia`, never a per-site file.
+- **It ALSO reads ANY page-world player's MEDIA LIST — the generic FALLBACK**
+  (`readPlayerMedia` → `collectPlayableMedia` → `resolveAndEmitPlayerMedia` →
+  `emitOneGroup`), for players that DON'T expose their fed URL on a readable API
+  like the one above — instead the fed value is a **config / source-list in a
+  page-world global** (or a tokenized JSON delegate that only resolves to a URL
+  after a fetch). Capture **whenever a site holds a playable media URL in a
+  page-world JS global before the player fetches it on play** — a custom player
+  config (`window.page_params`, `flashvars`…), a framework store
+  (`__NEXT_DATA__`/`__NUXT__`/Redux…), or any plain object. Like `findPlayerMedia`
+  it runs in **all frames** (the player is often a cross-origin iframe) and reads
+  the player's **RESOLVED** page-world values, so a packed / `eval`-obfuscated
+  source URL is read **post-resolution**, never the packed blob (read the result,
+  not the packer — not cat-and-mouse).
+  **How it matches (shape, never host):** walk the state tree (bounded — depth +
+  30k-node budget + visited set, index-loop/primitive reads only, Xray-safe) and
+  collect a URL only when it sits under a **media-ish KEY** (`videoUrl`/`url`/`src`/
+  `file`/`hls`/`source`/`contentUrl`… — `MEDIA_KEY_RE`) AND its **VALUE is a real
+  media URL**: the key says "a player", the value extension says "a url to play"
+  (this key-proximity is what keeps it off the page's countless non-media URLs —
+  share/canonical/next links carry no media extension). Three outcomes per hit:
+  `.m3u8` → HLS master (`postHlsMaster` → `page-state-hls` — Java enumerates, no
+  probe); `.mp4`/`.m4v`/`.webm` → progressive variant; a
+  **SAME-ORIGIN non-media URL beside a `format`/`quality`/`segmentFormats` hint**
+  → a tokenized **media-list DELEGATE** (e.g. the Pornhub-network player's
+  `…/media/mp4/?s=<token>` returning `[{quality, videoUrl:…mp4}]`), resolved with
+  a **credentialed SAME-ORIGIN `fetch`** (`fetchMediaList`). Same-origin is the
+  whole point: the bridge runs ON the page, so the resolve needs **no host
+  permission and hits no CORS** — which is why it lives in the bridge, not
+  `background.js` (which would need a per-host permission + CORS bypass).
+- **Why a JSON delegate is invisible to everything else** (the tube8 case that
+  motivated this): the real `.mp4` URLs live **only inside an `application/json`
+  XHR body** the generic catcher rejects (`classifyXhr` drops `application/json`)
+  and **never in the DOM** (the page carries only the tokenized delegate — no
+  media extension — so the passive scrape and the manifest body-sniff skip it).
+  The page fetches the delegate **on LOAD, not on play**, so nothing is captured
+  until the user presses play and the wire finally sees a real `.mp4`. Reading the
+  list page-world + resolving the delegate fixes exactly that.
+- **Grouping (one entity per video, no merging, no related-list spam).**
+  `collectPlayableMedia` returns **groups**, one per clip: (1) a media-LIST array
+  under a `LIST_KEY` (`sources`/`mediaDefinitions`/`qualities`/`levels`/
+  `renditions`/`formats`/`variants`) is **one** group (its entries are qualities
+  of the SAME clip), and (2) a single player object's own media-key string(s) is
+  one group. `LIST_KEY` is **deliberately narrow** — NOT `videos`/`items`/
+  `playlist`, which hold *different* clips and must not merge. **Noise guard:**
+  rule (2) is skipped for objects that are **entries of an array**, so a
+  related/recommended-videos array doesn't turn every item into a capture (a main
+  clip nested in an array still yields its own `LIST_KEY` source list via rule 1).
+  Total groups are capped (`MAX_PLAYER_GROUPS`). Each group emits as its **own**
+  entity.
+- **Emit + metadata.** Progressive → Background `kind:"page-state-progressive"` →
+  `sendVariants` (skip-probe auto-set from any page `duration`; the variant
+  carries only `height`, `width:0` — `JsonHelper` renders `"720p"`, never
+  `"0x720"`). **No request headers** for the progressive case — these URLs are
+  query-signed/self-authorizing (verified on tube8: the real browser fetch carries
+  **no** Referer/Origin/Cookie), unlike the HLS-master CDNs (which DO need the full
+  browser header set — see `postHlsMaster`). Title is the generic page title;
+  `duration`/`poster` come from `DURATION_KEY_RE`/`IMG_KEY_RE` siblings of the
+  source when present.
+- **Dedup on play.** The player's default quality is the entity's primary URL, so
+  it dedups by URL against the play-time wire capture. For known high-traffic CDN
+  families (Pornhub-network: `t8cdn`/`phncdn`/`ypncdn`/`rdtcdn`) a
+  `parser-blocklist.js` block ALSO suppresses a manually-selected *other*-quality
+  duplicate; un-listed sites rely on the URL dedup alone (a rare other-quality dup
+  is the accepted trade-off — same stance as TikTok's first-video case).
+- **To extend:** it's already generic — add a key to `MEDIA_KEY_RE` /
+  `LIST_KEY_RE` / `QUALITY_KEY_RE` (etc.) if a player names its source/quality/
+  duration fields differently, extend `fetchMediaList`'s wrapper-array keys for a
+  new delegate JSON shape, and (only for a high-traffic CDN family worth the
+  extra dedup) add its media hosts to `parser-blocklist.js`. **Never** a per-site
+  file, **never** a host check in `background.js` or the bridge.
 - Cheap on the ~all sites/frames with no such state: it probes a short list of
   known state-global names + a player global (`jwplayer`) and no-ops instantly
   when neither holds media (so ad/tracker iframes pay only a presence check); the

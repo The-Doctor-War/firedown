@@ -4105,18 +4105,20 @@ browser.runtime.onMessage.addListener((message, sender) => {
     });
 });
 
-// Progressive (single-URL) media variants read from a page-world player's media
-// list (page-state-bridge resolveAndEmitMediaDefs — Pornhub-network family:
-// tube8 / pornhub / youporn / redtube). Their player fetches its quality list on
-// LOAD, but only into an application/json XHR body the generic catcher rejects,
-// so nothing is captured until the user presses play and the wire sees a real
-// .mp4. The bridge reads the list page-world (resolving the same-origin JSON
-// delegate) and posts the real progressive URLs here. Routed through sendVariants
-// as progressive files (skipProbe is auto-set from the page duration). No special
-// requestHeaders: the media URL is query-signed and self-authorizing (the real
-// browser fetch carries no Referer/Origin/Cookie). The played default-quality URL
-// dedups by URL against this; the t8cdn-family media block in parser-blocklist.js
-// keeps the catcher off a manually-selected other-quality URL.
+// Progressive (single-URL) media variants read GENERICALLY from any page-world
+// player's source/quality list (page-state-bridge readPlayerMedia → emitOneGroup),
+// for any site that holds a playable URL in a JS global before the player fetches
+// it on play (a custom player config, flashvars, a framework store, …). Some such
+// players resolve their list through a same-origin JSON delegate whose body the
+// generic catcher rejects (application/json), so nothing is captured until play;
+// the bridge reads the list page-world (resolving any delegate) and posts the real
+// progressive URLs here. Routed through sendVariants as progressive files
+// (skipProbe is auto-set from any page duration). No special requestHeaders — and
+// none are needed for the common case: these media URLs are query-signed and
+// self-authorizing (verified on tube8: the real browser fetch carries no
+// Referer/Origin/Cookie). The played URL dedups by URL against this; for known
+// CDN families a parser-blocklist.js block also covers a manually-selected
+// other-quality URL, otherwise we rely on the URL dedup.
 browser.runtime.onMessage.addListener((message, sender) => {
     if (message?.kind !== "page-state-progressive") return;
     const p = message.payload;

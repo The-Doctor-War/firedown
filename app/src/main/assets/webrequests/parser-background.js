@@ -4374,6 +4374,17 @@ browser.runtime.onMessage.addListener((message, sender) => {
     const p = message.payload;
     if (!p || !Array.isArray(p.variants) || p.variants.length === 0) return;
 
+    // Skip if a dedicated parser owns this host (same rationale as the HLS path
+    // above — avoid the bridge duplicating a parser-owned capture). Check the
+    // primary variant URL against the shared blocklist.
+    const primaryUrl = p.variants[0] && p.variants[0].url;
+    if (typeof primaryUrl === "string"
+        && typeof globalThis.matchInParserBlocklist === "function"
+        && globalThis.matchInParserBlocklist(primaryUrl)) {
+        log("PAGE-STATE", `skip progressive — parser-owned host`, { url: primaryUrl.slice(0, 80) });
+        return;
+    }
+
     const tabId = sender.tab?.id ?? -1;
     const pageUrl = p.origin || sender.tab?.url || "";
     const details = {
@@ -4437,6 +4448,23 @@ async function handlePageStateHls(message, sender) {
     const p = message.payload;
     if (!p || typeof p.url !== "string") return;
 
+    // The page-state bridge's generic readers can pick up media on a site that
+    // already has a DEDICATED parser (e.g. Dailymotion's player exposes its HLS
+    // master, which findPlayerMedia reads — but processDailymotionData already
+    // captures it via the geo API). Those two emits carry different origins and
+    // rotating signed tokens, so neither the URL nor the origin dedup collapses
+    // them → a duplicate entry. Now that the blocklist lives in this same
+    // extension, consult it: if a dedicated parser owns this host, skip the
+    // bridge emit and let the parser own the capture. This is the SAME oracle the
+    // generic catcher uses, applied here ONLY to the bridge's generic readers —
+    // the host-keyed branches (Bilibili page-state-media, Mega) go through other
+    // handlers and are unaffected; genuine generic-only hosts (tube8, series.ly)
+    // aren't in the list and so are not skipped.
+    if (typeof globalThis.matchInParserBlocklist === "function" && globalThis.matchInParserBlocklist(p.url)) {
+        log("PAGE-STATE", `skip HLS master — parser-owned host`, { url: p.url.slice(0, 80) });
+        return;
+    }
+
     const tabId = sender.tab?.id ?? -1;
     const pageUrl = p.origin || sender.tab?.url || "";
     const details = {
@@ -4449,35 +4477,20 @@ async function handlePageStateHls(message, sender) {
     // Prefer the REAL ambient headers (the exact Accept-Language / User-Agent
     // Gecko sends) over the bridge's reconstruction. The bridge can only rebuild
     // Accept-Language from navigator.languages, and a format slip there once cost
-    // a 403 (missing ";q=0.9"). The downloader@ catcher sees every request on
-    // <all_urls> and harvests the real strings; ask it (graceful fallback to the
-    // reconstructed p.lang / p.ua if it's unavailable or slow). Both are
-    // browser-global, so any request's values are correct for this fetch.
+    // a 403 (missing ";q=0.9"). The catcher (now in this same extension) harvests
+    // the real strings off every <all_urls> request and exposes them on the shared
+    // background global; read them directly (graceful fallback to the bridge's
+    // reconstructed p.lang / p.ua if not yet harvested). Both are browser-global,
+    // so any request's values are correct for this fetch.
     let realAcceptLanguage = null, realUserAgent = null;
     try {
-        // sendMessage rejects if the catcher isn't loaded yet, and can be slow on
-        // a cold start, so race it against a timeout and fall back to the bridge's
-        // reconstruction. Two race subtleties this guards:
-        //   1. Attach a no-op `.catch` to the message promise BEFORE the race, so
-        //      that if the timeout wins, a *later* rejection of the still-pending
-        //      message promise doesn't surface as an unhandled rejection (the
-        //      classic Promise.race leak — the loser keeps running). The same
-        //      promise also feeds the race, so an *early* rejection still rejects
-        //      the race and is caught below; both handlers coexist.
-        //   2. Validate the response is the {acceptLanguage,userAgent} shape with
-        //      non-empty strings before trusting it — a malformed/empty reply must
-        //      fall through to reconstruction, not poison the header with "".
-        const ask = browser.runtime.sendMessage("downloader@solarized.dev", { kind: "get-ambient-headers" });
-        ask.catch(() => {});
-        const ambient = await Promise.race([
-            ask,
-            new Promise((resolve) => setTimeout(() => resolve(null), 250))
-        ]);
+        const ambient = typeof globalThis.__getAmbientHeaders === "function"
+            ? globalThis.__getAmbientHeaders() : null;
         if (ambient && typeof ambient === "object") {
             if (typeof ambient.acceptLanguage === "string" && ambient.acceptLanguage) realAcceptLanguage = ambient.acceptLanguage;
             if (typeof ambient.userAgent === "string" && ambient.userAgent) realUserAgent = ambient.userAgent;
         }
-    } catch (_) { /* cross-extension messaging unavailable — use reconstruction */ }
+    } catch (_) { /* ambient headers not yet harvested — use reconstruction */ }
 
     const acceptLanguage = realAcceptLanguage || p.lang;
     const userAgent = realUserAgent || p.ua;

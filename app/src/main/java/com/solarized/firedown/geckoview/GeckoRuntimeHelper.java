@@ -208,7 +208,11 @@ public class GeckoRuntimeHelper {
 
     private void setupWebExtensions() {
         // We use the MainExecutor for all delegate registrations to prevent threading crashes
-        registerBuiltIn("resource://android/assets/parser/", "parser@solarized.dev", "parser");
+        // The former parser@ extension has been merged into webrequests@
+        // (downloader@solarized.dev): the per-site parsers + page-state bridge now
+        // run in that one extension's background/content scripts. Its captures
+        // still arrive over the "parser" nativeApp name, so the downloader@
+        // delegate is registered under BOTH "browser" and "parser" below.
         registerBuiltIn("resource://android/assets/youtube/", "youtube@solarized.dev", "youtube");
         registerBuiltIn("resource://android/assets/webrequests/", "downloader@solarized.dev", "browser");
         registerBuiltIn("resource://android/assets/ublock/", "uBlock0@raymondhill.net", "ublock");
@@ -236,6 +240,15 @@ public class GeckoRuntimeHelper {
                         if ("youtube".equals(delegateId)) {
                             webExtension.setMessageDelegate(
                                     mMessageDelegate, PoTokenGenerator.PORT_NAME);
+                        }
+                        // The merged downloader@ extension also emits parser
+                        // captures over the "parser" nativeApp name (former
+                        // parser@ extension). Bind the same delegate for it so
+                        // sendNativeMessage("parser", …) reaches onMessage's
+                        // "parser" case. setMessageDelegate is keyed by name, so
+                        // this is additive to the "browser" registration above.
+                        if ("browser".equals(delegateId)) {
+                            webExtension.setMessageDelegate(mMessageDelegate, "parser");
                         }
                     }
 
@@ -292,6 +305,13 @@ public class GeckoRuntimeHelper {
                 if ("youtube".equals(entry.getKey())) {
                     geckoSession.getWebExtensionController().setMessageDelegate(
                             entry.getValue(), mMessageDelegate, PoTokenGenerator.PORT_NAME);
+                }
+                // Per-session twin of the global "parser" delegate hookup so the
+                // merged downloader@ extension's parser captures reach Java on
+                // per-session controllers too (see setupWebExtensions).
+                if ("browser".equals(entry.getKey())) {
+                    geckoSession.getWebExtensionController().setMessageDelegate(
+                            entry.getValue(), mMessageDelegate, "parser");
                 }
             }
         });

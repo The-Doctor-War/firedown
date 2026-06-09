@@ -14,14 +14,38 @@ bundled as assets and loaded via `GeckoRuntimeHelper.registerBuiltIn(...)`
 
 | dir           | id                       | role |
 |---------------|--------------------------|------|
-| `parser/`     | `parser@solarized.dev`   | Per-site parsers (Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Niconico, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok, Bluesky). Emits download entries **with metadata** (title, author, thumbnail, duration, multiple quality variants). |
-| `webrequests/`| `downloader@solarized.dev` | **Generic** catch-all. Captures any media URL (`.mp4`, `.m3u8`, `.mpd`, …) seen on the wire. Has **no rich metadata** — just the URL + whatever `og:`/JSON-LD the content script scrapes. |
+| `webrequests/`| `downloader@solarized.dev` | **ALL capture** — the former `parser@` extension was MERGED into this one. Two halves in one extension: (1) the per-site **parsers** (`parser-background.js` — Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Niconico, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok, Bluesky; emits entries **with metadata** — title, author, thumbnail, duration, quality variants) plus the page-state bridge (`js/page-state-bridge.js`); (2) the **generic catch-all** (`js/requests.js` + `js/content-script.js` — any media URL seen on the wire, no rich metadata). Also hosts `js/wasm-watch.js` (+ `js/wasm-probe.js`), the WASM-disabled detector — a settings feature, not capture. |
 | `youtube/`    | `youtube@solarized.dev`  | YouTube (separate; uses `PoTokenGenerator` on the Java side). |
 | `ublock/`     | uBlock Origin            | Ad blocking. |
 | `icons/`, `search/`, `db/`, `error/` | — | Support. |
 
-Native bridge: extensions call `browser.runtime.sendNativeMessage("parser", …)`
-and emit captures via `sendNative(...)`; Java handles them in
+There is **no separate `parser/` extension anymore** — it was merged into
+`webrequests/` so the page-state bridge can consult `parser-blocklist.js`
+directly (fixing the Dailymotion-class duplication where the bridge's generic
+player readers re-captured a parser-owned site; the bridge's generic
+`page-state-hls`/`page-state-progressive` handlers now skip a URL that matches
+the block-list). `GeckoRuntimeHelper` explicitly **uninstalls the orphaned
+`parser@solarized.dev` registration** on boot (`uninstallOrphanedExtension`)
+because GeckoView persists built-in registrations across in-place updates.
+Throughout this doc, "the parser" / a "`parser@` module" means a per-site
+module in `webrequests/parser-background.js`, and a bare "`background.js`"
+in parser/bridge context means that same file (it was `parser/background.js`
+before the merge).
+
+Background-page layout (`webrequests/background.html`): `requests.js` /
+`parser-blocklist.js` / `regex.js` / `cookies.js` load as ES modules;
+`parser-background.js` is a classic script. NOTE the execution order:
+`type="module"` scripts are implicitly deferred, so the classic script runs
+FIRST. The modules publish `globalThis.matchInParserBlocklist` and
+`globalThis.__getAmbientHeaders` for it; every read is `typeof`-guarded at
+navigation/message time — top-level code in `parser-background.js` must never
+touch those globals.
+
+Native bridge: the parser half still calls
+`browser.runtime.sendNativeMessage("parser", …)` and the catcher half uses
+`"browser"` — the merged extension's message delegate is registered under BOTH
+nativeApp names (globally and per-session, mirroring the youtube/PoToken
+multi-name pattern in `GeckoRuntimeHelper`). Java handles captures in
 `GeckoRuntimeHelper.handleExtractionMessage` / `GeckoInspectTask`.
 
 ## Parser vs. generic catcher — the cardinal rule
@@ -82,7 +106,7 @@ When a site inlines the playable media into a page-world JS global
 devalue blob …) and fires **no** playurl XHR, neither the wire nor the DOM can
 see it — only page-world JS can. **Do NOT add a per-site content-script + WAR
 inject pair for this** (the old Bilibili.tv approach, since removed). One
-catch-all content script, `parser/page-state-bridge.js`, matched on
+catch-all content script, `webrequests/js/page-state-bridge.js`, matched on
 **`<all_urls>`** and **`all_frames: true`** (so it needs **no per-site `matches`
 and no host permissions**, and it reaches embedded cross-origin player iframes —
 see the HLS-master path below), covers every such site:
@@ -376,7 +400,7 @@ raw). `og:`/`twitter:` meta read via `getAttribute('content')` are already
 decoded by the DOM, so this is a JSON-LD/JSON-source problem, not a meta-tag one.
 Two layers, both best-effort with a **raw-text fallback** on error:
 
-- **`parser/background.js` `decodeHtmlEntities`** — decimal `&#NNN;`, hex
+- **`webrequests/parser-background.js` `decodeHtmlEntities`** — decimal `&#NNN;`, hex
   `&#xHHH;`, and the named refs that appear in titles/descriptions; applied to
   `name`/`description` at the emit choke points (`sendVariants`,
   `enumerateMasterNative`, `emitHlsMasterOrSingle`). Idempotent; unknown refs
@@ -517,7 +541,13 @@ Don't reintroduce the inject, and don't move SSR reading back to the DOM.
 
 Three layers prevent duplicate entries for one video:
 - **regex block** (cardinal rule) — keeps the generic catcher off a parser's media;
-- **JS `sentOrigins`** (`background.js`) — per page origin, 30s TTL;
+- **JS `sentOrigins`** (`parser-background.js`) — per **(tabId, page origin)**,
+  30s TTL. Tab-scoped on purpose: an origin-only key suppressed the same video
+  opened in a SECOND tab for the whole TTL (the repository dedups per tab, so
+  the global JS key was too coarse). A mixed-attribution guard in
+  `alreadySent` collapses emits whose tab resolution diverged (one real tabId,
+  one `-1` fallback — e.g. Bluesky's two hls-master listeners) without
+  re-suppressing genuine multi-tab captures;
 - **`BrowserDownloadRepository.isPresent`** — per `tabId`, then `uid` /
   exact-or-trivially-different URL / image perceptual hash. `uid` is
   `url.hashCode()`, except **HLS_MASTER** keys it on the page origin (signed
@@ -610,11 +640,15 @@ returns. Two independent layers bound it:
 was *rejected* for the probe loop: it can't tell "slow" from "broken", and the
 real failure (a run of open failures) is **countable** — so count it. A timer is
 the *right* tool only for an inherently-unbounded **external wait that has a
-correct fallback** and no better signal — e.g. `handlePageStateHls`'s 200 ms
-`Promise.race` on the cross-extension `get-ambient-headers` lookup, which falls
-back to the bridge's reconstructed `navigator` headers. Rule: count a detectable
-failure condition; time-box only a best-effort external dependency with a
-fallback.
+correct fallback** and no better signal. (Historical example: when the parser
+was a separate extension, `handlePageStateHls` time-boxed a cross-extension
+`get-ambient-headers` lookup with a 200 ms `Promise.race`, falling back to the
+bridge's reconstructed `navigator` headers. The merge removed the external
+dependency — the handler now reads `globalThis.__getAmbientHeaders()`
+synchronously — so the timer went with it, which is exactly the point: the
+timer existed only because the dependency was external.) Rule: count a
+detectable failure condition; time-box only a best-effort external dependency
+with a fallback.
 
 (YouTube **live** is HLS, not SABR — `youtube@` routes `isLive` → `hlsManifestUrl`;
 SABR is VOD-only. It's emitted as `type:"hls-master"` so **capture** only fetches
@@ -693,13 +727,18 @@ browser's usual logged-out state.
 ## WebExtension loading & versioning (GeckoView gotcha)
 
 `registerBuiltIn` → `WebExtensionController.ensureBuiltIn(uri, id)` caches the
-extension **keyed by the manifest `version`**. If you change a manifest
-(e.g. add **or remove** a `content_scripts` entry) but **don't bump
-`parser/manifest.json`'s `version`**, an in-place app update
+extension **keyed by the manifest `version`**. If you change ANY of an
+extension's files (JS, content scripts, the manifest itself) but **don't bump
+`webrequests/manifest.json`'s `version`**, an in-place app update
 (`adb install -r`) keeps the old registration and your change silently doesn't
 load — a *removed* content script keeps running, an added one never starts. To
 force a re-register: **bump the version**, or do a clean **uninstall + install**
-(which wipes the registration so any version reloads). Symptom of this trap: a
+(which wipes the registration so any version reloads). A REMOVED extension is
+the harder case: dropping its `registerBuiltIn` call does NOT remove the
+persisted registration — it fails to boot every launch with
+`NS_ERROR_FILE_NOT_FOUND` until explicitly uninstalled
+(`uninstallOrphanedExtension` in `GeckoRuntimeHelper` does this for the merged-
+away `parser@`). Symptom of this trap: a
 brand-new listener/content-script produces *no logs at all* (or a deleted one
 still does).
 
@@ -937,7 +976,7 @@ The generic catcher has **two** sources, because `webRequest` alone misses media
    forwards the (sanitized) result through the same emit path. So: content script
    *finds* it, the HEAD probe *authenticates* it.
 3. **Page-world state** — read via the generic `wrappedJSObject` bridge
-   (`parser/page-state-bridge.js`, `<all_urls>`), for media inlined into a page
+   (`webrequests/js/page-state-bridge.js`, `<all_urls>`), for media inlined into a page
    JS global with no XHR (Bilibili.tv). See "Page-world state — the generic
    `wrappedJSObject` bridge" above. This **replaced** per-site inject pairs;
    prefer `wrappedJSObject` from a content script over a `<script>`/WAR inject.

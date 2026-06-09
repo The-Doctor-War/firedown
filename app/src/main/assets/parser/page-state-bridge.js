@@ -299,17 +299,22 @@
     const HLS_MASTER_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
 
     // Classify a candidate media URL as "hls" | "progressive" | null. Extension
-    // first (the strong signal), then the declared MIME `type` so an EXTENSIONLESS
-    // URL still classifies — e.g. a Plyr/HTML5 <source src="…/play/video/<token>"
-    // type="video/mp4"> (krakencloud) or an HLS <source type="application/
-    // x-mpegurl">. A blob:/data:/mediasource: URL is rejected (not http(s)) — that
-    // is an MSE handle, and the real manifest is read from the player API instead.
+    // first (the strong signal), then the declared `type` so an EXTENSIONLESS or
+    // BOGUS-extension URL still classifies — e.g. a Plyr/HTML5 <source src="…/play/
+    // video/<token>" type="video/mp4"> (krakencloud), or a JWPlayer source
+    // {file:"…/master.txt", type:"hls"} (series.ly/vibuxer serves the HLS master at
+    // a .txt extension — the player knows it's HLS only from `type`). A blob:/data:/
+    // mediasource: URL is rejected (not http(s)) — that is an MSE handle, the real
+    // manifest is read from the player API. Type hints accepted: a MIME
+    // (application/x-mpegurl, vnd.apple.mpegurl, video/*, audio/*) OR a player
+    // shorthand (JWPlayer "hls"/"mp4"/…).
     function mediaKindOf(url, type) {
         if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return null;
         if (HLS_MASTER_RE.test(url)) return "hls";
-        if (typeof type === "string" && /mpegurl/i.test(type)) return "hls";
+        const ty = (typeof type === "string") ? type.toLowerCase().trim() : "";
+        if (/mpegurl|m3u8|^hls$/.test(ty)) return "hls";
         if (PROGRESSIVE_RE.test(url)) return "progressive";
-        if (typeof type === "string" && /^(?:video|audio)\//i.test(type)) return "progressive";
+        if (/^(?:video|audio)\//.test(ty) || /^(?:mp4|m4v|webm|mov|ogv)$/.test(ty)) return "progressive";
         return null;
     }
 

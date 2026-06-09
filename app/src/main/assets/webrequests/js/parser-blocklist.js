@@ -125,6 +125,17 @@ const PARSER_BLOCKLIST = {
     'video(?:\\.cdn)?\\.bsky\\.app\\/(?:watch|hls)\\/.*\\.(?:m3u8|ts)',
   ],
 
+  // series.ly / krakenfiles (Plyr embeds) — the page-state bridge captures the
+  // krakencloud progressive source (a DOM <video><source type="video/mp4"> with
+  // no extension, read player-agnostically) WITH a title from the embed. Block the
+  // krakencloud /play/ media so the generic catcher can't emit a bare, titleless
+  // duplicate of the SAME URL on play — repository dedup keeps whichever lands
+  // first, so without this block the catcher's titleless capture would win. Scoped
+  // to /play/ so the /uploads/.../cover.jpg thumbnail is untouched.
+  krakenfiles: [
+    'krakencloud\\.net\\/play\\/',
+  ],
+
   // YouTube — fully owned by the youtube@ parser (VOD = SABR, LIVE = HLS master,
   // both emitted with rich metadata + quality variants). Unlike the shared CDNs
   // above this is a HOST-level block: googlevideo.com is YouTube's EXCLUSIVE media

@@ -282,11 +282,13 @@
         return null;
     }
 
-    // ---- HLS master from a page-world JS player (JWPlayer …) -----------------
-    // A site can hand a (often obfuscated) HLS master to a player that fetches it
-    // only on PLAY (preload:none) — so the wire never sees it until the user
-    // clicks. But to play, the player must hold the DE-OBFUSCATED url, so we read
-    // it from the player's resolved state via the same wrappedJSObject waiver.
+    // ---- Media the player was FED — player-agnostic (DOM / JWPlayer / Video.js) --
+    // A site can hand a (often obfuscated) source to a player that fetches it only
+    // on PLAY (preload:none) — so the wire never sees it until the user clicks. But
+    // to play, the player must hold the DE-OBFUSCATED url, so we read it from the
+    // player's resolved state: the DOM <video>/<source> it drives, or its JS API
+    // (JWPlayer/Video.js) via the wrappedJSObject waiver. NOT tied to any one
+    // player — see findPlayerMedia.
     // Agnostic to however the site packed the source (we read the result, not the
     // packed blob), so it's not cat-and-mouse. Index-loop / primitive reads only
     // (Xray-safe). Runs in subframes too (all_frames) because the player is
@@ -295,6 +297,22 @@
     // page-state reader (further down): a progressive file vs an HLS master.
     const PROGRESSIVE_RE = /^https?:\/\/[^\s"']+\.(?:mp4|m4v|webm)(?:[?#]|$)/i;
     const HLS_MASTER_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
+
+    // Classify a candidate media URL as "hls" | "progressive" | null. Extension
+    // first (the strong signal), then the declared MIME `type` so an EXTENSIONLESS
+    // URL still classifies — e.g. a Plyr/HTML5 <source src="…/play/video/<token>"
+    // type="video/mp4"> (krakencloud) or an HLS <source type="application/
+    // x-mpegurl">. A blob:/data:/mediasource: URL is rejected (not http(s)) — that
+    // is an MSE handle, and the real manifest is read from the player API instead.
+    function mediaKindOf(url, type) {
+        if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return null;
+        if (HLS_MASTER_RE.test(url)) return "hls";
+        if (typeof type === "string" && /mpegurl/i.test(type)) return "hls";
+        if (PROGRESSIVE_RE.test(url)) return "progressive";
+        if (typeof type === "string" && /^(?:video|audio)\//i.test(type)) return "progressive";
+        return null;
+    }
+
 
     // Pull the RESOLVED source URL(s) the player was fed out of a JWPlayer playlist
     // item — BOTH an HLS master (.m3u8) and progressive (.mp4/.m4v/.webm) sources,
@@ -307,13 +325,13 @@
         if (!item || typeof item !== "object") return null;
         const variants = [];
         const hls = [];
-        const take = (url, label) => {
-            if (typeof url !== "string") return;
-            if (HLS_MASTER_RE.test(url)) hls.push(url);
-            else if (PROGRESSIVE_RE.test(url)) variants.push({ url, height: heightFrom(label, url) });
+        const take = (url, label, type) => {
+            const kind = mediaKindOf(url, type);
+            if (kind === "hls") hls.push(url);
+            else if (kind === "progressive") variants.push({ url, height: heightFrom(label, url) });
         };
         // The item's own resolved `file`, then each entry of `sources` (qualities).
-        take(readPrim(item, "file"), readPrim(item, "label") || readPrim(item, "height"));
+        take(readPrim(item, "file"), readPrim(item, "label") || readPrim(item, "height"), readPrim(item, "type"));
         let sources;
         try { sources = item.sources; } catch (_) { sources = null; }
         let n = 0;
@@ -321,63 +339,204 @@
         for (let i = 0; i < n; i++) {
             let s;
             try { s = sources[i]; } catch (_) { continue; }
-            take(readPrim(s, "file"), readPrim(s, "label") || readPrim(s, "height") || readPrim(s, "quality"));
+            take(readPrim(s, "file"), readPrim(s, "label") || readPrim(s, "height") || readPrim(s, "quality"), readPrim(s, "type"));
         }
         if (!variants.length && !hls.length) return null;
         const t = readPrim(item, "title");
         const d = Number(readPrim(item, "duration"));
+        // Poster from the player config: JWPlayer item carries `image`.
+        const image = readPrim(item, "image") || readPrim(item, "poster");
         return {
-            variants, hls, delegates: [], img: undefined,
+            variants, hls, delegates: [],
+            img: (typeof image === "string" && /^https?:\/\//i.test(image)) ? image : undefined,
             title: (typeof t === "string" && t.trim()) ? t.trim() : null,
             durationSec: (isFinite(d) && d > 0) ? d : 0
         };
     }
 
-    // Read the media the player was FED from its live JS API (not page state) —
-    // the most precise "final url passed to the player", de-obfuscation-proof.
-    // JWPlayer (jw8) covers the common embed hosts (vibuxer / luluvdo / lulustream
-    // …): jwplayer().getPlaylist() → [{file, sources:[{file,label}], title}],
-    // resolved at setup() — preload:none defers only the FETCH, not setup, so the
-    // url is present on load. Add another player's API as a new block here, never a
-    // per-site file. Returns a media group (see readPlayerItem) or null.
+    // Read the media a player was FED — the most precise "final url passed to the
+    // player", de-obfuscation-proof (we read the RESOLVED value, never the packed
+    // blob). PLAYER-AGNOSTIC: three readers, each independent, results merged —
+    //   1. readDomMedia  — the DOM <video>/<audio> + <source> elements. The
+    //      backbone: any player driving a real HTML5 element (Plyr, Video.js with a
+    //      native source, plain HTML5, series.ly/krakenfiles) exposes the resolved
+    //      source here, incl. an EXTENSIONLESS one classified by its <source> type.
+    //      A blob:/MSE src is skipped (HLS/DASH over MSE) — that manifest is read
+    //      from a player API below.
+    //   2. readJwPlayer  — jwplayer().getPlaylist() (jw8: vibuxer/luluvdo/…).
+    //   3. readVideoJs   — videojs.getAllPlayers()[].currentSources().
+    // (2)/(3) are the ONLY place the real URL lives when the element holds a blob
+    // (HLS over hls.js/dash.js). Add another player API as a new reader here, never
+    // a per-site file. Returns an array of media groups (see readPlayerItem) or null.
     function findPlayerMedia() {
+        const groups = [];
+        // The DOM read runs only in a frame that actually looks like a player/embed
+        // (a known player global or a player container) — the bridge runs in EVERY
+        // frame on EVERY site, so an ungated <video> scan would capture inline
+        // article videos site-wide. The API readers are self-gating (the global
+        // must exist), so they always run.
+        if (looksLikePlayerFrame()) {
+            const dom = readDomMedia();
+            if (dom) groups.push(dom);
+        }
+        const jw = readJwPlayer();
+        if (jw) groups.push(jw);
+        const vjs = readVideoJs();
+        if (vjs) groups.push(vjs);
+        return groups.length ? groups : null;
+    }
+
+    // True when this frame hosts a recognised player/embed: a known player global
+    // (page-world) or a common player container. Keeps the DOM <video> scan off the
+    // countless content sites that merely have an inline <video>.
+    function looksLikePlayerFrame() {
+        let pw;
+        try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
+        if (pw) {
+            const names = ["Plyr", "videojs", "jwplayer", "Hls", "dashjs",
+                "fluidPlayer", "Clappr", "DPlayer", "Playerjs", "videojs5"];
+            for (let i = 0; i < names.length; i++) {
+                try { if (pw[names[i]]) return true; } catch (_) {}
+            }
+        }
+        try {
+            if (document.querySelector(".plyr,.video-js,.jwplayer,.jw-video,.fp-player,[data-plyr],[data-player]")) return true;
+        } catch (_) {}
+        return false;
+    }
+
+    // Player-agnostic DOM read: every <video>/<audio> element's own src/currentSrc
+    // plus its <source> children, classified by mediaKindOf (extension OR type).
+    // Poster → thumbnail. Returns a media group or null.
+    function readDomMedia() {
+        let els;
+        try { els = document.querySelectorAll("video, audio"); } catch (_) { return null; }
+        const n = els ? els.length : 0;
+        if (!n) return null;
+
+        const variants = [];
+        const hls = [];
+        let img;
+        const take = (url, type, label) => {
+            const kind = mediaKindOf(url, type);
+            if (kind === "hls") hls.push(url);
+            else if (kind === "progressive") variants.push({ url, height: heightFrom(label, url) });
+        };
+        for (let i = 0; i < n; i++) {
+            const el = els[i];
+            let poster;
+            try { poster = el.getAttribute("poster"); } catch (_) {}
+            if (!img && typeof poster === "string" && /^https?:\/\//i.test(poster)) img = poster;
+            // currentSrc resolves to the playing URL (a blob for MSE — rejected by
+            // mediaKindOf); the src attribute is the declared one.
+            let cur, attr, etype;
+            try { cur = el.currentSrc; } catch (_) {}
+            try { attr = el.getAttribute("src"); } catch (_) {}
+            try { etype = el.getAttribute("type"); } catch (_) {}
+            take(cur, etype);
+            take(attr, etype);
+            let sources;
+            try { sources = el.querySelectorAll("source"); } catch (_) { sources = null; }
+            const sn = sources ? sources.length : 0;
+            for (let j = 0; j < sn; j++) {
+                const s = sources[j];
+                let su, st, sl;
+                try { su = s.getAttribute("src"); } catch (_) {}
+                try { st = s.getAttribute("type"); } catch (_) {}
+                try { sl = s.getAttribute("size") || s.getAttribute("label") || s.getAttribute("data-quality"); } catch (_) {}
+                take(su, st, sl);
+            }
+        }
+        if (!variants.length && !hls.length) return null;
+        log("player-probe: DOM <video>/<source> @", location.host, "variants=", variants.length, "hls=", hls.length);
+        return { variants, hls, delegates: [], img, title: null, durationSec: 0 };
+    }
+
+    // JWPlayer (jw8): jwplayer().getPlaylist() → [{file, sources:[{file,label}],
+    // title}], resolved at setup() — preload:none defers only the FETCH, not setup,
+    // so the url is present on load. Returns a media group or null.
+    function readJwPlayer() {
         let pw;
         try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
         if (!pw) return null;
-
         let jw;
         try { jw = pw.jwplayer; } catch (_) { jw = null; }
-        // No JWPlayer in this frame: stay silent (this runs in every frame incl.
-        // ad iframes, so logging here would spam). Verbose only once a player is
-        // actually present, to pinpoint where extraction fails.
         if (typeof jw !== "function") return null;
 
         log("player-probe: jwplayer present @", location.host);
         let api;
         try { api = jw(); } catch (e) { log("player-probe: jwplayer() threw:", e && e.message); return null; }
         if (!api || typeof api !== "object") { log("player-probe: jwplayer() gave no api (player not set up yet?)"); return null; }
-
         let getPl;
         try { getPl = api.getPlaylist; } catch (_) { getPl = null; }
         if (typeof getPl !== "function") { log("player-probe: api has no getPlaylist()"); return null; }
-
         let pl;
         try { pl = api.getPlaylist(); } catch (e) { log("player-probe: getPlaylist() threw:", e && e.message); return null; }
         let n = 0;
         try { n = (pl && typeof pl.length === "number") ? pl.length : 0; } catch (_) { n = 0; }
         log("player-probe: getPlaylist length =", n);
-
         for (let i = 0; i < n; i++) {
             let it;
             try { it = pl[i]; } catch (_) { continue; }
             const grp = readPlayerItem(it);
-            log("player-probe: item", i,
-                "variants=", grp ? grp.variants.length : 0,
-                "hls=", grp ? grp.hls.length : 0);
+            log("player-probe: jw item", i, "variants=", grp ? grp.variants.length : 0, "hls=", grp ? grp.hls.length : 0);
             if (grp) return grp;
         }
-        log("player-probe: no playable source in playlist");
+        log("player-probe: no playable source in jw playlist");
         return null;
+    }
+
+    // Video.js: videojs.getAllPlayers() → each player's currentSources() (or src()).
+    // currentSources() holds the real .m3u8 even when the <video> shows a blob.
+    function readVideoJs() {
+        let pw;
+        try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
+        if (!pw) return null;
+        let vjs;
+        try { vjs = pw.videojs; } catch (_) { vjs = null; }
+        if (typeof vjs !== "function") return null;
+
+        log("player-probe: videojs present @", location.host);
+        let players;
+        try { players = vjs.getAllPlayers ? vjs.getAllPlayers() : null; } catch (_) { players = null; }
+        let n = 0;
+        try { n = (players && typeof players.length === "number") ? players.length : 0; } catch (_) { n = 0; }
+
+        const variants = [];
+        const hls = [];
+        let img;
+        const take = (url, type, label) => {
+            const kind = mediaKindOf(url, type);
+            if (kind === "hls") hls.push(url);
+            else if (kind === "progressive") variants.push({ url, height: heightFrom(label, url) });
+        };
+        for (let i = 0; i < n; i++) {
+            let pl;
+            try { pl = players[i]; } catch (_) { continue; }
+            let srcs;
+            try { srcs = pl.currentSources ? pl.currentSources() : null; } catch (_) { srcs = null; }
+            let sn = 0;
+            try { sn = (srcs && typeof srcs.length === "number") ? srcs.length : 0; } catch (_) { sn = 0; }
+            for (let j = 0; j < sn; j++) {
+                let s;
+                try { s = srcs[j]; } catch (_) { continue; }
+                take(readPrim(s, "src"), readPrim(s, "type"), readPrim(s, "label"));
+            }
+            if (!sn) {
+                let one;
+                try { one = pl.src ? pl.src() : null; } catch (_) { one = null; }
+                take(typeof one === "string" ? one : null, null);
+            }
+            // Poster from the player config: Video.js exposes poster().
+            if (!img) {
+                let p;
+                try { p = pl.poster ? pl.poster() : null; } catch (_) { p = null; }
+                if (typeof p === "string" && /^https?:\/\//i.test(p)) img = p;
+            }
+        }
+        if (!variants.length && !hls.length) return null;
+        log("player-probe: videojs @", location.host, "variants=", variants.length, "hls=", hls.length);
+        return { variants, hls, delegates: [], img, title: null, durationSec: 0 };
     }
 
     // Browser-shaped navigator hints for a native re-fetch that must look real to
@@ -877,15 +1036,16 @@
             }
         }
 
-        // 2) READ THE URL THE PLAYER WAS FED, from its live JS API (the resolved
-        //    source, so we capture without the user pressing play and read it
-        //    AFTER any eval/packer de-obfuscation). Now covers BOTH an HLS master
-        //    and progressive .mp4 (generalised from the old HLS-only reader). The
-        //    played URL dedups by URL against this; raw .ts segments are dropped
+        // 2) READ THE URL THE PLAYER WAS FED — player-AGNOSTIC (DOM <video>/<source>
+        //    + JWPlayer + Video.js, see findPlayerMedia). The resolved source, so we
+        //    capture without the user pressing play and read it AFTER any eval/
+        //    packer de-obfuscation. Covers an HLS master AND progressive (incl. an
+        //    extensionless type="video/*" source — series.ly/krakenfiles via Plyr).
+        //    The played URL dedups by URL against this; raw .ts segments are dropped
         //    natively (mpegts).
         const playerMedia = findPlayerMedia();
         if (playerMedia) {
-            resolveAndEmitPlayerMedia([playerMedia], label).then(() => {}, () => {});
+            resolveAndEmitPlayerMedia(playerMedia, label).then(() => {}, () => {});
             armSpaObserver();
             return true;
         }

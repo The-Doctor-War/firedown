@@ -298,24 +298,30 @@
     const PROGRESSIVE_RE = /^https?:\/\/[^\s"']+\.(?:mp4|m4v|webm)(?:[?#]|$)/i;
     const HLS_MASTER_RE = /^https?:\/\/[^\s"']+\.m3u8(?:[?#]|$)/i;
 
-    // Classify a candidate media URL as "hls" | "progressive" | null. Extension
-    // first (the strong signal), then the declared `type` so an EXTENSIONLESS or
-    // BOGUS-extension URL still classifies — e.g. a Plyr/HTML5 <source src="…/play/
-    // video/<token>" type="video/mp4"> (krakencloud), or a JWPlayer source
-    // {file:"…/master.txt", type:"hls"} (series.ly/vibuxer serves the HLS master at
-    // a .txt extension — the player knows it's HLS only from `type`). A blob:/data:/
-    // mediasource: URL is rejected (not http(s)) — that is an MSE handle, the real
-    // manifest is read from the player API. Type hints accepted: a MIME
-    // (application/x-mpegurl, vnd.apple.mpegurl, video/*, audio/*) OR a player
-    // shorthand (JWPlayer "hls"/"mp4"/…).
+    // Classify a PLAYER-FED media URL (a JWPlayer/Video.js source, or a DOM
+    // <video>/<source> the player drives) as "hls" | "progressive". The url IS
+    // media by definition — the player was told to play it — so we DELIBERATELY DO
+    // NOT gate on the file extension: these embeds keep serving the manifest at an
+    // obfuscated / rotating extension (series.ly/vibuxer's HLS master is at
+    // /master.txt, and that will keep changing). We decide the emit path from the
+    // player's DECLARED type — its stable, structural signal (JWPlayer "hls", a
+    // video/audio MIME, application/x-mpegurl, dash) — then a .m3u8/.mpd hint, and
+    // finally DEFAULT TO HLS: an unknown source on these players is an obfuscated
+    // master, and the HLS path sends the full anti-bot header set AND native
+    // reroutes a non-manifest body to ffmpeg, whereas the progressive path sends no
+    // headers and would 403 a header-gated master. Only a non-http (blob:/data:/
+    // mediasource:) MSE handle returns null — that real manifest is read from the
+    // player API. (The broad page-state walk does NOT use this — it stays
+    // extension-strict so it can't grab a non-media URL that merely sits under a
+    // media-ish key.)
     function mediaKindOf(url, type) {
         if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return null;
-        if (HLS_MASTER_RE.test(url)) return "hls";
         const ty = (typeof type === "string") ? type.toLowerCase().trim() : "";
-        if (/mpegurl|m3u8|^hls$/.test(ty)) return "hls";
+        if (/mpegurl|m3u8|^hls$|^dash$|dash\+xml|mpd/.test(ty)) return "hls";
+        if (/^(?:video|audio)\//.test(ty) || /^(?:mp4|m4v|webm|mov|ogv|ogg|aac|mp3)$/.test(ty)) return "progressive";
+        if (HLS_MASTER_RE.test(url) || /\.mpd(?:[?#]|$)/i.test(url)) return "hls";
         if (PROGRESSIVE_RE.test(url)) return "progressive";
-        if (/^(?:video|audio)\//.test(ty) || /^(?:mp4|m4v|webm|mov|ogv)$/.test(ty)) return "progressive";
-        return null;
+        return "hls";
     }
 
 
@@ -411,7 +417,8 @@
     }
 
     // Player-agnostic DOM read: every <video>/<audio> element's own src/currentSrc
-    // plus its <source> children, classified by mediaKindOf (extension OR type).
+    // plus its <source> children, classified by mediaKindOf (type-primary, the
+    // extension is not a gate — the element's source IS media).
     // Poster → thumbnail. Returns a media group or null.
     function readDomMedia() {
         let els;

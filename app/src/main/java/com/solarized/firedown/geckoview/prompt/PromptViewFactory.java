@@ -68,17 +68,26 @@ public class PromptViewFactory {
                 }
                 handler.onResponse(state.getGeckoSession(), prompt.confirm(selectedIds.toArray(new String[0])));
             });
-        } else {
+        }
+        builder.setView(list);
+        AlertDialog dialog = setupDismissListener(builder.create(), state, prompt, handler);
+
+        if (prompt.type != PromptDelegate.ChoicePrompt.Type.MULTIPLE) {
             list.setOnItemClickListener((p, v, pos, id) -> {
+                // A tap can land on a second row before the dialog tears
+                // down (or be double-fired); confirm() throws "Cannot
+                // confirm/dismiss a Prompt twice" if it already ran. Gate on
+                // isComplete() so only the first selection confirms.
+                if (prompt.isComplete()) return;
                 ModifiableChoice item = adapter.getItem(pos);
                 if (item != null) {
                     handler.onResponse(state.getGeckoSession(), prompt.confirm(item.choice));
                 }
-                state.setPromptDisplaying(false);
+                // Dismiss so the now-completed prompt can't be tapped again.
+                dialog.dismiss();
             });
         }
-        builder.setView(list);
-        return setupDismissListener(builder.create(), state, prompt, handler);
+        return dialog;
     }
 
     // --- COLOR PROMPT ---

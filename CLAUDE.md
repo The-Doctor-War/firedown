@@ -14,7 +14,7 @@ bundled as assets and loaded via `GeckoRuntimeHelper.registerBuiltIn(...)`
 
 | dir           | id                       | role |
 |---------------|--------------------------|------|
-| `parser/`     | `parser@solarized.dev`   | Per-site parsers (Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Niconico, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok). Emits download entries **with metadata** (title, author, thumbnail, duration, multiple quality variants). |
+| `parser/`     | `parser@solarized.dev`   | Per-site parsers (Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Niconico, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok, Bluesky). Emits download entries **with metadata** (title, author, thumbnail, duration, multiple quality variants). |
 | `webrequests/`| `downloader@solarized.dev` | **Generic** catch-all. Captures any media URL (`.mp4`, `.m3u8`, `.mpd`, …) seen on the wire. Has **no rich metadata** — just the URL + whatever `og:`/JSON-LD the content script scrapes. |
 | `youtube/`    | `youtube@solarized.dev`  | YouTube (separate; uses `PoTokenGenerator` on the Java side). |
 | `ublock/`     | uBlock Origin            | Ad blocking. |
@@ -241,8 +241,11 @@ cardinal rule as any parser.
 
 ### HLS-master sites — Java enumeration, no ffmpeg probe
 
-niconico, Twitch and Kick emit `type:"hls-master"` from the parser
-(`enumerateMasterNative` in `background.js`). `GeckoInspectTask.processHlsMaster`
+niconico, Twitch, Kick and Bluesky emit `type:"hls-master"` from the parser
+(`enumerateMasterNative` in `background.js`). (Bluesky reads the HLS master URL
+straight from the AT-Proto app-view JSON — `app.bsky.embed.video#view.playlist`,
+deduped per-video on that stable master URL, not the page origin, so a whole feed
+of videos is captured rather than collapsing to one.) `GeckoInspectTask.processHlsMaster`
 fetches the master with native OkHttp (`WebUtils.getString` — can set
 Origin/Referer/Cookie, unlike a page `fetch()`), enumerates qualities with
 `M3U8Parser.parseMaster` (text only — never opens a segment), and runs them

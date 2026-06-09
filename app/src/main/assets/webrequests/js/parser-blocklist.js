@@ -114,6 +114,17 @@ const PARSER_BLOCKLIST = {
     '(t8cdn|phncdn|ypncdn|rdtcdn)\\.com\\/.*\\.(mp4|m3u8)',
   ],
 
+  // Bluesky — the bsky@ parser emits the HLS master
+  // (video.bsky.app/watch/<did>/<cid>/playlist.m3u8) read from the AT-Proto
+  // app-view JSON. Block the master + child playlists on video.bsky.app and the
+  // .ts segments the player fetches from video.cdn.bsky.app, so the generic
+  // catcher doesn't grab the bare master (a duplicate) or the child/segment
+  // pieces as standalone unplayable entries. Scoped to .m3u8/.ts so the
+  // thumbnails these same hosts serve (.jpg) are untouched.
+  bsky: [
+    'video(?:\\.cdn)?\\.bsky\\.app\\/(?:watch|hls)\\/.*\\.(?:m3u8|ts)',
+  ],
+
   // YouTube — fully owned by the youtube@ parser (VOD = SABR, LIVE = HLS master,
   // both emitted with rich metadata + quality variants). Unlike the shared CDNs
   // above this is a HOST-level block: googlevideo.com is YouTube's EXCLUSIVE media

@@ -1809,6 +1809,156 @@ browser.webRequest.onBeforeRequest.addListener(
 );
 
 // ============================================================================
+// Bluesky (bsky.app) — AT-Protocol app-view JSON over the wire
+// ============================================================================
+//
+// bsky.app is a React SPA: every post / feed / profile view is rendered from
+// XHR JSON the app fetches from the AT-Proto app view (api.bsky.app and
+// public.api.bsky.app). A post's video lives in its `embed` as an
+// `app.bsky.embed.video#view`, which carries the HLS master URL DIRECTLY:
+//
+//   { "$type": "app.bsky.embed.video#view",
+//     "playlist":  "https://video.bsky.app/watch/<did>/<cid>/playlist.m3u8",
+//     "thumbnail": "https://video.bsky.app/watch/<did>/<cid>/thumbnail.jpg",
+//     "aspectRatio": { "width": 1080, "height": 1920 } }
+//
+// `playlist` is a stock HLS multivariant playlist (360p/720p child playlists on
+// video.bsky.app, .ts segments on video.cdn.bsky.app), so we hand it to
+// enumerateMasterNative — native OkHttp fetch + M3U8Parser enumerates the
+// qualities with skipProbe (no ffprobe), exactly like Twitch/Kick/niconico. The
+// CDN is public: the master request carries no auth/cookie, only an Origin, so
+// the sole header we backfill is a bsky.app Referer (OriginInterceptor derives
+// the Origin from it).
+//
+// READ THE RESPONSE, NOT THE DOM (the Threads/TikTok lesson). The video#view
+// surfaces in getFeed / getAuthorFeed / getTimeline / getActorLikes /
+// getListFeed / getPostThread / getPostThreadV2 / searchPosts. The post object
+// shape is uniform wherever it nests (feed[].post, thread[].value.post, a quoted
+// record, recordWithMedia#view), so we walk the whole JSON for any post that
+// carries a video#view and read its caption (record.text) + author.
+//
+// DEDUP: each video is keyed on its OWN playlist URL (the master has no session
+// token — only the child playlists do, so it's stable across refreshes), passed
+// as `origin`. So a feed of N distinct videos yields N entities (the Java side
+// sets the HLS_MASTER uid from `origin`), while a refresh / a video repeated
+// across feed pages collapses via enumerateMasterNative's origin dedup. (Were
+// the page origin used instead, the whole feed would collapse to one entity.)
+
+const BSKY_VIDEO_VIEW = "app.bsky.embed.video#view";
+
+// Only the app-view methods that actually carry post objects. Skips
+// getProfile / getConfig / labelers / events, so we don't buffer their bodies
+// through filterResponseData just to find nothing.
+const BSKY_POST_METHOD_RE =
+    /\/xrpc\/(?:app\.bsky\.feed\.(?:getFeed|getAuthorFeed|getTimeline|getActorLikes|getListFeed|getPostThread|searchPosts|getPosts|getQuotes)|app\.bsky\.unspecced\.getPostThread\w*)\b/;
+
+// A post's embed is either the video view directly, or a recordWithMedia#view
+// whose `.media` is the video view (a quote-post with an attached video).
+function bskyVideoView(embed) {
+    if (!embed || typeof embed !== "object") return null;
+    if (embed["$type"] === BSKY_VIDEO_VIEW) return embed;
+    if (embed["$type"] === "app.bsky.embed.recordWithMedia#view") {
+        const media = embed.media;
+        if (media && media["$type"] === BSKY_VIDEO_VIEW) return media;
+    }
+    return null;
+}
+
+function buildBskyVideo(post, view) {
+    const author = post.author || {};
+    const handle = author.handle || "";
+    const displayName = author.displayName || handle || "Bluesky";
+    const record = post.record || {};
+    const text = (typeof record.text === "string") ? record.text.trim() : "";
+    return {
+        playlist: view.playlist,
+        thumbnail: view.thumbnail || null,
+        // bsky posts have no title; the caption is the closest thing, with the
+        // author as a fallback so the entry is never blank.
+        name: text || `Video by ${displayName}`,
+        description: handle ? `${displayName} (@${handle})` : displayName,
+    };
+}
+
+// Walk the app-view JSON (plain JSON.parse output — ordinary objects, not Xray
+// page proxies) for every post that carries a video. A post object is the one
+// place author + record + embed sit together, which is the same object whether
+// it's a feed item, a thread node, or a quoted record — so matching that shape
+// finds them all at any nesting. Bounded (depth + node budget) like the other
+// walkers, and dedups playlist URLs within the one response.
+function collectBskyVideos(root) {
+    const out = [];
+    const seen = new Set();
+    let nodes = 0;
+    const MAX_NODES = 60000;
+    const MAX_DEPTH = 30;
+
+    function visit(o, depth) {
+        if (nodes++ > MAX_NODES || depth > MAX_DEPTH) return;
+        if (Array.isArray(o)) {
+            for (let i = 0; i < o.length; i++) visit(o[i], depth + 1);
+            return;
+        }
+        if (!o || typeof o !== "object") return;
+        if (o.author && o.record && o.embed) {
+            const view = bskyVideoView(o.embed);
+            if (view && view.playlist && !seen.has(view.playlist)) {
+                seen.add(view.playlist);
+                out.push(buildBskyVideo(o, view));
+            }
+        }
+        for (const k in o) {
+            const v = o[k];
+            if (v && typeof v === "object") visit(v, depth + 1);
+        }
+    }
+
+    visit(root, 0);
+    return out;
+}
+
+async function processBskyResponse(details, json) {
+    const videos = collectBskyVideos(json);
+    if (videos.length === 0) return;
+    log("BSKY", `found ${videos.length} video(s)`, { url: details.url.slice(0, 90) });
+
+    // Public CDN; the only header the master fetch needs is a page Referer so
+    // OriginInterceptor stamps the bsky.app Origin the CDN expects.
+    const requestHeaders = [{ name: "Referer", value: "https://bsky.app/" }];
+
+    for (const v of videos) {
+        await enumerateMasterNative(details, {
+            url: v.playlist,
+            origin: v.playlist, // stable per-video uid (master carries no token)
+            name: v.name,
+            description: v.description,
+            img: v.thumbnail || undefined,
+            requestHeaders,
+        });
+    }
+}
+
+// Passive read of the page's OWN authenticated app-view response (no refetch,
+// byte-exact pass-through), same as the Twitter/Threads paths.
+function listenerBskyApi(details) {
+    if (!BSKY_POST_METHOD_RE.test(details.url)) return {};
+    const ok = filterResponseText(details, (body) => {
+        if (!body) return;
+        const json = tryParseJson(body);
+        if (!json) { log("BSKY", "response not JSON", { url: details.url.slice(0, 90) }); return; }
+        processBskyResponse(details, json);
+    });
+    if (!ok) log("BSKY", "filter unavailable", { url: details.url.slice(0, 90) });
+    return {};
+}
+
+browser.webRequest.onBeforeRequest.addListener(
+    listenerBskyApi,
+    { urls: ["*://api.bsky.app/xrpc/*", "*://public.api.bsky.app/xrpc/*"], types: ["xmlhttprequest"] },
+    ["blocking"]
+);
+
+// ============================================================================
 // Kick
 // ============================================================================
 

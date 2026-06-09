@@ -7,7 +7,7 @@
     }
   },
   "name": "webRequest-downloads",
-  "version": "2.12",
+  "version": "2.13",
   "permissions": [
     "nativeMessaging",
     "nativeMessagingFromContent",

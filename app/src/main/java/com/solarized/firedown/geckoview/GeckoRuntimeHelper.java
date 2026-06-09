@@ -207,6 +207,15 @@ public class GeckoRuntimeHelper {
     }
 
     private void setupWebExtensions() {
+        // The former parser@ extension was merged into downloader@ and its assets
+        // removed. GeckoView PERSISTS a built-in's registration across an in-place
+        // app update, so simply dropping its registerBuiltIn() call below is not
+        // enough — on the next boot Gecko still tries to start parser@ and fails
+        // with NS_ERROR_FILE_NOT_FOUND (its manifest no longer ships). Explicitly
+        // uninstall the orphan so the state is clean. No-op on a fresh install (the
+        // id isn't present) and after the first successful cleanup.
+        uninstallOrphanedExtension("parser@solarized.dev");
+
         // We use the MainExecutor for all delegate registrations to prevent threading crashes
         // The former parser@ extension has been merged into webrequests@
         // (downloader@solarized.dev): the per-site parsers + page-state bridge now
@@ -217,6 +226,29 @@ public class GeckoRuntimeHelper {
         registerBuiltIn("resource://android/assets/webrequests/", "downloader@solarized.dev", "browser");
         registerBuiltIn("resource://android/assets/ublock/", "uBlock0@raymondhill.net", "ublock");
         registerBuiltIn("resource://android/assets/icons/", "icons@mozac.org", "icons");
+    }
+
+    /**
+     * Remove a built-in WebExtension whose assets no longer ship (it was merged
+     * into another extension). Needed because GeckoView keeps a built-in's
+     * registration in the profile across an in-place update; without this, the
+     * orphaned registration fails to boot every launch (missing manifest).
+     * Enumerates the installed extensions and uninstalls the matching id.
+     */
+    private void uninstallOrphanedExtension(String id) {
+        sGeckoRuntime.getWebExtensionController().list().accept(extensions -> {
+            if (extensions == null) {
+                return;
+            }
+            for (WebExtension extension : extensions) {
+                if (id.equals(extension.id)) {
+                    if (BuildConfig.DEBUG) {
+                        Log.d(TAG, "Uninstalling orphaned extension: " + id);
+                    }
+                    sGeckoRuntime.getWebExtensionController().uninstall(extension);
+                }
+            }
+        }, e -> Log.e(TAG, "Orphan-extension cleanup list() failed", e));
     }
 
     private void registerBuiltIn(String uri, String id, String delegateId) {

@@ -34,15 +34,6 @@ function tryParseJson(str) {
     try { return JSON.parse(str); } catch { return null; }
 }
 
-// Metadata authority of a capture SOURCE, carried on each native message as
-// `metaPriority` and used by the Java same-URL dedup merge
-// (BrowserDownloadRepository.upgradeMetadata): a per-site parser outranks the
-// generic page-state bridge, which outranks the generic catcher (downloader@ —
-// it sends no metaPriority, so it's 0). When two sources capture the SAME url,
-// the higher-priority source's title/thumbnail wins regardless of arrival order,
-// so the catcher's URL-derived name can't clobber a real parser/bridge title.
-const META_PRIORITY = { PARSER: 20, BRIDGE: 10 };
-
 // ============================================================================
 // Dedup — keyed on origin URL (stable across CDN rotations)
 // ============================================================================
@@ -136,7 +127,7 @@ async function sendNative(message) {
  * Unified variant sender for Twitter, Instagram, and future parsers.
  * Handles dedup, sorting, and message construction.
  */
-async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders, skipProbe, manifest, metaPriority = META_PRIORITY.PARSER }) {
+async function sendVariants(details, { variants, origin, description, img, name, duration, requestHeaders, skipProbe, manifest }) {
     if (!Array.isArray(variants) || variants.length === 0) return;
 
     // If the parser already has what the capture-time ffmpeg probe would supply
@@ -182,8 +173,7 @@ async function sendVariants(details, { variants, origin, description, img, name,
         tabId,
         request: details.requestId,
         variants,
-        incognito,
-        metaPriority
+        incognito
     };
 
     if (description) message.description = decodeHtmlEntities(description);
@@ -330,7 +320,7 @@ function filterResponseText(details, onText) {
 // qualities, re-dispatching as variants+skipProbe (or a plain media capture on
 // failure). Used for master-only / single-use-key sites (niconico, Kick, Twitch)
 // so capture needs no ffmpeg probe and never burns a single-use AES key.
-async function enumerateMasterNative(details, { url, origin, name, description, img, duration, requestHeaders, metaPriority = META_PRIORITY.PARSER }) {
+async function enumerateMasterNative(details, { url, origin, name, description, img, duration, requestHeaders }) {
     if (!url) return;
     if (origin && alreadySent(origin)) { log("HLS", "already sent", { origin }); return; }
     if (origin) markSent(origin);
@@ -341,7 +331,7 @@ async function enumerateMasterNative(details, { url, origin, name, description, 
         try { incognito = (await browser.tabs.get(tabId))?.incognito || false; } catch (e) {}
     }
 
-    const message = { type: "hls-master", url, origin, tabId, request: details.requestId, incognito, metaPriority };
+    const message = { type: "hls-master", url, origin, tabId, request: details.requestId, incognito };
     if (name) message.name = decodeHtmlEntities(name);
     if (description) message.description = decodeHtmlEntities(description);
     if (img) message.img = img;
@@ -370,7 +360,6 @@ async function emitHlsMasterOrSingle(details, { url, origin, tabId, name, title,
         name: decodeHtmlEntities(name),
         description: decodeHtmlEntities(title),
         img,
-        metaPriority: META_PRIORITY.PARSER,
         ...(duration > 0 ? { duration } : {})
     });
 }
@@ -4356,8 +4345,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
         name: p.title,
         img: p.img,
         duration: p.durationMs > 0 ? p.durationMs : 0,
-        requestHeaders,
-        metaPriority: META_PRIORITY.BRIDGE
+        requestHeaders
     });
 });
 
@@ -4419,8 +4407,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
         name: p.title,
         img: p.img,
         duration: p.durationMs > 0 ? p.durationMs : 0,
-        requestHeaders,
-        metaPriority: META_PRIORITY.BRIDGE
+        requestHeaders
     });
 });
 
@@ -4544,8 +4531,7 @@ async function handlePageStateHls(message, sender) {
         name: p.title,
         description: p.title,
         img: p.img,
-        requestHeaders,
-        metaPriority: META_PRIORITY.BRIDGE
+        requestHeaders
     });
 }
 

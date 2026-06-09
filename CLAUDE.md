@@ -508,19 +508,10 @@ Three layers prevent duplicate entries for one video:
 - **`BrowserDownloadRepository.isPresent`** — per `tabId`, then `uid` /
   exact-or-trivially-different URL / image perceptual hash. `uid` is
   `url.hashCode()`, except **HLS_MASTER** keys it on the page origin (signed
-  master URLs rotate per refresh).
-
-When the SAME url is nonetheless captured by two sources (e.g. a generic-bridge
-site after its block was removed — the bridge AND the generic catcher both grab
-it), `addValue` keeps one entry but **merges display metadata priority-weighted**
-(`upgradeMetadata`): every capture carries a `metaPriority` stamped by its source
-— a per-site parser (`META_PRIORITY.PARSER`) outranks the page-state bridge
-(`META_PRIORITY.BRIDGE`) outranks the generic catcher (no `metaPriority` → `0`).
-For each of name/thumbnail/description the higher-priority source's value wins
-(and fills any empty field) **regardless of arrival order**, so the catcher's
-URL-derived name can't clobber a real parser/bridge title. No name heuristic — it
-keys on the explicit priority, threaded JS message → `JsonHelper` →
-`GeckoInspectTask` → entity.
+  master URLs rotate per refresh). First capture of a URL wins; a later capture of
+  the same URL is dropped (the `GeckoInspectTask.contains()` pre-check skips it
+  before it even probes). So when a parser/bridge and the generic catcher both see
+  one URL, whichever lands first is the entry — no metadata merge.
 
 ### Capture "scanning" indicator
 

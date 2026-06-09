@@ -73,7 +73,6 @@ public class GeckoInspectTask implements Runnable, ProbeRegistry {
     private final String mImg;
     private final String mRequestId;
     private final int mTabId;
-    private final int mMetaPriority;
     private final int mVisitId;
     private final Map<String, String> mRequestHeaders;
     private final ArrayList<FFmpegEntity> mVariants;
@@ -127,7 +126,6 @@ public class GeckoInspectTask implements Runnable, ProbeRegistry {
         mRequestId = geckoInspectEntity.getRequestId();
         mRequestHeaders = safeHeaders(geckoInspectEntity.getRequestHeaders());
         mTabId = geckoInspectEntity.getTabId();
-        mMetaPriority = geckoInspectEntity.getMetaPriority();
         mVisitId = geckoInspectEntity.getVisitId();
         mName = geckoInspectEntity.getName();
         mImg = geckoInspectEntity.getImg();
@@ -212,7 +210,6 @@ public class GeckoInspectTask implements Runnable, ProbeRegistry {
         entity.setHeaders(mRequestHeaders);
         entity.setUpdateTime(System.currentTimeMillis());
         entity.setTabId(mTabId);
-        entity.setMetaPriority(mMetaPriority);
         entity.setVisitId(mVisitId);
         entity.setRequestId(mRequestId);
         entity.setFileDescription(mDescription);

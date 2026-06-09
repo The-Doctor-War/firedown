@@ -34,12 +34,6 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
 
     int tabId;
 
-    /** Metadata authority of the capture SOURCE (per-site parser / page-state
-     *  bridge > generic catcher), used only at same-URL dedup time so the richer
-     *  title/thumbnail wins regardless of arrival order. In-memory only (not
-     *  parceled/persisted — dedup runs before either). 0 = generic. */
-    int metaPriority;
-
     /** Navigation-visit id at capture time, assigned by the browser's own
      *  onLocationChange (see GeckoState#getVisitId). Identifies which page
      *  visit within a tab this capture belongs to, independent of how any
@@ -439,14 +433,6 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         return tabId;
     }
 
-    public int getMetaPriority() {
-        return metaPriority;
-    }
-
-    public void setMetaPriority(int metaPriority) {
-        this.metaPriority = metaPriority;
-    }
-
     public void setVisitId(int visitId) {
         this.visitId = visitId;
     }
@@ -528,7 +514,6 @@ public class BrowserDownloadEntity implements Parcelable, Comparable<BrowserDown
         this.videoNumber = entity.getVideoNumber();
         this.hasVariants = entity.getHasVariants();
         this.tabId = entity.getTabId();
-        this.metaPriority = entity.getMetaPriority();
         this.visitId = entity.getVisitId();
         this.requestId = entity.getRequestId();
         this.updateTime = entity.getUpdateTime();

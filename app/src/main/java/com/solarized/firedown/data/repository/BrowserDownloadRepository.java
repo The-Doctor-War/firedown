@@ -4,7 +4,6 @@ package com.solarized.firedown.data.repository;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
@@ -122,15 +121,11 @@ public class BrowserDownloadRepository {
 
     public void addValue(BrowserDownloadEntity browserDownloadEntity) {
         boolean added = false;
-        boolean upgraded = false;
         synchronized (mInterceptedList) {
             boolean exists = false;
             for (BrowserDownloadEntity entity : mInterceptedList) {
                 if (isPresent(entity, browserDownloadEntity)) {
                     exists = true;
-                    // Same URL captured twice — keep ONE entry, but let the RICHER
-                    // capture's title/thumbnail win regardless of arrival order.
-                    upgraded = upgradeMetadata(entity, browserDownloadEntity);
                     break;
                 }
             }
@@ -141,59 +136,9 @@ public class BrowserDownloadRepository {
             }
         }
         // Throttled emit, outside the list lock (see scheduleEmit / mEmitRunnable).
-        if (added || upgraded) {
+        if (added) {
             scheduleEmit();
         }
-    }
-
-    /**
-     * Same URL captured twice — keep ONE entry, but merge its DISPLAY metadata
-     * priority-weighted, so the richer source wins regardless of arrival order.
-     * Each capture carries a {@code metaPriority} stamped by its source (per-site
-     * parser / page-state bridge &gt; generic catcher, the latter = 0). For each
-     * display field (name / thumbnail / description) we take the incoming value
-     * when it's non-empty AND the incoming source is at least as authoritative as
-     * the existing one (and never downgrade a higher-priority title); we also fill
-     * any field the existing entry simply lacks. This is order-independent — a
-     * late higher-priority capture upgrades, a late lower-priority one only fills
-     * gaps — and uses no name heuristic. The existing entity's already-working
-     * headers / download strategy are left untouched. Returns true if anything
-     * changed (→ re-emit).
-     */
-    private boolean upgradeMetadata(BrowserDownloadEntity existing, BrowserDownloadEntity incoming) {
-        boolean changed = false;
-        boolean incomingWins = incoming.getMetaPriority() > existing.getMetaPriority();
-
-        // Title: adopt the incoming title when the existing one is missing, or when
-        // the incoming source outranks it (a real title never gets downgraded —
-        // the generic catcher is priority 0, so its URL-token name can't win).
-        String incomingName = incoming.getFileName();
-        if (!TextUtils.isEmpty(incomingName) && !existing.isFileNameForced()
-                && (TextUtils.isEmpty(existing.getFileName()) || incomingWins)) {
-            existing.setFileName(incomingName);
-            changed = true;
-        }
-
-        String incomingThumb = incoming.getFileThumbnail();
-        if (!TextUtils.isEmpty(incomingThumb)
-                && (TextUtils.isEmpty(existing.getFileThumbnail()) || incomingWins)) {
-            existing.setFileThumbnail(incomingThumb);
-            changed = true;
-        }
-
-        String incomingDesc = incoming.getFileDescription();
-        if (!TextUtils.isEmpty(incomingDesc)
-                && (TextUtils.isEmpty(existing.getFileDescription()) || incomingWins)) {
-            existing.setFileDescription(incomingDesc);
-            changed = true;
-        }
-
-        // Remember the highest authority seen for this entry, so a still-later,
-        // even-lower-priority capture can't override what a winner just set.
-        if (incomingWins) {
-            existing.setMetaPriority(incoming.getMetaPriority());
-        }
-        return changed;
     }
 
     public void postComplete() {

@@ -113,6 +113,28 @@ const PARSER_BLOCKLIST = {
   pornhubNetwork: [
     '(t8cdn|phncdn|ypncdn|rdtcdn)\\.com\\/.*\\.(mp4|m3u8)',
   ],
+
+  // YouTube — fully owned by the youtube@ parser (VOD = SABR, LIVE = HLS master,
+  // both emitted with rich metadata + quality variants). Unlike the shared CDNs
+  // above this is a HOST-level block: googlevideo.com is YouTube's EXCLUSIVE media
+  // CDN (no unrelated media lives there), so scoping to an extension would only
+  // risk missing one of YouTube's many URL shapes. The generic catcher must never
+  // emit a googlevideo entry.
+  //
+  // The load-bearing case is LIVE. VOD is SABR (videoplayback chunks, no manifest
+  // URL the catcher classifies as media), so it never tripped. But a live stream
+  // plays over HLS, so a clean .m3u8 crosses the wire —
+  // manifest.googlevideo.com/.../hls_variant/ (master) and .../hls_playlist/
+  // (child) — which the catcher grabbed and emitted as type:"media". That fired a
+  // metadatareader probe that opened the live segments on the rr*.googlevideo
+  // chunk hosts, every one 403ing on the per-host n-param / live edge, spinning
+  // ffmpeg's reload loop until the hls.c patch-0005 bail. This block drops the
+  // capture before classify, so no probe. (The youtube@ parser separately emits
+  // the master as type:"hls-master" → native enumerates the master text only, no
+  // probe — these two together close both probe sources for live.)
+  youtube: [
+    'googlevideo\\.com\\/',
+  ],
 };
 
 // Flatten every parser's patterns into one compiled RegExp — same approach and

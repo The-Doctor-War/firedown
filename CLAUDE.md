@@ -340,7 +340,16 @@ captured. `type:"hls-master"` → `processHlsMaster` fetches only the master tex
 from the lenient manifest host and `M3U8Parser` enumerates the qualities (no
 segment opened, `skipProbe`), and the capture is **origin-deduped** (a re-signed
 manifest URL per refresh won't dupe, unlike `MEDIA`'s url-hash uid). Same
-no-probe master rule as Twitch/Kick/niconico.
+no-probe master rule as Twitch/Kick/niconico. **The parser is only one of two
+probe sources for live, though** — a live stream plays over HLS, so the player
+also puts a clean `.m3u8` on the wire (`manifest.googlevideo.com/.../hls_variant/`
+master + `.../hls_playlist/` child), which the **generic catcher** would grab and
+probe as `type:"media"` (the cardinal-rule violation). So `googlevideo.com` is
+host-block-listed in `parser-blocklist.js` (the `youtube` key) — YouTube is fully
+parser-owned and googlevideo is its exclusive media CDN. VOD never tripped this
+(SABR = `videoplayback` chunks, no `.m3u8`); only live did. Both the parser
+`type:"hls-master"` emit AND the catcher block are needed to fully kill the live
+probe.
 
 ### TikTok — filterResponseData (item_list feeds + document SSR)
 

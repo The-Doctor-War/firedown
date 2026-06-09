@@ -28,6 +28,12 @@ public class AutoCompleteView extends FrameLayout {
 
     private static final String TAG = AutoCompleteView.class.getSimpleName();
 
+    /** Longest clipboard text the chip will offer. Generous for any real URL
+     *  (data: URIs included) or search phrase; everything beyond this is a
+     *  pasted document/log dump that must not be volunteered into the
+     *  address bar (see showClipboard). */
+    private static final int MAX_CLIP_SUGGESTION_LENGTH = 8192;
+
     private final Context mContext;
 
     private AutoCompleteRecyclerView mSearchView;
@@ -238,7 +244,24 @@ public class AutoCompleteView extends FrameLayout {
         // getPrimaryClip() call chain triggered Android 13's 'App
         // pasted from your clipboard' toast on every visibility
         // check. One call now.
-        ClipData clip = clipboardManager == null ? null : clipboardManager.getPrimaryClip();
+        //
+        // The read is a binder call into system_server's clipboard service
+        // and MUST NOT be fatal: when system_server is dying/restarting,
+        // getPrimaryClip() throws RuntimeException(DeadSystemException) —
+        // observed on-device killing the app on the URL-bar focus tap that
+        // races the system's death (the process is doomed either way, but
+        // crashing here files a junk crash report and loses any in-flight
+        // state). Some OEM clipboard services also throw SecurityException
+        // on background reads. The chip is a convenience suggestion, so on
+        // any failure just don't offer it.
+        ClipData clip = null;
+        try {
+            if (clipboardManager != null) {
+                clip = clipboardManager.getPrimaryClip();
+            }
+        } catch (RuntimeException e) {
+            Log.e(TAG, "showClipboard: clipboard read failed", e);
+        }
         if (clip == null || clip.getItemCount() == 0) {
             mClipboardView.setVisibility(View.GONE);
             return;
@@ -254,6 +277,17 @@ public class AutoCompleteView extends FrameLayout {
         CharSequence raw = clip.getItemAt(0).coerceToText(mContext);
         String text = raw == null ? "" : raw.toString();
         if (text.isEmpty()) {
+            mClipboardView.setVisibility(View.GONE);
+            return;
+        }
+        // Don't offer an absurdly long clip (a pasted log dump, a whole
+        // document). No real URL or search term comes close to this cap, and
+        // tapping the chip would shuttle the entire blob into the address
+        // bar — from where it gets carried across binder again and again
+        // (EditText view-state save on every onStop, accessibility
+        // announcements) and churned through text-change handling. The user
+        // can still long-press-paste deliberately; we just don't volunteer it.
+        if (text.length() > MAX_CLIP_SUGGESTION_LENGTH) {
             mClipboardView.setVisibility(View.GONE);
             return;
         }

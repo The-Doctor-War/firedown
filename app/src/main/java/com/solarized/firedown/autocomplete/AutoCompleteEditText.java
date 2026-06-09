@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.solarized.firedown.App;
+import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.R;
 import com.solarized.firedown.ui.FocusEditText;
 
@@ -91,6 +92,20 @@ public class AutoCompleteEditText extends FocusEditText {
     private boolean mDiscardAutoCompleteResult;
 
     private final Object AUTOCOMPLETE_SPAN = new NoCopySpan.Concrete();
+
+    /** Truncate text for logging. The field can hold an arbitrarily large
+     *  paste; logging it whole on every text/focus event multiplies that
+     *  blob through logcat (observed churning the main thread after a
+     *  log-dump paste). 128 chars identifies any URL/search in a log line. */
+    private static String logPreview(CharSequence text) {
+        if (text == null) {
+            return "null";
+        }
+        if (text.length() <= 128) {
+            return text.toString();
+        }
+        return text.subSequence(0, 128) + "…(" + text.length() + " chars)";
+    }
 
     private BackgroundColorSpan mBackgroundSpanColor;
 
@@ -197,7 +212,9 @@ public class AutoCompleteEditText extends FocusEditText {
             setText(uri, false);
         }
         mLocationUri = uri;
-        Log.d(TAG, "setLocation: " + mLocationUri);
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "setLocation: " + logPreview(mLocationUri));
+        }
     }
 
     private boolean removeAutocomplete(Editable text) {
@@ -319,7 +336,11 @@ public class AutoCompleteEditText extends FocusEditText {
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
 
-        Log.d(TAG, "onFocusChanged: " + focused + " originalText: " + getOriginalText() + " mLocationUri: " + mLocationUri);
+        if (BuildConfig.DEBUG) {
+            Log.d(TAG, "onFocusChanged: " + focused
+                    + " originalText: " + logPreview(getOriginalText())
+                    + " mLocationUri: " + logPreview(mLocationUri));
+        }
 
         if(focused){
             setMovementMethod(ArrowKeyMovementMethod.getInstance());
@@ -861,7 +882,12 @@ public class AutoCompleteEditText extends FocusEditText {
                 mOnTextChangedListener.onTextChanged(mAfterNonAutocompleteText, getText() != null ? getText().toString() : "");
             }
 
-            Log.d(TAG, "hasBackspaceBeenPressed: " + hasBackspaceBeenPressed + " before: " + mBeforeChangedTextNonAutocomplete + " after: " + mAfterNonAutocompleteText + " hasTextShortenedByOne: " + hasTextShortenedByOne);
+            if (BuildConfig.DEBUG) {
+                Log.d(TAG, "hasBackspaceBeenPressed: " + hasBackspaceBeenPressed
+                        + " before: " + logPreview(mBeforeChangedTextNonAutocomplete)
+                        + " after: " + logPreview(mAfterNonAutocompleteText)
+                        + " hasTextShortenedByOne: " + hasTextShortenedByOne);
+            }
 
         }
     };

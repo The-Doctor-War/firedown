@@ -1,7 +1,7 @@
 // Threads parser — split verbatim out of the former parser-background.js.
 // Same backend as Instagram; emits through sendInstagramItem (see the section
 // comment below for why the parser must own Threads captures).
-import { log, tryParseJson, isOwnRequest, cacheTabUrl } from './common.js';
+import { log, tryParseJson, isOwnRequest, cacheTabUrl, readFilteredBody } from './common.js';
 import { sendInstagramItem } from './instagram.js';
 
 // Threads
@@ -126,29 +126,7 @@ function emitThreadsItems(details, bestByCode, pageUrl, label) {
 // string to onBody. Shared by the doc (main_frame HTML) and API (XHR JSON)
 // listeners.
 function filterThreadsResponse(details, label, onBody) {
-    let filter;
-    try {
-        filter = browser.webRequest.filterResponseData(details.requestId);
-    } catch (e) {
-        log("THREADS", `${label}: filter create failed`, { error: e.message });
-        return;
-    }
-    const chunks = [];
-    filter.ondata = (event) => {
-        chunks.push(new Uint8Array(event.data));
-        filter.write(event.data); // pass through unmodified
-    };
-    filter.onstop = () => {
-        filter.close();
-        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) { log("THREADS", `${label}: 0 bytes`); return; }
-        const combined = new Uint8Array(total);
-        let offset = 0;
-        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
-        const str = new TextDecoder("utf-8").decode(combined);
-        Promise.resolve().then(() => onBody(str, total));
-    };
-    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+    readFilteredBody(details, "THREADS", label, onBody);
 }
 
 // (1) Logged-in: read the post JSON inlined in the page HTML's data-sjs blobs.

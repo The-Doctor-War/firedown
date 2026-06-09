@@ -1,5 +1,5 @@
 // Niconico (nicovideo.jp) parser — split verbatim out of the former parser-background.js.
-import { log, tryParseJson, isOwnRequest, alreadySent, markSent, sendNative, sendVariants, enumerateMasterNative, resolveTabId } from './common.js';
+import { log, isOwnRequest, alreadySent, markSent, sendNative, sendVariants, enumerateMasterNative, resolveTabId, readFilteredBody, readFilteredJson } from './common.js';
 
 // Niconico (nicovideo.jp)
 // ----------------------------------------------------------------------------
@@ -35,29 +35,10 @@ function nicoGetMeta(id) {
 }
 
 function nicoFilterJson(details, label, onParsed) {
-    let filter;
-    try {
-        filter = browser.webRequest.filterResponseData(details.requestId);
-    } catch (e) {
-        log("NICO", `${label} filter create failed`, { error: e.message });
-        return;
-    }
-    const chunks = [];
-    filter.ondata = (event) => { chunks.push(new Uint8Array(event.data)); filter.write(event.data); };
-    filter.onstop = () => {
-        filter.close();
-        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) { log("NICO", `${label}: 0 bytes`); return; }
-        const buf = new Uint8Array(total);
-        let offset = 0;
-        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
-        const text = new TextDecoder("utf-8").decode(buf);
-        const parsed = tryParseJson(text);
-        if (!parsed) { log("NICO", `${label}: not JSON`, { bytes: total, head: text.slice(0, 100) }); return; }
+    readFilteredJson(details, "NICO", label, (parsed, total) => {
         log("NICO", `${label}: parsed ${total} bytes`);
-        Promise.resolve().then(() => onParsed(parsed));
-    };
-    filter.onerror = () => { log("NICO", `${label}: filter error`); try { filter.close(); } catch (_) {} };
+        onParsed(parsed);
+    });
 }
 
 function nicoIdFromWatchApi(url) {
@@ -179,25 +160,7 @@ const NICO_MASTER_TTL = 8000;
 
 // Passive text-body filter (m3u8 isn't JSON, so nicoFilterJson can't be reused).
 function nicoFilterText(details, label, onText) {
-    let filter;
-    try {
-        filter = browser.webRequest.filterResponseData(details.requestId);
-    } catch (e) {
-        log("NICO", `${label} filter create failed`, { error: e.message });
-        return;
-    }
-    const chunks = [];
-    filter.ondata = (event) => { chunks.push(new Uint8Array(event.data)); filter.write(event.data); };
-    filter.onstop = () => {
-        filter.close();
-        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) { log("NICO", `${label}: 0 bytes`); return; }
-        const buf = new Uint8Array(total);
-        let offset = 0;
-        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
-        Promise.resolve().then(() => onText(new TextDecoder("utf-8").decode(buf)));
-    };
-    filter.onerror = () => { log("NICO", `${label}: filter error`); try { filter.close(); } catch (_) {} };
+    readFilteredBody(details, "NICO", label, onText);
 }
 
 // Parse a domand master m3u8 → { audios:{groupId:url}, videos:[{url,width,height,audioGroup}] }.

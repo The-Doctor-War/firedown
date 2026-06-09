@@ -319,6 +319,54 @@ function filterResponseText(details, onText) {
     return true;
 }
 
+// Passive write-through body capture for the per-site response filters — the
+// shape every site's JSON/document filter shared (verbatim, modulo log tag)
+// before the module split. Contract differs from filterResponseText above:
+// a create failure logs and returns false; an EMPTY body is skipped with a
+// log (no callback); a filter error logs and closes (no callback). onBody
+// runs OFF the filter callback (microtask) with (text, totalBytes) so it
+// never holds the stream stop. Keep new parsers on this unless they need an
+// error fallback (dailymotion.js re-fetches on filter failure) or
+// chunk-level diagnostics (instagram.js).
+function readFilteredBody(details, tag, label, onBody) {
+    let filter;
+    try {
+        filter = browser.webRequest.filterResponseData(details.requestId);
+    } catch (e) {
+        log(tag, `${label}: filter create failed`, { error: e.message });
+        return false;
+    }
+    const chunks = [];
+    filter.ondata = (event) => {
+        chunks.push(new Uint8Array(event.data));
+        filter.write(event.data); // pass through unmodified
+    };
+    filter.onstop = () => {
+        filter.close();
+        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
+        if (total === 0) { log(tag, `${label}: 0 bytes`); return; }
+        const buf = new Uint8Array(total);
+        let offset = 0;
+        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
+        const text = new TextDecoder("utf-8").decode(buf);
+        Promise.resolve().then(() => onBody(text, total));
+    };
+    filter.onerror = () => {
+        log(tag, `${label}: filter error`);
+        try { filter.close(); } catch (_) {}
+    };
+    return true;
+}
+
+// readFilteredBody + JSON.parse, skipping (with a log) bodies that aren't JSON.
+function readFilteredJson(details, tag, label, onParsed) {
+    return readFilteredBody(details, tag, label, (text, total) => {
+        const parsed = tryParseJson(text);
+        if (!parsed) { log(tag, `${label}: not JSON`, { bytes: total, head: text.slice(0, 100) }); return; }
+        onParsed(parsed, total);
+    });
+}
+
 // Emit enumerated HLS variants (no ffprobe) or, on ANY failure, the single media
 // URL. For an .m3u8 master we fetch+parse it (unless `body` is supplied). Does
 // its own dedup — callers must NOT pre-markSent the origin.
@@ -713,7 +761,7 @@ export {
     markOwnRequest, isOwnRequest,
     sendNative, sendVariants, sendSubtitles,
     parseHlsMaster, enumerateMasterNative, emitHlsMasterOrSingle,
-    filterResponseText, collectFilteredResponse,
+    filterResponseText, readFilteredBody, readFilteredJson, collectFilteredResponse,
     cacheTabUrl, resolveTabId, ensureTabId, urlToTabCache,
     registerSpaHandler, runSpaHandlers, registerMessageHandler,
 };

@@ -1,5 +1,5 @@
 // Rumble parser — split verbatim out of the former parser-background.js.
-import { log, tryParseJson, isOwnRequest, sendVariants, enumerateMasterNative, cacheTabUrl } from './common.js';
+import { log, tryParseJson, isOwnRequest, sendVariants, enumerateMasterNative, cacheTabUrl, readFilteredBody } from './common.js';
 
 // Rumble
 // ----------------------------------------------------------------------------
@@ -46,28 +46,7 @@ async function emitRumbleHls(details, { hls, origin, title, author, thumb, durat
 // Buffer a Rumble response body and hand the decoded text to onText. Shared by
 // the JSON listeners (embedJS, service.php) and the shorts-page HTML reader.
 function filterRumbleText(details, label, onText) {
-    let filter;
-    try {
-        filter = browser.webRequest.filterResponseData(details.requestId);
-    } catch (e) {
-        log("RUMBLE", `${label} filter create failed`, { error: e.message });
-        return;
-    }
-    const chunks = [];
-    filter.ondata = (event) => {
-        chunks.push(new Uint8Array(event.data));
-        filter.write(event.data); // pass through unmodified
-    };
-    filter.onstop = () => {
-        filter.close();
-        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) { log("RUMBLE", `${label} 0 bytes`); return; }
-        const buf = new Uint8Array(total);
-        let offset = 0;
-        for (const c of chunks) { buf.set(c, offset); offset += c.byteLength; }
-        Promise.resolve().then(() => onText(new TextDecoder("utf-8").decode(buf)));
-    };
-    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+    readFilteredBody(details, "RUMBLE", label, onText);
 }
 
 // Parse a Rumble JSON response and hand it to onParsed.

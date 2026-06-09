@@ -1,5 +1,5 @@
 // Twitter / X parser — split verbatim out of the former parser-background.js.
-import { log, tryParseJson, sendVariants, sendSubtitles, urlToTabCache } from './common.js';
+import { log, sendVariants, sendSubtitles, urlToTabCache, readFilteredJson } from './common.js';
 
 // ============================================================================
 // Twitter / X
@@ -268,34 +268,9 @@ function listenerTwitterGraphql(details) {
     const kind = twitterQueryKind(details.url);
     if (!kind) return {};
 
-    let filter;
-    try {
-        filter = browser.webRequest.filterResponseData(details.requestId);
-    } catch (e) {
-        log("TWITTER", "filter create failed", { error: e.message });
-        return {};
-    }
-
-    const chunks = [];
-    filter.ondata = (event) => {
-        chunks.push(new Uint8Array(event.data));
-        filter.write(event.data); // pass through unmodified
-    };
-    filter.onstop = () => {
-        filter.close();
-        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) return;
-        const combined = new Uint8Array(total);
-        let offset = 0;
-        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
-        const parsed = tryParseJson(new TextDecoder("utf-8").decode(combined));
-        if (!parsed) { log("TWITTER", "response not JSON", { kind, bytes: total }); return; }
-        // Off the filter callback to avoid holding the stream stop.
-        Promise.resolve().then(() => processTwitterResponse(details, kind, parsed));
-    };
-    filter.onerror = () => {
-        try { filter.close(); } catch (_) {}
-    };
+    readFilteredJson(details, "TWITTER", kind, (parsed) => {
+        processTwitterResponse(details, kind, parsed);
+    });
 
     return {};
 }

@@ -1,5 +1,5 @@
 // Facebook parser — split verbatim out of the former parser-background.js.
-import { log, tryParseJson, isOwnRequest, sendVariants, registerSpaHandler } from './common.js';
+import { log, tryParseJson, isOwnRequest, sendVariants, registerSpaHandler, readFilteredBody } from './common.js';
 
 // Facebook
 // ----------------------------------------------------------------------------
@@ -212,30 +212,9 @@ function listenerFacebookApiFilter(details) {
     const url = details.url;
     if (isOwnRequest(url)) return {};
 
-    let filter;
-    try {
-        filter = browser.webRequest.filterResponseData(details.requestId);
-    } catch (e) {
-        log("FB-FILTER", `filter create failed`, { error: e.message });
-        return {};
-    }
-
-    const chunks = [];
-    filter.ondata = (event) => {
-        chunks.push(new Uint8Array(event.data));
-        filter.write(event.data);
-    };
-    filter.onstop = () => {
-        filter.close();
-        const total = chunks.reduce((acc, c) => acc + c.byteLength, 0);
-        if (total === 0) return;
-        const combined = new Uint8Array(total);
-        let offset = 0;
-        for (const c of chunks) { combined.set(c, offset); offset += c.byteLength; }
-        const body = new TextDecoder("utf-8").decode(combined);
-        Promise.resolve().then(() => processFacebookGraphqlBody(details, url, body));
-    };
-    filter.onerror = () => { try { filter.close(); } catch (_) {} };
+    readFilteredBody(details, "FB-FILTER", "graphql", (body) => {
+        processFacebookGraphqlBody(details, url, body);
+    });
     return {};
 }
 

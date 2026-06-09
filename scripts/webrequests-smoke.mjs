@@ -155,6 +155,37 @@ for (const url of spaUrls) {
 }
 expect(!spaThrew, "SPA handlers run for all five registered sites");
 
+// ---------------------------------------------------------------------------
+// Pure-function checks — the point of the module split: extraction logic is
+// importable, so a HAR-replay test can run the REAL code (CLAUDE.md's
+// "reproduce the parser's exact algorithm against the HAR bytes" rule)
+// instead of a copy-pasted simulation.
+// ---------------------------------------------------------------------------
+const { parseHlsMaster, decodeHtmlEntities } = await import(
+  pathToFileURL(join(ext, "js/parsers/common.js"))
+);
+
+const master = [
+  "#EXTM3U",
+  '#EXT-X-MEDIA:TYPE=AUDIO,GROUP-ID="aud1",NAME="en",URI="audio/hi.m3u8"',
+  '#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=90000,URI="iframe.m3u8"',
+  '#EXT-X-STREAM-INF:BANDWIDTH=5000000,RESOLUTION=1920x1080,CODECS="avc1.64002a,mp4a.40.2",AUDIO="aud1"',
+  "v1080.m3u8",
+  '#EXT-X-STREAM-INF:BANDWIDTH=1500000,RESOLUTION=1280x720,CODECS="avc1.4d401f,mp4a.40.2",AUDIO="aud1"',
+  "v720.m3u8",
+].join("\n");
+const variants = parseHlsMaster(master, "https://cdn.example.com/live/master.m3u8");
+expect(variants.length === 2, `parseHlsMaster: 2 variants (got ${variants.length})`);
+expect(variants[0]?.height === 1080 && variants[0]?.url === "https://cdn.example.com/live/v1080.m3u8",
+  "parseHlsMaster: best-first with resolved URL");
+expect(variants[0]?.audioUrl === "https://cdn.example.com/live/audio/hi.m3u8",
+  "parseHlsMaster: split audio group resolved");
+expect(variants[0]?.videoCodec === "h264" && variants[0]?.audioCodec === "aac",
+  "parseHlsMaster: codecs mapped");
+
+expect(decodeHtmlEntities("&#x41c;&amp;&#1052; &hellip;") === "М&М …",
+  "decodeHtmlEntities: hex/named/decimal references");
+
 if (failures) {
   console.error(`\n${failures} failure(s)`);
   process.exit(1);

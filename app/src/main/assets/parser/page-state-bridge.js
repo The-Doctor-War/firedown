@@ -901,7 +901,14 @@
                 .map(v => ({ url: v.url, width: 0, height: v.height || 0 }));
             if (variants.length && !sentKeys.has(variants[0].url)) {
                 sentKeys.add(variants[0].url);
-                const payload = { variants, origin: location.href, title, img, durationMs };
+                // Navigator hints so the native download can replicate the
+                // browser's <video>-element request: some progressive CDNs
+                // (krakencloud /play/video/<token> on series.ly) 404 a bare GET
+                // and only serve a media-element-shaped request (UA + Accept:
+                // video/* + Accept-Language + Sec-Fetch-Dest: video). background
+                // builds those from ua/lang here.
+                const { ua, lang } = readNavigatorHints();
+                const payload = { variants, origin: location.href, title, img, durationMs, ua, lang };
                 log("sending", variants.length, "page-player progressive variant(s) at", label, title);
                 browser.runtime.sendMessage({ kind: "page-state-progressive", payload }).then(() => {}, () => {});
             }

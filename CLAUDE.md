@@ -187,12 +187,24 @@ see the HLS-master path below), covers every such site:
 - **Emit + metadata.** Progressive → Background `kind:"page-state-progressive"` →
   `sendVariants` (skip-probe auto-set from any page `duration`; the variant
   carries only `height`, `width:0` — `JsonHelper` renders `"720p"`, never
-  `"0x720"`). **No request headers** for the progressive case — these URLs are
-  query-signed/self-authorizing (verified on tube8: the real browser fetch carries
-  **no** Referer/Origin/Cookie), unlike the HLS-master CDNs (which DO need the full
-  browser header set — see `postHlsMaster`). Title is the generic page title;
-  `duration`/`poster` come from `DURATION_KEY_RE`/`IMG_KEY_RE` siblings of the
-  source when present.
+  `"0x720"`). **Request headers: the `<video>`-element MEDIA-REQUEST set, but NO
+  Referer/Origin/Cookie.** These URLs are query-signed/self-authorizing (verified
+  on tube8: the real browser fetch carries no Referer/Origin/Cookie), so those are
+  omitted — but some progressive CDNs still gate on the headers a real `<video>`
+  fetch *always* carries: krakencloud's `/play/video/<token>` (series.ly) **404s a
+  bare GET** (and a UA-only ffmpeg probe), while the **byte-identical** url+token
+  plays in-browser as a **206** — the difference is `Accept: video/*` +
+  `Sec-Fetch-Dest: video` + `User-Agent` + `Accept-Language`. So
+  `handlePageStateProgressive` sends exactly that set (UA/Accept-Language from the
+  bridge's `readNavigatorHints`), benign for self-authorizing CDNs since a real
+  browser sends them too. Range is NOT sent up-front (`HttpDownloadStrategy`'s
+  fresh request is no-Range by design) but its **403/404/416 retry adds
+  `Range: bytes=0-`** carrying these same headers — so the retry replicates the
+  player's exact request (headers + Range → 206). Ceiling: a CDN that also
+  fingerprints **TLS (JA3/JA4)** is still unreachable to OkHttp, header-spoofing or
+  not. (HLS-master CDNs get the fuller set incl. Origin/Referer — see
+  `postHlsMaster`.) Title is the generic page title; `duration`/`poster` come from
+  `DURATION_KEY_RE`/`IMG_KEY_RE` siblings of the source when present.
 - **Dedup on play — NO `parser-blocklist.js` rule for generic-bridge sites.** The
   player's default quality is the entity's primary URL, and the bridge fires
   PRE-PLAY, so it dedups **by URL** against the play-time wire capture. A media

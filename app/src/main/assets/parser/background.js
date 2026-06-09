@@ -4381,13 +4381,33 @@ browser.runtime.onMessage.addListener((message, sender) => {
         title: p.title, origin: pageUrl.slice(0, 80), tabId
     });
 
+    // Replicate the browser's <video>-element request shape. These URLs are
+    // query-signed/self-authorizing (no Referer/Origin/Cookie — verified on tube8,
+    // which serves a header-LESS GET fine), but some progressive CDNs gate on the
+    // MEDIA-REQUEST headers a real <video> fetch always carries: krakencloud's
+    // /play/video/<token> (series.ly) 404s a bare GET (and a UA-only ffmpeg probe),
+    // yet the SAME url + token plays in-browser as a 206 — the difference is the
+    // `Accept: video/*` + `Sec-Fetch-Dest: video` + UA/Accept-Language set. Send
+    // those (NOT Referer/Origin, which the working play omits and tube8 doesn't
+    // need). Benign for self-authorizing CDNs (a real browser sends them too); a
+    // CDN that also fingerprints TLS (JA3/JA4) is still unreachable to OkHttp.
+    const requestHeaders = [
+        { name: "Accept", value: "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5" },
+        { name: "Sec-Fetch-Dest", value: "video" },
+        { name: "Sec-Fetch-Mode", value: "no-cors" },
+        { name: "Sec-Fetch-Site", value: "cross-site" }
+    ];
+    if (typeof p.lang === "string" && p.lang) requestHeaders.push({ name: "Accept-Language", value: p.lang });
+    if (typeof p.ua === "string" && p.ua) requestHeaders.push({ name: "User-Agent", value: p.ua });
+
     sendVariants(details, {
         variants: p.variants,
         origin: pageUrl,
         description: p.title,
         name: p.title,
         img: p.img,
-        duration: p.durationMs > 0 ? p.durationMs : 0
+        duration: p.durationMs > 0 ? p.durationMs : 0,
+        requestHeaders
     });
 });
 

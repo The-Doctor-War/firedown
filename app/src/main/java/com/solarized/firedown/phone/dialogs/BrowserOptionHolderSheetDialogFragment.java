@@ -246,7 +246,11 @@ public class BrowserOptionHolderSheetDialogFragment extends BaseBottomSheetDialo
                     startDownloads(captionRequests, mAnchorView);
                 }
 
-            } else if (id == R.id.empty_button) {
+            } else if (id == R.id.empty_button || id == R.id.action_help) {
+                // empty_button: the empty-state help affordance.
+                // action_help: the toolbar Help item — same help screen, but
+                // reachable when the list is non-empty (captured some media, but
+                // not the embedded video the user still needs to play).
                 BrowserOptionHelpFragment helpFragment = new BrowserOptionHelpFragment();
                 getChildFragmentManager().beginTransaction()
                         .setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left, R.anim.slide_in_left, R.anim.slide_out_right)

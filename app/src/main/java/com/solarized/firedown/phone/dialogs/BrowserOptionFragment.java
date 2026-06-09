@@ -294,6 +294,15 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
                     mAdapter.clearSelection();
                     updateActionModeTitle();
                     return true;
+                } else if (id == R.id.action_help) {
+                    // Opens the same "play the media before downloading" help the
+                    // empty-state button shows — but reachable even when the list
+                    // is non-empty (some media captured, but not the embedded one
+                    // the user must play first).
+                    OptionEntity option = new OptionEntity();
+                    option.setId(R.id.action_help);
+                    mFragmentsViewModel.onOptionsSelected(option);
+                    return true;
                 } else if (id == R.id.action_downloads) {
                     mStartForResult.launch(new Intent(requireContext(), DownloadsActivity.class));
                     return true;

@@ -1688,12 +1688,12 @@ function emitTwitterTweetVideos(details, result) {
             .map(v => {
                 const wh = v.url.match(/\/(\d+)x(\d+)\//);
                 // Twitter progressive mp4s are always H.264/AAC. Supplying the
-                // codecs here (with skipProbe below) lets the Java side trust the
-                // parser metadata and skip the capture-time ffmpeg probe: the
-                // variant already carries url + resolution, and duration comes
-                // from duration_millis. A single progressive .mp4 has no separate
-                // audio, so VariantProcessor keeps it on the byte-exact
-                // HttpDownloadStrategy (type FILE), not an ffmpeg remux.
+                // codecs here lets the Java side trust the parser metadata and
+                // skip the capture-time ffmpeg probe (the variant already carries
+                // url + resolution, and duration comes from duration_millis). A
+                // single progressive .mp4 has no separate audio, so
+                // VariantProcessor keeps it on the byte-exact HttpDownloadStrategy
+                // (type FILE), not an ffmpeg remux.
                 return {
                     url: v.url,
                     width: wh ? parseInt(wh[1]) : 0,
@@ -1705,14 +1705,20 @@ function emitTwitterTweetVideos(details, result) {
             });
         if (variants.length === 0) continue;
         emitted = true;
+        // Do NOT hardcode skipProbe. Let sendVariants auto-enable it when
+        // duration > 0 (the normal case — duration_millis is present, so the
+        // probe is skipped exactly as before). When duration_millis is absent or
+        // 0 (animated-GIF-as-video, some embed/SPA response shapes), leaving
+        // skipProbe off lets the capture-time ffmpeg probe backfill the real
+        // duration — otherwise Twitter would uniquely emit NO duration tag while
+        // every other progressive parser (Instagram/Threads/Facebook) recovers it.
         sendVariants(details, {
             variants,
             origin: originUrl,
             description: videoText,
             img: imageUrl,
             name: screenName,
-            duration: m.video_info.duration_millis || 0,
-            skipProbe: true
+            duration: m.video_info.duration_millis || 0
         });
 
         const subtitles = extractTwitterSubtitles(m);

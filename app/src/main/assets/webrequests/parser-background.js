@@ -4365,7 +4365,7 @@ browser.runtime.onMessage.addListener((message, sender) => {
 // progressive URLs here. Routed through sendVariants as progressive files
 // (skipProbe is auto-set from any page duration). No special requestHeaders — and
 // none are needed for the common case: these media URLs are query-signed and
-// self-authorizing (verified on tube8: the real browser fetch carries no
+// self-authorizing (verified in practice: the real browser fetch carries no
 // Referer/Origin/Cookie). The played URL dedups by URL against this; for known
 // CDN families a parser-blocklist.js block also covers a manually-selected
 // other-quality URL, otherwise we rely on the URL dedup.
@@ -4399,14 +4399,15 @@ browser.runtime.onMessage.addListener((message, sender) => {
     });
 
     // Replicate the browser's <video>-element request shape. These URLs are
-    // query-signed/self-authorizing (no Referer/Origin/Cookie — verified on tube8,
-    // which serves a header-LESS GET fine), but some progressive CDNs gate on the
-    // MEDIA-REQUEST headers a real <video> fetch always carries: krakencloud's
-    // /play/video/<token> (series.ly) 404s a bare GET (and a UA-only ffmpeg probe),
-    // yet the SAME url + token plays in-browser as a 206 — the difference is the
-    // `Accept: video/*` + `Sec-Fetch-Dest: video` + UA/Accept-Language set. Send
-    // those (NOT Referer/Origin, which the working play omits and tube8 doesn't
-    // need). Benign for self-authorizing CDNs (a real browser sends them too); a
+    // query-signed/self-authorizing (no Referer/Origin/Cookie — verified on a
+    // self-authorizing CDN that serves a header-LESS GET fine), but some
+    // progressive CDNs gate on the MEDIA-REQUEST headers a real <video> fetch
+    // always carries: krakencloud's /play/video/<token> (series.ly) 404s a bare
+    // GET (and a UA-only ffmpeg probe), yet the SAME url + token plays in-browser
+    // as a 206 — the difference is the `Accept: video/*` + `Sec-Fetch-Dest: video`
+    // + UA/Accept-Language set. Send those (NOT Referer/Origin, which the working
+    // play omits and such CDNs don't need). Benign for self-authorizing CDNs (a
+    // real browser sends them too); a
     // CDN that also fingerprints TLS (JA3/JA4) is still unreachable to OkHttp.
     const requestHeaders = [
         { name: "Accept", value: "video/webm,video/ogg,video/*;q=0.9,application/ogg;q=0.7,audio/*;q=0.6,*/*;q=0.5" },
@@ -4458,7 +4459,7 @@ async function handlePageStateHls(message, sender) {
     // bridge emit and let the parser own the capture. This is the SAME oracle the
     // generic catcher uses, applied here ONLY to the bridge's generic readers —
     // the host-keyed branches (Bilibili page-state-media, Mega) go through other
-    // handlers and are unaffected; genuine generic-only hosts (tube8, series.ly)
+    // handlers and are unaffected; genuine generic-only hosts (e.g. series.ly)
     // aren't in the list and so are not skipped.
     if (typeof globalThis.matchInParserBlocklist === "function" && globalThis.matchInParserBlocklist(p.url)) {
         log("PAGE-STATE", `skip HLS master — parser-owned host`, { url: p.url.slice(0, 80) });

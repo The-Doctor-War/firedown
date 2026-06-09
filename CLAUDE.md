@@ -53,7 +53,7 @@ Consequences when working on a parser:
   exists. **This applies ONLY to site-specific parsers — a dedicated `parser@`
   module, or a host-keyed branch of the page-state bridge (Bilibili.tv, Mega).
   Media captured by the bridge's GENERIC, host-agnostic player readers
-  (`findPlayerMedia`/`readPlayerMedia`/`readDomMedia` — the tube8 /
+  (`findPlayerMedia`/`readPlayerMedia`/`readDomMedia` — the JSON-delegate /
   series.ly-krakenfiles class) gets NO block rule**: the bridge fires pre-play and
   the repository dedups by URL, so a block would only suppress the play-time
   capture with no parser owning the (often shared/random) host. See "Dedup on play"
@@ -158,13 +158,13 @@ see the HLS-master path below), covers every such site:
   `.m3u8` → HLS master (`postHlsMaster` → `page-state-hls` — Java enumerates, no
   probe); `.mp4`/`.m4v`/`.webm` → progressive variant; a
   **SAME-ORIGIN non-media URL beside a `format`/`quality`/`segmentFormats` hint**
-  → a tokenized **media-list DELEGATE** (e.g. the Pornhub-network player's
+  → a tokenized **media-list DELEGATE** (e.g. a player whose source is
   `…/media/mp4/?s=<token>` returning `[{quality, videoUrl:…mp4}]`), resolved with
   a **credentialed SAME-ORIGIN `fetch`** (`fetchMediaList`). Same-origin is the
   whole point: the bridge runs ON the page, so the resolve needs **no host
   permission and hits no CORS** — which is why it lives in the bridge, not
   `background.js` (which would need a per-host permission + CORS bypass).
-- **Why a JSON delegate is invisible to everything else** (the tube8 case that
+- **Why a JSON delegate is invisible to everything else** (the case that
   motivated this): the real `.mp4` URLs live **only inside an `application/json`
   XHR body** the generic catcher rejects (`classifyXhr` drops `application/json`)
   and **never in the DOM** (the page carries only the tokenized delegate — no
@@ -189,7 +189,7 @@ see the HLS-master path below), covers every such site:
   carries only `height`, `width:0` — `JsonHelper` renders `"720p"`, never
   `"0x720"`). **Request headers: the `<video>`-element MEDIA-REQUEST set, but NO
   Referer/Origin/Cookie.** These URLs are query-signed/self-authorizing (verified
-  on tube8: the real browser fetch carries no Referer/Origin/Cookie), so those are
+  in practice: the real browser fetch carries no Referer/Origin/Cookie), so those are
   omitted — but some progressive CDNs still gate on the headers a real `<video>`
   fetch *always* carries: krakencloud's `/play/video/<token>` (series.ly) **404s a
   bare GET** (and a UA-only ffmpeg probe), while the **byte-identical** url+token
@@ -209,7 +209,7 @@ see the HLS-master path below), covers every such site:
   player's default quality is the entity's primary URL, and the bridge fires
   PRE-PLAY, so it dedups **by URL** against the play-time wire capture. A media
   captured by the bridge's **generic, host-agnostic** readers (the
-  tube8 / series.ly-krakenfiles class) **never gets a `parser-blocklist.js`
+  JSON-delegate / series.ly-krakenfiles class) **never gets a `parser-blocklist.js`
   entry** — a block there would only suppress the play-time capture with no parser
   owning the (often shared / per-video-random) host. The accepted trade-off is a
   rare *other*-quality duplicate (a manually-picked non-default rendition whose URL
@@ -222,7 +222,7 @@ see the HLS-master path below), covers every such site:
 - **`readPlayerMedia` is NAME-AGNOSTIC — do NOT add global names.** It scans
   EVERY enumerable page-world global object (`Object.keys(wrappedJSObject)`), not a
   hand-kept list, so a config under any name is found: `page_params`,
-  `flashvars_<videoid>` (pornhub/tube8 — the id-suffixed name no fixed list could
+  `flashvars_<videoid>` (an id-suffixed name no fixed list could
   match), `__NEXT_DATA__`, a Redux store, a one-off `var`. This is safe to scan
   broadly because **the precision is in `collectPlayableMedia`'s walk, not the
   global name**: a url only counts under a media-ish KEY (`MEDIA_KEY_RE`) with a

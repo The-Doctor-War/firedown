@@ -613,7 +613,7 @@
     //   - .m3u8            → HLS master  (postHlsMaster → Java enumerates, no probe)
     //   - .mp4/.m4v/.webm  → progressive variant (page-state-progressive)
     //   - a SAME-ORIGIN non-media url beside a format/quality/segmentFormats hint
-    //     → a tokenized media-list DELEGATE (e.g. the Pornhub-network player's
+    //     → a tokenized media-list DELEGATE (e.g. a player whose source is
     //     …/media/mp4/?s=… returning [{quality, videoUrl:…mp4}]); resolved with a
     //     same-origin credentialed fetch (the bridge runs ON the page, so NO host
     //     permission and no CORS problem — that's why the resolve is here, not in
@@ -1143,7 +1143,7 @@
         // 3) GENERIC page-world player media (any site, any player) for players
         //    whose fed value is NOT a final URL on a readable API but a config/
         //    source-list in a page-world global (or a tokenized JSON delegate that
-        //    only resolves to a URL after a fetch — e.g. tube8). Direct .mp4/.m3u8
+        //    only resolves to a URL after a fetch). Direct .mp4/.m3u8
         //    under a media-ish key, a source list, or a same-origin delegate
         //    (resolved with a same-origin fetch). Async; fire-and-forget.
         const found = readPlayerMedia();

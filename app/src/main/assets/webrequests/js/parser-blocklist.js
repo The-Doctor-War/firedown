@@ -34,7 +34,7 @@
 // a host-keyed branch of the page-state bridge (Bilibili.tv, Mega.nz). Media
 // captured by the bridge's GENERIC, HOST-AGNOSTIC player readers (findPlayerMedia
 // / readPlayerMedia / readDomMedia — Plyr/JWPlayer/Video.js DOM + player-API, the
-// tube8 / series.ly-krakenfiles class) must NOT get an entry: the bridge reads the
+// JSON-delegate / series.ly-krakenfiles class) must NOT get an entry: the bridge reads the
 // source page-world and fires PRE-PLAY, so its rich capture lands BEFORE the
 // player's on-play wire fetch and the repository dedups the two BY URL — a block
 // would only suppress that play-time capture with no parser owning the (often

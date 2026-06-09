@@ -1877,18 +1877,6 @@ function cacheBskyMeta(playlist, meta) {
     bskyMetaCache.set(playlist, meta);
 }
 
-// A post's embed is either the video view directly, or a recordWithMedia#view
-// whose `.media` is the video view (a quote-post with an attached video).
-function bskyVideoView(embed) {
-    if (!embed || typeof embed !== "object") return null;
-    if (embed["$type"] === BSKY_VIDEO_VIEW) return embed;
-    if (embed["$type"] === "app.bsky.embed.recordWithMedia#view") {
-        const media = embed.media;
-        if (media && media["$type"] === BSKY_VIDEO_VIEW) return media;
-    }
-    return null;
-}
-
 // Collapse whitespace/newlines to single spaces so a multi-line caption becomes
 // one clean title line.
 function cleanBskyText(s) {
@@ -1911,12 +1899,11 @@ function truncateBskyTitle(s, max) {
     return (sp > max * 0.6 ? cut.slice(0, sp) : cut).trim() + "…";
 }
 
-function buildBskyVideo(post, view) {
-    const author = post.author || {};
+function buildBskyVideo(view, author, text) {
+    author = author || {};
     const handle = author.handle || "";
     const displayName = author.displayName || handle || "Bluesky";
-    const record = post.record || {};
-    const caption = cleanBskyText(record.text);   // the post text
+    const caption = cleanBskyText(text);           // the owning post's text
     const alt = cleanBskyText(view.alt);           // the video's alt/description
 
     // bsky posts have no title. Prefer the post caption; fall back to the video
@@ -1935,39 +1922,56 @@ function buildBskyVideo(post, view) {
 }
 
 // Walk the app-view JSON (plain JSON.parse output — ordinary objects, not Xray
-// page proxies) for every post that carries a video. A post object is the one
-// place author + record + embed sit together, which is the same object whether
-// it's a feed item, a thread node, or a quoted record — so matching that shape
-// finds them all at any nesting. Bounded (depth + node budget) like the other
-// walkers, and dedups playlist URLs within the one response.
+// page proxies) for EVERY app.bsky.embed.video#view node, attributing each to
+// the nearest enclosing author + post text. Carrying that context down the walk
+// (instead of matching a fixed "author+record+embed" post shape) is what makes
+// it catch videos that DON'T sit on a top-level post: a QUOTED post puts the
+// video under app.bsky.embed.record#viewRecord, which uses `author`+`value`+
+// `embeds` (note: value/embeds, not record/embed) — the old shape gate missed
+// those entirely. recordWithMedia#view (its `media` is the video#view) and any
+// deeper nesting are covered for free. Bounded (depth + node budget) and dedups
+// playlist URLs within the one response.
 function collectBskyVideos(root) {
     const out = [];
     const seen = new Set();
     let nodes = 0;
-    const MAX_NODES = 60000;
-    const MAX_DEPTH = 30;
+    const MAX_NODES = 200000;   // threads can be large (hundreds of posts)
+    const MAX_DEPTH = 40;       // quoted-post nesting adds several levels
 
-    function visit(o, depth) {
+    function visit(o, depth, author, text) {
         if (nodes++ > MAX_NODES || depth > MAX_DEPTH) return;
         if (Array.isArray(o)) {
-            for (let i = 0; i < o.length; i++) visit(o[i], depth + 1);
+            for (let i = 0; i < o.length; i++) visit(o[i], depth + 1, author, text);
             return;
         }
         if (!o || typeof o !== "object") return;
-        if (o.author && o.record && o.embed) {
-            const view = bskyVideoView(o.embed);
-            if (view && view.playlist && !seen.has(view.playlist)) {
-                seen.add(view.playlist);
-                out.push(buildBskyVideo(o, view));
-            }
+
+        // Update the nearest-post context. A new author means a new post/quoted
+        // record, so reset the caption to that post's own text.
+        let a = author;
+        let t = text;
+        if (o.author && typeof o.author === "object") {
+            a = o.author;
+            t = "";
         }
+        // The caption lives on the record (normal post: record.text; the record
+        // node itself: .text) or on the quoted record's value (value.text).
+        if (typeof o.text === "string") t = o.text;
+        else if (o.record && typeof o.record.text === "string") t = o.record.text;
+        else if (o.value && typeof o.value.text === "string") t = o.value.text;
+
+        if (o["$type"] === BSKY_VIDEO_VIEW && o.playlist && !seen.has(o.playlist)) {
+            seen.add(o.playlist);
+            out.push(buildBskyVideo(o, a, t));
+        }
+
         for (const k in o) {
             const v = o[k];
-            if (v && typeof v === "object") visit(v, depth + 1);
+            if (v && typeof v === "object") visit(v, depth + 1, a, t);
         }
     }
 
-    visit(root, 0);
+    visit(root, 0, null, "");
     return out;
 }
 

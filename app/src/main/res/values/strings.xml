@@ -34,7 +34,7 @@
     <string name="capture_empty_subtext">Reload the website and Firedown will detect available media.</string>
     <string name="capture_scanning">Checking for media…</string>
     <string name="capture_help_action">Video not listed?</string>
-    <string name="capture_help_banner">Don\'t see the video you want? Some embedded media must be played first — tap to learn how.</string>
+    <string name="capture_help_banner">Some embedded media must be played first — tap to learn how.</string>
     <string name="capture_empty_subtitles_message">No Subtitles available.</string>
     <string name="capture_empty_video_message">No videos available.</string>
     <string name="cert_connection_exception">Security Exception</string>

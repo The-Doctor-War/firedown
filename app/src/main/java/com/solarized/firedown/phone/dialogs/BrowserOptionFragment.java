@@ -34,6 +34,7 @@ import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.util.FixedPreloadSizeProvider;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.ChipGroup;
 import com.solarized.firedown.BuildConfig;
 import com.solarized.firedown.GlideHelper;
@@ -57,6 +58,7 @@ import com.solarized.firedown.ui.OnItemClickListener;
 import com.solarized.firedown.ui.adapters.BrowserOptionAdapter;
 import com.solarized.firedown.ui.diffs.BrowserDownloadsDiffCallback;
 import com.solarized.firedown.utils.NavigationUtils;
+import com.solarized.firedown.utils.SelectionStyling;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -125,6 +127,15 @@ public class BrowserOptionFragment extends BaseFocusFragment implements OnItemCl
         // same help screen as the toolbar Help item; the X just dismisses. Either
         // gesture persists the dismissal so it never returns.
         mHelpBanner = view.findViewById(R.id.capture_help_banner);
+        // Brand wash (primaryContainer @ 20% over surface) — composed in code, so
+        // set here rather than XML — matching the archive / incognito-in-progress
+        // banners so the three list-banners read as siblings.
+        if (mHelpBanner instanceof MaterialCardView) {
+            ((MaterialCardView) mHelpBanner).setCardBackgroundColor(
+                    SelectionStyling.selectedCardWashOver(
+                            requireContext(),
+                            com.google.android.material.R.attr.colorSurface));
+        }
         mHelpBanner.setOnClickListener(v -> {
             openCaptureHelp();
             dismissHelpBanner();

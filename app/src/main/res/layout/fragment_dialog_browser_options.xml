@@ -71,7 +71,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
-                android:text="@string/capture_help_action"
+                android:text="@string/capture_help_banner_title"
                 android:textAppearance="?attr/textAppearanceTitleSmall"
                 android:textColor="?attr/colorOnSurface"
                 app:layout_constraintStart_toEndOf="@id/capture_help_banner_icon"

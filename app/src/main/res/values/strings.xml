@@ -33,7 +33,8 @@
     <string name="capture_empty_message">No media available for downloading.</string>
     <string name="capture_empty_subtext">Reload the website and Firedown will detect available media.</string>
     <string name="capture_scanning">Checking for media…</string>
-    <string name="capture_help_action">Video not listed?</string>
+    <string name="capture_help_menu">Capture help</string>
+    <string name="capture_help_banner_title">Video not listed?</string>
     <string name="capture_help_banner">Some embedded media must be played first — tap to learn how.</string>
     <string name="capture_empty_subtitles_message">No Subtitles available.</string>
     <string name="capture_empty_video_message">No videos available.</string>

@@ -36,7 +36,7 @@
         android:icon="@drawable/ic_help_24"
         app:iconTint="?attr/colorOnSurface"
         app:showAsAction="never"
-        android:title="@string/capture_help_action"/>
+        android:title="@string/capture_help_menu"/>
 
     <item
         android:id="@+id/action_settings"

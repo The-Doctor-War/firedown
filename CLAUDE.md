@@ -367,27 +367,33 @@ pair or a **declared** manifest — see "Manifest vs progressive — declared, n
 URL-sniffed" under Downloading. Default is progressive so tokenized URLs (TikTok)
 carry no `.mp4` and aren't needlessly remuxed.
 
-### Post-download metadata backfill (when capture skipped the probe)
+### Post-download metadata refresh (the file is the ground truth)
 
-`DownloadTask.backfillMetadataIfMissing()` (called from `onRunComplete` on a
-FINISHED download) stamps the **secondary metadatum** the Downloads UI shows when
-it's absent — probing the **finished local file** once (cheap, no network, no
-keys), so it never burns a single-use key the way a capture-time probe would. Two
-gaps reach it:
+`DownloadTask.refreshMetadataFromFile()` (called from `onRunComplete` on a
+FINISHED download) probes the **finished local file** once (cheap, no network,
+no keys — it never burns a single-use key the way a capture-time probe would)
+and re-stamps the secondary metadatum the Downloads UI shows:
 
-- **Duration** (audio/video) — HLS-master captures (Twitch/Kick/niconico) skip
-  the capture probe and the master carries no duration, so a selected
-  audio-only rendition finishes with none.
-- **Resolution** (image/SVG) — an image saved via the browser long-press menu
-  ("save image", `BrowserFragment`) is a bare `DownloadRequest` (url + name +
-  cookies); it never goes through the parser/`VariantProcessor`, so it has no
-  resolution and the list/info row would render a blank resolution tag.
-
-It only probes when the field for the entity's **type** is actually missing
-(mime resolved by then via `HttpDownloadStrategy.onMimeResolved`). Resolution
-reuses `FFmpegMetaDataReader.getStreams()` so the `"WxH"` / SVG-encoded-size
-formatting matches the parser path exactly. Don't widen this into an
-unconditional probe — it's a targeted backfill, not a second capture probe.
+- **Duration** (audio/video) — re-probed **unconditionally**, and the probe
+  result **overwrites** the capture-time value. Never trust the stored
+  duration on a finished file: the user can hit Finish mid-download
+  (`finishDownloadToExecutor` seals FINISHED + stops the runnable), leaving a
+  file cut in half while the entity still claims the parser's full length.
+  Only the bytes on disk are ground truth. When the probe can't read a
+  duration at all (e.g. a progressive MP4 truncated before its moov atom),
+  the stored value is **cleared** (`0`/`null`, the CompressTask convention)
+  rather than left to lie. This also covers the original backfill case —
+  HLS-master captures (Twitch/Kick/niconico) skip the capture probe, so a
+  selected rendition finishes with no duration at all. (Known limit: a
+  *faststart* MP4 truncated mid-download still reports the moov's full
+  duration — players show the same, so that's accepted.)
+- **Resolution** (image/SVG) — still **backfill-only** (probed when missing):
+  covers an image saved via the browser long-press menu ("save image",
+  `BrowserFragment` — a bare `DownloadRequest` that never went through the
+  parser/`VariantProcessor`); an image can't be "shorter" than captured, a
+  truncated one just fails to decode. Reuses
+  `FFmpegMetaDataReader.getStreams()` so the `"WxH"` / SVG-encoded-size
+  formatting matches the parser path exactly.
 
 ### HTML character references in scraped titles/descriptions
 

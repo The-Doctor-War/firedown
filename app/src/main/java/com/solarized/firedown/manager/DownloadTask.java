@@ -173,7 +173,7 @@ public class DownloadTask implements DownloadCallback {
             // sealWithStatus, or ERROR from onError). For SABR/FFmpeg finish,
             // onFileSizeKnown already updated the size before we get here.
             if (entity.getFileStatus() == Download.FINISHED) {
-                backfillMetadataIfMissing();
+                refreshMetadataFromFile();
             }
             repository.add(entity);
         }
@@ -354,34 +354,36 @@ public class DownloadTask implements DownloadCallback {
     }
 
     /**
-     * Stamp the secondary metadatum from the finished file when it's missing:
-     * <b>duration</b> for audio/video, <b>resolution</b> for images.
+     * Re-read metadata from the finished file on disk: <b>duration</b> for
+     * audio/video (always), <b>resolution</b> for images (only when missing).
      *
-     * <p>Two completion paths reach here lacking it. (1) The capture probe is
-     * skipped for HLS-master sites (Twitch/Kick/niconico) to avoid burning a
-     * single-use key, and the master playlist carries no duration — so those
-     * downloads (e.g. a selected audio-only rendition) finish with no duration.
-     * (2) An image saved straight from the browser long-press menu
-     * ("save image") is built as a bare {@link DownloadRequest} (url + name +
-     * cookies only — see {@code BrowserFragment}); it never goes through the
-     * parser/{@code VariantProcessor}, so it carries no resolution and the
-     * Downloads list renders a blank resolution tag.
+     * <p><b>Duration is re-probed unconditionally and the probe result wins
+     * over the capture-time value.</b> The stored duration comes from the
+     * parser/capture probe and describes the <i>full</i> media — but the user
+     * can hit Finish mid-download ({@code finishDownloadToExecutor} seals the
+     * entity FINISHED and stops the runnable), leaving a file that is cut in
+     * half while the entity still claims the full length. The local file is
+     * the only ground truth, so probe it once here (cheap, no network, no
+     * single-use keys — unlike a capture-time probe). When the probe can't
+     * read a duration at all (e.g. a progressive MP4 truncated before its
+     * moov atom), the capture-time value is unverified and almost certainly
+     * wrong, so it's <i>cleared</i> rather than left to lie.
      *
-     * <p>The download strategies never wire {@code onDurationResolved} and there
-     * is no resolution callback at all, so probe the local output here once:
-     * cheap, no network, no keys. Only probes when the relevant field is
-     * actually absent for the entity's type. Resolution reuses the reader's
-     * stream formatter ("WxH", SVG-aware), matching what the parser path emits.
+     * <p>Resolution stays backfill-only: it covers an image saved straight
+     * from the browser long-press menu ("save image", a bare
+     * {@link DownloadRequest} that never went through the parser/
+     * {@code VariantProcessor}), and an image can't be "shorter" than
+     * captured — a truncated one just fails to decode. Reuses the reader's
+     * stream formatter ("WxH", SVG-aware), matching what the parser path
+     * emits.
      */
-    private void backfillMetadataIfMissing() {
+    private void refreshMetadataFromFile() {
         String mime = entity.getFileMimeType();
         boolean isAv = FileUriHelper.isAudio(mime) || FileUriHelper.isVideo(mime);
         boolean isImage = FileUriHelper.isImage(mime) || FileUriHelper.isSVG(mime);
 
-        boolean needDuration = isAv
-                && (entity.getDuration() <= 0 || TextUtils.isEmpty(entity.getDurationFormatted()));
         boolean needResolution = isImage && TextUtils.isEmpty(entity.getFileResolution());
-        if (!needDuration && !needResolution) {
+        if (!isAv && !needResolution) {
             return;
         }
 
@@ -390,17 +392,12 @@ public class DownloadTask implements DownloadCallback {
             return;
         }
 
+        long duration = 0;
         FFmpegMetaDataReader reader = new FFmpegMetaDataReader();
         try {
             FFmpegMetaData meta = reader.getStreamInfo(path, null, false);
             if (meta != null) {
-                if (needDuration) {
-                    long duration = meta.getDuration();
-                    if (duration > 0) {
-                        entity.setFileDuration(duration);
-                        entity.setFileDurationFormatted(FFmpegUtils.getFileDuration(duration));
-                    }
-                }
+                duration = meta.getDuration();
                 if (needResolution) {
                     String resolution = readVideoStreamInfo(reader);
                     if (!TextUtils.isEmpty(resolution)) {
@@ -409,10 +406,23 @@ public class DownloadTask implements DownloadCallback {
                 }
             }
         } catch (Exception e) {
-            // best-effort — leave the metadata unset on probe failure
+            // best-effort — duration stays 0 and is cleared below for A/V
         } finally {
             reader.stop();
             reader.release();
+        }
+
+        if (isAv) {
+            if (duration > 0) {
+                entity.setFileDuration(duration);
+                entity.setFileDurationFormatted(FFmpegUtils.getFileDuration(duration));
+            } else {
+                // Unreadable file — don't keep a capture-time duration the
+                // bytes on disk can't back up. Same clearing convention as
+                // CompressTask.
+                entity.setFileDuration(0);
+                entity.setFileDurationFormatted(null);
+            }
         }
     }
 

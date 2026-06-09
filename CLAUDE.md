@@ -330,7 +330,17 @@ YouTube isn't HLS/DASH — it's Google's SABR (itag formats, a
 itag-pair variants + the shared SABR data; routed via `UrlType.SABR`, downloaded
 by `SabrStrategy`. `VariantProcessor` skips ffprobe for SABR variants (empty
 media URLs) and trusts the JS codec/resolution/duration. Captions use the
-separate `timedtext` path.
+separate `timedtext` path. **YouTube LIVE is the exception: HLS, not SABR** —
+`isLive` → the `hlsManifestUrl` (n-param-transformed), emitted as
+**`type:"hls-master"`, NOT `type:"media"`**. This matters: `type:"media"` →
+`UrlType.MEDIA` runs the capture-time ffmpeg probe, which on a LIVE stream opens
+the `rr*.googlevideo` segments — every one 403s (n-param/live edge) and the
+demuxer reload loop spins until patch-0005 bails, all wasted on an item already
+captured. `type:"hls-master"` → `processHlsMaster` fetches only the master text
+from the lenient manifest host and `M3U8Parser` enumerates the qualities (no
+segment opened, `skipProbe`), and the capture is **origin-deduped** (a re-signed
+manifest URL per refresh won't dupe, unlike `MEDIA`'s url-hash uid). Same
+no-probe master rule as Twitch/Kick/niconico.
 
 ### TikTok — filterResponseData (item_list feeds + document SSR)
 
@@ -530,8 +540,11 @@ failure condition; time-box only a best-effort external dependency with a
 fallback.
 
 (YouTube **live** is HLS, not SABR — `youtube@` routes `isLive` → `hlsManifestUrl`;
-SABR is VOD-only. A live 403-on-every-segment loop is the HLS n-param transform
-not taking effect, not a transport bug.)
+SABR is VOD-only. It's emitted as `type:"hls-master"` so **capture** only fetches
+the master text and enumerates — it does NOT probe the segments, so the
+403-on-every-segment loop can no longer happen at capture time. A live
+403-on-every-segment loop *at DOWNLOAD* is the HLS n-param transform not taking
+effect, not a transport bug.)
 
 ## Debugging "video not captured" — do this, in order
 

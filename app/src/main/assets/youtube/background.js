@@ -1936,15 +1936,26 @@ async function processVideo(details, videoId) {
 
                 const streamHeaders = getBrowserHeaders();
                 const duration = parseInt(playerResponse.videoDetails?.lengthSeconds || "0", 10) * 1000;
+                // type:"hls-master" — NOT "media". A live HLS master must be
+                // ENUMERATED, never probed: type:"media" routes to UrlType.MEDIA,
+                // which runs the capture-time ffmpeg metadatareader probe — and for
+                // a LIVE stream that opens the (rr*.googlevideo) segments, every one
+                // of which 403s on the n-param/live edge, spinning the demuxer's
+                // reload loop until patch-0005 bails. Wasted work for an item we
+                // already have. type:"hls-master" → GeckoInspectTask.processHlsMaster
+                // fetches just the master text from the lenient manifest host,
+                // M3U8Parser enumerates the qualities (skipProbe, no segment opened),
+                // and the capture is origin-deduped (a re-signed manifest URL per
+                // refresh won't dupe — UrlType.MEDIA's url-hash uid would).
                 const message = {
-                    type: "media", url: finalManifestUrl, origin: videoUrl,
+                    type: "hls-master", url: finalManifestUrl, origin: videoUrl,
                     name: videoTitle, description: videoDescription, img: thumbnailUrl,
                     duration, headers: streamHeaders,
                     tabId: details._resolvedTabId ?? details.tabId,
                     request: details.requestId
                 };
                 await sendYouTubeNative(message);
-                console.log(`[Process] Sent HLS to native: ${videoId} [${streamSource}]`);
+                console.log(`[Process] Sent HLS master (enumerate, no probe) to native: ${videoId} [${streamSource}]`);
                 await emitYouTubeCaptions(details, playerResponse, videoTitle, videoUrl);
                 return;
             }

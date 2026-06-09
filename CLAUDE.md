@@ -819,10 +819,17 @@ such titles get truncated to their first segment (`156.mp3`).
   partial content**: if the body ends short of `Content-Length` — thrown
   "unexpected end of stream" *or* a clean early EOF — it re-requests
   `Range: bytes=<have>-` and appends until complete (bails on no-progress / a
-  resume cap). One mechanism for CDN anti-leech truncation (e.g. Bilibili
-  `upos/bilivideo` caps a plain 200 at ~1 MiB but serves 206 in full), chunked
-  short reads, and mid-stream disconnects. Don't reintroduce an unconditional
-  Range default — it's site-specific thinking and breaks range-hostile servers.
+  resume cap). It **also reacts to a rejected plain GET**: a fresh no-Range
+  request answered with **403/404/416** is retried **once** with
+  `Range: bytes=0-`, for streaming endpoints that *only* serve ranged requests
+  (e.g. krakencloud's `/play/video/<token>` on series.ly — the browser plays it
+  with `Range: bytes=0-` → 206, a plain GET is refused). Reactive on purpose: it
+  fires only after the plain GET was rejected, so a range-**hostile** server
+  (which answered the plain GET) is never sent a Range. One mechanism for CDN
+  anti-leech truncation (e.g. Bilibili `upos/bilivideo` caps a plain 200 at
+  ~1 MiB but serves 206 in full), chunked short reads, mid-stream disconnects,
+  and range-required endpoints. Don't reintroduce an unconditional Range default
+  — it's site-specific thinking and breaks range-hostile servers.
 - **Streams (HLS/DASH/segments) — ffmpeg via `FFmpegOkhttp`.** ffmpeg's HTTP is
   **not** native `http.c`; it's bridged to our OkHttp client by `FFmpegOkhttp`
   (a custom AVIO handler). It already does Range/206 properly: accepts 206 as

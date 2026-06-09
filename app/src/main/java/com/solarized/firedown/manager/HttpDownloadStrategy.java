@@ -85,7 +85,7 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                     + " isResume=" + isResume
                     + " downloadedLength=" + downloadedLength);
 
-            httpResponse = makeRequest(context, downloadUrl, isResume);
+            httpResponse = makeRequest(context, downloadUrl, isResume, false);
 
             int status = httpResponse.code();
             Log.d(TAG, "execute: response status=" + status
@@ -102,6 +102,25 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                 callback.onFileSizeKnown(file.length());
                 callback.onStatusChanged(Download.FINISHED);
                 return;
+            }
+
+            // Some streaming endpoints reject a plain GET and ONLY serve a ranged
+            // request — e.g. krakencloud's /play/video/<token> (series.ly): the
+            // browser plays it with "Range: bytes=0-" and gets 206, while a
+            // no-Range GET is refused (403/404/416). makeRequest sends no Range on
+            // a fresh request by design (some servers reject one), so retry ONCE
+            // with a zero-offset Range before giving up. Reactive — it fires only
+            // after the plain GET was rejected, so a range-HOSTILE server (which
+            // answered the plain GET) is never sent a Range.
+            if (!isResume && downloadedLength == 0
+                    && (status == 403 || status == 404 || status == 416)) {
+                Log.w(TAG, "execute: plain GET rejected status=" + status
+                        + " — retrying with Range: bytes=0-");
+                closeQuietly(null, null, null, httpResponse);
+                httpResponse = makeRequest(context, downloadUrl, false, true);
+                status = httpResponse.code();
+                Log.d(TAG, "execute: range-retry status=" + status
+                        + " contentRange=" + httpResponse.header("Content-Range"));
             }
 
             if (status >= HttpURLConnection.HTTP_BAD_REQUEST
@@ -248,7 +267,7 @@ public class HttpDownloadStrategy implements DownloadStrategy {
                 httpResponse = null;
                 Log.d(TAG, "execute: resuming Range bytes=" + downloadedLength + "- (attempt "
                         + resumeAttempts + ")");
-                httpResponse = makeRequest(context, downloadUrl, true);
+                httpResponse = makeRequest(context, downloadUrl, true, false);
                 int rst = httpResponse.code();
                 if (rst == 416) {
                     // Offset is past the end — we already have the whole file.
@@ -364,7 +383,7 @@ public class HttpDownloadStrategy implements DownloadStrategy {
      * <p>On 416 Range Not Satisfiable, we retry without the Range header
      * and reset {@link #downloadedLength} so the caller restarts from byte 0.
      */
-    private Response makeRequest(DownloadContext context, String url, boolean isResume) throws IOException {
+    private Response makeRequest(DownloadContext context, String url, boolean isResume, boolean forceRange) throws IOException {
         OkHttpClient client = context.getOkHttpClient();
 
         Map<String, String> perCallHeaders = new HashMap<>(context.getHeaders());
@@ -384,6 +403,10 @@ public class HttpDownloadStrategy implements DownloadStrategy {
         // was already stripped above, so we never grab just the <video> slice.)
         if (downloadedLength > 0) {
             perCallHeaders.put(BrowserHeaders.RANGES, "bytes=" + downloadedLength + "-");
+        } else if (forceRange) {
+            // A fresh request the caller wants ranged: a server that rejected the
+            // plain GET only serves ranged requests (see execute()'s range-retry).
+            perCallHeaders.put(BrowserHeaders.RANGES, "bytes=0-");
         }
 
         Request request = new Request.Builder()

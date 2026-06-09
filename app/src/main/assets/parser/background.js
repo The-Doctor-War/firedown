@@ -1919,8 +1919,8 @@ function collectBskyVideos(root) {
 
 async function processBskyResponse(details, json) {
     const videos = collectBskyVideos(json);
+    log("BSKY", `parsed response: ${videos.length} video(s)`, { url: details.url.slice(0, 90) });
     if (videos.length === 0) return;
-    log("BSKY", `found ${videos.length} video(s)`, { url: details.url.slice(0, 90) });
 
     // Public CDN; the only header the master fetch needs is a page Referer so
     // OriginInterceptor stamps the bsky.app Origin the CDN expects.
@@ -1942,6 +1942,7 @@ async function processBskyResponse(details, json) {
 // byte-exact pass-through), same as the Twitter/Threads paths.
 function listenerBskyApi(details) {
     if (!BSKY_POST_METHOD_RE.test(details.url)) return {};
+    log("BSKY", "listener fired", { url: details.url.slice(0, 110), type: details.type });
     const ok = filterResponseText(details, (body) => {
         if (!body) return;
         const json = tryParseJson(body);

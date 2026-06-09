@@ -219,15 +219,28 @@ see the HLS-master path below), covers every such site:
   entry only because the catcher would otherwise emit a *harmful* capture: an
   unplayable whole-track `.m4s`, or undecryptable AES-CTR bytes — not a benign
   same-URL dup). See the header of `parser-blocklist.js`.
-- **To extend:** it's already generic — add a key to `MEDIA_KEY_RE` /
-  `LIST_KEY_RE` / `QUALITY_KEY_RE` (etc.) if a player names its source/quality/
-  duration fields differently, and extend `fetchMediaList`'s wrapper-array keys for
-  a new delegate JSON shape. **Never** a per-site file, **never** a host check in
-  `background.js` or the bridge, and **never** a `parser-blocklist.js` rule for a
-  generic-bridge host.
-- Cheap on the ~all sites/frames with no such state: it probes a short list of
-  known state-global names + a player global (`jwplayer`) and no-ops instantly
-  when neither holds media (so ad/tracker iframes pay only a presence check); the
+- **`readPlayerMedia` is NAME-AGNOSTIC — do NOT add global names.** It scans
+  EVERY enumerable page-world global object (`Object.keys(wrappedJSObject)`), not a
+  hand-kept list, so a config under any name is found: `page_params`,
+  `flashvars_<videoid>` (pornhub/tube8 — the id-suffixed name no fixed list could
+  match), `__NEXT_DATA__`, a Redux store, a one-off `var`. This is safe to scan
+  broadly because **the precision is in `collectPlayableMedia`'s walk, not the
+  global name**: a url only counts under a media-ish KEY (`MEDIA_KEY_RE`) with a
+  media-extension VALUE or a same-origin delegate, so non-media globals are
+  ignored. Bounded three ways: a `GLOBAL_DENY` denylist of huge native window
+  members (document/location/…), `MAX_GLOBALS_SCANNED`, and a SHARED node budget
+  (`SCAN_NODE_BUDGET`) across the whole pass (one giant store can't starve the
+  rest). Known config names are scanned first (common case, found cheaply).
+- **To extend:** add a key to `MEDIA_KEY_RE` / `LIST_KEY_RE` / `QUALITY_KEY_RE`
+  (etc.) only if a player names its source/quality/duration FIELDS differently, and
+  extend `fetchMediaList`'s wrapper-array keys for a new delegate JSON shape.
+  **Never** a per-site file, **never** a global NAME (it's scanned automatically),
+  **never** a host check in `background.js` or the bridge, and **never** a
+  `parser-blocklist.js` rule for a generic-bridge host.
+- Cheap on the ~all sites/frames with no such state: the scan reads object globals
+  only (skipping primitives/functions/denylist), the walk is shared-budget-capped,
+  and it no-ops instantly when nothing holds media (so ad/tracker iframes pay only
+  a presence check); the
   persistent SPA-nav observer is armed **only after** a successful capture.
 
 **Metadata: generic by default, host-keyed when richer fields exist in page

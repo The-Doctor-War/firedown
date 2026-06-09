@@ -691,9 +691,12 @@
     // host-agnostic; runs in every frame (all_frames), reading the player's
     // RESOLVED page-world values — so a packed/eval-obfuscated source URL is read
     // post-resolution, never the packed blob.
-    function collectPlayableMedia(root) {
+    function collectPlayableMedia(root, budgetRef) {
         const seen = new Set();
-        let budget = 30000;
+        // Shared node budget when scanning MANY globals in one pass (readPlayerMedia
+        // passes one ref so the whole scan is bounded, not 30k PER global); a lone
+        // caller gets its own.
+        const budget = budgetRef || { n: 30000 };
         const groups = [];
         let pageOrigin = "";
         try { pageOrigin = location.origin; } catch (_) { pageOrigin = ""; }
@@ -734,7 +737,7 @@
         }
 
         (function walk(o, depth, fromArray) {
-            if (!o || typeof o !== "object" || depth > 9 || budget-- <= 0) return;
+            if (!o || typeof o !== "object" || depth > 9 || budget.n-- <= 0) return;
             if (seen.has(o)) return;
             seen.add(o);
 
@@ -845,23 +848,61 @@
         return out;
     }
 
-    // Probe page_params + flashvars + the known framework state globals for
-    // playable-media groups. Cheap no-op on the ~all pages/frames whose globals
-    // hold none. Capped so a state-heavy page can't emit an unbounded set.
+    // Scan the page-world for playable-media config, NAME-AGNOSTICALLY: walk EVERY
+    // enumerable window global object, not a hand-maintained name list — sites put
+    // the config under any name (page_params, flashvars_<videoid>, __NEXT_DATA__, a
+    // Redux store, a one-off var), and chasing each is the per-site treadmill. This
+    // is safe to do broadly because the precision is in collectPlayableMedia's WALK,
+    // not the global name: a url only counts when it sits under a media-ish KEY
+    // (MEDIA_KEY_RE: videoUrl/url/file/hls/…) with a media-extension VALUE or a
+    // same-origin delegate — so arbitrary non-media URLs on unrelated globals are
+    // ignored. The known config names are scanned FIRST (common case, found before
+    // the budget is spent), then everything else. Bounded three ways: a denylist of
+    // huge native window objects, a cap on globals scanned, and a SHARED node budget
+    // across the whole pass (so one giant store can't starve the rest, and the total
+    // work per page is fixed). Cheap no-op on the ~all pages/frames with no media.
     const PLAYER_MEDIA_GLOBALS = ["page_params", "flashvars"].concat(STATE_GLOBALS);
     const MAX_PLAYER_GROUPS = 12;
+    const MAX_GLOBALS_SCANNED = 80;
+    const SCAN_NODE_BUDGET = 60000;
+    // Native/self-referential window members that are huge or circular — never a
+    // media config, and walking them (esp. the DOM) would burn the whole budget.
+    const GLOBAL_DENY = new Set([
+        "window", "self", "top", "parent", "frames", "globalThis", "document",
+        "location", "navigator", "history", "screen", "localStorage",
+        "sessionStorage", "indexedDB", "caches", "crypto", "performance",
+        "console", "external", "visualViewport", "speechSynthesis",
+        "customElements", "trustedTypes", "cookieStore", "scheduler"
+    ]);
     function readPlayerMedia() {
         let pw;
         try { pw = window.wrappedJSObject; } catch (_) { pw = null; }
         if (!pw) return null;
+
+        // Candidate names: the known config globals first, then every other own
+        // enumerable global, deduped.
+        const ordered = [];
+        const seenName = new Set();
+        const add = (n) => { if (!seenName.has(n)) { seenName.add(n); ordered.push(n); } };
+        for (let i = 0; i < PLAYER_MEDIA_GLOBALS.length; i++) add(PLAYER_MEDIA_GLOBALS[i]);
+        try {
+            const allKeys = Object.keys(pw);
+            for (let i = 0; i < allKeys.length; i++) add(allKeys[i]);
+        } catch (_) {}
+
+        const budget = { n: SCAN_NODE_BUDGET };
         const groups = [];
         const seenSig = new Set();
-        for (const name of PLAYER_MEDIA_GLOBALS) {
+        let scanned = 0;
+        for (const name of ordered) {
+            if (budget.n <= 0 || scanned >= MAX_GLOBALS_SCANNED) break;
+            if (GLOBAL_DENY.has(name) || /^(?:on|webkit)/.test(name)) continue;
             let g;
             try { g = pw[name]; } catch (_) { continue; }
             if (!g || typeof g !== "object") continue;
+            scanned++;
             let found;
-            try { found = collectPlayableMedia(g); } catch (_) { found = null; }
+            try { found = collectPlayableMedia(g, budget); } catch (_) { found = null; }
             if (!found) continue;
             for (const grp of found) {
                 // Dedup identical groups seen via two globals (a signature of its

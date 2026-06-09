@@ -14,7 +14,7 @@ bundled as assets and loaded via `GeckoRuntimeHelper.registerBuiltIn(...)`
 
 | dir           | id                       | role |
 |---------------|--------------------------|------|
-| `webrequests/`| `downloader@solarized.dev` | **ALL capture** — the former `parser@` extension was MERGED into this one. Two halves in one extension: (1) the per-site **parsers** (`parser-background.js` — Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Niconico, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok, Bluesky; emits entries **with metadata** — title, author, thumbnail, duration, quality variants) plus the page-state bridge (`js/page-state-bridge.js`); (2) the **generic catch-all** (`js/requests.js` + `js/content-script.js` — any media URL seen on the wire, no rich metadata). Also hosts `js/wasm-watch.js` (+ `js/wasm-probe.js`), the WASM-disabled detector — a settings feature, not capture. |
+| `webrequests/`| `downloader@solarized.dev` | **ALL capture** — the former `parser@` extension was MERGED into this one. Two halves in one extension: (1) the per-site **parsers** (`js/parsers/` — one ES module per site: Twitter/X, Instagram, Threads, Facebook, Vimeo, Rumble, Bilibili.tv, Niconico, Kick, Twitch, Dailymotion, Apple Podcasts, TikTok, Bluesky; emits entries **with metadata** — title, author, thumbnail, duration, quality variants) plus the page-state bridge (`js/page-state-bridge.js`); (2) the **generic catch-all** (`js/requests.js` + `js/content-script.js` — any media URL seen on the wire, no rich metadata). Also hosts `js/wasm-watch.js` (+ `js/wasm-probe.js`), the WASM-disabled detector — a settings feature, not capture. |
 | `youtube/`    | `youtube@solarized.dev`  | YouTube (separate; uses `PoTokenGenerator` on the Java side). |
 | `ublock/`     | uBlock Origin            | Ad blocking. |
 | `icons/`, `search/`, `db/`, `error/` | — | Support. |
@@ -28,18 +28,39 @@ the block-list). `GeckoRuntimeHelper` explicitly **uninstalls the orphaned
 `parser@solarized.dev` registration** on boot (`uninstallOrphanedExtension`)
 because GeckoView persists built-in registrations across in-place updates.
 Throughout this doc, "the parser" / a "`parser@` module" means a per-site
-module in `webrequests/parser-background.js`, and a bare "`background.js`"
-in parser/bridge context means that same file (it was `parser/background.js`
-before the merge).
+module under `webrequests/js/parsers/`, and a bare "`background.js`" in
+parser/bridge context means that module tree (its history:
+`parser/background.js` before the merge, then the monolithic
+`parser-background.js` classic script until the per-site module split).
 
-Background-page layout (`webrequests/background.html`): `requests.js` /
-`parser-blocklist.js` / `regex.js` / `cookies.js` load as ES modules;
-`parser-background.js` is a classic script. NOTE the execution order:
-`type="module"` scripts are implicitly deferred, so the classic script runs
-FIRST. The modules publish `globalThis.matchInParserBlocklist` and
-`globalThis.__getAmbientHeaders` for it; every read is `typeof`-guarded at
-navigation/message time — top-level code in `parser-background.js` must never
-touch those globals.
+Background-page layout (`webrequests/background.html`): **everything is an ES
+module** — `regex.js` / `parser-blocklist.js` / `requests.js` / `cookies.js`,
+plus the per-site parsers under `js/parsers/` entered through
+`js/parsers/index.js`. The parser tree: one module per site, `common.js` (the
+shared infra: log/dedup/native messaging/`parseHlsMaster`/
+`enumerateMasterNative`/tab resolution/`readFilteredBody`), `page-state.js`
+(the page-state-bridge + Mega message handlers), `boot.js` (existing-tab
+sweep; imported last by `index.js` so every site module has registered first).
+Cross-module access is **explicit imports** — `page-state.js` imports
+`matchInParserBlocklist` from `parser-blocklist.js` and `getAmbientHeaders()`
+from `requests.js`; the old classic-vs-deferred execution-order trap and its
+`typeof`-guarded `globalThis` bridges are gone. Site modules plug into two
+registries in `common.js` instead of hardcoded fan-outs: the **message
+router** (`registerMessageHandler(kind, fn)` — the ONE `runtime.onMessage`
+listener on the parser side, keyed `message.kind ?? message.type`,
+fire-and-forget by contract: it never returns a handler's value, so it can
+never become the message's responder and race `requests.js`'s own listener)
+and the **SPA registry** (`registerSpaHandler(fn)` — runs each handler on
+every tab-URL change AND in `boot.js`'s existing-tab sweep; handlers must be
+cheap and self-filtering, host test first). Adding a site = one new module in
+`js/parsers/` + an `import` line in `index.js` (+ the block-list rule, see the
+cardinal rule). **Verify any parser change with
+`node scripts/webrequests-smoke.mjs`** — it imports the whole background
+module graph under a stubbed `browser` (ESM link-checks every import/export),
+asserts the listener-registration inventory, dispatches every router kind,
+drives the SPA handlers, and unit-checks the pure helpers; it's also the
+template for HAR-replay tests that run the REAL extraction code (import the
+site module's walker directly — no more copy-pasted simulations).
 
 Native bridge: the parser half still calls
 `browser.runtime.sendNativeMessage("parser", …)` and the catcher half uses
@@ -406,7 +427,7 @@ raw). `og:`/`twitter:` meta read via `getAttribute('content')` are already
 decoded by the DOM, so this is a JSON-LD/JSON-source problem, not a meta-tag one.
 Two layers, both best-effort with a **raw-text fallback** on error:
 
-- **`webrequests/parser-background.js` `decodeHtmlEntities`** — decimal `&#NNN;`, hex
+- **`webrequests/js/parsers/common.js` `decodeHtmlEntities`** — decimal `&#NNN;`, hex
   `&#xHHH;`, and the named refs that appear in titles/descriptions; applied to
   `name`/`description` at the emit choke points (`sendVariants`,
   `enumerateMasterNative`, `emitHlsMasterOrSingle`). Idempotent; unknown refs
@@ -547,7 +568,7 @@ Don't reintroduce the inject, and don't move SSR reading back to the DOM.
 
 Three layers prevent duplicate entries for one video:
 - **regex block** (cardinal rule) — keeps the generic catcher off a parser's media;
-- **JS `sentOrigins`** (`parser-background.js`) — per **(tabId, page origin)**,
+- **JS `sentOrigins`** (`js/parsers/common.js`) — per **(tabId, page origin)**,
   30s TTL. Tab-scoped on purpose: an origin-only key suppressed the same video
   opened in a SECOND tab for the whole TTL (the repository dedups per tab, so
   the global JS key was too coarse). A mixed-attribution guard in
@@ -650,9 +671,9 @@ correct fallback** and no better signal. (Historical example: when the parser
 was a separate extension, `handlePageStateHls` time-boxed a cross-extension
 `get-ambient-headers` lookup with a 200 ms `Promise.race`, falling back to the
 bridge's reconstructed `navigator` headers. The merge removed the external
-dependency — the handler now reads `globalThis.__getAmbientHeaders()`
-synchronously — so the timer went with it, which is exactly the point: the
-timer existed only because the dependency was external.) Rule: count a
+dependency — the handler now calls `getAmbientHeaders()` (imported from
+`requests.js`) synchronously — so the timer went with it, which is exactly the
+point: the timer existed only because the dependency was external.) Rule: count a
 detectable failure condition; time-box only a best-effort external dependency
 with a fallback.
 
@@ -750,9 +771,19 @@ still does).
 
 ## After changing a parser
 
-- `node --check` the JS file(s) you touched.
+- **Run `node scripts/webrequests-smoke.mjs`** — imports the whole background
+  module graph under a stubbed `browser` (catches a broken import/export, a
+  dropped listener registration, a duplicate router kind, syntax errors —
+  ES modules need `node --input-type=module --check`, plain `node --check`
+  rejects `import`).
 - Re-run your HAR simulation with the **final** code (caps included) and confirm
-  it finds the expected item(s) with `user`, `caption`, and `video_versions`.
+  it finds the expected item(s) with `user`, `caption`, and `video_versions` —
+  and since the split, **import the real walker from the site's module** in the
+  simulation instead of copy-pasting it (a simplified copy is how the Threads
+  depth-cap bug survived 8 rounds).
+- **Bump `webrequests/manifest.json` `version`** if you changed any extension
+  file (the `ensureBuiltIn` version-cache trap — see "WebExtension loading &
+  versioning" below).
 - **Confirm the `parser-blocklist.js` block rule exists** (the per-parser
   `PARSER_BLOCKLIST` entry) for the media this parser emits (see the cardinal
   rule above) — this is the #1 thing that gets forgotten and causes duplicate

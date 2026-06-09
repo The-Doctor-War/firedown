@@ -741,32 +741,17 @@ function harvestAmbientHeaders(requestHeaders) {
   }
 }
 
-// parser@ asks for the harvested real ambient headers (kind:"get-ambient-headers").
-// Only answer our own parser@ extension — uBO is also loaded as a built-in and
-// would deliver its messages here too. The values aren't secret (any page reads
-// navigator.userAgent / Accept-Language), so this is hygiene, not a secret gate;
-// returning undefined for anyone/anything else signals "no async response" so we
-// don't hold their sendMessage open.
-// Direct intra-extension access to the harvested ambient headers. Since the
-// parser background (parser-background.js) now lives in THIS extension's
-// background page, it reads the values synchronously off the shared global
-// instead of the old cross-extension get-ambient-headers round-trip (which no
-// longer fires — runtime.sendMessage to our own id goes to onMessage, not
-// onMessageExternal). A getter (not a snapshot) so callers always see the latest
-// values harvested from the wire.
+// Direct intra-extension access to the harvested ambient headers. The parser
+// background (parser-background.js) lives in THIS extension's background page,
+// so it reads the values synchronously off the shared global. (The old
+// cross-extension get-ambient-headers onMessageExternal round-trip from the
+// standalone parser@ extension was removed with the merge — runtime.sendMessage
+// to one's own id goes to onMessage, never onMessageExternal, so that listener
+// could never fire again.) A getter (not a snapshot) so callers always see the
+// latest values harvested from the wire.
 globalThis.__getAmbientHeaders = () => ({
   acceptLanguage: ambientAcceptLanguage,
   userAgent: ambientUserAgent
-});
-
-browser.runtime.onMessageExternal.addListener((msg, sender) => {
-  if (!sender || sender.id !== 'parser@solarized.dev') return;
-  if (msg && msg.kind === 'get-ambient-headers') {
-    return Promise.resolve({
-      acceptLanguage: ambientAcceptLanguage,
-      userAgent: ambientUserAgent
-    });
-  }
 });
 
 browser.webRequest.onHeadersReceived.addListener(

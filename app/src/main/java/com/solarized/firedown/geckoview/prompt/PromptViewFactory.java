@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.function.Supplier;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.view.ViewGroup;
@@ -128,10 +129,10 @@ public class PromptViewFactory {
                 .setTitle(prompt.title)
                 .setMessage(prompt.message)
                 .setPositiveButton(android.R.string.ok, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(PromptDelegate.ButtonPrompt.Type.POSITIVE));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(PromptDelegate.ButtonPrompt.Type.POSITIVE));
                 })
                 .setNegativeButton(android.R.string.cancel, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(PromptDelegate.ButtonPrompt.Type.NEGATIVE));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(PromptDelegate.ButtonPrompt.Type.NEGATIVE));
                 });
 
         return setupDismissListener(builder.create(), state, prompt, handler);
@@ -153,10 +154,10 @@ public class PromptViewFactory {
                 .setMessage(prompt.message)
                 .setView(container)
                 .setPositiveButton(android.R.string.ok, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(input.getText().toString()));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(input.getText().toString()));
                 })
                 .setNegativeButton(android.R.string.cancel, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.dismiss());
+                    respondOnce(state, prompt, handler, prompt::dismiss);
                 });
 
         return setupDismissListener(builder.create(), state, prompt, handler);
@@ -216,10 +217,10 @@ public class PromptViewFactory {
                 .setTitle(R.string.prompt_repost_title)
                 .setMessage(R.string.prompt_repost_message)
                 .setPositiveButton(R.string.prompt_repost_positive_button_text, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(AllowOrDeny.ALLOW));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(AllowOrDeny.ALLOW));
                 })
                 .setNegativeButton(R.string.prompt_repost_negative_button_text, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(AllowOrDeny.DENY));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(AllowOrDeny.DENY));
                 });
 
         // We pass the prompt cast to BasePrompt for the universal dismiss listener
@@ -299,19 +300,16 @@ public class PromptViewFactory {
         builder.setView(scrollView);
 
         builder.setNegativeButton(android.R.string.cancel, (d, w) -> {
-            handler.onResponse(state.getGeckoSession(), prompt.dismiss());
+            respondOnce(state, prompt, handler, prompt::dismiss);
         });
 
         builder.setPositiveButton(android.R.string.ok, (d, w) -> {
-            String user = (usernameField != null) ? usernameField.getText().toString() : "";
-            String pass = passwordField.getText().toString();
-
             // Return response based on Gecko's required signature
-            if (usernameField != null) {
-                handler.onResponse(state.getGeckoSession(), prompt.confirm(user, pass));
-            } else {
-                handler.onResponse(state.getGeckoSession(), prompt.confirm(pass));
-            }
+            respondOnce(state, prompt, handler, () -> {
+                String user = (usernameField != null) ? usernameField.getText().toString() : "";
+                String pass = passwordField.getText().toString();
+                return (usernameField != null) ? prompt.confirm(user, pass) : prompt.confirm(pass);
+            });
         });
 
         return setupDismissListener(builder.create(), state, prompt, handler);
@@ -329,10 +327,10 @@ public class PromptViewFactory {
         builder.setTitle(R.string.prompt_before_unload_dialog_title)
                 .setMessage(R.string.prompt_before_unload_dialog_body)
                 .setPositiveButton(android.R.string.ok, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(AllowOrDeny.ALLOW));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(AllowOrDeny.ALLOW));
                 })
                 .setNegativeButton(android.R.string.cancel, (d, w) -> {
-                    handler.onResponse(state.getGeckoSession(), prompt.confirm(AllowOrDeny.DENY));
+                    respondOnce(state, prompt, handler, () -> prompt.confirm(AllowOrDeny.DENY));
                 });
 
         return setupDismissListener(builder.create(), state, prompt, handler);
@@ -504,6 +502,23 @@ public class PromptViewFactory {
         return isIncognito
                 ? R.style.Theme_FireDown_VaultDialogTheme
                 : 0;
+    }
+
+    /**
+     * Sends a prompt response only if the prompt hasn't already been
+     * completed. A GeckoView prompt accepts exactly one confirm()/dismiss();
+     * a second call throws "Cannot confirm/dismiss a Prompt twice". A
+     * two-button dialog can deliver two button clicks from a single
+     * split-touch (both buttons pressed together — Android splits motion
+     * events across sibling views by default), so every multi-button handler
+     * routes through here. {@code response} (which calls confirm/dismiss) is
+     * evaluated only when the prompt is still open.
+     */
+    private static void respondOnce(GeckoState state, PromptDelegate.BasePrompt prompt,
+                                    PromptResponseHandler handler,
+                                    Supplier<PromptDelegate.PromptResponse> response) {
+        if (prompt.isComplete()) return;
+        handler.onResponse(state.getGeckoSession(), response.get());
     }
 
     private static AlertDialog setupDismissListener(AlertDialog dialog, GeckoState state, PromptDelegate.BasePrompt prompt, PromptResponseHandler handler) {

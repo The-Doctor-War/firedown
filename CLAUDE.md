@@ -50,7 +50,14 @@ Consequences when working on a parser:
   `PARSER_BLOCKLIST` table. Without it, the generic catcher *also* captures the
   same media and you get a duplicate download entry (one rich from the parser,
   one bare from the catcher). Adding a parser is not done until its block rule
-  exists. Examples:
+  exists. **This applies ONLY to site-specific parsers — a dedicated `parser@`
+  module, or a host-keyed branch of the page-state bridge (Bilibili.tv, Mega).
+  Media captured by the bridge's GENERIC, host-agnostic player readers
+  (`findPlayerMedia`/`readPlayerMedia`/`readDomMedia` — the tube8 /
+  series.ly-krakenfiles class) gets NO block rule**: the bridge fires pre-play and
+  the repository dedups by URL, so a block would only suppress the play-time
+  capture with no parser owning the (often shared/random) host. See "Dedup on play"
+  in the page-state-bridge section and the `parser-blocklist.js` header. Examples:
   - Instagram/Threads → `instagram.*\.mp4`
   - Twitter/X → `video\.twimg\.com.*\.(mp4|m4s|m3u8)`
   - Rumble → `rumble\.com\/hls-vod\/.*\.m3u8` (the HLS master the parser emits)
@@ -186,18 +193,26 @@ see the HLS-master path below), covers every such site:
   browser header set — see `postHlsMaster`). Title is the generic page title;
   `duration`/`poster` come from `DURATION_KEY_RE`/`IMG_KEY_RE` siblings of the
   source when present.
-- **Dedup on play.** The player's default quality is the entity's primary URL, so
-  it dedups by URL against the play-time wire capture. For known high-traffic CDN
-  families (Pornhub-network: `t8cdn`/`phncdn`/`ypncdn`/`rdtcdn`) a
-  `parser-blocklist.js` block ALSO suppresses a manually-selected *other*-quality
-  duplicate; un-listed sites rely on the URL dedup alone (a rare other-quality dup
-  is the accepted trade-off — same stance as TikTok's first-video case).
+- **Dedup on play — NO `parser-blocklist.js` rule for generic-bridge sites.** The
+  player's default quality is the entity's primary URL, and the bridge fires
+  PRE-PLAY, so it dedups **by URL** against the play-time wire capture. A media
+  captured by the bridge's **generic, host-agnostic** readers (the
+  tube8 / series.ly-krakenfiles class) **never gets a `parser-blocklist.js`
+  entry** — a block there would only suppress the play-time capture with no parser
+  owning the (often shared / per-video-random) host. The accepted trade-off is a
+  rare *other*-quality duplicate (a manually-picked non-default rendition whose URL
+  differs from the bridge's primary) — same stance as TikTok's first-video case.
+  **The block-list is for SITE-SPECIFIC parsers only** (a dedicated `parser@`
+  module, or a host-keyed bridge branch like Bilibili.tv / Mega — those keep an
+  entry only because the catcher would otherwise emit a *harmful* capture: an
+  unplayable whole-track `.m4s`, or undecryptable AES-CTR bytes — not a benign
+  same-URL dup). See the header of `parser-blocklist.js`.
 - **To extend:** it's already generic — add a key to `MEDIA_KEY_RE` /
   `LIST_KEY_RE` / `QUALITY_KEY_RE` (etc.) if a player names its source/quality/
-  duration fields differently, extend `fetchMediaList`'s wrapper-array keys for a
-  new delegate JSON shape, and (only for a high-traffic CDN family worth the
-  extra dedup) add its media hosts to `parser-blocklist.js`. **Never** a per-site
-  file, **never** a host check in `background.js` or the bridge.
+  duration fields differently, and extend `fetchMediaList`'s wrapper-array keys for
+  a new delegate JSON shape. **Never** a per-site file, **never** a host check in
+  `background.js` or the bridge, and **never** a `parser-blocklist.js` rule for a
+  generic-bridge host.
 - Cheap on the ~all sites/frames with no such state: it probes a short list of
   known state-global names + a player global (`jwplayer`) and no-ops instantly
   when neither holds media (so ad/tracker iframes pay only a presence check); the

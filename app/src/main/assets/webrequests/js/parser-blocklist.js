@@ -28,6 +28,24 @@
 // matches exactly what the parser emits (plus the segments its player fetches),
 // but is narrow enough not to swallow unrelated media on a shared CDN.
 //
+// ONLY FOR SITE-SPECIFIC PARSERS — NOT FOR THE GENERIC PAGE-STATE BRIDGE. A block
+// rule belongs here only when SITE-SPECIFIC code emits the media: a dedicated
+// per-site `parser@` module (Twitter, Instagram, Bluesky, niconico, Twitch, …) or
+// a host-keyed branch of the page-state bridge (Bilibili.tv, Mega.nz). Media
+// captured by the bridge's GENERIC, HOST-AGNOSTIC player readers (findPlayerMedia
+// / readPlayerMedia / readDomMedia — Plyr/JWPlayer/Video.js DOM + player-API, the
+// tube8 / series.ly-krakenfiles class) must NOT get an entry: the bridge reads the
+// source page-world and fires PRE-PLAY, so its rich capture lands BEFORE the
+// player's on-play wire fetch and the repository dedups the two BY URL — a block
+// would only suppress that play-time capture with no parser owning the (often
+// shared / per-video-random) host. The accepted trade-off is a rare other-quality
+// duplicate (a manually-picked non-default rendition whose URL differs from the
+// bridge's primary) — same stance as TikTok's first-video case; these sites rely
+// on the URL dedup ALONE. (Bilibili.tv / Mega keep their entries only because the
+// catcher would otherwise emit a HARMFUL capture — an unplayable whole-track .m4s
+// video/audio segment, or undecryptable AES-CTR ciphertext — not a benign
+// same-URL dup.)
+//
 // NOTE: TikTok is deliberately ABSENT. Its `webapp-prime` media host is left
 // un-blocked on purpose so the generic catcher can grab the cache-served first
 // /foryou video the parser structurally cannot see (see the TikTok note in
@@ -99,21 +117,6 @@ const PARSER_BLOCKLIST = {
     'gfs[^/.]*\\.(userstorage\\.)?mega\\.co\\.nz\\/',
   ],
 
-  // Tube8 / Pornhub-network family (tube8, pornhub, youporn, redtube, white-label
-  // clones). These are captured by the GENERIC page-state bridge
-  // (readPlayerMedia → resolves the …/media/mp4/?s= JSON delegate, emits the
-  // progressive .mp4 / .m3u8 on the t8cdn/phncdn/ypncdn/rdtcdn media CDNs). The
-  // bridge is host-agnostic, but dedup against the play-time wire capture is not:
-  // the played URL dedups by URL against the parser entity for the DEFAULT
-  // quality, but a manually-selected OTHER quality has a URL the parser emitted as
-  // a non-primary variant — so for this known, high-traffic CDN family we block
-  // its media here to suppress that duplicate. Other (un-listed) sites the bridge
-  // handles rely on the URL dedup alone. Scoped to the media extension so it never
-  // swallows the thumbnails these same CDNs serve (.jpg).
-  pornhubNetwork: [
-    '(t8cdn|phncdn|ypncdn|rdtcdn)\\.com\\/.*\\.(mp4|m3u8)',
-  ],
-
   // Bluesky — the bsky@ parser emits the HLS master
   // (video.bsky.app/watch/<did>/<cid>/playlist.m3u8) read from the AT-Proto
   // app-view JSON. Block the master + child playlists on video.bsky.app and the
@@ -123,17 +126,6 @@ const PARSER_BLOCKLIST = {
   // thumbnails these same hosts serve (.jpg) are untouched.
   bsky: [
     'video(?:\\.cdn)?\\.bsky\\.app\\/(?:watch|hls)\\/.*\\.(?:m3u8|ts)',
-  ],
-
-  // series.ly / krakenfiles (Plyr embeds) — the page-state bridge captures the
-  // krakencloud progressive source (a DOM <video><source type="video/mp4"> with
-  // no extension, read player-agnostically) WITH a title from the embed. Block the
-  // krakencloud /play/ media so the generic catcher can't emit a bare, titleless
-  // duplicate of the SAME URL on play — repository dedup keeps whichever lands
-  // first, so without this block the catcher's titleless capture would win. Scoped
-  // to /play/ so the /uploads/.../cover.jpg thumbnail is untouched.
-  krakenfiles: [
-    'krakencloud\\.net\\/play\\/',
   ],
 
   // YouTube — fully owned by the youtube@ parser (VOD = SABR, LIVE = HLS master,

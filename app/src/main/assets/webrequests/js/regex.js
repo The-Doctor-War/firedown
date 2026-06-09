@@ -54,6 +54,17 @@ const DEFAULT_PATTERNS = [
   '\\/chunk[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
   '\\/frag(?:ment)?[-_]?\\d+\\.(ts|m4s|mp4)(?:[?#]|$)',
 
+  // Bare-numbered HLS .ts segments — a path component that is JUST digits then
+  // .ts (e.g. /720p60/7.ts, /18.ts, /20.ts). Many CDNs (AWS IVS / Kick,
+  // among others) name segments with no seg/chunk/frag prefix, so the rules
+  // above miss them. A pure-number .ts filename is essentially always an
+  // MPEG-TS HLS fragment, never a standalone deliverable — capturing it just
+  // fans out junk entries and wastes a metadatareader probe per segment (each
+  // pulls the whole ~MBs segment before isValidMedia drops it as raw mpegts).
+  // The leading '/' + digits-only filename keeps it off named files
+  // ('message5.ts', 'v18.ts', 'ep01.ts' won't match — those carry letters).
+  '\\/\\d+\\.ts(?:[?#]|$)',
+
   // NOTE: there is deliberately NO ".image" / ts-in-png URL rule here. MPEG-TS
   // video disguised as image/png (the series.ly / tiktokcdn ad-CDN trick) is
   // caught content-side, not by URL — the native probe runs the bytes through
